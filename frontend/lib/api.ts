@@ -14,3 +14,9 @@ export const fetchHistoricalLeaderboard = async (startDate?: string, endDate?: s
   if (!res.ok) throw new Error('Failed to fetch historical leaderboard')
   return res.json()
 }
+
+export const fetchTodayLeaderboard = async () => {
+  const res = await fetch(`${API_BASE}/api/leaderboard/today`)
+  if (!res.ok) throw new Error('Failed to fetch today leaderboard')
+  return res.json()
+}

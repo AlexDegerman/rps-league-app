@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { getHistoricalLeaderboard } from '../services/leaderboardService.js'
-
+import { getTodayLeaderboard } from '../services/leaderboardService.js'
 const router = Router()
 
 // GET /api/leaderboard/historical?startDate=2025-02-01&endDate=2025-03-08
@@ -12,6 +12,16 @@ router.get('/historical', async (req, res) => {
     res.json(leaderboard)
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch historical leaderboard' })
+  }
+})
+
+// GET /api/leaderboard/today
+router.get('/today', async (req, res) => {
+  try {
+    const leaderboard = await getTodayLeaderboard()
+    res.json(leaderboard)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch today leaderboard' })
   }
 })
 

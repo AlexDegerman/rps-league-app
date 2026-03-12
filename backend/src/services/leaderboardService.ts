@@ -48,3 +48,12 @@ export const getHistoricalLeaderboard = async (startDate?: string, endDate?: str
   })
   return buildLeaderboard(filtered)
 }
+
+export const getTodayLeaderboard = async (): Promise<PlayerStats[]> => {
+  const all = await fetchAllMatches()
+  const today = new Date().toISOString().split('T')[0]
+  const todayMatches = all.filter(m => 
+    new Date(m.time as number).toISOString().split('T')[0] === today
+  )
+  return buildLeaderboard(todayMatches)
+}
