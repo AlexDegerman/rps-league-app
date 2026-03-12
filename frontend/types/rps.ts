@@ -10,3 +10,10 @@ export interface Match {
   playerA: Player
   playerB: Player
 }
+
+export interface PlayerStats {
+  name: string
+  wins: number
+  losses: number
+  ties: number
+}

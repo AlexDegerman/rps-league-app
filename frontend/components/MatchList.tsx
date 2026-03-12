@@ -26,7 +26,7 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
 
   return (
     <li className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      {/* Top row — timestamp + result badge */}
+      {/* Top row, timestamp + result badge */}
       <div className="flex justify-between items-center mb-2 gap-2">
         <span className="text-xs text-gray-400 shrink-0">
           {formatDateTime(match.time)}
