@@ -15,33 +15,34 @@ interface ApiResponse {
   cursor?: string
 }
 
+// History and live matches are kept separate to avoid sort issues
+// on large arrays where V8's TimSort fast-path breaks down.
+// Live matches are always newer so they're simply prepended — no sort needed.
 interface Cache {
-  data: Match[]
+  history: Match[]  // fetched from /history, stable, saved to disk
+  live: Match[]     // from SSE stream, grows at runtime, resets on restart
   fetchedAt: number
 }
 
-// In-memory cache, lost on restart, but fastest to access
 let cache: Cache | null = null
 
-// 24 hour TTL, disk cache older than this triggers a full re-fetch
-const CACHE_TTL = 24 * 60 * 60_000
+// Prevents multiple simultaneous full fetches if fetchAllMatches
+// is called concurrently before the first fetch completes
+let fetchInProgress: Promise<Cache> | null = null
+
 const CACHE_DIR = './cache'
 const CACHE_FILE = join(CACHE_DIR, 'matches.json')
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-// Load cache from disk if it exists and hasn't expired
+// Load history cache from disk if it exists
 // This avoids re-fetching 300+ pages on every server restart
 const loadDiskCache = async (): Promise<Cache | null> => {
   try {
     if (!existsSync(CACHE_FILE)) return null
     const raw = await readFile(CACHE_FILE, 'utf-8')
     const saved = JSON.parse(raw) as Cache
-    if (Date.now() - saved.fetchedAt > CACHE_TTL) {
-      console.log('Disk cache expired , will re-fetch')
-      return null
-    }
-    console.log(`Disk cache loaded , ${saved.data.length} matches (age: ${Math.round((Date.now() - saved.fetchedAt) / 60000)}min)`)
+    console.log(`Disk cache loaded — ${saved.history.length} history matches (age: ${Math.round((Date.now() - saved.fetchedAt) / 60000)}min)`)
     return saved
   } catch (err) {
     console.warn('Failed to load disk cache:', err)
@@ -49,20 +50,20 @@ const loadDiskCache = async (): Promise<Cache | null> => {
   }
 }
 
-// Persist current cache to disk so restarts don't lose live match data
-// Called once after initial full fetch, then every 100 live matches
+// Only history is persisted to disk — live matches reset on restart
+// and are refilled by the SSE stream
 const saveDiskCache = async (data: Cache): Promise<void> => {
   try {
     await mkdir(CACHE_DIR, { recursive: true })
-    await writeFile(CACHE_FILE, JSON.stringify(data))
-    console.log(`Disk cache saved , ${data.data.length} matches`)
+    await writeFile(CACHE_FILE, JSON.stringify({ history: data.history, live: [], fetchedAt: data.fetchedAt }))
+    console.log(`Disk cache saved — ${data.history.length} history matches`)
   } catch (err) {
     console.warn('Failed to save disk cache:', err)
   }
 }
 
 // Fetch a single page from the API with exponential backoff retry
-// The Reaktor API is intentionally unreliable, 429, 500, 503 are common
+// The Reaktor API is intentionally unreliable — 429, 500, 503 are common
 // Retries indefinitely with increasing wait times up to 60s max
 const fetchPage = async (endpoint: string): Promise<ApiResponse> => {
   let retries = 0
@@ -73,7 +74,7 @@ const fetchPage = async (endpoint: string): Promise<ApiResponse> => {
         headers: { Authorization: `Bearer ${TOKEN}` }
       })
 
-      // Rate limit or server errors, wait and retry same page
+      // Rate limit or server errors — wait and retry same page
       if (res.status === 429 || res.status === 500 || res.status === 503) {
         retries++
         const wait = Math.min(5000 * retries, 60000)
@@ -84,11 +85,11 @@ const fetchPage = async (endpoint: string): Promise<ApiResponse> => {
 
       if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`)
 
-      retries = 0 // reset on success
+      retries = 0
       return await res.json() as ApiResponse
 
     } catch (err) {
-      // Network level errors (timeout, DNS, etc) , also retry with backoff
+      // Network level errors (timeout, DNS, etc) — also retry with backoff
       retries++
       const wait = Math.min(5000 * retries, 60000)
       console.error(`Network error (attempt ${retries}), waiting ${wait / 1000}s...`, err)
@@ -97,52 +98,70 @@ const fetchPage = async (endpoint: string): Promise<ApiResponse> => {
   }
 }
 
-// Main data access function used by all services
-// Priority: memory cache → disk cache → full API fetch
-export const fetchAllMatches = async (): Promise<Match[]> => {
-  // 1. fastest, already in memory from this session
-  if (cache && Date.now() - cache.fetchedAt < CACHE_TTL) {
-    console.log(`Memory cache hit , ${cache.data.length} matches`)
-    return cache.data
+// Full paginated fetch from the API — slow, only runs when no valid cache exists
+// Uses a promise lock to prevent duplicate concurrent fetches
+const fetchFull = async (): Promise<Cache> => {
+  if (fetchInProgress) {
+    console.log('Fetch already in progress — waiting for it to complete')
+    return fetchInProgress
   }
 
-  // 2. fast, load from disk, avoids full re-fetch on restart
+  fetchInProgress = (async () => {
+    console.log('Fetching all matches from API...')
+    const all: Match[] = []
+    let endpoint = '/history'
+    let page = 1
+
+    while (true) {
+      console.log(`Fetching page ${page}...`)
+      const json = await fetchPage(endpoint)
+
+      all.push(...json.data)
+      console.log(`Page ${page} fetched — ${json.data.length} matches (total so far: ${all.length})`)
+
+      if (!json.cursor) break
+      endpoint = json.cursor
+      page++
+
+      // Small delay between pages to avoid triggering rate limits
+      await sleep(200)
+    }
+
+    const newCache: Cache = { history: all, live: [], fetchedAt: Date.now() }
+    cache = newCache
+    await saveDiskCache(cache)
+    fetchInProgress = null
+    return cache
+  })()
+
+  return fetchInProgress
+}
+
+// Returns all matches as [live, ...history] — live first, no sort needed
+// since live matches are always newer than history matches
+export const fetchAllMatches = async (): Promise<Match[]> => {
+  // 1. fastest — already in memory from this session
+  if (cache) {
+    console.log(`Memory cache hit — ${cache.history.length} history + ${cache.live.length} live`)
+    return [...cache.live, ...cache.history]
+  }
+
+  // 2. fast — load from disk, live starts empty and fills from SSE
   const diskCache = await loadDiskCache()
   if (diskCache) {
-    cache = diskCache
-    return cache.data
+    cache = { ...diskCache, live: [] }
+    return [...cache.live, ...cache.history]
   }
 
-  // 3. slow, full paginated fetch from API (300+ pages, several minutes)
-  // Only happens when no valid cache exists
-  console.log('Fetching all matches from API...')
-  const all: Match[] = []
-  let endpoint = '/history'
-  let page = 1
-
-  while (true) {
-    console.log(`Fetching page ${page}...`)
-    const json = await fetchPage(endpoint)
-
-    all.push(...json.data)
-    console.log(`Page ${page} fetched , ${json.data.length} matches (total so far: ${all.length})`)
-
-    if (!json.cursor) break
-    endpoint = json.cursor
-    page++
-
-    // Small delay between pages to avoid triggering rate limits
-    await sleep(200)
-  }
-
-  cache = { data: all, fetchedAt: Date.now() }
-  await saveDiskCache(cache)
-  return cache.data
+  // 3. slow — no cache at all, must block and fetch everything
+  // This only happens on first ever run or if cache file was deleted
+  const newCache = await fetchFull()
+  return [...newCache.live, ...newCache.history]
 }
 
 // Connect to the Reaktor live SSE stream
-// New matches are appended to the in-memory cache in real time
-// Disk cache is updated every 100 live matches to stay reasonably fresh
+// New matches are prepended to the live array — no sort needed
+// Disk cache updated every 100 live matches to stay fresh on restart
 export const startLiveStream = (onMatch: (match: Match) => void): void => {
   let liveMatchCount = 0
 
@@ -159,12 +178,17 @@ export const startLiveStream = (onMatch: (match: Match) => void): void => {
       })
     })
 
+    eventSource.onopen = () => {
+      console.log('SSE connected to live stream')
+    }
+
     eventSource.onmessage = (event) => {
       try {
         const match = JSON.parse(event.data) as Match
 
         if (cache) {
-          cache.data.push(match)
+          // Prepend so newest live matches are always at the front
+          cache.live.unshift(match)
           liveMatchCount++
 
           // Persist to disk every 100 live matches
@@ -174,9 +198,9 @@ export const startLiveStream = (onMatch: (match: Match) => void): void => {
             saveDiskCache(cache)
           }
         } else {
-          // This shouldn't happen since we await fetchAllMatches before
-          // calling startLiveStream in app.ts, but just in case
-          console.warn('Live match received but cache not yet populated , skipping append')
+          // Shouldn't happen since fetchAllMatches is awaited before
+          // startLiveStream is called in app.ts — but just in case
+          console.warn('Live match received but cache not yet populated — skipping')
         }
 
         onMatch(match)
@@ -185,7 +209,7 @@ export const startLiveStream = (onMatch: (match: Match) => void): void => {
       }
     }
 
-    // SSE connection dropped , reconnect after 5s
+    // SSE connection dropped — reconnect after 5s
     // This handles network blips and Reaktor API restarts
     eventSource.onerror = (err) => {
       console.error('SSE connection lost, reconnecting in 5s...', err)

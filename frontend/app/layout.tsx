@@ -7,19 +7,12 @@ export const metadata: Metadata = {
   description: "Track and explore Rock Paper Scissors match results and leaderboards.",
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
- return (
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen text-gray-900 items-center">
-        <div className="w-[95%] max-w-[750px] min-w-[280px] mt-6">
-          <Header />
-        </div>
-
-        <main className="flex flex-col items-center w-[95%] max-w-[750px] min-w-[280px] bg-white shadow p-6 flex-1">
+      <body className="bg-gray-100 min-h-screen">
+        <Header />
+        <main className="max-w-2xl mx-auto px-4 py-4 w-full overflow-hidden">
           {children}
         </main>
       </body>
