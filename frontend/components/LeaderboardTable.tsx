@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { PlayerStats } from '@/types/rps'
 
 interface LeaderboardTableProps {
@@ -32,6 +33,9 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
             <th className="text-center px-4 py-3 text-orange-400 font-medium">
               T
             </th>
+            <th className="text-center px-4 py-3 text-indigo-500 font-medium">
+              Win%
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -43,8 +47,13 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
               <td className="px-4 py-3 text-gray-400 font-medium">
                 {index === 0 ? '🏆' : index + 1}
               </td>
-              <td className="px-4 py-3 font-medium text-gray-800">
-                {player.name}
+              <td className="px-4 py-3 font-medium">
+                <Link
+                  href={`/player/${encodeURIComponent(player.name)}`}
+                  className="text-gray-800 hover:text-indigo-600 hover:underline transition"
+                >
+                  {player.name}
+                </Link>
               </td>
               <td className="px-4 py-3 text-center text-green-600 font-bold">
                 {player.wins}
@@ -54,6 +63,9 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
               </td>
               <td className="px-4 py-3 text-center text-orange-400">
                 {player.ties}
+              </td>
+              <td className="px-4 py-3 text-center text-indigo-500 font-medium">
+                {player.winRate}%
               </td>
             </tr>
           ))}

@@ -89,3 +89,38 @@ export const getAllPlayerNames = async (): Promise<string[]> => {
   }
   return [...names].sort()
 }
+
+export const getPlayerStats = async (
+  name: string
+): Promise<{
+  total: number
+  wins: number
+  losses: number
+  ties: number
+  winRate: number
+}> => {
+  const all = await fetchAllMatches()
+  const matches = all.filter(
+    (m) => m.playerA.name === name || m.playerB.name === name
+  )
+  let wins = 0,
+    losses = 0,
+    ties = 0
+  for (const m of matches) {
+    const winner = getWinner(m)
+    if (winner === 'TIE') ties++
+    else if (
+      (winner === 'A' && m.playerA.name === name) ||
+      (winner === 'B' && m.playerB.name === name)
+    )
+      wins++
+    else losses++
+  }
+  return {
+    total: matches.length,
+    wins,
+    losses,
+    ties,
+    winRate: matches.length > 0 ? Math.round((wins / matches.length) * 100) : 0
+  }
+}

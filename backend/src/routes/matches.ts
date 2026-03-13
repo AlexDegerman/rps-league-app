@@ -3,7 +3,8 @@ import {
   getLatestMatches,
   getMatchesByDate,
   getMatchesByPlayer,
-  getAllPlayerNames
+  getAllPlayerNames,
+  getPlayerStats
 } from '../services/matchService.js'
 
 const router = Router()
@@ -59,6 +60,17 @@ router.get('/by-player', async (req, res) => {
     res.json(result)
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch matches by player' })
+  }
+})
+
+// GET /api/players/:name/stats
+router.get('/players/:name/stats', async (req, res) => {
+  try {
+    const name = decodeURIComponent(req.params.name)
+    const stats = await getPlayerStats(name)
+    res.json(stats)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch player stats' })
   }
 })
 

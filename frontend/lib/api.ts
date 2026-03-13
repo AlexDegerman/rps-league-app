@@ -53,3 +53,11 @@ export const fetchMatchesByPlayer = async (
   if (!res.ok) throw new Error('Failed to fetch matches by player')
   return res.json()
 }
+
+export const fetchPlayerStats = async (name: string) => {
+  const res = await fetch(
+    `${API_BASE}/api/matches/players/${encodeURIComponent(name)}/stats`
+  )
+  if (!res.ok) throw new Error('Failed to fetch player stats')
+  return res.json()
+}

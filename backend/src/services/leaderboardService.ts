@@ -7,13 +7,15 @@ export interface PlayerStats {
   wins: number
   losses: number
   ties: number
+  winRate: number
 }
 
 const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
   const stats = new Map<string, PlayerStats>()
 
   const getOrCreate = (name: string): PlayerStats => {
-    if (!stats.has(name)) stats.set(name, { name, wins: 0, losses: 0, ties: 0 })
+    if (!stats.has(name))
+      stats.set(name, { name, wins: 0, losses: 0, ties: 0, winRate: 0 })
     return stats.get(name)!
   }
 
@@ -34,9 +36,15 @@ const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
     }
   }
 
-  return [...stats.values()].sort(
-    (a, b) => b.wins - a.wins || a.name.localeCompare(b.name)
-  )
+  return [...stats.values()]
+    .map((p) => ({
+      ...p,
+      winRate:
+        p.wins + p.losses + p.ties > 0
+          ? Math.round((p.wins / (p.wins + p.losses + p.ties)) * 100)
+          : 0
+    }))
+    .sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name))
 }
 
 // Historical leaderboard, filter by date range, both dates optional

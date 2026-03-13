@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { formatDateTime, getPlayerResult, resultColor } from '@/lib/format'
 import type { Match } from '@/types/rps'
 import MoveIcon from '@/components/MoveIcon'
@@ -46,15 +47,17 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
       <div className="flex items-center justify-between gap-2">
         {/* Player A */}
         <div className="flex flex-col items-start flex-1">
-          <span
-            className={`font-medium text-sm ${
+          <Link
+            href={`/player/${encodeURIComponent(playerA.name)}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`font-medium text-sm hover:underline hover:text-indigo-600 transition ${
               !isTie && winner === playerA.name
                 ? 'text-green-600 font-bold'
                 : 'text-gray-800'
             }`}
           >
             {playerA.name}
-          </span>
+          </Link>
           {highlightPlayer === playerA.name && (
             <span
               className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(
@@ -75,15 +78,17 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
 
         {/* Player B */}
         <div className="flex flex-col items-end flex-1">
-          <span
-            className={`font-medium text-sm text-right ${
+          <Link
+            href={`/player/${encodeURIComponent(playerB.name)}`}
+            onClick={(e) => e.stopPropagation()}
+            className={`font-medium text-sm text-right hover:underline hover:text-indigo-600 transition ${
               !isTie && winner === playerB.name
                 ? 'text-green-600 font-bold'
                 : 'text-gray-800'
             }`}
           >
             {playerB.name}
-          </span>
+          </Link>
           {highlightPlayer === playerB.name && (
             <span
               className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(
