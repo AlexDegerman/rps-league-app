@@ -46,7 +46,8 @@ export default function LeaderboardPage() {
     else loadToday()
   }, [tab, loadAllTime, loadToday])
 
-  const handleFilter = () => loadAllTime(startDate || undefined, endDate || undefined)
+  const handleFilter = () =>
+    loadAllTime(startDate || undefined, endDate || undefined)
 
   const handleClear = () => {
     setStartDate('')
@@ -57,7 +58,9 @@ export default function LeaderboardPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-4">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Leaderboard</h1>
-      <p className="text-gray-500 mb-6">Player standings based on number of wins</p>
+      <p className="text-gray-500 mb-6">
+        Player standings based on number of wins
+      </p>
 
       {/* Tab toggle */}
       <div className="flex gap-2 mb-6">
@@ -94,7 +97,7 @@ export default function LeaderboardPage() {
                 value={startDate}
                 min={FIRST_MATCH_DATE}
                 max={TODAY}
-                onChange={e => setStartDate(e.target.value)}
+                onChange={(e) => setStartDate(e.target.value)}
                 className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
@@ -105,7 +108,7 @@ export default function LeaderboardPage() {
                 value={endDate}
                 min={FIRST_MATCH_DATE}
                 max={TODAY}
-                onChange={e => setEndDate(e.target.value)}
+                onChange={(e) => setEndDate(e.target.value)}
                 className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
@@ -126,12 +129,16 @@ export default function LeaderboardPage() {
               </button>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2">Leave blank for all-time standings</p>
+          <p className="text-xs text-gray-400 mt-2">
+            Leave blank for all-time standings
+          </p>
         </div>
       )}
 
       {isLoading ? (
-        <p className="text-center text-gray-400 py-12">Building leaderboard...</p>
+        <p className="text-center text-gray-400 py-12">
+          Building leaderboard...
+        </p>
       ) : (
         <LeaderboardTable stats={stats} />
       )}

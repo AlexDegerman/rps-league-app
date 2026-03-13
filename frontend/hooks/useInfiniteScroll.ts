@@ -2,11 +2,14 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Match } from '@/types/rps'
 
 interface UseInfiniteScrollProps {
-  fetchFn: (page: number) => Promise<{ matches: Match[], hasMore: boolean }>
-  enabled?: boolean  // only start scrolling when true, e.g. after a search
+  fetchFn: (page: number) => Promise<{ matches: Match[]; hasMore: boolean }>
+  enabled?: boolean // only start scrolling when true, e.g. after a search
 }
 
-export const useInfiniteScroll = ({ fetchFn, enabled = true }: UseInfiniteScrollProps) => {
+export const useInfiniteScroll = ({
+  fetchFn,
+  enabled = true
+}: UseInfiniteScrollProps) => {
   const [matches, setMatches] = useState<Match[]>([])
   const [hasMore, setHasMore] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
@@ -14,26 +17,29 @@ export const useInfiniteScroll = ({ fetchFn, enabled = true }: UseInfiniteScroll
   const pageRef = useRef(1)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const loadMatches = useCallback(async (targetPage: number) => {
-    if (targetPage === 1) setIsLoading(true)
-    else setIsLoadingMore(true)
+  const loadMatches = useCallback(
+    async (targetPage: number) => {
+      if (targetPage === 1) setIsLoading(true)
+      else setIsLoadingMore(true)
 
-    try {
-      const data = await fetchFn(targetPage)
-      setMatches(prev => {
-        if (targetPage === 1) return data.matches
-        const existingIds = new Set(prev.map(m => m.gameId))
-        const unique = data.matches.filter(m => !existingIds.has(m.gameId))
-        return [...prev, ...unique]
-      })
-      setHasMore(data.hasMore)
-    } catch (err) {
-      console.error('Failed to load matches:', err)
-    } finally {
-      setIsLoading(false)
-      setIsLoadingMore(false)
-    }
-  }, [fetchFn])
+      try {
+        const data = await fetchFn(targetPage)
+        setMatches((prev) => {
+          if (targetPage === 1) return data.matches
+          const existingIds = new Set(prev.map((m) => m.gameId))
+          const unique = data.matches.filter((m) => !existingIds.has(m.gameId))
+          return [...prev, ...unique]
+        })
+        setHasMore(data.hasMore)
+      } catch (err) {
+        console.error('Failed to load matches:', err)
+      } finally {
+        setIsLoading(false)
+        setIsLoadingMore(false)
+      }
+    },
+    [fetchFn]
+  )
 
   const loadNextPage = useCallback(() => {
     if (isLoading || isLoadingMore || !hasMore || !enabled) return
@@ -79,5 +85,14 @@ export const useInfiniteScroll = ({ fetchFn, enabled = true }: UseInfiniteScroll
     }
   }, [handleScroll])
 
-  return { matches, setMatches, hasMore, isLoading, isLoadingMore, loadMatches, loadNextPage, reset }
+  return {
+    matches,
+    setMatches,
+    hasMore,
+    isLoading,
+    isLoadingMore,
+    loadMatches,
+    loadNextPage,
+    reset
+  }
 }

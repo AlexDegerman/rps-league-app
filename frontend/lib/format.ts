@@ -6,13 +6,19 @@ const toMs = (timestamp: number): number =>
 
 export const formatDateTime = (timestamp: number): string => {
   return new Date(toMs(timestamp)).toLocaleString('en-GB', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
     timeZone: 'UTC'
   })
 }
 
-export const getPlayerResult = (match: Match, playerName: string): 'WIN' | 'LOSE' | 'TIE' => {
+export const getPlayerResult = (
+  match: Match,
+  playerName: string
+): 'WIN' | 'LOSE' | 'TIE' => {
   const { playerA, playerB } = match
   if (playerA.played === playerB.played) return 'TIE'
   const aWins =

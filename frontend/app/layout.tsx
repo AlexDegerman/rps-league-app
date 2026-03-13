@@ -1,13 +1,21 @@
-import type { Metadata } from "next"
-import "./globals.css"
-import Header from "../components/Header"
+import type { Metadata } from 'next'
+import './globals.css'
+import Header from '../components/Header'
 
 export const metadata: Metadata = {
-  title: "rps-league",
-  description: "Track and explore Rock Paper Scissors match results and leaderboards.",
+  title: 'RPS League',
+  description:
+    'Track and explore Rock Paper Scissors match results and leaderboards.',
+  icons: {
+    icon: '/rpslogo.png'
+  }
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
       <body className="bg-gray-100 min-h-screen">

@@ -19,8 +19,8 @@ interface ApiResponse {
 // on large arrays where V8's TimSort fast-path breaks down.
 // Live matches are always newer so they're simply prepended, no sort needed.
 interface Cache {
-  history: Match[]  // fetched from /history, stable, saved to disk
-  live: Match[]     // from SSE stream, grows at runtime, resets on restart
+  history: Match[] // fetched from /history, stable, saved to disk
+  live: Match[] // from SSE stream, grows at runtime, resets on restart
   fetchedAt: number
 }
 
@@ -33,18 +33,19 @@ let fetchInProgress: Promise<Cache> | null = null
 const CACHE_DIR = './cache'
 const CACHE_FILE = join(CACHE_DIR, 'matches.json')
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // Normalize match data on ingest to handle API inconsistencies:
 // - time can be a UTC string, seconds, or milliseconds
 // - played values can be mixed case (e.g. "Scissors" instead of "SCISSORS")
 const normalizeMatch = (match: Match): Match => ({
   ...match,
-  time: typeof match.time === 'string'
-    ? new Date(match.time as string).getTime()
-    : (match.time as number) < 10_000_000_000
-      ? (match.time as number) * 1000
-      : match.time as number,
+  time:
+    typeof match.time === 'string'
+      ? new Date(match.time as string).getTime()
+      : (match.time as number) < 10_000_000_000
+        ? (match.time as number) * 1000
+        : (match.time as number),
   playerA: {
     ...match.playerA,
     played: match.playerA.played.toUpperCase()
@@ -62,7 +63,9 @@ const loadDiskCache = async (): Promise<Cache | null> => {
     if (!existsSync(CACHE_FILE)) return null
     const raw = await readFile(CACHE_FILE, 'utf-8')
     const saved = JSON.parse(raw) as Cache
-    console.log(`Disk cache loaded , ${saved.history.length} history matches (age: ${Math.round((Date.now() - saved.fetchedAt) / 60000)}min)`)
+    console.log(
+      `Disk cache loaded , ${saved.history.length} history matches (age: ${Math.round((Date.now() - saved.fetchedAt) / 60000)}min)`
+    )
     return saved
   } catch (err) {
     console.warn('Failed to load disk cache:', err)
@@ -75,7 +78,14 @@ const loadDiskCache = async (): Promise<Cache | null> => {
 const saveDiskCache = async (data: Cache): Promise<void> => {
   try {
     await mkdir(CACHE_DIR, { recursive: true })
-    await writeFile(CACHE_FILE, JSON.stringify({ history: data.history, live: [], fetchedAt: data.fetchedAt }))
+    await writeFile(
+      CACHE_FILE,
+      JSON.stringify({
+        history: data.history,
+        live: [],
+        fetchedAt: data.fetchedAt
+      })
+    )
     console.log(`Disk cache saved, ${data.history.length} history matches`)
   } catch (err) {
     console.warn('Failed to save disk cache:', err)
@@ -98,7 +108,9 @@ const fetchPage = async (endpoint: string): Promise<ApiResponse> => {
       if (res.status === 429 || res.status === 500 || res.status === 503) {
         retries++
         const wait = Math.min(5000 * retries, 60000)
-        console.warn(`${res.status} on ${endpoint} (attempt ${retries}), waiting ${wait / 1000}s...`)
+        console.warn(
+          `${res.status} on ${endpoint} (attempt ${retries}), waiting ${wait / 1000}s...`
+        )
         await sleep(wait)
         continue
       }
@@ -106,13 +118,15 @@ const fetchPage = async (endpoint: string): Promise<ApiResponse> => {
       if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`)
 
       retries = 0
-      return await res.json() as ApiResponse
-
+      return (await res.json()) as ApiResponse
     } catch (err) {
       // Network level errors (timeout, DNS, etc), also retry with backoff
       retries++
       const wait = Math.min(5000 * retries, 60000)
-      console.error(`Network error (attempt ${retries}), waiting ${wait / 1000}s...`, err)
+      console.error(
+        `Network error (attempt ${retries}), waiting ${wait / 1000}s...`,
+        err
+      )
       await sleep(wait)
     }
   }
@@ -139,7 +153,9 @@ const fetchFull = async (): Promise<Cache> => {
       cache = { history: all, live: [], fetchedAt: Date.now() }
       // Normalize each match on ingest so all downstream code gets clean data
       all.push(...json.data.map(normalizeMatch))
-      console.log(`Page ${page} fetched , ${json.data.length} matches (total so far: ${all.length})`)
+      console.log(
+        `Page ${page} fetched , ${json.data.length} matches (total so far: ${all.length})`
+      )
 
       if (!json.cursor) break
       endpoint = json.cursor
@@ -162,21 +178,26 @@ const fetchFull = async (): Promise<Cache> => {
 // Returns all matches as [live, ...history] , live first, no sort needed
 // since live matches are always newer than history matches
 export const fetchAllMatches = async (): Promise<Match[]> => {
-  // 1. fastest, already in memory from this session
-  if (cache) {
-    console.log(`Memory cache hit, ${cache.history.length} history + ${cache.live.length} live`)
-    return [...cache.live, ...cache.history]
+  const dedup = (matches: Match[]): Match[] => {
+    const seen = new Set<string>()
+    return matches.filter((m) => {
+      if (seen.has(m.gameId)) return false
+      seen.add(m.gameId)
+      return true
+    })
   }
 
+  // 1. fastest, already in memory from this session
+  if (cache) {
+    return dedup([...cache.live, ...cache.history])
+  }
   // 2. fast, load from disk
   const diskCache = await loadDiskCache()
   if (diskCache) {
     cache = { ...diskCache, live: [] }
-    return [...cache.live, ...cache.history]
+    return dedup([...cache.live, ...cache.history])
   }
-
   // 3. slow, no cache at all, kick off full fetch but return empty immediately
-  // frontend will get data on next poll once pages start coming in
   if (!fetchInProgress) {
     fetchFull()
   }
@@ -193,13 +214,14 @@ export const startLiveStream = (onMatch: (match: Match) => void): void => {
     // Standard EventSource doesn't support custom headers
     // The eventsource npm package allows passing a custom fetch with Bearer token
     const eventSource = new EventSource(`${API_BASE}/live`, {
-      fetch: (url, init) => fetch(url, {
-        ...init,
-        headers: {
-          ...init?.headers,
-          Authorization: `Bearer ${TOKEN}`
-        }
-      })
+      fetch: (url, init) =>
+        fetch(url, {
+          ...init,
+          headers: {
+            ...init?.headers,
+            Authorization: `Bearer ${TOKEN}`
+          }
+        })
     })
 
     eventSource.onopen = () => {
@@ -225,7 +247,9 @@ export const startLiveStream = (onMatch: (match: Match) => void): void => {
         } else {
           // Shouldn't happen since fetchAllMatches is awaited before
           // startLiveStream is called in app.ts , but just in case
-          console.warn('Live match received but cache not yet populated , skipping')
+          console.warn(
+            'Live match received but cache not yet populated , skipping'
+          )
         }
 
         onMatch(match)

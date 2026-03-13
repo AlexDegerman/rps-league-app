@@ -46,17 +46,21 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
       <div className="flex items-center justify-between gap-2">
         {/* Player A */}
         <div className="flex flex-col items-start flex-1">
-          <span className={`font-medium text-sm ${
-            !isTie && winner === playerA.name
-              ? 'text-green-600 font-bold'
-              : 'text-gray-800'
-          }`}>
+          <span
+            className={`font-medium text-sm ${
+              !isTie && winner === playerA.name
+                ? 'text-green-600 font-bold'
+                : 'text-gray-800'
+            }`}
+          >
             {playerA.name}
           </span>
           {highlightPlayer === playerA.name && (
-            <span className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${
-              resultColor(getPlayerResult(match, playerA.name))
-            }`}>
+            <span
+              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(
+                getPlayerResult(match, playerA.name)
+              )}`}
+            >
               {getPlayerResult(match, playerA.name)}
             </span>
           )}
@@ -71,17 +75,21 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
 
         {/* Player B */}
         <div className="flex flex-col items-end flex-1">
-          <span className={`font-medium text-sm text-right ${
-            !isTie && winner === playerB.name
-              ? 'text-green-600 font-bold'
-              : 'text-gray-800'
-          }`}>
+          <span
+            className={`font-medium text-sm text-right ${
+              !isTie && winner === playerB.name
+                ? 'text-green-600 font-bold'
+                : 'text-gray-800'
+            }`}
+          >
             {playerB.name}
           </span>
           {highlightPlayer === playerB.name && (
-            <span className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${
-              resultColor(getPlayerResult(match, playerB.name))
-            }`}>
+            <span
+              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(
+                getPlayerResult(match, playerB.name)
+              )}`}
+            >
               {getPlayerResult(match, playerB.name)}
             </span>
           )}
@@ -98,11 +106,16 @@ interface MatchListProps {
   hasMore?: boolean
 }
 
-const MatchList = ({ matches, highlightPlayer, isLoadingMore, hasMore }: MatchListProps) => {
+const MatchList = ({
+  matches,
+  highlightPlayer,
+  isLoadingMore,
+  hasMore
+}: MatchListProps) => {
   return (
     <>
       <ul className="space-y-3">
-        {matches.map(match => (
+        {matches.map((match) => (
           <MatchRow
             key={match.gameId}
             match={match}
@@ -114,7 +127,9 @@ const MatchList = ({ matches, highlightPlayer, isLoadingMore, hasMore }: MatchLi
         <p className="text-center text-gray-400 py-6">Loading more...</p>
       )}
       {!hasMore && matches.length > 0 && (
-        <p className="text-center text-gray-400 py-6">You&apos;ve reached the end</p>
+        <p className="text-center text-gray-400 py-6">
+          You&apos;ve reached the end
+        </p>
       )}
     </>
   )

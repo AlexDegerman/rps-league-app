@@ -10,16 +10,25 @@ export default function HomePage() {
   const initialLoadRef = useRef(false)
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
 
-  const { matches, setMatches, hasMore, isLoading, isLoadingMore, loadMatches } = useInfiniteScroll({ fetchFn })
+  const {
+    matches,
+    setMatches,
+    hasMore,
+    isLoading,
+    isLoadingMore,
+    loadMatches
+  } = useInfiniteScroll({ fetchFn })
 
   // Poll for new matches every 5 seconds
   useEffect(() => {
     const poll = async () => {
       try {
         const data = await fetchLatestMatches(1)
-        setMatches(prev => {
-          const existingIds = new Set(prev.map(m => m.gameId))
-          const newOnes = data.matches.filter((m: Match) => !existingIds.has(m.gameId))
+        setMatches((prev) => {
+          const existingIds = new Set(prev.map((m) => m.gameId))
+          const newOnes = data.matches.filter(
+            (m: Match) => !existingIds.has(m.gameId)
+          )
           if (newOnes.length === 0) return prev
           return [...newOnes, ...prev]
         })
@@ -48,7 +57,11 @@ export default function HomePage() {
       ) : matches.length === 0 ? (
         <p className="text-center text-gray-400 py-12">No matches found</p>
       ) : (
-        <MatchList matches={matches} isLoadingMore={isLoadingMore} hasMore={hasMore} />
+        <MatchList
+          matches={matches}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+        />
       )}
     </div>
   )

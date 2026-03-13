@@ -34,13 +34,18 @@ const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
     }
   }
 
-  return [...stats.values()].sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name))
+  return [...stats.values()].sort(
+    (a, b) => b.wins - a.wins || a.name.localeCompare(b.name)
+  )
 }
 
 // Historical leaderboard, filter by date range, both dates optional
-export const getHistoricalLeaderboard = async (startDate?: string, endDate?: string): Promise<PlayerStats[]> => {
+export const getHistoricalLeaderboard = async (
+  startDate?: string,
+  endDate?: string
+): Promise<PlayerStats[]> => {
   const all = await fetchAllMatches()
-  const filtered = all.filter(match => {
+  const filtered = all.filter((match) => {
     const date = new Date(match.time).toISOString().split('T')[0] ?? ''
     if (startDate && date < startDate) return false
     if (endDate && date > endDate) return false
@@ -52,8 +57,8 @@ export const getHistoricalLeaderboard = async (startDate?: string, endDate?: str
 export const getTodayLeaderboard = async (): Promise<PlayerStats[]> => {
   const all = await fetchAllMatches()
   const today = new Date().toISOString().split('T')[0]
-  const todayMatches = all.filter(m => 
-    new Date(m.time as number).toISOString().split('T')[0] === today
+  const todayMatches = all.filter(
+    (m) => new Date(m.time as number).toISOString().split('T')[0] === today
   )
   return buildLeaderboard(todayMatches)
 }
