@@ -44,7 +44,15 @@ const normalizeMatch = (match: Match): Match => ({
     ? new Date(match.time as string).getTime()
     : (match.time as number) < 10_000_000_000
       ? (match.time as number) * 1000
-      : match.time as number
+      : match.time as number,
+  playerA: {
+    ...match.playerA,
+    played: match.playerA.played.toUpperCase()
+  },
+  playerB: {
+    ...match.playerB,
+    played: match.playerB.played.toUpperCase()
+  }
 })
 
 // Load history cache from disk if it exists

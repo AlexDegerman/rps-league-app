@@ -30,3 +30,20 @@ export const getWinner = (match: Match): 'A' | 'B' | 'TIE' => {
   if (b !== 'ROCK' && b !== 'PAPER' && b !== 'SCISSORS') return 'A'
   return 'B'
 }
+
+export const getMatchesByDate = async (date: string, page: number, limit: number): Promise<{
+  matches: Match[]
+  total: number
+  hasMore: boolean
+}> => {
+  const all = await fetchAllMatches()
+  const filtered = all
+    .filter(m => new Date(m.time as number).toISOString().split('T')[0] === date)
+    .sort((a, b) => (b.time as number) - (a.time as number))
+  const start = (page - 1) * limit
+  return {
+    matches: filtered.slice(start, start + limit),
+    total: filtered.length,
+    hasMore: start + limit < filtered.length
+  }
+}

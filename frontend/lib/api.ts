@@ -20,3 +20,9 @@ export const fetchTodayLeaderboard = async () => {
   if (!res.ok) throw new Error('Failed to fetch today leaderboard')
   return res.json()
 }
+
+export const fetchMatchesByDate = async (date: string, page: number, limit = 20) => {
+  const res = await fetch(`${API_BASE}/api/matches/by-date?date=${date}&page=${page}&limit=${limit}`)
+  if (!res.ok) throw new Error('Failed to fetch matches by date')
+  return res.json()
+}

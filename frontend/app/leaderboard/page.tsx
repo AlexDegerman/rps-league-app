@@ -41,7 +41,6 @@ export default function LeaderboardPage() {
     }
   }, [])
 
-  // Load on mount and when tab changes
   useEffect(() => {
     if (tab === 'alltime') loadAllTime()
     else loadToday()
@@ -64,31 +63,31 @@ export default function LeaderboardPage() {
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setTab('alltime')}
-          className={`px-4 py-2 rounded font-medium text-sm transition ${
+          className={`px-4 py-2 rounded font-medium text-sm transition cursor-pointer ${
             tab === 'alltime'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              ? 'bg-yellow-400 text-gray-900'
+              : 'bg-indigo-600 text-white hover:bg-yellow-400 hover:text-gray-900'
           }`}
         >
           All Time
         </button>
         <button
           onClick={() => setTab('today')}
-          className={`px-4 py-2 rounded font-medium text-sm transition ${
+          className={`px-4 py-2 rounded font-medium text-sm transition cursor-pointer ${
             tab === 'today'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+              ? 'bg-yellow-400 text-gray-900'
+              : 'bg-indigo-600 text-white hover:bg-yellow-400 hover:text-gray-900'
           }`}
         >
           Today
         </button>
       </div>
 
-      {/* Date range filter — only shown on all time tab */}
+      {/* Date range filter, only shown on all time tab */}
       {tab === 'alltime' && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-3 items-end">
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <label className="block text-xs text-gray-500 mb-1">From</label>
               <input
                 type="date"
@@ -99,7 +98,7 @@ export default function LeaderboardPage() {
                 className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 w-full">
               <label className="block text-xs text-gray-500 mb-1">To</label>
               <input
                 type="date"
@@ -110,18 +109,18 @@ export default function LeaderboardPage() {
                 className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 w-full sm:w-auto sm:shrink-0">
               <button
                 onClick={handleFilter}
                 disabled={isLoading}
-                className="px-5 py-2 bg-indigo-600 text-white rounded font-medium text-sm hover:bg-indigo-700 transition disabled:opacity-50"
+                className="flex-1 sm:flex-none px-5 py-2 bg-indigo-600 text-white rounded font-medium text-sm hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer"
               >
                 {isLoading ? 'Loading...' : 'Filter'}
               </button>
               <button
                 onClick={handleClear}
                 disabled={isLoading}
-                className="px-4 py-2 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
+                className="flex-1 sm:flex-none px-4 py-2 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 cursor-pointer"
               >
                 Clear
               </button>
