@@ -1,1 +1,0 @@
-Test project for Reaktor Summer Developer application, showcasing a full-stack RPS app with React, Next.js, TypeScript, Node.js, and Express.

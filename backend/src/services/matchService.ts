@@ -18,20 +18,16 @@ export const getWinner = (match: Match): 'A' | 'B' | 'TIE' => {
   return 'B'
 }
 
-export const getLatestMatches = async (
-  page: number,
-  limit: number
-): Promise<{
-  matches: Match[]
-  total: number
-  hasMore: boolean
-}> => {
+export const getLatestMatches = async (page: number, limit: number) => {
   const all = await fetchAllMatches()
+  const sorted = [...all].sort(
+    (a, b) => (b.time as number) - (a.time as number)
+  )
   const start = (page - 1) * limit
   return {
-    matches: all.slice(start, start + limit),
-    total: all.length,
-    hasMore: start + limit < all.length
+    matches: sorted.slice(start, start + limit),
+    total: sorted.length,
+    hasMore: start + limit < sorted.length
   }
 }
 

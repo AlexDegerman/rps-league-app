@@ -51,7 +51,12 @@ export default function HomePage() {
   useEffect(() => {
     if (!initialLoadRef.current) {
       initialLoadRef.current = true
-      loadMatches(1)
+      fetchLatestMatches(1)
+        .then((data) => {
+          if (data.matches.length > 0) markReady()
+          loadMatches(1)
+        })
+        .catch(() => setBackendReady(false))
     }
   }, [loadMatches])
 
