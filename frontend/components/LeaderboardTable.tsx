@@ -50,7 +50,7 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
               <td className="px-4 py-3 font-medium">
                 <Link
                   href={`/player/${encodeURIComponent(player.name)}`}
-                  className="text-gray-800 hover:text-indigo-600 hover:underline transition"
+                  className="text-gray-800 underline decoration-gray-300 hover:decoration-indigo-600 hover:text-indigo-600 transition"
                 >
                   {player.name}
                 </Link>

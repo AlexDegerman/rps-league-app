@@ -50,7 +50,7 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
           <Link
             href={`/player/${encodeURIComponent(playerA.name)}`}
             onClick={(e) => e.stopPropagation()}
-            className={`font-medium text-sm hover:underline hover:text-indigo-600 transition ${
+            className={`font-medium text-sm underline decoration-gray-300 hover:decoration-indigo-600 hover:text-indigo-600 transition ${
               !isTie && winner === playerA.name
                 ? 'text-green-600 font-bold'
                 : 'text-gray-800'
@@ -60,9 +60,7 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
           </Link>
           {highlightPlayer === playerA.name && (
             <span
-              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(
-                getPlayerResult(match, playerA.name)
-              )}`}
+              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(getPlayerResult(match, playerA.name))}`}
             >
               {getPlayerResult(match, playerA.name)}
             </span>
@@ -81,7 +79,7 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
           <Link
             href={`/player/${encodeURIComponent(playerB.name)}`}
             onClick={(e) => e.stopPropagation()}
-            className={`font-medium text-sm text-right hover:underline hover:text-indigo-600 transition ${
+            className={`font-medium text-sm text-right underline decoration-gray-300 hover:decoration-indigo-600 hover:text-indigo-600 transition ${
               !isTie && winner === playerB.name
                 ? 'text-green-600 font-bold'
                 : 'text-gray-800'
@@ -91,9 +89,7 @@ const MatchRow = ({ match, highlightPlayer }: MatchRowProps) => {
           </Link>
           {highlightPlayer === playerB.name && (
             <span
-              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(
-                getPlayerResult(match, playerB.name)
-              )}`}
+              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(getPlayerResult(match, playerB.name))}`}
             >
               {getPlayerResult(match, playerB.name)}
             </span>
