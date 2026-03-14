@@ -17,7 +17,6 @@ interface PlayerStats {
 export default function PlayerPage() {
   const params = useParams()
   const name = decodeURIComponent(params.name as string)
-
   const [stats, setStats] = useState<PlayerStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
 
@@ -33,10 +32,7 @@ export default function PlayerPage() {
     [name]
   )
   const { matches, hasMore, isLoading, isLoadingMore, loadMatches } =
-    useInfiniteScroll({
-      fetchFn,
-      enabled: true
-    })
+    useInfiniteScroll({ fetchFn, enabled: true })
 
   useEffect(() => {
     loadMatches(1)
@@ -47,9 +43,8 @@ export default function PlayerPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-1">{name}</h1>
       <p className="text-gray-500 mb-6">Player profile</p>
 
-      {/* Stats cards */}
       {statsLoading ? (
-        <p className="text-gray-400 py-4">Loading stats...</p>
+        <p className="text-gray-400 py-2">Loading stats...</p>
       ) : (
         stats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
@@ -75,7 +70,6 @@ export default function PlayerPage() {
         )
       )}
 
-      {/* Match history */}
       <h2 className="text-lg font-semibold text-gray-800 mb-3">
         Match History
       </h2>

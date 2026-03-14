@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-gray-100 min-h-screen">
         <Header />
-        <main className="max-w-2xl mx-auto px-4 py-4 w-full overflow-hidden">
+        <main className="w-full">
           {children}
         </main>
       </body>

@@ -12,7 +12,7 @@ const navItems = [
 const Header = () => {
   const pathname = usePathname()
   return (
-    <header className="w-full bg-white shadow">
+    <header className="w-full bg-white shadow sticky top-0 z-50">
       <div className="max-w-2xl mx-auto px-2 py-3 flex items-center justify-center gap-3">
         <Link href="/" className="shrink-0">
           <Image src="/rpslogo.png" alt="RPS League" width={52} height={52} />

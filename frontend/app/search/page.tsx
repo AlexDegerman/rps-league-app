@@ -16,12 +16,8 @@ type Tab = 'date' | 'player'
 
 export default function SearchPage() {
   const [tab, setTab] = useState<Tab>('date')
-
-  // Date search state
   const [date, setDate] = useState('')
   const [hasDateSearched, setHasDateSearched] = useState(false)
-
-  // Player search state
   const [playerInput, setPlayerInput] = useState('')
   const [selectedPlayer, setSelectedPlayer] = useState('')
   const [playerNames, setPlayerNames] = useState<string[]>([])
@@ -98,13 +94,17 @@ export default function SearchPage() {
     n.toLowerCase().includes(playerInput.toLowerCase())
   )
 
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-4">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Search</h1>
-      <p className="text-gray-500 mb-6">Find matches by date or player</p>
+return (
+  <div className="max-w-2xl mx-auto px-4">
+    {/* title scrolls away normally */}
+    <div className="py-4">
+      <h1 className="text-3xl font-bold text-gray-900 mb-1">Search</h1>
+      <p className="text-gray-500">Find matches by date or player</p>
+    </div>
 
-      {/* Tab toggle */}
-      <div className="flex gap-2 mb-6">
+    {/* only tabs and search input stick */}
+    <div className="sticky top-[75px] z-40 bg-gray-100 pb-4">
+      <div className="flex gap-2 mb-4">
         <button
           onClick={() => {
             setTab('date')
@@ -113,11 +113,7 @@ export default function SearchPage() {
             setPlayerInput('')
             setSelectedPlayer('')
           }}
-          className={`px-4 py-2 rounded font-medium text-sm transition cursor-pointer ${
-            tab === 'date'
-              ? 'bg-yellow-400 text-gray-900'
-              : 'bg-indigo-600 text-white hover:bg-yellow-400 hover:text-gray-900'
-          }`}
+          className={`px-4 py-2 rounded font-medium text-sm transition cursor-pointer ${tab === 'date' ? 'bg-yellow-400 text-gray-900' : 'bg-indigo-600 text-white hover:bg-yellow-400 hover:text-gray-900'}`}
         >
           By Date
         </button>
@@ -128,42 +124,86 @@ export default function SearchPage() {
             setHasDateSearched(false)
             setDate('')
           }}
-          className={`px-4 py-2 rounded font-medium text-sm transition cursor-pointer ${
-            tab === 'player'
-              ? 'bg-yellow-400 text-gray-900'
-              : 'bg-indigo-600 text-white hover:bg-yellow-400 hover:text-gray-900'
-          }`}
+          className={`px-4 py-2 rounded font-medium text-sm transition cursor-pointer ${tab === 'player' ? 'bg-yellow-400 text-gray-900' : 'bg-indigo-600 text-white hover:bg-yellow-400 hover:text-gray-900'}`}
         >
           By Player
         </button>
       </div>
 
-      {/* Date tab */}
+      {tab === 'date' && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="flex gap-3 items-end">
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Date</label>
+              <input
+                type="date"
+                value={date}
+                min={FIRST_MATCH_DATE}
+                max={TODAY}
+                onClick={(e) => (e.target as HTMLInputElement).showPicker()}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer"
+              />
+            </div>
+            <button
+              onClick={handleDateSearch}
+              disabled={!date || dateIsLoading}
+              className="px-6 py-2 bg-indigo-600 text-white rounded font-medium text-sm hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer"
+            >
+              {dateIsLoading ? 'Loading...' : 'Search'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'player' && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="flex gap-3 items-end">
+            <div className="flex-1 relative" ref={dropdownRef}>
+              <label className="block text-xs text-gray-500 mb-1">
+                Player name
+              </label>
+              <input
+                type="text"
+                value={playerInput}
+                onChange={(e) => {
+                  setPlayerInput(e.target.value)
+                  setSelectedPlayer('')
+                  setShowDropdown(true)
+                }}
+                onFocus={() => setShowDropdown(true)}
+                placeholder="Type to search players..."
+                className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
+              {showDropdown && filteredPlayers.length > 0 && (
+                <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
+                  {filteredPlayers.map((name) => (
+                    <li
+                      key={name}
+                      onMouseDown={() => handlePlayerSelect(name)}
+                      className="px-3 py-2 text-sm text-gray-800 hover:bg-indigo-50 cursor-pointer"
+                    >
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <button
+              onClick={handlePlayerSearch}
+              disabled={!selectedPlayer || playerIsLoading}
+              className="px-6 py-2 bg-indigo-600 text-white rounded font-medium text-sm hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer"
+            >
+              {playerIsLoading ? 'Loading...' : 'Search'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <div className="pt-2">
       {tab === 'date' && (
         <>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
-            <div className="flex gap-3 items-end">
-              <div className="flex-1">
-                <label className="block text-xs text-gray-500 mb-1">Date</label>
-                <input
-                  type="date"
-                  value={date}
-                  min={FIRST_MATCH_DATE}
-                  max={TODAY}
-                  onClick={(e) => (e.target as HTMLInputElement).showPicker()}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer"
-                />
-              </div>
-              <button
-                onClick={handleDateSearch}
-                disabled={!date || dateIsLoading}
-                className="px-6 py-2 bg-indigo-600 text-white rounded font-medium text-sm hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer"
-              >
-                {dateIsLoading ? 'Loading...' : 'Search'}
-              </button>
-            </div>
-          </div>
           {!hasDateSearched ? (
             <p className="text-center text-gray-400 py-12">
               Select a date to view matches
@@ -185,51 +225,8 @@ export default function SearchPage() {
           )}
         </>
       )}
-
-      {/* Player tab */}
       {tab === 'player' && (
         <>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 mb-4">
-            <div className="flex gap-3 items-end">
-              <div className="flex-1 relative" ref={dropdownRef}>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Player name
-                </label>
-                <input
-                  type="text"
-                  value={playerInput}
-                  onChange={(e) => {
-                    setPlayerInput(e.target.value)
-                    setSelectedPlayer('')
-                    setShowDropdown(true)
-                  }}
-                  onFocus={() => setShowDropdown(true)}
-                  placeholder="Type to search players..."
-                  className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                />
-                {showDropdown && filteredPlayers.length > 0 && (
-                  <ul className="absolute z-10 w-full bg-white border border-gray-200 rounded mt-1 max-h-48 overflow-y-auto shadow-lg">
-                    {filteredPlayers.map((name) => (
-                      <li
-                        key={name}
-                        onMouseDown={() => handlePlayerSelect(name)}
-                        className="px-3 py-2 text-sm text-gray-800 hover:bg-indigo-50 cursor-pointer"
-                      >
-                        {name}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-              <button
-                onClick={handlePlayerSearch}
-                disabled={!selectedPlayer || playerIsLoading}
-                className="px-6 py-2 bg-indigo-600 text-white rounded font-medium text-sm hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer"
-              >
-                {playerIsLoading ? 'Loading...' : 'Search'}
-              </button>
-            </div>
-          </div>
           {!hasPlayerSearched ? (
             <p className="text-center text-gray-400 py-12">
               Select a player to view matches
@@ -253,5 +250,6 @@ export default function SearchPage() {
         </>
       )}
     </div>
-  )
+  </div>
+)
 }

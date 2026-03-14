@@ -1,13 +1,16 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { fetchLatestMatches } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { Match } from '@/types/rps'
 
+let _backendReady = false
+
 export default function HomePage() {
   const initialLoadRef = useRef(false)
+  const [backendReady, setBackendReady] = useState(_backendReady)
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
 
   const {
@@ -19,7 +22,11 @@ export default function HomePage() {
     loadMatches
   } = useInfiniteScroll({ fetchFn })
 
-  // Poll for new matches every 5 seconds
+  const markReady = () => {
+    _backendReady = true
+    setBackendReady(true)
+  }
+
   useEffect(() => {
     const poll = async () => {
       try {
@@ -32,8 +39,9 @@ export default function HomePage() {
           if (newOnes.length === 0) return prev
           return [...newOnes, ...prev]
         })
-      } catch (err) {
-        console.error('Poll failed:', err)
+        if (data.matches.length > 0) markReady()
+      } catch {
+        setBackendReady(false)
       }
     }
     const id = setInterval(poll, 5000)
@@ -49,10 +57,15 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Latest Matches</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-1">Latest Matches</h1>
       <p className="text-gray-500 mb-6">Live results from the RPS League</p>
 
-      {isLoading ? (
+      {!backendReady ? (
+        <p className="text-center text-gray-400 py-12">
+          Server is starting up, matches will appear shortly. Full match history
+          may take a moment to load.
+        </p>
+      ) : isLoading ? (
         <p className="text-center text-gray-400 py-12">Loading matches...</p>
       ) : matches.length === 0 ? (
         <p className="text-center text-gray-400 py-12">No matches found</p>

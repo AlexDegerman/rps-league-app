@@ -149,8 +149,8 @@ const fetchFull = async (): Promise<Cache> => {
     while (true) {
       console.log(`Fetching page ${page}...`)
       const json = await fetchPage(endpoint)
-      // update cache incrementally so frontend gets data during fetch
-      cache = { history: all, live: [], fetchedAt: Date.now() }
+      // update cache incrementally, preserve existing live matches
+      cache = { history: all, live: cache?.live ?? [], fetchedAt: Date.now() }
       // Normalize each match on ingest so all downstream code gets clean data
       all.push(...json.data.map(normalizeMatch))
       console.log(
