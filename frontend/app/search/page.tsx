@@ -103,7 +103,7 @@ return (
     </div>
 
     {/* only tabs and search input stick */}
-    <div className="sticky top-[75px] z-40 bg-gray-100 pb-4">
+    <div className="sticky top-18.75 z-40 bg-gray-100 pb-4">
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => {

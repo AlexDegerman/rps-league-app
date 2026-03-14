@@ -68,7 +68,7 @@ export default function LeaderboardPage() {
       </div>
 
       {/* tabs and filter stick */}
-      <div className="sticky top-[75px] z-40 bg-gray-100 pb-4">
+      <div className="sticky top-18.75 z-40 bg-gray-100 pb-4">
         <div className="flex items-center gap-2 mb-4">
           <button
             onClick={() => setTab('alltime')}
