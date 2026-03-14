@@ -67,8 +67,8 @@ export default function HomePage() {
 
       {!backendReady ? (
         <p className="text-center text-gray-400 py-12">
-          Server is starting up, matches will appear shortly. Full match history
-          may take a moment to load.
+          Server is starting up, matches will appear shortly. Full match
+          history may take 4–5 minutes to load after a cold start.
         </p>
       ) : isLoading ? (
         <p className="text-center text-gray-400 py-12">Loading matches...</p>
