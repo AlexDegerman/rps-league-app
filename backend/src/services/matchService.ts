@@ -1,6 +1,9 @@
 import { fetchAllMatches } from '../utils/apiClient.js'
 import type { Match } from '../types/rps.js'
 
+// Determines the winner of a match from the perspective of playerA and playerB.
+// Returns 'A' if playerA wins, 'B' if playerB wins, or 'TIE'.
+// Unrecognized moves (e.g. "dog") are treated as a loss for that player.
 export const getWinner = (match: Match): 'A' | 'B' | 'TIE' => {
   const a = match.playerA.played.toUpperCase()
   const b = match.playerB.played.toUpperCase()
@@ -18,6 +21,7 @@ export const getWinner = (match: Match): 'A' | 'B' | 'TIE' => {
   return 'B'
 }
 
+// Returns paginated matches sorted newest first.
 export const getLatestMatches = async (page: number, limit: number) => {
   const all = await fetchAllMatches()
   const sorted = [...all].sort(
@@ -31,15 +35,12 @@ export const getLatestMatches = async (page: number, limit: number) => {
   }
 }
 
+// Returns paginated matches for a specific UTC date, sorted newest first.
 export const getMatchesByDate = async (
   date: string,
   page: number,
   limit: number
-): Promise<{
-  matches: Match[]
-  total: number
-  hasMore: boolean
-}> => {
+): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
   const all = await fetchAllMatches()
   const filtered = all
     .filter(
@@ -54,15 +55,12 @@ export const getMatchesByDate = async (
   }
 }
 
+// Returns paginated matches involving a specific player, sorted newest first.
 export const getMatchesByPlayer = async (
   name: string,
   page: number,
   limit: number
-): Promise<{
-  matches: Match[]
-  total: number
-  hasMore: boolean
-}> => {
+): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
   const all = await fetchAllMatches()
   const filtered = all
     .filter((m) => m.playerA.name === name || m.playerB.name === name)
@@ -75,7 +73,7 @@ export const getMatchesByPlayer = async (
   }
 }
 
-// Returns sorted unique player names for the search dropdown
+// Returns all unique player names sorted alphabetically, used for the search dropdown.
 export const getAllPlayerNames = async (): Promise<string[]> => {
   const all = await fetchAllMatches()
   const names = new Set<string>()
@@ -86,6 +84,7 @@ export const getAllPlayerNames = async (): Promise<string[]> => {
   return [...names].sort()
 }
 
+// Returns career statistics for a specific player.
 export const getPlayerStats = async (
   name: string
 ): Promise<{

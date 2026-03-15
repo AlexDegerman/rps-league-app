@@ -10,6 +10,8 @@ export interface PlayerStats {
   winRate: number
 }
 
+// Aggregates match results into per-player win/loss/tie counts and win rate.
+// Sorted by wins descending, with alphabetical name as tiebreaker.
 const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
   const stats = new Map<string, PlayerStats>()
 

@@ -1,9 +1,12 @@
 import type { Match } from '../types/rps'
 
-// History matches use seconds (10 digits), live matches use milliseconds (13 digits)
+// Fallback conversion in case a raw timestamp reaches the frontend unnormalized.
+// Under normal conditions all timestamps are normalized to milliseconds on ingest.
 const toMs = (timestamp: number): number =>
   timestamp < 10_000_000_000 ? timestamp * 1000 : timestamp
 
+// Formats a UTC millisecond timestamp as a human-readable date and time.
+// Always displayed in UTC to match the API's timezone assumption.
 export const formatDateTime = (timestamp: number): string => {
   return new Date(toMs(timestamp)).toLocaleString('en-GB', {
     day: '2-digit',
@@ -15,6 +18,7 @@ export const formatDateTime = (timestamp: number): string => {
   })
 }
 
+// Determines the result of a match from a specific player's perspective.
 export const getPlayerResult = (
   match: Match,
   playerName: string
@@ -30,6 +34,7 @@ export const getPlayerResult = (
   return 'TIE'
 }
 
+// Maps a match result to its corresponding Tailwind background color class.
 export const resultColor = (result: 'WIN' | 'LOSE' | 'TIE'): string => {
   if (result === 'WIN') return 'bg-green-500'
   if (result === 'LOSE') return 'bg-red-500'
