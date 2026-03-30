@@ -6,6 +6,7 @@ import MatchList from '@/components/MatchList'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { Match } from '@/types/rps'
 
+// module-level so backendReady survives client-side navigation without resetting
 let _backendReady = false
 
 export default function HomePage() {

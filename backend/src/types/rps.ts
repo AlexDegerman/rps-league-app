@@ -8,10 +8,9 @@ export interface PlayerResult {
 export interface Match {
   type: string
   gameId: string
-  time: number | string
+  time: number | string // inconsistent across API endpoints, normalized on ingest
   playerA: Player
   playerB: Player
-  comment?: number
 }
 
 export interface Player {
