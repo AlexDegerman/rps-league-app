@@ -43,7 +43,7 @@ const saveMatch = async (match: Match): Promise<void> => {
 export const startMatchGenerator = (
   onPending: (pendingMatch: PendingMatch) => void,
   onResult: (match: Match) => void,
-  intervalMs = 15000
+  intervalMs = 10000
 ): void => {
   setInterval(async () => {
     const match = generateMatch()
@@ -57,7 +57,7 @@ export const startMatchGenerator = (
 
     onPending(pendingMatch)
 
-    await new Promise((resolve) => setTimeout(resolve, 10000))
+    await new Promise((resolve) => setTimeout(resolve, 5000))
 
     addMatch(match)
     await saveMatch(match)

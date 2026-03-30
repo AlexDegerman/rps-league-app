@@ -18,3 +18,16 @@ export interface PlayerStats {
   ties: number
   winRate: number
 }
+
+export interface PendingMatch {
+  gameId: string
+  time: number
+  playerA: string
+  playerB: string
+}
+
+export interface PredictionRecord {
+  gameId: string
+  pick: string // player name picked
+  result?: 'WIN' | 'LOSE' | 'TIE'
+}

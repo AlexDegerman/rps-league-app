@@ -1,16 +1,22 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { fetchLatestMatches } from '@/lib/api'
 import MatchList from '@/components/MatchList'
+import PendingMatchCard from '@/components/PendingMatchCard'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import type { Match } from '@/types/rps'
+import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+
 let _backendReady = false
 
 export default function HomePage() {
   const [backendReady, setBackendReady] = useState(_backendReady)
+  const [pendingMatches, setPendingMatches] = useState<PendingMatch[]>([])
+  const [predictions, setPredictions] = useState<Map<string, PredictionRecord>>(
+    new Map()
+  )
 
   const markReady = () => {
     _backendReady = true
@@ -18,7 +24,6 @@ export default function HomePage() {
   }
 
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
-
   const {
     matches,
     setMatches,
@@ -28,30 +33,69 @@ export default function HomePage() {
     loadMatches
   } = useInfiniteScroll({ fetchFn })
 
-  useEffect(() => {
-    loadMatches(1)
-  }, [loadMatches])
+useEffect(() => {
+  fetchLatestMatches(1)
+    .then((data) => {
+      if (data.matches.length > 0) markReady()
+      loadMatches(1)
+    })
+    .catch(() => {})
+}, [loadMatches])
+
+  const handlePick = (gameId: string, playerName: string) => {
+    setPredictions((prev) => {
+      const next = new Map(prev)
+      next.set(gameId, { gameId, pick: playerName })
+      return next
+    })
+  }
 
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
 
-    es.onmessage = (event) => {
-      try {
-        const match: Match = JSON.parse(event.data)
-        setMatches((prev) => {
-          if (prev.some((m) => m.gameId === match.gameId)) return prev
-          return [match, ...prev]
-        })
-        markReady()
-      } catch (err) {
-        console.error('Failed to parse SSE event:', err)
-      }
-    }
+    es.addEventListener('pending', (event) => {
+      const pending: PendingMatch = JSON.parse(event.data)
+      setPendingMatches((prev) => [pending, ...prev])
+      markReady()
+    })
 
-    es.onerror = () => {
-      console.error('SSE connection lost')
-    }
+    es.addEventListener('result', (event) => {
+      const match: Match = JSON.parse(event.data)
 
+      // Resolve prediction if one was made
+      setPredictions((prev) => {
+        const prediction = prev.get(match.gameId)
+        if (!prediction) return prev
+
+        const winner =
+          match.playerA.played === match.playerB.played
+            ? 'TIE'
+            : (match.playerA.played === 'ROCK' &&
+                  match.playerB.played === 'SCISSORS') ||
+                (match.playerA.played === 'SCISSORS' &&
+                  match.playerB.played === 'PAPER') ||
+                (match.playerA.played === 'PAPER' &&
+                  match.playerB.played === 'ROCK')
+              ? match.playerA.name
+              : match.playerB.name
+
+        const result =
+          winner === 'TIE' ? 'TIE' : winner === prediction.pick ? 'WIN' : 'LOSE'
+
+        const next = new Map(prev)
+        next.set(match.gameId, { ...prediction, result })
+        return next
+      })
+
+      // Move from pending to match list
+      setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
+      setMatches((prev) => {
+        if (prev.some((m) => m.gameId === match.gameId)) return prev
+        return [match, ...prev]
+      })
+    })
+
+    es.onerror = () => console.error('SSE connection lost')
     return () => es.close()
   }, [setMatches])
 
@@ -65,14 +109,27 @@ export default function HomePage() {
         </p>
       ) : isLoading ? (
         <p className="text-center text-gray-400 py-12">Loading matches...</p>
-      ) : matches.length === 0 ? (
-        <p className="text-center text-gray-400 py-12">No matches found</p>
       ) : (
-        <MatchList
-          matches={matches}
-          isLoadingMore={isLoadingMore}
-          hasMore={hasMore}
-        />
+        <>
+          {pendingMatches.length > 0 && (
+            <ul className="space-y-3 mb-3">
+              {pendingMatches.map((pending) => (
+                <PendingMatchCard
+                  key={pending.gameId}
+                  pending={pending}
+                  prediction={predictions.get(pending.gameId) ?? null}
+                  onPick={handlePick}
+                />
+              ))}
+            </ul>
+          )}
+          <MatchList
+            matches={matches}
+            isLoadingMore={isLoadingMore}
+            hasMore={hasMore}
+            predictions={predictions}
+          />
+        </>
       )}
     </div>
   )
