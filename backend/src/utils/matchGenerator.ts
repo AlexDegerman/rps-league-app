@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { playerNames } from './playerNames.js'
 import { addMatch } from './apiClient.js'
+import pool from './db.js'
 import type { Match } from '../types/rps.js'
 
 const MOVES = ['ROCK', 'PAPER', 'SCISSORS'] as const
@@ -22,13 +23,31 @@ const generateMatch = (): Match => {
   }
 }
 
+const saveMatch = async (match: Match): Promise<void> => {
+  await pool.query(
+    `INSERT INTO matches (game_id, type, time, player_a_name, player_a_played, player_b_name, player_b_played)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    ON CONFLICT (game_id) DO NOTHING`,
+    [
+      match.gameId,
+      match.type,
+      match.time,
+      match.playerA.name,
+      match.playerA.played,
+      match.playerB.name,
+      match.playerB.played
+    ]
+  )
+}
+
 export const startMatchGenerator = (
   onMatch: (match: Match) => void,
   intervalMs = 5000
 ): void => {
-  setInterval(() => {
+  setInterval(async () => {
     const match = generateMatch()
     addMatch(match)
+    await saveMatch(match)
     onMatch(match)
   }, intervalMs)
 }

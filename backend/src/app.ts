@@ -4,6 +4,7 @@ import cors from 'cors'
 import matchesRouter from './routes/matches.js'
 import leaderboardRouter from './routes/leaderboard.js'
 import liveRouter from './routes/live.js'
+import { initDb } from './utils/initDb.js'
 
 const app = express()
 
@@ -20,8 +21,9 @@ app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/live', liveRouter)
 
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`)
+  await initDb()
 })
 
 export default app

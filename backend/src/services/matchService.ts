@@ -1,12 +1,23 @@
-import { fetchAllMatches } from '../utils/apiClient.js'
-import type { Match } from '../types/rps.js'
+import pool from '../utils/db.js'
+import type { Match, Move } from '../types/rps.js'
 
-// Determines the winner of a match from the perspective of playerA and playerB.
-// Returns 'A' if playerA wins, 'B' if playerB wins, or 'TIE'.
-// Unrecognized moves (e.g. "dog") are treated as a loss for that player.
+const rowToMatch = (row: Record<string, unknown>): Match => ({
+  type: row.type as string,
+  gameId: row.game_id as string,
+  time: Number(row.time),
+  playerA: {
+    name: row.player_a_name as string,
+    played: row.player_a_played as Move
+  },
+  playerB: {
+    name: row.player_b_name as string,
+    played: row.player_b_played as Move
+  }
+})
+
 export const getWinner = (match: Match): 'A' | 'B' | 'TIE' => {
-  const a = match.playerA.played.toUpperCase()
-  const b = match.playerB.played.toUpperCase()
+  const a = match.playerA.played
+  const b = match.playerB.played
   if (a === b) return 'TIE'
   if (
     (a === 'ROCK' && b === 'SCISSORS') ||
@@ -14,77 +25,87 @@ export const getWinner = (match: Match): 'A' | 'B' | 'TIE' => {
     (a === 'PAPER' && b === 'ROCK')
   )
     return 'A'
-  // anything unrecognized (like "dog"), treat as loss for that player
-  // if both unrecognized it's effectively a tie
-  if (a !== 'ROCK' && a !== 'PAPER' && a !== 'SCISSORS') return 'B'
-  if (b !== 'ROCK' && b !== 'PAPER' && b !== 'SCISSORS') return 'A'
   return 'B'
 }
 
-// Returns paginated matches sorted newest first.
 export const getLatestMatches = async (page: number, limit: number) => {
-  const all = await fetchAllMatches()
-  const sorted = [...all].sort(
-    (a, b) => (b.time as number) - (a.time as number)
-  )
-  const start = (page - 1) * limit
+  const offset = (page - 1) * limit
+  const [data, count] = await Promise.all([
+    pool.query(`SELECT * FROM matches ORDER BY time DESC LIMIT $1 OFFSET $2`, [
+      limit,
+      offset
+    ]),
+    pool.query(`SELECT COUNT(*) FROM matches`)
+  ])
+  const total = Number(count.rows[0].count)
   return {
-    matches: sorted.slice(start, start + limit),
-    total: sorted.length,
-    hasMore: start + limit < sorted.length
+    matches: data.rows.map(rowToMatch),
+    total,
+    hasMore: offset + limit < total
   }
 }
 
-// Returns paginated matches for a specific UTC date, sorted newest first.
 export const getMatchesByDate = async (
   date: string,
   page: number,
   limit: number
 ): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
-  const all = await fetchAllMatches()
-  const filtered = all
-    .filter(
-      (m) => new Date(m.time as number).toISOString().split('T')[0] === date
-    )
-    .sort((a, b) => (b.time as number) - (a.time as number))
-  const start = (page - 1) * limit
+  const offset = (page - 1) * limit
+  const start = new Date(date).getTime()
+  const end = start + 86400000
+
+  const [data, count] = await Promise.all([
+    pool.query(
+      `SELECT * FROM matches WHERE time >= $1 AND time < $2 ORDER BY time DESC LIMIT $3 OFFSET $4`,
+      [start, end, limit, offset]
+    ),
+    pool.query(`SELECT COUNT(*) FROM matches WHERE time >= $1 AND time < $2`, [
+      start,
+      end
+    ])
+  ])
+  const total = Number(count.rows[0].count)
   return {
-    matches: filtered.slice(start, start + limit),
-    total: filtered.length,
-    hasMore: start + limit < filtered.length
+    matches: data.rows.map(rowToMatch),
+    total,
+    hasMore: offset + limit < total
   }
 }
 
-// Returns paginated matches involving a specific player, sorted newest first.
 export const getMatchesByPlayer = async (
   name: string,
   page: number,
   limit: number
 ): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
-  const all = await fetchAllMatches()
-  const filtered = all
-    .filter((m) => m.playerA.name === name || m.playerB.name === name)
-    .sort((a, b) => (b.time as number) - (a.time as number))
-  const start = (page - 1) * limit
+  const offset = (page - 1) * limit
+  const [data, count] = await Promise.all([
+    pool.query(
+      `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1 ORDER BY time DESC LIMIT $2 OFFSET $3`,
+      [name, limit, offset]
+    ),
+    pool.query(
+      `SELECT COUNT(*) FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
+      [name]
+    )
+  ])
+  const total = Number(count.rows[0].count)
   return {
-    matches: filtered.slice(start, start + limit),
-    total: filtered.length,
-    hasMore: start + limit < filtered.length
+    matches: data.rows.map(rowToMatch),
+    total,
+    hasMore: offset + limit < total
   }
 }
 
-// Returns all unique player names sorted alphabetically, used for the search dropdown.
 export const getAllPlayerNames = async (): Promise<string[]> => {
-  const all = await fetchAllMatches()
-  const names = new Set<string>()
-  for (const m of all) {
-    names.add(m.playerA.name)
-    names.add(m.playerB.name)
-  }
-  return [...names].sort()
+  const result = await pool.query(
+    `SELECT DISTINCT player_a_name AS name FROM matches
+      UNION
+      SELECT DISTINCT player_b_name AS name FROM matches
+      ORDER BY name ASC`
+  )
+  return result.rows.map((r) => r.name as string)
 }
 
-// Returns career statistics for a specific player.
 export const getPlayerStats = async (
   name: string
 ): Promise<{
@@ -94,13 +115,15 @@ export const getPlayerStats = async (
   ties: number
   winRate: number
 }> => {
-  const all = await fetchAllMatches()
-  const matches = all.filter(
-    (m) => m.playerA.name === name || m.playerB.name === name
+  const result = await pool.query(
+    `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
+    [name]
   )
+  const matches = result.rows.map(rowToMatch)
   let wins = 0,
     losses = 0,
     ties = 0
+
   for (const m of matches) {
     const winner = getWinner(m)
     if (winner === 'TIE') ties++
@@ -111,6 +134,7 @@ export const getPlayerStats = async (
       wins++
     else losses++
   }
+
   return {
     total: matches.length,
     wins,

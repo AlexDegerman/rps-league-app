@@ -1,6 +1,6 @@
-import { fetchAllMatches } from '../utils/apiClient.js'
+import pool from '../utils/db.js'
 import { getWinner } from './matchService.js'
-import type { Match } from '../types/rps.js'
+import type { Match, Move } from '../types/rps.js'
 
 export interface PlayerStats {
   name: string
@@ -10,22 +10,33 @@ export interface PlayerStats {
   winRate: number
 }
 
+const rowToMatch = (row: Record<string, unknown>): Match => ({
+  type: row.type as string,
+  gameId: row.game_id as string,
+  time: Number(row.time),
+  playerA: {
+    name: row.player_a_name as string,
+    played: row.player_a_played as Move
+  },
+  playerB: {
+    name: row.player_b_name as string,
+    played: row.player_b_played as Move
+  }
+})
+
 // Aggregates match results into per-player win/loss/tie counts and win rate.
 // Sorted by wins descending, with alphabetical name as tiebreaker.
 const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
   const stats = new Map<string, PlayerStats>()
-
   const getOrCreate = (name: string): PlayerStats => {
     if (!stats.has(name))
       stats.set(name, { name, wins: 0, losses: 0, ties: 0, winRate: 0 })
     return stats.get(name)!
   }
-
   for (const match of matches) {
     const a = getOrCreate(match.playerA.name)
     const b = getOrCreate(match.playerB.name)
     const winner = getWinner(match)
-
     if (winner === 'TIE') {
       a.ties++
       b.ties++
@@ -37,7 +48,6 @@ const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
       a.losses++
     }
   }
-
   return [...stats.values()]
     .map((p) => ({
       ...p,
@@ -48,27 +58,34 @@ const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
     }))
     .sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name))
 }
-
 // Historical leaderboard, filter by date range, both dates optional
 export const getHistoricalLeaderboard = async (
   startDate?: string,
   endDate?: string
 ): Promise<PlayerStats[]> => {
-  const all = await fetchAllMatches()
-  const filtered = all.filter((match) => {
-    const date = new Date(match.time).toISOString().split('T')[0] ?? ''
-    if (startDate && date < startDate) return false
-    if (endDate && date > endDate) return false
-    return true
-  })
-  return buildLeaderboard(filtered)
+  const conditions: string[] = []
+  const params: unknown[] = []
+
+  if (startDate) {
+    params.push(new Date(startDate).getTime())
+    conditions.push(`time >= $${params.length}`)
+  }
+  if (endDate) {
+    params.push(new Date(endDate).getTime() + 86400000)
+    conditions.push(`time < $${params.length}`)
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+  const result = await pool.query(`SELECT * FROM matches ${where}`, params)
+  return buildLeaderboard(result.rows.map(rowToMatch))
 }
 
 export const getTodayLeaderboard = async (): Promise<PlayerStats[]> => {
-  const all = await fetchAllMatches()
-  const today = new Date().toISOString().split('T')[0]
-  const todayMatches = all.filter(
-    (m) => new Date(m.time as number).toISOString().split('T')[0] === today
+  const start = new Date().setUTCHours(0, 0, 0, 0)
+  const end = start + 86400000
+  const result = await pool.query(
+    `SELECT * FROM matches WHERE time >= $1 AND time < $2`,
+    [start, end]
   )
-  return buildLeaderboard(todayMatches)
+  return buildLeaderboard(result.rows.map(rowToMatch))
 }
