@@ -12,5 +12,18 @@ export const initDb = async (): Promise<void> => {
       player_b_played TEXT NOT NULL
     )
   `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS predictions (
+      id SERIAL PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      game_id TEXT NOT NULL,
+      pick TEXT NOT NULL,
+      result TEXT,
+      created_at BIGINT NOT NULL,
+      UNIQUE(user_id, game_id)
+    )
+  `)
+
   console.log('Database initialized')
 }

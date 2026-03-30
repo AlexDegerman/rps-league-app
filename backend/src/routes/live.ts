@@ -3,6 +3,7 @@ import {
   startMatchGenerator,
   type PendingMatch
 } from '../utils/matchGenerator.js'
+import { resolvePrediction } from '../services/predictionService.js'
 import type { Match } from '../types/rps.js'
 
 const router = Router()
@@ -29,7 +30,20 @@ router.get('/', (req, res) => {
           client('pending', JSON.stringify(pendingMatch))
         )
       },
-      (match: Match) => {
+      async (match: Match) => {
+        const winner =
+          match.playerA.played === match.playerB.played
+            ? 'TIE'
+            : (match.playerA.played === 'ROCK' &&
+                  match.playerB.played === 'SCISSORS') ||
+                (match.playerA.played === 'SCISSORS' &&
+                  match.playerB.played === 'PAPER') ||
+                (match.playerA.played === 'PAPER' &&
+                  match.playerB.played === 'ROCK')
+              ? match.playerA.name
+              : match.playerB.name
+
+        await resolvePrediction(match.gameId, winner)
         clients.forEach((client) => client('result', JSON.stringify(match)))
       }
     )
