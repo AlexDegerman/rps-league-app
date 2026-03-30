@@ -4,6 +4,7 @@ import cors from 'cors'
 import matchesRouter from './routes/matches.js'
 import { fetchAllMatches, startLiveStream } from './utils/apiClient.js'
 import leaderboardRouter from './routes/leaderboard.js'
+import liveRouter from './routes/live.js'
 
 const app = express()
 
@@ -17,6 +18,7 @@ app.use(express.json())
 
 app.use('/api/matches', matchesRouter)
 app.use('/api/leaderboard', leaderboardRouter)
+app.use('/api/live', liveRouter)
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, async () => {
