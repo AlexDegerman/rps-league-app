@@ -3,7 +3,7 @@
 A full-stack web application for exploring Rock Paper Scissors League match results and player statistics. Built as a Reaktor summer developer assignment.
 
 **Live demo:** https://rps-league-eight.vercel.app  
-> The backend runs on a free tier and may be sleeping, first load can take 30–60 seconds to wake up. Full match history (~185,000 matches) takes a few minutes to load after startup.
+> Match data is frozen as of the last cached snapshot (March 2026) - the Reaktor API this project depended on is no longer in service. A self-contained version with a mock match generator is in development.
 
 ![RPS League Demo](./assets/rpsdemo.gif)
 ---
