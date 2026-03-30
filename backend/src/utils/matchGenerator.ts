@@ -41,13 +41,33 @@ const saveMatch = async (match: Match): Promise<void> => {
 }
 
 export const startMatchGenerator = (
-  onMatch: (match: Match) => void,
-  intervalMs = 5000
+  onPending: (pendingMatch: PendingMatch) => void,
+  onResult: (match: Match) => void,
+  intervalMs = 15000
 ): void => {
   setInterval(async () => {
     const match = generateMatch()
+
+    const pendingMatch: PendingMatch = {
+      gameId: match.gameId,
+      time: match.time,
+      playerA: match.playerA.name,
+      playerB: match.playerB.name
+    }
+
+    onPending(pendingMatch)
+
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+
     addMatch(match)
     await saveMatch(match)
-    onMatch(match)
+    onResult(match)
   }, intervalMs)
+}
+
+export interface PendingMatch {
+  gameId: string
+  time: number
+  playerA: string
+  playerB: string
 }
