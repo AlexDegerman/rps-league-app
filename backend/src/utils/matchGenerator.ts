@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { playerNames } from './playernames.js'
+import { playerNames } from './playerNames.js'
 import { addMatch } from './apiClient.js'
 import type { Match } from '../types/rps.js'
 

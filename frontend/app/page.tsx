@@ -1,17 +1,22 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { fetchLatestMatches } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { Match } from '@/types/rps'
 
-// module-level so backendReady survives client-side navigation without resetting
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 let _backendReady = false
 
 export default function HomePage() {
-  const initialLoadRef = useRef(false)
   const [backendReady, setBackendReady] = useState(_backendReady)
+
+  const markReady = () => {
+    _backendReady = true
+    setBackendReady(true)
+  }
+
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
 
   const {
@@ -23,53 +28,40 @@ export default function HomePage() {
     loadMatches
   } = useInfiniteScroll({ fetchFn })
 
-  const markReady = () => {
-    _backendReady = true
-    setBackendReady(true)
-  }
+  useEffect(() => {
+    loadMatches(1)
+  }, [loadMatches])
 
   useEffect(() => {
-    const poll = async () => {
+    const es = new EventSource(`${API_BASE}/api/live`)
+
+    es.onmessage = (event) => {
       try {
-        const data = await fetchLatestMatches(1)
+        const match: Match = JSON.parse(event.data)
         setMatches((prev) => {
-          const existingIds = new Set(prev.map((m) => m.gameId))
-          const newOnes = data.matches.filter(
-            (m: Match) => !existingIds.has(m.gameId)
-          )
-          if (newOnes.length === 0) return prev
-          return [...newOnes, ...prev]
+          if (prev.some((m) => m.gameId === match.gameId)) return prev
+          return [match, ...prev]
         })
-        if (data.matches.length > 0) markReady()
-      } catch {
-        setBackendReady(false)
+        markReady()
+      } catch (err) {
+        console.error('Failed to parse SSE event:', err)
       }
     }
-    const id = setInterval(poll, 5000)
-    return () => clearInterval(id)
-  }, [setMatches])
 
-  useEffect(() => {
-    if (!initialLoadRef.current) {
-      initialLoadRef.current = true
-      fetchLatestMatches(1)
-        .then((data) => {
-          if (data.matches.length > 0) markReady()
-          loadMatches(1)
-        })
-        .catch(() => setBackendReady(false))
+    es.onerror = () => {
+      console.error('SSE connection lost')
     }
-  }, [loadMatches])
+
+    return () => es.close()
+  }, [setMatches])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4">
       <h1 className="text-3xl font-bold text-gray-900 mb-1">Latest Matches</h1>
       <p className="text-gray-500 mb-6">Live results from the RPS League</p>
-
       {!backendReady ? (
         <p className="text-center text-gray-400 py-12">
-          Server is starting up, matches will appear shortly. Full match history
-          may take 4-5 minutes to load after a cold start.
+          Connecting to live stream...
         </p>
       ) : isLoading ? (
         <p className="text-center text-gray-400 py-12">Loading matches...</p>
