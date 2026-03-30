@@ -1,16 +1,44 @@
 import pool from '../utils/db.js'
 
+const POINTS_FLOOR = 500
+
+const getOrCreateUser = async (userId: string): Promise<number> => {
+  await pool.query(
+    `INSERT INTO users (user_id, points) VALUES ($1, $2) ON CONFLICT (user_id) DO NOTHING`,
+    [userId, POINTS_FLOOR]
+  )
+  const result = await pool.query(
+    `SELECT points FROM users WHERE user_id = $1`,
+    [userId]
+  )
+  return Number(result.rows[0].points)
+}
+
+export const getUserPoints = async (userId: string): Promise<number> => {
+  return getOrCreateUser(userId)
+}
+
 export const savePrediction = async (
   userId: string,
   gameId: string,
-  pick: string
-): Promise<void> => {
+  pick: string,
+  betAmount: number
+): Promise<{ success: boolean; error?: string }> => {
+  const balance = await getOrCreateUser(userId)
+
+  if (betAmount <= 0)
+    return { success: false, error: 'Bet amount must be greater than 0' }
+  if (betAmount > balance)
+    return { success: false, error: 'Bet amount exceeds balance' }
+
   await pool.query(
-    `INSERT INTO predictions (user_id, game_id, pick, created_at)
-      VALUES ($1, $2, $3, $4)
+    `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
+      VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (user_id, game_id) DO NOTHING`,
-    [userId, gameId, pick, Date.now()]
+    [userId, gameId, pick, betAmount, Date.now()]
   )
+
+  return { success: true }
 }
 
 export const resolvePrediction = async (
@@ -30,6 +58,25 @@ export const resolvePrediction = async (
       `UPDATE predictions SET result = $1 WHERE user_id = $2 AND game_id = $3`,
       [result, row.user_id, row.game_id]
     )
+
+    // Update points based on result
+    const currentPoints = await getUserPoints(row.user_id)
+    const bet = Number(row.bet_amount)
+
+    let newPoints: number
+    if (result === 'WIN') {
+      newPoints = currentPoints + bet
+    } else if (result === 'LOSE') {
+      newPoints = Math.max(POINTS_FLOOR, currentPoints - bet)
+    } else {
+      // TIE — full refund, no change
+      newPoints = currentPoints
+    }
+
+    await pool.query(`UPDATE users SET points = $1 WHERE user_id = $2`, [
+      newPoints,
+      row.user_id
+    ])
   }
 }
 
