@@ -55,11 +55,13 @@ export const getUserStats = async (userId: string) => {
   const row = result.rows[0]
   const total = Number(row.total)
   const wins = Number(row.wins)
+  const losses = Number(row.losses)
+  const decidedMatches = wins + losses
   return {
     total,
     wins,
-    losses: Number(row.losses),
+    losses,
     ties: Number(row.ties),
-    winRate: total > 0 ? Math.round((wins / total) * 100) : 0
+    winRate: decidedMatches > 0 ? Math.round((wins / decidedMatches) * 100) : 0
   }
 }

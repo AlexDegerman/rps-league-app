@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation'
 const navItems = [
   { label: 'Newest', href: '/' },
   { label: 'Leaderboard', href: '/leaderboard' },
-  { label: 'Search', href: '/search' }
+  { label: 'Search', href: '/search' },
+  { label: 'Profile', href: '/profile' }
 ]
 
 const Header = () => {

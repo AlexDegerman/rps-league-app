@@ -120,10 +120,7 @@ export const getPlayerStats = async (
     [name]
   )
   const matches = result.rows.map(rowToMatch)
-  let wins = 0,
-    losses = 0,
-    ties = 0
-
+  let wins = 0, losses = 0, ties = 0
   for (const m of matches) {
     const winner = getWinner(m)
     if (winner === 'TIE') ties++
@@ -134,12 +131,12 @@ export const getPlayerStats = async (
       wins++
     else losses++
   }
-
+  const decidedMatches = wins + losses
   return {
     total: matches.length,
     wins,
     losses,
     ties,
-    winRate: matches.length > 0 ? Math.round((wins / matches.length) * 100) : 0
+    winRate: decidedMatches > 0 ? Math.round((wins / decidedMatches) * 100) : 0
   }
 }

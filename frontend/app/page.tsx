@@ -6,6 +6,7 @@ import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
+import { getOrCreateUser, getUserId } from '@/lib/user'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -33,20 +34,33 @@ export default function HomePage() {
     loadMatches
   } = useInfiniteScroll({ fetchFn })
 
-useEffect(() => {
-  fetchLatestMatches(1)
-    .then((data) => {
-      if (data.matches.length > 0) markReady()
-      loadMatches(1)
-    })
-    .catch(() => {})
-}, [loadMatches])
+  useEffect(() => {
+    fetchLatestMatches(1)
+      .then((data) => {
+        if (data.matches.length > 0) markReady()
+        loadMatches(1)
+      })
+      .catch(() => {})
+  }, [loadMatches])
 
-  const handlePick = (gameId: string, playerName: string) => {
+  useEffect(() => {
+    getOrCreateUser()
+  }, [])
+
+  const handlePick = async (gameId: string, playerName: string) => {
+    const userId = getUserId()
+    if (!userId) return
+
     setPredictions((prev) => {
       const next = new Map(prev)
       next.set(gameId, { gameId, pick: playerName })
       return next
+    })
+
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, gameId, pick: playerName })
     })
   }
 
