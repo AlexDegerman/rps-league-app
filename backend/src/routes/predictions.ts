@@ -5,8 +5,30 @@ import {
   getUserStats,
   getUserPoints
 } from '../services/predictionService.js'
+import pool from '../utils/db.js'
 
 const router = Router()
+
+// GET /api/predictions/leaderboard
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.user_id,
+        u.points,
+        COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
+        COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
+      FROM users u
+      LEFT JOIN predictions p ON u.user_id = p.user_id
+      GROUP BY u.user_id, u.points
+      ORDER BY u.points DESC
+      LIMIT 100
+    `)
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch predictor leaderboard' })
+  }
+})
 
 // GET /api/predictions/:userId/points
 router.get('/:userId/points', async (req, res) => {
@@ -38,6 +60,7 @@ router.get('/:userId', async (req, res) => {
   }
 })
 
+
 // POST /api/predictions
 router.post('/', async (req, res) => {
   try {
@@ -50,9 +73,9 @@ router.post('/', async (req, res) => {
     if (!result.success) return res.status(400).json({ error: result.error })
     res.json({ success: true })
   } catch (err) {
-    console.error('Prediction error:', err)
     res.status(500).json({ error: 'Failed to save prediction' })
   }
 })
+
 
 export default router

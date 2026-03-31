@@ -61,3 +61,9 @@ export const fetchPlayerStats = async (name: string) => {
   if (!res.ok) throw new Error('Failed to fetch player stats')
   return res.json()
 }
+
+export const fetchPredictorLeaderboard = async () => {
+  const res = await fetch(`${API_BASE}/api/predictions/leaderboard`)
+  if (!res.ok) throw new Error('Failed to fetch predictor leaderboard')
+  return res.json()
+}

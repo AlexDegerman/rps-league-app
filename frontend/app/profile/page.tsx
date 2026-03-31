@@ -11,6 +11,7 @@ export default function ProfilePage() {
   const [points, setPoints] = useState<number | null>(null)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
+  const [rank, setRank] = useState<{ rank: number; total: number } | null>(null)
 
   useEffect(() => {
     const userId = getUserId()
@@ -26,6 +27,14 @@ export default function ProfilePage() {
       .then(setStats)
       .catch((err) => console.error('Failed to load stats:', err))
       .finally(() => setStatsLoading(false))
+
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/leaderboard`)
+        .then((res) => res.json())
+        .then((data: { user_id: string; points: number }[]) => {
+          const index = data.findIndex((e) => e.user_id === userId)
+          if (index !== -1) setRank({ rank: index + 1, total: data.length })
+        })
+        .catch((err) => console.error('Failed to load rank:', err))
   }, [])
 
   const handleRegenerate = () => {
@@ -56,6 +65,11 @@ export default function ProfilePage() {
             {points ?? '...'}
           </span>
           <span className="text-sm text-gray-500">points</span>
+          {rank && (
+            <span className="text-sm text-gray-400 ml-1">
+              · Rank {rank.rank}/{rank.total}
+            </span>
+          )}
         </div>
       </div>
 
