@@ -1,10 +1,12 @@
+export type Move = 'ROCK' | 'PAPER' | 'SCISSORS'
+
 export interface Player {
   name: string
-  played: 'ROCK' | 'PAPER' | 'SCISSORS' | string
+  played: Move
 }
 
 export interface Match {
-  type: 'GAME_RESULT'
+  type: string
   gameId: string
   time: number
   playerA: Player
@@ -15,7 +17,6 @@ export interface PlayerStats {
   name: string
   wins: number
   losses: number
-  ties: number
   winRate: number
 }
 
@@ -28,6 +29,20 @@ export interface PendingMatch {
 
 export interface PredictionRecord {
   gameId: string
-  pick: string // player name picked
-  result?: 'WIN' | 'LOSE' | 'TIE'
+  pick: string
+  result?: 'WIN' | 'LOSE'
+}
+
+export interface SinglePlayerStats {
+  total: number
+  wins: number
+  losses: number
+  winRate: number
+}
+
+export interface UserStats {
+  total: number
+  wins: number
+  losses: number
+  winRate: number
 }

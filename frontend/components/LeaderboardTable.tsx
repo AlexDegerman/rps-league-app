@@ -30,9 +30,6 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
             <th className="text-center px-4 py-3 text-red-500 font-medium">
               L
             </th>
-            <th className="text-center px-4 py-3 text-orange-400 font-medium">
-              T
-            </th>
             <th className="text-center px-4 py-3 text-indigo-500 font-medium">
               Win%
             </th>
@@ -60,9 +57,6 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
               </td>
               <td className="px-4 py-3 text-center text-red-500">
                 {player.losses}
-              </td>
-              <td className="px-4 py-3 text-center text-orange-400">
-                {player.ties}
               </td>
               <td className="px-4 py-3 text-center text-indigo-500 font-medium">
                 {player.winRate}%

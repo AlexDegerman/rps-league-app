@@ -243,6 +243,7 @@ return (
               highlightPlayer={selectedPlayer}
               isLoadingMore={playerIsLoadingMore}
               hasMore={playerHasMore}
+              alwaysLeft
             />
           )}
         </>

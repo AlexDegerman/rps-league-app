@@ -2,26 +2,24 @@
 
 import { useEffect, useState } from 'react'
 import { getOrCreateUser, regenerateNickname, getUserId } from '@/lib/user'
-
-interface UserStats {
-  total: number
-  wins: number
-  losses: number
-  ties: number
-  winRate: number
-}
+import GemIcon from '@/components/GemIcon'
+import type { UserStats } from '@/types/rps'
 
 export default function ProfilePage() {
-  const [nickname, setNickname] = useState('')
+  const { nickname: initialNickname } = getOrCreateUser()
+  const [nickname, setNickname] = useState(initialNickname)
+  const [points, setPoints] = useState<number | null>(null)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
 
   useEffect(() => {
-    const { nickname } = getOrCreateUser()
-    setNickname(nickname)
-
     const userId = getUserId()
     if (!userId) return
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/${userId}/points`)
+      .then((res) => res.json())
+      .then((data) => setPoints(data.points))
+      .catch((err) => console.error('Failed to load points:', err))
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/${userId}/stats`)
       .then((res) => res.json())
@@ -40,10 +38,10 @@ export default function ProfilePage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-1">Profile</h1>
       <p className="text-gray-500 mb-6">Your prediction stats</p>
 
-      {/* Nickname */}
+      {/* Nickname + points */}
       <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 mb-6">
         <p className="text-xs text-gray-500 mb-1">Your nickname</p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-4">
           <p className="text-2xl font-bold text-gray-900">{nickname}</p>
           <button
             onClick={handleRegenerate}
@@ -51,6 +49,13 @@ export default function ProfilePage() {
           >
             Randomize
           </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <GemIcon size={24} />
+          <span className="text-lg font-bold text-purple-600">
+            {points ?? '...'}
+          </span>
+          <span className="text-sm text-gray-500">points</span>
         </div>
       </div>
 
