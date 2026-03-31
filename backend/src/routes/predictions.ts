@@ -50,6 +50,7 @@ router.post('/', async (req, res) => {
     if (!result.success) return res.status(400).json({ error: result.error })
     res.json({ success: true })
   } catch (err) {
+    console.error('Prediction error:', err)
     res.status(500).json({ error: 'Failed to save prediction' })
   }
 })

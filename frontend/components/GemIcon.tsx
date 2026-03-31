@@ -14,21 +14,21 @@ const GemIcon = ({ size = 40 }: GemIconProps) => (
         r="42"
         fill="#A855F7"
         stroke="#6B21A8"
-        stroke-width="4"
+        strokeWidth="4"
       />
       <path
         d="M40 40 Q50 30 60 35"
         fill="none"
         stroke="#DDD6FE"
-        stroke-width="3"
-        stroke-linecap="round"
+        strokeWidth="3"
+        strokeLinecap="round"
       />
       <path
         d="M42 50 Q52 42 60 46"
         fill="none"
         stroke="#DDD6FE"
-        stroke-width="2.5"
-        stroke-linecap="round"
+        strokeWidth="2.5"
+        strokeLinecap="round"
       />
     </svg>
   </span>

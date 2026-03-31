@@ -25,54 +25,39 @@ export const savePrediction = async (
   betAmount: number
 ): Promise<{ success: boolean; error?: string }> => {
   const balance = await getOrCreateUser(userId)
-
   if (betAmount <= 0)
     return { success: false, error: 'Bet amount must be greater than 0' }
   if (betAmount > balance)
     return { success: false, error: 'Bet amount exceeds balance' }
-
   await pool.query(
     `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (user_id, game_id) DO NOTHING`,
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (user_id, game_id) DO NOTHING`,
     [userId, gameId, pick, betAmount, Date.now()]
   )
-
   return { success: true }
 }
 
 export const resolvePrediction = async (
   gameId: string,
-  winnerName: string | 'TIE'
+  winnerName: string
 ): Promise<void> => {
   const predictions = await pool.query(
     `SELECT * FROM predictions WHERE game_id = $1 AND result IS NULL`,
     [gameId]
   )
-
   for (const row of predictions.rows) {
-    const result =
-      winnerName === 'TIE' ? 'TIE' : row.pick === winnerName ? 'WIN' : 'LOSE'
-
+    const result = row.pick === winnerName ? 'WIN' : 'LOSE'
     await pool.query(
       `UPDATE predictions SET result = $1 WHERE user_id = $2 AND game_id = $3`,
       [result, row.user_id, row.game_id]
     )
-
-    // Update points based on result
     const currentPoints = await getUserPoints(row.user_id)
     const bet = Number(row.bet_amount)
-
-    let newPoints: number
-    if (result === 'WIN') {
-      newPoints = currentPoints + bet
-    } else if (result === 'LOSE') {
-      newPoints = Math.max(POINTS_FLOOR, currentPoints - bet)
-    } else {
-      // TIE — full refund, no change
-      newPoints = currentPoints
-    }
-
+    const newPoints =
+      result === 'WIN'
+        ? currentPoints + bet
+        : Math.max(POINTS_FLOOR, currentPoints - bet)
     await pool.query(`UPDATE users SET points = $1 WHERE user_id = $2`, [
       newPoints,
       row.user_id
@@ -93,22 +78,19 @@ export const getUserStats = async (userId: string) => {
     `SELECT
       COUNT(*) AS total,
       COUNT(*) FILTER (WHERE result = 'WIN') AS wins,
-      COUNT(*) FILTER (WHERE result = 'LOSE') AS losses,
-      COUNT(*) FILTER (WHERE result = 'TIE') AS ties
-      FROM predictions
-      WHERE user_id = $1 AND result IS NOT NULL`,
+      COUNT(*) FILTER (WHERE result = 'LOSE') AS losses
+     FROM predictions
+     WHERE user_id = $1 AND result IS NOT NULL`,
     [userId]
   )
   const row = result.rows[0]
   const total = Number(row.total)
   const wins = Number(row.wins)
   const losses = Number(row.losses)
-  const decidedMatches = wins + losses
   return {
     total,
     wins,
     losses,
-    ties: Number(row.ties),
-    winRate: decidedMatches > 0 ? Math.round((wins / decidedMatches) * 100) : 0
+    winRate: total > 0 ? Math.round((wins / total) * 100) : 0
   }
 }

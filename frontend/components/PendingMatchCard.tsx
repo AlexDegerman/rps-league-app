@@ -53,12 +53,12 @@ export default function PendingMatchCard({
               onClick={() => onPick(pending.gameId, pending.playerA)}
               className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition cursor-pointer"
             >
-              Pick
+              Bet
             </button>
           )}
           {prediction?.pick === pending.playerA && !canPick && (
             <span className="text-xs font-bold px-2 py-0.5 rounded text-white bg-indigo-400">
-              Picked
+              Bet placed
             </span>
           )}
         </div>
@@ -84,12 +84,12 @@ export default function PendingMatchCard({
               onClick={() => onPick(pending.gameId, pending.playerB)}
               className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition cursor-pointer"
             >
-              Pick
+              Bet
             </button>
           )}
           {prediction?.pick === pending.playerB && !canPick && (
             <span className="text-xs font-bold px-2 py-0.5 rounded text-white bg-indigo-400">
-              Picked
+              Bet placed
             </span>
           )}
         </div>

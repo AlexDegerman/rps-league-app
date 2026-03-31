@@ -6,7 +6,6 @@ export interface PlayerStats {
   name: string
   wins: number
   losses: number
-  ties: number
   winRate: number
 }
 
@@ -24,23 +23,18 @@ const rowToMatch = (row: Record<string, unknown>): Match => ({
   }
 })
 
-// Aggregates match results into per-player win/loss/tie counts and win rate.
-// Sorted by wins descending, with alphabetical name as tiebreaker.
 const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
   const stats = new Map<string, PlayerStats>()
   const getOrCreate = (name: string): PlayerStats => {
     if (!stats.has(name))
-      stats.set(name, { name, wins: 0, losses: 0, ties: 0, winRate: 0 })
+      stats.set(name, { name, wins: 0, losses: 0, winRate: 0 })
     return stats.get(name)!
   }
   for (const match of matches) {
     const a = getOrCreate(match.playerA.name)
     const b = getOrCreate(match.playerB.name)
     const winner = getWinner(match)
-    if (winner === 'TIE') {
-      a.ties++
-      b.ties++
-    } else if (winner === 'A') {
+    if (winner === 'A') {
       a.wins++
       b.losses++
     } else {
@@ -52,20 +46,19 @@ const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
     .map((p) => ({
       ...p,
       winRate:
-        p.wins + p.losses + p.ties > 0
-          ? Math.round((p.wins / (p.wins + p.losses + p.ties)) * 100)
+        p.wins + p.losses > 0
+          ? Math.round((p.wins / (p.wins + p.losses)) * 100)
           : 0
     }))
     .sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name))
 }
-// Historical leaderboard, filter by date range, both dates optional
+
 export const getHistoricalLeaderboard = async (
   startDate?: string,
   endDate?: string
 ): Promise<PlayerStats[]> => {
   const conditions: string[] = []
   const params: unknown[] = []
-
   if (startDate) {
     params.push(new Date(startDate).getTime())
     conditions.push(`time >= $${params.length}`)
@@ -74,7 +67,6 @@ export const getHistoricalLeaderboard = async (
     params.push(new Date(endDate).getTime() + 86400000)
     conditions.push(`time < $${params.length}`)
   }
-
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
   const result = await pool.query(`SELECT * FROM matches ${where}`, params)
   return buildLeaderboard(result.rows.map(rowToMatch))

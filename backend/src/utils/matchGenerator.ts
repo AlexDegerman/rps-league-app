@@ -14,12 +14,16 @@ const generateMatch = (): Match => {
   let playerB = randomItem(playerNames)
   while (playerB === playerA) playerB = randomItem(playerNames)
 
+  const moveA = randomItem(MOVES)
+  let moveB = randomItem(MOVES)
+  while (moveB === moveA) moveB = randomItem(MOVES)
+
   return {
     type: 'GAME_RESULT',
     gameId: uuidv4(),
     time: Date.now(),
-    playerA: { name: playerA, played: randomItem(MOVES) },
-    playerB: { name: playerB, played: randomItem(MOVES) }
+    playerA: { name: playerA, played: moveA },
+    playerB: { name: playerB, played: moveB }
   }
 }
 

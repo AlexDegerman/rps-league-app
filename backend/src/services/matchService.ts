@@ -15,10 +15,9 @@ const rowToMatch = (row: Record<string, unknown>): Match => ({
   }
 })
 
-export const getWinner = (match: Match): 'A' | 'B' | 'TIE' => {
+export const getWinner = (match: Match): 'A' | 'B' => {
   const a = match.playerA.played
   const b = match.playerB.played
-  if (a === b) return 'TIE'
   if (
     (a === 'ROCK' && b === 'SCISSORS') ||
     (a === 'SCISSORS' && b === 'PAPER') ||
@@ -53,7 +52,6 @@ export const getMatchesByDate = async (
   const offset = (page - 1) * limit
   const start = new Date(date).getTime()
   const end = start + 86400000
-
   const [data, count] = await Promise.all([
     pool.query(
       `SELECT * FROM matches WHERE time >= $1 AND time < $2 ORDER BY time DESC LIMIT $3 OFFSET $4`,
@@ -99,9 +97,9 @@ export const getMatchesByPlayer = async (
 export const getAllPlayerNames = async (): Promise<string[]> => {
   const result = await pool.query(
     `SELECT DISTINCT player_a_name AS name FROM matches
-      UNION
-      SELECT DISTINCT player_b_name AS name FROM matches
-      ORDER BY name ASC`
+     UNION
+     SELECT DISTINCT player_b_name AS name FROM matches
+     ORDER BY name ASC`
   )
   return result.rows.map((r) => r.name as string)
 }
@@ -112,7 +110,6 @@ export const getPlayerStats = async (
   total: number
   wins: number
   losses: number
-  ties: number
   winRate: number
 }> => {
   const result = await pool.query(
@@ -120,23 +117,21 @@ export const getPlayerStats = async (
     [name]
   )
   const matches = result.rows.map(rowToMatch)
-  let wins = 0, losses = 0, ties = 0
+  let wins = 0,
+    losses = 0
   for (const m of matches) {
     const winner = getWinner(m)
-    if (winner === 'TIE') ties++
-    else if (
+    if (
       (winner === 'A' && m.playerA.name === name) ||
       (winner === 'B' && m.playerB.name === name)
     )
       wins++
     else losses++
   }
-  const decidedMatches = wins + losses
   return {
     total: matches.length,
     wins,
     losses,
-    ties,
-    winRate: decidedMatches > 0 ? Math.round((wins / decidedMatches) * 100) : 0
+    winRate: matches.length > 0 ? Math.round((wins / matches.length) * 100) : 0
   }
 }
