@@ -60,6 +60,60 @@ router.get('/:userId', async (req, res) => {
   }
 })
 
+// GET /api/predictions/leaderboard — all time by peak points
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.user_id,
+        u.peak_points,
+        u.points,
+        COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
+        COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
+      FROM users u
+      LEFT JOIN predictions p ON u.user_id = p.user_id
+      GROUP BY u.user_id, u.peak_points, u.points
+      ORDER BY u.peak_points DESC
+      LIMIT 100
+    `)
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch predictor leaderboard' })
+  }
+})
+
+// GET /api/predictions/leaderboard/weekly — this week by points gained
+router.get('/leaderboard/weekly', async (req, res) => {
+  try {
+    const weekStart = new Date()
+    weekStart.setUTCHours(0, 0, 0, 0)
+    weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay())
+    const weekStartMs = weekStart.getTime()
+
+    const result = await pool.query(`
+      SELECT
+        u.user_id,
+        u.points,
+        COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
+        COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
+      FROM users u
+      LEFT JOIN predictions p ON u.user_id = p.user_id
+        AND p.created_at >= $1
+      WHERE EXISTS (
+        SELECT 1 FROM predictions p2
+        WHERE p2.user_id = u.user_id AND p2.created_at >= $1
+      )
+      GROUP BY u.user_id, u.points
+      ORDER BY u.points DESC
+      LIMIT 100
+    `,
+      [weekStartMs]
+    )
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch weekly leaderboard' })
+  }
+})
 
 // POST /api/predictions
 router.post('/', async (req, res) => {

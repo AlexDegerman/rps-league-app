@@ -31,8 +31,8 @@ export const savePrediction = async (
     return { success: false, error: 'Bet amount exceeds balance' }
   await pool.query(
     `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
-     VALUES ($1, $2, $3, $4, $5)
-     ON CONFLICT (user_id, game_id) DO NOTHING`,
+      VALUES ($1, $2, $3, $4, $5)
+      ON CONFLICT (user_id, game_id) DO NOTHING`,
     [userId, gameId, pick, betAmount, Date.now()]
   )
   return { success: true }
@@ -55,13 +55,15 @@ export const resolvePrediction = async (
     const currentPoints = await getUserPoints(row.user_id)
     const bet = Number(row.bet_amount)
     const newPoints =
-      result === 'WIN'
-        ? currentPoints + bet
-        : Math.max(POINTS_FLOOR, currentPoints - bet)
-    await pool.query(`UPDATE users SET points = $1 WHERE user_id = $2`, [
-      newPoints,
-      row.user_id
-    ])
+    result === 'WIN'
+      ? currentPoints + bet
+      : Math.max(POINTS_FLOOR, currentPoints - bet)
+    await pool.query(
+      `UPDATE users 
+        SET points = $1, peak_points = GREATEST(peak_points, $1)
+        WHERE user_id = $2`,
+      [newPoints, row.user_id]
+    )
   }
 }
 
@@ -79,8 +81,8 @@ export const getUserStats = async (userId: string) => {
       COUNT(*) AS total,
       COUNT(*) FILTER (WHERE result = 'WIN') AS wins,
       COUNT(*) FILTER (WHERE result = 'LOSE') AS losses
-     FROM predictions
-     WHERE user_id = $1 AND result IS NOT NULL`,
+      FROM predictions
+      WHERE user_id = $1 AND result IS NOT NULL`,
     [userId]
   )
   const row = result.rows[0]
