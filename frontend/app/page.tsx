@@ -21,6 +21,11 @@ export default function HomePage() {
   )
   const [points, setPoints] = useState<number>(500)
   const [betAmount, setBetAmount] = useState<number>(500)
+  const [resultAnim, setResultAnim] = useState<{
+    win: boolean
+    amount: number
+    confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
+  } | null>(null)
 
   const markReady = () => {
     _backendReady = true
@@ -100,6 +105,7 @@ export default function HomePage() {
       setPredictions((prev) => {
         const prediction = prev.get(match.gameId)
         if (!prediction) return prev
+
         const aWins =
           (match.playerA.played === 'ROCK' &&
             match.playerB.played === 'SCISSORS') ||
@@ -108,6 +114,27 @@ export default function HomePage() {
           (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
         const winner = aWins ? match.playerA.name : match.playerB.name
         const result = winner === prediction.pick ? 'WIN' : 'LOSE'
+
+        // Trigger animation
+        const isWin = result === 'WIN'
+
+        setResultAnim({
+          win: isWin,
+          amount: betAmount,
+          confetti: isWin
+            ? Array.from({ length: 40 }).map((_, i) => {
+                const leftOffset =
+                  i < 20 ? -(Math.random() * 40 + 10) : Math.random() * 40 + 10
+                const vx =
+                  i < 20 ? Math.random() * 60 + 20 : -(Math.random() * 60 + 20)
+                const vy = -(Math.random() * 100 + 60)
+                const delay = Math.random() * 0.15
+                return { vx, vy, leftOffset, delay }
+              })
+            : []
+        })
+        setTimeout(() => setResultAnim(null), 2000)
+
         const next = new Map(prev)
         next.set(match.gameId, { ...prediction, result })
         return next
@@ -124,12 +151,53 @@ export default function HomePage() {
 
     es.onerror = () => console.error('SSE connection lost')
     return () => es.close()
-  }, [setMatches])
+  }, [setMatches, betAmount])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4">
       <h1 className="text-3xl font-bold text-gray-900 mb-1">Latest Matches</h1>
       <p className="text-gray-500 mb-4">Live results from the RPS League</p>
+
+      {/* Result animation overlay */}
+      {resultAnim && (
+        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center gap-2">
+          <span
+            className={`text-4xl font-bold animate-bounce ${
+              resultAnim.win ? 'text-green-500' : 'text-red-500'
+            }`}
+          >
+            {resultAnim.win ? `+${resultAnim.amount}` : `-${resultAnim.amount}`}
+          </span>
+          {resultAnim.win && (
+            <div className="relative w-0 h-0">
+              {resultAnim.confetti?.map((c, i) => (
+                <div
+                  key={i}
+                  className="absolute w-2.5 h-2.5 rounded-sm"
+                  style={
+                    {
+                      left: `${c.leftOffset}px`,
+                      top: 0,
+                      backgroundColor: [
+                        '#A855F7',
+                        '#C084FC',
+                        '#7C3AED',
+                        '#F0ABFC',
+                        '#9333EA',
+                        '#E9D5FF',
+                        '#6D28D9'
+                      ][i % 7],
+                      animation: `confetti-burst 1s ease-out ${c.delay}s forwards`,
+                      '--vx': `${c.vx}px`,
+                      '--vy': `${c.vy}px`
+                    } as React.CSSProperties
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Points display and bet input */}
       <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 mb-2 flex flex-col sm:flex-row sm:items-center gap-3">

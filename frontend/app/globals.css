@@ -3,3 +3,17 @@
 :root {
   background-color: #F3F4F6;
 }
+
+@keyframes confetti-burst {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--vx), var(--vy)) rotate(720deg) scale(0.5);
+    opacity: 0;
+  }
+}
