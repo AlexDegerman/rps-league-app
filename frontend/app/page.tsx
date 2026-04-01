@@ -19,8 +19,8 @@ export default function HomePage() {
   const [predictions, setPredictions] = useState<Map<string, PredictionRecord>>(
     new Map()
   )
-  const [points, setPoints] = useState<number>(500)
-  const [betAmount, setBetAmount] = useState<number>(500)
+  const [points, setPoints] = useState<number>(1000)
+  const [betAmount, setBetAmount] = useState<number>(1000)
   const [resultAnim, setResultAnim] = useState<{
     win: boolean
     amount: number
@@ -50,7 +50,7 @@ export default function HomePage() {
       .then((res) => res.json())
       .then((data) => {
         setPoints(data.points)
-        setBetAmount(Math.min(500, data.points))
+        setBetAmount(Math.min(1000, data.points))
       })
       .catch(console.error)
   }, [])
@@ -117,10 +117,11 @@ export default function HomePage() {
 
         // Trigger animation
         const isWin = result === 'WIN'
+        const amount = isWin ? betAmount : Math.floor(betAmount * 0.5)
 
         setResultAnim({
           win: isWin,
-          amount: betAmount,
+          amount,
           confetti: isWin
             ? Array.from({ length: 40 }).map((_, i) => {
                 const leftOffset =
@@ -227,7 +228,13 @@ export default function HomePage() {
           </button>
         </div>
       </div>
-      <p className="text-xs text-gray-400 mb-4">Points cannot drop below 500</p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-400">Points cannot drop below 1000</p>
+        <p className="text-xs text-gray-400">
+          Win: <span className="text-green-600 font-medium">+100%</span> · Lose:{' '}
+          <span className="text-red-500 font-medium">-50%</span> of bet
+        </p>
+      </div>
 
       {!backendReady ? (
         <p className="text-center text-gray-400 py-12">

@@ -14,12 +14,12 @@ export const initDb = async (): Promise<void> => {
   `)
 
   await pool.query(`
-  CREATE TABLE IF NOT EXISTS users (
-    user_id TEXT PRIMARY KEY,
-    points INTEGER NOT NULL DEFAULT 500,
-    peak_points INTEGER NOT NULL DEFAULT 500
-  )
-`)
+    CREATE TABLE IF NOT EXISTS users (
+      user_id TEXT PRIMARY KEY,
+      points INTEGER NOT NULL DEFAULT 1000,
+      peak_points INTEGER NOT NULL DEFAULT 1000
+    )
+  `)
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS predictions (

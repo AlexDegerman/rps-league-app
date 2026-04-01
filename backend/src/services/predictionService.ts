@@ -1,6 +1,6 @@
 import pool from '../utils/db.js'
 
-const POINTS_FLOOR = 500
+const POINTS_FLOOR = 1000
 
 const getOrCreateUser = async (userId: string): Promise<number> => {
   await pool.query(
@@ -55,9 +55,9 @@ export const resolvePrediction = async (
     const currentPoints = await getUserPoints(row.user_id)
     const bet = Number(row.bet_amount)
     const newPoints =
-    result === 'WIN'
-      ? currentPoints + bet
-      : Math.max(POINTS_FLOOR, currentPoints - bet)
+      result === 'WIN'
+        ? currentPoints + bet
+        : Math.max(POINTS_FLOOR, currentPoints - Math.floor(bet / 2))
     await pool.query(
       `UPDATE users 
         SET points = $1, peak_points = GREATEST(peak_points, $1)
