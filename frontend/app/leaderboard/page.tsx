@@ -201,7 +201,7 @@ export default function LeaderboardPage() {
           {mainTab === 'predictors'
             ? predictorSubTab === 'alltime'
               ? 'Users ranked by peak points ever held'
-              : 'Users ranked by current points this week'
+              : 'Users ranked by total points gained this week'
             : 'Player standings based on number of wins'}
         </p>
       </div>

@@ -5,8 +5,11 @@ import { fetchLatestMatches } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
 import GemIcon from '@/components/GemIcon'
+import PredictionTicker, {
+  type TickerEvent
+} from '@/components/PredictionTicker'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { getOrCreateUser, getUserId } from '@/lib/user'
+import { getOrCreateUser, getUserId, getNickname } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -21,6 +24,7 @@ export default function HomePage() {
   )
   const [points, setPoints] = useState<number>(1000)
   const [betAmount, setBetAmount] = useState<number>(1000)
+  const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([])
   const [resultAnim, setResultAnim] = useState<{
     win: boolean
     amount: number
@@ -30,6 +34,13 @@ export default function HomePage() {
   const markReady = () => {
     _backendReady = true
     setBackendReady(true)
+  }
+
+  const pushTickerEvent = (message: string, isReal: boolean) => {
+    setTickerEvents((prev) => [
+      ...prev.slice(-14),
+      { id: crypto.randomUUID(), message, isReal, timestamp: Date.now() }
+    ])
   }
 
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
@@ -67,13 +78,11 @@ export default function HomePage() {
   const handlePick = async (gameId: string, playerName: string) => {
     const userId = getUserId()
     if (!userId || betAmount <= 0) return
-
     setPredictions((prev) => {
       const next = new Map(prev)
       next.set(gameId, { gameId, pick: playerName })
       return next
     })
-
     await fetch(`${API_BASE}/api/predictions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -81,14 +90,24 @@ export default function HomePage() {
     })
   }
 
-  const fetchUpdatedPoints = async () => {
+  const fetchUpdatedPoints = useCallback(async () => {
     const userId = getUserId()
     if (!userId) return
     const res = await fetch(`${API_BASE}/api/predictions/${userId}/points`)
     const data = await res.json()
-    setPoints(data.points)
+    setPoints((prev) => {
+      const newPoints = data.points
+      if (newPoints > prev) {
+        const nickname = getNickname() ?? 'You'
+        pushTickerEvent(
+          `${nickname} reached a new peak of ${newPoints} points!`,
+          true
+        )
+      }
+      return newPoints
+    })
     setBetAmount((prev) => Math.min(prev, data.points))
-  }
+  }, [])
 
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
@@ -114,11 +133,25 @@ export default function HomePage() {
           (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
         const winner = aWins ? match.playerA.name : match.playerB.name
         const result = winner === prediction.pick ? 'WIN' : 'LOSE'
-
-        // Trigger animation
         const isWin = result === 'WIN'
         const amount = isWin ? betAmount : Math.floor(betAmount * 0.5)
+        const nickname = getNickname() ?? 'You'
 
+        // Ticker event
+        if (isWin) {
+          if (betAmount === points) {
+            pushTickerEvent(
+              `${nickname} went all-in and won ${amount} points!`,
+              true
+            )
+          } else {
+            pushTickerEvent(`${nickname} won ${amount} points!`, true)
+          }
+        } else {
+          pushTickerEvent(`${nickname} lost ${amount} points.`, true)
+        }
+
+        // Animation
         setResultAnim({
           win: isWin,
           amount,
@@ -152,10 +185,10 @@ export default function HomePage() {
 
     es.onerror = () => console.error('SSE connection lost')
     return () => es.close()
-  }, [setMatches, betAmount])
+  }, [setMatches, betAmount, points, fetchUpdatedPoints])
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4">
+    <div className="max-w-2xl mx-auto px-4 py-4 pb-16">
       <h1 className="text-3xl font-bold text-gray-900 mb-1">Latest Matches</h1>
       <p className="text-gray-500 mb-4">Live results from the RPS League</p>
 
@@ -228,7 +261,7 @@ export default function HomePage() {
           </button>
         </div>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <p className="text-xs text-gray-400">Points cannot drop below 1000</p>
         <p className="text-xs text-gray-400">
           Win: <span className="text-green-600 font-medium">+100%</span> · Lose:{' '}
@@ -264,6 +297,8 @@ export default function HomePage() {
           />
         </>
       )}
+
+      <PredictionTicker events={tickerEvents} />
     </div>
   )
 }
