@@ -28,11 +28,13 @@ export default function HomePage() {
   const [points, setPoints] = useState<number>(1000)
   const [betAmount, setBetAmount] = useState<number>(1000)
   const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([])
+  const [serverOffset, setServerOffset] = useState<number>(0)
   const [resultAnim, setResultAnim] = useState<{
     win: boolean
     amount: number
     confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
   } | null>(null)
+
   const [animatedAmount, setAnimatedAmount] = useState(0)
   const [peakPoints, setPeakPoints] = useState(1000)
   const [autoAllIn, setAutoAllIn] = useState(false)
@@ -59,40 +61,33 @@ export default function HomePage() {
     setBackendReady(true)
   }, [])
 
-  // --- Auto All-in Logic (With Lint Suppression for Hydration Safety) ---
+  const pushTickerEvent = useCallback(
+    (message: string, isReal: boolean, amount?: number) => {
+      setTickerEvents((prev) => [
+        ...prev.slice(-14),
+        {
+          id: crypto.randomUUID(),
+          message,
+          isReal,
+          timestamp: Date.now(),
+          amount
+        }
+      ])
+    },
+    []
+  )
+
   useEffect(() => {
     const saved = localStorage.getItem('autoAllIn')
-    if (saved !== null) {
-      const isAuto = saved === 'true'
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAutoAllIn(isAuto)
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (saved !== null) setAutoAllIn(saved === 'true')
   }, [])
 
   useEffect(() => {
     localStorage.setItem('autoAllIn', autoAllIn.toString())
-    if (autoAllIn) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setBetAmount(points)
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (autoAllIn) setBetAmount(points)
   }, [autoAllIn, points])
-
-  const pushTickerEvent = (
-    message: string,
-    isReal: boolean,
-    amount?: number
-  ) => {
-    setTickerEvents((prev) => [
-      ...prev.slice(-14),
-      {
-        id: crypto.randomUUID(),
-        message,
-        isReal,
-        timestamp: Date.now(),
-        amount
-      }
-    ])
-  }
 
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
   const {
@@ -104,7 +99,6 @@ export default function HomePage() {
     loadMatches
   } = useInfiniteScroll({ fetchFn })
 
-  // Animation logic
   useEffect(() => {
     if (!resultAnim) return
     const end = resultAnim.amount
@@ -113,14 +107,29 @@ export default function HomePage() {
     const animate = (time: number) => {
       const progress = Math.min((time - startTime) / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 3)
-      const current = Math.floor(eased * end)
-      setAnimatedAmount(current)
+      setAnimatedAmount(Math.floor(eased * end))
       if (progress < 1) requestAnimationFrame(animate)
     }
     requestAnimationFrame(animate)
   }, [resultAnim])
 
-  // MASTER INITIALIZATION
+  const fetchUpdatedPoints = useCallback(async () => {
+    const userId = getUserId()
+    if (!userId) return
+    const res = await fetch(`${API_BASE}/api/predictions/${userId}/points`)
+    const data = await res.json()
+
+    if (data.points > peakPoints) {
+      setPeakPoints(data.peak_points)
+      pushTickerEvent(
+        `You reached a new peak of ${formatPoints(data.points)} points!`,
+        true,
+        data.points
+      )
+    }
+    setPoints(data.points)
+  }, [peakPoints, pushTickerEvent])
+
   useEffect(() => {
     getOrCreateUser()
     const userId = getUserId()
@@ -130,14 +139,9 @@ export default function HomePage() {
         .then((res) => res.json())
         .then((data) => {
           setPoints(data.points)
-          // Initialize bet amount based on points, but respect autoAllIn if it's already true
-          if (autoAllIn) {
-            setBetAmount(data.points)
-          } else {
-            setBetAmount(Math.min(1000, data.points))
-          }
+          setPeakPoints(data.peak_points)
+          setBetAmount(autoAllIn ? data.points : Math.min(1000, data.points))
         })
-        .catch(console.error)
     }
 
     fetch(`${API_BASE}/api/matches/pending`)
@@ -148,123 +152,83 @@ export default function HomePage() {
           markReady()
         }
       })
-      .catch(console.error)
 
-    fetchLatestMatches(1)
-      .then(() => {
-        markReady()
-        loadMatches(1)
-      })
-      .catch(() => markReady())
+    fetchLatestMatches(1).then(() => {
+      markReady()
+      loadMatches(1)
+    })
   }, [markReady, loadMatches, autoAllIn])
 
-const handlePick = async (gameId: string, playerName: string) => {
-  const userId = getUserId()
-  const nickname = getNickname()
-  if (!userId || !nickname || betAmount <= 0) return
-
-  setPredictions((prev) => {
-    const next = new Map(prev)
-    next.set(gameId, { gameId, pick: playerName })
-    return next
-  })
-
-  await fetch(`${API_BASE}/api/predictions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId,
-      gameId,
-      pick: playerName,
-      betAmount,
-      nickname
-    })
-  })
-}
-
-  const fetchUpdatedPoints = useCallback(async () => {
+  const handlePick = async (gameId: string, playerName: string) => {
     const userId = getUserId()
-    if (!userId) return
-    const res = await fetch(`${API_BASE}/api/predictions/${userId}/points`)
-    const data = await res.json()
-    setPeakPoints((prevPeak) => Math.max(prevPeak, data.peak_points))
-    setPoints(() => {
-      const newPoints = data.points
-      if (newPoints > peakPoints) {
-        pushTickerEvent(
-          `You reached a new peak of ${formatPoints(newPoints)} points!`,
-          true,
-          newPoints
-        )
-      }
-      return newPoints
+    const nickname = getNickname()
+    if (!userId || !nickname || betAmount <= 0) return
+
+    setPredictions((prev) =>
+      new Map(prev).set(gameId, { gameId, pick: playerName })
+    )
+
+    await fetch(`${API_BASE}/api/predictions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        gameId,
+        pick: playerName,
+        betAmount,
+        nickname
+      })
     })
-  }, [peakPoints])
+  }
 
   // SSE Listener
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
 
+    es.addEventListener('sync', (event) => {
+      const { serverTime } = JSON.parse(event.data)
+      setServerOffset(serverTime - Date.now())
+    })
+
     es.addEventListener('pending', (event) => {
       const pending: PendingMatch = JSON.parse(event.data)
-      setPendingMatches((prev) => {
-        if (prev.some((m) => m.gameId === pending.gameId)) return prev
-        return [pending, ...prev]
-      })
+      setPendingMatches((prev) =>
+        prev.some((m) => m.gameId === pending.gameId)
+          ? prev
+          : [pending, ...prev]
+      )
       markReady()
     })
 
     es.addEventListener('prediction_result', (event) => {
-      const data = JSON.parse(event.data) as {
-        userId: string
-        nickname: string
-        result: 'WIN' | 'LOSE'
-        amount: number
-        wasAllIn: boolean
-      }
-      console.log('prediction_result received:', data)
-
-      // Skip own events — already handled by result handler
+      const data = JSON.parse(event.data)
       if (data.userId === getUserId()) return
-
       const name = data.nickname ?? 'Someone'
-      if (data.result === 'WIN') {
-        if (data.wasAllIn) {
-          pushTickerEvent(
-            `${name} went all-in and won ${formatPoints(data.amount)} points!`,
-            true,
-            data.amount
-          )
-        } else {
-          pushTickerEvent(
-            `${name} won ${formatPoints(data.amount)} points!`,
-            true,
-            data.amount
-          )
-        }
-      } else {
-        pushTickerEvent(
-          `${name} lost ${formatPoints(data.amount)} points.`,
-          true,
-          data.amount
-        )
-      }
+      const msg =
+        data.result === 'WIN'
+          ? data.wasAllIn
+            ? `${name} went all-in and won ${formatPoints(data.amount)}!`
+            : `${name} won ${formatPoints(data.amount)}!`
+          : `${name} lost ${formatPoints(data.amount)}.`
+      pushTickerEvent(msg, true, data.amount)
     })
 
     es.addEventListener('result', (event) => {
       const match: Match = JSON.parse(event.data)
+
       setPredictions((prev) => {
-        const prediction = prev.get(match.gameId)
-        if (!prediction) return prev
+        const p = prev.get(match.gameId)
+        if (!p) return prev
+
         const aWins =
           (match.playerA.played === 'ROCK' &&
             match.playerB.played === 'SCISSORS') ||
           (match.playerA.played === 'SCISSORS' &&
             match.playerB.played === 'PAPER') ||
           (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
-        const winner = aWins ? match.playerA.name : match.playerB.name
-        const result = winner === prediction.pick ? 'WIN' : 'LOSE'
-        const isWin = result === 'WIN'
+        const winnerName = aWins ? match.playerA.name : match.playerB.name
+        const isWin = p.pick === winnerName
+
         const amount = isWin ? betAmount : Math.floor(betAmount * 0.5)
 
         if (isWin) {
@@ -300,30 +264,29 @@ const handlePick = async (gameId: string, playerName: string) => {
             : []
         })
         setTimeout(() => setResultAnim(null), 2000)
-
-        const next = new Map(prev)
-        next.set(match.gameId, { ...prediction, result })
-        return next
+        return new Map(prev).set(match.gameId, {
+          ...p,
+          result: isWin ? 'WIN' : 'LOSE'
+        })
       })
 
       setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
-      setMatches((prev) => {
-        if (prev.some((m) => m.gameId === match.gameId)) return prev
-        return [match, ...prev]
-      })
+      setMatches((prev) =>
+        prev.some((m) => m.gameId === match.gameId) ? prev : [match, ...prev]
+      )
       fetchUpdatedPoints()
     })
 
-    es.onerror = () => console.error('SSE connection lost')
     return () => es.close()
   }, [
-    setMatches,
     betAmount,
     points,
     fetchUpdatedPoints,
     playWin,
     playLoss,
-    markReady
+    markReady,
+    setMatches,
+    pushTickerEvent
   ])
 
   return (
@@ -338,39 +301,14 @@ const handlePick = async (gameId: string, playerName: string) => {
       {/* Betting Card */}
       <div className="relative bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-2 overflow-hidden">
         {resultAnim && (
-          <div className="absolute inset-0 z-50 pointer-events-none flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px] animate-in fade-in duration-300">
+          <div className="absolute inset-0 z-50 pointer-events-none flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px]">
             <span
-              className={`text-3xl sm:text-4xl font-black drop-shadow-md animate-bounce ${resultAnim.win ? 'text-green-500' : 'text-red-500'}`}
+              className={`text-3xl sm:text-4xl font-black animate-bounce ${resultAnim.win ? 'text-green-500' : 'text-red-500'}`}
             >
               {resultAnim.win
                 ? `+${formatPoints(animatedAmount)}`
                 : `-${formatPoints(animatedAmount)}`}
             </span>
-            {resultAnim.win && (
-              <div className="relative w-0 h-0">
-                {resultAnim.confetti?.map((c, i) => (
-                  <div
-                    key={i}
-                    className="absolute w-2 h-2 rounded-full"
-                    style={
-                      {
-                        left: `${c.leftOffset}px`,
-                        top: 0,
-                        backgroundColor: [
-                          '#A855F7',
-                          '#7C3AED',
-                          '#22C55E',
-                          '#EAB308'
-                        ][i % 4],
-                        animation: `confetti-burst 1s ease-out ${c.delay}s forwards`,
-                        '--vx': `${c.vx * 0.7}px`,
-                        '--vy': `${c.vy * 0.7}px`
-                      } as React.CSSProperties
-                    }
-                  />
-                ))}
-              </div>
-            )}
           </div>
         )}
 
@@ -405,7 +343,7 @@ const handlePick = async (gameId: string, playerName: string) => {
                     Math.max(1, Math.min(Number(e.target.value), points))
                   )
                 }
-                className="w-full border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all"
+                className="w-full border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400 pointer-events-none">
                 ({formatPoints(betAmount)})
@@ -445,18 +383,15 @@ const handlePick = async (gameId: string, playerName: string) => {
         </div>
       ) : (
         <div className="min-h-[60vh]">
-          {pendingMatches.length > 0 && (
-            <div className="space-y-3 mb-4">
-              {pendingMatches.map((pending) => (
-                <PendingMatchCard
-                  key={pending.gameId}
-                  pending={pending}
-                  prediction={predictions.get(pending.gameId) ?? null}
-                  onPick={handlePick}
-                />
-              ))}
-            </div>
-          )}
+          {pendingMatches.map((pending) => (
+            <PendingMatchCard
+              key={pending.gameId}
+              pending={pending}
+              prediction={predictions.get(pending.gameId) ?? null}
+              onPick={handlePick}
+              serverOffset={serverOffset}
+            />
+          ))}
           {isLoading && matches.length === 0 ? (
             <p className="text-center text-gray-400 py-12">
               Loading arena history...
@@ -475,24 +410,6 @@ const handlePick = async (gameId: string, playerName: string) => {
       <PredictionTicker events={tickerEvents} speed={8000} />
 
       <footer className="mt-12 py-8 border-t border-gray-100 text-center">
-        <div className="flex items-center justify-center gap-6 mb-4">
-          <a
-            href="https://github.com/yourusername"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-indigo-600 transition-colors text-sm font-medium"
-          >
-            GitHub
-          </a>
-          <a
-            href="https://linkedin.com/in/yourusername"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-indigo-600 transition-colors text-sm font-medium"
-          >
-            LinkedIn
-          </a>
-        </div>
         <p className="text-[10px] text-gray-300 uppercase tracking-[0.2em]">
           &copy; 2026 RPS LEAGUE AI · v2.4.0
         </p>
@@ -500,16 +417,10 @@ const handlePick = async (gameId: string, playerName: string) => {
 
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-20 right-4 sm:bottom-24 sm:right-8 z-40 flex items-center gap-2 bg-indigo-600 text-white p-3 sm:px-5 sm:py-3 rounded-full shadow-2xl hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer group border border-white/20 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+        className={`fixed bottom-20 right-4 z-40 flex items-center gap-2 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
       >
-        {pendingMatches.length > 0 && (
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-300 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
-          </span>
-        )}
         <svg
-          className="w-5 h-5 sm:w-4 sm:h-4 group-hover:-translate-y-0.5 transition-transform"
+          className="w-5 h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -521,9 +432,6 @@ const handlePick = async (gameId: string, playerName: string) => {
             d="M5 10l7-7m0 0l7 7"
           />
         </svg>
-        <span className="hidden sm:inline font-bold text-xs uppercase tracking-wider">
-          Back to Top
-        </span>
       </button>
     </div>
   )

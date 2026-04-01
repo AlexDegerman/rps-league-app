@@ -23,6 +23,7 @@ export interface PlayerStats {
 export interface PendingMatch {
   gameId: string
   time: number
+  expiresAt: number
   playerA: string
   playerB: string
 }

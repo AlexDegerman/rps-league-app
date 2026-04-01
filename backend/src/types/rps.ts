@@ -9,6 +9,7 @@ export interface Match {
   type: string
   gameId: string
   time: number
+  expiresAt: number
   playerA: Player
   playerB: Player
 }

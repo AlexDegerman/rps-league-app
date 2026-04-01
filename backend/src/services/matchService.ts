@@ -5,6 +5,7 @@ const rowToMatch = (row: Record<string, unknown>): Match => ({
   type: row.type as string,
   gameId: row.game_id as string,
   time: Number(row.time),
+  expiresAt: row.expires_at ? Number(row.expires_at) : Number(row.time),
   playerA: {
     name: row.player_a_name as string,
     played: row.player_a_played as Move
@@ -97,9 +98,9 @@ export const getMatchesByPlayer = async (
 export const getAllPlayerNames = async (): Promise<string[]> => {
   const result = await pool.query(
     `SELECT DISTINCT player_a_name AS name FROM matches
-     UNION
-     SELECT DISTINCT player_b_name AS name FROM matches
-     ORDER BY name ASC`
+      UNION
+      SELECT DISTINCT player_b_name AS name FROM matches
+      ORDER BY name ASC`
   )
   return result.rows.map((r) => r.name as string)
 }

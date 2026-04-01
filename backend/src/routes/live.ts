@@ -20,6 +20,8 @@ router.get('/', (req, res) => {
   const send = (event: string, data: string) =>
     res.write(`event: ${event}\ndata: ${data}\n\n`)
 
+  send('sync', JSON.stringify({ serverTime: Date.now() }))
+
   clients.add(send)
 
   if (!generatorStarted) {
