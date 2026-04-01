@@ -101,34 +101,38 @@ export default function PredictionTicker({
   useEffect(() => {
     if (events.length === 0) return
     const latest = events[events.length - 1]
-    pendingRef.current.push(latest)
+    if (latest.isReal) {
+      pendingRef.current.unshift(latest)
+    } else {
+      pendingRef.current.push(latest)
+    }
   }, [events])
 
-useEffect(() => {
-  const interval = setInterval(() => {
-    if (document.hidden || pendingRef.current.length === 0) return
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (pendingRef.current.length === 0) return
+      const next = pendingRef.current.shift()!
+      const now = Date.now()
+      const minStart = lastStartRef.current + 1500
+      const startDelay = Math.max(0, minStart - now)
+      lastStartRef.current = now + startDelay
 
-    const next = pendingRef.current.shift()!
-    const now = Date.now()
-    const minStart = lastStartRef.current + 1500
-    const startDelay = Math.max(0, minStart - now)
-    lastStartRef.current = now + startDelay
-
-    setTimeout(() => {
-      setActive((prev) => {
-        const filtered = prev.filter((e) => e.id !== next.id)
-        const limited = filtered.slice(-2)
-        return [...limited, { ...next, startDelay: 0 }]
-      })
+      if (next.isReal) {
+        // Clear active and pending demo events
+        pendingRef.current = pendingRef.current.filter((e) => e.isReal)
+        setActive((prev) => prev.filter((e) => e.isReal))
+      }
 
       setTimeout(() => {
-        setActive((prev) => prev.filter((e) => e.id !== next.id))
-      }, speed + 500)
-    }, startDelay)
-  }, 300)
+        setActive((prev) => [...prev, { ...next, startDelay: 0 }])
+        setTimeout(() => {
+          setActive((prev) => prev.filter((e) => e.id !== next.id))
+        }, 5500)
+      }, startDelay)
+    }, 300)
 
-  return () => clearInterval(interval)
-}, [speed])
+    return () => clearInterval(interval)
+  }, [speed])
 
   if (!visible) {
     return (
@@ -176,7 +180,7 @@ useEffect(() => {
                 {index < array.length - 1 && (
                   <GemIcon
                     size={14}
-                    className="mx-1 text-purple-500 translate-y-[-1px]"
+                    className="mx-1 text-purple-500 -translate-y-px"
                   />
                 )}
               </span>

@@ -15,13 +15,14 @@ router.get('/leaderboard', async (req, res) => {
     const result = await pool.query(`
       SELECT 
         u.user_id,
+        u.nickname,
         u.points,
         u.peak_points,
         COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
         COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
       FROM users u
       LEFT JOIN predictions p ON u.user_id = p.user_id
-      GROUP BY u.user_id, u.points, u.peak_points
+      GROUP BY u.user_id, u.nickname, u.points, u.peak_points
       ORDER BY u.peak_points DESC
       LIMIT 100
     `)
@@ -43,6 +44,7 @@ router.get('/leaderboard/weekly', async (req, res) => {
       `
       SELECT
         u.user_id,
+        u.nickname,
         u.points,
         COALESCE(SUM(p.bet_amount) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1), 0) AS weekly_gained,
         COUNT(p.id) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1) AS wins,
@@ -53,7 +55,7 @@ router.get('/leaderboard/weekly', async (req, res) => {
         SELECT 1 FROM predictions p2
         WHERE p2.user_id = u.user_id AND p2.created_at >= $1
       )
-      GROUP BY u.user_id, u.points
+      GROUP BY u.user_id, u.nickname, u.points
       ORDER BY weekly_gained DESC
       LIMIT 100
     `,
@@ -71,13 +73,14 @@ router.get('/leaderboard/current', async (req, res) => {
     const result = await pool.query(`
       SELECT 
         u.user_id,
+        u.nickname,
         u.points,
         u.peak_points,
         COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
         COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
       FROM users u
       LEFT JOIN predictions p ON u.user_id = p.user_id
-      GROUP BY u.user_id, u.points, u.peak_points
+      GROUP BY u.user_id, u.nickname, u.points, u.peak_points
       ORDER BY u.points DESC
       LIMIT 100
     `)
@@ -90,15 +93,22 @@ router.get('/leaderboard/current', async (req, res) => {
 // POST /api/predictions
 router.post('/', async (req, res) => {
   try {
-    const { userId, gameId, pick, betAmount } = req.body
-    if (!userId || !gameId || !pick || !betAmount)
-      return res
-        .status(400)
-        .json({ error: 'userId, gameId, pick and betAmount required' })
-    const result = await savePrediction(userId, gameId, pick, Number(betAmount))
+    const { userId, gameId, pick, betAmount, nickname } = req.body
+    if (!userId || !gameId || !pick || !betAmount || !nickname)
+      return res.status(400).json({
+        error: 'userId, gameId, pick, betAmount and nickname required'
+      })
+    const result = await savePrediction(
+      userId,
+      gameId,
+      pick,
+      Number(betAmount),
+      nickname
+    )
     if (!result.success) return res.status(400).json({ error: result.error })
     res.json({ success: true })
   } catch (err) {
+    console.error('Prediction error:', err)
     res.status(500).json({ error: 'Failed to save prediction' })
   }
 })
@@ -117,6 +127,43 @@ router.get('/stats', async (req, res) => {
     })
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch stats' })
+  }
+})
+
+// POST /api/users/recover — recover profile by code
+router.post('/recover', async (req, res) => {
+  try {
+    const { recoveryCode } = req.body
+    if (!recoveryCode)
+      return res.status(400).json({ error: 'Recovery code required' })
+    const result = await pool.query(
+      `SELECT user_id, nickname, points FROM users WHERE recovery_code = $1`,
+      [recoveryCode.toLowerCase().trim()]
+    )
+    if (result.rows.length === 0)
+      return res.status(404).json({ error: 'Invalid recovery code' })
+    res.json({
+      userId: result.rows[0].user_id,
+      nickname: result.rows[0].nickname,
+      points: result.rows[0].points
+    })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to recover profile' })
+  }
+})
+
+// GET /api/users/:userId/recovery — get recovery code
+router.get('/recovery/:userId', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT recovery_code FROM users WHERE user_id = $1`,
+      [req.params.userId]
+    )
+    if (result.rows.length === 0)
+      return res.status(404).json({ error: 'User not found' })
+    res.json({ recoveryCode: result.rows[0].recovery_code })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch recovery code' })
   }
 })
 

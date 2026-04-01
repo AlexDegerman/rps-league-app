@@ -11,7 +11,7 @@ import {
 } from '@/lib/api'
 import LeaderboardTable from '@/components/LeaderboardTable'
 import GemIcon from '@/components/icons/GemIcon'
-import { getNickname, getUserId } from '@/lib/user'
+import { getUserId } from '@/lib/user'
 import type { PlayerStats } from '@/types/rps'
 import { formatPoints } from '@/lib/format'
 
@@ -29,6 +29,7 @@ interface PredictorEntry {
   weekly_gained?: number
   wins: number
   losses: number
+  nickname: string
 }
 
 export default function LeaderboardPage() {
@@ -61,7 +62,6 @@ export default function LeaderboardPage() {
   const [predictors, setPredictors] = useState<PredictorEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [myUserId, setMyUserId] = useState<string | null>(null)
-  const [myNickname, setMyNickname] = useState<string | null>(null)
 
   const updateUrl = useCallback(
     (params: Record<string, string | null>) => {
@@ -77,7 +77,6 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     setMyUserId(getUserId())
-    setMyNickname(getNickname())
   }, [])
 
   const loadPredictorsCurrent = useCallback(async () => {
@@ -245,10 +244,10 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-3 font-medium text-gray-800">
                     {isMe ? (
                       <span className="text-purple-600 font-bold">
-                        {myNickname ?? entry.user_id.slice(0, 8)}
+                        {entry.nickname ?? entry.user_id.slice(0, 8)}
                       </span>
                     ) : (
-                      entry.user_id.slice(0, 8)
+                      <span>{entry.nickname ?? entry.user_id.slice(0, 8)}</span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-center text-green-600 font-bold">

@@ -31,17 +31,18 @@ router.get('/', (req, res) => {
         )
       },
       async (match: Match) => {
-        const aWins =
+        const winner =
           (match.playerA.played === 'ROCK' &&
             match.playerB.played === 'SCISSORS') ||
           (match.playerA.played === 'SCISSORS' &&
             match.playerB.played === 'PAPER') ||
           (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
+            ? match.playerA.name
+            : match.playerB.name
 
-        const winner = aWins ? match.playerA.name : match.playerB.name
-
-        await resolvePrediction(match.gameId, winner)
-
+        await resolvePrediction(match.gameId, winner, (event, data) => {
+          clients.forEach((client) => client(event, data))
+        })
         clients.forEach((client) => client('result', JSON.stringify(match)))
       }
     )

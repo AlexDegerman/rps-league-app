@@ -1,11 +1,73 @@
 import pool from '../utils/db.js'
+import { readFileSync } from 'fs'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+const wordList = [
+  'swift',
+  'bold',
+  'calm',
+  'fierce',
+  'brave',
+  'clever',
+  'mighty',
+  'nimble',
+  'silent',
+  'loyal',
+  'wild',
+  'sharp',
+  'bright',
+  'sly',
+  'wise',
+  'agile',
+  'steady',
+  'noble',
+  'quick',
+  'keen',
+  'proud',
+  'royal',
+  'tough',
+  'vivid',
+  'tiger',
+  'falcon',
+  'wolf',
+  'eagle',
+  'fox',
+  'bear',
+  'hawk',
+  'lynx',
+  'raven',
+  'cobra',
+  'panda',
+  'crane',
+  'viper',
+  'bison',
+  'moose',
+  'otter'
+]
+
+const generateRecoveryCode = (): string => {
+  const rand = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)]!
+  const num = Math.floor(Math.random() * 9000 + 1000)
+  return `${rand(wordList)}-${rand(wordList)}-${num}`
+}
 const POINTS_FLOOR = 1000
 
 const getOrCreateUser = async (userId: string): Promise<number> => {
+  const existing = await pool.query(
+    `SELECT points FROM users WHERE user_id = $1`,
+    [userId]
+  )
+  if (existing.rows.length > 0) return Number(existing.rows[0].points)
+
+  const recoveryCode = generateRecoveryCode()
   await pool.query(
-    `INSERT INTO users (user_id, points) VALUES ($1, $2) ON CONFLICT (user_id) DO NOTHING`,
-    [userId, POINTS_FLOOR]
+    `INSERT INTO users (user_id, points, peak_points, recovery_code)
+      VALUES ($1, $2, $2, $3)
+      ON CONFLICT (user_id) DO NOTHING`,
+    [userId, POINTS_FLOOR, recoveryCode]
   )
   const result = await pool.query(
     `SELECT points FROM users WHERE user_id = $1`,
@@ -22,13 +84,21 @@ export const savePrediction = async (
   userId: string,
   gameId: string,
   pick: string,
-  betAmount: number
+  betAmount: number,
+  nickname: string
 ): Promise<{ success: boolean; error?: string }> => {
   const balance = await getOrCreateUser(userId)
   if (betAmount <= 0)
     return { success: false, error: 'Bet amount must be greater than 0' }
   if (betAmount > balance)
     return { success: false, error: 'Bet amount exceeds balance' }
+
+  // Save/update nickname
+  await pool.query(`UPDATE users SET nickname = $1 WHERE user_id = $2`, [
+    nickname,
+    userId
+  ])
+
   await pool.query(
     `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
       VALUES ($1, $2, $3, $4, $5)
@@ -40,29 +110,46 @@ export const savePrediction = async (
 
 export const resolvePrediction = async (
   gameId: string,
-  winnerName: string
+  winnerName: string,
+  broadcast: (event: string, data: string) => void
 ): Promise<void> => {
   const predictions = await pool.query(
-    `SELECT * FROM predictions WHERE game_id = $1 AND result IS NULL`,
+    `SELECT p.*, u.nickname FROM predictions p
+      JOIN users u ON p.user_id = u.user_id
+      WHERE p.game_id = $1 AND p.result IS NULL`,
     [gameId]
   )
+
   for (const row of predictions.rows) {
     const result = row.pick === winnerName ? 'WIN' : 'LOSE'
+
     await pool.query(
       `UPDATE predictions SET result = $1 WHERE user_id = $2 AND game_id = $3`,
       [result, row.user_id, row.game_id]
     )
+
     const currentPoints = await getUserPoints(row.user_id)
     const bet = Number(row.bet_amount)
     const newPoints =
       result === 'WIN'
         ? currentPoints + bet
         : Math.max(POINTS_FLOOR, currentPoints - Math.floor(bet / 2))
+
     await pool.query(
-      `UPDATE users 
-        SET points = $1, peak_points = GREATEST(peak_points, $1)
-        WHERE user_id = $2`,
+      `UPDATE users SET points = $1, peak_points = GREATEST(peak_points, $1) WHERE user_id = $2`,
       [newPoints, row.user_id]
+    )
+
+    // Broadcast to all connected clients
+    broadcast(
+      'prediction_result',
+      JSON.stringify({
+        userId: row.user_id,
+        nickname: row.nickname,
+        result,
+        amount: result === 'WIN' ? bet : Math.floor(bet / 2),
+        wasAllIn: bet === currentPoints
+      })
     )
   }
 }

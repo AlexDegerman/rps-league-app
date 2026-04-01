@@ -9,7 +9,7 @@ import PredictionTicker, {
   type TickerEvent
 } from '@/components/PredictionTicker'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { getOrCreateUser, getUserId } from '@/lib/user'
+import { getOrCreateUser, getUserId, getNickname } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatPoints } from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
@@ -158,20 +158,29 @@ export default function HomePage() {
       .catch(() => markReady())
   }, [markReady, loadMatches, autoAllIn])
 
-  const handlePick = async (gameId: string, playerName: string) => {
-    const userId = getUserId()
-    if (!userId || betAmount <= 0) return
-    setPredictions((prev) => {
-      const next = new Map(prev)
-      next.set(gameId, { gameId, pick: playerName })
-      return next
+const handlePick = async (gameId: string, playerName: string) => {
+  const userId = getUserId()
+  const nickname = getNickname()
+  if (!userId || !nickname || betAmount <= 0) return
+
+  setPredictions((prev) => {
+    const next = new Map(prev)
+    next.set(gameId, { gameId, pick: playerName })
+    return next
+  })
+
+  await fetch(`${API_BASE}/api/predictions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId,
+      gameId,
+      pick: playerName,
+      betAmount,
+      nickname
     })
-    await fetch(`${API_BASE}/api/predictions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, gameId, pick: playerName, betAmount })
-    })
-  }
+  })
+}
 
   const fetchUpdatedPoints = useCallback(async () => {
     const userId = getUserId()
@@ -203,6 +212,43 @@ export default function HomePage() {
         return [pending, ...prev]
       })
       markReady()
+    })
+
+    es.addEventListener('prediction_result', (event) => {
+      const data = JSON.parse(event.data) as {
+        userId: string
+        nickname: string
+        result: 'WIN' | 'LOSE'
+        amount: number
+        wasAllIn: boolean
+      }
+      console.log('prediction_result received:', data)
+
+      // Skip own events — already handled by result handler
+      if (data.userId === getUserId()) return
+
+      const name = data.nickname ?? 'Someone'
+      if (data.result === 'WIN') {
+        if (data.wasAllIn) {
+          pushTickerEvent(
+            `${name} went all-in and won ${formatPoints(data.amount)} points!`,
+            true,
+            data.amount
+          )
+        } else {
+          pushTickerEvent(
+            `${name} won ${formatPoints(data.amount)} points!`,
+            true,
+            data.amount
+          )
+        }
+      } else {
+        pushTickerEvent(
+          `${name} lost ${formatPoints(data.amount)} points.`,
+          true,
+          data.amount
+        )
+      }
     })
 
     es.addEventListener('result', (event) => {
