@@ -81,6 +81,23 @@ router.post('/', async (req, res) => {
   }
 })
 
+router.get('/stats', async (req, res) => {
+  try {
+    const [users, predictions, matches] = await Promise.all([
+      pool.query(`SELECT COUNT(*) FROM users`),
+      pool.query(`SELECT COUNT(*) FROM predictions`),
+      pool.query(`SELECT COUNT(*) FROM matches`)
+    ])
+    res.json({
+      users: Number(users.rows[0].count),
+      predictions: Number(predictions.rows[0].count),
+      matches: Number(matches.rows[0].count)
+    })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch stats' })
+  }
+})
+
 // GET /api/predictions/:userId/points
 router.get('/:userId/points', async (req, res) => {
   try {
