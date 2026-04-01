@@ -19,18 +19,8 @@
 }
 
 @keyframes ticker-slide {
-  0% {
-    transform: translateX(-600px);
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(calc(100vw + 600px));
-    opacity: 0;
-  }
+  0% { transform: translateX(100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(-150%); opacity: 0; }
 }

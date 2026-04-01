@@ -1,23 +1,30 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getOrCreateUser, regenerateNickname, getUserId } from '@/lib/user'
+import { getOrCreateUser, regenerateNickname } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import type { UserStats } from '@/types/rps'
 import { formatPoints } from '@/lib/format'
 
 export default function ProfilePage() {
-  const { nickname: initialNickname } = getOrCreateUser()
-  const [nickname, setNickname] = useState(initialNickname)
+  // Initialize with empty/null and fill inside useEffect
+  const [nickname, setNickname] = useState<string>('')
   const [points, setPoints] = useState<number | null>(null)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [rank, setRank] = useState<{ rank: number; total: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const userId = getUserId()
+    const user = getOrCreateUser()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNickname(user.nickname)
+    setMounted(true)
+
+    const userId = user.userId
     if (!userId) return
 
+    // 2. Fetch Stats & Points
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/${userId}/points`)
       .then((res) => res.json())
       .then((data) => setPoints(data.points))
@@ -43,6 +50,15 @@ export default function ProfilePage() {
     setNickname(newNickname)
   }
 
+  // Prevent "Hydration Mismatch" by showing a simple loader until mounted
+  if (!mounted) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center animate-pulse">
+        <p className="text-gray-400">Loading your profile...</p>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-4">
       <h1 className="text-3xl font-bold text-gray-900 mb-1">Profile</h1>
@@ -55,7 +71,7 @@ export default function ProfilePage() {
           <p className="text-2xl font-bold text-gray-900">{nickname}</p>
           <button
             onClick={handleRegenerate}
-            className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition cursor-pointer"
+            className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 active:scale-95 transition-all cursor-pointer font-bold"
           >
             Randomize
           </button>
@@ -88,21 +104,29 @@ export default function ProfilePage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
             <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            <p className="text-xs text-gray-500 mt-1">Predictions</p>
+            <p className="text-xs text-gray-500 mt-1 uppercase font-bold tracking-wider">
+              Predictions
+            </p>
           </div>
           <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
             <p className="text-2xl font-bold text-green-600">{stats.wins}</p>
-            <p className="text-xs text-gray-500 mt-1">Wins</p>
+            <p className="text-xs text-gray-500 mt-1 uppercase font-bold tracking-wider">
+              Wins
+            </p>
           </div>
           <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
             <p className="text-2xl font-bold text-red-500">{stats.losses}</p>
-            <p className="text-xs text-gray-500 mt-1">Losses</p>
+            <p className="text-xs text-gray-500 mt-1 uppercase font-bold tracking-wider">
+              Losses
+            </p>
           </div>
           <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
             <p className="text-2xl font-bold text-indigo-600">
               {stats.winRate}%
             </p>
-            <p className="text-xs text-gray-500 mt-1">Win Rate</p>
+            <p className="text-xs text-gray-500 mt-1 uppercase font-bold tracking-wider">
+              Win Rate
+            </p>
           </div>
         </div>
       )}

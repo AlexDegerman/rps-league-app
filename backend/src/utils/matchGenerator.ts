@@ -4,6 +4,10 @@ import { addMatch } from './apiClient.js'
 import pool from './db.js'
 import type { Match } from '../types/rps.js'
 
+let currentPendingMatch: PendingMatch | null = null
+
+export const getActivePendingMatch = () => currentPendingMatch
+
 const MOVES = ['ROCK', 'PAPER', 'SCISSORS'] as const
 
 const randomItem = <T>(arr: readonly T[]): T =>
@@ -59,9 +63,12 @@ export const startMatchGenerator = (
       playerB: match.playerB.name
     }
 
+    currentPendingMatch = pendingMatch
     onPending(pendingMatch)
 
     await new Promise((resolve) => setTimeout(resolve, 5000))
+
+    currentPendingMatch = null
 
     addMatch(match)
     await saveMatch(match)

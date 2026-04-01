@@ -6,6 +6,10 @@ const NICKNAME_KEY = 'rps_nickname'
 const generateUserId = (): string => crypto.randomUUID()
 
 export const getOrCreateUser = (): { userId: string; nickname: string } => {
+  if (typeof window === 'undefined') {
+    return { userId: '', nickname: '' }
+  }
+
   let userId = localStorage.getItem(USER_ID_KEY)
   let nickname = localStorage.getItem(NICKNAME_KEY)
 
@@ -23,12 +27,18 @@ export const getOrCreateUser = (): { userId: string; nickname: string } => {
 }
 
 export const regenerateNickname = (): string => {
+  if (typeof window === 'undefined') return ''
   const nickname = generateNickname()
   localStorage.setItem(NICKNAME_KEY, nickname)
   return nickname
 }
 
-export const getUserId = (): string | null => localStorage.getItem(USER_ID_KEY)
+export const getUserId = (): string | null => {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(USER_ID_KEY)
+}
 
-export const getNickname = (): string | null =>
-  localStorage.getItem(NICKNAME_KEY)
+export const getNickname = (): string | null => {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(NICKNAME_KEY)
+}

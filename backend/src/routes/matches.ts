@@ -6,8 +6,14 @@ import {
   getAllPlayerNames,
   getPlayerStats
 } from '../services/matchService.js'
+import { getActivePendingMatch } from '../utils/matchGenerator.js'
 
 const router = Router()
+
+router.get('/pending', (req, res) => {
+  const active = getActivePendingMatch()
+  res.json(active ? [active] : [])
+})
 
 // GET /api/matches?page=1&limit=20
 router.get('/', async (req, res) => {

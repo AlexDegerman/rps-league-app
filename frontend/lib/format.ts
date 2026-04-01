@@ -21,20 +21,19 @@ export const formatDateTime = (timestamp: number): string => {
 export const getPlayerResult = (
   match: Match,
   playerName: string
-): 'WIN' | 'LOSE' | 'TIE' => {
+): 'WIN' | 'LOSE' => {
   const { playerA, playerB } = match
-  if (playerA.played === playerB.played) return 'TIE'
   const aWins =
     (playerA.played === 'ROCK' && playerB.played === 'SCISSORS') ||
     (playerA.played === 'SCISSORS' && playerB.played === 'PAPER') ||
     (playerA.played === 'PAPER' && playerB.played === 'ROCK')
+
   if (playerName === playerA.name) return aWins ? 'WIN' : 'LOSE'
-  if (playerName === playerB.name) return aWins ? 'LOSE' : 'WIN'
-  return 'TIE'
+  return aWins ? 'LOSE' : 'WIN'
 }
 
 // Maps a match result to its corresponding Tailwind background color class.
-export const resultColor = (result: 'WIN' | 'LOSE' | 'TIE'): string => {
+export const resultColor = (result: 'WIN' | 'LOSE'): string => {
   if (result === 'WIN') return 'bg-green-500'
   if (result === 'LOSE') return 'bg-red-500'
   return 'bg-orange-400'

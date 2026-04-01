@@ -17,6 +17,5 @@ export interface PlayerStats {
   name: string
   wins: number
   losses: number
-  ties: number
   winRate: number
 }
