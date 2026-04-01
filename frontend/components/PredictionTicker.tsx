@@ -1,16 +1,40 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { generateNickname } from '@/lib/nicknames'
+import { formatPoints } from '@/lib/format'
 
 export interface TickerEvent {
   id: string
   message: string
   isReal: boolean
   timestamp: number
+  amount?: number
 }
 
 interface PredictionTickerProps {
   events: TickerEvent[]
+}
+const demoTemplates = [
+  (name: string, amt: number) =>
+    `${name} won ${amt.toLocaleString()} points!`,
+  (name: string, amt: number) =>
+    `${name} lost ${amt.toLocaleString()} points.`,
+  (name: string, amt: number) =>
+    `${name} went all-in and won ${amt.toLocaleString()} points!`,
+  (name: string, amt: number) =>
+    `${name} is on a winning streak with ${amt.toLocaleString()} points!`,
+  (name: string, amt: number) =>
+    `${name} reached a new peak of ${amt.toLocaleString()} points!`
+]
+
+const getAmountColor = (amount?: number): string => {
+  if (!amount) return 'text-gray-400'
+  if (amount >= 50_000_000_000) return 'text-red-500'
+  if (amount >= 10_000_000) return 'text-yellow-500'
+  if (amount >= 100_000) return 'text-purple-500'
+  if (amount >= 10_000) return 'text-blue-500'
+  return 'text-gray-400'
 }
 
 export default function PredictionTicker({ events }: PredictionTickerProps) {
@@ -20,6 +44,63 @@ export default function PredictionTicker({ events }: PredictionTickerProps) {
   >([])
   const pendingRef = useRef<TickerEvent[]>([])
   const lastStartRef = useRef<number>(0)
+
+  useEffect(() => {
+    let demoTimer: ReturnType<typeof setTimeout>
+
+    const scheduleDemoEvent = () => {
+      const delay = 2000 + Math.random() * 3000
+      demoTimer = setTimeout(() => {
+        const name = generateNickname()
+
+        // Tiered random amount
+        const tierRoll = Math.random() * 100
+        let amount = 0
+        if (tierRoll < 60) {
+          // Tier 1: 2k–10k
+          amount = Math.floor(Math.random() * (10_000 - 2_000 + 1) + 2_000)
+        } else if (tierRoll < 80) {
+          // Tier 2: 10k–100k
+          amount = Math.floor(Math.random() * (100_000 - 10_000 + 1) + 10_000)
+        } else if (tierRoll < 90) {
+          // Tier 3: 100k–1M
+          amount = Math.floor(
+            Math.random() * (1_000_000 - 100_000 + 1) + 100_000
+          )
+        } else if (tierRoll < 96) {
+          // Tier 4: 1M–1B
+          amount = Math.floor(
+            Math.random() * (1_000_000_000 - 1_000_000 + 1) + 1_000_000
+          )
+        } else if (tierRoll < 99) {
+          // Tier 5: 1B–50B
+          amount = Math.floor(
+            Math.random() * (50_000_000_000 - 1_000_000_000 + 1) + 1_000_000_000
+          )
+        } else {
+          // Tier 6: 50.1B–500B
+          amount = Math.floor(
+            Math.random() * (500_000_000_000 - 50_100_000_000 + 1) +
+              50_100_000_000
+          )
+        }
+
+        const template =
+          demoTemplates[Math.floor(Math.random() * demoTemplates.length)]
+        pendingRef.current.push({
+          id: crypto.randomUUID(),
+          message: template(name, formatPoints(amount)),
+          isReal: false,
+          timestamp: Date.now(),
+          amount
+        })
+        scheduleDemoEvent()
+      }, delay)
+    }
+
+    scheduleDemoEvent()
+    return () => clearTimeout(demoTimer)
+  }, [])
 
   useEffect(() => {
     if (events.length === 0) return
@@ -74,10 +155,13 @@ export default function PredictionTicker({ events }: PredictionTickerProps) {
           <p
             key={event.id}
             className={`absolute whitespace-nowrap text-sm top-0 left-0 ${
-              event.isReal ? 'text-gray-800 font-medium' : 'text-gray-400'
+              event.isReal
+                ? `${getAmountColor(event.amount)} font-bold`
+                : getAmountColor(event.amount)
             }`}
             style={{ animation: 'ticker-slide 5s linear forwards' }}
           >
+            {event.isReal && <span className="text-red-400 mr-1">●</span>}
             {event.message}
           </p>
         ))}

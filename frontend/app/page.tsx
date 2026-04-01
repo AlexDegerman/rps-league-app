@@ -9,8 +9,9 @@ import PredictionTicker, {
   type TickerEvent
 } from '@/components/PredictionTicker'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { getOrCreateUser, getUserId, getNickname } from '@/lib/user'
+import { getOrCreateUser, getUserId } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
+import { formatPoints } from '@/lib/format'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -36,10 +37,10 @@ export default function HomePage() {
     setBackendReady(true)
   }
 
-  const pushTickerEvent = (message: string, isReal: boolean) => {
+  const pushTickerEvent = (message: string, isReal: boolean, amount?: number) => {
     setTickerEvents((prev) => [
       ...prev.slice(-14),
-      { id: crypto.randomUUID(), message, isReal, timestamp: Date.now() }
+      { id: crypto.randomUUID(), message, isReal, timestamp: Date.now(), amount }
     ])
   }
 
@@ -98,10 +99,10 @@ export default function HomePage() {
     setPoints((prev) => {
       const newPoints = data.points
       if (newPoints > prev) {
-        const nickname = getNickname() ?? 'You'
         pushTickerEvent(
-          `${nickname} reached a new peak of ${newPoints} points!`,
-          true
+          `You reached a new peak of ${formatPoints(newPoints)} points!`,
+          true,
+          newPoints
         )
       }
       return newPoints
@@ -135,20 +136,28 @@ export default function HomePage() {
         const result = winner === prediction.pick ? 'WIN' : 'LOSE'
         const isWin = result === 'WIN'
         const amount = isWin ? betAmount : Math.floor(betAmount * 0.5)
-        const nickname = getNickname() ?? 'You'
 
         // Ticker event
         if (isWin) {
           if (betAmount === points) {
             pushTickerEvent(
-              `${nickname} went all-in and won ${amount} points!`,
-              true
+              `You went all-in and won ${formatPoints(amount)} points!`,
+              true,
+              amount
             )
           } else {
-            pushTickerEvent(`${nickname} won ${amount} points!`, true)
+            pushTickerEvent(
+              `You won ${formatPoints(amount)} points!`,
+              true,
+              amount
+            )
           }
         } else {
-          pushTickerEvent(`${nickname} lost ${amount} points.`, true)
+          pushTickerEvent(
+            `You lost ${formatPoints(amount)} points.`,
+            true,
+            amount
+          )
         }
 
         // Animation

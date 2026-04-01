@@ -13,7 +13,7 @@ export const formatDateTime = (timestamp: number): string => {
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit',
+    minute: '2-digit'
   })
 }
 
@@ -38,4 +38,16 @@ export const resultColor = (result: 'WIN' | 'LOSE' | 'TIE'): string => {
   if (result === 'WIN') return 'bg-green-500'
   if (result === 'LOSE') return 'bg-red-500'
   return 'bg-orange-400'
+}
+
+export const formatPoints = (n: number): string => {
+  if (n >= 1_000_000_000) {
+    const val = n / 1_000_000_000
+    return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}B`
+  }
+  if (n >= 1_000_000) {
+    const val = n / 1_000_000
+    return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}M`
+  }
+  return n.toLocaleString()
 }
