@@ -49,5 +49,5 @@ export const formatPoints = (n: number): string => {
     const val = n / 1_000_000
     return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}M`
   }
-  return n.toLocaleString()
+  return n.toLocaleString('en-US')
 }

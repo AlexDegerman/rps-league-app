@@ -15,17 +15,14 @@ export interface TickerEvent {
 interface PredictionTickerProps {
   events: TickerEvent[]
 }
+
 const demoTemplates = [
-  (name: string, amt: number) =>
-    `${name} won ${amt.toLocaleString()} points!`,
-  (name: string, amt: number) =>
-    `${name} lost ${amt.toLocaleString()} points.`,
-  (name: string, amt: number) =>
-    `${name} went all-in and won ${amt.toLocaleString()} points!`,
-  (name: string, amt: number) =>
-    `${name} is on a winning streak with ${amt.toLocaleString()} points!`,
-  (name: string, amt: number) =>
-    `${name} reached a new peak of ${amt.toLocaleString()} points!`
+  (name: string, amt: string) => `${name} won ${amt} points!`,
+  (name: string, amt: string) => `${name} lost ${amt} points.`,
+  (name: string, amt: string) => `${name} went all-in and won ${amt} points!`,
+  (name: string, amt: string) =>
+    `${name} is on a winning streak with ${amt} points!`,
+  (name: string, amt: string) => `${name} reached a new peak of ${amt} points!`
 ]
 
 const getAmountColor = (amount?: number): string => {

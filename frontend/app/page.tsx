@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { fetchLatestMatches } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
-import GemIcon from '@/components/GemIcon'
+import GemIcon from '@/components/icons/GemIcon'
 import PredictionTicker, {
   type TickerEvent
 } from '@/components/PredictionTicker'
@@ -12,6 +12,8 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, getUserId } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatPoints } from '@/lib/format'
+import { useSound } from '@/hooks/useSound'
+import SoundIcon from '@/components/icons/SoundIcon'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -31,16 +33,52 @@ export default function HomePage() {
     amount: number
     confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
   } | null>(null)
+  const [animatedAmount, setAnimatedAmount] = useState(0)
+  const [peakPoints, setPeakPoints] = useState(1000)
+  const [autoAllIn, setAutoAllIn] = useState(false)
+  const { playWin, playLoss, soundOn, toggleSound } = useSound()
+
+  useEffect(() => {
+    const saved = localStorage.getItem('autoAllIn')
+    if (saved !== null) {
+      const isAuto = saved === 'true'
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAutoAllIn(isAuto)
+
+      if (isAuto) {
+        setBetAmount(points)
+      }
+    }
+  }, [points])
+
+  useEffect(() => {
+    localStorage.setItem('autoAllIn', autoAllIn.toString())
+
+    if (autoAllIn) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBetAmount(points)
+    }
+  }, [autoAllIn, points])
 
   const markReady = () => {
     _backendReady = true
     setBackendReady(true)
   }
 
-  const pushTickerEvent = (message: string, isReal: boolean, amount?: number) => {
+  const pushTickerEvent = (
+    message: string,
+    isReal: boolean,
+    amount?: number
+  ) => {
     setTickerEvents((prev) => [
       ...prev.slice(-14),
-      { id: crypto.randomUUID(), message, isReal, timestamp: Date.now(), amount }
+      {
+        id: crypto.randomUUID(),
+        message,
+        isReal,
+        timestamp: Date.now(),
+        amount
+      }
     ])
   }
 
@@ -53,6 +91,29 @@ export default function HomePage() {
     isLoadingMore,
     loadMatches
   } = useInfiniteScroll({ fetchFn })
+
+  useEffect(() => {
+    if (!resultAnim) return
+
+    const end = resultAnim.amount
+    const duration = 600
+    const startTime = performance.now()
+
+    const animate = (time: number) => {
+      const progress = Math.min((time - startTime) / duration, 1)
+
+      const eased = 1 - Math.pow(1 - progress, 3)
+
+      const current = Math.floor(eased * end)
+      setAnimatedAmount(current)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [resultAnim])
 
   useEffect(() => {
     getOrCreateUser()
@@ -96,9 +157,12 @@ export default function HomePage() {
     if (!userId) return
     const res = await fetch(`${API_BASE}/api/predictions/${userId}/points`)
     const data = await res.json()
-    setPoints((prev) => {
+
+    setPeakPoints((prevPeak) => Math.max(prevPeak, data.peak_points))
+
+    setPoints(() => {
       const newPoints = data.points
-      if (newPoints > prev) {
+      if (newPoints > peakPoints) {
         pushTickerEvent(
           `You reached a new peak of ${formatPoints(newPoints)} points!`,
           true,
@@ -107,8 +171,13 @@ export default function HomePage() {
       }
       return newPoints
     })
-    setBetAmount((prev) => Math.min(prev, data.points))
-  }, [])
+
+    if (autoAllIn) {
+      setBetAmount(data.points)
+    } else {
+      setBetAmount((prev) => Math.min(prev, data.points))
+    }
+  }, [autoAllIn, peakPoints])
 
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
@@ -139,6 +208,7 @@ export default function HomePage() {
 
         // Ticker event
         if (isWin) {
+          playWin()
           if (betAmount === points) {
             pushTickerEvent(
               `You went all-in and won ${formatPoints(amount)} points!`,
@@ -153,6 +223,7 @@ export default function HomePage() {
             )
           }
         } else {
+          playLoss()
           pushTickerEvent(
             `You lost ${formatPoints(amount)} points.`,
             true,
@@ -194,7 +265,7 @@ export default function HomePage() {
 
     es.onerror = () => console.error('SSE connection lost')
     return () => es.close()
-  }, [setMatches, betAmount, points, fetchUpdatedPoints])
+  }, [setMatches, betAmount, points, fetchUpdatedPoints, playWin, playLoss])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-16">
@@ -209,7 +280,9 @@ export default function HomePage() {
               resultAnim.win ? 'text-green-500' : 'text-red-500'
             }`}
           >
-            {resultAnim.win ? `+${resultAnim.amount}` : `-${resultAnim.amount}`}
+            {resultAnim.win
+              ? `+${formatPoints(animatedAmount)}`
+              : `-${formatPoints(animatedAmount)}`}
           </span>
           {resultAnim.win && (
             <div className="relative w-0 h-0">
@@ -246,9 +319,11 @@ export default function HomePage() {
       <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 mb-2 flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex items-center gap-2">
           <GemIcon size={24} />
-          <span className="text-lg font-bold text-purple-600">{points}</span>
-          <span className="text-sm text-gray-500">points</span>
+          <span className="text-lg font-bold text-purple-600">
+            {formatPoints(points)}
+          </span>
         </div>
+
         <div className="flex items-center gap-2 sm:ml-auto">
           <label className="text-sm text-gray-500 shrink-0">Bet amount</label>
           <input
@@ -260,14 +335,39 @@ export default function HomePage() {
               const val = Math.min(Number(e.target.value), points)
               setBetAmount(Math.max(1, val))
             }}
-            className="w-24 border border-gray-200 rounded px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-28 border border-gray-200 rounded px-2 py-1 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-300"
           />
-          <button
-            onClick={() => setBetAmount(points)}
-            className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer"
-          >
-            All in
-          </button>
+          <span className="text-xs text-gray-400">
+            ({formatPoints(betAmount)})
+          </span>
+
+          {/* Container for All in + Auto all-in */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setBetAmount(points)}
+              className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition cursor-pointer"
+            >
+              All in
+            </button>
+
+            <button
+              onClick={() => setAutoAllIn((prev) => !prev)}
+              className={`text-xs px-2 py-1 rounded ${
+                autoAllIn
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-200 text-gray-700'
+              } cursor-pointer`}
+            >
+              Auto All-in {autoAllIn ? 'ON' : 'OFF'}
+            </button>
+            <button
+              onClick={toggleSound}
+              className="ml-2 p-2 rounded-full border border-gray-300 hover:bg-gray-100 transition"
+              title={soundOn ? 'Mute sounds' : 'Unmute sounds'}
+            >
+              <SoundIcon muted={!soundOn} />
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex items-center justify-between mb-4">

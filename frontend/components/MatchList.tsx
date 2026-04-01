@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { formatDateTime, getPlayerResult, resultColor } from '@/lib/format'
 import type { Match, PredictionRecord } from '@/types/rps'
-import MoveIcon from '@/components/MoveIcon'
+import MoveIcon from '@/components/icons/MoveIcon'
 
 const getMatchWinner = (match: Match): string => {
   const { playerA, playerB } = match

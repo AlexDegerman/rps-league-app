@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { getOrCreateUser, regenerateNickname, getUserId } from '@/lib/user'
-import GemIcon from '@/components/GemIcon'
+import GemIcon from '@/components/icons/GemIcon'
 import type { UserStats } from '@/types/rps'
+import { formatPoints } from '@/lib/format'
 
 export default function ProfilePage() {
   const { nickname: initialNickname } = getOrCreateUser()
@@ -28,13 +29,13 @@ export default function ProfilePage() {
       .catch((err) => console.error('Failed to load stats:', err))
       .finally(() => setStatsLoading(false))
 
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/leaderboard`)
-        .then((res) => res.json())
-        .then((data: { user_id: string; points: number }[]) => {
-          const index = data.findIndex((e) => e.user_id === userId)
-          if (index !== -1) setRank({ rank: index + 1, total: data.length })
-        })
-        .catch((err) => console.error('Failed to load rank:', err))
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/leaderboard`)
+      .then((res) => res.json())
+      .then((data: { user_id: string; points: number }[]) => {
+        const index = data.findIndex((e) => e.user_id === userId)
+        if (index !== -1) setRank({ rank: index + 1, total: data.length })
+      })
+      .catch((err) => console.error('Failed to load rank:', err))
   }, [])
 
   const handleRegenerate = () => {
@@ -62,7 +63,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-2">
           <GemIcon size={24} />
           <span className="text-lg font-bold text-purple-600">
-            {points ?? '...'}
+            {points !== null ? formatPoints(points) : '...'}
           </span>
           <span className="text-sm text-gray-500">points</span>
           {rank && (

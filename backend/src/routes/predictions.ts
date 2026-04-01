@@ -65,6 +65,28 @@ router.get('/leaderboard/weekly', async (req, res) => {
   }
 })
 
+// GET /api/predictions/leaderboard/current — ranked by current balance
+router.get('/leaderboard/current', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        u.user_id,
+        u.points,
+        u.peak_points,
+        COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
+        COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
+      FROM users u
+      LEFT JOIN predictions p ON u.user_id = p.user_id
+      GROUP BY u.user_id, u.points, u.peak_points
+      ORDER BY u.points DESC
+      LIMIT 100
+    `)
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch current leaderboard' })
+  }
+})
+
 // POST /api/predictions
 router.post('/', async (req, res) => {
   try {

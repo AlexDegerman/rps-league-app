@@ -73,3 +73,9 @@ export const fetchWeeklyPredictorLeaderboard = async () => {
   if (!res.ok) throw new Error('Failed to fetch weekly predictor leaderboard')
   return res.json()
 }
+
+export const fetchCurrentPredictorLeaderboard = async () => {
+  const res = await fetch(`${API_BASE}/api/predictions/leaderboard/current`)
+  if (!res.ok) throw new Error('Failed to fetch current predictor leaderboard')
+  return res.json()
+}

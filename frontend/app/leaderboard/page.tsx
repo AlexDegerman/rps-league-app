@@ -5,18 +5,20 @@ import {
   fetchHistoricalLeaderboard,
   fetchTodayLeaderboard,
   fetchPredictorLeaderboard,
-  fetchWeeklyPredictorLeaderboard
+  fetchWeeklyPredictorLeaderboard,
+  fetchCurrentPredictorLeaderboard
 } from '@/lib/api'
 import LeaderboardTable from '@/components/LeaderboardTable'
-import GemIcon from '@/components/GemIcon'
+import GemIcon from '@/components/icons/GemIcon'
 import { getNickname, getUserId } from '@/lib/user'
 import type { PlayerStats } from '@/types/rps'
+import { formatPoints } from '@/lib/format'
 
 const TODAY = new Date().toISOString().split('T')[0]
 const FIRST_MATCH_DATE = '2026-02-16'
 
 type MainTab = 'predictors' | 'players'
-type PredictorSubTab = 'weekly' | 'alltime'
+type PredictorSubTab = 'current' | 'weekly' | 'alltime'
 type PlayerSubTab = 'alltime' | 'today'
 
 interface PredictorEntry {
@@ -31,7 +33,7 @@ interface PredictorEntry {
 export default function LeaderboardPage() {
   const [mainTab, setMainTab] = useState<MainTab>('predictors')
   const [predictorSubTab, setPredictorSubTab] =
-    useState<PredictorSubTab>('weekly')
+    useState<PredictorSubTab>('current')
   const [playerSubTab, setPlayerSubTab] = useState<PlayerSubTab>('alltime')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -45,6 +47,18 @@ export default function LeaderboardPage() {
   useEffect(() => {
     setMyUserId(getUserId())
     setMyNickname(getNickname())
+  }, [])
+
+  const loadPredictorsCurrent = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const data = await fetchCurrentPredictorLeaderboard()
+      setPredictors(data)
+    } catch (err) {
+      console.error('Failed to fetch current predictors:', err)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   const loadPredictorsWeekly = useCallback(async () => {
@@ -97,7 +111,8 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     if (mainTab === 'predictors') {
-      if (predictorSubTab === 'weekly') loadPredictorsWeekly()
+      if (predictorSubTab === 'current') loadPredictorsCurrent()
+      else if (predictorSubTab === 'weekly') loadPredictorsWeekly()
       else loadPredictorsAllTime()
     } else {
       if (playerSubTab === 'alltime') loadAllTime()
@@ -107,6 +122,7 @@ export default function LeaderboardPage() {
     mainTab,
     predictorSubTab,
     playerSubTab,
+    loadPredictorsCurrent,
     loadPredictorsWeekly,
     loadPredictorsAllTime,
     loadAllTime,
@@ -123,75 +139,90 @@ export default function LeaderboardPage() {
     loadAllTime()
   }
 
-  const renderPredictorTable = (
-    pointsLabel: string,
-    pointsKey: keyof PredictorEntry
-  ) =>
-    predictors.length === 0 ? (
-      <p className="text-center text-gray-400 py-12">No predictors yet</p>
-    ) : (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="text-left px-4 py-3 text-gray-500 font-medium w-10">
-                #
-              </th>
-              <th className="text-left px-4 py-3 text-gray-500 font-medium">
-                Nickname
-              </th>
-              <th className="text-center px-4 py-3 text-green-600 font-medium">
-                W
-              </th>
-              <th className="text-center px-4 py-3 text-red-500 font-medium">
-                L
-              </th>
+const renderPredictorTable = (
+  pointsLabel?: string,
+  pointsKey?: keyof PredictorEntry
+) =>
+  predictors.length === 0 ? (
+    <p className="text-center text-gray-400 py-12">No predictors yet</p>
+  ) : (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+      <table className="w-full text-sm">
+        <thead className="bg-gray-50 border-b border-gray-100">
+          <tr>
+            <th className="text-left px-4 py-3 text-gray-500 font-medium w-10">
+              #
+            </th>
+            <th className="text-left px-4 py-3 text-gray-500 font-medium">
+              Nickname
+            </th>
+            <th className="text-center px-4 py-3 text-green-600 font-medium">
+              W
+            </th>
+            <th className="text-center px-4 py-3 text-red-500 font-medium">
+              L
+            </th>
+            <th className="text-right px-4 py-3 text-purple-500 font-medium">
+              Current
+            </th>
+            {pointsLabel && (
               <th className="text-right px-4 py-3 text-purple-500 font-medium">
                 {pointsLabel}
               </th>
-            </tr>
-          </thead>
-          <tbody>
-            {predictors.map((entry, index) => {
-              const isMe = entry.user_id === myUserId
-              return (
-                <tr
-                  key={entry.user_id}
-                  className={`border-b border-gray-50 ${index === 0 ? 'bg-yellow-50' : ''} ${isMe ? 'bg-purple-50' : ''}`}
-                >
-                  <td className="px-4 py-3 text-gray-400 font-medium">
-                    {index === 0 ? '🏆' : index + 1}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    {isMe ? (
-                      <span className="text-purple-600 font-bold">
-                        {myNickname ?? entry.user_id.slice(0, 8)}
-                      </span>
-                    ) : (
-                      entry.user_id.slice(0, 8)
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center text-green-600 font-bold">
-                    {Number(entry.wins)}
-                  </td>
-                  <td className="px-4 py-3 text-center text-red-500">
-                    {Number(entry.losses)}
-                  </td>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {predictors.map((entry, index) => {
+            const isMe = entry.user_id === myUserId
+            return (
+              <tr
+                key={entry.user_id}
+                className={`border-b border-gray-50 ${index === 0 ? 'bg-yellow-50' : ''} ${isMe ? 'bg-purple-50' : ''}`}
+              >
+                <td className="px-4 py-3 text-gray-400 font-medium">
+                  {index === 0 ? '🏆' : index + 1}
+                </td>
+                <td className="px-4 py-3 font-medium text-gray-800">
+                  {isMe ? (
+                    <span className="text-purple-600 font-bold">
+                      {myNickname ?? entry.user_id.slice(0, 8)}
+                    </span>
+                  ) : (
+                    entry.user_id.slice(0, 8)
+                  )}
+                </td>
+                <td className="px-4 py-3 text-center text-green-600 font-bold">
+                  {Number(entry.wins)}
+                </td>
+                <td className="px-4 py-3 text-center text-red-500">
+                  {Number(entry.losses)}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <GemIcon size={16} />
+                    <span className="font-bold text-purple-600">
+                      {formatPoints(entry.points)}
+                    </span>
+                  </div>
+                </td>
+                {pointsKey && (
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <GemIcon size={16} />
                       <span className="font-bold text-purple-600">
-                        {Number(entry[pointsKey] ?? 0)}
+                        {formatPoints(Number(entry[pointsKey] ?? 0))}
                       </span>
                     </div>
                   </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    )
+                )}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
 
   return (
     <div className="max-w-2xl mx-auto px-4">
@@ -199,9 +230,11 @@ export default function LeaderboardPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-1">Leaderboard</h1>
         <p className="text-gray-500">
           {mainTab === 'predictors'
-            ? predictorSubTab === 'alltime'
-              ? 'Users ranked by peak points ever held'
-              : 'Users ranked by total points gained this week'
+            ? predictorSubTab === 'current'
+              ? 'Users ranked by current points held'
+              : predictorSubTab === 'alltime'
+                ? 'Users ranked by peak points ever held'
+                : 'Users ranked by total points gained this week'
             : 'Player standings based on number of wins'}
         </p>
       </div>
@@ -234,6 +267,16 @@ export default function LeaderboardPage() {
         {/* Predictor sub-tabs */}
         {mainTab === 'predictors' && (
           <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setPredictorSubTab('current')}
+              className={`px-3 py-1.5 rounded font-medium text-xs transition cursor-pointer ${
+                predictorSubTab === 'current'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-purple-50'
+              }`}
+            >
+              Current
+            </button>
             <button
               onClick={() => setPredictorSubTab('weekly')}
               className={`px-3 py-1.5 rounded font-medium text-xs transition cursor-pointer ${
@@ -353,7 +396,9 @@ export default function LeaderboardPage() {
               : 'Building leaderboard...'}
           </p>
         ) : mainTab === 'predictors' ? (
-          predictorSubTab === 'weekly' ? (
+          predictorSubTab === 'current' ? (
+            renderPredictorTable()
+          ) : predictorSubTab === 'weekly' ? (
             renderPredictorTable('Gained', 'weekly_gained')
           ) : (
             renderPredictorTable('Peak', 'peak_points')
