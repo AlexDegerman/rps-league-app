@@ -7,24 +7,33 @@ import type { UserStats } from '@/types/rps'
 import { formatPoints } from '@/lib/format'
 
 export default function ProfilePage() {
-  // Initialize with empty/null and fill inside useEffect
   const [nickname, setNickname] = useState<string>('')
   const [points, setPoints] = useState<number | null>(null)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [rank, setRank] = useState<{ rank: number; total: number } | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [recoveryCode, setRecoveryCode] = useState<string | null>(null)
+  const [codeRevealed, setCodeRevealed] = useState(false)
+  const [codeCopied, setCodeCopied] = useState(false)
 
   useEffect(() => {
     const user = getOrCreateUser()
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNickname(user.nickname)
     setMounted(true)
-
+    
     const userId = user.userId
     if (!userId) return
 
     // 2. Fetch Stats & Points
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/predictions/recovery/${userId}`
+    )
+      .then((res) => res.json())
+      .then((data) => setRecoveryCode(data.recoveryCode))
+      .catch((err) => console.error('Failed to load recovery code:', err))
+
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/${userId}/points`)
       .then((res) => res.json())
       .then((data) => setPoints(data.points))
@@ -69,6 +78,41 @@ export default function ProfilePage() {
         <p className="text-xs text-gray-500 mb-1">Your nickname</p>
         <div className="flex items-center gap-3 mb-4">
           <p className="text-2xl font-bold text-gray-900">{nickname}</p>
+          {/* Recovery code */}
+          <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-6 mb-6">
+            <p className="text-xs text-gray-500 mb-1">Recovery code</p>
+            <p className="text-xs text-gray-400 mb-3">
+              Use this code to access your profile on another device.
+            </p>
+            <div className="flex items-center gap-3">
+              <span
+                className={`font-mono text-sm font-bold text-gray-800 tracking-wide ${!codeRevealed ? 'blur-sm select-none' : ''}`}
+              >
+                {recoveryCode ?? '...'}
+              </span>
+              {!codeRevealed ? (
+                <button
+                  onClick={() => setCodeRevealed(true)}
+                  className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition cursor-pointer"
+                >
+                  Reveal
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    if (recoveryCode) {
+                      navigator.clipboard.writeText(recoveryCode)
+                      setCodeCopied(true)
+                      setTimeout(() => setCodeCopied(false), 2000)
+                    }
+                  }}
+                  className="text-xs px-3 py-1.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition cursor-pointer"
+                >
+                  {codeCopied ? 'Copied!' : 'Copy'}
+                </button>
+              )}
+            </div>
+          </div>
           <button
             onClick={handleRegenerate}
             className="text-xs px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 active:scale-95 transition-all cursor-pointer font-bold"

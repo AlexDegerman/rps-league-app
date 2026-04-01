@@ -1,9 +1,4 @@
 import pool from '../utils/db.js'
-import { readFileSync } from 'fs'
-import { join, dirname } from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
 
 const wordList = [
   'swift',
