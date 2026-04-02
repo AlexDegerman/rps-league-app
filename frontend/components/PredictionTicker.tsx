@@ -39,19 +39,18 @@ const getAmountColor = (amount?: number): string => {
 
 export default function PredictionTicker({
   events,
-  speed = 5000,
   pauseDemos = false
 }: PredictionTickerProps) {
   const [visible, setVisible] = useState(true)
-  const [active, setActive] = useState<
-    (TickerEvent & { startDelay: number })[]
-  >([])
-  const [dynamicDuration, setDynamicDuration] = useState(speed)
-
+  const [active, setActive] = useState<(TickerEvent & { duration: number })[]>([])
+  const [velocity, setVelocity] = useState(200)
   const pendingRef = useRef<TickerEvent[]>([])
-  const lastStartRef = useRef<number>(0)
+  const lastStartRef = useRef<{ time: number; gapMs: number }>({
+    time: 0,
+    gapMs: 1500
+  })
   const pauseDemosRef = useRef(pauseDemos)
-
+  
   useEffect(() => {
     pauseDemosRef.current = pauseDemos
   }, [pauseDemos])
@@ -60,8 +59,7 @@ export default function PredictionTicker({
     const updateVelocity = () => {
       const width = window.innerWidth
       const v = Math.max(120, Math.min(width / 3, 600))
-      const calculatedDuration = ((width + 200) / v) * 1000
-      setDynamicDuration(calculatedDuration)
+      setVelocity(v)
     }
     updateVelocity()
     window.addEventListener('resize', updateVelocity)
@@ -132,22 +130,31 @@ export default function PredictionTicker({
       if (pendingRef.current.length === 0) return
 
       const now = Date.now()
-      const minGap = 1500
+      const { time: lastTime, gapMs: lastGap } = lastStartRef.current
 
-      if (now < lastStartRef.current + minGap) return
+      if (now < lastTime + lastGap) return
 
       const next = pendingRef.current.shift()!
-      lastStartRef.current = now
 
-      setActive((prev) => [...prev, { ...next, startDelay: 0 }])
+      const estimatedWidth = next.message.length * 8 + 60
+      const screenWidth = window.innerWidth
+
+      const totalDistance = screenWidth + estimatedWidth
+      const eventDuration = (totalDistance / velocity) * 1000
+
+      const nextGapMs = ((estimatedWidth + 60) / velocity) * 1000
+
+      lastStartRef.current = { time: now, gapMs: nextGapMs }
+
+      setActive((prev) => [...prev, { ...next, duration: eventDuration }])
 
       setTimeout(() => {
         setActive((prev) => prev.filter((e) => e.id !== next.id))
-      }, dynamicDuration + 1000)
+      }, eventDuration + 500)
     }, 100)
 
     return () => clearInterval(interval)
-  }, [dynamicDuration])
+  }, [velocity])
 
   if (!visible) {
     return (
@@ -161,7 +168,7 @@ export default function PredictionTicker({
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-md px-4 py-2 flex items-center gap-3 h-10">
+    <div className="fixed bottom-8 left-0 right-0 z-40 bg-white border-t border-gray-100 shadow-md px-4 py-2 flex items-center gap-3 h-10">
       <span className="text-[10px] font-bold text-gray-400 shrink-0 uppercase tracking-wide">
         Live
       </span>
@@ -183,7 +190,7 @@ export default function PredictionTicker({
                 : getAmountColor(event.amount)
             }`}
             style={{
-              animation: `ticker-ltr ${dynamicDuration}ms linear forwards`
+              animation: `ticker-ltr ${event.duration}ms linear forwards`
             }}
           >
             {event.isReal && (

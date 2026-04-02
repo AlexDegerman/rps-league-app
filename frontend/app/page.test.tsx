@@ -31,14 +31,12 @@ describe('HomePage', () => {
   it('updates bet amount to total points when ALL IN is clicked', async () => {
     render(<HomePage />)
 
-    // 1. Wait for initial API load (5,000 points to show up)
     await waitFor(() => {
       expect(screen.getByText('5,000')).toBeInTheDocument()
     })
 
     const allInBtn = screen.getByRole('button', { name: /ALL IN/i })
 
-    // 2. Wrap interaction in act to handle the immediate state change
     await act(async () => {
       fireEvent.click(allInBtn)
     })
@@ -58,7 +56,6 @@ describe('HomePage', () => {
   it('toggles Auto All-In mode correctly', async () => {
     render(<HomePage />)
 
-    // Wait for load to avoid act warnings on mount
     await waitFor(() => expect(screen.getByText('5,000')).toBeInTheDocument())
 
     const autoBtn = screen.getByRole('button', { name: /AUTO OFF/i })
@@ -73,7 +70,6 @@ describe('HomePage', () => {
   it('handles the UI state after ALL IN', async () => {
     render(<HomePage />)
 
-    // Wait for the mock data to populate
     await waitFor(() => expect(screen.getByText('5,000')).toBeInTheDocument())
 
     const allInBtn = screen.getByRole('button', { name: /ALL IN/i })
@@ -83,7 +79,6 @@ describe('HomePage', () => {
     })
 
     const input = screen.getByRole('spinbutton') as HTMLInputElement
-    // Now this will be 5000 because we waited for the initial fetch to set 'points'
     expect(input.value).toBe('5000')
   })
 })

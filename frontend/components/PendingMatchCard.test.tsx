@@ -18,7 +18,6 @@ describe('PendingMatchCard', () => {
 
   beforeEach(() => {
     vi.useFakeTimers()
-    // Set a fixed system time so the countdown is consistent
     vi.setSystemTime(new Date(2026, 3, 2, 5, 0, 0))
   })
 
@@ -52,7 +51,6 @@ describe('PendingMatchCard', () => {
       />
     )
 
-    // Your buttons literally say "Bet". Alice is usually the first one (index 0)
     const betButtons = screen.getAllByRole('button', { name: /Bet/i })
 
     fireEvent.click(betButtons[0])
@@ -75,17 +73,14 @@ describe('PendingMatchCard', () => {
       />
     )
 
-    // According to your debug log, the buttons disappear when a bet is placed
     expect(
       screen.queryByRole('button', { name: /Bet/i })
     ).not.toBeInTheDocument()
 
-    // And "Bet placed" appears
     expect(screen.getByText(/Bet placed/i)).toBeInTheDocument()
   })
 
   it('counts down correctly as time expires', () => {
-    // We need to re-calculate the mock with the current fake time
     const startTime = Date.now()
     const expiresAt = startTime + 10000
 
@@ -98,15 +93,12 @@ describe('PendingMatchCard', () => {
       />
     )
 
-    // Check initial state (10s left)
     expect(screen.getByText(/10s left/i)).toBeInTheDocument()
 
-    // Advance time by 5 seconds
     act(() => {
       vi.advanceTimersByTime(5000)
     })
 
-    // Should now show 5s left
     expect(screen.getByText(/5s left/i)).toBeInTheDocument()
   })
 })

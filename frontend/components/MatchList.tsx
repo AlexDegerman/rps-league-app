@@ -82,9 +82,10 @@ const MatchRow = ({
           )}
           {prediction?.pick === left.name && prediction.result && (
             <span
-              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${
-                prediction.result === 'WIN' ? 'bg-green-500' : 'bg-red-500'
-              }`}
+              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white
+                inline-flex items-center justify-center
+                whitespace-nowrap w-fit leading-none
+                ${prediction.result === 'WIN' ? 'bg-green-500' : 'bg-red-500'}`}
             >
               {prediction.result === 'WIN' ? 'You won!' : 'You lost'}
             </span>
@@ -120,9 +121,10 @@ const MatchRow = ({
           )}
           {prediction?.pick === right.name && prediction.result && (
             <span
-              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${
-                prediction.result === 'WIN' ? 'bg-green-500' : 'bg-red-500'
-              }`}
+              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white
+                inline-flex items-center justify-center
+                whitespace-nowrap w-fit leading-none
+                ${prediction.result === 'WIN' ? 'bg-green-500' : 'bg-red-500'}`}
             >
               {prediction.result === 'WIN' ? 'You won!' : 'You lost'}
             </span>

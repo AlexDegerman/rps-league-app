@@ -14,23 +14,23 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
     )
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-      <table className="w-full text-sm">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-x-auto">
+      <table className="mx-auto text-sm min-w-150 border-collapse">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
-            <th className="text-left px-4 py-3 text-gray-500 font-medium w-10">
+            <th className="text-left px-4 py-3 text-gray-500 font-medium w-12">
               #
             </th>
-            <th className="text-left px-4 py-3 text-gray-500 font-medium">
+            <th className="text-left px-4 py-3 text-gray-500 font-medium w-auto sm:w-48">
               Player
             </th>
-            <th className="text-center px-4 py-3 text-green-600 font-medium">
+            <th className="text-center px-4 py-3 text-green-600 font-medium w-auto sm:w-20">
               W
             </th>
-            <th className="text-center px-4 py-3 text-red-500 font-medium">
+            <th className="text-center px-4 py-3 text-red-500 font-medium w-auto sm:w-20">
               L
             </th>
-            <th className="text-center px-4 py-3 text-indigo-500 font-medium">
+            <th className="text-center px-4 py-3 text-indigo-500 font-medium w-auto sm:w-24">
               Win%
             </th>
           </tr>
@@ -39,7 +39,9 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
           {stats.map((player, index) => (
             <tr
               key={player.name}
-              className={`border-b border-gray-50 ${index === 0 ? 'bg-yellow-50' : ''}`}
+              className={`border-b border-gray-50 whitespace-nowrap ${
+                index === 0 ? 'bg-yellow-50' : ''
+              }`}
             >
               <td className="px-4 py-3 text-gray-400 font-medium">
                 {index === 0 ? '🏆' : index + 1}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import type { PendingMatch, PredictionRecord } from '@/types/rps'
+import { formatDateTime } from '@/lib/format'
 
 interface PendingMatchCardProps {
   pending: PendingMatch
@@ -18,7 +19,6 @@ export default function PendingMatchCard({
 }: PendingMatchCardProps) {
   const calculateTimeLeft = useCallback(() => {
     if (!pending.expiresAt) return 0
-
     const correctedNow = Date.now() + serverOffset
     const diff = Math.max(
       0,
@@ -35,7 +35,6 @@ export default function PendingMatchCard({
       setTimeLeft(remaining)
       if (remaining <= 0) clearInterval(id)
     }, 200)
-
     return () => clearInterval(id)
   }, [calculateTimeLeft])
 
@@ -44,13 +43,9 @@ export default function PendingMatchCard({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-indigo-200 p-4 mb-3 animate-in fade-in zoom-in duration-300">
       <div className="flex justify-between items-center mb-2 gap-2">
+        {/* 2. Use formatDateTime here to ensure consistency with the MatchList */}
         <span className="text-xs text-gray-400 shrink-0">
-          {new Date(pending.time).toLocaleString('en-GB', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            timeZone: 'UTC'
-          })}
+          {formatDateTime(pending.time)}
         </span>
 
         <span
@@ -67,10 +62,11 @@ export default function PendingMatchCard({
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-col items-start flex-1 gap-1">
+        <div className="flex flex-col items-start gap-1">
           <span className="font-medium text-sm text-gray-800">
             {pending.playerA}
           </span>
+
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerA)}
@@ -80,7 +76,7 @@ export default function PendingMatchCard({
             </button>
           ) : (
             prediction?.pick === pending.playerA && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded text-white bg-indigo-400 uppercase">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded text-white bg-indigo-400 uppercase whitespace-nowrap inline-flex w-fit self-start">
                 Bet placed
               </span>
             )
@@ -99,10 +95,11 @@ export default function PendingMatchCard({
           </span>
         </div>
 
-        <div className="flex flex-col items-end flex-1 gap-1">
+        <div className="flex flex-col items-end gap-1">
           <span className="font-medium text-sm text-gray-800 text-right">
             {pending.playerB}
           </span>
+
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerB)}
@@ -112,7 +109,7 @@ export default function PendingMatchCard({
             </button>
           ) : (
             prediction?.pick === pending.playerB && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded text-white bg-indigo-400 uppercase">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded text-white bg-indigo-400 uppercase whitespace-nowrap inline-flex w-fit self-end">
                 Bet placed
               </span>
             )

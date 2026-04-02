@@ -5,7 +5,6 @@ import * as api from '@/lib/api'
 import * as user from '@/lib/user'
 import { useSearchParams } from 'next/navigation'
 
-// 1. Mock Next.js Navigation
 const mockReplace = vi.fn()
 vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn(() => new URLSearchParams()),
@@ -13,7 +12,6 @@ vi.mock('next/navigation', () => ({
   usePathname: vi.fn(() => '/leaderboard')
 }))
 
-// 2. Mock API functions
 vi.mock('@/lib/api', () => ({
   fetchCurrentPredictorLeaderboard: vi.fn(),
   fetchWeeklyPredictorLeaderboard: vi.fn(),
@@ -34,7 +32,6 @@ describe('LeaderboardPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    // Type-safe casting using 'as Mock'
     ;(user.getUserId as Mock).mockReturnValue('my-id')
     ;(api.fetchCurrentPredictorLeaderboard as Mock).mockResolvedValue(
       mockPredictors
@@ -70,7 +67,6 @@ describe('LeaderboardPage', () => {
   })
 
   it('initializes with All Time view if URL param is present', async () => {
-    // Correctly cast the hook to a Mock to change its return value for this specific test
     ;(useSearchParams as Mock).mockReturnValue(
       new URLSearchParams('ps=alltime')
     )

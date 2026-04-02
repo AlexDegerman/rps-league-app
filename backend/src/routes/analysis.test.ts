@@ -66,7 +66,7 @@ describe('Analysis Route - The Shield', () => {
 
     const res = await request(app)
       .post('/analysis')
-      .set('x-forwarded-for', '2.2.2.2') // Fresh IP
+      .set('x-forwarded-for', '2.2.2.2')
       .send({ query: 'Crash me' })
 
     expect(res.status).toBe(500)
@@ -94,7 +94,6 @@ describe('Analysis Route - The Shield', () => {
 
   it('should enforce rate limits (429) after 5 requests', async () => {
     const testIp = '4.4.4.4'
-    // Send 5 requests
     for (let i = 0; i < 5; i++) {
       await request(app)
         .post('/analysis')
@@ -102,7 +101,6 @@ describe('Analysis Route - The Shield', () => {
         .send({ query: `limit-test-${i}` })
     }
 
-    // The 6th should fail
     const res = await request(app)
       .post('/analysis')
       .set('x-forwarded-for', testIp)

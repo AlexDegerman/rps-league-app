@@ -6,7 +6,6 @@ import pool from '../utils/db.js'
 const router = Router()
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-// --- 1. PRO-TIER UTILITIES: Cache & Rate Limiting ---
 const queryCache = new Map<string, { result: string; timestamp: number }>()
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 
@@ -47,7 +46,6 @@ async function generateWithFallback(query: string, contextString: string) {
   throw new Error('Oracle nodes offline.')
 }
 
-// --- 2. THE ROUTE ---
 router.post('/', async (req: Request, res: Response) => {
   try {
     const ip = (req.headers['x-forwarded-for'] ||
@@ -55,7 +53,6 @@ router.post('/', async (req: Request, res: Response) => {
       'anonymous') as string
     const now = Date.now()
 
-    // A. Rate Limit Check
     const userRate = rateLimitMap.get(ip) || {
       count: 0,
       resetTime: now + 60000
@@ -75,7 +72,6 @@ router.post('/', async (req: Request, res: Response) => {
     userRate.count++
     rateLimitMap.set(ip, userRate)
 
-    // B. Validate & Cache Check
     const { query } = req.body
     if (!query || typeof query !== 'string')
       return res.status(400).json({ error: 'Invalid query' })
@@ -86,7 +82,6 @@ router.post('/', async (req: Request, res: Response) => {
       return res.json({ result: cached.result, cached: true })
     }
 
-    // C. Data Fetching
     const [matchesData, statsRes, topUsersRes] = await Promise.all([
       getLatestMatches(1, 30),
       pool.query(`
@@ -103,7 +98,6 @@ router.post('/', async (req: Request, res: Response) => {
 
     const stats = statsRes.rows[0]
 
-    // D. Context Construction
     const history = (matchesData.matches || []).map((m: any) => ({
       p1: m.player_a_name || m.playerA?.name || 'Unknown',
       p2: m.player_b_name || m.playerB?.name || 'Unknown',
@@ -123,10 +117,8 @@ router.post('/', async (req: Request, res: Response) => {
       active_match_history: history
     })
 
-    // E. AI Execution
     const responseText = await generateWithFallback(query, context)
 
-    // F. Store Cache & Respond
     queryCache.set(normalizedQuery, { result: responseText, timestamp: now })
     res.json({ result: responseText, cached: false })
   } catch (err: any) {

@@ -56,7 +56,11 @@ export default function HomePage() {
   const peakPointsRef = useRef(peakPoints)
   const autoAllInRef = useRef(autoAllIn)
   const predictionsRef = useRef(predictions)
+  const serverOffsetRef = useRef(serverOffset)
 
+  useEffect(() => {
+    serverOffsetRef.current = serverOffset
+  }, [serverOffset])
   useEffect(() => {
     pointsRef.current = points
   }, [points])
@@ -144,18 +148,38 @@ export default function HomePage() {
   useEffect(() => {
     getOrCreateUser()
     const userId = getUserId()
+
     if (!userId) return
     fetch(`${API_BASE}/api/predictions/${userId}/points`)
       .then((res) => res.json())
       .then((data) => {
         const p = Number(data.points)
         setPoints(p)
+        setPeakPoints(Number(data.peak_points))
+
         if (autoAllInRef.current) {
           setBetAmount(p)
         } else {
           setBetAmount(Math.min(100000, p))
         }
       })
+      .catch((err) => console.error('Error fetching points:', err))
+
+    fetch(`${API_BASE}/api/matches/pending`)
+      .then((res) => res.json())
+      .then((data: PendingMatch[]) => {
+        setPendingMatches((prev) => {
+          const existingIds = new Set(prev.map((p) => p.gameId))
+          const freshMatches = data.filter((m) => !existingIds.has(m.gameId))
+
+          if (freshMatches.length > 0) {
+            markReady()
+            return [...freshMatches, ...prev]
+          }
+          return prev
+        })
+      })
+      .catch((err) => console.error('Error fetching pending matches:', err))
   }, [])
 
   useEffect(() => {
@@ -169,20 +193,38 @@ export default function HomePage() {
     const userId = getUserId()
     const nickname = getNickname()
     if (!userId || !nickname || betAmount <= 0) return
+
     setPredictions((prev) =>
       new Map(prev).set(gameId, { gameId, pick: playerName })
     )
-    await fetch(`${API_BASE}/api/predictions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        gameId,
-        pick: playerName,
-        betAmount: betAmountRef.current,
-        nickname
+
+    try {
+      const res = await fetch(`${API_BASE}/api/predictions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          gameId,
+          pick: playerName,
+          betAmount: betAmountRef.current,
+          nickname
+        })
       })
-    })
+
+      if (!res.ok) {
+        setPredictions((prev) => {
+          const next = new Map(prev)
+          next.delete(gameId)
+          return next
+        })
+      }
+    } catch {
+      setPredictions((prev) => {
+        const next = new Map(prev)
+        next.delete(gameId)
+        return next
+      })
+    }
   }
 
   const fetchUpdatedPoints = useCallback(async (): Promise<{
@@ -210,23 +252,33 @@ export default function HomePage() {
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
 
-    // SSE sync event corrects client-server time drift
-    // used by PendingMatchCard to calculate accurate countdown
     es.addEventListener('sync', (event) => {
       const { serverTime } = JSON.parse(event.data)
-      setServerOffset(serverTime - Date.now())
+      const newOffset = serverTime - Date.now()
+      setServerOffset(newOffset)
+      serverOffsetRef.current = newOffset
     })
 
     es.addEventListener('pending', (event) => {
       const pending: PendingMatch = JSON.parse(event.data)
-      setPendingMatches((prev) => [pending, ...prev])
+
+      setPendingMatches((prev) => {
+        if (prev.find((p) => p.gameId === pending.gameId)) return prev
+        return [pending, ...prev]
+      })
+
+      const timeoutMs =
+        pending.expiresAt - (Date.now() + serverOffsetRef.current) + 5000
+      setTimeout(
+        () => {
+          setPendingMatches((prev) =>
+            prev.filter((p) => p.gameId !== pending.gameId)
+          )
+        },
+        Math.max(5000, timeoutMs)
+      )
+
       markReady()
-      // Safety cleanup, remove if result never arrives within 10s
-      setTimeout(() => {
-        setPendingMatches((prev) =>
-          prev.filter((p) => p.gameId !== pending.gameId)
-        )
-      }, 10000)
     })
 
     es.addEventListener('prediction_result', (event) => {
@@ -238,8 +290,6 @@ export default function HomePage() {
         wasAllIn: boolean
       }
 
-      // prediction_result fires for ALL users, skip own since
-      // own result is handled by the 'result' event handler
       if (data.userId === getUserId()) return
 
       const name = data.nickname ?? 'Someone'
@@ -269,9 +319,17 @@ export default function HomePage() {
     es.addEventListener('result', (event) => {
       const match: Match = JSON.parse(event.data)
 
+      setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
+
+      setMatches((prev) => {
+        if (prev.some((m) => m.gameId === match.gameId)) return prev
+        const updated = [match, ...prev]
+        return updated.slice(0, 20)
+      })
+
       const prediction = predictionsRef.current.get(match.gameId)
 
-      if (prediction) {
+      if (prediction && !prediction.result) {
         const aWins =
           (match.playerA.played === 'ROCK' &&
             match.playerB.played === 'SCISSORS') ||
@@ -316,7 +374,9 @@ export default function HomePage() {
           playLoss()
           const pointsBefore = pointsRef.current
 
-          fetchUpdatedPoints().then(({ newPoints }) => {
+          new Promise<{ newPoints: number; isNewPeak: boolean }>((resolve) => {
+            setTimeout(() => resolve(fetchUpdatedPoints()), 100)
+          }).then(({ newPoints }) => {
             const actualLoss = pointsBefore - newPoints
             pushTickerEvent(
               `You lost ${formatPoints(actualLoss)} points.`,
@@ -339,19 +399,15 @@ export default function HomePage() {
 
         setTimeout(() => setResultAnim(null), 2000)
 
-        setPredictions((prev) =>
-          new Map(prev).set(match.gameId, {
+        setPredictions((prev) => {
+          const newMap = new Map(prev)
+          newMap.set(match.gameId, {
             ...prediction,
             result: isWin ? 'WIN' : 'LOSE'
           })
-        )
+          return newMap
+        })
       }
-
-      setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
-
-      setMatches((prev) =>
-        prev.some((m) => m.gameId === match.gameId) ? prev : [match, ...prev]
-      )
     })
 
     return () => es.close()
@@ -491,15 +547,17 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            {pendingMatches.map((pending) => (
-              <PendingMatchCard
-                key={pending.gameId}
-                pending={pending}
-                prediction={predictions.get(pending.gameId) ?? null}
-                onPick={handlePick}
-                serverOffset={serverOffset}
-              />
-            ))}
+            {pendingMatches
+              .filter((pm) => pm.expiresAt - (now + serverOffset) > -5000)
+              .map((pending) => (
+                <PendingMatchCard
+                  key={pending.gameId}
+                  pending={pending}
+                  prediction={predictions.get(pending.gameId) ?? null}
+                  onPick={handlePick}
+                  serverOffset={serverOffset}
+                />
+              ))}
             <MatchList
               matches={matches}
               isLoadingMore={isLoadingMore}
@@ -514,7 +572,7 @@ export default function HomePage() {
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-20 right-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+        className={`fixed bottom-25 right-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
       >
         <svg
           className="w-5 h-5"

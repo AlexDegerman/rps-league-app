@@ -137,7 +137,6 @@ export default function AnalysisPage() {
         </div>
       )}
 
-      {/* REINSTATED HISTORY SECTION */}
       {history.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-4">

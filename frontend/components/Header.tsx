@@ -21,7 +21,6 @@ const Header = () => {
     <header className="w-full bg-white shadow sticky top-0 z-50">
       <div className="max-w-2xl mx-auto px-4 py-3">
         <div className="flex items-center gap-4">
-          {/* Logo */}
           <Link href="/" className="shrink-0" onClick={() => setIsOpen(false)}>
             <Image
               src="/rpslogo.png"
@@ -32,7 +31,6 @@ const Header = () => {
             />
           </Link>
 
-          {/* 1. DESKTOP NAV - Restored to text-xs and 600px threshold */}
           <nav className="hidden min-[550px]:flex gap-2">
             {allNavItems.map(({ label, href }) => (
               <Link
@@ -49,7 +47,6 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* 2. MOBILE NAV - Only shows below 600px */}
           <div className="flex min-[550px]:hidden items-center gap-1.5 flex-1">
             <Link
               href="/"
@@ -81,7 +78,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* MOBILE DROPDOWN */}
         {isOpen && (
           <nav className="min-[600px]:hidden mt-3 py-2 flex flex-col gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
             {[allNavItems[2], allNavItems[3], allNavItems[4]].map(

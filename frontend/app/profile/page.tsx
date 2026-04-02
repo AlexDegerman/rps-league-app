@@ -112,21 +112,24 @@ export default function ProfilePage() {
 
       {/* Identity card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-        <div className="flex items-start justify-between gap-3 mb-6">
-          <div className="min-w-0">
-            <p className="text-[10px] text-gray-400 mb-1 uppercase font-black tracking-widest">
+        <div className="flex flex-col mb-6">
+          <div className="flex items-center gap-3 mb-2">
+            {' '}
+            {/* Align label and button in one row */}
+            <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
               Current Identity
             </p>
-            <p className="text-2xl font-black text-gray-900 break-all leading-tight">
-              {nickname}
-            </p>
+            <button
+              onClick={handleRegenerate}
+              className="text-[8px] px-2 py-1 bg-gray-900 text-white rounded-md hover:bg-black active:scale-95 transition cursor-pointer font-black uppercase tracking-wider shadow-sm"
+            >
+              Randomize
+            </button>
           </div>
-          <button
-            onClick={handleRegenerate}
-            className="text-[10px] px-3 py-2 bg-gray-900 text-white rounded-lg hover:bg-black active:scale-95 transition cursor-pointer font-black shrink-0 mt-4 uppercase tracking-wider shadow-sm"
-          >
-            Randomize
-          </button>
+
+          <p className="text-[clamp(1.125rem,4vw,1.5rem)] font-black text-gray-900 leading-tight whitespace-nowrap overflow-visible">
+            {nickname}
+          </p>
         </div>
 
         <div className="items-center gap-3 mb-6 bg-purple-50/50 p-4 rounded-xl inline-flex">

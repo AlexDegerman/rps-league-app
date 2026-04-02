@@ -1,52 +1,46 @@
 import { useRef, useState, useEffect } from 'react'
 
-export const useSound = () => {
-  const winAudio = useRef(
-    typeof window !== 'undefined' ? new Audio('/sounds/win.wav') : null
-  )
-  const lossAudio = useRef(
-    typeof window !== 'undefined' ? new Audio('/sounds/loss.wav') : null
-  )
+const winAudioInstance =
+  typeof window !== 'undefined' ? new Audio('/sounds/win.wav') : null
+const lossAudioInstance =
+  typeof window !== 'undefined' ? new Audio('/sounds/loss.wav') : null
 
-  const [soundOn, setSoundOn] = useState(true)
+if (winAudioInstance) winAudioInstance.volume = 0.1
+if (lossAudioInstance) lossAudioInstance.volume = 0.1
+
+export const useSound = () => {
+  const [soundOn, setOn] = useState(true)
   const soundOnRef = useRef(true)
 
-  // Load saved sound setting from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('soundOn')
     if (saved !== null) {
-      const state = saved === 'true'
+      const isEnabled = saved === 'true'
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSoundOn(state)
-      soundOnRef.current = state
+      setOn(isEnabled)
+      soundOnRef.current = isEnabled
     }
   }, [])
 
-  // Save sound setting whenever it changes
   useEffect(() => {
     localStorage.setItem('soundOn', soundOn.toString())
   }, [soundOn])
 
-  // Set volume on mount
-  useEffect(() => {
-    if (winAudio.current) winAudio.current.volume = 0.1
-    if (lossAudio.current) lossAudio.current.volume = 0.1
-  }, [])
-
   const playWin = () => {
-    if (!soundOnRef.current || !winAudio.current) return
-    winAudio.current.currentTime = 0
-    winAudio.current.play().catch(() => {})
+    if (!soundOnRef.current || !winAudioInstance) return
+    winAudioInstance.currentTime = 0
+    winAudioInstance.play().catch(() => {
+    })
   }
 
   const playLoss = () => {
-    if (!soundOnRef.current || !lossAudio.current) return
-    lossAudio.current.currentTime = 0
-    lossAudio.current.play().catch(() => {})
+    if (!soundOnRef.current || !lossAudioInstance) return
+    lossAudioInstance.currentTime = 0
+    lossAudioInstance.play().catch(() => {})
   }
 
   const toggleSound = () => {
-    setSoundOn((prev) => {
+    setOn((prev) => {
       const nextState = !prev
       soundOnRef.current = nextState
       return nextState

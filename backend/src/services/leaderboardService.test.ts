@@ -25,7 +25,6 @@ describe('Leaderboard Service', () => {
 
     const leaderboard = await leaderboardService.getTodayLeaderboard()
 
-    // Both have 1 win. 'Ant' should be #1 due to alphabetical tie-break.
     expect(leaderboard[0]!.name).toBe('Ant')
     expect(leaderboard[1]!.name).toBe('Zebra')
   })

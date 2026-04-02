@@ -22,7 +22,6 @@ const generateMatch = (
 
   const moveA = randomItem(MOVES) as Move
   let moveB = randomItem(MOVES) as Move
-  // Ensure no ties — moves must differ so every match has a winner
   while (moveB === moveA) moveB = randomItem(MOVES) as Move
 
   return {

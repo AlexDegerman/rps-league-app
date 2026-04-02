@@ -37,7 +37,6 @@ export default function LeaderboardPage() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // 1. Initialize state from URL
   const [mainTab, setMainTab] = useState<MainTab>(
     (searchParams.get('m') as MainTab) || 'predictors'
   )
@@ -48,11 +47,9 @@ export default function LeaderboardPage() {
     (searchParams.get('pls') as PlayerSubTab) || 'alltime'
   )
 
-  // 2. Date States for the Inputs
   const [startDate, setStartDate] = useState(searchParams.get('start') || '')
   const [endDate, setEndDate] = useState(searchParams.get('end') || '')
 
-  // 3. Active Filters Ref (Fixes the Linter warning without disabling it)
   const activeFilters = useRef({
     start: searchParams.get('start') || '',
     end: searchParams.get('end') || ''
@@ -139,7 +136,6 @@ export default function LeaderboardPage() {
     }
   }, [])
 
-  // MASTER EFFECT: Re-runs only on Tab changes
   useEffect(() => {
     if (mainTab === 'predictors') {
       if (predictorSubTab === 'current') loadPredictorsCurrent()
@@ -147,7 +143,6 @@ export default function LeaderboardPage() {
       else loadPredictorsAllTime()
     } else {
       if (playerSubTab === 'alltime') {
-        // Use the Ref values here
         loadAllTime(
           activeFilters.current.start || undefined,
           activeFilters.current.end || undefined
@@ -204,8 +199,8 @@ export default function LeaderboardPage() {
     predictors.length === 0 ? (
       <p className="text-center text-gray-400 py-12">No predictors yet</p>
     ) : (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-x-auto">
+        <table className="w-full text-sm min-w-150">
           <thead className="bg-gray-50 border-b border-gray-100">
             <tr>
               <th className="text-left px-4 py-3 text-gray-500 font-medium w-10">
@@ -237,58 +232,46 @@ export default function LeaderboardPage() {
               return (
                 <tr
                   key={entry.user_id}
-                  className={`border-b border-gray-50 ${isMe ? 'bg-purple-50' : ''}`}
+                  className={`border-b border-gray-50 whitespace-nowrap ${isMe ? 'bg-purple-50' : ''}`}
                 >
-                  {/* 1. Rank Column */}
                   <td className="px-4 py-3 font-bold text-gray-400">
                     {index + 1}
                   </td>
 
-                  {/* 2. Nickname Column */}
                   <td className="px-4 py-3 font-medium text-gray-800">
                     <div className="flex items-center gap-2">
-                      {isMe ? (
-                        <>
-                          <span className="text-purple-600 font-bold">
-                            {entry.nickname ?? entry.user_id.slice(0, 8)}
-                          </span>
-                          <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter border border-purple-200">
-                            YOU
-                          </span>
-                        </>
-                      ) : (
-                        <span>
-                          {entry.nickname ?? entry.user_id.slice(0, 8)}
+                      <span className={isMe ? 'text-purple-600 font-bold' : ''}>
+                        {entry.nickname ?? entry.user_id.slice(0, 8)}
+                      </span>
+                      {isMe && (
+                        <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter border border-purple-200 shrink-0">
+                          YOU
                         </span>
                       )}
                     </div>
                   </td>
 
-                  {/* 3. Wins Column */}
                   <td className="px-4 py-3 text-center text-green-600 font-bold">
                     {Number(entry.wins)}
                   </td>
 
-                  {/* 4. Losses Column */}
                   <td className="px-4 py-3 text-center text-red-500">
                     {Number(entry.losses)}
                   </td>
 
-                  {/* 5. Current Points Column */}
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <GemIcon size={16} />
+                      <GemIcon size={14} />
                       <span className="font-bold text-purple-600">
                         {formatPoints(entry.points)}
                       </span>
                     </div>
                   </td>
 
-                  {/* 6. Optional (Gained/Peak) Column */}
                   {pointsKey && (
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <GemIcon size={16} />
+                        <GemIcon size={14} />
                         <span className="font-bold text-purple-600">
                           {formatPoints(Number(entry[pointsKey] ?? 0))}
                         </span>

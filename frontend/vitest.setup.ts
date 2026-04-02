@@ -17,7 +17,6 @@ class MockEventSource {
 
 global.EventSource = MockEventSource as unknown as typeof EventSource
 
-// Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {}
   return {
@@ -33,10 +32,8 @@ const localStorageMock = (() => {
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
 
-// Mock scrollTo (used for your jump button)
 window.scrollTo = vi.fn()
 
-// Mock crypto.randomUUID (used in ticker events)
 Object.defineProperty(global, 'crypto', {
   value: { randomUUID: () => 'test-uuid' }
 })

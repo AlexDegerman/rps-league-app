@@ -20,7 +20,6 @@ export default function SearchPage() {
   const router = useRouter()
   const pathname = usePathname()
 
-  // --- State from URL ---
   const [tab, setTab] = useState<Tab>(
     (searchParams.get('type') as Tab) || 'date'
   )
@@ -34,14 +33,12 @@ export default function SearchPage() {
   const [hasPlayerSearched, setHasPlayerSearched] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Sync Tab to URL
   const handleTabChange = (newTab: Tab) => {
     setTab(newTab)
     const params = new URLSearchParams(searchParams.toString())
     params.set('type', newTab)
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
 
-    // Clean up other tab state
     if (newTab === 'date') {
       resetPlayer()
       setHasPlayerSearched(false)
@@ -73,7 +70,6 @@ export default function SearchPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Infinite Scroll Hooks
   const dateFetchFn = useCallback(
     (page: number) => fetchMatchesByDate(date, page),
     [date]

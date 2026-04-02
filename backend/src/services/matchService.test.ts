@@ -14,7 +14,7 @@ describe('Match Service', () => {
 
     expect(matchService.getWinner(mockMatch('ROCK', 'SCISSORS'))).toBe('A')
     expect(matchService.getWinner(mockMatch('PAPER', 'ROCK'))).toBe('A')
-    expect(matchService.getWinner(mockMatch('ROCK', 'ROCK'))).toBe('B') // Draw case
+    expect(matchService.getWinner(mockMatch('ROCK', 'ROCK'))).toBe('B')
   })
 
   it('should accurately calculate total pages and hasMore flag', async () => {
