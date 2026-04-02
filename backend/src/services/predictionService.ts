@@ -178,3 +178,13 @@ export const getUserStats = async (userId: string) => {
     winRate: total > 0 ? Math.round((wins / total) * 100) : 0
   }
 }
+export const getGlobalBettingStats = async () => {
+  const result = await pool.query(`
+    SELECT 
+      COUNT(*) as total_bets,
+      SUM(bet_amount) as total_volume,
+      COUNT(*) FILTER (WHERE result = 'WIN') as winning_bets
+    FROM predictions
+  `)
+  return result.rows[0]
+}
