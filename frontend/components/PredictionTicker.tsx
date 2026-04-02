@@ -16,18 +16,15 @@ export interface TickerEvent {
 interface PredictionTickerProps {
   events: TickerEvent[]
   speed?: number
+  pauseDemos?: boolean
 }
 
 const demoTemplates = [
   (name: string, amt: string) => `${name} won ${amt} points!`,
-
   (name: string, amt: string) => `${name} lost ${amt} points.`,
-
   (name: string, amt: string) => `${name} went all-in and won ${amt} points!`,
-
   (name: string, amt: string) =>
     `${name} is on a winning streak with ${amt} points!`,
-
   (name: string, amt: string) => `${name} reached a new peak of ${amt} points!`
 ]
 
@@ -40,57 +37,79 @@ const getAmountColor = (amount?: number): string => {
   return 'text-gray-400'
 }
 
-// Added speed prop with a default of 5000ms
 export default function PredictionTicker({
   events,
-  speed = 5000
+  speed = 5000,
+  pauseDemos = false
 }: PredictionTickerProps) {
   const [visible, setVisible] = useState(true)
   const [active, setActive] = useState<
     (TickerEvent & { startDelay: number })[]
   >([])
+  const [dynamicDuration, setDynamicDuration] = useState(speed)
+
   const pendingRef = useRef<TickerEvent[]>([])
   const lastStartRef = useRef<number>(0)
+  const pauseDemosRef = useRef(pauseDemos)
+
+  useEffect(() => {
+    pauseDemosRef.current = pauseDemos
+  }, [pauseDemos])
+
+  useEffect(() => {
+    const updateVelocity = () => {
+      const width = window.innerWidth
+      const v = Math.max(120, Math.min(width / 3, 600))
+      const calculatedDuration = ((width + 200) / v) * 1000
+      setDynamicDuration(calculatedDuration)
+    }
+    updateVelocity()
+    window.addEventListener('resize', updateVelocity)
+    return () => window.removeEventListener('resize', updateVelocity)
+  }, [])
 
   useEffect(() => {
     let demoTimer: ReturnType<typeof setTimeout>
     const scheduleDemoEvent = () => {
       const delay = 2000 + Math.random() * 3000
       demoTimer = setTimeout(() => {
-        const name = generateNickname()
-        const tierRoll = Math.random() * 100
-        let amount = 0
-        if (tierRoll < 60)
-          amount = Math.floor(Math.random() * (10_000 - 2_000 + 1) + 2_000)
-        else if (tierRoll < 80)
-          amount = Math.floor(Math.random() * (100_000 - 10_000 + 1) + 10_000)
-        else if (tierRoll < 90)
-          amount = Math.floor(
-            Math.random() * (1_000_000 - 100_000 + 1) + 100_000
-          )
-        else if (tierRoll < 96)
-          amount = Math.floor(
-            Math.random() * (1_000_000_000 - 1_000_000 + 1) + 1_000_000
-          )
-        else if (tierRoll < 99)
-          amount = Math.floor(
-            Math.random() * (50_000_000_000 - 1_000_000_000 + 1) + 1_000_000_000
-          )
-        else
-          amount = Math.floor(
-            Math.random() * (500_000_000_000 - 50_100_000_000 + 1) +
-              50_100_000_000
-          )
+        if (!pauseDemosRef.current) {
+          const name = generateNickname()
+          const tierRoll = Math.random() * 100
+          let amount = 0
+          if (tierRoll < 60)
+            amount = Math.floor(Math.random() * (10_000 - 2_000 + 1) + 2_000)
+          else if (tierRoll < 80)
+            amount = Math.floor(Math.random() * (100_000 - 10_000 + 1) + 10_000)
+          else if (tierRoll < 90)
+            amount = Math.floor(
+              Math.random() * (1_000_000 - 100_000 + 1) + 100_000
+            )
+          else if (tierRoll < 96)
+            amount = Math.floor(
+              Math.random() * (1_000_000_000 - 1_000_000 + 1) + 1_000_000
+            )
+          else if (tierRoll < 99)
+            amount = Math.floor(
+              Math.random() * (50_000_000_000 - 1_000_000_000 + 1) +
+                1_000_000_000
+            )
+          else
+            amount = Math.floor(
+              Math.random() * (500_000_000_000 - 50_100_000_000 + 1) +
+                50_100_000_000
+            )
 
-        const template =
-          demoTemplates[Math.floor(Math.random() * demoTemplates.length)]
-        pendingRef.current.push({
-          id: crypto.randomUUID(),
-          message: template(name, formatPoints(amount)),
-          isReal: false,
-          timestamp: Date.now(),
-          amount
-        })
+          const template =
+            demoTemplates[Math.floor(Math.random() * demoTemplates.length)]
+          pendingRef.current.push({
+            id: crypto.randomUUID(),
+            message: template(name, formatPoints(amount)),
+            isReal: false,
+            timestamp: Date.now(),
+            amount
+          })
+        }
         scheduleDemoEvent()
       }, delay)
     }
@@ -112,32 +131,23 @@ export default function PredictionTicker({
     const interval = setInterval(() => {
       if (pendingRef.current.length === 0) return
 
-      const next = pendingRef.current.shift()!
       const now = Date.now()
-      const minStart = lastStartRef.current + 300
-      const startDelay = Math.max(0, minStart - now)
-      lastStartRef.current = now + startDelay
+      const minGap = 1500
 
-      if (next.isReal) {
-        pendingRef.current = pendingRef.current.filter((e) => e.isReal)
-        lastStartRef.current = Date.now()
-        setActive((prev) => [...prev, { ...next, startDelay: 0 }])
-        setTimeout(() => {
-          setActive((prev) => prev.filter((e) => e.id !== next.id))
-        }, speed + 500)
-        return
-      }
+      if (now < lastStartRef.current + minGap) return
+
+      const next = pendingRef.current.shift()!
+      lastStartRef.current = now
+
+      setActive((prev) => [...prev, { ...next, startDelay: 0 }])
 
       setTimeout(() => {
-        setActive((prev) => [...prev, { ...next, startDelay: 0 }])
-        setTimeout(() => {
-          setActive((prev) => prev.filter((e) => e.id !== next.id))
-        }, speed + 500)
-      }, startDelay)
-    }, 200)
+        setActive((prev) => prev.filter((e) => e.id !== next.id))
+      }, dynamicDuration + 1000)
+    }, 100)
 
     return () => clearInterval(interval)
-  }, [speed])
+  }, [dynamicDuration])
 
   if (!visible) {
     return (
@@ -172,13 +182,14 @@ export default function PredictionTicker({
                 ? `${getAmountColor(event.amount)} font-bold`
                 : getAmountColor(event.amount)
             }`}
-            style={{ animation: `ticker-slide ${speed}ms linear forwards` }}
+            style={{
+              animation: `ticker-ltr ${dynamicDuration}ms linear forwards`
+            }}
           >
             {event.isReal && (
               <span className="text-red-400 mr-1 shrink-0">●</span>
             )}
 
-            {/* The Regex Splitter: splits on 'points' but keeps punctuation like '!' or '.' */}
             {event.message.split('points').map((part, index, array) => (
               <span key={index} className="flex items-center">
                 {part}

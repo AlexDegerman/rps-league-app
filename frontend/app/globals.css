@@ -18,19 +18,19 @@
   }
 }
 
-@keyframes ticker-slide {
-  0% { 
-    transform: translateX(-100%); 
-    opacity: 0; 
+@keyframes ticker-ltr {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
   }
-  10% { 
-    opacity: 1; 
+  5% {
+    opacity: 1;
   }
-  90% { 
-    opacity: 1; 
+  95% {
+    opacity: 1;
   }
-  100% { 
+  100% {
     transform: translateX(100vw);
-    opacity: 0; 
+    opacity: 0;
   }
 }

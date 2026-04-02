@@ -42,6 +42,12 @@ export default function HomePage() {
   const [isHydrated, setIsHydrated] = useState(false)
   const { playWin, playLoss, soundOn, toggleSound } = useSound()
   const [showJumpButton, setShowJumpButton] = useState(false)
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 500)
+    return () => clearInterval(timer)
+  }, [])
 
   // Refs mirror state values so SSE handlers always read current values
   // without requiring the effect to re-run (which would reconnect SSE)
@@ -135,7 +141,6 @@ export default function HomePage() {
     requestAnimationFrame(animate)
   }, [resultAnim])
 
-  // Fix 3: Initial points fetch respects autoAllIn Ref
   useEffect(() => {
     getOrCreateUser()
     const userId = getUserId()
@@ -216,9 +221,11 @@ export default function HomePage() {
       const pending: PendingMatch = JSON.parse(event.data)
       setPendingMatches((prev) => [pending, ...prev])
       markReady()
-      // Safety cleanup — remove if result never arrives within 10s
+      // Safety cleanup, remove if result never arrives within 10s
       setTimeout(() => {
-        setPendingMatches((prev) => prev.filter((p) => p.gameId !== pending.gameId))
+        setPendingMatches((prev) =>
+          prev.filter((p) => p.gameId !== pending.gameId)
+        )
       }, 10000)
     })
 
@@ -259,96 +266,105 @@ export default function HomePage() {
       }
     })
 
-es.addEventListener('result', (event) => {
-  const match: Match = JSON.parse(event.data)
-  
-  const prediction = predictionsRef.current.get(match.gameId)
+    es.addEventListener('result', (event) => {
+      const match: Match = JSON.parse(event.data)
 
-  if (prediction) {
-    const aWins =
-      (match.playerA.played === 'ROCK' &&
-        match.playerB.played === 'SCISSORS') ||
-      (match.playerA.played === 'SCISSORS' &&
-        match.playerB.played === 'PAPER') ||
-      (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
+      const prediction = predictionsRef.current.get(match.gameId)
 
-    const winner = aWins ? match.playerA.name : match.playerB.name
-    const isWin = winner === prediction.pick
+      if (prediction) {
+        const aWins =
+          (match.playerA.played === 'ROCK' &&
+            match.playerB.played === 'SCISSORS') ||
+          (match.playerA.played === 'SCISSORS' &&
+            match.playerB.played === 'PAPER') ||
+          (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
 
-    if (isWin) {
-      playWin()
-      const amount = betAmountRef.current
+        const winner = aWins ? match.playerA.name : match.playerB.name
+        const isWin = winner === prediction.pick
 
-      fetchUpdatedPoints().then(({ isNewPeak, newPoints }) => {
-        if (isNewPeak) {
-          pushTickerEvent(
-            `You reached a new peak of ${formatPoints(newPoints)} points!`,
-            true,
-            newPoints
-          )
-        } else {
-          pushTickerEvent(
-            `You won ${formatPoints(amount)} points!`,
-            true,
-            amount
-          )
-        }
-      })
+        if (isWin) {
+          playWin()
+          const amount = betAmountRef.current
 
-      setResultAnim({
-        win: true,
-        amount,
-        confetti: Array.from({ length: 100 }).map(() => ({
-          leftOffset: Math.random() * 100 - 50,
-          vx: (Math.random() - 0.5) * 300,
-          vy: -(Math.random() * 200 + 100),
-          delay: Math.random() * 0.2
-        }))
-      })
-    } else {
-      playLoss()
-      const pointsBefore = pointsRef.current
+          fetchUpdatedPoints().then(({ isNewPeak, newPoints }) => {
+            if (isNewPeak) {
+              pushTickerEvent(
+                `You reached a new peak of ${formatPoints(newPoints)} points!`,
+                true,
+                newPoints
+              )
+            } else {
+              pushTickerEvent(
+                `You won ${formatPoints(amount)} points!`,
+                true,
+                amount
+              )
+            }
+          })
 
-      fetchUpdatedPoints().then(({ newPoints }) => {
-        const actualLoss = pointsBefore - newPoints
-        pushTickerEvent(
-          `You lost ${formatPoints(actualLoss)} points.`,
-          true,
-          actualLoss
-        )
-
-        setResultAnim({
-          win: false,
-          amount: actualLoss,
-          confetti: Array.from({ length: 100 }).map(() => ({
+          setResultAnim({
+            win: true,
+            amount,
+            confetti: Array.from({ length: 100 }).map(() => ({
               leftOffset: Math.random() * 100 - 50,
               vx: (Math.random() - 0.5) * 300,
               vy: -(Math.random() * 200 + 100),
               delay: Math.random() * 0.2
             }))
-        })
-      })
-    }
+          })
+        } else {
+          playLoss()
+          const pointsBefore = pointsRef.current
 
-    setTimeout(() => setResultAnim(null), 2000)
+          fetchUpdatedPoints().then(({ newPoints }) => {
+            const actualLoss = pointsBefore - newPoints
+            pushTickerEvent(
+              `You lost ${formatPoints(actualLoss)} points.`,
+              true,
+              actualLoss
+            )
 
-    setPredictions((prev) =>
-      new Map(prev).set(match.gameId, {
-        ...prediction,
-        result: isWin ? 'WIN' : 'LOSE'
-      })
-    )
-  }
+            setResultAnim({
+              win: false,
+              amount: actualLoss,
+              confetti: Array.from({ length: 100 }).map(() => ({
+                leftOffset: Math.random() * 100 - 50,
+                vx: (Math.random() - 0.5) * 300,
+                vy: -(Math.random() * 200 + 100),
+                delay: Math.random() * 0.2
+              }))
+            })
+          })
+        }
 
-  setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
+        setTimeout(() => setResultAnim(null), 2000)
 
-  setMatches((prev) =>
-    prev.some((m) => m.gameId === match.gameId) ? prev : [match, ...prev]
-  )
-})
+        setPredictions((prev) =>
+          new Map(prev).set(match.gameId, {
+            ...prediction,
+            result: isWin ? 'WIN' : 'LOSE'
+          })
+        )
+      }
+
+      setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
+
+      setMatches((prev) =>
+        prev.some((m) => m.gameId === match.gameId) ? prev : [match, ...prev]
+      )
+    })
 
     return () => es.close()
   }, [setMatches, fetchUpdatedPoints, playWin, playLoss])
+
+  const isAnimatingResult = !!resultAnim
+
+  const isBettingClosing = pendingMatches.some((pm) => {
+    const timeLeft = pm.expiresAt - (now + serverOffset)
+    return timeLeft > 0 && timeLeft < 3000
+  })
+
+  const shouldPauseDemos = isAnimatingResult || isBettingClosing
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-24">
@@ -376,7 +392,6 @@ es.addEventListener('result', (event) => {
                   className="absolute rounded-sm pointer-events-none"
                   style={
                     {
-                      // Randomize size between 6px and 12px
                       width: `${i % 3 === 0 ? 8 : 6}px`,
                       height: `${i % 3 === 0 ? 10 : 8}px`,
                       left: `${c.leftOffset}px`,
@@ -389,7 +404,7 @@ es.addEventListener('result', (event) => {
                         '#9333EA',
                         '#E9D5FF',
                         '#FFD700',
-                        '#FCD34D' // Added some Gold/Yellow for "Big Win" feel
+                        '#FCD34D'
                       ][i % 8],
                       animation: `confetti-burst 1.2s ease-out ${c.delay}s forwards`,
                       '--vx': `${c.vx}px`,
@@ -495,7 +510,7 @@ es.addEventListener('result', (event) => {
         )}
       </div>
 
-      <PredictionTicker events={tickerEvents} speed={3000} />
+      <PredictionTicker events={tickerEvents} pauseDemos={shouldPauseDemos} />
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
