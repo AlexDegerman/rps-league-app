@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+export const dynamic = 'force-dynamic'
+
+import { useState, useCallback, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import {
   fetchMatchesByDate,
@@ -15,7 +17,7 @@ const FIRST_MATCH_DATE = '2026-02-16'
 
 type Tab = 'date' | 'player'
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -246,5 +248,17 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-center text-gray-400 py-12">Loading search...</p>
+      }
+    >
+      <SearchContent />
+    </Suspense>
   )
 }
