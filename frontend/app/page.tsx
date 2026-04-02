@@ -46,6 +46,11 @@ export default function HomePage() {
   const [now, setNow] = useState(() => Date.now())
   const [inputString, setInputString] = useState(betAmount.toString())
 
+  // Track server and internet connection status
+  const lastPacketRef = useRef(Date.now())
+  const isOffline = typeof window !== 'undefined' && !navigator.onLine
+  const isStreamStale = now - lastPacketRef.current > 10000
+  const showConnectionWarning = backendReady && (isOffline || isStreamStale)
 
   useEffect(() => {
     setInputString(betAmount.toString())
@@ -266,7 +271,7 @@ export default function HomePage() {
 
     es.addEventListener('pending', (event) => {
       const pending: PendingMatch = JSON.parse(event.data)
-
+      lastPacketRef.current = Date.now()
       setPendingMatches((prev) => {
         if (prev.find((p) => p.gameId === pending.gameId)) return prev
         return [pending, ...prev]
@@ -323,6 +328,7 @@ export default function HomePage() {
 
     es.addEventListener('result', (event) => {
       const match: Match = JSON.parse(event.data)
+      lastPacketRef.current = Date.now()
 
       setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
 
@@ -573,6 +579,16 @@ export default function HomePage() {
           </div>
         ) : (
           <>
+            {showConnectionWarning && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                <p className="text-xs font-bold text-red-900 uppercase tracking-wide">
+                  {isOffline
+                    ? 'No Internet Connection. Check your WiFi...'
+                    : 'Server having issues. Next match to bet on appearing soon...'}
+                </p>
+              </div>
+            )}
             {pendingMatches
               .filter((pm) => pm.expiresAt - (now + serverOffset) > -5000)
               .map((pending) => (
