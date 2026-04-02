@@ -231,24 +231,28 @@ export default function LeaderboardPage() {
             </tr>
           </thead>
           <tbody>
-            {predictors.map((entry, index) => {
+            {predictors.map((entry) => {
               const isMe = entry.user_id === myUserId
+
               return (
-                <tr
-                  key={entry.user_id}
-                  className={`border-b border-gray-50 ${index === 0 ? 'bg-yellow-50' : ''} ${isMe ? 'bg-purple-50' : ''}`}
-                >
-                  <td className="px-4 py-3 text-gray-400 font-medium">
-                    {index === 0 ? '🏆' : index + 1}
-                  </td>
+                <tr key={entry.user_id} className="...">
                   <td className="px-4 py-3 font-medium text-gray-800">
-                    {isMe ? (
-                      <span className="text-purple-600 font-bold">
-                        {entry.nickname ?? entry.user_id.slice(0, 8)}
-                      </span>
-                    ) : (
-                      <span>{entry.nickname ?? entry.user_id.slice(0, 8)}</span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {isMe ? (
+                        <>
+                          <span className="text-purple-600 font-bold">
+                            {entry.nickname ?? entry.user_id.slice(0, 8)}
+                          </span>
+                          <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter border border-purple-200">
+                            YOU
+                          </span>
+                        </>
+                      ) : (
+                        <span>
+                          {entry.nickname ?? entry.user_id.slice(0, 8)}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-center text-green-600 font-bold">
                     {Number(entry.wins)}
