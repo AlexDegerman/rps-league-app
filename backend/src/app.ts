@@ -12,6 +12,10 @@ const app = express()
 // Global CORS handler
 const allowedOrigin = process.env.CORS_ORIGIN || '*'
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK')
+})
+
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
   res.setHeader(
