@@ -127,7 +127,7 @@ export default function SearchPage() {
         <p className="text-gray-500">Find matches by date or player</p>
       </div>
 
-      <div className="sticky top-18.75 z-40 bg-gray-100 pb-4">
+      <div className="sticky top-16 z-40 bg-gray-100 pb-4">
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => handleTabChange('date')}
