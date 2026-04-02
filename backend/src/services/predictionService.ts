@@ -43,7 +43,7 @@ const wordList = [
   'otter'
 ]
 
-const generateRecoveryCode = (): string => {
+export const generateRecoveryCode = (): string => {
   const rand = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)]!
   const num = Math.floor(Math.random() * 9000 + 1000)
   return `${rand(wordList)}-${rand(wordList)}-${num}`
