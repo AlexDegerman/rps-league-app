@@ -5,7 +5,7 @@ A full-stack web application for exploring Rock Paper Scissors League match resu
 **Live demo:** https://rps-league-eight.vercel.app  
 > Match data is frozen as of the last cached snapshot (March 2026) - the Reaktor API this project depended on is no longer in service. A self-contained version with a mock match generator is in development.
 
-![RPS League Demo](./assets/rpsdemo.gif)
+![RPS League Demo](./assets/rps.gif)
 ---
 
 ## Overview

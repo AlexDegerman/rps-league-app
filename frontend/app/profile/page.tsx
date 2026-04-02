@@ -108,7 +108,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-20">
       <h1 className="text-3xl font-bold text-gray-900 mb-1">Profile</h1>
-      <p className="text-gray-500 mb-6">Your identity and prediction history</p>
+      <p className="text-gray-500 mb-6">Your identity</p>
 
       {/* Identity card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">

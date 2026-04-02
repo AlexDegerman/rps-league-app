@@ -43,7 +43,6 @@ export default function PendingMatchCard({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-indigo-200 p-4 mb-3 animate-in fade-in zoom-in duration-300">
       <div className="flex justify-between items-center mb-2 gap-2">
-        {/* 2. Use formatDateTime here to ensure consistency with the MatchList */}
         <span className="text-xs text-gray-400 shrink-0">
           {formatDateTime(pending.time)}
         </span>

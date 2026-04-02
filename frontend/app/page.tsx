@@ -11,9 +11,10 @@ import PredictionTicker, {
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, getUserId, getNickname } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
-import { formatPoints } from '@/lib/format'
+import { formatPoints, parseShorthand } from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
+
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -43,6 +44,12 @@ export default function HomePage() {
   const { playWin, playLoss, soundOn, toggleSound } = useSound()
   const [showJumpButton, setShowJumpButton] = useState(false)
   const [now, setNow] = useState(() => Date.now())
+  const [inputString, setInputString] = useState(betAmount.toString())
+
+
+  useEffect(() => {
+    setInputString(betAmount.toString())
+  }, [betAmount])
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 500)
@@ -483,6 +490,7 @@ export default function HomePage() {
           </div>
           <button
             onClick={toggleSound}
+            title="Toggle sound effects"
             className="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
           >
             <SoundIcon muted={!soundOn} />
@@ -496,15 +504,29 @@ export default function HomePage() {
             </label>
             <div className="relative flex-1">
               <input
-                type="number"
-                min={100000}
-                max={points}
-                value={betAmount}
-                onChange={(e) =>
-                  setBetAmount(
-                    Math.max(100000, Math.min(Number(e.target.value), points))
+                type="text"
+                value={inputString}
+                title="Supports shorthand like 400k, 1.5m, or 2b"
+                onChange={(e) => {
+                  const val = e.target.value
+                  setInputString(val) // Let them type freely (zeros, letters, etc.)
+
+                  const parsed = parseShorthand(val)
+                  if (parsed > 0) {
+                    // Update the actual bet logic immediately so the label (4M) updates
+                    setBetAmount(Math.min(parsed, points))
+                  }
+                }}
+                onBlur={() => {
+                  // The Safety Snap: Enforce the 100k floor when they click away
+                  const final = Math.max(
+                    100000,
+                    Math.min(parseShorthand(inputString), points)
                   )
-                }
+                  setBetAmount(final)
+                  setInputString(final.toString())
+                }}
+                placeholder="e.g. 500k or 2m"
                 className="w-full border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400">

@@ -50,3 +50,18 @@ export const formatPoints = (n: number): string => {
   }
   return n.toLocaleString('en-US')
 }
+
+// Converts shorthand strings (400k, 1.5m, 2b) into raw integers.
+export const parseShorthand = (val: string): number => {
+  const clean = val.toLowerCase().replace(/,/g, '').trim();
+  if (!clean) return 0;
+
+  const num = parseFloat(clean);
+  if (isNaN(num)) return 0;
+
+  if (clean.endsWith('k')) return Math.floor(num * 1_000);
+  if (clean.endsWith('m')) return Math.floor(num * 1_000_000);
+  if (clean.endsWith('b')) return Math.floor(num * 1_000_000_000);
+
+  return Math.floor(num);
+};
