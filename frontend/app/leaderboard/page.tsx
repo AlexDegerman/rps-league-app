@@ -1,5 +1,5 @@
 'use client'
-
+export const dynamic = 'force-dynamic'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import {
@@ -301,7 +301,7 @@ export default function LeaderboardPage() {
         </p>
       </div>
 
-      <div className="sticky top-18.75 z-40 bg-gray-100 pb-4">
+      <div className="sticky top-16 z-40 bg-gray-100 pb-4">
         <div className="flex items-center gap-2 mb-3">
           <button
             onClick={() => handleMainTabChange('predictors')}
