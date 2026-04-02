@@ -11,26 +11,29 @@ type SSEClient = (event: string, data: string) => void
 const clients = new Set<SSEClient>()
 let generatorStarted = false
 
-// Handle CORS preflight
+// Handle SSE preflight
 router.options('/', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*')
-  res.setHeader('Access-Control-Allow-Credentials', 'true')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-  res.sendStatus(204) // No Content
+  const origin = process.env.CORS_ORIGIN || '*'
+  res.setHeader('Access-Control-Allow-Origin', origin)
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+  res.setHeader('Access-Control-Allow-Credentials', 'false')
+  res.sendStatus(204)
 })
 
 router.get('/', (req, res) => {
+  const origin = process.env.CORS_ORIGIN || '*'
+
   // SSE headers
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
   res.setHeader('Connection', 'keep-alive')
 
   // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*')
-  res.setHeader('Access-Control-Allow-Credentials', 'true')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res.setHeader('Access-Control-Allow-Origin', origin)
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+  res.setHeader('Access-Control-Allow-Credentials', 'false')
 
   res.flushHeaders()
 
@@ -38,7 +41,6 @@ router.get('/', (req, res) => {
     res.write(`event: ${event}\ndata: ${data}\n\n`)
 
   send('sync', JSON.stringify({ serverTime: Date.now() }))
-
   clients.add(send)
 
   if (!generatorStarted) {
@@ -62,6 +64,7 @@ router.get('/', (req, res) => {
         await resolvePrediction(match.gameId, winner, (event, data) => {
           clients.forEach((client) => client(event, data))
         })
+
         clients.forEach((client) => client('result', JSON.stringify(match)))
       }
     )
