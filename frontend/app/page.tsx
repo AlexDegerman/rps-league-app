@@ -521,7 +521,12 @@ export default function HomePage() {
             </button>
             <button
               onClick={() => setAutoAllIn((prev) => !prev)}
-              className={`flex-1 sm:flex-none px-3 py-2.5 text-[10px] font-bold rounded-lg border transition-all ${autoAllIn ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
+              title="Enable Auto All-In"
+              className={`flex-1 sm:flex-none px-3 py-2.5 text-[10px] font-bold rounded-lg border transition-all ${
+                autoAllIn
+                  ? 'bg-green-600 text-white border-green-700'
+                  : 'bg-gray-50 text-gray-500 border-gray-200'
+              }`}
             >
               AUTO {autoAllIn ? 'ON' : 'OFF'}
             </button>
