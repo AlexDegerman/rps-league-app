@@ -1,6 +1,8 @@
 'use client'
+
 export const dynamic = 'force-dynamic'
-import { useState, useEffect, useCallback, useRef } from 'react'
+
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import {
   fetchHistoricalLeaderboard,
@@ -32,7 +34,7 @@ interface PredictorEntry {
   nickname: string
 }
 
-export default function LeaderboardPage() {
+function LeaderboardContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -178,7 +180,6 @@ export default function LeaderboardPage() {
   }
 
   const handleFilter = () => {
-    // Sync UI state to the Ref before triggering load
     activeFilters.current = { start: startDate, end: endDate }
     updateUrl({ start: startDate || null, end: endDate || null })
     loadAllTime(startDate || undefined, endDate || undefined)
@@ -228,7 +229,6 @@ export default function LeaderboardPage() {
           <tbody>
             {predictors.map((entry, index) => {
               const isMe = entry.user_id === myUserId
-
               return (
                 <tr
                   key={entry.user_id}
@@ -237,7 +237,6 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-3 font-bold text-gray-400">
                     {index + 1}
                   </td>
-
                   <td className="px-4 py-3 font-medium text-gray-800">
                     <div className="flex items-center gap-2">
                       <span className={isMe ? 'text-purple-600 font-bold' : ''}>
@@ -250,15 +249,12 @@ export default function LeaderboardPage() {
                       )}
                     </div>
                   </td>
-
                   <td className="px-4 py-3 text-center text-green-600 font-bold">
                     {Number(entry.wins)}
                   </td>
-
                   <td className="px-4 py-3 text-center text-red-500">
                     {Number(entry.losses)}
                   </td>
-
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <GemIcon size={14} />
@@ -267,7 +263,6 @@ export default function LeaderboardPage() {
                       </span>
                     </div>
                   </td>
-
                   {pointsKey && (
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
@@ -416,5 +411,19 @@ export default function LeaderboardPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function LeaderboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="max-w-2xl mx-auto px-4 py-12 text-center text-gray-400">
+          Loading...
+        </div>
+      }
+    >
+      <LeaderboardContent />
+    </Suspense>
   )
 }
