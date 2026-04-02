@@ -11,29 +11,12 @@ type SSEClient = (event: string, data: string) => void
 const clients = new Set<SSEClient>()
 let generatorStarted = false
 
-// Handle SSE preflight
-router.options('/', (req, res) => {
-  const origin = process.env.CORS_ORIGIN || '*'
-  res.setHeader('Access-Control-Allow-Origin', origin)
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-  res.setHeader('Access-Control-Allow-Credentials', 'false')
-  res.sendStatus(204)
-})
-
 router.get('/', (req, res) => {
-  const origin = process.env.CORS_ORIGIN || '*'
-
-  // SSE headers
   res.setHeader('Content-Type', 'text/event-stream')
-  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
   res.setHeader('Connection', 'keep-alive')
 
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', origin)
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-  res.setHeader('Access-Control-Allow-Credentials', 'false')
+  res.setHeader('X-Accel-Buffering', 'no')
 
   res.flushHeaders()
 

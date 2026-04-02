@@ -80,7 +80,6 @@ export default function HomePage() {
   useEffect(() => {
     const saved = localStorage.getItem('autoAllIn')
     if (saved !== null) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAutoAllIn(saved === 'true')
     }
     setIsHydrated(true)
@@ -94,7 +93,6 @@ export default function HomePage() {
 
   useEffect(() => {
     if (isHydrated && autoAllIn) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBetAmount(points)
     }
   }, [autoAllIn, points, isHydrated])
@@ -411,7 +409,8 @@ export default function HomePage() {
     })
 
     return () => es.close()
-  }, [setMatches, fetchUpdatedPoints, playWin, playLoss])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const isAnimatingResult = !!resultAnim
 
