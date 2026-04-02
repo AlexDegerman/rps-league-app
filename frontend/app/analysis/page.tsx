@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react'
 
-// 1. Centralize the API Base
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
-// 2. Proper Type for History
 interface HistoryItem {
   id: number
   query: string
@@ -42,7 +40,6 @@ export default function AnalysisPage() {
     setError(null)
 
     try {
-      // Use the API_BASE here
       const res = await fetch(`${API_BASE}/api/analysis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,25 +51,29 @@ export default function AnalysisPage() {
 
       setCurrentResult(data.result)
 
-      if (!overrideQuery) {
-        const newHistory: HistoryItem[] = [
-          {
-            id: Date.now(),
-            query: activeQuery,
-            result: data.result,
-            timestamp: Date.now()
-          },
-          ...history
-        ].slice(0, 5)
-        setHistory(newHistory)
-        localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
-        setQuery('')
-      }
+      const newHistory: HistoryItem[] = [
+        {
+          id: Date.now(),
+          query: activeQuery,
+          result: data.result,
+          timestamp: Date.now()
+        },
+        ...history
+      ].slice(0, 5)
+
+      setHistory(newHistory)
+      localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
+      if (!overrideQuery) setQuery('')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred')
     } finally {
       setLoading(false)
     }
+  }
+
+  const clearHistory = () => {
+    setHistory([])
+    localStorage.removeItem('aiQueryHistory')
   }
 
   return (
@@ -116,7 +117,6 @@ export default function AnalysisPage() {
         </button>
       </form>
 
-      {/* Error state is now being read here */}
       {error && (
         <div className="p-4 mb-6 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium animate-pulse">
           ⚠️ {error}
@@ -137,7 +137,39 @@ export default function AnalysisPage() {
         </div>
       )}
 
-      {/* History rendering code... */}
+      {/* REINSTATED HISTORY SECTION */}
+      {history.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-4">
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">
+              Recent Prophecies
+            </h2>
+            <button
+              onClick={clearHistory}
+              className="text-[10px] text-gray-400 hover:text-red-500 transition-colors uppercase font-bold"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div className="grid gap-3">
+            {history.map((item) => (
+              <div
+                key={item.id}
+                className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors cursor-pointer group"
+                onClick={() => setCurrentResult(item.result)}
+              >
+                <p className="text-xs font-bold text-gray-400 mb-1">
+                  Q: {item.query}
+                </p>
+                <p className="text-sm text-gray-600 line-clamp-1 group-hover:text-gray-900">
+                  {item.result}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

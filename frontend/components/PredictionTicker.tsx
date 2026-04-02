@@ -111,25 +111,30 @@ export default function PredictionTicker({
   useEffect(() => {
     const interval = setInterval(() => {
       if (pendingRef.current.length === 0) return
+
       const next = pendingRef.current.shift()!
       const now = Date.now()
-      const minStart = lastStartRef.current + 1500
+      const minStart = lastStartRef.current + 300
       const startDelay = Math.max(0, minStart - now)
       lastStartRef.current = now + startDelay
 
       if (next.isReal) {
-        // Clear active and pending demo events
         pendingRef.current = pendingRef.current.filter((e) => e.isReal)
-        setActive((prev) => prev.filter((e) => e.isReal))
+        lastStartRef.current = Date.now()
+        setActive((prev) => [...prev, { ...next, startDelay: 0 }])
+        setTimeout(() => {
+          setActive((prev) => prev.filter((e) => e.id !== next.id))
+        }, speed + 500)
+        return
       }
 
       setTimeout(() => {
         setActive((prev) => [...prev, { ...next, startDelay: 0 }])
         setTimeout(() => {
           setActive((prev) => prev.filter((e) => e.id !== next.id))
-        }, 5500)
+        }, speed + 500)
       }, startDelay)
-    }, 300)
+    }, 200)
 
     return () => clearInterval(interval)
   }, [speed])

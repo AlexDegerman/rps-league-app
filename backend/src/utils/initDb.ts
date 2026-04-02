@@ -17,8 +17,8 @@ export const initDb = async (): Promise<void> => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       user_id TEXT PRIMARY KEY,
-      points BIGINT NOT NULL DEFAULT 1000,
-      peak_points BIGINT NOT NULL DEFAULT 1000,
+      points BIGINT NOT NULL DEFAULT 100000,
+      peak_points BIGINT NOT NULL DEFAULT 100000,
       nickname TEXT,
       recovery_code TEXT UNIQUE
     )
@@ -30,7 +30,7 @@ export const initDb = async (): Promise<void> => {
       user_id TEXT NOT NULL,
       game_id TEXT NOT NULL,
       pick TEXT NOT NULL,
-      bet_amount INTEGER NOT NULL DEFAULT 0,
+      bet_amount BIGINT NOT NULL DEFAULT 0,
       result TEXT,
       created_at BIGINT NOT NULL,
       UNIQUE(user_id, game_id)

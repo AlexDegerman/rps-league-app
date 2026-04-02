@@ -231,11 +231,20 @@ export default function LeaderboardPage() {
             </tr>
           </thead>
           <tbody>
-            {predictors.map((entry) => {
+            {predictors.map((entry, index) => {
               const isMe = entry.user_id === myUserId
 
               return (
-                <tr key={entry.user_id} className="...">
+                <tr
+                  key={entry.user_id}
+                  className={`border-b border-gray-50 ${isMe ? 'bg-purple-50' : ''}`}
+                >
+                  {/* 1. Rank Column */}
+                  <td className="px-4 py-3 font-bold text-gray-400">
+                    {index + 1}
+                  </td>
+
+                  {/* 2. Nickname Column */}
                   <td className="px-4 py-3 font-medium text-gray-800">
                     <div className="flex items-center gap-2">
                       {isMe ? (
@@ -254,12 +263,18 @@ export default function LeaderboardPage() {
                       )}
                     </div>
                   </td>
+
+                  {/* 3. Wins Column */}
                   <td className="px-4 py-3 text-center text-green-600 font-bold">
                     {Number(entry.wins)}
                   </td>
+
+                  {/* 4. Losses Column */}
                   <td className="px-4 py-3 text-center text-red-500">
                     {Number(entry.losses)}
                   </td>
+
+                  {/* 5. Current Points Column */}
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <GemIcon size={16} />
@@ -268,6 +283,8 @@ export default function LeaderboardPage() {
                       </span>
                     </div>
                   </td>
+
+                  {/* 6. Optional (Gained/Peak) Column */}
                   {pointsKey && (
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">

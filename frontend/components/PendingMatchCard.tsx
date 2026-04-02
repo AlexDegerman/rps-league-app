@@ -7,7 +7,7 @@ interface PendingMatchCardProps {
   pending: PendingMatch
   prediction: PredictionRecord | null
   onPick: (gameId: string, playerName: string) => void
-  serverOffset: number // Received from HomePage SSE
+  serverOffset: number
 }
 
 export default function PendingMatchCard({
@@ -19,7 +19,6 @@ export default function PendingMatchCard({
   const calculateTimeLeft = useCallback(() => {
     if (!pending.expiresAt) return 0
 
-    // ADJUSTED TIME: Compensates for local clock being off
     const correctedNow = Date.now() + serverOffset
     const diff = Math.max(
       0,

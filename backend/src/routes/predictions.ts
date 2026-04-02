@@ -170,8 +170,18 @@ router.get('/recovery/:userId', async (req, res) => {
 // GET /api/predictions/:userId/points
 router.get('/:userId/points', async (req, res) => {
   try {
-    const points = await getUserPoints(req.params.userId)
-    res.json({ points })
+    const result = await pool.query(
+      `SELECT points, peak_points FROM users WHERE user_id = $1`,
+      [req.params.userId]
+    )
+    if (result.rows.length === 0) {
+      const points = await getUserPoints(req.params.userId)
+      return res.json({ points, peak_points: points })
+    }
+    res.json({
+      points: Number(result.rows[0].points),
+      peak_points: Number(result.rows[0].peak_points)
+    })
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch points' })
   }

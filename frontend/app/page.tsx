@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { fetchLatestMatches } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
@@ -9,7 +9,7 @@ import PredictionTicker, {
   type TickerEvent
 } from '@/components/PredictionTicker'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { getOrCreateUser, getUserId } from '@/lib/user'
+import { getOrCreateUser, getUserId, getNickname } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatPoints } from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
@@ -17,6 +17,8 @@ import SoundIcon from '@/components/icons/SoundIcon'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
+// Module-level flag persists across navigation, component state resets
+// but this survives, so cold start message doesn't reappear
 let _backendReady = false
 
 export default function HomePage() {
@@ -25,40 +27,73 @@ export default function HomePage() {
   const [predictions, setPredictions] = useState<Map<string, PredictionRecord>>(
     new Map()
   )
-  const [points, setPoints] = useState<number>(1000)
-  const [betAmount, setBetAmount] = useState<number>(1000)
+  const [points, setPoints] = useState<number>(100000)
+  const [betAmount, setBetAmount] = useState<number>(100000)
   const [tickerEvents, setTickerEvents] = useState<TickerEvent[]>([])
-  const [serverOffset, setServerOffset] = useState<number>(0) // Restored offset state
+  const [serverOffset, setServerOffset] = useState<number>(0)
   const [resultAnim, setResultAnim] = useState<{
     win: boolean
     amount: number
     confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
   } | null>(null)
   const [animatedAmount, setAnimatedAmount] = useState(0)
-  const [peakPoints, setPeakPoints] = useState(1000)
+  const [peakPoints, setPeakPoints] = useState(100000)
   const [autoAllIn, setAutoAllIn] = useState(false)
+  const [isHydrated, setIsHydrated] = useState(false)
   const { playWin, playLoss, soundOn, toggleSound } = useSound()
   const [showJumpButton, setShowJumpButton] = useState(false)
+
+  // Refs mirror state values so SSE handlers always read current values
+  // without requiring the effect to re-run (which would reconnect SSE)
+  const pointsRef = useRef(points)
+  const betAmountRef = useRef(betAmount)
+  const peakPointsRef = useRef(peakPoints)
+  const autoAllInRef = useRef(autoAllIn)
+  const predictionsRef = useRef(predictions)
+
+  useEffect(() => {
+    pointsRef.current = points
+  }, [points])
+  useEffect(() => {
+    betAmountRef.current = betAmount
+  }, [betAmount])
+  useEffect(() => {
+    peakPointsRef.current = peakPoints
+  }, [peakPoints])
+  useEffect(() => {
+    autoAllInRef.current = autoAllIn
+  }, [autoAllIn])
+  useEffect(() => {
+    predictionsRef.current = predictions
+  }, [predictions])
+
+  useEffect(() => {
+    const saved = localStorage.getItem('autoAllIn')
+    if (saved !== null) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAutoAllIn(saved === 'true')
+    }
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (isHydrated) {
+      localStorage.setItem('autoAllIn', autoAllIn.toString())
+    }
+  }, [autoAllIn, isHydrated])
+
+  useEffect(() => {
+    if (isHydrated && autoAllIn) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBetAmount(points)
+    }
+  }, [autoAllIn, points, isHydrated])
 
   useEffect(() => {
     const handleScroll = () => setShowJumpButton(window.scrollY > 400)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
-
-  useEffect(() => {
-    const saved = localStorage.getItem('autoAllIn')
-    if (saved !== null) {
-      const isAuto = saved === 'true'
-      setAutoAllIn(isAuto)
-      if (isAuto) setBetAmount(points)
-    }
-  }, [points])
-
-  useEffect(() => {
-    localStorage.setItem('autoAllIn', autoAllIn.toString())
-    if (autoAllIn) setBetAmount(points)
-  }, [autoAllIn, points])
 
   const markReady = () => {
     _backendReady = true
@@ -83,14 +118,8 @@ export default function HomePage() {
   }
 
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
-  const {
-    matches,
-    setMatches,
-    hasMore,
-    isLoading,
-    isLoadingMore,
-    loadMatches
-  } = useInfiniteScroll({ fetchFn })
+  const { matches, setMatches, hasMore, isLoadingMore, loadMatches } =
+    useInfiniteScroll({ fetchFn })
 
   useEffect(() => {
     if (!resultAnim) return
@@ -106,6 +135,7 @@ export default function HomePage() {
     requestAnimationFrame(animate)
   }, [resultAnim])
 
+  // Fix 3: Initial points fetch respects autoAllIn Ref
   useEffect(() => {
     getOrCreateUser()
     const userId = getUserId()
@@ -113,8 +143,13 @@ export default function HomePage() {
     fetch(`${API_BASE}/api/predictions/${userId}/points`)
       .then((res) => res.json())
       .then((data) => {
-        setPoints(data.points)
-        setBetAmount(Math.min(1000, data.points))
+        const p = Number(data.points)
+        setPoints(p)
+        if (autoAllInRef.current) {
+          setBetAmount(p)
+        } else {
+          setBetAmount(Math.min(100000, p))
+        }
       })
   }, [])
 
@@ -127,38 +162,51 @@ export default function HomePage() {
 
   const handlePick = async (gameId: string, playerName: string) => {
     const userId = getUserId()
-    if (!userId || betAmount <= 0) return
+    const nickname = getNickname()
+    if (!userId || !nickname || betAmount <= 0) return
     setPredictions((prev) =>
       new Map(prev).set(gameId, { gameId, pick: playerName })
     )
     await fetch(`${API_BASE}/api/predictions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, gameId, pick: playerName, betAmount })
+      body: JSON.stringify({
+        userId,
+        gameId,
+        pick: playerName,
+        betAmount: betAmountRef.current,
+        nickname
+      })
     })
   }
 
-  const fetchUpdatedPoints = useCallback(async () => {
+  const fetchUpdatedPoints = useCallback(async (): Promise<{
+    newPoints: number
+    isNewPeak: boolean
+  }> => {
     const userId = getUserId()
-    if (!userId) return
+    if (!userId) return { newPoints: pointsRef.current, isNewPeak: false }
     const res = await fetch(`${API_BASE}/api/predictions/${userId}/points`)
     const data = await res.json()
-    setPeakPoints((prevPeak) => Math.max(prevPeak, data.peak_points))
-    setPoints(data.points)
-    if (data.points > peakPoints) {
-      pushTickerEvent(
-        `You reached a new peak of ${formatPoints(data.points)} points!`,
-        true,
-        data.points
-      )
-    }
-    setBetAmount(autoAllIn ? data.points : Math.min(betAmount, data.points))
-  }, [autoAllIn, peakPoints, betAmount])
+    const newPoints = Number(data.points)
+    const newPeak = Number(data.peak_points)
+    const isNewPeak = newPeak > peakPointsRef.current
+
+    setPeakPoints(newPeak)
+    setPoints(newPoints)
+    setBetAmount(
+      autoAllInRef.current
+        ? newPoints
+        : Math.min(betAmountRef.current, newPoints)
+    )
+    return { newPoints, isNewPeak }
+  }, [])
 
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
 
-    // Restored Sync listener for serverOffset
+    // SSE sync event corrects client-server time drift
+    // used by PendingMatchCard to calculate accurate countdown
     es.addEventListener('sync', (event) => {
       const { serverTime } = JSON.parse(event.data)
       setServerOffset(serverTime - Date.now())
@@ -168,69 +216,139 @@ export default function HomePage() {
       const pending: PendingMatch = JSON.parse(event.data)
       setPendingMatches((prev) => [pending, ...prev])
       markReady()
+      // Safety cleanup — remove if result never arrives within 10s
+      setTimeout(() => {
+        setPendingMatches((prev) => prev.filter((p) => p.gameId !== pending.gameId))
+      }, 10000)
     })
 
-    es.addEventListener('result', (event) => {
-      const match: Match = JSON.parse(event.data)
-      setPredictions((prev) => {
-        const prediction = prev.get(match.gameId)
-        if (!prediction) return prev
-        const aWins =
-          (match.playerA.played === 'ROCK' &&
-            match.playerB.played === 'SCISSORS') ||
-          (match.playerA.played === 'SCISSORS' &&
-            match.playerB.played === 'PAPER') ||
-          (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
-        const winner = aWins ? match.playerA.name : match.playerB.name
-        const isWin = winner === prediction.pick
-        const amount = isWin ? betAmount : Math.floor(betAmount * 0.5)
+    es.addEventListener('prediction_result', (event) => {
+      const data = JSON.parse(event.data) as {
+        userId: string
+        nickname: string
+        result: 'WIN' | 'LOSE'
+        amount: number
+        wasAllIn: boolean
+      }
 
-        if (isWin) {
-          playWin()
+      // prediction_result fires for ALL users, skip own since
+      // own result is handled by the 'result' event handler
+      if (data.userId === getUserId()) return
+
+      const name = data.nickname ?? 'Someone'
+      if (data.result === 'WIN') {
+        if (data.wasAllIn) {
+          pushTickerEvent(
+            `${name} went all-in and won ${formatPoints(data.amount)} points!`,
+            true,
+            data.amount
+          )
+        } else {
+          pushTickerEvent(
+            `${name} won ${formatPoints(data.amount)} points!`,
+            true,
+            data.amount
+          )
+        }
+      } else {
+        pushTickerEvent(
+          `${name} lost ${formatPoints(data.amount)} points.`,
+          true,
+          data.amount
+        )
+      }
+    })
+
+es.addEventListener('result', (event) => {
+  const match: Match = JSON.parse(event.data)
+  
+  const prediction = predictionsRef.current.get(match.gameId)
+
+  if (prediction) {
+    const aWins =
+      (match.playerA.played === 'ROCK' &&
+        match.playerB.played === 'SCISSORS') ||
+      (match.playerA.played === 'SCISSORS' &&
+        match.playerB.played === 'PAPER') ||
+      (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
+
+    const winner = aWins ? match.playerA.name : match.playerB.name
+    const isWin = winner === prediction.pick
+
+    if (isWin) {
+      playWin()
+      const amount = betAmountRef.current
+
+      fetchUpdatedPoints().then(({ isNewPeak, newPoints }) => {
+        if (isNewPeak) {
+          pushTickerEvent(
+            `You reached a new peak of ${formatPoints(newPoints)} points!`,
+            true,
+            newPoints
+          )
+        } else {
           pushTickerEvent(
             `You won ${formatPoints(amount)} points!`,
             true,
             amount
           )
-        } else {
-          playLoss()
-          pushTickerEvent(
-            `You lost ${formatPoints(amount)} points.`,
-            true,
-            amount
-          )
         }
-
-        setResultAnim({
-          win: isWin,
-          amount,
-          confetti: isWin
-            ? Array.from({ length: 40 }).map((_, i) => ({
-                leftOffset:
-                  i < 20 ? -(Math.random() * 40 + 10) : Math.random() * 40 + 10,
-                vx:
-                  i < 20 ? Math.random() * 60 + 20 : -(Math.random() * 60 + 20),
-                vy: -(Math.random() * 100 + 60),
-                delay: Math.random() * 0.15
-              }))
-            : []
-        })
-        setTimeout(() => setResultAnim(null), 2000)
-        return new Map(prev).set(match.gameId, {
-          ...prediction,
-          result: isWin ? 'WIN' : 'LOSE'
-        })
       })
 
-      setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
-      setMatches((prev) =>
-        prev.some((m) => m.gameId === match.gameId) ? prev : [match, ...prev]
-      )
-      fetchUpdatedPoints()
-    })
+      setResultAnim({
+        win: true,
+        amount,
+        confetti: Array.from({ length: 100 }).map(() => ({
+          leftOffset: Math.random() * 100 - 50,
+          vx: (Math.random() - 0.5) * 300,
+          vy: -(Math.random() * 200 + 100),
+          delay: Math.random() * 0.2
+        }))
+      })
+    } else {
+      playLoss()
+      const pointsBefore = pointsRef.current
+
+      fetchUpdatedPoints().then(({ newPoints }) => {
+        const actualLoss = pointsBefore - newPoints
+        pushTickerEvent(
+          `You lost ${formatPoints(actualLoss)} points.`,
+          true,
+          actualLoss
+        )
+
+        setResultAnim({
+          win: false,
+          amount: actualLoss,
+          confetti: Array.from({ length: 100 }).map(() => ({
+              leftOffset: Math.random() * 100 - 50,
+              vx: (Math.random() - 0.5) * 300,
+              vy: -(Math.random() * 200 + 100),
+              delay: Math.random() * 0.2
+            }))
+        })
+      })
+    }
+
+    setTimeout(() => setResultAnim(null), 2000)
+
+    setPredictions((prev) =>
+      new Map(prev).set(match.gameId, {
+        ...prediction,
+        result: isWin ? 'WIN' : 'LOSE'
+      })
+    )
+  }
+
+  setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
+
+  setMatches((prev) =>
+    prev.some((m) => m.gameId === match.gameId) ? prev : [match, ...prev]
+  )
+})
 
     return () => es.close()
-  }, [setMatches, betAmount, points, fetchUpdatedPoints, playWin, playLoss])
+  }, [setMatches, fetchUpdatedPoints, playWin, playLoss])
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-24">
@@ -241,7 +359,6 @@ export default function HomePage() {
         Live results from the RPS League
       </p>
 
-      {/* Result Overlay */}
       {resultAnim && (
         <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center gap-2">
           <span
@@ -256,9 +373,12 @@ export default function HomePage() {
               {resultAnim.confetti?.map((c, i) => (
                 <div
                   key={i}
-                  className="absolute w-2.5 h-2.5 rounded-sm"
+                  className="absolute rounded-sm pointer-events-none"
                   style={
                     {
+                      // Randomize size between 6px and 12px
+                      width: `${i % 3 === 0 ? 8 : 6}px`,
+                      height: `${i % 3 === 0 ? 10 : 8}px`,
                       left: `${c.leftOffset}px`,
                       top: 0,
                       backgroundColor: [
@@ -268,9 +388,10 @@ export default function HomePage() {
                         '#F0ABFC',
                         '#9333EA',
                         '#E9D5FF',
-                        '#6D28D9'
-                      ][i % 7],
-                      animation: `confetti-burst 1s ease-out ${c.delay}s forwards`,
+                        '#FFD700',
+                        '#FCD34D' // Added some Gold/Yellow for "Big Win" feel
+                      ][i % 8],
+                      animation: `confetti-burst 1.2s ease-out ${c.delay}s forwards`,
                       '--vx': `${c.vx}px`,
                       '--vy': `${c.vy}px`
                     } as React.CSSProperties
@@ -282,7 +403,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Betting Card */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-2">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -307,12 +427,12 @@ export default function HomePage() {
             <div className="relative flex-1">
               <input
                 type="number"
-                min={1}
+                min={100000}
                 max={points}
                 value={betAmount}
                 onChange={(e) =>
                   setBetAmount(
-                    Math.max(1, Math.min(Number(e.target.value), points))
+                    Math.max(100000, Math.min(Number(e.target.value), points))
                   )
                 }
                 className="w-full border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all"
@@ -341,7 +461,7 @@ export default function HomePage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-1 px-1">
         <p className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">
-          Points floor: 1,000
+          Points floor: 100,000
         </p>
         <div className="flex gap-3 text-[10px] font-bold">
           <span className="text-green-600">WIN: +100%</span>
@@ -352,7 +472,7 @@ export default function HomePage() {
       <div className="min-h-[60vh]">
         {!backendReady ? (
           <div className="text-center py-20 animate-pulse text-gray-400 text-sm">
-            Connecting to arena stream...
+            Connecting to stream...
           </div>
         ) : (
           <>
@@ -362,7 +482,7 @@ export default function HomePage() {
                 pending={pending}
                 prediction={predictions.get(pending.gameId) ?? null}
                 onPick={handlePick}
-                serverOffset={serverOffset} // Fixed: Passing serverOffset prop
+                serverOffset={serverOffset}
               />
             ))}
             <MatchList
@@ -375,7 +495,7 @@ export default function HomePage() {
         )}
       </div>
 
-      <PredictionTicker events={tickerEvents} />
+      <PredictionTicker events={tickerEvents} speed={3000} />
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

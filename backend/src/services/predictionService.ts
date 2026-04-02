@@ -48,7 +48,7 @@ export const generateRecoveryCode = (): string => {
   const num = Math.floor(Math.random() * 9000 + 1000)
   return `${rand(wordList)}-${rand(wordList)}-${num}`
 }
-const POINTS_FLOOR = 1000
+const POINTS_FLOOR = 100000
 
 const getOrCreateUser = async (userId: string): Promise<number> => {
   const existing = await pool.query(
