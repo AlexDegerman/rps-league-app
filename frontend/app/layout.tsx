@@ -7,7 +7,23 @@ import PredictionTicker from '@/components/PredictionTicker'
 export const metadata: Metadata = {
   title: 'RPS League',
   description:
-    'Track and explore Rock Paper Scissors match results and leaderboards.',
+    'Experience high-frequency, real-time Rock Paper Scissors betting with virtual points, live global leaderboards, and AI-driven match analytics.',
+  openGraph: {
+    title: 'RPS League',
+    description:
+      'Experience high-frequency, real-time Rock Paper Scissors betting with virtual points, live global leaderboards, and AI-driven match analytics.',
+    url: 'https://rpsleaguegame.vercel.app',
+    siteName: 'RPS League',
+    images: [
+      {
+        url: 'https://rpsleaguegame.vercel.app/rpsimage.png',
+        height: 630,
+        alt: 'RPS League Virtual Betting Platform'
+      }
+    ],
+    locale: 'en_US',
+    type: 'website'
+  },
   icons: {
     icon: '/rpslogo.png'
   }
