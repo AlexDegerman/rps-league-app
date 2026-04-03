@@ -315,6 +315,8 @@ export default function HomePage() {
     })
 
     return () => es.close()
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

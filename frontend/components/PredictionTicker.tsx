@@ -54,10 +54,10 @@ export default function PredictionTicker() {
     []
   )
   const [velocity, setVelocity] = useState(220)
-
+  const lastEventRef = useRef<TickerEvent | null>(null)
   const pendingRef = useRef<TickerEvent[]>([])
   const lastStartTimeRef = useRef<number>(0)
-  const cleanupTimeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set())
+  const cleanupTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set())
 
   // 1. SSE Connection
   useEffect(() => {
@@ -145,24 +145,27 @@ export default function PredictionTicker() {
     return () => clearTimeout(demoTimer)
   }, [visible])
 
-  // 4. Processor (With Visibility Guard to prevent stacking text)
+  // 4. The Processor
   useEffect(() => {
+    const currentTimeouts = cleanupTimeoutsRef.current
+
     const handleVisibility = () => {
       if (document.hidden) {
-        pendingRef.current = [] // Wipe queue on alt-tab
-        setActive([]) // Clear screen to reset
+        pendingRef.current = []
+        setActive([])
+        lastEventRef.current = null
       }
     }
 
     document.addEventListener('visibilitychange', handleVisibility)
 
     const interval = setInterval(() => {
-      // Don't process if hidden or queue empty
       if (pendingRef.current.length === 0 || !visible || document.hidden) return
 
       const now = Date.now()
       const isMobile = window.innerWidth < 640
-      const lastEvent = active[active.length - 1]
+
+      const lastEvent = lastEventRef.current
       let minDelay = 650
 
       if (lastEvent) {
@@ -185,28 +188,35 @@ export default function PredictionTicker() {
         next = pendingRef.current.shift()!
       }
 
+      lastEventRef.current = next
+
       const estimatedWidth = next.message.length * 8 + 50
       const screenWidth = window.innerWidth
       const totalDistance = screenWidth + estimatedWidth
       const eventDuration = (totalDistance / velocity) * 1000
 
       lastStartTimeRef.current = now
+
       setActive((prev) => [...prev, { ...next, duration: eventDuration }])
 
-      const removalTimeout = setTimeout(() => {
+      const removalId = setTimeout(() => {
         setActive((prev) => prev.filter((e) => e.id !== next.id))
-        cleanupTimeoutsRef.current.delete(removalTimeout)
+        currentTimeouts.delete(removalId)
       }, eventDuration + 500)
 
-      cleanupTimeoutsRef.current.add(removalTimeout)
+      currentTimeouts.add(removalId)
     }, 50)
 
     return () => {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibility)
-      cleanupTimeoutsRef.current.forEach(clearTimeout)
+
+      currentTimeouts.forEach((timeoutId) => {
+        clearTimeout(timeoutId)
+      })
+      currentTimeouts.clear()
     }
-  }, [velocity, visible, active])
+  }, [velocity, visible])
 
   if (!visible) {
     return (
