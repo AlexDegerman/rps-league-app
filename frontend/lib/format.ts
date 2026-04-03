@@ -64,4 +64,16 @@ export const parseShorthand = (val: string): number => {
   if (clean.endsWith('b')) return Math.floor(num * 1_000_000_000);
 
   return Math.floor(num);
-};
+}
+
+export const formatTickerPoints = (n: number): string => {
+  if (n >= 1_000_000_000) {
+    const val = n / 1_000_000_000
+    return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}BIL`
+  }
+  if (n >= 1_000_000) {
+    const val = n / 1_000_000
+    return `${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}MIL`
+  }
+  return n.toLocaleString('en-US')
+}
