@@ -197,3 +197,10 @@ npm run dev
 ```
 
 Open http://localhost:3000
+
+
+## ⚠️ Disclaimer
+
+This project is a non-commercial portfolio piece created for educational purposes.  
+All points and in-app currency are strictly virtual and have no real-world value.  
+No real-money gambling or payouts are offered.
