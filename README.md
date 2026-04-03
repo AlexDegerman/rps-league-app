@@ -42,7 +42,7 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
 - Player profiles with nickname randomization and recovery codes
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
-- Live League Insights: Collapsible dashboard showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
+- Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
 
 ---
 

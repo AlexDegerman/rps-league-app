@@ -59,12 +59,13 @@ export const startMatchGenerator = (
   onResult: (match: Match) => void,
   intervalMs = 5000
 ): void => {
+  
   setInterval(async () => {
     const BETTING_DURATION = 3000
     const startTime = Date.now()
 
     const match = generateMatch(startTime, BETTING_DURATION)
-
+    await saveMatch(match)
     const pendingMatch: PendingMatch = {
       gameId: match.gameId,
       time: match.time,
@@ -78,10 +79,7 @@ export const startMatchGenerator = (
 
     await new Promise((resolve) => setTimeout(resolve, BETTING_DURATION))
 
-
     currentPendingMatch = null
-
-    await saveMatch(match)
     onResult(match)
   }, intervalMs)
 }

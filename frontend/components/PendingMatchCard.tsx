@@ -48,11 +48,11 @@ export default function PendingMatchCard({
         </span>
 
         <span
-          className={`text-xs font-bold px-2 py-0.5 rounded shrink-0 transition-colors ${
+          className={`text-[13px] font-black px-3 py-1.5 rounded-md shrink-0 transition-colors min-w-18.75 text-center shadow-sm ${
             timeLeft > 0
               ? timeLeft <= 2
-                ? 'bg-red-100 text-red-600 animate-pulse'
-                : 'bg-indigo-100 text-indigo-600'
+                ? 'bg-red-500 text-white animate-pulse'
+                : 'bg-indigo-600 text-white'
               : 'bg-gray-100 text-gray-400'
           }`}
         >
@@ -76,8 +76,8 @@ export default function PendingMatchCard({
             </button>
           ) : (
             prediction?.pick === pending.playerA && (
-              <span className="w-full py-3 text-[10px] font-bold rounded-lg text-white bg-indigo-400 uppercase flex items-center justify-center">
-                BET PLACED
+              <span className="...">
+                {prediction.confirmed ? 'BET PLACED' : 'CONFIRMING...'}
               </span>
             )
           )}
@@ -105,8 +105,8 @@ export default function PendingMatchCard({
             </button>
           ) : (
             prediction?.pick === pending.playerB && (
-              <span className="w-full py-3 text-[10px] font-bold rounded-lg text-white bg-indigo-400 uppercase flex items-center justify-center">
-                BET PLACED
+              <span className="...">
+                {prediction.confirmed ? 'BET PLACED' : 'CONFIRMING...'}
               </span>
             )
           )}

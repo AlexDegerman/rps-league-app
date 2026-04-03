@@ -87,19 +87,31 @@ export const savePrediction = async (
     return { success: false, error: 'Bet amount must be greater than 0' }
   if (betAmount > balance)
     return { success: false, error: 'Bet amount exceeds balance' }
+  const matchRes = await pool.query(
+    `SELECT expires_at FROM matches WHERE game_id = $1`,
+    [gameId]
+  )
+  if (matchRes.rows.length === 0)
+    return { success: false, error: 'MATCH NOT FOUND' }
+  if (Date.now() > Number(matchRes.rows[0].expires_at))
+    return { success: false, error: 'BETTING WINDOW CLOSED' }
 
-  // Save/update nickname
   await pool.query(`UPDATE users SET nickname = $1 WHERE user_id = $2`, [
     nickname,
     userId
   ])
 
-  await pool.query(
+  const insertResult = await pool.query(
     `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
       VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (user_id, game_id) DO NOTHING`,
     [userId, gameId, pick, betAmount, Date.now()]
   )
+
+  if (insertResult.rowCount === 0) {
+    return { success: false, error: 'BET ALREADY PLACED' }
+  }
+
   return { success: true }
 }
 

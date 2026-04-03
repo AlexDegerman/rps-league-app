@@ -40,7 +40,12 @@ export default function HomePage() {
   const [showJumpButton, setShowJumpButton] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const [inputString, setInputString] = useState(betAmount.toString())
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  const triggerErrorRef = useRef((msg: string) => {
+    setErrorMessage(msg)
+    setTimeout(() => setErrorMessage(null), 1200)
+  })
   const lastPacketRef = useRef(Date.now())
   const isOffline = typeof window !== 'undefined' && !navigator.onLine
   const isStreamStale = now - lastPacketRef.current > 10000
@@ -51,7 +56,7 @@ export default function HomePage() {
   }, [betAmount])
 
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 500)
+    const timer = setInterval(() => setNow(Date.now()), 100)
     return () => clearInterval(timer)
   }, [])
 
@@ -171,10 +176,15 @@ export default function HomePage() {
     if (!userId || !nickname || betAmount <= 0) return
 
     setPredictions((prev) =>
-      new Map(prev).set(gameId, { gameId, pick: playerName })
+      new Map(prev).set(gameId, { gameId, pick: playerName, confirmed: false })
     )
 
+    let succeeded = false
+
     try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 3000)
+
       const res = await fetch(`${API_BASE}/api/predictions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -184,21 +194,39 @@ export default function HomePage() {
           pick: playerName,
           betAmount: betAmountRef.current,
           nickname
-        })
+        }),
+        signal: controller.signal
       })
-      if (!res.ok) {
+
+      clearTimeout(timeout)
+      const data = await res.json()
+
+      if (res.ok && data.success === true) {
+        succeeded = true
+        setPredictions((prev) => {
+          const next = new Map(prev)
+          const current = next.get(gameId)
+          if (current) next.set(gameId, { ...current, confirmed: true })
+          return next
+        })
+      } else {
+        triggerErrorRef.current(data.error || 'MATCH ALREADY ENDED')
+      }
+    } catch (err: unknown) {
+      console.log('handlePick catch:', err)
+      if (err instanceof Error && err.name === 'AbortError') {
+        triggerErrorRef.current('CONNECTION TOO SLOW')
+      } else {
+        triggerErrorRef.current('CONNECTION FAILED')
+      }
+    } finally {
+      if (!succeeded) {
         setPredictions((prev) => {
           const next = new Map(prev)
           next.delete(gameId)
           return next
         })
       }
-    } catch {
-      setPredictions((prev) => {
-        const next = new Map(prev)
-        next.delete(gameId)
-        return next
-      })
     }
   }
 
@@ -265,7 +293,7 @@ export default function HomePage() {
       })
 
       const prediction = predictionsRef.current.get(match.gameId)
-      if (prediction && !prediction.result) {
+      if (prediction && prediction.confirmed && !prediction.result) {
         const aWins =
           (match.playerA.played === 'ROCK' &&
             match.playerB.played === 'SCISSORS') ||
@@ -443,6 +471,15 @@ export default function HomePage() {
       </div>
 
       <LiveStatsTicker />
+
+      {errorMessage && (
+        <div className="my-4 transition-all duration-300">
+          <div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg font-bold border-2 border-red-400 flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-200">
+            <span className="animate-pulse">⚠️</span>
+            {errorMessage}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-row items-center justify-between mb-6 gap-2 px-1">
         <p className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wide uppercase whitespace-nowrap">

@@ -32,6 +32,7 @@ export interface PredictionRecord {
   gameId: string
   pick: string
   result?: 'WIN' | 'LOSE'
+  confirmed: boolean
 }
 
 export interface SinglePlayerStats {
