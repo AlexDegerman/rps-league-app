@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     siteName: 'RPS League',
     images: [
       {
-        url: 'https://rpsleaguegame.vercel.app/rpsimage.png',
+        url: 'https://rpsleaguegame.vercel.app/rpshomepage.png',
         height: 630,
         alt: 'RPS League Virtual Betting Platform'
       }
