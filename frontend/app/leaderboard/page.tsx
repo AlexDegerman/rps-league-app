@@ -291,7 +291,7 @@ function LeaderboardContent() {
               ? 'Users ranked by current points'
               : predictorSubTab === 'alltime'
                 ? 'Users ranked by peak points'
-                : 'Weekly gains'
+                : 'Users ranked by weekly gains'
             : 'Player standings'}
         </p>
       </div>

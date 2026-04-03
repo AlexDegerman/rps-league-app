@@ -11,7 +11,7 @@ import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatPoints, parseShorthand } from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
-import LeagueStats from '@/components/LeagueStats'
+import LiveStatsTicker from '@/components/LiveStatTicker'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -379,7 +379,7 @@ export default function HomePage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-2">
+      <div className="bg-white rounded-t-xl border border-gray-100 shadow-sm p-4 ">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <GemIcon size={24} />
@@ -395,8 +395,6 @@ export default function HomePage() {
           </button>
         </div>
 
-        <LeagueStats />
-        
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex items-center gap-2 flex-1">
             <label className="text-xs font-bold text-gray-400 uppercase shrink-0">
@@ -444,13 +442,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-1 px-1">
-        <p className="text-[10px] text-gray-400 font-medium tracking-wide uppercase">
+      <LiveStatsTicker />
+
+      <div className="flex flex-row items-center justify-between mb-6 gap-2 px-1">
+        <p className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wide uppercase whitespace-nowrap">
           Points floor: 100,000
         </p>
-        <div className="flex gap-3 text-[10px] font-bold">
+        <div className="flex gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
           <span className="text-green-600">WIN: +100%</span>
-          <span className="text-red-500">LOSE: -50% OF BET</span>
+          <span className="text-red-500">LOSE: -50%</span>
         </div>
       </div>
 

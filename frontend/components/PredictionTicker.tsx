@@ -60,7 +60,7 @@ export default function PredictionTicker() {
       const data = JSON.parse(event.data)
       const isMe = data.userId === getUserId()
       const name = data.nickname ?? 'Someone'
-      const displayName = isMe ? 'YOU' : name
+      const displayName = isMe ? 'You' : name
 
       const rawMsg =
         data.result === 'WIN'
@@ -81,15 +81,17 @@ export default function PredictionTicker() {
   }, [])
 
   // 2. Responsive Velocity
-  useEffect(() => {
-    const updateVelocity = () => {
-      const width = window.innerWidth
-      setVelocity(Math.max(180, Math.min(width / 2, 750)))
-    }
-    updateVelocity()
-    window.addEventListener('resize', updateVelocity)
-    return () => window.removeEventListener('resize', updateVelocity)
-  }, [])
+useEffect(() => {
+  const updateVelocity = () => {
+    const width = window.innerWidth
+    setVelocity(Math.max(160, Math.min(width / 2, 400)))
+    setActive([])
+  }
+
+  updateVelocity()
+  window.addEventListener('resize', updateVelocity)
+  return () => window.removeEventListener('resize', updateVelocity)
+}, [])
 
   // 3. Generator (Pauses when hidden)
   useEffect(() => {
