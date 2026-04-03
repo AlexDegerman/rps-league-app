@@ -445,7 +445,7 @@ export default function HomePage() {
       <div className="min-h-[60vh]">
         {!backendReady ? (
           <div className="text-center py-20 animate-pulse text-gray-400 text-sm">
-            Connecting to stream...
+            Connecting to live stream… (server cold start, may take up to 60s)
           </div>
         ) : (
           <>
