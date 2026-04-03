@@ -42,7 +42,7 @@ export default function PendingMatchCard({
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-indigo-200 p-4 mb-3 animate-in fade-in zoom-in duration-300">
-      <div className="flex justify-between items-center mb-2 gap-2">
+      <div className="flex justify-between items-center mb-4 gap-2">
         <span className="text-xs text-gray-400 shrink-0">
           {formatDateTime(pending.time)}
         </span>
@@ -60,56 +60,53 @@ export default function PendingMatchCard({
         </span>
       </div>
 
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-col items-start gap-1">
-          <span className="font-medium text-sm text-gray-800">
+      <div className="flex items-start justify-between gap-3">
+        {/* Left Side Column */}
+        <div className="flex flex-col items-center flex-1 gap-2">
+          <span className="font-bold text-sm text-gray-800 text-center leading-tight min-h-10 flex items-center">
             {pending.playerA}
           </span>
 
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerA)}
-              className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 active:scale-95"
+              className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold text-xs hover:bg-indigo-700 active:scale-95 shadow-sm lg:max-w-40"
             >
-              Bet
+              BET
             </button>
           ) : (
             prediction?.pick === pending.playerA && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded text-white bg-indigo-400 uppercase whitespace-nowrap inline-flex w-fit self-start">
-                Bet placed
+              <span className="w-full py-3 text-[10px] font-bold rounded-lg text-white bg-indigo-400 uppercase flex items-center justify-center">
+                BET PLACED
               </span>
             )
           )}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="w-8 h-8 flex items-center justify-center text-lg text-gray-200 font-bold border-2 border-dashed border-gray-100 rounded-full">
-            ?
-          </span>
+        {/* Static VS Divider */}
+        <div className="flex flex-col items-center pt-2 shrink-0">
           <span className="text-gray-300 text-[10px] font-black uppercase">
             vs
           </span>
-          <span className="w-8 h-8 flex items-center justify-center text-lg text-gray-200 font-bold border-2 border-dashed border-gray-100 rounded-full">
-            ?
-          </span>
         </div>
 
-        <div className="flex flex-col items-end gap-1">
-          <span className="font-medium text-sm text-gray-800 text-right">
+        {/* Right Side Column */}
+        <div className="flex flex-col items-center flex-1 gap-2">
+          <span className="font-bold text-sm text-gray-800 text-center leading-tight min-h-10 flex items-center">
             {pending.playerB}
           </span>
 
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerB)}
-              className="text-xs px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 active:scale-95"
+              className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold text-xs hover:bg-indigo-700 active:scale-95 shadow-sm lg:max-w-40"
             >
-              Bet
+              BET
             </button>
           ) : (
             prediction?.pick === pending.playerB && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded text-white bg-indigo-400 uppercase whitespace-nowrap inline-flex w-fit self-end">
-                Bet placed
+              <span className="w-full py-3 text-[10px] font-bold rounded-lg text-white bg-indigo-400 uppercase flex items-center justify-center">
+                BET PLACED
               </span>
             )
           )}
