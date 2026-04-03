@@ -114,14 +114,8 @@ export const resolvePrediction = async (
       WHERE p.game_id = $1 AND p.result IS NULL`,
     [gameId]
   )
-
   for (const row of predictions.rows) {
     const result = row.pick === winnerName ? 'WIN' : 'LOSE'
-
-    await pool.query(
-      `UPDATE predictions SET result = $1 WHERE user_id = $2 AND game_id = $3`,
-      [result, row.user_id, row.game_id]
-    )
 
     const currentPoints = await getUserPoints(row.user_id)
     const bet = Number(row.bet_amount)
@@ -129,6 +123,13 @@ export const resolvePrediction = async (
       result === 'WIN'
         ? currentPoints + bet
         : Math.max(POINTS_FLOOR, currentPoints - Math.floor(bet / 2))
+
+    const gainLoss = result === 'WIN' ? bet : -(currentPoints - newPoints)
+
+    await pool.query(
+      `UPDATE predictions SET result = $1, gain_loss = $2 WHERE user_id = $3 AND game_id = $4`,
+      [result, gainLoss, row.user_id, row.game_id]
+    )
 
     await pool.query(
       `UPDATE users SET points = $1, peak_points = GREATEST(peak_points, $1) WHERE user_id = $2`,

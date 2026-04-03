@@ -11,6 +11,7 @@ import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatPoints, parseShorthand } from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
+import LeagueStats from '@/components/LeagueStats'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -394,6 +395,8 @@ export default function HomePage() {
           </button>
         </div>
 
+        <LeagueStats />
+        
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex items-center gap-2 flex-1">
             <label className="text-xs font-bold text-gray-400 uppercase shrink-0">

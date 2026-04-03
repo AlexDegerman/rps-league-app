@@ -42,6 +42,7 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
 - Player profiles with nickname randomization and recovery codes
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
+- Live League Insights: Collapsible dashboard showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
 
 ---
 
@@ -87,6 +88,52 @@ Implemented connection awareness and fallback messaging to handle backend cold s
 
 ---
 
+## AI Oracle & Analytics
+The platform features "The Oracle", a custom-tuned AI analyst powered by Google Gemini. Unlike standard chatbots, The Oracle is a domain-specific agent designed to provide snarky, data-driven insights into the RPS league.
+
+**Key AI Features:**
+- **Context-Aware Grounding**: Injects real-time league telemetry, gambler leaderboards, and match histories into the model context via XML-tagged data structures.
+- **Resilient Model Fallback**: Rotates across gemini-2.0-flash, gemini-flash-lite, and gemini-pro to maintain uptime during 503/429 errors.
+- **Intent Guardrailing**: Strict system instructions prevent hallucinations or off-topic queries. Refuses non-RPS topics, maintaining persona and reducing token costs.
+- **Performance Optimization**: In-memory TTL cache and IP-based rate limiting to prevent abuse and minimize latency.
+
+---
+
+## Tests
+
+**Backend (Vitest)**
+- **Analysis Route**: Verifies model fallback rotation, caching, and rate limiting to ensure API stability.
+- **Leaderboard Service**: Tests SQL aggregations including win ranking, alphabetical tiebreaking, and date range padding.
+- **Match Service**: Validates deterministic winner logic, pagination offsets, and player stat aggregation.
+- **Prediction Service**: Ensures correct bet validation, win/loss point calculations, 100k floor enforcement, and secure recovery code formatting.
+
+**Frontend (Vitest + React Testing Library)**
+- **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
+- **HomePage**: Tests core betting loop, "ALL IN" button logic, Auto All-In state persistence, and hydration-safe points display.
+- **Leaderboard Page**: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
+
+---
+
+## Design Decisions
+
+- **Zero-friction onboarding**: Instant anonymous play with random nickname generation
+- **SSE over WebSockets**: Chosen for simplicity, lower overhead, and better serverless compatibility
+- **Concurrency-aware event stream**: Guaranteed stability and zero overlap between real user bets and demo traffic
+- **Profile recovery system** for cross-device portability
+- **Mock match generator** for self-contained deployment
+- **Production-hardened AI**: Resilient, grounded, and rate-limited analytics engine
+
+---
+
+## Future Improvements
+
+- Friends system with social leaderboard
+- Player vs player head-to-head statistics
+- Dynamic Risk & Multiplier Engine: Asymmetric betting system with “Flash Events” with increased gain and loss rates to enhance strategic depth.
+- Deeper AI-driven insights and trend detection
+
+---
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
@@ -109,7 +156,8 @@ Implemented connection awareness and fallback messaging to handle backend cold s
 | GET | `/api/predictions/recovery/:userId` | Get recovery code |
 | POST | `/api/predictions/recover` | Recover profile by code |
 | GET | `/api/stats` | Platform stats |
-| POST | `/api/analysis` | AI Gemini query |
+| GET | `/api/stats/daily` | Daily platform stats |
+| POST | `/api/analysis` | AI Oracle query |
 
 ---
 
@@ -149,38 +197,3 @@ npm run dev
 ```
 
 Open http://localhost:3000
-
----
-
-## Tests
-
-**Backend (Vitest)**
-- Analysis Route: Verifies model fallback rotation, caching, and rate limiting to ensure API stability.
-- Leaderboard Service: Tests SQL aggregations including win ranking, alphabetical tiebreaking, and date range padding.
-- Match Service: Validates deterministic winner logic, pagination offsets, and player stat aggregation.
-- Prediction Service: Ensures correct bet validation, win/loss point calculations, 100k floor enforcement, and secure recovery code formatting.
-
-**Frontend (Vitest + React Testing Library)**
-- PendingMatchCard: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
-- HomePage: Tests core betting loop, "ALL IN" button logic, Auto All-In state persistence, and hydration-safe points display.
-- Leaderboard Page: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
-
----
-
-## Design Decisions
-
-- Zero-friction onboarding for instant engagement
-- SSE over WebSockets for simplicity and broad compatibility
-- Concurrency-aware event stream for stability under load
-- Profile recovery system for cross-device portability
-- Mock match generator for self-contained deployment
-- AI integration for exploratory analytics
-
----
-
-## Future Improvements
-
-- Friends system with social leaderboard
-- Player vs player head-to-head statistics
-- Dynamic Risk & Multiplier Engine: Asymmetric betting system with “Flash Events” with increased gain and loss rates to enhance strategic depth.
-- Deeper AI-driven insights and trend detection

@@ -113,20 +113,72 @@ router.post('/', async (req, res) => {
   }
 })
 
+//GET /api/stats
 router.get('/stats', async (req, res) => {
   try {
-    const [users, predictions, matches] = await Promise.all([
+    const [users, predictions, matches, activeBets] = await Promise.all([
       pool.query(`SELECT COUNT(*) FROM users`),
       pool.query(`SELECT COUNT(*) FROM predictions`),
-      pool.query(`SELECT COUNT(*) FROM matches`)
+      pool.query(`SELECT COUNT(*) FROM matches`),
+      pool.query(`SELECT COUNT(*) FROM predictions WHERE result IS NULL`)
     ])
     res.json({
       users: Number(users.rows[0].count),
       predictions: Number(predictions.rows[0].count),
-      matches: Number(matches.rows[0].count)
+      matches: Number(matches.rows[0].count),
+      activeBets: Number(activeBets.rows[0].count)
     })
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch stats' })
+  }
+})
+
+// GET /api/stats/daily
+router.get('/stats/daily', async (req, res) => {
+  try {
+    const todayStart = new Date()
+    todayStart.setUTCHours(0, 0, 0, 0)
+    const todayStartMs = todayStart.getTime()
+
+    const [volumeRes, mvpRes] = await Promise.all([
+      pool.query(`
+        SELECT
+          COALESCE(SUM(bet_amount), 0) AS total_volume,
+          COALESCE(SUM(gain_loss), 0) AS daily_payout,
+          COUNT(*) AS total_bets,
+          COUNT(*) FILTER (WHERE result = 'WIN') AS wins
+        FROM predictions
+        WHERE created_at >= $1
+      `, [todayStartMs]),
+      pool.query(`
+        SELECT u.nickname, SUM(p.gain_loss) AS total_gain
+        FROM predictions p
+        JOIN users u ON p.user_id = u.user_id
+        WHERE p.created_at >= $1 AND p.gain_loss IS NOT NULL
+        GROUP BY u.nickname
+        ORDER BY total_gain DESC
+        LIMIT 1
+      `, [todayStartMs])
+    ])
+
+    const row = volumeRes.rows[0]
+    const total = Number(row.total_bets)
+    const wins = Number(row.wins)
+
+    res.json({
+      totalVolume: Number(row.total_volume),
+      dailyPayout: Number(row.daily_payout),
+      totalBets: total,
+      winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
+      mvp: mvpRes.rows[0]
+        ? {
+            nickname: mvpRes.rows[0].nickname,
+            gain: Number(mvpRes.rows[0].total_gain)
+          }
+        : null
+    })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch daily stats' })
   }
 })
 

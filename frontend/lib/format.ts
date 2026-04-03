@@ -77,3 +77,13 @@ export const formatTickerPoints = (n: number): string => {
   }
   return n.toLocaleString('en-US')
 }
+
+export const getAmountColor = (amount?: number): string => {
+  if (!amount) return 'text-gray-400'
+  if (amount >= 50_000_000_000) return 'text-red-500'
+  if (amount >= 1_000_000_000) return 'text-orange-500'
+  if (amount >= 100_000_000) return 'text-yellow-500'
+  if (amount >= 10_000_000) return 'text-purple-500'
+  if (amount >= 1_000_000) return 'text-blue-500'
+  return 'text-gray-400'
+}

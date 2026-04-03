@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { generateNickname } from '@/lib/nicknames'
-import { formatTickerPoints } from '@/lib/format'
+import { formatTickerPoints, getAmountColor } from '@/lib/format'
 import { getUserId } from '@/lib/user'
 import GemIcon from './icons/GemIcon'
 
@@ -25,16 +25,6 @@ const demoTemplates = [
     `${name} is on a winning streak with ${amt} points`,
   (name: string, amt: string) => `${name} reached a new peak of ${amt} points`
 ]
-
-const getAmountColor = (amount?: number): string => {
-  if (!amount) return 'text-gray-400'
-  if (amount >= 50_000_000_000) return 'text-red-500'
-  if (amount >= 1_000_000_000) return 'text-orange-500'
-  if (amount >= 100_000_000) return 'text-yellow-500'
-  if (amount >= 10_000_000) return 'text-purple-500'
-  if (amount >= 1_000_000) return 'text-blue-500'
-  return 'text-gray-400'
-}
 
 const parseMessageWithGem = (message: string) => {
   const parts = message.split('points')
