@@ -23,6 +23,7 @@ export default function HomePage() {
     new Map()
   )
   const [points, setPoints] = useState<number>(100000)
+  const [pointsLoaded, setPointsLoaded] = useState(false)
   const [betAmount, setBetAmount] = useState<number>(100000)
   const [serverOffset, setServerOffset] = useState<number>(0)
   const [resultAnim, setResultAnim] = useState<{
@@ -134,6 +135,11 @@ export default function HomePage() {
         setPoints(p)
         setPeakPoints(Number(data.peak_points))
         setBetAmount(autoAllInRef.current ? p : Math.min(100000, p))
+        setPointsLoaded(true)
+      })
+      .catch((err) => {
+        console.error("Failed to fetch points, falling back to 100k", err)
+        setPointsLoaded(true)
       })
 
     fetch(`${API_BASE}/api/matches/pending`)
@@ -206,6 +212,7 @@ export default function HomePage() {
     const newPoints = Number(data.points)
     const newPeak = Number(data.peak_points)
     const isNewPeak = newPeak > peakPointsRef.current
+    setPointsLoaded(true)
 
     setPeakPoints(newPeak)
     setPoints(newPoints)
@@ -376,7 +383,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <GemIcon size={24} />
             <span className="text-xl font-bold text-purple-600">
-              {formatPoints(points)}
+              {pointsLoaded ? formatPoints(points) : '...'}
             </span>
           </div>
           <button
