@@ -1,4 +1,4 @@
-# RPS League Betting App
+# RPS League App
 
 A fast-paced Rock Paper Scissors league web app where players bet virtual cosmetic points on live matches, track rankings, and explore analytics.
 
@@ -65,17 +65,17 @@ Guarantees:
 | Layer | Stack |
 |-------|-------|
 | Frontend | Next.js, React, TypeScript, Tailwind CSS |
-| Backend | Node.js, Express, TypeScript |
+| Backend | Node.js, Express, TypeScript, Google Gemini API |
 | Real-time | Server-Sent Events via `/api/live` |
 | Database | Supabase PostgreSQL |
+| Testing | Vitest, React Testing Library |
 | Match system | Custom generator feeding SSE stream |
-
----
 
 ## Technical Challenges & Solutions
 
 **SSE buffering in production**
 Real-time events were delayed in deployment due to proxy buffering. Solved by disabling buffering: X-Accel-Buffering: no
+
 **High-frequency UI ticker**
 Built a custom event processing system using React refs and controlled update loops to handle a constant stream of events without UI stutter or state thrashing.
 
@@ -128,8 +128,8 @@ GEMINI_API_KEY=your_gemini_api_key
 
 ## How to Run
 ```bash
-git clone https://github.com/yourusername/rps-league-betting.git
-cd rps-league-betting
+git clone https://github.com/AlexDegerman/rps-league-app.git
+cd rps-league-app
 ```
 
 **Backend**
@@ -155,15 +155,15 @@ Open http://localhost:3000
 ## Tests
 
 **Backend (Vitest)**
-- Analysis route — model fallback rotation, caching, rate limiting
-- Leaderboard service — win ranking, alphabetical tiebreaking, date range padding
-- Match service — winner logic, pagination, player stat aggregation
-- Prediction service — bet validation, win/loss point calculation, floor enforcement, recovery code format
+- Analysis Route: Verifies model fallback rotation, caching, and rate limiting to ensure API stability.
+- Leaderboard Service: Tests SQL aggregations including win ranking, alphabetical tiebreaking, and date range padding.
+- Match Service: Validates deterministic winner logic, pagination offsets, and player stat aggregation.
+- Prediction Service: Ensures correct bet validation, win/loss point calculations, 100k floor enforcement, and secure recovery code formatting.
 
 **Frontend (Vitest + React Testing Library)**
-- PendingMatchCard — player rendering, bet button interaction, prediction state, countdown timer
-- HomePage — points display, ALL IN button, Auto All-In toggle
-- Leaderboard page — default tab, tab switching, URL sync, empty state
+- PendingMatchCard: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
+- HomePage: Tests core betting loop, "ALL IN" button logic, Auto All-In state persistence, and hydration-safe points display.
+- Leaderboard Page: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
 
 ---
 
@@ -182,5 +182,5 @@ Open http://localhost:3000
 
 - Friends system with social leaderboard
 - Player vs player head-to-head statistics
-- Expanded betting mechanics and risk systems
+- Dynamic Risk & Multiplier Engine: Asymmetric betting system with “Flash Events” with increased gain and loss rates to enhance strategic depth.
 - Deeper AI-driven insights and trend detection
