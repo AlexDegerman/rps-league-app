@@ -9,7 +9,7 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping RPS League safely
+      - name: Ping RPS League
         run: |
           sleep $((RANDOM % 60))
 
