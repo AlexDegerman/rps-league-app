@@ -155,9 +155,9 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 | GET | `/api/predictions/:userId/stats` | User prediction stats |
 | GET | `/api/predictions/recovery/:userId` | Get recovery code |
 | POST | `/api/predictions/recover` | Recover profile by code |
-| GET | `/api/stats` | Platform stats |
-| GET | `/api/stats/daily` | Daily platform stats |
-| POST | `/api/analysis` | AI Oracle query |
+| GET | `/api/predictions/stats` | Platform stats |
+| GET | `/api/predictions/stats/daily` | Daily betting stats and MVP |
+| POST | `/api/analysis` | AI Oracle query (Gemini) |
 
 ---
 
