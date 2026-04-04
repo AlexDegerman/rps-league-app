@@ -414,6 +414,38 @@ export default function HomePage() {
             <span className="text-xl font-bold text-purple-600">
               {pointsLoaded ? formatPoints(points) : '...'}
             </span>
+
+            <div className="relative group flex items-center ml-1">
+              <div
+                className="text-gray-300 hover:text-purple-500 transition-colors cursor-default p-1"
+                aria-label="Points information"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+
+              <div
+                className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 sm:w-56 p-2.5 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl 
+                opacity-0 pointer-events-none 
+                group-hover:opacity-100 
+                transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed"
+              >
+                Virtual simulation points. No real-world currency or value. Used
+                for platform performance testing.
+                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
+              </div>
+            </div>
           </div>
           <button
             onClick={toggleSound}

@@ -23,6 +23,7 @@ router.get('/leaderboard', async (req, res) => {
       FROM users u
       LEFT JOIN predictions p ON u.user_id = p.user_id
       GROUP BY u.user_id, u.nickname, u.points, u.peak_points
+      HAVING COUNT(p.id) > 0
       ORDER BY u.peak_points DESC
       LIMIT 100
     `)
@@ -31,7 +32,6 @@ router.get('/leaderboard', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch predictor leaderboard' })
   }
 })
-
 // GET /api/predictions/leaderboard/weekly — this week by points gained
 router.get('/leaderboard/weekly', async (req, res) => {
   try {
@@ -81,6 +81,7 @@ router.get('/leaderboard/current', async (req, res) => {
       FROM users u
       LEFT JOIN predictions p ON u.user_id = p.user_id
       GROUP BY u.user_id, u.nickname, u.points, u.peak_points
+      HAVING COUNT(p.id) > 0
       ORDER BY u.points DESC
       LIMIT 100
     `)
