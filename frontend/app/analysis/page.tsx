@@ -8,6 +8,7 @@ interface HistoryItem {
   id: number
   query: string
   result: string
+  source?: string
   timestamp: number
 }
 
@@ -25,6 +26,7 @@ export default function AnalysisPage() {
   const [error, setError] = useState<string | null>(null)
   const [currentResult, setCurrentResult] = useState<string | null>(null)
   const [history, setHistory] = useState<HistoryItem[]>([])
+  const [currentSource, setCurrentSource] = useState<string | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('aiQueryHistory')
@@ -47,15 +49,17 @@ export default function AnalysisPage() {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'The Oracle is silent...')
+      if (!res.ok) throw new Error(data.error)
 
       setCurrentResult(data.result)
+      setCurrentSource(data.source)
 
       const newHistory: HistoryItem[] = [
         {
           id: Date.now(),
           query: activeQuery,
           result: data.result,
+          source: data.source,
           timestamp: Date.now()
         },
         ...history
@@ -124,13 +128,31 @@ export default function AnalysisPage() {
       )}
 
       {currentResult && (
-        <div className="p-8 mb-10 bg-white rounded-3xl border-2 border-indigo-500 shadow-2xl animate-in fade-in zoom-in-95 duration-500">
+        <div className="p-8 mb-10 bg-white rounded-3xl border-2 border-indigo-500 shadow-2xl relative overflow-hidden">
+          {/* Source Badge */}
+          {currentSource && (
+            <div className="absolute top-4 right-4">
+              <span
+                className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border ${
+                  currentSource === 'active_match_history'
+                    ? 'bg-blue-50 text-blue-600 border-blue-200'
+                    : currentSource === 'predictor_leaderboard'
+                      ? 'bg-amber-50 text-amber-600 border-amber-200'
+                      : 'bg-gray-50 text-gray-600 border-gray-200'
+                }`}
+              >
+                {currentSource.replace(/_/g, ' ')}
+              </span>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 mb-4">
             <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
             <span className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
-              Live Insight
+              Oracle Insight
             </span>
           </div>
+
           <p className="text-xl text-gray-800 leading-relaxed font-medium italic">
             &quot;{currentResult}&quot;
           </p>

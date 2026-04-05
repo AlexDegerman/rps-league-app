@@ -107,14 +107,34 @@ async function generateWithFallback(query: string, contextString: string) {
         ${contextString}
         
         DIRECTIVES:
-        1. ROLE & BOUNDARIES: You ONLY analyze the RPS league. If the prompt is unrelated to RPS or betting, REFUSE snarkily.
-        2. DEFINITIONS: 
-          - "PREDICTORS": The users who bet points. Data in <predictor_leaderboard>.
-          - "PLAYERS": The combatants in the ring. Data in <top_players_by_wins>.
-        3. SUBJECTS: Your knowledge is grounded in 'predictor_leaderboard', 'active_match_history', and 'league_telemetry'.
-        4. GROUNDING: Do NOT invent stats. Use provided telemetry only.
-        5. LOGIC: For aggression or move trends, look ONLY at active_match_history.
-        6. TONE: Analytical, condescending, professional. Max 2 sentences. No emojis.`
+
+        1. ROLE & BOUNDARIES:
+        You ONLY analyze the RPS league. If the prompt is unrelated, refuse with a short dismissive response and redirect to league-related queries.
+
+        2. DEFINITIONS:
+        - "PREDICTORS": users who bet points (<predictor_leaderboard>)
+        - "PLAYERS": competitors in matches (<top_players_by_wins>)
+
+        3. GROUNDING:
+        Use ONLY the provided data. Do NOT invent stats.
+
+        4. ANALYSIS:
+        Prioritize patterns, dominance, inefficiencies, and anomalies in the data.
+        For move trends, use ONLY <active_match_history>.
+
+        5. STRUCTURE:
+        - Sentence 1: direct insight or conclusion
+        - Sentence 2: justification using data
+
+        6. TONE:
+        Sharp, confident, slightly sarcastic. Never rude.
+        Sound like a competitive analyst reviewing performance.
+
+        7. CONSTRAINTS:
+        Maximum 2 sentences. No emojis. No generic advice.
+        
+        8. SOURCE TAGGING: 
+        Always end the response with exactly one source tag from this list based on the primary data used: [SOURCE: league_telemetry], [SOURCE: predictor_leaderboard], [SOURCE: active_match_history].`
       })
       const result = await model.generateContent(query)
       return result.response.text()
@@ -144,12 +164,10 @@ router.post('/', async (req: Request, res: Response) => {
       userRate.resetTime = now + 60000
     }
     if (userRate.count >= RATE_LIMIT) {
-      return res
-        .status(429)
-        .json({
-          error:
-            'The Oracle is annoyed. Asking too many questions. Wait a minute.'
-        })
+      return res.status(429).json({
+        error:
+          'The Oracle is annoyed. Asking too many questions. Wait a minute.'
+      })
     }
     userRate.count++
     rateLimitMap.set(ip, userRate)
@@ -218,8 +236,12 @@ router.post('/', async (req: Request, res: Response) => {
     // Discord Webhook
     logToDiscord(query, ip, responseText)
 
-    queryCache.set(normalizedQuery, { result: responseText, timestamp: now })
-    res.json({ result: responseText, cached: false })
+    const sourceMatch = responseText.match(/\[SOURCE:\s*(.*?)\]/)
+    const source = sourceMatch ? sourceMatch[1] : 'league_telemetry'
+    const cleanText = responseText.replace(/\[SOURCE:.*?\]/, '').trim()
+    
+    queryCache.set(normalizedQuery, { result: cleanText, timestamp: now })
+    res.json({ result: cleanText, source, cached: false })
   } catch (err: any) {
     console.error('--- ORACLE CRITICAL ERROR ---', err.message)
     res
