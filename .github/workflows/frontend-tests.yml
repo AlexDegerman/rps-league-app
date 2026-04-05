@@ -39,8 +39,8 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: "http://localhost:5000"
 
-      - name: Notify Vercel
-        if: always() 
-        uses: vercel/repository-dispatch/actions/status@v1
+      - name: 'notify vercel'
+        if: always()
+        uses: 'vercel/repository-dispatch/actions/status@v1'
         with:
-          name: 'Frontend Tests'
+          name: "Vercel - rps-league: Frontend Tests"
