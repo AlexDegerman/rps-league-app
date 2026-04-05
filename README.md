@@ -208,6 +208,68 @@ npm run dev
 Open http://localhost:3000
 
 ---
+# 🗄️ Database Schema
+
+This project uses **Supabase PostgreSQL** to manage real-time betting, match history, and global leaderboards. The schema is optimized for high-frequency writes and real-time state synchronization.
+
+---
+
+### `matches`
+
+The source of truth for the league's match history. Each row represents a completed match.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| **game_id** (PK) | TEXT | Unique UUID v4 for the match |
+| **type** | TEXT | Event discriminator (hardcoded as `GAME_RESULT`) |
+| **time** | BIGINT | Unix timestamp (ms) of match creation |
+| **expires_at** | BIGINT | End of 3-second betting window (start + duration) |
+| **player_a_name** | TEXT | Name of the first competitor |
+| **player_a_played** | TEXT | Move: `ROCK`, `PAPER`, or `SCISSORS` |
+| **player_b_name** | TEXT | Name of the second competitor |
+| **player_b_played** | TEXT | Move: `ROCK`, `PAPER`, or `SCISSORS` |
+
+---
+
+### `users`
+
+Global user profiles with persistent point tracking and account recovery logic.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| **user_id** (PK) | TEXT | Unique persistent identifier |
+| **points** | BIGINT | Current balance (**100,000 floor enforced**) |
+| **peak_points** | BIGINT | All-time highest balance achieved |
+| **daily_peak** | BIGINT | Highest balance today (reset via GitHub Cron) |
+| **weekly_peak** | BIGINT | Highest balance this week (reset via GitHub Cron) |
+| **nickname** | TEXT | Auto-generated display name (adjective + color + animal). Users can randomize to a new combination. |
+| **recovery_code** | TEXT | Unique slug (e.g., `swift-tiger-1234`) |
+
+---
+
+### `predictions`
+
+Tracks all user wagers. Composite constraints prevent multiple bets on the same game.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| **id** (PK) | SERIAL | Internal unique incrementing ID |
+| **user_id** | TEXT | Bettor ID (references `users.user_id`) |
+| **game_id** | TEXT | Match ID (references `matches.game_id`) |
+| **pick** | TEXT | Chosen winner (`Player A` or `Player B`) |
+| **bet_amount** | BIGINT | Points wagered |
+| **result** | TEXT | Outcome: `WIN`, `LOSE`, or `NULL` (if pending) |
+| **gain_loss** | BIGINT | Net change (Win: +100% / Loss: -50% of bet) |
+| **created_at** | BIGINT | Timestamp for volume and daily stats |
+
+---
+
+**Relationships:**
+
+- `predictions.user_id` → `users.user_id`  
+- `predictions.game_id` → `matches.game_id`
+
+---
 
 ## ⚠️ Disclaimer
 
