@@ -59,6 +59,7 @@ export default function PredictionTicker() {
 
       const data = JSON.parse(event.data)
       const isMe = data.userId === getUserId()
+      if (isMe && data.result === 'LOSE' && data.amount === 50000) return
       const name = data.nickname ?? 'Someone'
       const displayName = isMe ? 'You' : name
 

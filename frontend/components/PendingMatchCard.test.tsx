@@ -61,7 +61,8 @@ describe('PendingMatchCard', () => {
   it('shows "Bet placed" and removes buttons when a prediction exists', () => {
     const mockPrediction: PredictionRecord = {
       gameId: 'game-123',
-      pick: 'Bob'
+      pick: 'Bob',
+      confirmed: true
     }
 
     render(

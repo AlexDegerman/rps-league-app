@@ -216,7 +216,11 @@ return (
                   'hidden min-[600px]:table-cell'
                 )}
                 {th(
-                  'Peak',
+                  tab === 'daily'
+                    ? 'Daily Peak'
+                    : tab === 'weekly'
+                      ? 'Weekly Peak'
+                      : 'All Time Peak',
                   'peak',
                   'text-right',
                   'hidden min-[600px]:table-cell'

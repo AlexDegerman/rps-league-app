@@ -76,7 +76,7 @@ router.get('/leaderboard/unified', async (req, res) => {
       FROM users u
       LEFT JOIN predictions p ON u.user_id = p.user_id
       ${hasPeriod ? 'WHERE EXISTS (SELECT 1 FROM predictions p2 WHERE p2.user_id = u.user_id AND p2.created_at >= $1)' : ''}
-      GROUP BY u.user_id, u.nickname, u.points, u.peak_points
+      GROUP BY u.user_id, u.nickname, u.points, u.peak_points, u.daily_peak, u.weekly_peak
       HAVING COUNT(p.id) > 0
       ORDER BY ${sortKey} ${dir}, u.nickname ASC
       LIMIT 100
