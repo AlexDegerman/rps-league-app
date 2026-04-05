@@ -136,24 +136,43 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 ## API Endpoints
 
+### Live Events
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/live` | SSE stream for live events |
-| GET | `/api/matches` | Paginated match history |
+| GET | `/api/live` | SSE stream for live match events |
 | GET | `/api/matches/pending` | Active pending match |
-| GET | `/api/matches/by-date` | Matches by date |
-| GET | `/api/matches/by-player` | Matches by player |
-| GET | `/api/matches/players` | All unique player names |
+| GET | `/api/matches` | Paginated match history |
+| GET | `/api/matches/by-date` | Matches filtered by date |
+| GET | `/api/matches/by-player` | Matches filtered by player |
+| GET | `/api/matches/players` | List all unique player names |
 | GET | `/api/matches/players/:name/stats` | Player career stats |
-| GET | `/api/leaderboard/historical` | Historical player leaderboard |
+
+### Leaderboards & Rankings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | GET | `/api/leaderboard/today` | Today's player leaderboard |
-| GET | `/api/predictions/leaderboard/unified?tab=[period]&sort=[metric]` | Unified predictor leaderboard with dynamic time filters and sortable performance metrics |
+| GET | `/api/leaderboard/historical` | Historical player leaderboard |
+| GET | `/api/predictions/leaderboard/unified?tab=[period]&sort=[metric]` | Unified predictor leaderboard with time filters and sortable metrics |
+
+### User Predictions
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | POST | `/api/predictions` | Submit a prediction |
-| GET | `/api/predictions/:userId/points` | User points and peak |
+| GET | `/api/predictions/:userId/points` | Get user points and peak |
 | GET | `/api/predictions/:userId/stats` | User prediction stats |
 | GET | `/api/predictions/recovery/:userId` | Get recovery code |
 | POST | `/api/predictions/recover` | Recover profile by code |
-| GET | `/api/predictions/stats` | Platform stats |
+
+### Automated Peak Resets
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/predictions/reset/daily` | Reset `daily_peak` (called by GitHub Actions cron) |
+| POST | `/api/predictions/reset/weekly` | Reset `weekly_peak` (called by GitHub Actions cron) |
+
+### Stats & Analytics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/predictions/stats` | Platform-wide statistics |
 | GET | `/api/predictions/stats/daily` | Daily betting stats and MVP |
 | POST | `/api/analysis` | AI Oracle query (Gemini) |
 
@@ -208,6 +227,29 @@ npm run dev
 Open http://localhost:3000
 
 ---
+
+## 🚀 CI/CD & Automation
+
+The RPS League stack is fully automated via **GitHub Actions** to manage testing, deployment, and high-frequency maintenance.
+
+### Pipeline Overview
+| Stage | Tool | Purpose |
+| :--- | :--- | :--- |
+| **Testing** | Vitest | ~28s suites for Betting Loops & API logic |
+| **Deployment** | Vercel / Render | Zero-touch CD after passing CI |
+| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets |
+| **Reliability** | Keep-Alive Pings | Prevent cold-starts on free-tier hosting |
+
+### Key Workflows
+- **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
+- **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
+- **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
+
+### Optimization Notes
+- **Warm-up Script:** Pings critical endpoints every 5 minutes to maintain smooth 5-second match cadence on serverless/free-tier hosting.
+
+---
+
 # 🗄️ Database Schema
 
 This project uses **Supabase PostgreSQL** to manage real-time betting, match history, and global leaderboards. The schema is optimized for high-frequency writes and real-time state synchronization.
