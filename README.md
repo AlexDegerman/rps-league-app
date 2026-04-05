@@ -1,4 +1,4 @@
-# RPS League App
+# 🎲 RPS League App
 
 A fast-paced Rock Paper Scissors league web app where players bet virtual cosmetic points on live matches, track rankings, and explore analytics.
 
@@ -10,7 +10,7 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
 
 ---
 
-## Gameplay & Betting Mechanics
+## 🕹️ Gameplay & Betting Mechanics
 
 - Players bet virtual points on fast-paced Rock Paper Scissors matches
 - Matches appear every 5 seconds, with a 3-second betting window
@@ -30,7 +30,7 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
 
 ---
 
-## Overview
+## 📋 Overview
 
 - High-frequency match system (5s intervals, 17,000+ daily events)
 - Instant user creation with persistent ID and nickname
@@ -43,7 +43,7 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
 
 ---
 
-## Live Activity Feed
+## ⚡ Live Activity Feed
 
 High-frequency, concurrency-aware event stream handling:
 
@@ -58,7 +58,7 @@ Guarantees:
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 | Layer | Stack |
 |-------|-------|
@@ -70,7 +70,7 @@ Guarantees:
 | Testing | Vitest, React Testing Library |
 | Match system | Custom generator feeding SSE stream |
 
-## Technical Challenges & Solutions
+## 🛠️ Technical Challenges & Solutions
 
 **SSE buffering in production**
 Real-time events were delayed in deployment due to proxy buffering. Solved by disabling buffering via the X-Accel-Buffering: no header, ensuring instant delivery of match results.
@@ -86,7 +86,7 @@ Engineered a connection-state monitor that detects backend cold starts and "stal
 
 ---
 
-## AI Oracle & Analytics
+## 🤖 AI Oracle & Analytics
 The platform features "The Oracle", a custom-tuned AI analyst powered by Google Gemini. Unlike standard chatbots, The Oracle is a domain-specific agent designed to provide snarky, data-driven insights into the RPS league.
 
 **Key AI Features:**
@@ -98,7 +98,21 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 ---
 
-## Tests
+## 📱 Mobile & PWA Experience
+
+RPS League is designed with a mobile-first approach, leveraging modern PWA standards to deliver a fast, app-like experience across devices.
+
+- **Responsive "Trading Card" Layout**: On smaller screens, the leaderboard transforms from a wide table into a compact vertical grid. Custom CSS Grid ratios (`35px 35px 1fr 1fr 1fr`) ensure key stats like **Wins**, **Losses**, and **Points** remain readable without horizontal scrolling, even with large values.
+
+- **PWA Install Experience**: Configured via `manifest` and Next.js Metadata API, enabling installable app behavior on mobile and desktop. Includes optimized icons and rich metadata for a polished, native-like installation prompt.
+
+- **Native-Feel Interactions**: Touch-friendly UI with optimized tap targets for betting actions, including "ALL IN", and a smooth, auto-scrolling live feed designed for thumb-based navigation.
+
+- **Connection Awareness**: Built for real-time, always-online gameplay. A connection guard system detects backend cold starts or dropped streams and surfaces clear status feedback to the user.
+
+---
+
+## 🧪 Tests
 
 **Backend (Vitest)**
 - **Analysis Route**: Verifies model fallback rotation, caching, and rate limiting to ensure API stability.
@@ -113,7 +127,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 ---
 
-## Design Decisions
+## 🎨 Design Decisions
 
 - **Zero-friction onboarding**: Instant anonymous play with random nickname generation
 - **SSE over WebSockets**: Chosen for simplicity, lower overhead, and better serverless compatibility
@@ -124,7 +138,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 ---
 
-## Future Improvements
+## 🚀 Future Improvements
 
 - Friends system with social leaderboard
 - Player vs player head-to-head statistics
@@ -134,7 +148,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 ---
 
-## API Endpoints
+## 🔌 API Endpoints
 
 ### Live Events
 | Method | Endpoint | Description |
@@ -178,7 +192,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 ---
 
-## Environment Variables
+## 🔑 Environment Variables
 Frontend (`/frontend/.env.local`)
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:5000
@@ -202,7 +216,7 @@ DISCORD_LOG_WEBHOOK=your_discord_webhook_url
 ```
 ---
 
-## How to Run
+## 📦 How to Run
 ```bash
 git clone https://github.com/AlexDegerman/rps-league-app.git
 cd rps-league-app

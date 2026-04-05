@@ -67,7 +67,7 @@ describe('Leaderboard Service', () => {
     const startTs = new Date(startStr).getTime()
 
     expect(params[0]).toBe(startTs)
-    expect(params[1]).toBe(startTs + 86400000) // Verifies +1 day padding
+    expect(params[1]).toBe(startTs + 86400000)
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('WHERE time >= $1 AND time < $2'),
       params

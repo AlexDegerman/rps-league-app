@@ -18,13 +18,11 @@ describe('Match Service', () => {
   })
 
   it('should accurately calculate total pages and hasMore flag', async () => {
-    // Page 1 of 5
     mockQuery.mockResolvedValueOnce(mockDbResponse([{}, {}]))
     mockQuery.mockResolvedValueOnce(mockDbResponse([{ count: '5' }]))
     const res1 = await matchService.getLatestMatches(1, 2)
     expect(res1.hasMore).toBe(true)
 
-    // Page 3 of 5 (Last item)
     mockQuery.mockResolvedValueOnce(mockDbResponse([{}]))
     mockQuery.mockResolvedValueOnce(mockDbResponse([{ count: '5' }]))
     const res2 = await matchService.getLatestMatches(3, 2)

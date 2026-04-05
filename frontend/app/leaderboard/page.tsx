@@ -252,6 +252,7 @@ function LeaderboardContent() {
 
                         <td className="px-3 py-3">
                           <div className="flex flex-col">
+                            {/* ROW 1: Name and Badge */}
                             <div className="flex items-center gap-2">
                               <span
                                 className={`font-medium ${isMe ? 'text-purple-600 font-bold' : 'text-gray-800'}`}
@@ -265,24 +266,45 @@ function LeaderboardContent() {
                               )}
                             </div>
 
-                            <div className="flex min-[600px]:hidden flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] font-medium text-gray-500">
-                              <div className="flex items-center gap-1">
-                                <span className="text-green-600">
-                                  {entry.wins}W
-                                </span>
-                                <span className="text-gray-300">/</span>
-                                <span className="text-red-400">
-                                  {entry.losses}L
-                                </span>
-                                <span className="text-indigo-500 ml-1">
-                                  ({entry.win_rate}%)
-                                </span>
+                            {/* ROW 2 & 3: Mobile Stats Grid (Hidden on desktop) */}
+                            <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
+                              {/* Row 2: Value Names (Labels) with custom fixed-width columns for W/L */}
+                              <div className="grid grid-cols-[35px_35px_1fr_1fr_1fr] gap-1 text-gray-400 font-bold uppercase tracking-wider text-left">
+                                <div>W</div>
+                                <div>L</div>
+                                <div className="pl-1">Pts</div>
+                                <div>Gain</div>
+                                <div>Peak</div>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <GemIcon size={10} className="text-purple-500" />
-                                <span className="text-purple-600 font-bold">
+
+                              {/* Row 3: Values using whitespace-nowrap to prevent clashing numbers */}
+                              <div className="grid grid-cols-[35px_35px_1fr_1fr_1fr] gap-1 font-medium text-left items-center">
+                                <div className="text-green-600 font-bold truncate">
+                                  {entry.wins}
+                                </div>
+                                <div className="text-red-500 font-bold truncate">
+                                  {entry.losses}
+                                </div>
+
+                                {/* Added pl-1 and flex-shrink-0 to protect the icon and points spacing */}
+                                <div className="text-purple-600 font-bold flex items-center gap-0.5 whitespace-nowrap pl-1">
+                                  <GemIcon
+                                    size={8}
+                                    className="text-purple-500 shrink-0"
+                                  />
                                   {formatPoints(Number(entry.points))}
-                                </span>
+                                </div>
+
+                                <div
+                                  className={`font-bold whitespace-nowrap ${gained >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                                >
+                                  {gained >= 0 ? '+' : ''}
+                                  {formatPoints(gained)}
+                                </div>
+
+                                <div className="text-gray-600 font-bold whitespace-nowrap">
+                                  {formatPoints(Number(entry.peak_points))}
+                                </div>
                               </div>
                             </div>
                           </div>

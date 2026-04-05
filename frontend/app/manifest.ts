@@ -23,6 +23,22 @@ export default function manifest(): MetadataRoute.Manifest {
         type: 'image/png',
         purpose: 'maskable'
       }
+    ],
+    screenshots: [
+      {
+        src: '/rpshomepagev2.png',
+        type: 'image/png',
+        sizes: '1204x628',
+        form_factor: 'narrow',
+        label: 'RPS League Mobile'
+      },
+      {
+        src: '/rpshomepagev2.png',
+        type: 'image/png',
+        sizes: '1204x628',
+        form_factor: 'wide',
+        label: 'RPS League Desktop'
+      }
     ]
   }
 }

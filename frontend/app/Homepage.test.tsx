@@ -3,7 +3,6 @@ import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest'
 import HomePage from '@/app/page'
 import { fetchLatestMatches, fetchDailyStats } from '@/lib/api'
 
-// 1. Mock the API module
 vi.mock('@/lib/api', () => ({
   fetchLatestMatches: vi.fn(() =>
     Promise.resolve({ matches: [], hasMore: false })
@@ -19,14 +18,12 @@ vi.mock('@/lib/api', () => ({
   )
 }))
 
-// 2. Mock the user module
 vi.mock('@/lib/user', () => ({
   getOrCreateUser: vi.fn(),
   getUserId: vi.fn(() => 'test-user-123'),
   getNickname: vi.fn(() => 'Tester')
 }))
 
-// 3. Mock EventSource
 class MockEventSource {
   static readonly CONNECTING = 0
   static readonly OPEN = 1
@@ -71,7 +68,6 @@ describe('HomePage', () => {
     })
   })
 
-  // FIXED: Specifically target the points display span to avoid duplicates
   const findPointsDisplay = () => screen.getAllByText(/500,000/)[0]
 
   it('loads and displays initial points from API', async () => {
@@ -96,11 +92,9 @@ describe('HomePage', () => {
     render(<HomePage />)
     await waitFor(() => expect(findPointsDisplay()).toBeInTheDocument())
 
-    // Initial state check based on your HTML output (AUTO ON is currently displayed)
     const autoBtn = screen.getByRole('button', { name: /AUTO/i })
     fireEvent.click(autoBtn)
 
-    // Depending on your logic, verify it toggled (e.g., class change or text change)
     expect(autoBtn).toBeInTheDocument()
   })
 
@@ -110,14 +104,11 @@ describe('HomePage', () => {
 
     const input = screen.getByRole('textbox') as HTMLInputElement
 
-    // 1. Change value to something low
     fireEvent.change(input, { target: { value: '5000' } })
     expect(input.value).toBe('5000')
 
-    // 2. Trigger blur to fire the "floor" logic
     fireEvent.blur(input)
 
-    // 3. Should reset to 100,000
     expect(input.value).toBe('100000')
   })
 })
