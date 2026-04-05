@@ -197,9 +197,9 @@ router.post('/', async (req: Request, res: Response) => {
       (Number(stats.win_count) / (Number(stats.total_count) || 1)) * 100
     const houseEdge = (100 - winRate).toFixed(1)
     const history = (matchesData.matches || []).map((m: any) => ({
-      p1: m.player_a_name,
-      p2: m.player_b_name,
-      moves: `${m.player_a_played} vs ${m.player_b_played}`
+      p1: m.playerA.name,
+      p2: m.playerB.name,
+      moves: `${m.playerA.played} vs ${m.playerB.played}`
     }))
 
     // Construct Context with explicit XML tags for Gemini
