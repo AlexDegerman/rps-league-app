@@ -27,7 +27,9 @@ const Header = () => {
               alt="RPS League"
               width={40}
               height={40}
+              style={{ height: 'auto' }}
               className="hover:scale-105 transition-transform"
+              priority
             />
           </Link>
 
