@@ -1,0 +1,35 @@
+name: Backend CI
+on:
+  push:
+    paths: ['backend/**']
+  pull_request:
+    paths: ['backend/**']
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Vitest
+        run: npm test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
+          CORS_ORIGIN: "http://localhost:3000"
+          RESET_SECRET: "dummy_secret_for_ci_testing_12345"
+          GEMINI_API_KEY: "dummy_key"
+          DISCORD_LOG_WEBHOOK: "https://discord.com/api/webhooks/dummy"

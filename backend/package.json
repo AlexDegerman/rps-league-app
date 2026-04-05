@@ -24,7 +24,6 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@rolldown/binding-win32-x64-msvc": "^1.0.0-rc.13",
     "@types/cors": "^2.8.19",
     "@types/eventsource": "^3.0.0",
     "@types/express": "^5.0.6",
@@ -36,8 +35,5 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.2"
-  },
-  "optionalDependencies": {
-    "@rolldown/binding-win32-x64-msvc": "^1.0.0-rc.13"
   }
 }
