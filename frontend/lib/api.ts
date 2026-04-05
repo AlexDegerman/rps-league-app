@@ -62,26 +62,21 @@ export const fetchPlayerStats = async (name: string) => {
   return res.json()
 }
 
-export const fetchPredictorLeaderboard = async () => {
-  const res = await fetch(`${API_BASE}/api/predictions/leaderboard`)
-  if (!res.ok) throw new Error('Failed to fetch predictor leaderboard')
-  return res.json()
-}
-
-export const fetchWeeklyPredictorLeaderboard = async () => {
-  const res = await fetch(`${API_BASE}/api/predictions/leaderboard/weekly`)
-  if (!res.ok) throw new Error('Failed to fetch weekly predictor leaderboard')
-  return res.json()
-}
-
-export const fetchCurrentPredictorLeaderboard = async () => {
-  const res = await fetch(`${API_BASE}/api/predictions/leaderboard/current`)
-  if (!res.ok) throw new Error('Failed to fetch current predictor leaderboard')
-  return res.json()
-}
-
 export const fetchDailyStats = async () => {
   const res = await fetch(`${API_BASE}/api/predictions/stats/daily`)
   if (!res.ok) throw new Error('Failed to fetch daily stats')
+  return res.json()
+}
+
+export const fetchUnifiedLeaderboard = async (
+  tab: string,
+  sort: string,
+  dir: string
+) => {
+  const params = new URLSearchParams({ tab, sort, dir })
+  const res = await fetch(
+    `${API_BASE}/api/predictions/leaderboard/unified?${params}`
+  )
+  if (!res.ok) throw new Error('Failed to fetch unified leaderboard')
   return res.json()
 }

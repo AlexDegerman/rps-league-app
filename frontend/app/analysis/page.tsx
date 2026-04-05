@@ -12,11 +12,11 @@ interface HistoryItem {
 }
 
 const SUGGESTIONS = [
-  'Who is the most aggressive player today?',
-  'What is the most overused move in the arena right now?',
-  'Which player is on a winning streak?',
-  'Who are the top 3 predictors to follow?',
-  'Is the house bleeding money or printing it?'
+  'Is the house bleeding money or printing it?',
+  'Analyze the current risk-to-reward ratio for the Top 5 leaders.',
+  'What is the current "Heat Map" of moves in the latest matches?',
+  'Based on the total league volume, how high are the stakes right now?',
+  'Compare the dominance of the #1 ranked player against the rest of the Top 5.'
 ]
 
 export default function AnalysisPage() {

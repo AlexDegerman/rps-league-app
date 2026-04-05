@@ -2,36 +2,52 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import {
-  fetchHistoricalLeaderboard,
-  fetchTodayLeaderboard,
-  fetchPredictorLeaderboard,
-  fetchWeeklyPredictorLeaderboard,
-  fetchCurrentPredictorLeaderboard
-} from '@/lib/api'
-import LeaderboardTable from '@/components/LeaderboardTable'
+import { fetchUnifiedLeaderboard } from '@/lib/api'
 import GemIcon from '@/components/icons/GemIcon'
 import { getUserId } from '@/lib/user'
-import type { PlayerStats } from '@/types/rps'
 import { formatPoints } from '@/lib/format'
+import Link from 'next/link'
 
-const TODAY = new Date().toISOString().split('T')[0]
-const FIRST_MATCH_DATE = '2026-02-16'
-
-type MainTab = 'predictors' | 'players'
-type PredictorSubTab = 'current' | 'weekly' | 'alltime'
-type PlayerSubTab = 'alltime' | 'today'
+type Tab = 'daily' | 'weekly' | 'alltime'
+type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
+type SortDir = 'asc' | 'desc'
 
 interface PredictorEntry {
   user_id: string
+  nickname: string
   points: number
-  peak_points?: number
-  weekly_gained?: number
+  peak_points: number
+  gained: number
   wins: number
   losses: number
-  nickname: string
+  win_rate: number
+}
+
+const DEFAULT_SORT: Record<Tab, SortKey> = {
+  daily: 'points',
+  weekly: 'gained',
+  alltime: 'peak'
+}
+
+const TAB_LABELS: Record<Tab, string> = {
+  daily: 'Daily',
+  weekly: 'Weekly',
+  alltime: 'All Time'
+}
+
+const EMPTY_MESSAGES: Record<Tab, string> = {
+  daily: 'No bets placed today yet — be the first to claim the top spot!',
+  weekly: 'Season just started — be the first to claim the weekly crown!',
+  alltime: 'No predictors yet — jump in and make history!'
+}
+
+function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
+  if (!active) return <span className="text-gray-300 ml-1">↕</span>
+  return (
+    <span className="text-purple-400 ml-1">{dir === 'desc' ? '↓' : '↑'}</span>
+  )
 }
 
 function LeaderboardContent() {
@@ -39,379 +55,273 @@ function LeaderboardContent() {
   const router = useRouter()
   const pathname = usePathname()
 
-  const [mainTab, setMainTab] = useState<MainTab>(
-    (searchParams.get('m') as MainTab) || 'predictors'
+  const [tab, setTab] = useState<Tab>(
+    (searchParams.get('tab') as Tab) || 'daily'
   )
-  const [predictorSubTab, setPredictorSubTab] = useState<PredictorSubTab>(
-    (searchParams.get('ps') as PredictorSubTab) || 'current'
+  const [sort, setSort] = useState<SortKey>(
+    (searchParams.get('sort') as SortKey) || DEFAULT_SORT[tab]
   )
-  const [playerSubTab, setPlayerSubTab] = useState<PlayerSubTab>(
-    (searchParams.get('pls') as PlayerSubTab) || 'alltime'
+  const [dir, setDir] = useState<SortDir>(
+    (searchParams.get('dir') as SortDir) || 'desc'
   )
-
-  const [startDate, setStartDate] = useState(searchParams.get('start') || '')
-  const [endDate, setEndDate] = useState(searchParams.get('end') || '')
-
-  const activeFilters = useRef({
-    start: searchParams.get('start') || '',
-    end: searchParams.get('end') || ''
-  })
-
-  const [stats, setStats] = useState<PlayerStats[]>([])
-  const [predictors, setPredictors] = useState<PredictorEntry[]>([])
+  const [data, setData] = useState<PredictorEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [myUserId, setMyUserId] = useState<string | null>(null)
-
-  const updateUrl = useCallback(
-    (params: Record<string, string | null>) => {
-      const newParams = new URLSearchParams(searchParams.toString())
-      Object.entries(params).forEach(([key, value]) => {
-        if (value === null) newParams.delete(key)
-        else newParams.set(key, value)
-      })
-      router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
-    },
-    [searchParams, router, pathname]
-  )
 
   useEffect(() => {
     setMyUserId(getUserId())
   }, [])
 
-  const loadPredictorsCurrent = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const data = await fetchCurrentPredictorLeaderboard()
-      setPredictors(data)
-    } catch (err) {
-      console.error('Failed to fetch current:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+  const updateUrl = useCallback(
+    (params: Record<string, string>) => {
+      const newParams = new URLSearchParams(searchParams.toString())
+      Object.entries(params).forEach(([k, v]) => newParams.set(k, v))
+      router.replace(`${pathname}?${newParams.toString()}`, { scroll: false })
+    },
+    [searchParams, router, pathname]
+  )
 
-  const loadPredictorsWeekly = useCallback(async () => {
+  const load = useCallback(async (t: Tab, s: SortKey, d: SortDir) => {
     setIsLoading(true)
     try {
-      const data = await fetchWeeklyPredictorLeaderboard()
-      setPredictors(data)
-    } catch (err) {
-      console.error('Failed to fetch weekly:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+      const result = await fetchUnifiedLeaderboard(t, s, d)
+      setData(result)
 
-  const loadPredictorsAllTime = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const data = await fetchPredictorLeaderboard()
-      setPredictors(data)
     } catch (err) {
-      console.error('Failed to fetch predictor all-time:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  const loadAllTime = useCallback(async (start?: string, end?: string) => {
-    setIsLoading(true)
-    try {
-      const data = await fetchHistoricalLeaderboard(start, end)
-      setStats(data)
-    } catch (err) {
-      console.error('Failed to fetch player leaderboard:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  const loadToday = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const data = await fetchTodayLeaderboard()
-      setStats(data)
-    } catch (err) {
-      console.error('Failed to fetch today leaderboard:', err)
+      console.error(err)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    if (mainTab === 'predictors') {
-      if (predictorSubTab === 'current') loadPredictorsCurrent()
-      else if (predictorSubTab === 'weekly') loadPredictorsWeekly()
-      else loadPredictorsAllTime()
-    } else {
-      if (playerSubTab === 'alltime') {
-        loadAllTime(
-          activeFilters.current.start || undefined,
-          activeFilters.current.end || undefined
-        )
-      } else {
-        loadToday()
-      }
-    }
-  }, [
-    mainTab,
-    predictorSubTab,
-    playerSubTab,
-    loadPredictorsCurrent,
-    loadPredictorsWeekly,
-    loadPredictorsAllTime,
-    loadAllTime,
-    loadToday
-  ])
+    load(tab, sort, dir)
+  }, [tab, sort, dir, load])
 
-  const handleMainTabChange = (tab: MainTab) => {
-    setMainTab(tab)
-    updateUrl({ m: tab })
+  const handleTab = (t: Tab) => {
+    const newSort = DEFAULT_SORT[t]
+    setTab(t)
+    setSort(newSort)
+    setDir('desc')
+    updateUrl({ tab: t, sort: newSort, dir: 'desc' })
   }
 
-  const handlePredictorSubChange = (tab: PredictorSubTab) => {
-    setPredictorSubTab(tab)
-    updateUrl({ ps: tab })
+  const handleSort = (col: SortKey) => {
+    const newDir: SortDir = sort === col && dir === 'desc' ? 'asc' : 'desc'
+    setSort(col)
+    setDir(newDir)
+    updateUrl({ tab, sort: col, dir: newDir })
   }
 
-  const handlePlayerSubChange = (tab: PlayerSubTab) => {
-    setPlayerSubTab(tab)
-    updateUrl({ pls: tab })
-  }
+  const th = (
+    label: string,
+    col: SortKey,
+    align: string = 'text-right',
+    extraClasses: string = ''
+  ) => (
+    <th
+      className={`px-3 py-3 font-bold text-xs uppercase tracking-wide cursor-pointer select-none ${align} ${sort === col ? 'text-purple-600' : 'text-gray-400'} hover:text-purple-500 transition ${extraClasses}`}
+      onClick={() => handleSort(col)}
+    >
+      {label}
+      <SortArrow active={sort === col} dir={dir} />
+    </th>
+  )
 
-  const handleFilter = () => {
-    activeFilters.current = { start: startDate, end: endDate }
-    updateUrl({ start: startDate || null, end: endDate || null })
-    loadAllTime(startDate || undefined, endDate || undefined)
-  }
+return (
+  <div className="max-w-4xl mx-auto px-4">
+    {/* Main Page Title */}
+    <div className="py-4">
+      <h1 className="text-3xl font-bold text-gray-900 mb-1">Leaderboard</h1>
+      <p className="text-gray-500 text-sm">Users ranked by performance</p>
+    </div>
 
-  const handleClear = () => {
-    setStartDate('')
-    setEndDate('')
-    activeFilters.current = { start: '', end: '' }
-    updateUrl({ start: null, end: null })
-    loadAllTime()
-  }
+    {/* Primary Switcher: Predictors vs Players */}
+    <div className="flex gap-2 mb-4">
+      <button className="px-6 py-2 rounded font-bold text-xs uppercase bg-yellow-400 text-gray-900 shadow-sm">
+        Predictors
+      </button>
+      <Link
+        href="/leaderboard/players"
+        className="px-6 py-2 rounded font-bold text-xs uppercase bg-indigo-600 text-white hover:bg-indigo-700 transition"
+      >
+        Players
+      </Link>
+    </div>
 
-  const renderPredictorTable = (
-    pointsLabel?: string,
-    pointsKey?: keyof PredictorEntry
-  ) =>
-    predictors.length === 0 ? (
-      <p className="text-center text-gray-400 py-12">No predictors yet</p>
-    ) : (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-x-auto">
-        <table className="w-full text-sm min-w-150">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="text-left px-4 py-3 text-gray-500 font-medium w-10">
-                #
-              </th>
-              <th className="text-left px-4 py-3 text-gray-500 font-medium">
-                Nickname
-              </th>
-              <th className="text-center px-4 py-3 text-green-600 font-medium">
-                W
-              </th>
-              <th className="text-center px-4 py-3 text-red-500 font-medium">
-                L
-              </th>
-              <th className="text-right px-4 py-3 text-purple-500 font-medium">
-                Current
-              </th>
-              {pointsLabel && (
-                <th className="text-right px-4 py-3 text-purple-500 font-medium">
-                  {pointsLabel}
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {predictors.map((entry, index) => {
-              const isMe = entry.user_id === myUserId
-              return (
-                <tr
-                  key={entry.user_id}
-                  className={`border-b border-gray-50 whitespace-nowrap ${isMe ? 'bg-purple-50' : ''}`}
-                >
-                  <td className="px-4 py-3 font-bold text-gray-400">
-                    {index + 1}
-                  </td>
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    <div className="flex items-center gap-2">
-                      <span className={isMe ? 'text-purple-600 font-bold' : ''}>
-                        {entry.nickname ?? entry.user_id.slice(0, 8)}
-                      </span>
-                      {isMe && (
-                        <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter border border-purple-200 shrink-0">
-                          YOU
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-center text-green-600 font-bold">
-                    {Number(entry.wins)}
-                  </td>
-                  <td className="px-4 py-3 text-center text-red-500">
-                    {Number(entry.losses)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <GemIcon size={14} />
-                      <span className="font-bold text-purple-600">
-                        {formatPoints(entry.points)}
-                      </span>
-                    </div>
-                  </td>
-                  {pointsKey && (
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <GemIcon size={14} />
-                        <span className="font-bold text-purple-600">
-                          {formatPoints(Number(entry[pointsKey] ?? 0))}
-                        </span>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    )
-
-  return (
-    <div className="max-w-2xl mx-auto px-4">
-      <div className="py-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">Leaderboard</h1>
-        <p className="text-gray-500">
-          {mainTab === 'predictors'
-            ? predictorSubTab === 'current'
-              ? 'Users ranked by current points'
-              : predictorSubTab === 'alltime'
-                ? 'Users ranked by peak points'
-                : 'Users ranked by weekly gains'
-            : 'Player standings'}
-        </p>
-      </div>
-
-      <div className="sticky top-16 z-40 bg-gray-100 pb-4">
-        <div className="flex items-center gap-2 mb-3">
+    {/* Secondary Sub-Tabs: Daily, Weekly, All Time */}
+    <div className="sticky top-16 z-40 bg-gray-100 pb-4">
+      <div className="flex gap-2">
+        {(['daily', 'weekly', 'alltime'] as Tab[]).map((t) => (
           <button
-            onClick={() => handleMainTabChange('predictors')}
-            className={`px-4 py-2 rounded font-bold text-xs uppercase tracking-tight transition cursor-pointer ${mainTab === 'predictors' ? 'bg-yellow-400 text-gray-900 shadow-sm' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+            key={t}
+            onClick={() => handleTab(t)}
+            className={`px-3 py-1.5 rounded font-bold text-[10px] uppercase transition ${
+              tab === t
+                ? 'bg-purple-600 text-white'
+                : 'bg-white border border-gray-200 text-gray-600'
+            }`}
           >
-            Predictors
+            {TAB_LABELS[t]}
           </button>
-          <button
-            onClick={() => handleMainTabChange('players')}
-            className={`px-4 py-2 rounded font-bold text-xs uppercase tracking-tight transition cursor-pointer ${mainTab === 'players' ? 'bg-yellow-400 text-gray-900 shadow-sm' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-          >
-            Players
-          </button>
-        </div>
-
-        {mainTab === 'predictors' && (
-          <div className="flex gap-2 mb-3">
-            {(['current', 'weekly', 'alltime'] as PredictorSubTab[]).map(
-              (t) => (
-                <button
-                  key={t}
-                  onClick={() => handlePredictorSubChange(t)}
-                  className={`px-3 py-1.5 rounded font-bold text-[10px] uppercase transition cursor-pointer ${predictorSubTab === t ? 'bg-purple-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-purple-50'}`}
-                >
-                  {t === 'alltime' ? 'All Time' : t}
-                </button>
-              )
-            )}
-          </div>
-        )}
-
-        {mainTab === 'players' && (
-          <div className="flex gap-2 mb-3">
-            {(['alltime', 'today'] as PlayerSubTab[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => handlePlayerSubChange(t)}
-                className={`px-3 py-1.5 rounded font-bold text-[10px] uppercase transition cursor-pointer ${playerSubTab === t ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-indigo-50'}`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {mainTab === 'players' && playerSubTab === 'alltime' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <div className="flex flex-col sm:flex-row gap-3 items-end">
-              <div className="flex-1 w-full">
-                <label className="block text-xs text-gray-500 mb-1">From</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  min={FIRST_MATCH_DATE}
-                  max={TODAY}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded px-3 py-2 text-sm"
-                />
-              </div>
-              <div className="flex-1 w-full">
-                <label className="block text-xs text-gray-500 mb-1">To</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  min={FIRST_MATCH_DATE}
-                  max={TODAY}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded px-3 py-2 text-sm"
-                />
-              </div>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <button
-                  onClick={handleFilter}
-                  disabled={isLoading}
-                  className="flex-1 px-5 py-2 bg-indigo-600 text-white rounded font-bold text-xs uppercase disabled:opacity-50"
-                >
-                  Filter
-                </button>
-                <button
-                  onClick={handleClear}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded font-bold text-xs uppercase text-gray-600"
-                >
-                  Clear
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="pt-2">
-        {isLoading ? (
-          <p className="text-center text-gray-400 py-12">
-            Loading Leaderboard...
-          </p>
-        ) : mainTab === 'predictors' ? (
-          renderPredictorTable(
-            predictorSubTab === 'weekly'
-              ? 'Gained'
-              : predictorSubTab === 'alltime'
-                ? 'Peak'
-                : undefined,
-            predictorSubTab === 'weekly'
-              ? 'weekly_gained'
-              : predictorSubTab === 'alltime'
-                ? 'peak_points'
-                : undefined
-          )
-        ) : (
-          <LeaderboardTable stats={stats} />
-        )}
+        ))}
       </div>
     </div>
-  )
+
+    <div className="pt-2">
+      {isLoading ? (
+        <p className="text-center text-gray-400 py-12">Loading...</p>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="text-left px-3 py-3 text-gray-400 font-bold text-xs uppercase w-10">
+                  #
+                </th>
+                <th className="text-left px-3 py-3 text-gray-400 font-bold text-xs uppercase">
+                  Player
+                </th>
+
+                {th(
+                  'W',
+                  'wins',
+                  'text-center',
+                  'hidden min-[600px]:table-cell'
+                )}
+                {th(
+                  'L',
+                  'losses',
+                  'text-center',
+                  'hidden min-[600px]:table-cell'
+                )}
+
+                {th(
+                  'Win%',
+                  'winrate',
+                  'text-center',
+                  'hidden min-[680px]:table-cell'
+                )}
+
+                {th(
+                  'Points',
+                  'points',
+                  'text-right',
+                  'hidden min-[600px]:table-cell'
+                )}
+                {th(
+                  'Gained',
+                  'gained',
+                  'text-right',
+                  'hidden min-[600px]:table-cell'
+                )}
+                {th(
+                  'Peak',
+                  'peak',
+                  'text-right',
+                  'hidden min-[600px]:table-cell'
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {data.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-20 px-4 text-center">
+                    <p className="text-gray-500 font-medium italic">
+                      {EMPTY_MESSAGES[tab]}
+                    </p>
+                  </td>
+                </tr>
+              ) : (
+                data.map((entry, index) => {
+                  const isMe = entry.user_id === myUserId
+                  const gained = Number(entry.gained)
+
+                  return (
+                    <tr
+                      key={entry.user_id}
+                      className={`border-b border-gray-50 ${isMe ? 'bg-purple-50' : ''}`}
+                    >
+                      <td className="px-3 py-3 align-top text-gray-400 font-bold text-xs">
+                        {index === 0 ? '🏆' : index + 1}
+                      </td>
+
+                      <td className="px-3 py-3">
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`font-medium ${isMe ? 'text-purple-600 font-bold' : 'text-gray-800'}`}
+                            >
+                              {entry.nickname ?? entry.user_id.slice(0, 8)}
+                            </span>
+                            {isMe && (
+                              <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase">
+                                YOU
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex min-[600px]:hidden flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] font-medium text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <span className="text-green-600">
+                                {entry.wins}W
+                              </span>
+                              <span className="text-gray-300">/</span>
+                              <span className="text-red-400">
+                                {entry.losses}L
+                              </span>
+                              <span className="text-indigo-500 ml-1">
+                                ({entry.win_rate}%)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <GemIcon size={10} className="text-purple-500" />
+                              <span className="text-purple-600 font-bold">
+                                {formatPoints(Number(entry.points))}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-green-600 font-bold">
+                        {entry.wins}
+                      </td>
+                      <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-red-500">
+                        {entry.losses}
+                      </td>
+
+                      <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500">
+                        {entry.win_rate}%
+                      </td>
+
+                      <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold text-purple-600">
+                        {formatPoints(Number(entry.points))}
+                      </td>
+                      <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
+                        <span
+                          className={
+                            gained >= 0 ? 'text-green-600' : 'text-red-500'
+                          }
+                        >
+                          {gained >= 0 ? '+' : ''}
+                          {formatPoints(gained)}
+                        </span>
+                      </td>
+                      <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold text-gray-600">
+                        {formatPoints(Number(entry.peak_points))}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  </div>
+)
 }
 
 export default function LeaderboardPage() {

@@ -9,85 +9,78 @@ import pool from '../utils/db.js'
 
 const router = Router()
 
-// GET /api/predictions/leaderboard — all time by peak points
-router.get('/leaderboard', async (req, res) => {
+// GET /api/predictions/leaderboard/unified?tab=daily&sort=points&dir=desc
+router.get('/leaderboard/unified', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT 
-        u.user_id,
-        u.nickname,
-        u.points,
-        u.peak_points,
-        COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
-        COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
-      FROM users u
-      LEFT JOIN predictions p ON u.user_id = p.user_id
-      GROUP BY u.user_id, u.nickname, u.points, u.peak_points
-      HAVING COUNT(p.id) > 0
-      ORDER BY u.peak_points DESC
-      LIMIT 100
-    `)
-    res.json(result.rows)
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch predictor leaderboard' })
-  }
-})
-// GET /api/predictions/leaderboard/weekly — this week by points gained
-router.get('/leaderboard/weekly', async (req, res) => {
-  try {
-    const weekStart = new Date()
-    weekStart.setUTCHours(0, 0, 0, 0)
-    weekStart.setUTCDate(weekStart.getUTCDate() - weekStart.getUTCDay())
-    const weekStartMs = weekStart.getTime()
+    const tab = (req.query.tab as string) || 'daily'
+    const sortParam = (req.query.sort as string) || ''
+    const dir = req.query.dir === 'asc' ? 'ASC' : 'DESC'
 
-    const result = await pool.query(
-      `
+    // Whitelist sort columns
+    const sortWhitelist: Record<string, string> = {
+      points: 'u.points',
+      gained: 'gained',
+      peak: 'u.peak_points',
+      wins: 'wins',
+      losses: 'losses',
+      winrate: 'win_rate'
+    }
+
+    const now = new Date()
+    now.setUTCHours(0, 0, 0, 0)
+    const dayStartMs = now.getTime()
+
+      const weekStart = new Date()
+      weekStart.setUTCHours(0, 0, 0, 0)
+      const day = weekStart.getUTCDay()
+      const diff = day === 0 ? 6 : day - 1
+
+      weekStart.setUTCDate(weekStart.getUTCDate() - diff)
+      const weekStartMs = weekStart.getTime()
+
+    const periodStart = tab === 'daily' ? dayStartMs : tab === 'weekly' ? weekStartMs : 0
+    const hasPeriod = periodStart > 0
+
+    // Default sort per tab
+    const defaultSort = tab === 'daily' ? 'points' : tab === 'weekly' ? 'gained' : 'peak'
+    const sortKey = sortWhitelist[sortParam] ?? sortWhitelist[defaultSort]
+
+    const result = await pool.query(`
       SELECT
         u.user_id,
         u.nickname,
         u.points,
-        COALESCE(SUM(p.bet_amount) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1), 0) AS weekly_gained,
-        COUNT(p.id) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1) AS wins,
-        COUNT(p.id) FILTER (WHERE p.result = 'LOSE' AND p.created_at >= $1) AS losses
-      FROM users u
-      LEFT JOIN predictions p ON u.user_id = p.user_id
-      WHERE EXISTS (
-        SELECT 1 FROM predictions p2
-        WHERE p2.user_id = u.user_id AND p2.created_at >= $1
-      )
-      GROUP BY u.user_id, u.nickname, u.points
-      ORDER BY weekly_gained DESC
-      LIMIT 100
-    `,
-      [weekStartMs]
-    )
-    res.json(result.rows)
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch weekly leaderboard' })
-  }
-})
-
-// GET /api/predictions/leaderboard/current — ranked by current balance
-router.get('/leaderboard/current', async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        u.user_id,
-        u.nickname,
-        u.points,
         u.peak_points,
-        COUNT(p.id) FILTER (WHERE p.result = 'WIN') AS wins,
-        COUNT(p.id) FILTER (WHERE p.result = 'LOSE') AS losses
+        COALESCE(SUM(p.gain_loss) FILTER (WHERE p.gain_loss > 0 ${hasPeriod ? 'AND p.created_at >= $1' : ''}), 0) AS gained,
+        COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS wins,
+        COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS losses,
+        CASE
+          WHEN (
+            COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
+            COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''})
+          ) > 0
+          THEN ROUND(
+            COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''})::numeric /
+            (
+              COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
+              COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''})
+            ) * 100
+          )
+          ELSE 0
+        END AS win_rate
       FROM users u
       LEFT JOIN predictions p ON u.user_id = p.user_id
+      ${hasPeriod ? 'WHERE EXISTS (SELECT 1 FROM predictions p2 WHERE p2.user_id = u.user_id AND p2.created_at >= $1)' : ''}
       GROUP BY u.user_id, u.nickname, u.points, u.peak_points
       HAVING COUNT(p.id) > 0
-      ORDER BY u.points DESC
+      ORDER BY ${sortKey} ${dir}, u.nickname ASC
       LIMIT 100
-    `)
+    `, hasPeriod ? [periodStart] : [])
+
     res.json(result.rows)
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch current leaderboard' })
+    console.error('Unified leaderboard error:', err)
+    res.status(500).json({ error: 'Failed to fetch leaderboard' })
   }
 })
 

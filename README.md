@@ -97,6 +97,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 - **Resilient Model Fallback**: Rotates across gemini-2.0-flash, gemini-flash-lite, and gemini-pro to maintain uptime during 503/429 errors.
 - **Intent Guardrailing**: Strict system instructions prevent hallucinations or off-topic queries. Refuses non-RPS topics, maintaining persona and reducing token costs.
 - **Performance Optimization**: In-memory TTL cache and IP-based rate limiting to prevent abuse and minimize latency.
+- **Strategic Analytical Presets**: Includes a curated set of “one-tap” queries designed to reveal hidden league patterns. These presets guide users in exploring underlying PostgreSQL telemetry, such as move frequency heatmaps and real-time house edge, transforming raw data into actionable betting insights.
 
 ---
 
