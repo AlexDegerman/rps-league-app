@@ -213,7 +213,6 @@ export default function HomePage() {
         triggerErrorRef.current(data.error || 'MATCH ALREADY ENDED')
       }
     } catch (err: unknown) {
-      console.log('handlePick catch:', err)
       if (err instanceof Error && err.name === 'AbortError') {
         triggerErrorRef.current('CONNECTION TOO SLOW')
       } else {

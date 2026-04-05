@@ -16,7 +16,6 @@ router.get('/leaderboard/unified', async (req, res) => {
     const sortParam = (req.query.sort as string) || ''
     const dir = req.query.dir === 'asc' ? 'ASC' : 'DESC'
 
-    // Whitelist sort columns
     const sortWhitelist: Record<string, string> = {
       points: 'u.points',
       gained: 'gained',
@@ -41,7 +40,6 @@ router.get('/leaderboard/unified', async (req, res) => {
     const periodStart = tab === 'daily' ? dayStartMs : tab === 'weekly' ? weekStartMs : 0
     const hasPeriod = periodStart > 0
 
-    // Default sort per tab
     const defaultSort = tab === 'daily' ? 'points' : tab === 'weekly' ? 'gained' : 'peak'
     const sortKey = sortWhitelist[sortParam] ?? sortWhitelist[defaultSort]
 

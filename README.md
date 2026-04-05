@@ -35,10 +35,7 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
 - High-frequency match system (5s intervals, 17,000+ daily events)
 - Instant user creation with persistent ID and nickname
 - Massive Match History: Optimized to handle and query a dataset of 10,000+ matches.
-- Leaderboards for:
-  - Current points
-  - Weekly gains
-  - All-time peak
+- Unified Ranking Engine: Dual leaderboards for Players and Predictors with deep-linkable URL state, supporting dynamic time-filtering (Daily/Weekly/All-Time) and multi-metric sorting (Points, Gained, Peak, Win Rate).
 - Player profiles with nickname randomization and recovery codes
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
@@ -133,6 +130,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 - Player vs player head-to-head statistics
 - Dynamic Risk & Multiplier Engine: Asymmetric betting system with “Flash Events” with increased gain and loss rates to enhance strategic depth.
 - Deeper AI-driven insights and trend detection
+- Cosmetic Prestige System: Spend earned points on profile customizations, including unique name colors, tiered badges, and exclusive icon sets to stand out on the leaderboards.
 
 ---
 
@@ -149,9 +147,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 | GET | `/api/matches/players/:name/stats` | Player career stats |
 | GET | `/api/leaderboard/historical` | Historical player leaderboard |
 | GET | `/api/leaderboard/today` | Today's player leaderboard |
-| GET | `/api/predictions/leaderboard` | All-time peak predictor leaderboard |
-| GET | `/api/predictions/leaderboard/weekly` | Weekly gains leaderboard |
-| GET | `/api/predictions/leaderboard/current` | Current points leaderboard |
+| GET | `/api/predictions/leaderboard/unified?tab=[period]&sort=[metric]` | Unified predictor leaderboard with dynamic time filters and sortable performance metrics |
 | POST | `/api/predictions` | Submit a prediction |
 | GET | `/api/predictions/:userId/points` | User points and peak |
 | GET | `/api/predictions/:userId/stats` | User prediction stats |
@@ -170,9 +166,16 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 Backend (`/backend/.env`)
 ```bash
+# Database & Security
 DATABASE_URL=your_supabase_connection_string
 CORS_ORIGIN=http://localhost:3000
+
+# AI Integration
 GEMINI_API_KEY=your_gemini_api_key
+
+# Observability (Optional)
+# Leave blank to disable administrative audit logging
+DISCORD_LOG_WEBHOOK=your_discord_webhook_url
 ```
 ---
 
@@ -200,9 +203,18 @@ npm run dev
 
 Open http://localhost:3000
 
+---
 
 ## ⚠️ Disclaimer
 
 This project is a non-commercial portfolio piece created for educational purposes.  
-All points and in-app currency are strictly virtual and have no real-world value.  
+All points are strictly virtual and have no real-world value.  
 No real-money gambling or payouts are offered.
+
+---
+
+## 🔮 Oracle Privacy & Monitoring
+To maintain system stability and fine-tune AI behavior, anonymized queries are logged to a private administrative audit channel.
+- **Privacy**: IP addresses are masked (e.g., `192.168.x.x`). 
+- **Security**: No authentication tokens, passwords, or personally identifiable information are logged or stored
+- **Observability**: Enables real-time monitoring of model behavior, including hallucinations and edge-case detection during live matches
