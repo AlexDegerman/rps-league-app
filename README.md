@@ -170,6 +170,10 @@ Backend (`/backend/.env`)
 DATABASE_URL=your_supabase_connection_string
 CORS_ORIGIN=http://localhost:3000
 
+# Infrastructure Automation
+# Secret key for GitHub Actions reset workflows
+RESET_SECRET=your_long_random_secret
+
 # AI Integration
 GEMINI_API_KEY=your_gemini_api_key
 

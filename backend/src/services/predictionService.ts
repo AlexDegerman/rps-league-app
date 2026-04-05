@@ -144,7 +144,12 @@ export const resolvePrediction = async (
     )
 
     await pool.query(
-      `UPDATE users SET points = $1, peak_points = GREATEST(peak_points, $1) WHERE user_id = $2`,
+      `UPDATE users 
+      SET points = $1, 
+          peak_points = GREATEST(peak_points, $1),
+          daily_peak = GREATEST(daily_peak, $1),
+          weekly_peak = GREATEST(weekly_peak, $1)
+      WHERE user_id = $2`,
       [newPoints, row.user_id]
     )
 

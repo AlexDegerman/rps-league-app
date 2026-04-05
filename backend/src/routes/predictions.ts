@@ -15,11 +15,17 @@ router.get('/leaderboard/unified', async (req, res) => {
     const tab = (req.query.tab as string) || 'daily'
     const sortParam = (req.query.sort as string) || ''
     const dir = req.query.dir === 'asc' ? 'ASC' : 'DESC'
+    const peakColumn =
+      tab === 'daily'
+        ? 'u.daily_peak'
+        : tab === 'weekly'
+          ? 'u.weekly_peak'
+          : 'u.peak_points'
 
     const sortWhitelist: Record<string, string> = {
       points: 'u.points',
       gained: 'gained',
-      peak: 'u.peak_points',
+      peak: peakColumn,
       wins: 'wins',
       losses: 'losses',
       winrate: 'win_rate'
@@ -43,12 +49,13 @@ router.get('/leaderboard/unified', async (req, res) => {
     const defaultSort = tab === 'daily' ? 'points' : tab === 'weekly' ? 'gained' : 'peak'
     const sortKey = sortWhitelist[sortParam] ?? sortWhitelist[defaultSort]
 
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT
         u.user_id,
         u.nickname,
         u.points,
-        u.peak_points,
+        ${peakColumn} AS peak_points,
         COALESCE(SUM(p.gain_loss) FILTER (WHERE p.gain_loss > 0 ${hasPeriod ? 'AND p.created_at >= $1' : ''}), 0) AS gained,
         COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS wins,
         COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS losses,
@@ -73,7 +80,9 @@ router.get('/leaderboard/unified', async (req, res) => {
       HAVING COUNT(p.id) > 0
       ORDER BY ${sortKey} ${dir}, u.nickname ASC
       LIMIT 100
-    `, hasPeriod ? [periodStart] : [])
+    `,
+      hasPeriod ? [periodStart] : []
+    )
 
     res.json(result.rows)
   } catch (err) {
@@ -193,6 +202,36 @@ router.post('/recover', async (req, res) => {
     })
   } catch (err) {
     res.status(500).json({ error: 'Failed to recover profile' })
+  }
+})
+
+// POST /api/predictions/reset/daily - called by GitHub Actions cron
+router.post('/reset/daily', async (req, res) => {
+  try {
+    const secret = req.headers['x-reset-secret']
+    if (secret !== process.env.RESET_SECRET)
+      return res.status(401).json({ error: 'Unauthorized' })
+
+    await pool.query(`UPDATE users SET daily_peak = points`)
+    console.log('Daily peak reset at', new Date().toISOString())
+    res.json({ success: true, reset: 'daily' })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reset daily peak' })
+  }
+})
+
+// POST /api/predictions/reset/weekly - called by GitHub Actions cron
+router.post('/reset/weekly', async (req, res) => {
+  try {
+    const secret = req.headers['x-reset-secret']
+    if (secret !== process.env.RESET_SECRET)
+      return res.status(401).json({ error: 'Unauthorized' })
+
+    await pool.query(`UPDATE users SET weekly_peak = points`)
+    console.log('Weekly peak reset at', new Date().toISOString())
+    res.json({ success: true, reset: 'weekly' })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to reset weekly peak' })
   }
 })
 

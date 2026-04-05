@@ -1,0 +1,60 @@
+name: Reset Peak Points
+
+on:
+  schedule:
+    # Daily reset — runs at 00:01 UTC every day
+    - cron: "1 0 * * *"
+    # Weekly reset — runs at 00:02 UTC every Monday
+    - cron: "2 0 * * 1"
+  workflow_dispatch:
+    inputs:
+      reset_type:
+        description: 'Which reset to run'
+        required: true
+        default: 'daily'
+        type: choice
+        options:
+          - daily
+          - weekly
+          - both
+
+jobs:
+  reset-daily:
+    runs-on: ubuntu-latest
+    # Run on daily cron OR manual trigger with daily/both
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '1 0 * * *' ||
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.reset_type == 'daily' || github.event.inputs.reset_type == 'both')
+    steps:
+      - name: Reset daily peak
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "x-reset-secret: ${{ secrets.RESET_SECRET }}" \
+            https://rps-league-g275.onrender.com/api/predictions/reset/daily)
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Daily reset failed with status $RESPONSE"
+            exit 1
+          fi
+          echo "Daily peak reset successful"
+
+  reset-weekly:
+    runs-on: ubuntu-latest
+    # Run on Monday cron OR manual trigger with weekly/both
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '2 0 * * 1' ||
+      github.event_name == 'workflow_dispatch' && (github.event.inputs.reset_type == 'weekly' || github.event.inputs.reset_type == 'both')
+    steps:
+      - name: Reset weekly peak
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "x-reset-secret: ${{ secrets.RESET_SECRET }}" \
+            https://rps-league-g275.onrender.com/api/predictions/reset/weekly)
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Weekly reset failed with status $RESPONSE"
+            exit 1
+          fi
+          echo "Weekly peak reset successful"
