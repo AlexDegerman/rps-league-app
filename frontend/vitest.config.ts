@@ -11,7 +11,15 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: ['./vitest.setup.ts'],
     globals: true,
-    pool: 'vmThreads',
+    css: false,
+    pool: 'threads',
+    exclude: [
+      '**/node_modules/**',
+      '**/.next/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**'
+    ]
   },
   resolve: {
     alias: {
