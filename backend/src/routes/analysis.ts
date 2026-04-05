@@ -146,7 +146,10 @@ router.post('/', async (req: Request, res: Response) => {
     if (userRate.count >= RATE_LIMIT) {
       return res
         .status(429)
-        .json({ error: 'Asking too many questions. Wait a minute.' })
+        .json({
+          error:
+            'The Oracle is annoyed. Asking too many questions. Wait a minute.'
+        })
     }
     userRate.count++
     rateLimitMap.set(ip, userRate)
