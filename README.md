@@ -138,6 +138,28 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 
 ---
 
+## 🚀 CI/CD & Automation
+
+The RPS League stack is fully automated via **GitHub Actions** to manage testing, deployment, and high-frequency maintenance.
+
+### Pipeline Overview
+| Stage | Tool | Purpose |
+| :--- | :--- | :--- |
+| **Testing** | Vitest | ~28s suites for Betting Loops & API logic |
+| **Deployment** | Vercel / Render | Zero-touch CD after passing CI |
+| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets |
+| **Reliability** | Keep-Alive Pings | Prevent cold-starts on free-tier hosting |
+
+### Key Workflows
+- **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
+- **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
+- **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
+
+### Optimization Notes
+- **Warm-up Script:** Pings critical endpoints every 5 minutes to maintain smooth 5-second match cadence on serverless/free-tier hosting.
+
+---
+
 ## 🚀 Future Improvements
 
 - Friends system with social leaderboard
@@ -239,28 +261,6 @@ npm run dev
 ```
 
 Open http://localhost:3000
-
----
-
-## 🚀 CI/CD & Automation
-
-The RPS League stack is fully automated via **GitHub Actions** to manage testing, deployment, and high-frequency maintenance.
-
-### Pipeline Overview
-| Stage | Tool | Purpose |
-| :--- | :--- | :--- |
-| **Testing** | Vitest | ~28s suites for Betting Loops & API logic |
-| **Deployment** | Vercel / Render | Zero-touch CD after passing CI |
-| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets |
-| **Reliability** | Keep-Alive Pings | Prevent cold-starts on free-tier hosting |
-
-### Key Workflows
-- **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
-- **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
-- **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
-
-### Optimization Notes
-- **Warm-up Script:** Pings critical endpoints every 5 minutes to maintain smooth 5-second match cadence on serverless/free-tier hosting.
 
 ---
 
