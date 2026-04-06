@@ -38,9 +38,9 @@ const TAB_LABELS: Record<Tab, string> = {
 }
 
 const EMPTY_MESSAGES: Record<Tab, string> = {
-  daily: 'No bets placed today yet — be the first to claim the top spot!',
-  weekly: 'Season just started — be the first to claim the weekly crown!',
-  alltime: 'No predictors yet — jump in and make history!'
+  daily: 'No bets placed today yet, be the first to claim the top spot!',
+  weekly: 'Season just started, be the first to claim the weekly crown!',
+  alltime: 'No predictors yet, jump in and make history!'
 }
 
 function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
@@ -130,13 +130,11 @@ function LeaderboardContent() {
 
   return (
     <div className="max-w-4xl mx-auto px-4">
-      {/* Main Page Title */}
       <div className="py-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-1">Leaderboard</h1>
         <p className="text-gray-500 text-sm">Users ranked by performance</p>
       </div>
 
-      {/* Primary Switcher: Predictors vs Players */}
       <div className="flex gap-2 mb-4">
         <button className="px-6 py-2 rounded font-bold text-xs uppercase bg-yellow-400 text-gray-900 shadow-sm">
           Predictors
@@ -149,7 +147,6 @@ function LeaderboardContent() {
         </Link>
       </div>
 
-      {/* Secondary Sub-Tabs: Daily, Weekly, All Time */}
       <div className="sticky top-16 z-40 bg-gray-100 pb-4">
         <div className="flex gap-2">
           {(['daily', 'weekly', 'alltime'] as Tab[]).map((t) => (
@@ -182,7 +179,6 @@ function LeaderboardContent() {
                   <th className="text-left px-3 py-3 text-gray-400 font-bold text-xs uppercase">
                     Player
                   </th>
-
                   {th(
                     'W',
                     'wins',
@@ -195,14 +191,12 @@ function LeaderboardContent() {
                     'text-center',
                     'hidden min-[600px]:table-cell'
                   )}
-
                   {th(
                     'Win%',
                     'winrate',
                     'text-center',
                     'hidden min-[680px]:table-cell'
                   )}
-
                   {th(
                     'Points',
                     'points',
@@ -252,7 +246,6 @@ function LeaderboardContent() {
 
                         <td className="px-3 py-3">
                           <div className="flex flex-col">
-                            {/* ROW 1: Name and Badge */}
                             <div className="flex items-center gap-2">
                               <span
                                 className={`font-medium ${isMe ? 'text-purple-600 font-bold' : 'text-gray-800'}`}
@@ -266,43 +259,46 @@ function LeaderboardContent() {
                               )}
                             </div>
 
-                            {/* ROW 2 & 3: Mobile Stats Grid (Hidden on desktop) */}
                             <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
-                              {/* Row 2: Value Names (Labels) with custom fixed-width columns for W/L */}
-                              <div className="grid grid-cols-[35px_35px_1fr_1fr_1fr] gap-1 text-gray-400 font-bold uppercase tracking-wider text-left">
-                                <div>W</div>
-                                <div>L</div>
-                                <div className="pl-1">Pts</div>
-                                <div>Gain</div>
-                                <div>Peak</div>
+                              <div className="grid grid-cols-10 gap-1 text-gray-400 font-bold uppercase tracking-wider text-left">
+                                <div className="col-span-1">W</div>
+                                <div className="col-span-1">L</div>
+                                <div className="hidden min-[380px]:block min-[380px]:col-span-2">
+                                  Win%
+                                </div>
+                                <div className="col-span-3 min-[380px]:col-span-2 pl-1">
+                                  Pts
+                                </div>
+                                <div className="col-span-3 min-[380px]:col-span-2">
+                                  Gain
+                                </div>
+                                <div className="col-span-2">Peak</div>
                               </div>
 
-                              {/* Row 3: Values using whitespace-nowrap to prevent clashing numbers */}
-                              <div className="grid grid-cols-[35px_35px_1fr_1fr_1fr] gap-1 font-medium text-left items-center">
-                                <div className="text-green-600 font-bold truncate">
+                              <div className="grid grid-cols-10 gap-1 font-medium text-left items-center">
+                                <div className="col-span-1 text-green-600 font-bold truncate">
                                   {entry.wins}
                                 </div>
-                                <div className="text-red-500 font-bold truncate">
+                                <div className="col-span-1 text-red-500 font-bold truncate">
                                   {entry.losses}
                                 </div>
-
-                                {/* Added pl-1 and flex-shrink-0 to protect the icon and points spacing */}
-                                <div className="text-purple-600 font-bold flex items-center gap-0.5 whitespace-nowrap pl-1">
+                                <div className="hidden min-[380px]:block min-[380px]:col-span-2 text-indigo-500 font-bold">
+                                  {entry.win_rate}%
+                                </div>
+                                <div className="col-span-3 min-[380px]:col-span-2 text-purple-600 font-bold flex items-center gap-0.5 whitespace-nowrap pl-1">
                                   <GemIcon
                                     size={8}
                                     className="text-purple-500 shrink-0"
                                   />
                                   {formatPoints(Number(entry.points))}
                                 </div>
-
                                 <div
-                                  className={`font-bold whitespace-nowrap ${gained >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                                  className={`col-span-3 min-[380px]:col-span-2 font-bold whitespace-nowrap ${gained >= 0 ? 'text-green-500' : 'text-red-500'}`}
                                 >
                                   {gained >= 0 ? '+' : ''}
                                   {formatPoints(gained)}
                                 </div>
-
-                                <div className="text-gray-600 font-bold whitespace-nowrap">
+                                <div className="col-span-2 text-gray-600 font-bold whitespace-nowrap">
                                   {formatPoints(Number(entry.peak_points))}
                                 </div>
                               </div>
@@ -316,11 +312,9 @@ function LeaderboardContent() {
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-red-500">
                           {entry.losses}
                         </td>
-
                         <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500">
                           {entry.win_rate}%
                         </td>
-
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold text-purple-600">
                           {formatPoints(Number(entry.points))}
                         </td>

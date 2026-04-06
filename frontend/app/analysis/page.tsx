@@ -27,6 +27,22 @@ export default function AnalysisPage() {
   const [currentResult, setCurrentResult] = useState<string | null>(null)
   const [history, setHistory] = useState<HistoryItem[]>([])
   const [currentSource, setCurrentSource] = useState<string | null>(null)
+  const [showPrivacyInfo, setShowPrivacyInfo] = useState(false)
+  const [placeholder, setPlaceholder] = useState('Ask the Oracle...')
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setPlaceholder('Ask the Oracle...')
+      } else {
+        setPlaceholder('Ask about streaks, volume, or players...')
+      }
+    }
+    handleResize()
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     const saved = localStorage.getItem('aiQueryHistory')
@@ -83,9 +99,53 @@ export default function AnalysisPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <div className="text-center mb-10">
-        <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold uppercase tracking-widest mb-4">
-          Powered by Gemini 1.5
-        </span>
+        <div className="flex items-center justify-center gap-1 mb-4">
+          <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold uppercase tracking-widest">
+            Powered by Gemini 1.5
+          </span>
+
+          <div className="relative group flex items-center">
+            <button
+              type="button"
+              onClick={() => setShowPrivacyInfo(!showPrivacyInfo)}
+              onBlur={() => setShowPrivacyInfo(false)}
+              /* sm:pointer-events-none disables clicking on desktop so only hover works */
+              className="text-indigo-300 hover:text-indigo-600 transition-colors p-1 outline-none sm:pointer-events-none"
+              aria-label="Privacy information"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </button>
+
+            <div
+              className={`absolute right-0 sm:left-1/2 sm:-translate-x-1/2 bottom-full mb-2 
+                w-48 sm:w-56 p-2.5 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl 
+                transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed
+                
+                /* Mobile Logic: Only show if state is true */
+                ${showPrivacyInfo ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} 
+                
+                /* Desktop Logic: Show on hover */
+                sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto`}
+            >
+              Prompts are logged for safety monitoring. IP addresses are masked
+              and no personal data is stored.
+              <div className="absolute right-2 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
+            </div>
+          </div>
+        </div>
+
         <h1 className="text-4xl font-black text-gray-900 mb-2">The Oracle</h1>
         <p className="text-gray-500">
           Real-time betting telemetry & player analysis.
@@ -109,8 +169,8 @@ export default function AnalysisPage() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ask about streaks, volume, or players..."
-          className="w-full p-5 pr-28 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 focus:ring-0 outline-none transition-all text-lg shadow-xl"
+          placeholder={placeholder} // Use the state variable here
+          className="w-full p-4 pr-20 sm:p-5 sm:pr-28 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 outline-none text-base sm:text-lg shadow-xl"
         />
         <button
           type="submit"
@@ -128,12 +188,18 @@ export default function AnalysisPage() {
       )}
 
       {currentResult && (
-        <div className="p-8 mb-10 bg-white rounded-3xl border-2 border-indigo-500 shadow-2xl relative overflow-hidden">
-          {/* Source Badge */}
-          {currentSource && (
-            <div className="absolute top-4 right-4">
+        <div className="p-6 sm:p-8 mb-10 bg-white rounded-3xl border-2 border-indigo-500 shadow-2xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+              <span className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
+                Oracle Insight
+              </span>
+            </div>
+
+            {currentSource && (
               <span
-                className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border ${
+                className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border self-start sm:self-auto ${
                   currentSource === 'active_match_history'
                     ? 'bg-blue-50 text-blue-600 border-blue-200'
                     : currentSource === 'predictor_leaderboard'
@@ -143,17 +209,10 @@ export default function AnalysisPage() {
               >
                 {currentSource.replace(/_/g, ' ')}
               </span>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            <span className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
-              Oracle Insight
-            </span>
+            )}
           </div>
 
-          <p className="text-xl text-gray-800 leading-relaxed font-medium italic">
+          <p className="text-lg sm:text-xl text-gray-800 leading-relaxed font-medium italic">
             &quot;{currentResult}&quot;
           </p>
         </div>
@@ -178,7 +237,10 @@ export default function AnalysisPage() {
               <div
                 key={item.id}
                 className="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors cursor-pointer group"
-                onClick={() => setCurrentResult(item.result)}
+                onClick={() => {
+                  setCurrentResult(item.result)
+                  setCurrentSource(item.source ?? null)
+                }}
               >
                 <p className="text-xs font-bold text-gray-400 mb-1">
                   Q: {item.query}

@@ -41,6 +41,7 @@ export default function HomePage() {
   const [now, setNow] = useState(() => Date.now())
   const [inputString, setInputString] = useState(betAmount.toString())
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showPointsInfo, setShowPointsInfo] = useState(false)
 
   const triggerErrorRef = useRef((msg: string) => {
     setErrorMessage(msg)
@@ -415,8 +416,11 @@ export default function HomePage() {
             </span>
 
             <div className="relative group flex items-center ml-1">
-              <div
-                className="text-gray-300 hover:text-purple-500 transition-colors cursor-default p-1"
+              <button
+                type="button"
+                onClick={() => setShowPointsInfo(!showPointsInfo)}
+                onBlur={() => setShowPointsInfo(false)}
+                className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
                 aria-label="Points information"
               >
                 <svg
@@ -432,13 +436,16 @@ export default function HomePage() {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-              </div>
+              </button>
 
               <div
-                className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 sm:w-56 p-2.5 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl 
-                opacity-0 pointer-events-none 
-                group-hover:opacity-100 
-                transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed"
+                className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 
+                  w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl 
+                  transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed
+                  
+                  /* State-based visibility for mobile and hover for desktop */
+                  ${showPointsInfo ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} 
+                  sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto`}
               >
                 Virtual simulation points. No real-world currency or value. Used
                 for platform performance testing.
