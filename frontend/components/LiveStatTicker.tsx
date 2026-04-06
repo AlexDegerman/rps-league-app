@@ -62,7 +62,7 @@ export default function LiveStatsTicker() {
           Daily MVP
         </span>
         <div className="flex items-center gap-1 leading-none">
-          <span className="text-[10px] font-black text-purple-700 truncate max-w-12.5 sm:max-w-25">
+          <span className="text-[10px] font-black text-purple-700 truncate max-[400px]:max-w-12.5 max-w-25">
             {stats.mvp?.nickname || '---'}
           </span>
           {stats.mvp && (
