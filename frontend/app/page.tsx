@@ -18,6 +18,7 @@ import {
 import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
 import LiveStatsTicker from '@/components/LiveStatTicker'
+import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -129,27 +130,9 @@ export default function HomePage() {
   const { matches, setMatches, hasMore, isLoadingMore, loadMatches } =
     useInfiniteScroll({ fetchFn })
 
-  useEffect(() => {
-    if (!resultAnim) return
-    const end = resultAnim.amount
-    const duration = 600
-    const startTime = performance.now()
+  const animatedPoints = useAnimatedBigInt(points, 1000)
 
-    const animate = (time: number) => {
-      const progress = Math.min((time - startTime) / duration, 1)
-      const easedFactor = 1 - Math.pow(1 - progress, 3)
-
-      if (progress < 1) {
-        const scaledFactor = BigInt(Math.floor(easedFactor * 1000))
-        setAnimatedAmount((end * scaledFactor) / 1000n)
-        requestAnimationFrame(animate)
-      } else {
-        setAnimatedAmount(end)
-      }
-    }
-    const rafId = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(rafId)
-  }, [resultAnim])
+  const animatedResult = useAnimatedBigInt(resultAnim?.amount ?? 0n, 600, true)
 
   useEffect(() => {
     getOrCreateUser()
@@ -380,7 +363,7 @@ export default function HomePage() {
     })
 
     return () => es.close()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getConfettiColors = (tier?: string) => {
@@ -439,8 +422,8 @@ export default function HomePage() {
             className={`text-5xl sm:text-7xl font-black drop-shadow-2xl animate-bounce leading-tight ${resultAnim.win ? 'text-green-500' : 'text-red-500'}`}
           >
             {resultAnim.win
-              ? `+${formatPoints(animatedAmount)}`
-              : `-${formatPoints(animatedAmount)}`}
+              ? `+${formatPoints(animatedResult)}`
+              : `-${formatPoints(animatedResult)}`}
           </span>
 
           {resultAnim.win && (
@@ -485,7 +468,7 @@ export default function HomePage() {
               >
                 <GemIcon size={24} />
                 <span className={`text-xl font-bold ${getAmountColor(points)}`}>
-                  {pointsLoaded ? formatPoints(points) : '...'}
+                  {pointsLoaded ? formatPoints(animatedPoints) : '...'}
                 </span>
               </div>
 
