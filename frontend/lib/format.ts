@@ -333,7 +333,7 @@ export const getBonusStyles = (tier: string) => {
     default:
       return {
         label: 'COMMON BONUS',
-        text: 'text-gray-400',
+        text: 'text-white',
         containerClass: `${base} text-xl`,
         scale: 'scale-100',
         glow: 'drop-shadow-sm'

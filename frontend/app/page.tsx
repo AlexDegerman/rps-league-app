@@ -401,15 +401,16 @@ export default function HomePage() {
 
       {/* Result Animation Overlay */}
       {resultAnim && (
-        <div className="fixed top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center justify-center w-full max-w-md">
+        <div className="fixed top-[50%] sm:top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center justify-center w-full max-w-md">
           {resultAnim.bonus && (
             <div
               className={`flex flex-col items-center mb-3 animate-in zoom-in slide-in-from-bottom-4 
-          ${getBonusStyles(resultAnim.bonus.tier).containerClass} 
+          ${getBonusStyles(resultAnim.bonus.tier).containerClass}
+          ${getBonusStyles(resultAnim.bonus.tier).scale}
           ${getBonusStyles(resultAnim.bonus.tier).glow}`}
             >
               <span
-                className={`text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}
+                className={`text-[8px] sm:text-[10px]font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}
               >
                 {getBonusStyles(resultAnim.bonus.tier).label}
               </span>
@@ -423,9 +424,9 @@ export default function HomePage() {
           )}
 
           <span
-            className={`text-6xl sm:text-8xl font-black animate-bounce leading-tight ${
+            className={`text-4xl sm:text-6xl font-black animate-bounce leading-tight ${
               resultAnim.win ? 'text-green-500' : 'text-red-500'
-            }`} 
+            }`}
           >
             {resultAnim.win
               ? `+${formatPoints(animatedResult)}`
