@@ -19,7 +19,6 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
     * [SSE Buffering](#sse-buffering-in-production)
     * [High-frequency UI Ticker](#high-frequency-ui-ticker-100000-daily-events)
     * [Concurrency & Prioritization](#concurrency-and-event-prioritization)
-    * [Cold Start Resilience](#cold-start-resilience--connection-guarding)
     * [Handling Extreme Numbers (BigInt)](#handling-extreme-numbers-quadrillions--vigintillions)
 * [🤖 AI Oracle & Analytics](#-ai-oracle--analytics)
 * [📱 Mobile & PWA Experience](#-mobile--pwa-experience)
@@ -110,8 +109,8 @@ Handling a constant stream of ~1.2 events per second (100,000+ daily) posed a ri
 **Concurrency and event prioritization**
 Designed a non-blocking feed that prioritizes real user actions over simulated demo traffic. Used a weighted splice logic to ensure "Live" user bets are injected immediately into the front of the processing queue, guaranteeing zero-latency feedback for players.
 
-**Cold start resilience & Connection Guarding**
-Engineered a connection-state monitor that detects backend cold starts and "stale" event streams. Replaces empty UI states with active status messaging and heartbeat tracking, ensuring the user is informed during server spin-up or network drops.
+**Real-Time Connection Guarding & State Monitoring**
+Engineered a robust connection-state monitor to manage "stale" event streams and intermittent network drops. Implemented heartbeat tracking and active status messaging to ensure seamless UI transitions and zero-data-loss during session interruptions.
 
 **Handling Extreme Numbers (Quadrillions → Vigintillions)**
 Standard JavaScript Numbers (IEEE 754) lose integer precision past ~9 quadrillion (2⁵³−1). In a high-frequency betting system with 100%+ multipliers, this limit was exceeded within hours. I refactored the full stack—including PostgreSQL numeric fields (NUMERIC(100,0)), Node.js backend, and React frontend—to use native BigInt. This allows safe calculation, storage, and rendering of point values up to the Vigintillions, even under extreme betting volumes.
@@ -134,13 +133,11 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 RPS League is designed with a mobile-first approach, leveraging modern PWA standards to deliver a fast, app-like experience across devices.
 
-- **Responsive "Trading Card" Layout**: On smaller screens, the leaderboard transforms from a wide table into a compact vertical grid. Custom CSS Grid ratios (`35px 35px 1fr 1fr 1fr`) ensure key stats like **Wins**, **Losses**, and **Points** remain readable without horizontal scrolling, even with large values.
+- **Adaptive Leaderboard Architecture**: On smaller screens, the leaderboard dynamically pivots from a wide table into a specialized 14-column grid. This ensures high-density data—including Wins, Losses, Points, and Peak Performance—remains perfectly aligned and readable without horizontal scrolling.
 
 - **PWA Install Experience**: Configured via `manifest` and Next.js Metadata API, enabling installable app behavior on mobile and desktop. Includes optimized icons and rich metadata for a polished, native-like installation prompt.
 
-- **Native-Feel Interactions**: Touch-friendly UI with optimized tap targets for betting actions, including "ALL IN", and a smooth, auto-scrolling live feed designed for thumb-based navigation.
-
-- **Connection Awareness**: Built for real-time, always-online gameplay. A connection guard system detects backend cold starts or dropped streams and surfaces clear status feedback to the user.
+- **Native-Feel Interactions**: Touch-friendly UI with optimized tap targets for betting actions (e.g., "ALL IN") and a real-time live feed that prepends new matches instantly, designed for seamless thumb-based navigation.
 
 ---
 
@@ -180,7 +177,6 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 | **Testing** | Vitest | ~28s suites for Betting Loops & API logic |
 | **Deployment** | Vercel / Render | Zero-touch CD after passing CI |
 | **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets |
-| **Reliability** | Keep-Alive Pings | Prevent cold-starts on free-tier hosting |
 
 ### Key Workflows
 - **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
