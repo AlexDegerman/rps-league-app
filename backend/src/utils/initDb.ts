@@ -17,8 +17,8 @@ export const initDb = async (): Promise<void> => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       user_id TEXT PRIMARY KEY,
-      points BIGINT NOT NULL DEFAULT 100000,
-      peak_points BIGINT NOT NULL DEFAULT 100000,
+      points BIGINT NOT NULL DEFAULT 200000,
+      peak_points BIGINT NOT NULL DEFAULT 200000,
       nickname TEXT,
       recovery_code TEXT UNIQUE
     )

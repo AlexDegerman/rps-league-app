@@ -22,7 +22,9 @@ import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
+// Module-level variables to persist across page navigations
 let _backendReady = false
+let _hasShownAutoNotice = false
 
 interface BonusData {
   amount: bigint
@@ -35,7 +37,7 @@ export default function HomePage() {
   const [predictions, setPredictions] = useState<Map<string, PredictionRecord>>(
     new Map()
   )
-  const [points, setPoints] = useState<bigint>(100000n)
+  const [points, setPoints] = useState<bigint>(200000n)
   const [pointsLoaded, setPointsLoaded] = useState(false)
   const [betAmount, setBetAmount] = useState<bigint>(100000n)
   const [serverOffset, setServerOffset] = useState<number>(0)
@@ -45,8 +47,8 @@ export default function HomePage() {
     bonus?: BonusData | null
     confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
   } | null>(null)
-  const [peakPoints, setPeakPoints] = useState<bigint>(100000n)
-  const [autoAllIn, setAutoAllIn] = useState(false)
+  const [peakPoints, setPeakPoints] = useState<bigint>(200000n)
+  const [autoAllIn, setAutoAllIn] = useState(true)
   const [isHydrated, setIsHydrated] = useState(false)
   const { playWin, playLoss, soundOn, toggleSound } = useSound()
   const [showJumpButton, setShowJumpButton] = useState(false)
@@ -57,6 +59,9 @@ export default function HomePage() {
   const [isFocused, setIsFocused] = useState(false)
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
   const [showBonusExplainer, setShowBonusExplainer] = useState(false)
+
+  // Initialize notice state based on the module-level variable
+  const [showAutoNotice, setShowAutoNotice] = useState(!_hasShownAutoNotice)
 
   const triggerErrorRef = useRef((msg: string) => {
     setErrorMessage(msg)
@@ -100,7 +105,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const saved = localStorage.getItem('autoAllIn')
-    if (saved !== null) setAutoAllIn(saved === 'true')
+    if (saved === 'false') setAutoAllIn(false)
     setIsHydrated(true)
   }, [])
 
@@ -114,6 +119,17 @@ export default function HomePage() {
       if (!isFocused) setInputString(points.toString())
     }
   }, [autoAllIn, points, isHydrated, isFocused])
+
+  // Handle Auto All-In notification lifecycle
+  useEffect(() => {
+    if (showAutoNotice) {
+      const timer = setTimeout(() => {
+        setShowAutoNotice(false)
+        _hasShownAutoNotice = true // Mark as shown so it doesn't trigger on re-mount
+      }, 4000) // Slightly longer as it's less intrusive
+      return () => clearTimeout(timer)
+    }
+  }, [showAutoNotice])
 
   useEffect(() => {
     const handleScroll = () => setShowJumpButton(window.scrollY > 400)
@@ -187,7 +203,7 @@ export default function HomePage() {
     let succeeded = false
     try {
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 3000)
+      const timeout = setTimeout(() => controller.abort(), 5000)
 
       const res = await fetch(`${API_BASE}/api/predictions`, {
         method: 'POST',
@@ -337,7 +353,11 @@ export default function HomePage() {
         })
       }
 
-      setTimeout(() => setResultAnim(null), 2000)
+      const displayTime = data.bonus?.tier === 'LEGENDARY' ? 4000 : 2000
+
+      setTimeout(() => {
+        setResultAnim(null)
+      }, displayTime)
 
       setPredictions((prev) => {
         const newMap = new Map(prev)
@@ -363,7 +383,7 @@ export default function HomePage() {
     })
 
     return () => es.close()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getConfettiColors = (tier?: string) => {
@@ -410,7 +430,7 @@ export default function HomePage() {
           ${getBonusStyles(resultAnim.bonus.tier).glow}`}
             >
               <span
-                className={`text-[8px] sm:text-[10px]font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}
+                className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}
               >
                 {getBonusStyles(resultAnim.bonus.tier).label}
               </span>
@@ -462,10 +482,9 @@ export default function HomePage() {
       )}
 
       {/* Main Controls Container */}
-      <div className="bg-white rounded-t-xl border border-gray-100 shadow-sm p-4">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            {/* Points Scale Name Explainer */}
             <div className="relative group flex items-center">
               <div
                 className="flex items-center gap-2 cursor-pointer select-none"
@@ -479,20 +498,19 @@ export default function HomePage() {
                 </span>
               </div>
 
-              {/* Tooltip */}
               {shouldShowTooltip && (
-                <div className="absolute -top-12 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
+                <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
                   <span
                     className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points)}`}
                   >
                     {numberName}
                   </span>
-                  <div className="absolute -bottom-1 left-6 w-2 h-2 bg-white border-b border-r border-gray-100 rotate-45" />
+                  {/* Arrow pointing up */}
+                  <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
                 </div>
               )}
             </div>
 
-            {/* General Info Icon Zone */}
             <div className="relative group flex items-center ml-1">
               <button
                 type="button"
@@ -518,10 +536,10 @@ export default function HomePage() {
                 </svg>
               </button>
               <div
-                className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
+                className={`absolute left-1/2 -translate-x-1/2 top-full mt w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
               >
                 Virtual simulation points. No real-world currency or value.
-                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900"></div>
               </div>
             </div>
           </div>
@@ -581,28 +599,74 @@ export default function HomePage() {
             >
               ALL IN
             </button>
-            <button
-              onClick={() => setAutoAllIn((prev) => !prev)}
-              className={`flex-1 sm:flex-none px-3 py-2.5 text-[10px] font-bold rounded-lg border transition-all ${autoAllIn ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
-            >
-              AUTO {autoAllIn ? 'ON' : 'OFF'}
-            </button>
+            <div className="relative flex-1 sm:flex-none flex">
+              <button
+                onClick={() => setAutoAllIn((prev) => !prev)}
+                className={`flex-1 w-full sm:w-auto px-3 py-2.5 text-[10px] font-bold rounded-lg border transition-all ${autoAllIn ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
+              >
+                AUTO {autoAllIn ? 'ON' : 'OFF'}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Optimized Auto All-In Notice Banner */}
+        {showAutoNotice && autoAllIn && isHydrated && (
+          <div className="mt-4 flex justify-end animate-in fade-in slide-in-from-top-2 duration-500 ease-out px-1">
+            <div className="relative w-full max-w-[320px] bg-gray-900 rounded-lg p-2.5 px-4 border border-gray-700 shadow-lg">
+              {/* Arrow: Fixed position to align with the AUTO button center */}
+              {/* Arrow: right-8 for mobile, md:right-12 for desktop */}
+              <div className="absolute -top-1.5 right-12 md:right-6 w-3 h-3 bg-gray-900 border-t border-l border-gray-700 rotate-45" />
+
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3 min-w-0 overflow-hidden">
+                  <span className="text-lg flex-none">🚀</span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest leading-tight truncate">
+                      Auto All-In Active
+                    </span>
+                    <p className="text-[10px] text-gray-400 font-medium leading-tight line-clamp-2">
+                      Max speed! Click "AUTO ON" to disable.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowAutoNotice(false)}
+                  className="text-gray-500 hover:text-white transition-colors p-1 flex-none flex items-center justify-center"
+                  aria-label="Close"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <LiveStatsTicker />
 
-      {/* Error Message */}
       {errorMessage && (
         <div className="my-4 transition-all duration-300">
           <div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg font-bold border-2 border-red-400 flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-200">
-            <span className="animate-pulse">⚠️</span> {errorMessage}
+            <span className="animate-pulse">🚨</span> {errorMessage}
           </div>
         </div>
       )}
 
-      <div className="flex flex-row items-center justify-between mb-6 gap-2 px-1">
+      <div className="flex flex-row items-center justify-between mb-1 gap-2 px-1">
         <p className="text-[9px] sm:text-[10px] text-gray-400 font-medium tracking-wide uppercase whitespace-nowrap">
           Points floor: 100,000
         </p>
@@ -611,7 +675,6 @@ export default function HomePage() {
             <span className="text-green-600">WIN: +100%</span>
           </div>
 
-          {/* Bonus Explainer Tooltip */}
           <div className="relative group flex items-center">
             <div
               className="cursor-pointer select-none flex items-center gap-1.5"
@@ -641,7 +704,7 @@ export default function HomePage() {
                   <ul className="text-[9px] text-gray-600 space-y-1 list-disc pl-3">
                     <li>
                       <span className="text-green-600 font-bold">
-                        +40% to +200%
+                        +100% to +1000%
                       </span>{' '}
                       gain on Win
                     </li>
@@ -667,7 +730,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Matches Area */}
       <div className="min-h-[60vh]">
         {!backendReady ? (
           <div className="text-center py-20 animate-pulse text-gray-400 text-sm">
@@ -706,7 +768,6 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Scroll to Top */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className={`fixed bottom-25 right-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}

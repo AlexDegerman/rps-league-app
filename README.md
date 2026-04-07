@@ -40,11 +40,11 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
   - **WIN:** +100% of your bet
   - **LOSE:** -50% of your bet
   - **Floor:** points never drop below 100,000
-  - **Bonus System**: 25% chance per match to trigger a Tiered Bonus.
-    - On Win: Gain an extra 40% to 200% bonus points.
+  - **Bonus System**: 40% chance per match to trigger a Tiered Bonus.
+    - On Win: Gain an extra 100% to 1000% bonus points.
     - On Loss: Lose 20% to 100% fewer points.
     - Tiers: Common, Rare, Epic, and Legendary (with unique UI glows and confetti).
-    - Guarantees a bonus at least every 5 bets if it doesn’t occur naturally from the 25% base chance
+    - Guarantees a bonus at least every 4 bets if it doesn’t occur naturally from the 40% base chance
 - Points contribute to:
   - Current points
   - Weekly gains

@@ -34,44 +34,58 @@ export default function ProfilePage() {
   const [recoverLoading, setRecoverLoading] = useState(false)
   const [recoverConfirm, setRecoverConfirm] = useState(false)
   const [resetConfirm, setResetConfirm] = useState(false)
+  const [resetError, setResetError] = useState('')
 
   useEffect(() => {
     const user = getOrCreateUser()
     setNickname(user.nickname)
     // Gate rendering on mount to avoid SSR/localStorage mismatch
     setMounted(true)
+
     const userId = user.userId
     if (!userId) return
 
-    fetch(`${API}/api/predictions/recovery/${userId}`)
-      .then((res) => res.json())
-      .then((data) => setRecoveryCode(data.recoveryCode))
-      .catch((err) => console.error('Failed to load recovery code:', err))
+    const fetchRecovery = async () => {
+      try {
+        const res = await fetch(`${API}/api/predictions/recovery/${userId}`)
+
+        if (res.ok) {
+          const data = await res.json()
+          setRecoveryCode(data.recoveryCode)
+        } else if (res.status === 404) {
+          setTimeout(fetchRecovery, 1500)
+        }
+      } catch {
+        setTimeout(fetchRecovery, 3000)
+      }
+    }
+
+    const initialDelay = setTimeout(fetchRecovery, 800)
 
     fetch(`${API}/api/predictions/${userId}/points`)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : { points: '200000' }))
       .then((data) => setPoints(data.points.toString()))
-      .catch((err) => console.error('Failed to load points:', err))
+      .catch(() => setPoints('200000'))
 
     fetch(`${API}/api/predictions/${userId}/stats`)
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then(setStats)
-      .catch((err) => console.error('Failed to load stats:', err))
+      .catch(() => setStats(null))
       .finally(() => setStatsLoading(false))
-
+      
     // Rank is derived client-side from the leaderboard array position
     const fetchRank = async (tab: string) => {
       try {
         const res = await fetch(
           `${API}/api/predictions/leaderboard/unified?tab=${tab}`
         )
+        if (!res.ok) return null
         const data = await res.json()
         const index = data.findIndex(
           (e: { user_id: string }) => e.user_id === userId
         )
         return index !== -1 ? index + 1 : null
-      } catch (err) {
-        console.error(`Failed to load ${tab} rank:`, err)
+      } catch {
         return null
       }
     }
@@ -80,9 +94,9 @@ export default function ProfilePage() {
       fetchRank('daily'),
       fetchRank('weekly'),
       fetchRank('alltime')
-    ]).then(([d, w, a]) => {
-      setRanks({ daily: d, weekly: w, allTime: a })
-    })
+    ]).then(([d, w, a]) => setRanks({ daily: d, weekly: w, allTime: a }))
+
+    return () => clearTimeout(initialDelay)
   }, [])
 
   const handleRegenerate = async () => {
@@ -136,10 +150,37 @@ export default function ProfilePage() {
   }
 
   const handleResetProfile = () => {
+    const now = Date.now()
+    const oneHour = 60 * 60 * 1000
+    let timestamps: number[] = []
+
+    try {
+      const stored = localStorage.getItem('rps_restart_timestamps')
+      if (stored) timestamps = JSON.parse(stored)
+    } catch {
+      timestamps = []
+    }
+
+    timestamps = timestamps.filter((t) => now - t < oneHour)
+
+    if (timestamps.length >= 3) {
+      const oldest = timestamps[0]
+      const waitTimeMin = Math.ceil((oneHour - (now - oldest)) / 60000)
+      setResetError(
+        `Rate limit reached. Please wait ${waitTimeMin} minutes before creating another identity.`
+      )
+      return
+    }
+
+    timestamps.push(now)
+    localStorage.setItem('rps_restart_timestamps', JSON.stringify(timestamps))
+
     localStorage.removeItem('rps_user_id')
     localStorage.removeItem('rps_nickname')
     localStorage.removeItem('autoAllIn')
-    window.location.reload()
+    setTimeout(() => {
+      window.location.href = window.location.pathname 
+    }, 50)
   }
 
   if (!mounted) {
@@ -172,7 +213,7 @@ export default function ProfilePage() {
               Randomize
             </button>
           </div>
-          <p className="text-[clamp(1.25rem,5vw,1.75rem)] font-black text-gray-900 leading-tight">
+          <p className="text-[clamp(1rem,4vw,1.4rem)] font-black text-gray-900 leading-tight">
             {nickname}
           </p>
         </div>
@@ -373,11 +414,16 @@ export default function ProfilePage() {
             <p className="text-xs font-black text-red-800 mb-2 uppercase">
               Confirm Identity Reset
             </p>
-            <p className="text-xs text-red-700 mb-5 leading-relaxed">
-              This generates a brand-new profile with 100,000 points. Your
+            <p className="text-xs text-red-700 mb-4 leading-relaxed">
+              This generates a brand-new profile with 200,000 points. Your
               current progress will be unreachable without your code:{' '}
               <span className="font-mono font-black">{recoveryCode}</span>
             </p>
+            {resetError && (
+              <p className="text-xs font-bold text-red-600 mb-4 bg-red-100 p-2 rounded-lg inline-block">
+                {resetError}
+              </p>
+            )}
             <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={handleResetProfile}
@@ -386,7 +432,10 @@ export default function ProfilePage() {
                 Yes, Create New Identity
               </button>
               <button
-                onClick={() => setResetConfirm(false)}
+                onClick={() => {
+                  setResetConfirm(false)
+                  setResetError('')
+                }}
                 className="px-6 py-3 bg-white text-red-400 rounded-xl text-xs font-black uppercase hover:bg-gray-50 transition"
               >
                 Cancel

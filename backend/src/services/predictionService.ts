@@ -50,8 +50,9 @@ export const generateRecoveryCode = (): string => {
 }
 
 const POINTS_FLOOR = 100000n
+const STARTING_POINTS = 200000n
 
-// Creates user with floor balance on first visit, returns current points otherwise.
+// Creates user with 200k points on first visit, returns current points otherwise.
 // Second SELECT after INSERT handles the race where ON CONFLICT DO NOTHING fires.
 const getOrCreateUser = async (userId: string): Promise<bigint> => {
   const existing = await pool.query(
@@ -65,7 +66,7 @@ const getOrCreateUser = async (userId: string): Promise<bigint> => {
     `INSERT INTO users (user_id, points, peak_points, recovery_code)
       VALUES ($1, $2, $2, $3)
       ON CONFLICT (user_id) DO NOTHING`,
-    [userId, POINTS_FLOOR.toString(), recoveryCode]
+    [userId, STARTING_POINTS.toString(), recoveryCode]
   )
   const result = await pool.query(
     `SELECT points FROM users WHERE user_id = $1`,
@@ -128,50 +129,57 @@ export const savePrediction = async (
   return { success: true }
 }
 
-// 25% chance of a bonus. Tier determines the multiplier range applied on top of the base payout.
+// 40% chance of a bonus. Tier determines the multiplier range applied on top of the base payout.
 const rollBonus = (
   isWin: boolean,
-  pityCount: number
+  pityCount: number,
+  currentPoints: bigint
 ): { multiplier: number; tier: string } | null => {
-  // If pityCount is 4, this is the 5th match: force the bonus
-  const forceBonus = pityCount >= 4
+  const forceBonus = pityCount >= 3
 
-  // 25% chance
-  if (!forceBonus && Math.random() > .25) return null
+  // STARTER BOOST: 80% for players < 2M, 40% for everyone else
+  const bonusChance = currentPoints < 2000000n ? 0.8 : 0.4
+  if (!forceBonus && Math.random() > bonusChance) return null
 
   const roll = Math.random() * 100
-  let baseMult = 0
 
-  // 50% chance
-  if (roll < 50) {
-    baseMult = 0.2 + Math.random() * 0.2 // Base: 20-40%
+  // 0 - 60 (60% chance)
+  if (roll < 60) {
+    // COMMON: Win 100-200% bonus | Loss 20-40% reduction
     return {
-      multiplier: isWin ? baseMult * 2 : baseMult,
+      multiplier: isWin ? 1.0 + Math.random() * 1.0 : 0.2 + Math.random() * 0.2,
       tier: 'COMMON'
     }
   }
 
-  // 25% chance
-  if (roll < 75) {
-    baseMult = 0.41 + Math.random() * 0.29 // Base: 41-70%
+  // 60 - 85 (25% chance)
+  if (roll < 85) {
+    // RARE: Win 201-349% bonus | Loss 41-70% reduction
     return {
-      multiplier: isWin ? baseMult * 2 : baseMult,
+      multiplier: isWin
+        ? 2.01 + Math.random() * 1.48
+        : 0.41 + Math.random() * 0.29,
       tier: 'RARE'
     }
   }
 
-  // 15% chance
-  if (roll < 90) {
-    baseMult = 0.71 + Math.random() * 0.28 // Base: 71-99%
+  // 85 - 98 (13% chance)
+  if (roll < 98) {
+    // EPIC: Win 350-499% bonus | Loss 71-99% reduction
     return {
-      multiplier: isWin ? baseMult * 2 : baseMult,
+      multiplier: isWin
+        ? 3.5 + Math.random() * 1.49
+        : 0.71 + Math.random() * 0.28,
       tier: 'EPIC'
     }
   }
 
-  // 10% chance
-  // LEGENDARY: 100% Loss protection or 200% Win Bonus
-  return { multiplier: isWin ? 2.0 : 1.0, tier: 'LEGENDARY' }
+  // 98 - 100 (2% chance -> 1/50)
+  // LEGENDARY: 100% Loss protection (1.0) or 1000% Win Bonus (10.0)
+  return {
+    multiplier: isWin ? 10.0 : 1.0,
+    tier: 'LEGENDARY'
+  }
 }
 
 export const resolvePrediction = async (
@@ -201,10 +209,11 @@ export const resolvePrediction = async (
     const totalBets = Number(row.total_bets)
     const currentPity = Number(row.bonus_pity_count)
 
-    const bonus =
-      totalBets <= 3
-        ? { multiplier: isWin ? 0.5 : 0.25, tier: 'COMMON' }
-        : rollBonus(isWin, currentPity)
+    const bonus = rollBonus(
+      isWin,
+      totalBets <= 3 ? 3 : currentPity,
+      currentPoints
+    )
 
     const effectiveMult = bonus
       ? BigInt(Math.floor(bonus.multiplier * 100))
@@ -294,8 +303,8 @@ export const getUserStats = async (userId: string) => {
       losses: 0,
       winRate: 0,
       total_gain: '0',
-      points: '100000',
-      peak_points: '100000'
+      points: '200000',
+      peak_points: '200000'
     }
 
   const total = Number(row.total)

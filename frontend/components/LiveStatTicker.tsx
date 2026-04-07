@@ -38,7 +38,7 @@ export default function LiveStatsTicker() {
   if (!stats) return null
 
   return (
-    <div className="bg-gray-50/80 border-x border-b border-gray-100 rounded-b-xl py-1.5 px-4 mb-4 flex items-center justify-between gap-2 shadow-sm">
+    <div className="bg-gray-50/80 border-x border-b border-gray-100 rounded-b-xl py-1.5 px-4 mb-2 flex items-center justify-between gap-2 shadow-sm">
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight mb-0.5">
           Today&apos;s Vol
