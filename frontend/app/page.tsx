@@ -59,8 +59,6 @@ export default function HomePage() {
   const [isFocused, setIsFocused] = useState(false)
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
   const [showBonusExplainer, setShowBonusExplainer] = useState(false)
-
-  // Initialize notice state based on the module-level variable
   const [showAutoNotice, setShowAutoNotice] = useState(!_hasShownAutoNotice)
 
   const triggerErrorRef = useRef((msg: string) => {
@@ -120,13 +118,22 @@ export default function HomePage() {
     }
   }, [autoAllIn, points, isHydrated, isFocused])
 
-  // Handle Auto All-In notification lifecycle
+  useEffect(() => {
+    if (isHydrated && !autoAllIn) {
+      const floor = 100000n
+      const resetTo = points < floor ? points : floor
+      setBetAmount(resetTo)
+      if (!isFocused) setInputString(resetTo.toString())
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoAllIn, isHydrated])
+
   useEffect(() => {
     if (showAutoNotice) {
       const timer = setTimeout(() => {
         setShowAutoNotice(false)
-        _hasShownAutoNotice = true // Mark as shown so it doesn't trigger on re-mount
-      }, 4000) // Slightly longer as it's less intrusive
+        _hasShownAutoNotice = true
+      }, 4000)
       return () => clearTimeout(timer)
     }
   }, [showAutoNotice])
@@ -505,7 +512,6 @@ export default function HomePage() {
                   >
                     {numberName}
                   </span>
-                  {/* Arrow pointing up */}
                   <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
                 </div>
               )}
@@ -610,12 +616,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Optimized Auto All-In Notice Banner */}
         {showAutoNotice && autoAllIn && isHydrated && (
           <div className="mt-4 flex justify-end animate-in fade-in slide-in-from-top-2 duration-500 ease-out px-1">
             <div className="relative w-full max-w-[320px] bg-gray-900 rounded-lg p-2.5 px-4 border border-gray-700 shadow-lg">
-              {/* Arrow: Fixed position to align with the AUTO button center */}
-              {/* Arrow: right-8 for mobile, md:right-12 for desktop */}
               <div className="absolute -top-1.5 right-12 md:right-6 w-3 h-3 bg-gray-900 border-t border-l border-gray-700 rotate-45" />
 
               <div className="flex items-center justify-between gap-2">
@@ -626,7 +629,7 @@ export default function HomePage() {
                       Auto All-In Active
                     </span>
                     <p className="text-[10px] text-gray-400 font-medium leading-tight line-clamp-2">
-                      Max speed! Click "AUTO ON" to disable.
+                      Max speed! Click &quot;AUTO ON&quot; to disable.
                     </p>
                   </div>
                 </div>

@@ -31,6 +31,8 @@ describe('HomePage', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     MockEventSource.instances = []
+    // Clear localStorage so autoAllIn=true default is never overridden by a saved 'false'
+    localStorage.clear()
 
     vi.stubGlobal(
       'fetch',
@@ -69,36 +71,55 @@ describe('HomePage', () => {
     )
   })
 
-  it('clamps initial bet to 100k floor even when fetched points are higher', async () => {
+  it('sets bet to full balance on load because AUTO ALL-IN defaults to on', async () => {
     render(<HomePage />)
-    // Points = 500k, but default bet starts at min(points, 100k) = 100k
-    await waitFor(() => expect(getBetInput().value).toBe('100.000'))
-    // Points display (not the bet input) should reflect the full 500k balance
+    // AUTO is on by default, so bet = full points balance (500k)
+    await waitFor(() => expect(getBetInput().value).toBe('500.000'))
+    // Points display should also reflect the full 500k balance
     await waitFor(() => expect(screen.getByText(/499|500/)).toBeInTheDocument())
+  })
+
+  it('clamps bet to 100k floor when AUTO is turned off', async () => {
+    render(<HomePage />)
+    // Wait for points to load (AUTO on → bet = 500k)
+    await waitFor(() => expect(getBetInput().value).toBe('500.000'))
+
+    // Turn off AUTO — bet should clamp to min(points, 100k) = 100k
+    fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
+    await waitFor(() => expect(getBetInput().value).toBe('100.000'))
   })
 
   it('sets bet to full balance when ALL IN is clicked', async () => {
     render(<HomePage />)
+    await waitFor(() => expect(getBetInput().value).toBe('500.000'))
+
+    // Turn off AUTO first so we can test ALL IN independently
+    fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
     await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 
     fireEvent.click(screen.getByRole('button', { name: /ALL IN/i }))
-
     await waitFor(() => expect(getBetInput().value).toBe('500.000'))
   })
 
-  it('toggles AUTO button class between off and on states', async () => {
+  it('toggles AUTO button class between on and off states', async () => {
     render(<HomePage />)
     const autoButton = screen.getByRole('button', { name: /AUTO/i })
 
-    expect(autoButton).not.toHaveClass('bg-green-600')
-    fireEvent.click(autoButton)
-    await waitFor(() => expect(autoButton).toHaveClass('bg-green-600'))
+    // Default is ON
+    expect(autoButton).toHaveClass('bg-green-600')
     fireEvent.click(autoButton)
     await waitFor(() => expect(autoButton).not.toHaveClass('bg-green-600'))
+    fireEvent.click(autoButton)
+    await waitFor(() => expect(autoButton).toHaveClass('bg-green-600'))
   })
 
-  it('resets bet to 100k floor when a below-floor value is entered and blurred', async () => {
+  it('resets bet to 100k floor when a below-floor value is entered and blurred (AUTO off)', async () => {
     render(<HomePage />)
+    await waitFor(() => expect(getBetInput().value).toBe('500.000'))
+
+    // Turn off AUTO so manual input is respected
+    fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
+    await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 
     fireEvent.focus(getBetInput())
     fireEvent.change(getBetInput(), { target: { value: '50000' } })
@@ -107,13 +128,15 @@ describe('HomePage', () => {
     await waitFor(() => expect(getBetInput().value).toBe('100.000'))
   })
 
-  it('syncs bet input to full balance when AUTO ALL-IN is enabled', async () => {
+  it('syncs bet input to full balance when AUTO ALL-IN is re-enabled', async () => {
     render(<HomePage />)
+    await waitFor(() => expect(getBetInput().value).toBe('500.000'))
+
+    // Turn off, then back on
+    fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
     await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 
     fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
-
-    // AUTO mode overrides the floor and sets bet = current points
     await waitFor(() => expect(getBetInput().value).toBe('500.000'))
   })
 })
