@@ -9,7 +9,6 @@ const SoundOnIcon = () => (
       d="M9 4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h2l4 4V0l-4 4H9z"
       fill="#6B7280"
     />
-
     <path
       d="M14 6c1.5 1.5 1.5 6.5 0 8"
       fill="none"
@@ -33,7 +32,7 @@ const SoundOffIcon = () => (
       d="M9 4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h2l4 4V0l-4 4H9z"
       fill="#9CA3AF"
     />
-
+    {/* Diagonal slash to indicate muted state */}
     <line
       x1="3"
       y1="3"
@@ -46,15 +45,13 @@ const SoundOffIcon = () => (
   </svg>
 )
 
-const SoundIcon = ({ muted, size = 20 }: SoundIconProps) => {
-  return (
-    <span
-      style={{ width: size, height: size }}
-      className="inline-flex items-center justify-center"
-    >
-      {muted ? <SoundOffIcon /> : <SoundOnIcon />}
-    </span>
-  )
-}
+const SoundIcon = ({ muted, size = 20 }: SoundIconProps) => (
+  <span
+    style={{ width: size, height: size }}
+    className="inline-flex items-center justify-center"
+  >
+    {muted ? <SoundOffIcon /> : <SoundOnIcon />}
+  </span>
+)
 
 export default SoundIcon

@@ -45,7 +45,6 @@ export default function HomePage() {
     bonus?: BonusData | null
     confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
   } | null>(null)
-  const [animatedAmount, setAnimatedAmount] = useState<bigint>(0n)
   const [peakPoints, setPeakPoints] = useState<bigint>(100000n)
   const [autoAllIn, setAutoAllIn] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
@@ -57,6 +56,7 @@ export default function HomePage() {
   const [showPointsInfo, setShowPointsInfo] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
+  const [showBonusExplainer, setShowBonusExplainer] = useState(false)
 
   const triggerErrorRef = useRef((msg: string) => {
     setErrorMessage(msg)
@@ -386,6 +386,10 @@ export default function HomePage() {
     }
   }
 
+  const numberName = pointsLoaded ? getFullNumberName(points) : ''
+  const shouldShowTooltip =
+    showPointsExplainer && numberName && numberName !== 'Points'
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-24">
       <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
@@ -397,20 +401,20 @@ export default function HomePage() {
 
       {/* Result Animation Overlay */}
       {resultAnim && (
-        <div className="fixed top-[58%] sm:top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center justify-center w-full max-w-md">
+        <div className="fixed top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center justify-center w-full max-w-md">
           {resultAnim.bonus && (
             <div
-              className={`flex flex-col items-center mb-1 sm:mb-2 transition-all duration-300 animate-in zoom-in 
-                ${getBonusStyles(resultAnim.bonus.tier).glow}
-                ${resultAnim.bonus.tier === 'LEGENDARY' ? 'animate-pulsate' : ''}`}
+              className={`flex flex-col items-center mb-3 animate-in zoom-in slide-in-from-bottom-4 
+          ${getBonusStyles(resultAnim.bonus.tier).containerClass} 
+          ${getBonusStyles(resultAnim.bonus.tier).glow}`}
             >
               <span
-                className={`text-[10px] sm:text-sm font-black uppercase tracking-[0.25em] mb-1 ${getBonusStyles(resultAnim.bonus.tier).text}`}
+                className={`text-[10px] sm:text-xs font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}
               >
                 {getBonusStyles(resultAnim.bonus.tier).label}
               </span>
               <span
-                className={`text-lg sm:text-2xl font-black ${resultAnim.win ? 'text-green-300' : 'text-blue-300'} drop-shadow-md`}
+                className={`text-lg sm:text-2xl font-black ${resultAnim.win ? 'text-green-300' : 'text-blue-300'}`}
               >
                 {resultAnim.win ? '+' : 'SAVED '}
                 {formatPoints(resultAnim.bonus.amount)}
@@ -419,7 +423,9 @@ export default function HomePage() {
           )}
 
           <span
-            className={`text-5xl sm:text-7xl font-black drop-shadow-2xl animate-bounce leading-tight ${resultAnim.win ? 'text-green-500' : 'text-red-500'}`}
+            className={`text-6xl sm:text-8xl font-black animate-bounce leading-tight ${
+              resultAnim.win ? 'text-green-500' : 'text-red-500'
+            }`} 
           >
             {resultAnim.win
               ? `+${formatPoints(animatedResult)}`
@@ -473,18 +479,16 @@ export default function HomePage() {
               </div>
 
               {/* Tooltip */}
-              <div
-                className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 min-w-35 max-w-55 p-2.5 bg-gray-900 text-white rounded-lg shadow-xl transition-all duration-200 z-50 text-center pointer-events-none
-                  ${showPointsExplainer ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
-                `}
-              >
-                <div className="flex flex-col items-center justify-center">
-                  <span className="text-[11px] text-purple-400 font-black uppercase tracking-[0.15em] leading-tight py-0.5 whitespace-normal">
-                    {getFullNumberName(points)}
+              {shouldShowTooltip && (
+                <div className="absolute -top-12 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points)}`}
+                  >
+                    {numberName}
                   </span>
+                  <div className="absolute -bottom-1 left-6 w-2 h-2 bg-white border-b border-r border-gray-100 rotate-45" />
                 </div>
-                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
-              </div>
+              )}
             </div>
 
             {/* General Info Icon Zone */}
@@ -602,8 +606,63 @@ export default function HomePage() {
           Points floor: 100,000
         </p>
         <div className="flex gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
-          <span className="text-green-600">WIN: +100%</span>
-          <span className="text-red-500">LOSE: -50%</span>
+          <div className="flex items-center">
+            <span className="text-green-600">WIN: +100%</span>
+          </div>
+
+          {/* Bonus Explainer Tooltip */}
+          <div className="relative group flex items-center">
+            <div
+              className="cursor-pointer select-none flex items-center gap-1.5"
+              onMouseEnter={() => setShowBonusExplainer(true)}
+              onMouseLeave={() => setShowBonusExplainer(false)}
+              onClick={() => setShowBonusExplainer(!showBonusExplainer)}
+            >
+              <span className="text-red-500 font-medium">LOSE: -50%</span>
+              <span className="bg-gray-100 hover:bg-gray-200 text-gray-500 text-[9px] px-1.5 py-0.5 rounded-md font-bold transition-colors tracking-tighter">
+                BONUS INFO
+              </span>
+            </div>
+
+            {showBonusExplainer && (
+              <div className="absolute bottom-full right-0 mb-3 z-50 p-3 bg-white border border-gray-100 rounded-xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 w-48 sm:w-56">
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-black text-purple-600 uppercase tracking-wider">
+                    Bonus System Active
+                  </span>
+                  <p className="text-[10px] leading-relaxed text-gray-500 font-medium whitespace-normal">
+                    25% chance per match to trigger a{' '}
+                    <span className="text-gray-800 font-bold">
+                      Tiered Bonus
+                    </span>
+                    :
+                  </p>
+                  <ul className="text-[9px] text-gray-600 space-y-1 list-disc pl-3">
+                    <li>
+                      <span className="text-green-600 font-bold">
+                        +40% to +200%
+                      </span>{' '}
+                      gain on Win
+                    </li>
+                    <li>
+                      <span className="text-blue-600 font-bold">
+                        20% to 100% fewer
+                      </span>{' '}
+                      points lost on Loss
+                    </li>
+                  </ul>
+
+                  <div className="mt-1 pt-1 border-t border-gray-50 flex gap-1 items-center justify-around text-[8px] font-black uppercase text-gray-400">
+                    <span>Common</span>
+                    <span className="text-blue-500">Rare</span>
+                    <span className="text-purple-400">Epic</span>
+                    <span className="text-yellow-500">Legendary</span>
+                  </div>
+                </div>
+                <div className="absolute -bottom-1 right-10 w-2 h-2 bg-white border-b border-r border-gray-100 rotate-45" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

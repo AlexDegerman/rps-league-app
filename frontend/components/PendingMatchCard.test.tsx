@@ -1,24 +1,24 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import PendingMatchCard from '@/components/PendingMatchCard'
-import { PendingMatch, PredictionRecord } from '@/types/rps'
+import type { PendingMatch, PredictionRecord } from '@/types/rps'
 
 describe('PendingMatchCard', () => {
-  const futureTime = Date.now() + 10000
+  const NOW = new Date(2026, 3, 2, 5, 0, 0).getTime()
 
   const mockPending: PendingMatch = {
     gameId: 'game-123',
     playerA: 'Alice',
     playerB: 'Bob',
-    time: Date.now(),
-    expiresAt: futureTime
+    time: NOW,
+    expiresAt: NOW + 10000
   }
 
   const mockOnPick = vi.fn()
 
   beforeEach(() => {
     vi.useFakeTimers()
-    vi.setSystemTime(new Date(2026, 3, 2, 5, 0, 0))
+    vi.setSystemTime(NOW)
   })
 
   afterEach(() => {
@@ -26,7 +26,7 @@ describe('PendingMatchCard', () => {
     vi.clearAllMocks()
   })
 
-  it('renders player names and the vs separator', () => {
+  it('renders both player names and the vs separator', () => {
     render(
       <PendingMatchCard
         pending={mockPending}
@@ -35,13 +35,12 @@ describe('PendingMatchCard', () => {
         serverOffset={0}
       />
     )
-
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('Bob')).toBeInTheDocument()
     expect(screen.getByText(/vs/i)).toBeInTheDocument()
   })
 
-  it('calls onPick with Alice when the first Bet button is clicked', async () => {
+  it('calls onPick with the correct player when a Bet button is clicked', () => {
     render(
       <PendingMatchCard
         pending={mockPending}
@@ -50,16 +49,13 @@ describe('PendingMatchCard', () => {
         serverOffset={0}
       />
     )
-
-    const betButtons = screen.getAllByRole('button', { name: /Bet/i })
-
-    fireEvent.click(betButtons[0])
-
+    // First button corresponds to playerA (Alice)
+    fireEvent.click(screen.getAllByRole('button', { name: /Bet/i })[0])
     expect(mockOnPick).toHaveBeenCalledWith('game-123', 'Alice')
   })
 
-  it('shows "Bet placed" and removes buttons when a prediction exists', () => {
-    const mockPrediction: PredictionRecord = {
+  it('hides Bet buttons and shows confirmation when a prediction is already placed', () => {
+    const prediction: PredictionRecord = {
       gameId: 'game-123',
       pick: 'Bob',
       confirmed: true
@@ -68,7 +64,7 @@ describe('PendingMatchCard', () => {
     render(
       <PendingMatchCard
         pending={mockPending}
-        prediction={mockPrediction}
+        prediction={prediction}
         onPick={mockOnPick}
         serverOffset={0}
       />
@@ -77,17 +73,13 @@ describe('PendingMatchCard', () => {
     expect(
       screen.queryByRole('button', { name: /Bet/i })
     ).not.toBeInTheDocument()
-
     expect(screen.getByText(/Bet placed/i)).toBeInTheDocument()
   })
 
-  it('counts down correctly as time expires', () => {
-    const startTime = Date.now()
-    const expiresAt = startTime + 10000
-
+  it('counts down the timer as time advances', () => {
     render(
       <PendingMatchCard
-        pending={{ ...mockPending, expiresAt }}
+        pending={mockPending}
         prediction={null}
         onPick={mockOnPick}
         serverOffset={0}
@@ -96,9 +88,7 @@ describe('PendingMatchCard', () => {
 
     expect(screen.getByText(/10s left/i)).toBeInTheDocument()
 
-    act(() => {
-      vi.advanceTimersByTime(5000)
-    })
+    act(() => vi.advanceTimersByTime(5000))
 
     expect(screen.getByText(/5s left/i)).toBeInTheDocument()
   })

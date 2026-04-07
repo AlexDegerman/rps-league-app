@@ -253,7 +253,22 @@ router.post('/reset/weekly', async (req, res) => {
   }
 })
 
-// GET /api/users/:userId/recovery
+// GET /api/predictions/check-name/:nickname
+router.get('/check-name/:nickname', async (req, res) => {
+  try {
+    const { nickname } = req.params;
+    const result = await pool.query(
+      'SELECT user_id FROM users WHERE nickname = $1', 
+      [nickname]
+    );
+    res.json({ available: result.rows.length === 0 });
+  } catch (err) {
+    console.error('Check name error:', err);
+    res.status(500).json({ error: 'Failed to check nickname' });
+  }
+});
+
+// GET /api/predictions/:userId/recovery
 router.get('/recovery/:userId', async (req, res) => {
   try {
     const result = await pool.query(

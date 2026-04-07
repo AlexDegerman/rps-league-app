@@ -9,10 +9,7 @@ interface DailyStats {
   dailyPayout: bigint
   winRate: number
   totalBets: number
-  mvp: {
-    nickname: string
-    gain: bigint
-  } | null
+  mvp: { nickname: string; gain: bigint } | null
 }
 
 export default function LiveStatsTicker() {
@@ -31,7 +28,9 @@ export default function LiveStatsTicker() {
         })
         .catch(console.error)
     }
+
     load()
+    // Refresh every 15s — frequent enough to feel live without hammering the DB
     const interval = setInterval(load, 15000)
     return () => clearInterval(interval)
   }, [])
@@ -40,7 +39,6 @@ export default function LiveStatsTicker() {
 
   return (
     <div className="bg-gray-50/80 border-x border-b border-gray-100 rounded-b-xl py-1.5 px-4 mb-4 flex items-center justify-between gap-2 shadow-sm">
-      {/* Today's Volume */}
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight mb-0.5">
           Today&apos;s Vol
@@ -52,7 +50,6 @@ export default function LiveStatsTicker() {
         </span>
       </div>
 
-      {/* Today's Payout */}
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight mb-0.5">
           Today&apos;s Pay
@@ -65,7 +62,6 @@ export default function LiveStatsTicker() {
         </span>
       </div>
 
-      {/* Daily MVP */}
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight mb-0.5">
           Daily MVP
@@ -84,15 +80,15 @@ export default function LiveStatsTicker() {
         </div>
       </div>
 
-      {/* Win Rate + Live Pulse */}
       <div className="flex flex-col items-end min-w-0">
         <div className="flex items-center gap-1 mb-0.5">
           <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight">
             Win Rate
           </span>
+          {/* Pulsing dot signals the stats are live-updated */}
           <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
           </span>
         </div>
         <span className="text-[10px] font-black text-indigo-600 leading-none">

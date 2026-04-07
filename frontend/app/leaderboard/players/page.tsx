@@ -27,6 +27,8 @@ function PlayerLeaderboardContent() {
   const [stats, setStats] = useState<PlayerStats[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Ref tracks the committed filter values — avoids re-fetching on every keystroke
+  // while the user is still filling in the date inputs
   const activeFilters = useRef({
     start: searchParams.get('start') || '',
     end: searchParams.get('end') || ''
@@ -35,17 +37,13 @@ function PlayerLeaderboardContent() {
   const loadData = useCallback(async () => {
     setIsLoading(true)
     try {
-      let data: PlayerStats[] = []
-
-      if (playerSubTab === 'today') {
-        data = await fetchTodayLeaderboard()
-      } else {
-        data = await fetchHistoricalLeaderboard(
-          activeFilters.current.start || undefined,
-          activeFilters.current.end || undefined
-        )
-      }
-
+      const data = playerSubTab === 'today'
+        ? await fetchTodayLeaderboard()
+        : await fetchHistoricalLeaderboard(
+            activeFilters.current.start || undefined,
+            activeFilters.current.end || undefined
+          )
+      // Cap at 200 to avoid rendering thousands of rows
       setStats(data.slice(0, 200))
     } catch (error) {
       console.error('Failed to load leaderboard:', error)
@@ -175,7 +173,7 @@ function PlayerLeaderboardContent() {
       <div className="pt-2 pb-20">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4" />
             <p className="text-gray-400 text-sm">Fetching standings...</p>
           </div>
         ) : stats.length === 0 ? (

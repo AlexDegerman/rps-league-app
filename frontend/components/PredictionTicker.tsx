@@ -13,17 +13,13 @@ export interface TickerEvent {
   message: string
   isReal: boolean
   timestamp: number
-  amount?: bigint // Changed to bigint
+  amount?: bigint
   parsedMessage?: React.ReactNode
 }
 
 const demoTemplates = [
   (name: string, amt: string) => `${name} won ${amt} points`,
   (name: string, amt: string) => `${name} lost ${amt} points`,
-  (name: string, amt: string) => `${name} went all-in and won ${amt} points`,
-  (name: string, amt: string) =>
-    `${name} is on a winning streak with ${amt} points`,
-  (name: string, amt: string) => `${name} reached a new peak of ${amt} points`
 ]
 
 const parseMessageWithGem = (message: string) => {
@@ -59,19 +55,16 @@ export default function PredictionTicker() {
 
       const data = JSON.parse(event.data)
       const isMe = data.userId === getUserId()
-
-      // Handle potential large values from SSE as BigInt
       const amount = BigInt(data.amount)
 
+      // Filter out the "welcome/floor" points
       if (isMe && data.result === 'LOSE' && amount === 50000n) return
 
       const name = data.nickname ?? 'Someone'
       const displayName = isMe ? 'You' : name
 
-      const rawMsg =
-        data.result === 'WIN'
-          ? `${displayName} ${data.wasAllIn ? 'went all-in and won' : 'won'} ${formatTickerPoints(amount)} points!`
-          : `${displayName} lost ${formatTickerPoints(amount)} points.`
+      const verb = data.result === 'WIN' ? 'won' : 'lost'
+      const rawMsg = `${displayName} ${verb} ${formatTickerPoints(amount)} points`
 
       pendingRef.current.unshift({
         id: crypto.randomUUID(),

@@ -21,6 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/android-chrome-512x512.png',
         sizes: '512x512',
         type: 'image/png',
+        // maskable allows the OS to apply its own icon shape (circle, squircle, etc.)
         purpose: 'maskable'
       }
     ],

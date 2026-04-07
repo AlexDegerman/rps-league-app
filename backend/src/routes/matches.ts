@@ -10,6 +10,8 @@ import { getActivePendingMatch } from '../utils/matchGenerator.js'
 
 const router = Router()
 
+// Returns the single in-progress match (if any) so clients can render the
+// betting card immediately on page load without waiting for the next SSE event
 router.get('/pending', (req, res) => {
   const active = getActivePendingMatch()
   res.json(active ? [active] : [])
@@ -20,8 +22,7 @@ router.get('/', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
-    const result = await getLatestMatches(page, limit)
-    res.json(result)
+    res.json(await getLatestMatches(page, limit))
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch matches' })
   }
@@ -37,8 +38,7 @@ router.get('/by-date', async (req, res) => {
         .json({ error: 'date query param required (YYYY-MM-DD)' })
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
-    const result = await getMatchesByDate(date, page, limit)
-    res.json(result)
+    res.json(await getMatchesByDate(date, page, limit))
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch matches by date' })
   }
@@ -47,8 +47,7 @@ router.get('/by-date', async (req, res) => {
 // GET /api/matches/players
 router.get('/players', async (req, res) => {
   try {
-    const players = await getAllPlayerNames()
-    res.json(players)
+    res.json(await getAllPlayerNames())
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch players' })
   }
@@ -62,19 +61,17 @@ router.get('/by-player', async (req, res) => {
       return res.status(400).json({ error: 'name query param required' })
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
-    const result = await getMatchesByPlayer(name, page, limit)
-    res.json(result)
+    res.json(await getMatchesByPlayer(name, page, limit))
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch matches by player' })
   }
 })
 
-// GET /api/players/:name/stats
+// GET /api/matches/players/:name/stats
 router.get('/players/:name/stats', async (req, res) => {
   try {
     const name = decodeURIComponent(req.params.name)
-    const stats = await getPlayerStats(name)
-    res.json(stats)
+    res.json(await getPlayerStats(name))
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch player stats' })
   }

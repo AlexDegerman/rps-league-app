@@ -6,18 +6,15 @@ interface GemIconProps {
 }
 
 const GemIcon = ({ size = 40, className = '' }: GemIconProps) => {
-  const baseSize = size
-  const svgSize = baseSize * 0.92
-  const centerX = 60
-  const centerY = 60
-  const radius = 42
+  const svgSize = size * 0.92
 
   return (
     <span
       className={`inline-flex items-center justify-center shrink-0 ${className}`}
       style={{
-        width: `${baseSize}px`,
-        height: `${baseSize}px`,
+        width: `${size}px`,
+        height: `${size}px`,
+        // Only apply the default purple if no text-* color class was passed in
         color: className.includes('text-') ? undefined : '#A855F7'
       }}
     >
@@ -37,17 +34,16 @@ const GemIcon = ({ size = 40, className = '' }: GemIconProps) => {
             </feMerge>
           </filter>
         </defs>
-        
         <circle
-          cx={centerX}
-          cy={centerY}
-          r={radius}
+          cx={60}
+          cy={60}
+          r={42}
           fill="currentColor"
           stroke="rgba(0,0,0,0.1)"
           strokeWidth="2"
           filter="url(#glow)"
         />
-
+        {/* Highlight streaks to give the gem a faceted look */}
         <path
           d="M40 40 Q50 30 60 35"
           fill="none"

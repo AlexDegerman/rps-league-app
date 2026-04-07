@@ -4,21 +4,33 @@ import pool from '../utils/db.js'
 import { mockDbResponse } from '../test/setup.js'
 
 const mockQuery = vi.mocked(pool.query)
-const POINT_FLOOR = 100000
+
+// Mirrors the shape of rows returned by the JOIN query in resolvePrediction.
+// All numeric fields are strings because pg returns numerics as strings.
+const makeRow = (overrides = {}) => ({
+  user_id: 'u1',
+  game_id: 'g1',
+  pick: 'Winner',
+  bet_amount: '50000',
+  current_points: '500000', // aliased from u.points in the JOIN
+  nickname: 'TestUser',
+  total_bets: '10', // COUNT(*) returns string from pg
+  result: null,
+  ...overrides
+})
 
 describe('Prediction Service', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
+  beforeEach(() => vi.clearAllMocks())
 
-  it('should reject bets that exceed user balance', async () => {
-    mockQuery.mockResolvedValueOnce(mockDbResponse([{ points: 100000 }]))
+  it('rejects bets that exceed user balance', async () => {
+    // getOrCreateUser does SELECT points — return less than the bet
+    mockQuery.mockResolvedValueOnce(mockDbResponse([{ points: '100000' }]))
 
     const result = await predictionService.savePrediction(
       'user123',
       'game456',
       'ROCK',
-      150000,
+      150000n,
       'Gambler'
     )
 
@@ -26,49 +38,54 @@ describe('Prediction Service', () => {
     expect(result.error).toBe('Bet amount exceeds balance')
   })
 
-  it('should correctly calculate winnings for a WIN result', async () => {
+  it('applies a positive gain_loss to user points on a WIN', async () => {
     const broadcastMock = vi.fn()
 
-    mockQuery.mockResolvedValueOnce(
-      mockDbResponse([
-        { user_id: 'u1', pick: 'Winner', bet_amount: 50000, game_id: 'g1' }
-      ])
-    )
-
-    mockQuery.mockResolvedValueOnce(mockDbResponse([{ points: 100000 }]))
+    // Query order: 1) JOIN fetch, 2) UPDATE predictions, 3) UPDATE users
+    mockQuery.mockResolvedValueOnce(mockDbResponse([makeRow()]))
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
     await predictionService.resolvePrediction('g1', 'Winner', broadcastMock)
 
-    expect(mockQuery).toHaveBeenLastCalledWith(
-      expect.stringContaining('SET points = $1'),
-      [150000, 'u1']
+    expect(broadcastMock).toHaveBeenCalledWith(
+      'prediction_result',
+      expect.stringContaining('"result":"WIN"')
     )
+
+    // Find the UPDATE users query by its unique peak_points column
+    const updateCall = mockQuery.mock.calls.find(
+      ([sql]) => typeof sql === 'string' && sql.includes('peak_points')
+    )
+    expect(updateCall).toBeDefined()
+    // gain_loss must be positive — winning always increases points
+    expect(BigInt(updateCall![1][0])).toBeGreaterThan(0n)
   })
 
-  it('should enforce the NEW POINTS_FLOOR on a loss', async () => {
+  it('clamps loss so points never drop below POINTS_FLOOR (100k)', async () => {
     const broadcastMock = vi.fn()
 
+    // 120k balance, 50k bet, loses — naive loss would bring to 70k,
+    // but floor enforcement means gain_loss = 100k - 120k = -20k
     mockQuery.mockResolvedValueOnce(
-      mockDbResponse([
-        { user_id: 'u1', pick: 'Loser', bet_amount: 50000, nickname: 'Alice' }
-      ])
+      mockDbResponse([makeRow({ pick: 'Loser', current_points: '120000' })])
     )
-
-    mockQuery.mockResolvedValueOnce(mockDbResponse([{ points: 120000 }]))
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
     await predictionService.resolvePrediction('g1', 'Winner', broadcastMock)
 
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('SET points = $1'),
-      expect.arrayContaining([100000, 'u1'])
+    const updateCall = mockQuery.mock.calls.find(
+      ([sql]) => typeof sql === 'string' && sql.includes('peak_points')
     )
+    expect(updateCall).toBeDefined()
+
+    const gainLoss = BigInt(updateCall![1][0])
+    // Test the invariant, not the exact value — rollBonus can affect the amount
+    expect(120000n + gainLoss).toBeGreaterThanOrEqual(100000n)
   })
 
-  it('should validate recovery code format [word-word-number]', () => {
+  it('generates recovery codes in word-word-4digit format', () => {
     const code = predictionService.generateRecoveryCode()
     expect(code).toMatch(/^[a-z]+-[a-z]+-\d{4}$/)
   })

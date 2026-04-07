@@ -1,3 +1,4 @@
+// app/analysis/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -20,26 +21,32 @@ const SUGGESTIONS = [
   'Compare the dominance of the #1 ranked player against the rest of the Top 5.'
 ]
 
+// Source tag colors match the XML tags injected into the Gemini prompt context
+const SOURCE_STYLES: Record<string, string> = {
+  active_match_history: 'bg-blue-50 text-blue-600 border-blue-200',
+  predictor_leaderboard: 'bg-amber-50 text-amber-600 border-amber-200'
+}
+
 export default function AnalysisPage() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentResult, setCurrentResult] = useState<string | null>(null)
-  const [history, setHistory] = useState<HistoryItem[]>([])
   const [currentSource, setCurrentSource] = useState<string | null>(null)
+  const [history, setHistory] = useState<HistoryItem[]>([])
   const [showPrivacyInfo, setShowPrivacyInfo] = useState(false)
   const [placeholder, setPlaceholder] = useState('Ask the Oracle...')
 
+  // Shorter placeholder on mobile to avoid overflow inside the input
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setPlaceholder('Ask the Oracle...')
-      } else {
-        setPlaceholder('Ask about streaks, volume, or players...')
-      }
+      setPlaceholder(
+        window.innerWidth < 640
+          ? 'Ask the Oracle...'
+          : 'Ask about streaks, volume, or players...'
+      )
     }
     handleResize()
-
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -70,14 +77,9 @@ export default function AnalysisPage() {
       setCurrentResult(data.result)
       setCurrentSource(data.source)
 
+      // Keep only the 5 most recent queries — avoids unbounded localStorage growth
       const newHistory: HistoryItem[] = [
-        {
-          id: Date.now(),
-          query: activeQuery,
-          result: data.result,
-          source: data.source,
-          timestamp: Date.now()
-        },
+        { id: Date.now(), query: activeQuery, result: data.result, source: data.source, timestamp: Date.now() },
         ...history
       ].slice(0, 5)
 
@@ -109,47 +111,30 @@ export default function AnalysisPage() {
               type="button"
               onClick={() => setShowPrivacyInfo(!showPrivacyInfo)}
               onBlur={() => setShowPrivacyInfo(false)}
-              /* sm:pointer-events-none disables clicking on desktop so only hover works */
+              // sm:pointer-events-none disables click on desktop so only hover works
               className="text-indigo-300 hover:text-indigo-600 transition-colors p-1 outline-none sm:pointer-events-none"
               aria-label="Privacy information"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
 
             <div
-              className={`absolute right-0 sm:left-1/2 sm:-translate-x-1/2 bottom-full mb-2 
-                w-48 sm:w-56 p-2.5 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl 
+              className={`absolute right-0 sm:left-1/2 sm:-translate-x-1/2 bottom-full mb-2
+                w-48 sm:w-56 p-2.5 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl
                 transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed
-                
-                /* Mobile Logic: Only show if state is true */
-                ${showPrivacyInfo ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} 
-                
-                /* Desktop Logic: Show on hover */
+                ${showPrivacyInfo ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
                 sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto`}
             >
-              Prompts are logged for safety monitoring. IP addresses are masked
-              and no personal data is stored.
-              <div className="absolute right-2 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
+              Prompts are logged for safety monitoring. IP addresses are masked and no personal data is stored.
+              <div className="absolute right-2 sm:right-auto sm:left-1/2 sm:-translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900" />
             </div>
           </div>
         </div>
 
         <h1 className="text-4xl font-black text-gray-900 mb-2">The Oracle</h1>
-        <p className="text-gray-500">
-          Real-time betting telemetry & player analysis.
-        </p>
+        <p className="text-gray-500">Real-time betting telemetry & player analysis.</p>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-8 justify-center">
@@ -169,7 +154,7 @@ export default function AnalysisPage() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={placeholder} // Use the state variable here
+          placeholder={placeholder}
           className="w-full p-4 pr-20 sm:p-5 sm:pr-28 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 outline-none text-base sm:text-lg shadow-xl"
         />
         <button
@@ -192,19 +177,13 @@ export default function AnalysisPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-              <span className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
-                Oracle Insight
-              </span>
+              <span className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">Oracle Insight</span>
             </div>
 
             {currentSource && (
               <span
                 className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md border self-start sm:self-auto ${
-                  currentSource === 'active_match_history'
-                    ? 'bg-blue-50 text-blue-600 border-blue-200'
-                    : currentSource === 'predictor_leaderboard'
-                      ? 'bg-amber-50 text-amber-600 border-amber-200'
-                      : 'bg-gray-50 text-gray-600 border-gray-200'
+                  SOURCE_STYLES[currentSource] ?? 'bg-gray-50 text-gray-600 border-gray-200'
                 }`}
               >
                 {currentSource.replace(/_/g, ' ')}
@@ -221,9 +200,7 @@ export default function AnalysisPage() {
       {history.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-gray-100 pb-2 mb-4">
-            <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">
-              Recent Prophecies
-            </h2>
+            <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest">Recent Prophecies</h2>
             <button
               onClick={clearHistory}
               className="text-[10px] text-gray-400 hover:text-red-500 transition-colors uppercase font-bold"
@@ -242,12 +219,8 @@ export default function AnalysisPage() {
                   setCurrentSource(item.source ?? null)
                 }}
               >
-                <p className="text-xs font-bold text-gray-400 mb-1">
-                  Q: {item.query}
-                </p>
-                <p className="text-sm text-gray-600 line-clamp-1 group-hover:text-gray-900">
-                  {item.result}
-                </p>
+                <p className="text-xs font-bold text-gray-400 mb-1">Q: {item.query}</p>
+                <p className="text-sm text-gray-600 line-clamp-1 group-hover:text-gray-900">{item.result}</p>
               </div>
             ))}
           </div>

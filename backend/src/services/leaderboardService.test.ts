@@ -6,22 +6,24 @@ import { mockDbResponse } from '../test/setup.js'
 const mockQuery = vi.mocked(pool.query)
 
 describe('Leaderboard Service', () => {
-  it('should rank players by wins, then alphabetically', async () => {
-    const mockRows = [
-      {
-        player_a_name: 'Zebra',
-        player_a_played: 'ROCK',
-        player_b_name: 'Ant',
-        player_b_played: 'SCISSORS'
-      },
-      {
-        player_a_name: 'Ant',
-        player_a_played: 'ROCK',
-        player_b_name: 'Zebra',
-        player_b_played: 'SCISSORS'
-      }
-    ]
-    mockQuery.mockResolvedValue(mockDbResponse(mockRows))
+  it('ranks players by wins descending, then alphabetically on ties', async () => {
+    // Ant wins once, Zebra wins once — tied on wins, so alphabetical order applies
+    mockQuery.mockResolvedValue(
+      mockDbResponse([
+        {
+          player_a_name: 'Zebra',
+          player_a_played: 'ROCK',
+          player_b_name: 'Ant',
+          player_b_played: 'SCISSORS'
+        },
+        {
+          player_a_name: 'Ant',
+          player_a_played: 'ROCK',
+          player_b_name: 'Zebra',
+          player_b_played: 'SCISSORS'
+        }
+      ])
+    )
 
     const leaderboard = await leaderboardService.getTodayLeaderboard()
 
@@ -29,7 +31,8 @@ describe('Leaderboard Service', () => {
     expect(leaderboard[1]!.name).toBe('Zebra')
   })
 
-  it('should round win rates to the nearest whole number', async () => {
+  it('rounds win rates to the nearest whole number', async () => {
+    // A wins 2/3 matches = 66.6...% → should round to 67
     mockQuery.mockResolvedValue(
       mockDbResponse([
         {
@@ -54,20 +57,21 @@ describe('Leaderboard Service', () => {
     )
 
     const board = await leaderboardService.getTodayLeaderboard()
+
     expect(board.find((p) => p.name === 'A')!.winRate).toBe(67)
   })
 
-  it('should build historical query with 24-hour end-date padding', async () => {
+  it('pads the end date by 24h so a single-day range covers the full day', async () => {
     mockQuery.mockResolvedValue(mockDbResponse([]))
-    const startStr = '2026-04-01'
 
-    await leaderboardService.getHistoricalLeaderboard(startStr, startStr)
+    const dateStr = '2026-04-01'
+    await leaderboardService.getHistoricalLeaderboard(dateStr, dateStr)
 
     const params = mockQuery.mock.calls[0]![1] as any[]
-    const startTs = new Date(startStr).getTime()
+    const startTs = new Date(dateStr).getTime()
 
     expect(params[0]).toBe(startTs)
-    expect(params[1]).toBe(startTs + 86400000)
+    expect(params[1]).toBe(startTs + 86400000) // exactly +24h
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('WHERE time >= $1 AND time < $2'),
       params

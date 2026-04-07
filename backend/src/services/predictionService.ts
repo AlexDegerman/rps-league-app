@@ -48,8 +48,11 @@ export const generateRecoveryCode = (): string => {
   const num = Math.floor(Math.random() * 9000 + 1000)
   return `${rand(wordList)}-${rand(wordList)}-${num}`
 }
+
 const POINTS_FLOOR = 100000n
 
+// Creates user with floor balance on first visit, returns current points otherwise.
+// Second SELECT after INSERT handles the race where ON CONFLICT DO NOTHING fires.
 const getOrCreateUser = async (userId: string): Promise<bigint> => {
   const existing = await pool.query(
     `SELECT points FROM users WHERE user_id = $1`,
@@ -83,10 +86,21 @@ export const savePrediction = async (
   nickname: string
 ): Promise<{ success: boolean; error?: string }> => {
   const balance = await getOrCreateUser(userId)
+
   if (betAmount <= 0n)
     return { success: false, error: 'Bet amount must be greater than 0' }
   if (betAmount > balance)
     return { success: false, error: 'Bet amount exceeds balance' }
+
+  const nameCheck = await pool.query(
+    `SELECT user_id FROM users WHERE nickname = $1 AND user_id != $2`,
+    [nickname, userId]
+  )
+
+  if (nameCheck.rows.length > 0) {
+    return { success: false, error: 'NICKNAME ALREADY TAKEN' }
+  }
+
   const matchRes = await pool.query(
     `SELECT expires_at FROM matches WHERE game_id = $1`,
     [gameId]
@@ -108,34 +122,56 @@ export const savePrediction = async (
     [userId, gameId, pick, betAmount.toString(), Date.now()]
   )
 
-  if (insertResult.rowCount === 0) {
+  if (insertResult.rowCount === 0)
     return { success: false, error: 'BET ALREADY PLACED' }
-  }
 
   return { success: true }
 }
 
-const rollBonus = (): { multiplier: number; tier: string } | null => {
-  // 25% chance of any bonus
-  if (Math.random() > .25) return null
+// 25% chance of a bonus. Tier determines the multiplier range applied on top of the base payout.
+const rollBonus = (
+  isWin: boolean,
+  pityCount: number
+): { multiplier: number; tier: string } | null => {
+  // If pityCount is 4, this is the 5th match: force the bonus
+  const forceBonus = pityCount >= 4
+
+  // 25% chance
+  if (!forceBonus && Math.random() > .25) return null
 
   const roll = Math.random() * 100
+  let baseMult = 0
+
+  // 50% chance
   if (roll < 50) {
-    // Common: 20–40%
-    const multiplier = 0.2 + Math.random() * 0.2
-    return { multiplier, tier: 'COMMON' }
-  } else if (roll < 80) {
-    // Rare: 41–70%
-    const multiplier = 0.41 + Math.random() * 0.29
-    return { multiplier, tier: 'RARE' }
-  } else if (roll < 90) {
-    // Epic: 71–99%
-    const multiplier = 0.71 + Math.random() * 0.28
-    return { multiplier, tier: 'EPIC' }
-  } else {
-    // Legendary: 100%
-    return { multiplier: 1.0, tier: 'LEGENDARY' }
+    baseMult = 0.2 + Math.random() * 0.2 // Base: 20-40%
+    return {
+      multiplier: isWin ? baseMult * 2 : baseMult,
+      tier: 'COMMON'
+    }
   }
+
+  // 25% chance
+  if (roll < 75) {
+    baseMult = 0.41 + Math.random() * 0.29 // Base: 41-70%
+    return {
+      multiplier: isWin ? baseMult * 2 : baseMult,
+      tier: 'RARE'
+    }
+  }
+
+  // 15% chance
+  if (roll < 90) {
+    baseMult = 0.71 + Math.random() * 0.28 // Base: 71-99%
+    return {
+      multiplier: isWin ? baseMult * 2 : baseMult,
+      tier: 'EPIC'
+    }
+  }
+
+  // 10% chance
+  // LEGENDARY: 100% Loss protection or 200% Win Bonus
+  return { multiplier: isWin ? 2.0 : 1.0, tier: 'LEGENDARY' }
 }
 
 export const resolvePrediction = async (
@@ -143,69 +179,68 @@ export const resolvePrediction = async (
   winnerName: string,
   broadcast: (event: string, data: string) => void
 ): Promise<void> => {
+  // JOIN fetches balance and bet count in one query to avoid N+1 calls per bettor
   const predictions = await pool.query(
-    `SELECT 
-      p.*, 
-      u.nickname, 
-      u.points as current_points,
-      (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) as total_bets
-    FROM predictions p
-    JOIN users u ON p.user_id = u.user_id
-    WHERE p.game_id = $1 AND p.result IS NULL`,
+    `SELECT
+      p.*,
+      u.nickname,
+      u.points AS current_points,
+      u.bonus_pity_count,
+      (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) AS total_bets
+      FROM predictions p
+      JOIN users u ON p.user_id = u.user_id
+      WHERE p.game_id = $1 AND p.result IS NULL`,
     [gameId]
   )
 
   for (const row of predictions.rows) {
     const result = row.pick === winnerName ? 'WIN' : 'LOSE'
+    const isWin = result === 'WIN'
     const currentPoints = BigInt(row.current_points)
     const bet = BigInt(row.bet_amount)
     const totalBets = Number(row.total_bets)
-    const BIG_POINTS_FLOOR = 100000n
+    const currentPity = Number(row.bonus_pity_count)
 
     const bonus =
-    totalBets <= 3 ? { multiplier: 0.25, tier: 'COMMON' } : rollBonus()
+      totalBets <= 3
+        ? { multiplier: isWin ? 0.5 : 0.25, tier: 'COMMON' }
+        : rollBonus(isWin, currentPity)
 
-    const multiplierPct = bonus
+    const effectiveMult = bonus
       ? BigInt(Math.floor(bonus.multiplier * 100))
       : 0n
 
-    const SHIELD_WEIGHT = 50n
-    const effectiveMult =
-      result === 'WIN' ? multiplierPct : (multiplierPct * SHIELD_WEIGHT) / 100n
-
-    const bonusAmount = (bet * effectiveMult) / 100n
-    const baseChange = result === 'WIN' ? bet : bet / 2n
+    const baseChange = isWin ? bet : bet / 2n
+    const bonusAmount = (baseChange * effectiveMult) / 100n
 
     let gainLoss: bigint
 
-    if (result === 'WIN') {
+    if (isWin) {
       gainLoss = baseChange + bonusAmount
     } else {
       const actualLoss = baseChange - bonusAmount
       const provisionalPoints = currentPoints - actualLoss
-
-      if (provisionalPoints < BIG_POINTS_FLOOR) {
-        gainLoss = BIG_POINTS_FLOOR - currentPoints
-      } else {
-        gainLoss = -actualLoss
-      }
+      gainLoss =
+        provisionalPoints < POINTS_FLOOR
+          ? POINTS_FLOOR - currentPoints
+          : -actualLoss
     }
-    
+
     await pool.query(
-      `UPDATE predictions 
-        SET result = $1, gain_loss = $2 
-        WHERE user_id = $3 AND game_id = $4`,
+      `UPDATE predictions SET result = $1, gain_loss = $2 WHERE user_id = $3 AND game_id = $4`,
       [result, gainLoss.toString(), row.user_id, row.game_id]
     )
 
+    // Single UPDATE keeps all peak columns in sync atomically
     await pool.query(
-      `UPDATE users 
-        SET points = points + $1,
-          peak_points = GREATEST(peak_points, points + $1),
-          daily_peak = GREATEST(daily_peak, points + $1),
-          weekly_peak = GREATEST(weekly_peak, points + $1)
+      `UPDATE users
+        SET points            = points + $1,
+            peak_points       = GREATEST(peak_points, points + $1),
+            daily_peak        = GREATEST(daily_peak,  points + $1),
+            weekly_peak       = GREATEST(weekly_peak, points + $1),
+            bonus_pity_count  = $3
         WHERE user_id = $2`,
-      [gainLoss.toString(), row.user_id]
+      [gainLoss.toString(), row.user_id, bonus ? 0 : currentPity + 1]
     )
 
     broadcast(
@@ -219,7 +254,8 @@ export const resolvePrediction = async (
         bonus: bonus
           ? {
               amount: bonusAmount.toString(),
-              tier: bonus.tier
+              tier: bonus.tier,
+              visualMultiplier: Number(effectiveMult)
             }
           : null,
         wasAllIn: bet === currentPoints
@@ -236,23 +272,22 @@ export const getUserPredictions = async (userId: string) => {
   return result.rows
 }
 
-// Inside your service exports
 export const getUserStats = async (userId: string) => {
   const result = await pool.query(
     `SELECT
-      COUNT(*) AS total,
-      COUNT(*) FILTER (WHERE result = 'WIN') AS wins,
-      COUNT(*) FILTER (WHERE result = 'LOSE') AS losses,
-      COALESCE(SUM(gain_loss), 0) AS total_gain,
-      (SELECT points FROM users WHERE user_id = $1) as points,
-      (SELECT peak_points FROM users WHERE user_id = $1) as peak_points
+        COUNT(*) AS total,
+        COUNT(*) FILTER (WHERE result = 'WIN') AS wins,
+        COUNT(*) FILTER (WHERE result = 'LOSE') AS losses,
+        COALESCE(SUM(gain_loss), 0) AS total_gain,
+        (SELECT points      FROM users WHERE user_id = $1) AS points,
+        (SELECT peak_points FROM users WHERE user_id = $1) AS peak_points
       FROM predictions
       WHERE user_id = $1 AND result IS NOT NULL`,
     [userId]
   )
 
   const row = result.rows[0]
-  if (!row) {
+  if (!row)
     return {
       total: 0,
       wins: 0,
@@ -262,11 +297,9 @@ export const getUserStats = async (userId: string) => {
       points: '100000',
       peak_points: '100000'
     }
-  }
 
   const total = Number(row.total)
   const wins = Number(row.wins)
-
   return {
     total,
     wins,
@@ -279,13 +312,13 @@ export const getUserStats = async (userId: string) => {
 }
 
 export const getGlobalBettingStats = async () => {
-  const result = await pool.query(`
-    SELECT 
-      COUNT(*) as total_bets,
-      COALESCE(SUM(bet_amount), 0) as total_volume,
-      COUNT(*) FILTER (WHERE result = 'WIN') as winning_bets
-    FROM predictions
-  `)
+  const result = await pool.query(
+    `SELECT
+        COUNT(*) AS total_bets,
+        COALESCE(SUM(bet_amount), 0) AS total_volume,
+        COUNT(*) FILTER (WHERE result = 'WIN') AS winning_bets
+      FROM predictions`
+  )
   const row = result.rows[0]
   return {
     total_bets: Number(row.total_bets),

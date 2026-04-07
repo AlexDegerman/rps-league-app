@@ -6,12 +6,13 @@ interface LeaderboardTableProps {
 }
 
 const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
-  if (stats.length === 0)
+  if (stats.length === 0) {
     return (
       <p className="text-center text-gray-400 py-12">
         No matches found for this period
       </p>
     )
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-x-auto">
@@ -39,9 +40,7 @@ const LeaderboardTable = ({ stats }: LeaderboardTableProps) => {
           {stats.map((player, index) => (
             <tr
               key={player.name}
-              className={`border-b border-gray-50 whitespace-nowrap ${
-                index === 0 ? 'bg-yellow-50' : ''
-              }`}
+              className={`border-b border-gray-50 whitespace-nowrap ${index === 0 ? 'bg-yellow-50' : ''}`}
             >
               <td className="px-4 py-3 text-gray-400 font-medium">
                 {index === 0 ? '🏆' : index + 1}

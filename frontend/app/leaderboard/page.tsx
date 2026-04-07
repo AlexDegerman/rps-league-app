@@ -25,6 +25,7 @@ interface PredictorEntry {
   win_rate: number
 }
 
+// Each tab defaults to its most meaningful sort column
 const DEFAULT_SORT: Record<Tab, SortKey> = {
   daily: 'points',
   weekly: 'gained',
@@ -68,6 +69,7 @@ function LeaderboardContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [myUserId, setMyUserId] = useState<string | null>(null)
 
+  // Defer localStorage read to avoid SSR mismatch
   useEffect(() => {
     setMyUserId(getUserId())
   }, [])
@@ -84,8 +86,7 @@ function LeaderboardContent() {
   const load = useCallback(async (t: Tab, s: SortKey, d: SortDir) => {
     setIsLoading(true)
     try {
-      const result = await fetchUnifiedLeaderboard(t, s, d)
-      setData(result)
+      setData(await fetchUnifiedLeaderboard(t, s, d))
     } catch (err) {
       console.error(err)
     } finally {
@@ -106,6 +107,7 @@ function LeaderboardContent() {
   }
 
   const handleSort = (col: SortKey) => {
+    // Clicking the active column flips direction; clicking a new column defaults to desc
     const newDir: SortDir = sort === col && dir === 'desc' ? 'asc' : 'desc'
     setSort(col)
     setDir(newDir)
@@ -115,8 +117,8 @@ function LeaderboardContent() {
   const th = (
     label: string,
     col: SortKey,
-    align: string = 'text-right',
-    extraClasses: string = ''
+    align = 'text-right',
+    extraClasses = ''
   ) => (
     <th
       className={`px-3 py-3 font-bold text-xs uppercase tracking-wide cursor-pointer select-none ${align} ${sort === col ? 'text-purple-600' : 'text-gray-400'} hover:text-purple-500 transition ${extraClasses}`}
@@ -258,16 +260,14 @@ function LeaderboardContent() {
                               )}
                             </div>
 
-                            {/* MOBILE VIEW GRID */}
+                            {/* Mobile stats grid — hidden at 600px+ where the table columns take over */}
                             <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
                               <div className="grid grid-cols-14 gap-1 text-gray-400 font-bold uppercase tracking-wider text-left">
                                 <div className="col-span-2">W</div>
                                 <div className="col-span-2">L</div>
-
                                 <div className="hidden min-[380px]:block min-[380px]:col-span-2">
                                   Win%
                                 </div>
-
                                 <div className="col-span-4 min-[380px]:col-span-3">
                                   Pts
                                 </div>
@@ -282,15 +282,12 @@ function LeaderboardContent() {
                                 <div className="col-span-2 text-green-600 font-bold truncate">
                                   {entry.wins}
                                 </div>
-
                                 <div className="col-span-2 text-red-500 font-bold truncate">
                                   {entry.losses}
                                 </div>
-
                                 <div className="hidden min-[380px]:block min-[380px]:col-span-2 text-indigo-500 font-bold">
                                   {entry.win_rate}%
                                 </div>
-
                                 <div
                                   className={`col-span-4 min-[380px]:col-span-3 font-bold flex items-center gap-0.5 whitespace-nowrap ${getAmountColor(entry.points)}`}
                                 >

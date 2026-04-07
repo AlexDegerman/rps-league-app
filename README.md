@@ -328,6 +328,7 @@ Global user profiles with persistent point tracking and account recovery logic.
 | **weekly_peak** | BIGINT | Highest balance this week (reset via GitHub Cron) |
 | **nickname** | TEXT | Auto-generated display name (adjective + color + animal). Users can randomize to a new combination. |
 | **recovery_code** | TEXT | Unique slug (e.g., `swift-tiger-1234`) |
+| **bonus_pity_count** | INTEGER | Consecutive bets without a bonus |
 
 ---
 

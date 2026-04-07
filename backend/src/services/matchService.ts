@@ -16,9 +16,11 @@ const rowToMatch = (row: Record<string, unknown>): Match => ({
   }
 })
 
+// Shared winner logic used by both this service and leaderboardService
+// to avoid duplicating the RPS outcome table.
 export const getWinner = (match: Match): 'A' | 'B' => {
-  const a = match.playerA.played
-  const b = match.playerB.played
+  const { played: a } = match.playerA
+  const { played: b } = match.playerB
   if (
     (a === 'ROCK' && b === 'SCISSORS') ||
     (a === 'SCISSORS' && b === 'PAPER') ||
@@ -53,6 +55,7 @@ export const getMatchesByDate = async (
   const offset = (page - 1) * limit
   const start = new Date(date).getTime()
   const end = start + 86400000
+
   const [data, count] = await Promise.all([
     pool.query(
       `SELECT * FROM matches WHERE time >= $1 AND time < $2 ORDER BY time DESC LIMIT $3 OFFSET $4`,
@@ -105,14 +108,7 @@ export const getAllPlayerNames = async (): Promise<string[]> => {
   return result.rows.map((r) => r.name as string)
 }
 
-export const getPlayerStats = async (
-  name: string
-): Promise<{
-  total: number
-  wins: number
-  losses: number
-  winRate: number
-}> => {
+export const getPlayerStats = async (name: string) => {
   const result = await pool.query(
     `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
     [name]
@@ -120,15 +116,16 @@ export const getPlayerStats = async (
   const matches = result.rows.map(rowToMatch)
   let wins = 0,
     losses = 0
+
   for (const m of matches) {
     const winner = getWinner(m)
-    if (
+    const playerWon =
       (winner === 'A' && m.playerA.name === name) ||
       (winner === 'B' && m.playerB.name === name)
-    )
-      wins++
+    if (playerWon) wins++
     else losses++
   }
+
   return {
     total: matches.length,
     wins,

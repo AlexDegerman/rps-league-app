@@ -4,16 +4,27 @@ import { useEffect, useState } from 'react'
 import { getOrCreateUser, regenerateNickname } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import type { UserStats } from '@/types/rps'
-import { formatPoints, getAmountColor } from '@/lib/format'
+import { formatPoints, getAmountColor, getFullNumberName } from '@/lib/format'
 
 const API = process.env.NEXT_PUBLIC_API_URL
+
+interface Ranks {
+  daily: number | null
+  weekly: number | null
+  allTime: number | null
+}
 
 export default function ProfilePage() {
   const [nickname, setNickname] = useState<string>('')
   const [points, setPoints] = useState<string | null>(null)
+  const [showPointsExplainer, setShowPointsExplainer] = useState(false)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
-  const [rank, setRank] = useState<{ rank: number; total: number } | null>(null)
+  const [ranks, setRanks] = useState<Ranks>({
+    daily: null,
+    weekly: null,
+    allTime: null
+  })
   const [mounted, setMounted] = useState(false)
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null)
   const [codeRevealed, setCodeRevealed] = useState(false)
@@ -27,6 +38,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const user = getOrCreateUser()
     setNickname(user.nickname)
+    // Gate rendering on mount to avoid SSR/localStorage mismatch
     setMounted(true)
     const userId = user.userId
     if (!userId) return
@@ -47,18 +59,54 @@ export default function ProfilePage() {
       .catch((err) => console.error('Failed to load stats:', err))
       .finally(() => setStatsLoading(false))
 
-    fetch(`${API}/api/predictions/leaderboard`)
-      .then((res) => res.json())
-      .then((data: { user_id: string }[]) => {
-        const index = data.findIndex((e) => e.user_id === userId)
-        if (index !== -1) setRank({ rank: index + 1, total: data.length })
-      })
-      .catch((err) => console.error('Failed to load rank:', err))
+    // Rank is derived client-side from the leaderboard array position
+    const fetchRank = async (tab: string) => {
+      try {
+        const res = await fetch(
+          `${API}/api/predictions/leaderboard/unified?tab=${tab}`
+        )
+        const data = await res.json()
+        const index = data.findIndex(
+          (e: { user_id: string }) => e.user_id === userId
+        )
+        return index !== -1 ? index + 1 : null
+      } catch (err) {
+        console.error(`Failed to load ${tab} rank:`, err)
+        return null
+      }
+    }
+
+    Promise.all([
+      fetchRank('daily'),
+      fetchRank('weekly'),
+      fetchRank('alltime')
+    ]).then(([d, w, a]) => {
+      setRanks({ daily: d, weekly: w, allTime: a })
+    })
   }, [])
 
-  const handleRegenerate = () => {
-    const newNickname = regenerateNickname()
+  const handleRegenerate = async () => {
+    let isAvailable = false
+    let newNickname = ''
+    let attempts = 0
+    const maxAttempts = 10
+
+    while (!isAvailable && attempts < maxAttempts) {
+      newNickname = regenerateNickname()
+      attempts++
+      try {
+        const res = await fetch(
+          `${API}/api/predictions/check-name/${newNickname}`
+        )
+        const data = await res.json()
+        if (data.available) isAvailable = true
+      } catch (err) {
+        console.error('Name check failed:', err)
+        break
+      }
+    }
     setNickname(newNickname)
+    localStorage.setItem('rps_nickname', newNickname)
   }
 
   const handleRecoverConfirm = async () => {
@@ -76,6 +124,7 @@ export default function ProfilePage() {
         setRecoverError(data.error ?? 'Invalid recovery code')
         return
       }
+      // Swap localStorage identity then hard-reload so all state reinitializes cleanly
       localStorage.setItem('rps_user_id', data.userId)
       if (data.nickname) localStorage.setItem('rps_nickname', data.nickname)
       window.location.reload()
@@ -101,16 +150,19 @@ export default function ProfilePage() {
     )
   }
 
+  const numberName = points ? getFullNumberName(points) : ''
+  const shouldShowTooltip =
+    showPointsExplainer && numberName && numberName !== 'Points'
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-20">
       <h1 className="text-3xl font-bold text-gray-900 mb-1">Profile</h1>
       <p className="text-gray-500 mb-6">Your identity</p>
 
-      {/* Identity card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-        <div className="flex flex-col mb-6">
+        <div className="flex flex-col mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
+            <p className="text-[10px] text-black uppercase font-black tracking-widest">
               Current Identity
             </p>
             <button
@@ -120,30 +172,70 @@ export default function ProfilePage() {
               Randomize
             </button>
           </div>
-
-          <p className="text-[clamp(1.125rem,4vw,1.5rem)] font-black text-gray-900 leading-tight whitespace-nowrap overflow-visible">
+          <p className="text-[clamp(1.25rem,5vw,1.75rem)] font-black text-gray-900 leading-tight">
             {nickname}
           </p>
         </div>
 
-        <div className="items-center gap-3 mb-6 bg-gray-50/50 p-4 rounded-xl inline-flex">
-          <GemIcon size={24} />
-          <div className="flex flex-col">
+        <div className="relative flex flex-col gap-4 mb-10 w-full">
+          <div
+            className="flex items-center gap-4 cursor-pointer select-none group"
+            onMouseEnter={() => setShowPointsExplainer(true)}
+            onMouseLeave={() => setShowPointsExplainer(false)}
+            onClick={() => setShowPointsExplainer(!showPointsExplainer)}
+          >
+            <div className="shrink-0">
+              <GemIcon size={32} />
+            </div>
             <span
-              className={`text-xl font-black leading-none ${points !== null ? getAmountColor(points) : 'text-purple-600'}`}
+              className={`text-3xl font-black leading-none ${points !== null ? getAmountColor(points) : 'text-purple-600'}`}
             >
               {points !== null ? formatPoints(points) : '...'}
             </span>
-            {rank && (
-              <span className="text-[10px] font-bold text-gray-400 uppercase mt-1">
-                Global Rank: #{rank.rank} of {rank.total}
-              </span>
-            )}
           </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] font-black uppercase text-black/30 tracking-widest">
+              Ranks
+            </p>
+            <div className="flex items-center gap-4 text-[11px] font-black uppercase text-black">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-black/40">Daily</span>
+                <span className="text-black">
+                  {ranks.daily ? `#${ranks.daily}` : '-'}
+                </span>
+              </div>
+              <div className="w-px h-2 bg-black/10" />
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-black/40">Weekly</span>
+                <span className="text-black">
+                  {ranks.weekly ? `#${ranks.weekly}` : '-'}
+                </span>
+              </div>
+              <div className="w-px h-2 bg-black/10" />
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-black/40">All-Time</span>
+                <span className="text-black">
+                  {ranks.allTime ? `#${ranks.allTime}` : '-'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {shouldShowTooltip && (
+            <div className="absolute -top-12 left-12 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200">
+              <span
+                className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points ?? '0')}`}
+              >
+                {numberName}
+              </span>
+              <div className="absolute -bottom-1 left-6 w-2 h-2 bg-white border-b border-r border-gray-100 rotate-45" />
+            </div>
+          )}
         </div>
 
         <div className="border-t border-gray-50 pt-6">
-          <p className="text-[10px] uppercase font-black tracking-widest text-gray-400 mb-1">
+          <p className="text-[10px] uppercase font-black tracking-widest text-black mb-1">
             Recovery code
           </p>
           <p className="text-xs text-gray-400 mb-4 leading-relaxed">
@@ -181,9 +273,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Recovery login */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
-        <p className="text-[10px] uppercase font-black tracking-widest text-gray-400 mb-1">
+        <p className="text-[10px] uppercase font-black tracking-widest text-black mb-1">
           Switch Profile
         </p>
         <p className="text-xs text-gray-400 mb-4">
@@ -213,7 +304,7 @@ export default function ProfilePage() {
         {recoverConfirm && (
           <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-xl animate-in fade-in slide-in-from-top-2">
             <p className="text-xs font-black text-yellow-800 mb-1 uppercase tracking-wider">
-              ⚠️ Warning
+              🚨 Warning
             </p>
             <p className="text-xs text-yellow-700 mb-4 leading-relaxed">
               This will end your current session. You can return using your own
@@ -242,8 +333,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Prediction stats */}
-      <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 px-1">
+      <h2 className="text-[10px] font-black text-black uppercase tracking-[0.3em] mb-4 px-1">
         Personal Records
       </h2>
       {statsLoading ? (
@@ -267,9 +357,8 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Danger Zone */}
       <div className="pt-8 border-t border-red-50">
-        <h2 className="text-[10px] font-black text-red-300 uppercase tracking-[0.3em] mb-4 px-1">
+        <h2 className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em] mb-4 px-1">
           Danger Zone
         </h2>
         {!resetConfirm ? (
@@ -285,8 +374,8 @@ export default function ProfilePage() {
               Confirm Identity Reset
             </p>
             <p className="text-xs text-red-700 mb-5 leading-relaxed">
-              This generates a brand-new profile with 100,000 points. Your current
-              progress will be unreachable without your code:{' '}
+              This generates a brand-new profile with 100,000 points. Your
+              current progress will be unreachable without your code:{' '}
               <span className="font-mono font-black">{recoveryCode}</span>
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -310,17 +399,19 @@ export default function ProfilePage() {
   )
 }
 
-interface StatBoxProps {
+function StatBox({
+  label,
+  value,
+  color = 'text-gray-900'
+}: {
   label: string
   value: string | number
   color?: string
-}
-
-function StatBox({ label, value, color = 'text-gray-900' }: StatBoxProps) {
+}) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
       <p className={`text-2xl font-black ${color} leading-none`}>{value}</p>
-      <p className="text-[10px] text-gray-400 mt-2 uppercase font-black tracking-tighter">
+      <p className="text-[10px] text-black mt-2 uppercase font-black tracking-tighter">
         {label}
       </p>
     </div>

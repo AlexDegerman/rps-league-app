@@ -3,7 +3,7 @@ import type { Match } from '@/types/rps'
 
 interface UseInfiniteScrollProps {
   fetchFn: (page: number) => Promise<{ matches: Match[]; hasMore: boolean }>
-  enabled?: boolean // only start scrolling when true, e.g. after a search
+  enabled?: boolean
 }
 
 export const useInfiniteScroll = ({
@@ -26,6 +26,8 @@ export const useInfiniteScroll = ({
         const data = await fetchFn(targetPage)
         setMatches((prev) => {
           if (targetPage === 1) return data.matches
+          // Dedup by gameId to guard against SSE races delivering a match
+          // both via polling and the live stream simultaneously
           const existingIds = new Set(prev.map((m) => m.gameId))
           const unique = data.matches.filter((m) => !existingIds.has(m.gameId))
           return [...prev, ...unique]
@@ -53,6 +55,8 @@ export const useInfiniteScroll = ({
     setHasMore(true)
   }, [])
 
+  // After initial load, check if the page is too short to trigger scroll events —
+  // if so, proactively fetch the next page to fill the viewport
   const checkIfMoreNeeded = useCallback(() => {
     if (isLoading || isLoadingMore || !hasMore || !enabled) return
     if (document.documentElement.offsetHeight <= window.innerHeight * 1.2) {
@@ -62,6 +66,7 @@ export const useInfiniteScroll = ({
 
   const handleScroll = useCallback(() => {
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
+    // Debounce at 150ms to avoid firing on every pixel of scroll momentum
     scrollTimeoutRef.current = setTimeout(() => {
       if (isLoading || isLoadingMore || !hasMore || !enabled) return
       const scrollPos = window.innerHeight + window.scrollY

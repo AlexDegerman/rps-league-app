@@ -1,20 +1,26 @@
 import '@testing-library/jest-dom/vitest'
 import { vi } from 'vitest'
+import { configure } from '@testing-library/dom'
+
+configure({
+  getElementError: (message) => {
+    const error = new Error(message ?? '')
+    error.stack = ''
+    return error
+  }
+})
 
 class MockEventSource {
   onopen: ((this: EventSource, ev: Event) => void) | null = null
   onmessage: ((this: EventSource, ev: MessageEvent) => void) | null = null
   onerror: ((this: EventSource, ev: Event) => void) | null = null
-
   close = vi.fn()
   addEventListener = vi.fn()
   removeEventListener = vi.fn()
-
   readonly url: string = ''
   readonly readyState: number = 0
   readonly withCredentials: boolean = false
 }
-
 global.EventSource = MockEventSource as unknown as typeof EventSource
 
 const localStorageMock = (() => {
@@ -29,11 +35,9 @@ const localStorageMock = (() => {
     })
   }
 })()
-
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
 
 window.scrollTo = vi.fn()
-
 Object.defineProperty(global, 'crypto', {
   value: { randomUUID: () => 'test-uuid' }
 })

@@ -79,21 +79,19 @@ const ScissorsIcon = () => (
   </svg>
 )
 
-const MoveIcon = ({ move, size = 40 }: MoveIconProps) => {
-  return (
-    <span
-      className="inline-flex items-center justify-center"
-      style={{ width: size, height: size }}
-      title={move}
-    >
-      {move === 'ROCK' && <RockIcon />}
-      {move === 'PAPER' && <PaperIcon />}
-      {move === 'SCISSORS' && <ScissorsIcon />}
-      {move !== 'ROCK' && move !== 'PAPER' && move !== 'SCISSORS' && (
-        <span className="text-xs font-bold text-gray-400">?</span>
-      )}
-    </span>
-  )
-}
+const MoveIcon = ({ move, size = 40 }: MoveIconProps) => (
+  <span
+    className="inline-flex items-center justify-center"
+    style={{ width: size, height: size }}
+    title={move}
+  >
+    {move === 'ROCK' && <RockIcon />}
+    {move === 'PAPER' && <PaperIcon />}
+    {move === 'SCISSORS' && <ScissorsIcon />}
+    {move !== 'ROCK' && move !== 'PAPER' && move !== 'SCISSORS' && (
+      <span className="text-xs font-bold text-gray-400">?</span>
+    )}
+  </span>
+)
 
 export default MoveIcon

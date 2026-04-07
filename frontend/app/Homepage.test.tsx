@@ -1,114 +1,119 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest'
-import HomePage from '@/app/page'
-import { fetchLatestMatches, fetchDailyStats } from '@/lib/api'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import HomePage from './page'
 
-vi.mock('@/lib/api', () => ({
-  fetchLatestMatches: vi.fn(() =>
-    Promise.resolve({ matches: [], hasMore: false })
-  ),
-  fetchDailyStats: vi.fn(() =>
-    Promise.resolve({
-      totalVolume: 0,
-      dailyPayout: 0,
-      winRate: 0,
-      totalBets: 0,
-      mvp: null
-    })
-  )
-}))
-
-vi.mock('@/lib/user', () => ({
-  getOrCreateUser: vi.fn(),
-  getUserId: vi.fn(() => 'test-user-123'),
-  getNickname: vi.fn(() => 'Tester')
-}))
-
+// Proper constructor mock — vi.fn() alone can't be new'd
 class MockEventSource {
-  static readonly CONNECTING = 0
-  static readonly OPEN = 1
-  static readonly CLOSED = 2
-  readyState = MockEventSource.OPEN
-  url = ''
-  addEventListener = vi.fn()
-  removeEventListener = vi.fn()
+  static instances: MockEventSource[] = []
+  listeners: Record<string, ((e: { data: string }) => void)[]> = {}
   close = vi.fn()
-  constructor(url: string | URL) {
-    this.url = url.toString()
+
+  constructor(public url: string) {
+    MockEventSource.instances.push(this)
+  }
+
+  addEventListener(event: string, callback: (e: { data: string }) => void) {
+    if (!this.listeners[event]) this.listeners[event] = []
+    this.listeners[event].push(callback)
+  }
+
+  emit(event: string, data: object) {
+    this.listeners[event]?.forEach((cb) => cb({ data: JSON.stringify(data) }))
   }
 }
-global.EventSource = MockEventSource as unknown as typeof EventSource
+
+vi.stubGlobal('EventSource', MockEventSource)
+
+// The input has no htmlFor/id pair, so getByRole('textbox') is the reliable selector
+const getBetInput = () => screen.getByRole('textbox') as HTMLInputElement
 
 describe('HomePage', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    ;(fetchDailyStats as Mock).mockResolvedValue({
-      totalVolume: 1000000,
-      dailyPayout: 50000,
-      winRate: 65,
-      totalBets: 100,
-      mvp: { nickname: 'ProPlayer', gain: 25000 }
-    })
-    ;(fetchLatestMatches as Mock).mockResolvedValue({
-      matches: [],
-      hasMore: false
-    })
+    vi.restoreAllMocks()
+    MockEventSource.instances = []
 
-    global.fetch = vi.fn().mockImplementation((url: string) => {
-      if (url.includes('/points')) {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ points: 500000, peak_points: 500000 })
-        })
-      }
-      if (url.includes('/pending')) {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
-      }
-      return Promise.reject(new Error('Not Found'))
-    })
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url: string) => {
+        if (url.includes('/api/predictions') && url.includes('/points')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({ points: '500000', peak_points: '500000' })
+          })
+        }
+        if (url.includes('/api/predictions/stats/daily')) {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                totalVolume: '1000000',
+                dailyPayout: '500000',
+                winRate: 55,
+                totalBets: 1234,
+                mvp: { nickname: 'Player1', gain: '200000' }
+              })
+          })
+        }
+        if (url.includes('/api/matches/pending')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
+        }
+        if (url.includes('/api/matches')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ matches: [], totalPages: 1 })
+          })
+        }
+        return Promise.reject(new Error(`Unhandled API call: ${url}`))
+      })
+    )
   })
 
-  const findPointsDisplay = () => screen.getAllByText(/500,000/)[0]
-
-  it('loads and displays initial points from API', async () => {
+  it('clamps initial bet to 100k floor even when fetched points are higher', async () => {
     render(<HomePage />)
-    await waitFor(() => {
-      expect(findPointsDisplay()).toBeInTheDocument()
-    })
+    // Points = 500k, but default bet starts at min(points, 100k) = 100k
+    await waitFor(() => expect(getBetInput().value).toBe('100.000'))
+    // Points display (not the bet input) should reflect the full 500k balance
+    await waitFor(() => expect(screen.getByText(/499|500/)).toBeInTheDocument())
   })
 
-  it('updates bet amount to total points when ALL IN is clicked', async () => {
+  it('sets bet to full balance when ALL IN is clicked', async () => {
     render(<HomePage />)
-    await waitFor(() => expect(findPointsDisplay()).toBeInTheDocument())
+    await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 
-    const allInBtn = screen.getByRole('button', { name: /ALL IN/i })
-    fireEvent.click(allInBtn)
+    fireEvent.click(screen.getByRole('button', { name: /ALL IN/i }))
 
-    const input = screen.getByRole('textbox') as HTMLInputElement
-    expect(input.value).toBe('500000')
+    await waitFor(() => expect(getBetInput().value).toBe('500.000'))
   })
 
-  it('toggles Auto All-In mode correctly', async () => {
+  it('toggles AUTO button class between off and on states', async () => {
     render(<HomePage />)
-    await waitFor(() => expect(findPointsDisplay()).toBeInTheDocument())
+    const autoButton = screen.getByRole('button', { name: /AUTO/i })
 
-    const autoBtn = screen.getByRole('button', { name: /AUTO/i })
-    fireEvent.click(autoBtn)
-
-    expect(autoBtn).toBeInTheDocument()
+    expect(autoButton).not.toHaveClass('bg-green-600')
+    fireEvent.click(autoButton)
+    await waitFor(() => expect(autoButton).toHaveClass('bg-green-600'))
+    fireEvent.click(autoButton)
+    await waitFor(() => expect(autoButton).not.toHaveClass('bg-green-600'))
   })
 
-  it('respects the points floor on blur', async () => {
+  it('resets bet to 100k floor when a below-floor value is entered and blurred', async () => {
     render(<HomePage />)
-    await waitFor(() => expect(findPointsDisplay()).toBeInTheDocument())
 
-    const input = screen.getByRole('textbox') as HTMLInputElement
+    fireEvent.focus(getBetInput())
+    fireEvent.change(getBetInput(), { target: { value: '50000' } })
+    fireEvent.blur(getBetInput())
 
-    fireEvent.change(input, { target: { value: '5000' } })
-    expect(input.value).toBe('5000')
+    await waitFor(() => expect(getBetInput().value).toBe('100.000'))
+  })
 
-    fireEvent.blur(input)
+  it('syncs bet input to full balance when AUTO ALL-IN is enabled', async () => {
+    render(<HomePage />)
+    await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 
-    expect(input.value).toBe('100000')
+    fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
+
+    // AUTO mode overrides the floor and sets bet = current points
+    await waitFor(() => expect(getBetInput().value).toBe('500.000'))
   })
 })

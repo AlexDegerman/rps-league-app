@@ -35,23 +35,19 @@ export default function PlayerPage() {
     <div className="max-w-2xl mx-auto px-4 py-4">
       <h1 className="text-3xl font-bold text-gray-900 mb-1">{name}</h1>
       <p className="text-gray-500 mb-6">Player profile</p>
+
       {statsLoading ? (
         <p className="text-gray-400 py-2">Loading stats...</p>
       ) : (
         stats && (
           <div className="grid grid-cols-3 gap-3 mb-8">
-            <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-              <p className="text-xs text-gray-500 mt-1">Matches</p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
-              <p className="text-2xl font-bold text-green-600">{stats.wins}</p>
-              <p className="text-xs text-gray-500 mt-1">Wins</p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
-              <p className="text-2xl font-bold text-red-500">{stats.losses}</p>
-              <p className="text-xs text-gray-500 mt-1">Losses</p>
-            </div>
+            <StatCard label="Matches" value={stats.total} />
+            <StatCard label="Wins" value={stats.wins} color="text-green-600" />
+            <StatCard
+              label="Losses"
+              value={stats.losses}
+              color="text-red-500"
+            />
             <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center col-span-3">
               <p className="text-2xl font-bold text-indigo-600">
                 {stats.winRate}%
@@ -61,9 +57,11 @@ export default function PlayerPage() {
           </div>
         )
       )}
+
       <h2 className="text-lg font-semibold text-gray-800 mb-3">
         Match History
       </h2>
+
       {isLoading ? (
         <p className="text-center text-gray-400 py-8">Loading matches...</p>
       ) : matches.length === 0 ? (
@@ -77,6 +75,22 @@ export default function PlayerPage() {
           alwaysLeft
         />
       )}
+    </div>
+  )
+}
+
+interface StatCardProps {
+  label: string
+  value: number
+  color?: string
+}
+
+// Extracted to avoid repeating the card markup for each stat
+function StatCard({ label, value, color = 'text-gray-900' }: StatCardProps) {
+  return (
+    <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
+      <p className={`text-2xl font-bold ${color}`}>{value}</p>
+      <p className="text-xs text-gray-500 mt-1">{label}</p>
     </div>
   )
 }

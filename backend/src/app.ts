@@ -9,12 +9,9 @@ import { initDb } from './utils/initDb.js'
 
 const app = express()
 
-// Global CORS handler
-const allowedOrigin = process.env.CORS_ORIGIN || '*'
+app.get('/health', (_req, res) => res.status(200).send('OK'))
 
-app.get('/health', (req, res) => {
-  res.status(200).send('OK')
-})
+const allowedOrigin = process.env.CORS_ORIGIN || '*'
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
@@ -24,13 +21,13 @@ app.use((req, res, next) => {
   )
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
   res.setHeader('Access-Control-Allow-Credentials', 'false')
+  // Preflight — browsers send OPTIONS before cross-origin POST/PUT
   if (req.method === 'OPTIONS') return res.sendStatus(204)
   next()
 })
 
 app.use(express.json())
 
-// Routes
 app.use('/api/matches', matchesRouter)
 app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/live', liveRouter)

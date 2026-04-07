@@ -5,10 +5,10 @@ const NICKNAME_KEY = 'rps_nickname'
 
 const generateUserId = (): string => crypto.randomUUID()
 
+// Returns existing identity or creates a new one on first visit.
+// Guards against SSR by returning empty strings when window is unavailable.
 export const getOrCreateUser = (): { userId: string; nickname: string } => {
-  if (typeof window === 'undefined') {
-    return { userId: '', nickname: '' }
-  }
+  if (typeof window === 'undefined') return { userId: '', nickname: '' }
 
   let userId = localStorage.getItem(USER_ID_KEY)
   let nickname = localStorage.getItem(NICKNAME_KEY)
@@ -17,7 +17,6 @@ export const getOrCreateUser = (): { userId: string; nickname: string } => {
     userId = generateUserId()
     localStorage.setItem(USER_ID_KEY, userId)
   }
-
   if (!nickname) {
     nickname = generateNickname()
     localStorage.setItem(NICKNAME_KEY, nickname)

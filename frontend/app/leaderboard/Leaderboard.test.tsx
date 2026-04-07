@@ -7,14 +7,12 @@ import { useSearchParams } from 'next/navigation'
 
 const mockReplace = vi.fn()
 
-// 1. Mock Next.js navigation
 vi.mock('next/navigation', () => ({
   useSearchParams: vi.fn(() => new URLSearchParams()),
   useRouter: vi.fn(() => ({ replace: mockReplace })),
   usePathname: vi.fn(() => '/leaderboard')
 }))
 
-// 2. Mock the API to match your actual implementation
 vi.mock('@/lib/api', () => ({
   fetchUnifiedLeaderboard: vi.fn()
 }))
@@ -23,44 +21,43 @@ vi.mock('@/lib/user', () => ({
   getUserId: vi.fn()
 }))
 
-describe('LeaderboardPage', () => {
-  const mockPredictors = [
-    {
-      user_id: 'user-1',
-      nickname: 'Alice',
-      points: 1000,
-      peak_points: 1100,
-      gained: 100,
-      wins: 5,
-      losses: 2,
-      win_rate: 71
-    },
-    {
-      user_id: 'my-id',
-      nickname: 'Me',
-      points: 500,
-      peak_points: 600,
-      gained: -50,
-      wins: 2,
-      losses: 5,
-      win_rate: 28
-    }
-  ]
+const mockPredictors = [
+  {
+    user_id: 'user-1',
+    nickname: 'Alice',
+    points: 1000,
+    peak_points: 1100,
+    gained: 100,
+    wins: 5,
+    losses: 2,
+    win_rate: 71
+  },
+  {
+    user_id: 'my-id',
+    nickname: 'Me',
+    points: 500,
+    peak_points: 600,
+    gained: -50,
+    wins: 2,
+    losses: 5,
+    win_rate: 28
+  }
+]
 
+describe('LeaderboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     ;(user.getUserId as Mock).mockReturnValue('my-id')
     ;(api.fetchUnifiedLeaderboard as Mock).mockResolvedValue(mockPredictors)
+    ;(useSearchParams as Mock).mockReturnValue(new URLSearchParams())
   })
 
-  it('loads daily predictors by default and identifies the "YOU" user', async () => {
+  it('fetches daily data by default and marks the current user as YOU', async () => {
     render(<LeaderboardPage />)
 
-    // Check loading state (from the Suspense boundary or component)
     expect(screen.getByText(/Loading/i)).toBeInTheDocument()
 
     await waitFor(() => {
-      // It should call the unified fetcher with default 'daily' params
       expect(api.fetchUnifiedLeaderboard).toHaveBeenCalledWith(
         'daily',
         'points',
@@ -71,20 +68,17 @@ describe('LeaderboardPage', () => {
     })
   })
 
-  it('switches to Weekly tab and updates the URL', async () => {
+  it('refetches with weekly params and updates URL when Weekly tab is clicked', async () => {
     render(<LeaderboardPage />)
 
-    const weeklyBtn = screen.getByRole('button', { name: /weekly/i })
-    fireEvent.click(weeklyBtn)
+    fireEvent.click(screen.getByRole('button', { name: /weekly/i }))
 
     await waitFor(() => {
-      // Check if it calls the API with 'weekly'
       expect(api.fetchUnifiedLeaderboard).toHaveBeenCalledWith(
         'weekly',
         'gained',
         'desc'
       )
-      // Check if URL updates using the correct key 'tab' (not 'ps')
       expect(mockReplace).toHaveBeenCalledWith(
         expect.stringContaining('tab=weekly'),
         expect.any(Object)
@@ -92,8 +86,7 @@ describe('LeaderboardPage', () => {
     })
   })
 
-  it('initializes with All Time view if URL param is present', async () => {
-    // Set the search param to 'alltime'
+  it('reads tab from URL param on mount and fetches alltime data', async () => {
     ;(useSearchParams as Mock).mockReturnValue(
       new URLSearchParams('tab=alltime')
     )
@@ -109,16 +102,12 @@ describe('LeaderboardPage', () => {
     })
   })
 
-  it('renders empty state message when no data is returned', async () => {
-    // Force the mock to return the default (daily) for this specific test
-    ;(useSearchParams as Mock).mockReturnValue(new URLSearchParams())
-
+  it('shows empty state when API returns no predictors', async () => {
     ;(api.fetchUnifiedLeaderboard as Mock).mockResolvedValue([])
 
     render(<LeaderboardPage />)
 
     await waitFor(() => {
-      // Using a more flexible regex that matches the start of any of your empty messages
       expect(screen.getByText(/No (predictors|bets)/i)).toBeInTheDocument()
     })
   })
