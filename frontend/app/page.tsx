@@ -567,7 +567,11 @@ export default function HomePage() {
               <input
                 type="text"
                 value={isFocused ? inputString : formatPoints(betAmount)}
-                onFocus={() => setIsFocused(true)}
+                onFocus={() => {
+                  setIsFocused(true)
+                  setInputString('')
+                }}
+                placeholder={!autoAllIn ? '100k → 100.000' : ''}
                 onChange={(e) => {
                   const val = e.target.value
                   setInputString(val)
