@@ -34,3 +34,12 @@
     opacity: 0;
   }
 }
+
+@keyframes pulsate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-pulsate {
+  animation: pulsate 1s ease-in-out infinite;
+}

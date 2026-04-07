@@ -8,7 +8,13 @@ import GemIcon from '@/components/icons/GemIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, getUserId, getNickname } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
-import { formatPoints, parseShorthand } from '@/lib/format'
+import {
+  formatPoints,
+  getAmountColor,
+  getBonusStyles,
+  getFullNumberName,
+  parseShorthand
+} from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
 import LiveStatsTicker from '@/components/LiveStatTicker'
@@ -17,31 +23,39 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 let _backendReady = false
 
+interface BonusData {
+  amount: bigint
+  tier: string
+}
+
 export default function HomePage() {
   const [backendReady, setBackendReady] = useState(_backendReady)
   const [pendingMatches, setPendingMatches] = useState<PendingMatch[]>([])
   const [predictions, setPredictions] = useState<Map<string, PredictionRecord>>(
     new Map()
   )
-  const [points, setPoints] = useState<number>(100000)
+  const [points, setPoints] = useState<bigint>(100000n)
   const [pointsLoaded, setPointsLoaded] = useState(false)
-  const [betAmount, setBetAmount] = useState<number>(100000)
+  const [betAmount, setBetAmount] = useState<bigint>(100000n)
   const [serverOffset, setServerOffset] = useState<number>(0)
   const [resultAnim, setResultAnim] = useState<{
     win: boolean
-    amount: number
+    amount: bigint
+    bonus?: BonusData | null
     confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
   } | null>(null)
-  const [animatedAmount, setAnimatedAmount] = useState(0)
-  const [peakPoints, setPeakPoints] = useState(100000)
+  const [animatedAmount, setAnimatedAmount] = useState<bigint>(0n)
+  const [peakPoints, setPeakPoints] = useState<bigint>(100000n)
   const [autoAllIn, setAutoAllIn] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const { playWin, playLoss, soundOn, toggleSound } = useSound()
   const [showJumpButton, setShowJumpButton] = useState(false)
   const [now, setNow] = useState(() => Date.now())
-  const [inputString, setInputString] = useState(betAmount.toString())
+  const [inputString, setInputString] = useState('100000')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [showPointsInfo, setShowPointsInfo] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
+  const [showPointsExplainer, setShowPointsExplainer] = useState(false)
 
   const triggerErrorRef = useRef((msg: string) => {
     setErrorMessage(msg)
@@ -51,10 +65,6 @@ export default function HomePage() {
   const isOffline = typeof window !== 'undefined' && !navigator.onLine
   const isStreamStale = now - lastPacketRef.current > 10000
   const showConnectionWarning = backendReady && (isOffline || isStreamStale)
-
-  useEffect(() => {
-    setInputString(betAmount.toString())
-  }, [betAmount])
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 100)
@@ -98,8 +108,11 @@ export default function HomePage() {
   }, [autoAllIn, isHydrated])
 
   useEffect(() => {
-    if (isHydrated && autoAllIn) setBetAmount(points)
-  }, [autoAllIn, points, isHydrated])
+    if (isHydrated && autoAllIn) {
+      setBetAmount(points)
+      if (!isFocused) setInputString(points.toString())
+    }
+  }, [autoAllIn, points, isHydrated, isFocused])
 
   useEffect(() => {
     const handleScroll = () => setShowJumpButton(window.scrollY > 400)
@@ -121,13 +134,21 @@ export default function HomePage() {
     const end = resultAnim.amount
     const duration = 600
     const startTime = performance.now()
+
     const animate = (time: number) => {
       const progress = Math.min((time - startTime) / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setAnimatedAmount(Math.floor(eased * end))
-      if (progress < 1) requestAnimationFrame(animate)
+      const easedFactor = 1 - Math.pow(1 - progress, 3)
+
+      if (progress < 1) {
+        const scaledFactor = BigInt(Math.floor(easedFactor * 1000))
+        setAnimatedAmount((end * scaledFactor) / 1000n)
+        requestAnimationFrame(animate)
+      } else {
+        setAnimatedAmount(end)
+      }
     }
-    requestAnimationFrame(animate)
+    const rafId = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(rafId)
   }, [resultAnim])
 
   useEffect(() => {
@@ -138,14 +159,16 @@ export default function HomePage() {
     fetch(`${API_BASE}/api/predictions/${userId}/points`)
       .then((res) => res.json())
       .then((data) => {
-        const p = Number(data.points)
+        const p = BigInt(data.points)
         setPoints(p)
-        setPeakPoints(Number(data.peak_points))
-        setBetAmount(autoAllInRef.current ? p : Math.min(100000, p))
+        setPeakPoints(BigInt(data.peak_points))
+        const initialBet = autoAllInRef.current ? p : p < 100000n ? p : 100000n
+        setBetAmount(initialBet)
+        setInputString(initialBet.toString())
         setPointsLoaded(true)
       })
       .catch((err) => {
-        console.error("Failed to fetch points, falling back to 100k", err)
+        console.error('Failed to fetch points, falling back to 100k', err)
         setPointsLoaded(true)
       })
 
@@ -162,9 +185,7 @@ export default function HomePage() {
           return prev
         })
       })
-  }, [])
 
-  useEffect(() => {
     fetchLatestMatches(1).then((data) => {
       if (data.matches.length > 0) markReady()
       loadMatches(1)
@@ -174,14 +195,13 @@ export default function HomePage() {
   const handlePick = async (gameId: string, playerName: string) => {
     const userId = getUserId()
     const nickname = getNickname()
-    if (!userId || !nickname || betAmount <= 0) return
+    if (!userId || !nickname || betAmount <= 0n) return
 
     setPredictions((prev) =>
       new Map(prev).set(gameId, { gameId, pick: playerName, confirmed: false })
     )
 
     let succeeded = false
-
     try {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 3000)
@@ -193,7 +213,7 @@ export default function HomePage() {
           userId,
           gameId,
           pick: playerName,
-          betAmount: betAmountRef.current,
+          betAmount: betAmountRef.current.toString(),
           nickname
         }),
         signal: controller.signal
@@ -231,25 +251,29 @@ export default function HomePage() {
   }
 
   const fetchUpdatedPoints = useCallback(async (): Promise<{
-    newPoints: number
+    newPoints: bigint
     isNewPeak: boolean
   }> => {
     const userId = getUserId()
     if (!userId) return { newPoints: pointsRef.current, isNewPeak: false }
     const res = await fetch(`${API_BASE}/api/predictions/${userId}/points`)
     const data = await res.json()
-    const newPoints = Number(data.points)
-    const newPeak = Number(data.peak_points)
+    const newPoints = BigInt(data.points)
+    const newPeak = BigInt(data.peak_points)
     const isNewPeak = newPeak > peakPointsRef.current
-    setPointsLoaded(true)
 
+    setPointsLoaded(true)
     setPeakPoints(newPeak)
     setPoints(newPoints)
-    setBetAmount(
-      autoAllInRef.current
-        ? newPoints
-        : Math.min(betAmountRef.current, newPoints)
-    )
+
+    if (autoAllInRef.current) {
+      setBetAmount(newPoints)
+      setInputString(newPoints.toString())
+    } else if (betAmountRef.current > newPoints) {
+      setBetAmount(newPoints)
+      setInputString(newPoints.toString())
+    }
+
     return { newPoints, isNewPeak }
   }, [])
 
@@ -283,6 +307,68 @@ export default function HomePage() {
       markReady()
     })
 
+    es.addEventListener('prediction_result', (event) => {
+      const data = JSON.parse(event.data)
+      const userId = getUserId()
+      if (data.userId !== userId) return
+
+      const isWin = data.result === 'WIN'
+
+      if (isWin) {
+        playWin()
+        const bonus = data.bonus
+          ? { ...data.bonus, amount: BigInt(data.bonus.amount) }
+          : null
+        const amount = BigInt(data.amount)
+
+        fetchUpdatedPoints()
+        setResultAnim({
+          win: true,
+          amount,
+          bonus,
+          confetti: Array.from({ length: 100 }).map(() => ({
+            leftOffset: Math.random() * 100 - 50,
+            vx: (Math.random() - 0.5) * 300,
+            vy: -(Math.random() * 200 + 100),
+            delay: Math.random() * 0.2
+          }))
+        })
+      } else {
+        playLoss()
+        const bonus = data.bonus
+          ? { ...data.bonus, amount: BigInt(data.bonus.amount) }
+          : null
+        const pointsBefore = pointsRef.current
+
+        new Promise<{ newPoints: bigint; isNewPeak: boolean }>((resolve) => {
+          setTimeout(() => resolve(fetchUpdatedPoints()), 100)
+        }).then(({ newPoints }) => {
+          const actualLoss =
+            pointsBefore > newPoints ? pointsBefore - newPoints : 0n
+          setResultAnim({
+            win: false,
+            amount: actualLoss,
+            bonus,
+            confetti: []
+          })
+        })
+      }
+
+      setTimeout(() => setResultAnim(null), 2000)
+
+      setPredictions((prev) => {
+        const newMap = new Map(prev)
+        const existing = prev.get(data.gameId)
+        if (existing) {
+          newMap.set(data.gameId, {
+            ...existing,
+            result: isWin ? 'WIN' : 'LOSE'
+          })
+        }
+        return newMap
+      })
+    })
+
     es.addEventListener('result', (event) => {
       const match: Match = JSON.parse(event.data)
       lastPacketRef.current = Date.now()
@@ -291,69 +377,31 @@ export default function HomePage() {
         if (prev.some((m) => m.gameId === match.gameId)) return prev
         return [match, ...prev].slice(0, 20)
       })
-
-      const prediction = predictionsRef.current.get(match.gameId)
-      if (prediction && prediction.confirmed && !prediction.result) {
-        const aWins =
-          (match.playerA.played === 'ROCK' &&
-            match.playerB.played === 'SCISSORS') ||
-          (match.playerA.played === 'SCISSORS' &&
-            match.playerB.played === 'PAPER') ||
-          (match.playerA.played === 'PAPER' && match.playerB.played === 'ROCK')
-
-        const winner = aWins ? match.playerA.name : match.playerB.name
-        const isWin = winner === prediction.pick
-
-        if (isWin) {
-          playWin()
-          const amount = betAmountRef.current
-          fetchUpdatedPoints()
-          setResultAnim({
-            win: true,
-            amount,
-            confetti: Array.from({ length: 100 }).map(() => ({
-              leftOffset: Math.random() * 100 - 50,
-              vx: (Math.random() - 0.5) * 300,
-              vy: -(Math.random() * 200 + 100),
-              delay: Math.random() * 0.2
-            }))
-          })
-        } else {
-          playLoss()
-          const pointsBefore = pointsRef.current
-          new Promise<{ newPoints: number; isNewPeak: boolean }>((resolve) => {
-            setTimeout(() => resolve(fetchUpdatedPoints()), 100)
-          }).then(({ newPoints }) => {
-            const actualLoss = pointsBefore - newPoints
-            setResultAnim({
-              win: false,
-              amount: actualLoss,
-              confetti: Array.from({ length: 100 }).map(() => ({
-                leftOffset: Math.random() * 100 - 50,
-                vx: (Math.random() - 0.5) * 300,
-                vy: -(Math.random() * 200 + 100),
-                delay: Math.random() * 0.2
-              }))
-            })
-          })
-        }
-
-        setTimeout(() => setResultAnim(null), 2000)
-        setPredictions((prev) => {
-          const newMap = new Map(prev)
-          newMap.set(match.gameId, {
-            ...prediction,
-            result: isWin ? 'WIN' : 'LOSE'
-          })
-          return newMap
-        })
-      }
     })
 
     return () => es.close()
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const getConfettiColors = (tier?: string) => {
+    switch (tier) {
+      case 'LEGENDARY':
+        return ['#FFD700', '#FCD34D', '#F59E0B', '#FBBF24']
+      case 'EPIC':
+        return [
+          '#A855F7',
+          '#C084FC',
+          '#7C3AED',
+          '#F0ABFC',
+          '#9333EA',
+          '#E9D5FF'
+        ]
+      case 'RARE':
+        return ['#60A5FA', '#3B82F6', '#93C5FD', '#2563EB']
+      default:
+        return ['#22C55E', '#4ADE80', '#86EFAC', '#16A34A']
+    }
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-4 pb-24">
@@ -364,64 +412,108 @@ export default function HomePage() {
         Live results from the RPS League
       </p>
 
+      {/* Result Animation Overlay */}
       {resultAnim && (
-        <div className="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center gap-2">
+        <div className="fixed top-[58%] sm:top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center justify-center w-full max-w-md">
+          {resultAnim.bonus && (
+            <div
+              className={`flex flex-col items-center mb-1 sm:mb-2 transition-all duration-300 animate-in zoom-in 
+                ${getBonusStyles(resultAnim.bonus.tier).glow}
+                ${resultAnim.bonus.tier === 'LEGENDARY' ? 'animate-pulsate' : ''}`}
+            >
+              <span
+                className={`text-[10px] sm:text-sm font-black uppercase tracking-[0.25em] mb-1 ${getBonusStyles(resultAnim.bonus.tier).text}`}
+              >
+                {getBonusStyles(resultAnim.bonus.tier).label}
+              </span>
+              <span
+                className={`text-lg sm:text-2xl font-black ${resultAnim.win ? 'text-green-300' : 'text-blue-300'} drop-shadow-md`}
+              >
+                {resultAnim.win ? '+' : 'SAVED '}
+                {formatPoints(resultAnim.bonus.amount)}
+              </span>
+            </div>
+          )}
+
           <span
-            className={`text-4xl sm:text-5xl font-black animate-bounce ${resultAnim.win ? 'text-green-500' : 'text-red-500'}`}
+            className={`text-5xl sm:text-7xl font-black drop-shadow-2xl animate-bounce leading-tight ${resultAnim.win ? 'text-green-500' : 'text-red-500'}`}
           >
             {resultAnim.win
               ? `+${formatPoints(animatedAmount)}`
               : `-${formatPoints(animatedAmount)}`}
           </span>
+
           {resultAnim.win && (
             <div className="relative w-0 h-0">
-              {resultAnim.confetti?.map((c, i) => (
-                <div
-                  key={i}
-                  className="absolute rounded-sm pointer-events-none"
-                  style={
-                    {
-                      width: `${i % 3 === 0 ? 8 : 6}px`,
-                      height: `${i % 3 === 0 ? 10 : 8}px`,
-                      left: `${c.leftOffset}px`,
-                      top: 0,
-                      backgroundColor: [
-                        '#A855F7',
-                        '#C084FC',
-                        '#7C3AED',
-                        '#F0ABFC',
-                        '#9333EA',
-                        '#E9D5FF',
-                        '#FFD700',
-                        '#FCD34D'
-                      ][i % 8],
-                      animation: `confetti-burst 1.2s ease-out ${c.delay}s forwards`,
-                      '--vx': `${c.vx}px`,
-                      '--vy': `${c.vy}px`
-                    } as React.CSSProperties
-                  }
-                />
-              ))}
+              {resultAnim.confetti?.map((c, i) => {
+                const colors = getConfettiColors(resultAnim.bonus?.tier)
+                return (
+                  <div
+                    key={i}
+                    className="absolute rounded-sm pointer-events-none"
+                    style={
+                      {
+                        width: `${i % 3 === 0 ? 8 : 6}px`,
+                        height: `${i % 3 === 0 ? 10 : 8}px`,
+                        left: `${c.leftOffset}px`,
+                        top: 0,
+                        backgroundColor: colors[i % colors.length],
+                        animation: `confetti-burst 1.2s ease-out ${c.delay}s forwards`,
+                        '--vx': `${c.vx}px`,
+                        '--vy': `${c.vy}px`
+                      } as React.CSSProperties
+                    }
+                  />
+                )
+              })}
             </div>
           )}
         </div>
       )}
 
-      <div className="bg-white rounded-t-xl border border-gray-100 shadow-sm p-4 ">
+      {/* Main Controls Container */}
+      <div className="bg-white rounded-t-xl border border-gray-100 shadow-sm p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <GemIcon size={24} />
-            <span className="text-xl font-bold text-purple-600">
-              {pointsLoaded ? formatPoints(points) : '...'}
-            </span>
+            {/* Points Scale Name Explainer */}
+            <div className="relative group flex items-center">
+              <div
+                className="flex items-center gap-2 cursor-pointer select-none"
+                onMouseEnter={() => setShowPointsExplainer(true)}
+                onMouseLeave={() => setShowPointsExplainer(false)}
+                onClick={() => setShowPointsExplainer(!showPointsExplainer)}
+              >
+                <GemIcon size={24} />
+                <span className={`text-xl font-bold ${getAmountColor(points)}`}>
+                  {pointsLoaded ? formatPoints(points) : '...'}
+                </span>
+              </div>
 
+              {/* Tooltip */}
+              <div
+                className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 min-w-35 max-w-55 p-2.5 bg-gray-900 text-white rounded-lg shadow-xl transition-all duration-200 z-50 text-center pointer-events-none
+                  ${showPointsExplainer ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
+                `}
+              >
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-[11px] text-purple-400 font-black uppercase tracking-[0.15em] leading-tight py-0.5 whitespace-normal">
+                    {getFullNumberName(points)}
+                  </span>
+                </div>
+                <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
+              </div>
+            </div>
+
+            {/* General Info Icon Zone */}
             <div className="relative group flex items-center ml-1">
               <button
                 type="button"
-                onClick={() => setShowPointsInfo(!showPointsInfo)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowPointsInfo(!showPointsInfo)
+                }}
                 onBlur={() => setShowPointsInfo(false)}
                 className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
-                aria-label="Points information"
               >
                 <svg
                   className="w-4 h-4"
@@ -437,22 +529,15 @@ export default function HomePage() {
                   />
                 </svg>
               </button>
-
               <div
-                className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 
-                  w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl 
-                  transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed
-                  
-                  /* State-based visibility for mobile and hover for desktop */
-                  ${showPointsInfo ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} 
-                  sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto`}
+                className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
               >
-                Virtual simulation points. No real-world currency or value. Used
-                for platform performance testing.
+                Virtual simulation points. No real-world currency or value.
                 <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900"></div>
               </div>
             </div>
           </div>
+
           <button
             onClick={toggleSound}
             className="p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
@@ -469,31 +554,41 @@ export default function HomePage() {
             <div className="relative flex-1">
               <input
                 type="text"
-                value={inputString}
+                value={isFocused ? inputString : formatPoints(betAmount)}
+                onFocus={() => setIsFocused(true)}
                 onChange={(e) => {
                   const val = e.target.value
                   setInputString(val)
                   const parsed = parseShorthand(val)
-                  if (parsed > 0) setBetAmount(Math.min(parsed, points))
+                  if (parsed > 0n) {
+                    const validBet = parsed > points ? points : parsed
+                    setBetAmount(validBet)
+                  }
                 }}
                 onBlur={() => {
-                  const final = Math.max(
-                    100000,
-                    Math.min(parseShorthand(inputString), points)
-                  )
+                  setIsFocused(false)
+                  let final = parseShorthand(inputString)
+                  if (final > points) final = points
+                  const floor = 100000n
+                  if (final < floor) final = points < floor ? points : floor
                   setBetAmount(final)
                   setInputString(final.toString())
                 }}
-                className="w-full border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 text-sm font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all"
+                className={`w-full border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400">
-                ({formatPoints(betAmount)})
-              </span>
+              {isFocused && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400 pointer-events-none">
+                  ({formatPoints(betAmount)})
+                </span>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
-              onClick={() => setBetAmount(points)}
+              onClick={() => {
+                setBetAmount(points)
+                setInputString(points.toString())
+              }}
               className="flex-1 sm:flex-none px-4 py-2.5 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 active:scale-95 transition-all shadow-sm"
             >
               ALL IN
@@ -510,11 +605,11 @@ export default function HomePage() {
 
       <LiveStatsTicker />
 
+      {/* Error Message */}
       {errorMessage && (
         <div className="my-4 transition-all duration-300">
           <div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg font-bold border-2 border-red-400 flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-200">
-            <span className="animate-pulse">⚠️</span>
-            {errorMessage}
+            <span className="animate-pulse">⚠️</span> {errorMessage}
           </div>
         </div>
       )}
@@ -529,20 +624,21 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Matches Area */}
       <div className="min-h-[60vh]">
         {!backendReady ? (
           <div className="text-center py-20 animate-pulse text-gray-400 text-sm">
-            Connecting to live stream… (server cold start, may take up to 60s)
+            Connecting to live stream…
           </div>
         ) : (
           <>
             {showConnectionWarning && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
                 <div className="w-2 h-2 bg-red-500 rounded-full" />
-                <p className="text-xs font-bold text-red-900 uppercase tracking-wide">
+                <p className="text-xs font-bold text-red-900 uppercase">
                   {isOffline
-                    ? 'No Internet Connection. Check your WiFi...'
-                    : 'Server having issues. Next match appearing soon...'}
+                    ? 'No Internet Connection.'
+                    : 'Server having issues.'}
                 </p>
               </div>
             )}
@@ -567,6 +663,7 @@ export default function HomePage() {
         )}
       </div>
 
+      {/* Scroll to Top */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className={`fixed bottom-25 right-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}

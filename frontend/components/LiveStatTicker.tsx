@@ -5,13 +5,13 @@ import { fetchDailyStats } from '@/lib/api'
 import { formatPoints, getAmountColor } from '@/lib/format'
 
 interface DailyStats {
-  totalVolume: number
-  dailyPayout: number
+  totalVolume: bigint
+  dailyPayout: bigint
   winRate: number
   totalBets: number
   mvp: {
     nickname: string
-    gain: number
+    gain: bigint
   } | null
 }
 
@@ -20,7 +20,16 @@ export default function LiveStatsTicker() {
 
   useEffect(() => {
     const load = () => {
-      fetchDailyStats().then(setStats).catch(console.error)
+      fetchDailyStats()
+        .then((data) => {
+          setStats({
+            ...data,
+            totalVolume: BigInt(data.totalVolume),
+            dailyPayout: BigInt(data.dailyPayout),
+            mvp: data.mvp ? { ...data.mvp, gain: BigInt(data.mvp.gain) } : null
+          })
+        })
+        .catch(console.error)
     }
     load()
     const interval = setInterval(load, 15000)
@@ -31,7 +40,7 @@ export default function LiveStatsTicker() {
 
   return (
     <div className="bg-gray-50/80 border-x border-b border-gray-100 rounded-b-xl py-1.5 px-4 mb-4 flex items-center justify-between gap-2 shadow-sm">
-      {/* 1. Today's Volume */}
+      {/* Today's Volume */}
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight mb-0.5">
           Today&apos;s Vol
@@ -43,20 +52,20 @@ export default function LiveStatsTicker() {
         </span>
       </div>
 
-      {/* 2. Today's Payout */}
+      {/* Today's Payout */}
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight mb-0.5">
           Today&apos;s Pay
         </span>
         <span
-          className={`text-[10px] font-black leading-none truncate ${stats.dailyPayout >= 0 ? 'text-green-600' : 'text-red-500'}`}
+          className={`text-[10px] font-black leading-none truncate ${stats.dailyPayout >= 0n ? 'text-green-600' : 'text-red-500'}`}
         >
-          {stats.dailyPayout >= 0 ? '+' : ''}
+          {stats.dailyPayout >= 0n ? '+' : ''}
           {formatPoints(stats.dailyPayout)}
         </span>
       </div>
 
-      {/* 3. Daily MVP (Already fits the 'Today' theme) */}
+      {/* Daily MVP */}
       <div className="flex flex-col min-w-0">
         <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight mb-0.5">
           Daily MVP
@@ -75,7 +84,7 @@ export default function LiveStatsTicker() {
         </div>
       </div>
 
-      {/* 4. Win Rate + Live Pulse */}
+      {/* Win Rate + Live Pulse */}
       <div className="flex flex-col items-end min-w-0">
         <div className="flex items-center gap-1 mb-0.5">
           <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight">

@@ -7,7 +7,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { fetchUnifiedLeaderboard } from '@/lib/api'
 import GemIcon from '@/components/icons/GemIcon'
 import { getUserId } from '@/lib/user'
-import { formatPoints } from '@/lib/format'
+import { formatPoints, getAmountColor } from '@/lib/format'
 import Link from 'next/link'
 
 type Tab = 'daily' | 'weekly' | 'alltime'
@@ -17,9 +17,9 @@ type SortDir = 'asc' | 'desc'
 interface PredictorEntry {
   user_id: string
   nickname: string
-  points: number
-  peak_points: number
-  gained: number
+  points: string
+  peak_points: string
+  gained: string
   wins: number
   losses: number
   win_rate: number
@@ -86,7 +86,6 @@ function LeaderboardContent() {
     try {
       const result = await fetchUnifiedLeaderboard(t, s, d)
       setData(result)
-
     } catch (err) {
       console.error(err)
     } finally {
@@ -233,7 +232,7 @@ function LeaderboardContent() {
                 ) : (
                   data.map((entry, index) => {
                     const isMe = entry.user_id === myUserId
-                    const gained = Number(entry.gained)
+                    const gainedBI = BigInt(entry.gained)
 
                     return (
                       <tr
@@ -259,47 +258,55 @@ function LeaderboardContent() {
                               )}
                             </div>
 
+                            {/* MOBILE VIEW GRID */}
                             <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
-                              <div className="grid grid-cols-10 gap-1 text-gray-400 font-bold uppercase tracking-wider text-left">
-                                <div className="col-span-1">W</div>
-                                <div className="col-span-1">L</div>
+                              <div className="grid grid-cols-14 gap-1 text-gray-400 font-bold uppercase tracking-wider text-left">
+                                <div className="col-span-2">W</div>
+                                <div className="col-span-2">L</div>
+
                                 <div className="hidden min-[380px]:block min-[380px]:col-span-2">
                                   Win%
                                 </div>
-                                <div className="col-span-3 min-[380px]:col-span-2 pl-1">
+
+                                <div className="col-span-4 min-[380px]:col-span-3">
                                   Pts
                                 </div>
-                                <div className="col-span-3 min-[380px]:col-span-2">
+                                <div className="col-span-4 min-[380px]:col-span-3">
                                   Gain
                                 </div>
-                                <div className="col-span-2">Peak</div>
+                                <div className="col-span-2 text-right">
+                                  Peak
+                                </div>
                               </div>
-
-                              <div className="grid grid-cols-10 gap-1 font-medium text-left items-center">
-                                <div className="col-span-1 text-green-600 font-bold truncate">
+                              <div className="grid grid-cols-14 gap-1 font-medium text-left items-center">
+                                <div className="col-span-2 text-green-600 font-bold truncate">
                                   {entry.wins}
                                 </div>
-                                <div className="col-span-1 text-red-500 font-bold truncate">
+
+                                <div className="col-span-2 text-red-500 font-bold truncate">
                                   {entry.losses}
                                 </div>
+
                                 <div className="hidden min-[380px]:block min-[380px]:col-span-2 text-indigo-500 font-bold">
                                   {entry.win_rate}%
                                 </div>
-                                <div className="col-span-3 min-[380px]:col-span-2 text-purple-600 font-bold flex items-center gap-0.5 whitespace-nowrap pl-1">
-                                  <GemIcon
-                                    size={8}
-                                    className="text-purple-500 shrink-0"
-                                  />
-                                  {formatPoints(Number(entry.points))}
+
+                                <div
+                                  className={`col-span-4 min-[380px]:col-span-3 font-bold flex items-center gap-0.5 whitespace-nowrap ${getAmountColor(entry.points)}`}
+                                >
+                                  <GemIcon size={8} className="shrink-0" />
+                                  {formatPoints(entry.points)}
                                 </div>
                                 <div
-                                  className={`col-span-3 min-[380px]:col-span-2 font-bold whitespace-nowrap ${gained >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                                  className={`col-span-4 min-[380px]:col-span-3 font-bold whitespace-nowrap ${gainedBI >= 0n ? 'text-green-500' : 'text-red-500'}`}
                                 >
-                                  {gained >= 0 ? '+' : ''}
-                                  {formatPoints(gained)}
+                                  {gainedBI >= 0n ? '+' : ''}
+                                  {formatPoints(entry.gained)}
                                 </div>
-                                <div className="col-span-2 text-gray-600 font-bold whitespace-nowrap">
-                                  {formatPoints(Number(entry.peak_points))}
+                                <div
+                                  className={`col-span-2 font-bold whitespace-nowrap text-right ${getAmountColor(entry.peak_points)}`}
+                                >
+                                  {formatPoints(entry.peak_points)}
                                 </div>
                               </div>
                             </div>
@@ -312,24 +319,28 @@ function LeaderboardContent() {
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-red-500">
                           {entry.losses}
                         </td>
-                        <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500">
+                        <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500 font-bold">
                           {entry.win_rate}%
                         </td>
-                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold text-purple-600">
-                          {formatPoints(Number(entry.points))}
+                        <td
+                          className={`hidden min-[600px]:table-cell px-3 py-3 text-right font-bold ${getAmountColor(entry.points)}`}
+                        >
+                          {formatPoints(entry.points)}
                         </td>
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
                           <span
                             className={
-                              gained >= 0 ? 'text-green-600' : 'text-red-500'
+                              gainedBI >= 0n ? 'text-green-600' : 'text-red-500'
                             }
                           >
-                            {gained >= 0 ? '+' : ''}
-                            {formatPoints(gained)}
+                            {gainedBI >= 0n ? '+' : ''}
+                            {formatPoints(entry.gained)}
                           </span>
                         </td>
-                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold text-gray-600">
-                          {formatPoints(Number(entry.peak_points))}
+                        <td
+                          className={`hidden min-[600px]:table-cell px-3 py-3 text-right font-bold ${getAmountColor(entry.peak_points)}`}
+                        >
+                          {formatPoints(entry.peak_points)}
                         </td>
                       </tr>
                     )

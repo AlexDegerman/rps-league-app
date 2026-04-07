@@ -2,13 +2,36 @@
 
 A fast-paced Rock Paper Scissors league web app where players bet virtual cosmetic points on live matches, track rankings, and explore analytics.
 
-Originally built as a summer dev assignment for Reaktor as a simple match viewer, now rebuilt into a full real-time betting and analysis platform.
+> 🚨 **Project Evolution:** This application is a full-scale rebuilding of my original **[RPS League](https://github.com/AlexDegerman/rps-league)** (originally built for a Reaktor developer assignment). While the initial version served as a static match viewer, this "App" version is a concurrency-aware betting engine engineered for **Infinite Scaling** and real-time user engagement.
 
-**Live demo:** https://rpsleaguegame.vercel.app/
+**Live demo:** [https://rpsleaguegame.vercel.app/](https://rpsleaguegame.vercel.app/)
 
 ![RPS League Demo](./assets/rps.gif)
 
 ---
+## 📑 Table of Contents
+
+* [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
+* [📋 Overview](#-overview)
+* [⚡ Live Activity Feed](#-live-activity-feed)
+* [🏗️ Architecture](#️-architecture)
+* [🛠️ Technical Challenges & Solutions](#️-technical-challenges--solutions)
+    * [SSE Buffering](#sse-buffering-in-production)
+    * [High-frequency UI Ticker](#high-frequency-ui-ticker-100000-daily-events)
+    * [Concurrency & Prioritization](#concurrency-and-event-prioritization)
+    * [Cold Start Resilience](#cold-start-resilience--connection-guarding)
+    * [Handling Extreme Numbers (BigInt)](#handling-extreme-numbers-quadrillions--vigintillions)
+* [🤖 AI Oracle & Analytics](#-ai-oracle--analytics)
+* [📱 Mobile & PWA Experience](#-mobile--pwa-experience)
+* [🧪 Tests](#-tests)
+* [🎨 Design Decisions](#-design-decisions)
+* [🚀 CI/CD & Automation](#-cicd--automation)
+* [🚀 Future Improvements](#-future-improvements)
+* [🔌 API Endpoints](#-api-endpoints)
+* [🔑 Environment Variables](#-environment-variables)
+* [📦 How to Run](#-how-to-run)
+* [🗄️ Database Schema](#️-database-schema)
+* [📱 Device Compatibility](#-device-compatibility)
 
 ## 🕹️ Gameplay & Betting Mechanics
 
@@ -18,6 +41,10 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
   - **WIN:** +100% of your bet
   - **LOSE:** -50% of your bet
   - **Floor:** points never drop below 100,000
+  - **Bonus System**: 25% chance per match to trigger a Tiered Bonus.
+    - On Win: Gain an extra 20% to 100% bonus points.
+    - On Loss: Lose 20% to 100% fewer points.
+    - Tiers: Common, Rare, Epic, and Legendary (with unique UI glows and confetti).
 - Points contribute to:
   - Current points
   - Weekly gains
@@ -40,6 +67,7 @@ Originally built as a summer dev assignment for Reaktor as a simple match viewer
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
+- Infinite Scaling: Engineered with native BigInt support to handle astronomical point values (Sextillions, Vigintillions, and beyond) without precision loss.
 
 ---
 
@@ -83,6 +111,9 @@ Designed a non-blocking feed that prioritizes real user actions over simulated d
 
 **Cold start resilience & Connection Guarding**
 Engineered a connection-state monitor that detects backend cold starts and "stale" event streams. Replaces empty UI states with active status messaging and heartbeat tracking, ensuring the user is informed during server spin-up or network drops.
+
+**Handling Extreme Numbers (Quadrillions → Vigintillions)**
+Standard JavaScript Numbers (IEEE 754) lose integer precision past ~9 quadrillion (2⁵³−1). In a high-frequency betting system with 100%+ multipliers, this limit was exceeded within hours. I refactored the full stack—including PostgreSQL numeric fields (NUMERIC(100,0)), Node.js backend, and React frontend—to use native BigInt. This allows safe calculation, storage, and rendering of point values up to the Vigintillions, even under extreme betting volumes.
 
 ---
 
@@ -154,9 +185,6 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 - **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
 - **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
 - **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
-
-### Optimization Notes
-- **Warm-up Script:** Pings critical endpoints every 5 minutes to maintain smooth 5-second match cadence on serverless/free-tier hosting.
 
 ---
 
@@ -324,6 +352,17 @@ Tracks all user wagers. Composite constraints prevent multiple bets on the same 
 
 - `predictions.user_id` → `users.user_id`  
 - `predictions.game_id` → `matches.game_id`
+
+---
+
+## 📱 Device Compatibility
+
+This application uses native BigInt to safely handle extremely large point values (into the vigintillions) without precision loss.
+
+- Supported: Modern mobile and desktop browsers (iOS 14+, Android 9+, Chrome, Firefox, Safari)
+- Not supported: Older devices and browsers without BigInt support (e.g. iPhone 6/7, Internet Explorer)
+
+This ensures leaderboard accuracy and consistent gameplay at high point values.
 
 ---
 

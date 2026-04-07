@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react'
 import { getOrCreateUser, regenerateNickname } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import type { UserStats } from '@/types/rps'
-import { formatPoints } from '@/lib/format'
+import { formatPoints, getAmountColor } from '@/lib/format'
 
 const API = process.env.NEXT_PUBLIC_API_URL
 
 export default function ProfilePage() {
   const [nickname, setNickname] = useState<string>('')
-  const [points, setPoints] = useState<number | null>(null)
+  const [points, setPoints] = useState<string | null>(null)
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [rank, setRank] = useState<{ rank: number; total: number } | null>(null)
@@ -31,26 +31,22 @@ export default function ProfilePage() {
     const userId = user.userId
     if (!userId) return
 
-    // 1. Load Recovery Code
     fetch(`${API}/api/predictions/recovery/${userId}`)
       .then((res) => res.json())
       .then((data) => setRecoveryCode(data.recoveryCode))
       .catch((err) => console.error('Failed to load recovery code:', err))
 
-    // 2. Load Points
     fetch(`${API}/api/predictions/${userId}/points`)
       .then((res) => res.json())
-      .then((data) => setPoints(data.points))
+      .then((data) => setPoints(data.points.toString()))
       .catch((err) => console.error('Failed to load points:', err))
 
-    // 3. Load Stats
     fetch(`${API}/api/predictions/${userId}/stats`)
       .then((res) => res.json())
       .then(setStats)
       .catch((err) => console.error('Failed to load stats:', err))
       .finally(() => setStatsLoading(false))
 
-    // 4. Load Global Rank
     fetch(`${API}/api/predictions/leaderboard`)
       .then((res) => res.json())
       .then((data: { user_id: string }[]) => {
@@ -114,8 +110,6 @@ export default function ProfilePage() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
         <div className="flex flex-col mb-6">
           <div className="flex items-center gap-3 mb-2">
-            {' '}
-            {/* Align label and button in one row */}
             <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
               Current Identity
             </p>
@@ -132,14 +126,16 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <div className="items-center gap-3 mb-6 bg-purple-50/50 p-4 rounded-xl inline-flex">
+        <div className="items-center gap-3 mb-6 bg-gray-50/50 p-4 rounded-xl inline-flex">
           <GemIcon size={24} />
           <div className="flex flex-col">
-            <span className="text-xl font-black text-purple-600 leading-none">
+            <span
+              className={`text-xl font-black leading-none ${points !== null ? getAmountColor(points) : 'text-purple-600'}`}
+            >
               {points !== null ? formatPoints(points) : '...'}
             </span>
             {rank && (
-              <span className="text-[10px] font-bold text-purple-400 uppercase mt-1">
+              <span className="text-[10px] font-bold text-gray-400 uppercase mt-1">
                 Global Rank: #{rank.rank} of {rank.total}
               </span>
             )}
@@ -289,7 +285,7 @@ export default function ProfilePage() {
               Confirm Identity Reset
             </p>
             <p className="text-xs text-red-700 mb-5 leading-relaxed">
-              This generates a brand-new profile with 1,000 points. Your current
+              This generates a brand-new profile with 100,000 points. Your current
               progress will be unreachable without your code:{' '}
               <span className="font-mono font-black">{recoveryCode}</span>
             </p>

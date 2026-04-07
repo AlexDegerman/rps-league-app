@@ -19,4 +19,7 @@ export interface PlayerStats {
   wins: number
   losses: number
   winRate: number
+  points?: string
+  peak_points?: string
+  total_gain?: string
 }

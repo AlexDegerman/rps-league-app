@@ -9,12 +9,13 @@ import pool from '../utils/db.js'
 
 const router = Router()
 
-// GET /api/predictions/leaderboard/unified?tab=daily&sort=points&dir=desc
+// GET /api/predictions/leaderboard/unified
 router.get('/leaderboard/unified', async (req, res) => {
   try {
     const tab = (req.query.tab as string) || 'daily'
     const sortParam = (req.query.sort as string) || ''
     const dir = req.query.dir === 'asc' ? 'ASC' : 'DESC'
+
     const peakColumn =
       tab === 'daily'
         ? 'u.daily_peak'
@@ -35,18 +36,19 @@ router.get('/leaderboard/unified', async (req, res) => {
     now.setUTCHours(0, 0, 0, 0)
     const dayStartMs = now.getTime()
 
-      const weekStart = new Date()
-      weekStart.setUTCHours(0, 0, 0, 0)
-      const day = weekStart.getUTCDay()
-      const diff = day === 0 ? 6 : day - 1
+    const weekStart = new Date()
+    weekStart.setUTCHours(0, 0, 0, 0)
+    const day = weekStart.getUTCDay()
+    const diff = day === 0 ? 6 : day - 1
+    weekStart.setUTCDate(weekStart.getUTCDate() - diff)
+    const weekStartMs = weekStart.getTime()
 
-      weekStart.setUTCDate(weekStart.getUTCDate() - diff)
-      const weekStartMs = weekStart.getTime()
-
-    const periodStart = tab === 'daily' ? dayStartMs : tab === 'weekly' ? weekStartMs : 0
+    const periodStart =
+      tab === 'daily' ? dayStartMs : tab === 'weekly' ? weekStartMs : 0
     const hasPeriod = periodStart > 0
 
-    const defaultSort = tab === 'daily' ? 'points' : tab === 'weekly' ? 'gained' : 'peak'
+    const defaultSort =
+      tab === 'daily' ? 'points' : tab === 'weekly' ? 'gained' : 'peak'
     const sortKey = sortWhitelist[sortParam] ?? sortWhitelist[defaultSort]
 
     const result = await pool.query(
@@ -75,16 +77,26 @@ router.get('/leaderboard/unified', async (req, res) => {
         END AS win_rate
       FROM users u
       LEFT JOIN predictions p ON u.user_id = p.user_id
-      ${hasPeriod ? 'WHERE EXISTS (SELECT 1 FROM predictions p2 WHERE p2.user_id = u.user_id AND p2.created_at >= $1)' : ''}
+      WHERE EXISTS (
+        SELECT 1 FROM predictions p2
+        WHERE p2.user_id = u.user_id
+        ${hasPeriod ? 'AND p2.created_at >= $1' : ''}
+      )
       GROUP BY u.user_id, u.nickname, u.points, u.peak_points, u.daily_peak, u.weekly_peak
-      HAVING COUNT(p.id) > 0
       ORDER BY ${sortKey} ${dir}, u.nickname ASC
       LIMIT 100
     `,
       hasPeriod ? [periodStart] : []
     )
 
-    res.json(result.rows)
+    const sanitizedRows = result.rows.map((row) => ({
+      ...row,
+      points: row.points.toString(),
+      peak_points: row.peak_points.toString(),
+      gained: row.gained.toString()
+    }))
+
+    res.json(sanitizedRows)
   } catch (err) {
     console.error('Unified leaderboard error:', err)
     res.status(500).json({ error: 'Failed to fetch leaderboard' })
@@ -99,11 +111,12 @@ router.post('/', async (req, res) => {
       return res.status(400).json({
         error: 'userId, gameId, pick, betAmount and nickname required'
       })
+
     const result = await savePrediction(
       userId,
       gameId,
       pick,
-      Number(betAmount),
+      BigInt(betAmount),
       nickname
     )
     if (!result.success) return res.status(400).json({ error: result.error })
@@ -114,7 +127,7 @@ router.post('/', async (req, res) => {
   }
 })
 
-//GET /api/stats
+// GET /api/stats
 router.get('/stats', async (req, res) => {
   try {
     const [users, predictions, matches, activeBets] = await Promise.all([
@@ -142,7 +155,8 @@ router.get('/stats/daily', async (req, res) => {
     const todayStartMs = todayStart.getTime()
 
     const [volumeRes, mvpRes] = await Promise.all([
-      pool.query(`
+      pool.query(
+        `
         SELECT
           COALESCE(SUM(bet_amount), 0) AS total_volume,
           COALESCE(SUM(gain_loss), 0) AS daily_payout,
@@ -150,8 +164,11 @@ router.get('/stats/daily', async (req, res) => {
           COUNT(*) FILTER (WHERE result = 'WIN') AS wins
         FROM predictions
         WHERE created_at >= $1
-      `, [todayStartMs]),
-      pool.query(`
+      `,
+        [todayStartMs]
+      ),
+      pool.query(
+        `
         SELECT u.nickname, SUM(p.gain_loss) AS total_gain
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
@@ -159,7 +176,9 @@ router.get('/stats/daily', async (req, res) => {
         GROUP BY u.nickname
         ORDER BY total_gain DESC
         LIMIT 1
-      `, [todayStartMs])
+      `,
+        [todayStartMs]
+      )
     ])
 
     const row = volumeRes.rows[0]
@@ -167,14 +186,14 @@ router.get('/stats/daily', async (req, res) => {
     const wins = Number(row.wins)
 
     res.json({
-      totalVolume: Number(row.total_volume),
-      dailyPayout: Number(row.daily_payout),
+      totalVolume: row.total_volume.toString(),
+      dailyPayout: row.daily_payout.toString(),
       totalBets: total,
       winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
       mvp: mvpRes.rows[0]
         ? {
             nickname: mvpRes.rows[0].nickname,
-            gain: Number(mvpRes.rows[0].total_gain)
+            gain: mvpRes.rows[0].total_gain.toString()
           }
         : null
     })
@@ -183,7 +202,7 @@ router.get('/stats/daily', async (req, res) => {
   }
 })
 
-// POST /api/users/recover — recover profile by code
+// POST /api/users/recover
 router.post('/recover', async (req, res) => {
   try {
     const { recoveryCode } = req.body
@@ -195,17 +214,18 @@ router.post('/recover', async (req, res) => {
     )
     if (result.rows.length === 0)
       return res.status(404).json({ error: 'Invalid recovery code' })
+
     res.json({
       userId: result.rows[0].user_id,
       nickname: result.rows[0].nickname,
-      points: result.rows[0].points
+      points: result.rows[0].points.toString()
     })
   } catch (err) {
     res.status(500).json({ error: 'Failed to recover profile' })
   }
 })
 
-// POST /api/predictions/reset/daily - called by GitHub Actions cron
+// POST /api/predictions/reset/daily
 router.post('/reset/daily', async (req, res) => {
   try {
     const secret = req.headers['x-reset-secret']
@@ -213,14 +233,13 @@ router.post('/reset/daily', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' })
 
     await pool.query(`UPDATE users SET daily_peak = points`)
-    console.log('Daily peak reset at', new Date().toISOString())
     res.json({ success: true, reset: 'daily' })
   } catch (err) {
     res.status(500).json({ error: 'Failed to reset daily peak' })
   }
 })
 
-// POST /api/predictions/reset/weekly - called by GitHub Actions cron
+// POST /api/predictions/reset/weekly
 router.post('/reset/weekly', async (req, res) => {
   try {
     const secret = req.headers['x-reset-secret']
@@ -228,14 +247,13 @@ router.post('/reset/weekly', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' })
 
     await pool.query(`UPDATE users SET weekly_peak = points`)
-    console.log('Weekly peak reset at', new Date().toISOString())
     res.json({ success: true, reset: 'weekly' })
   } catch (err) {
     res.status(500).json({ error: 'Failed to reset weekly peak' })
   }
 })
 
-// GET /api/users/:userId/recovery — get recovery code
+// GET /api/users/:userId/recovery
 router.get('/recovery/:userId', async (req, res) => {
   try {
     const result = await pool.query(
@@ -259,11 +277,14 @@ router.get('/:userId/points', async (req, res) => {
     )
     if (result.rows.length === 0) {
       const points = await getUserPoints(req.params.userId)
-      return res.json({ points, peak_points: points })
+      return res.json({
+        points: points.toString(),
+        peak_points: points.toString()
+      })
     }
     res.json({
-      points: Number(result.rows[0].points),
-      peak_points: Number(result.rows[0].peak_points)
+      points: result.rows[0].points.toString(),
+      peak_points: result.rows[0].peak_points.toString()
     })
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch points' })
@@ -274,7 +295,13 @@ router.get('/:userId/points', async (req, res) => {
 router.get('/:userId/stats', async (req, res) => {
   try {
     const stats = await getUserStats(req.params.userId)
-    res.json(stats)
+    const sanitizedStats = {
+      ...stats,
+      points: stats.points?.toString(),
+      peak_points: stats.peak_points?.toString(),
+      total_gain: stats.total_gain?.toString()
+    }
+    res.json(sanitizedStats)
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch user stats' })
   }
@@ -284,7 +311,12 @@ router.get('/:userId/stats', async (req, res) => {
 router.get('/:userId', async (req, res) => {
   try {
     const predictions = await getUserPredictions(req.params.userId)
-    res.json(predictions)
+    const sanitizedPredictions = predictions.map((p: any) => ({
+      ...p,
+      bet_amount: p.bet_amount?.toString(),
+      gain_loss: p.gain_loss?.toString()
+    }))
+    res.json(sanitizedPredictions)
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch predictions' })
   }
