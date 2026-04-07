@@ -266,7 +266,7 @@ router.get('/check-name/:nickname', async (req, res) => {
     console.error('Check name error:', err);
     res.status(500).json({ error: 'Failed to check nickname' });
   }
-});
+})
 
 // GET /api/predictions/:userId/recovery
 router.get('/recovery/:userId', async (req, res) => {

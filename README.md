@@ -42,9 +42,10 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
   - **LOSE:** -50% of your bet
   - **Floor:** points never drop below 100,000
   - **Bonus System**: 25% chance per match to trigger a Tiered Bonus.
-    - On Win: Gain an extra 20% to 100% bonus points.
+    - On Win: Gain an extra 40% to 200% bonus points.
     - On Loss: Lose 20% to 100% fewer points.
     - Tiers: Common, Rare, Epic, and Legendary (with unique UI glows and confetti).
+    - Guarantees a bonus at least every 5 bets if it doesn’t occur naturally from the 25% base chance
 - Points contribute to:
   - Current points
   - Weekly gains
@@ -226,6 +227,7 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 | GET | `/api/predictions/:userId/stats` | User prediction stats |
 | GET | `/api/predictions/recovery/:userId` | Get recovery code |
 | POST | `/api/predictions/recover` | Recover profile by code |
+| GET | `/api/predictions/check-name/:nickname` | Check nickname availability |
 
 ### Automated Peak Resets
 | Method | Endpoint | Description |

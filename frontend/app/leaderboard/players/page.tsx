@@ -5,9 +5,9 @@ export const dynamic = 'force-dynamic'
 import { useState, useCallback, useRef, Suspense, useEffect } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { fetchHistoricalLeaderboard, fetchTodayLeaderboard } from '@/lib/api'
-import LeaderboardTable from '@/components/LeaderboardTable'
 import type { PlayerStats } from '@/types/rps'
 import Link from 'next/link'
+import LeaderboardTable from '@/components/LeaderboardTable'
 
 const TODAY = new Date().toISOString().split('T')[0]
 const FIRST_MATCH_DATE = '2026-02-16'
@@ -27,8 +27,6 @@ function PlayerLeaderboardContent() {
   const [stats, setStats] = useState<PlayerStats[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Ref tracks the committed filter values — avoids re-fetching on every keystroke
-  // while the user is still filling in the date inputs
   const activeFilters = useRef({
     start: searchParams.get('start') || '',
     end: searchParams.get('end') || ''
@@ -37,13 +35,13 @@ function PlayerLeaderboardContent() {
   const loadData = useCallback(async () => {
     setIsLoading(true)
     try {
-      const data = playerSubTab === 'today'
-        ? await fetchTodayLeaderboard()
-        : await fetchHistoricalLeaderboard(
-            activeFilters.current.start || undefined,
-            activeFilters.current.end || undefined
-          )
-      // Cap at 200 to avoid rendering thousands of rows
+      const data =
+        playerSubTab === 'today'
+          ? await fetchTodayLeaderboard()
+          : await fetchHistoricalLeaderboard(
+              activeFilters.current.start || undefined,
+              activeFilters.current.end || undefined
+            )
       setStats(data.slice(0, 200))
     } catch (error) {
       console.error('Failed to load leaderboard:', error)
@@ -176,14 +174,14 @@ function PlayerLeaderboardContent() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4" />
             <p className="text-gray-400 text-sm">Fetching standings...</p>
           </div>
-        ) : stats.length === 0 ? (
-          <p className="text-center text-gray-400 py-12">No players found.</p>
         ) : (
           <>
             <LeaderboardTable stats={stats} />
-            <p className="text-center text-gray-400 text-xs py-8 uppercase font-bold tracking-widest">
-              Top 200 Rankings
-            </p>
+            {stats.length > 0 && (
+              <p className="text-center text-gray-400 text-xs py-8 uppercase font-bold tracking-widest">
+                Top 200 Rankings
+              </p>
+            )}
           </>
         )}
       </div>
