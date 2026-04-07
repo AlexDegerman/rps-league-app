@@ -263,6 +263,17 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {statsLoading ? (
+            <div className="h-16 bg-gray-50 rounded-2xl animate-pulse mt-2" />
+          ) : !stats || stats.total === 0 ? null : (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+              <StatBox label="Predictions" value={stats.total} />
+              <StatBox label="Wins" value={stats.wins} color="text-green-600" />
+              <StatBox label="Losses" value={stats.losses} color="text-red-500" />
+              <StatBox label="Win Rate" value={`${stats.winRate}%`} color="text-indigo-600" />
+            </div>
+          )}
+
           {shouldShowTooltip && (
             <div className="absolute -top-12 left-12 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200">
               <span
@@ -374,30 +385,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      <h2 className="text-[10px] font-black text-black uppercase tracking-[0.3em] mb-4 px-1">
-        Personal Records
-      </h2>
-      {statsLoading ? (
-        <div className="h-24 bg-gray-50 rounded-2xl animate-pulse" />
-      ) : !stats || stats.total === 0 ? (
-        <div className="bg-gray-50 rounded-2xl p-8 text-center border-2 border-dashed border-gray-100">
-          <p className="text-xs font-bold text-gray-400 uppercase">
-            No betting history found
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12">
-          <StatBox label="Predictions" value={stats.total} />
-          <StatBox label="Wins" value={stats.wins} color="text-green-600" />
-          <StatBox label="Losses" value={stats.losses} color="text-red-500" />
-          <StatBox
-            label="Win Rate"
-            value={`${stats.winRate}%`}
-            color="text-indigo-600"
-          />
-        </div>
-      )}
-
       <div className="pt-8 border-t border-red-50">
         <h2 className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em] mb-4 px-1">
           Danger Zone
@@ -446,23 +433,23 @@ export default function ProfilePage() {
       </div>
     </div>
   )
-}
 
-function StatBox({
-  label,
-  value,
-  color = 'text-gray-900'
-}: {
-  label: string
-  value: string | number
-  color?: string
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
-      <p className={`text-2xl font-black ${color} leading-none`}>{value}</p>
-      <p className="text-[10px] text-black mt-2 uppercase font-black tracking-tighter">
-        {label}
-      </p>
-    </div>
-  )
+  function StatBox({
+    label,
+    value,
+    color = 'text-gray-900'
+  }: {
+    label: string
+    value: string | number
+    color?: string
+  }) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
+        <p className={`text-2xl font-black ${color} leading-none`}>{value}</p>
+        <p className="text-[10px] text-black mt-2 uppercase font-black tracking-tighter">
+          {label}
+        </p>
+      </div>
+    )
+  }
 }
