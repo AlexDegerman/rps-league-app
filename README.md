@@ -13,6 +13,7 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
 
 * [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
 * [📋 Overview](#-overview)
+* [📊 Player Analytics & Deep Profiles](#-player-analytics--deep-profiles)
 * [⚡ Live Activity Feed](#-live-activity-feed)
 * [🏗️ Architecture](#️-architecture)
 * [🛠️ Technical Challenges & Solutions](#️-technical-challenges--solutions)
