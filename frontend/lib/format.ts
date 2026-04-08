@@ -121,7 +121,10 @@ export const formatTickerPoints = (n: number | bigint | string): string => {
 }
 
 // Formats large point values into human-readable strings.
-export const formatPoints = (n: number | bigint | string, useK: boolean = false): string => {
+export const formatPoints = (
+  n: number | bigint | string,
+  useK: boolean = false
+): string => {
   const bigN = BigInt(n)
   if (bigN === 0n) return '0'
 
@@ -334,8 +337,8 @@ export const getBonusStyles = (tier: string) => {
       return {
         label: 'LUCKY SAVE',
         text: 'text-green-300',
-        containerClass: `${base} text-xl`,
-        scale: 'scale-100',
+        containerClass: `${base} text-sm sm:text-base`,
+        scale: 'scale-90',
         glow: 'drop-shadow-md'
       }
     default:
