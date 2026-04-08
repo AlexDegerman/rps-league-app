@@ -6,9 +6,17 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
 
 **Live demo:** [https://rpsleaguegame.vercel.app/](https://rpsleaguegame.vercel.app/)
 
-![RPS League Demo](./assets/rps.gif)
+## 🎮 Preview
+
+| Desktop Gameplay | Mobile (320px) |
+| :---: | :---: |
+| <img src="./assets/rps.gif" width="450" /> | <img src="./assets/rpsmobile.gif" width="220" /> |
+
+<p><em>Showcasing selected tier colors with live transitions.</em></p>
+<img src="./assets/rpscolor.gif" width="300" />
 
 ---
+
 ## 📑 Table of Contents
 
 * [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
