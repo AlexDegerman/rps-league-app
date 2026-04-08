@@ -44,7 +44,7 @@ export default function LiveStatsTicker() {
           Today&apos;s Vol
         </span>
         <span
-          className={`text-[10px] font-black leading-none truncate ${getAmountColor(stats.totalVolume)}`}
+          className={`text-[10px] font-black leading-none whitespace-nowrap tracking-tighter ${getAmountColor(stats.totalVolume)}`}
         >
           {formatPoints(stats.totalVolume)}
         </span>
@@ -55,7 +55,7 @@ export default function LiveStatsTicker() {
           Today&apos;s Pay
         </span>
         <span
-          className={`text-[10px] font-black leading-none truncate ${stats.dailyPayout >= 0n ? 'text-green-600' : 'text-red-500'}`}
+          className={`text-[10px] font-black leading-none whitespace-nowrap tracking-tighter ${stats.dailyPayout >= 0n ? 'text-green-600' : 'text-red-500'}`}
         >
           {stats.dailyPayout >= 0n ? '+' : ''}
           {formatPoints(stats.dailyPayout)}
@@ -72,7 +72,7 @@ export default function LiveStatsTicker() {
           </span>
           {stats.mvp && (
             <span
-              className={`text-[9px] font-bold ${getAmountColor(stats.mvp.gain)}`}
+              className={`text-[9px] font-bold whitespace-nowrap tracking-tighter ${getAmountColor(stats.mvp.gain)}`}
             >
               +{formatPoints(stats.mvp.gain)}
             </span>

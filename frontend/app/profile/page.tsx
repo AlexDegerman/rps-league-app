@@ -475,9 +475,16 @@ function StatBox({
   color?: string
 }) {
   return (
-    <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-2 py-2 sm:py-6 flex flex-col items-center justify-center text-center transition-all">
+    <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-1 sm:p-2 py-2 sm:py-6 flex flex-col items-center justify-center text-center transition-all overflow-hidden">
       <p
-        className={`text-lg sm:text-xl font-black ${color} leading-tight truncate w-full px-1 tracking-tight`}
+        className={`
+          ${
+            value.toString().length >= 8
+              ? 'text-[13px] tracking-tighter [@media(min-width:375px)]:text-lg [@media(min-width:375px)]:tracking-tight'
+              : 'text-[15px] tracking-tight [@media(min-width:375px)]:text-lg'
+          } 
+          font-black ${color} leading-tight whitespace-nowrap w-full px-0.5
+        `}
       >
         {value}
       </p>
