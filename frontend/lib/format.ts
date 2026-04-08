@@ -97,27 +97,41 @@ export const parseShorthand = (val: string): bigint => {
 }
 
 export const formatTickerPoints = (n: number | bigint | string): string => {
-  const bigN = BigInt(n)
-  const absN = bigN < 0n ? -bigN : bigN
-  const sign = bigN < 0n ? '-' : ''
+  const bigN = BigInt(n);
+  const absN = bigN < 0n ? -bigN : bigN;
+  const sign = bigN < 0n ? '-' : '';
 
   const tiers = [
+    { threshold: 10n ** 63n, symbol: 'Vg' },
+    { threshold: 10n ** 60n, symbol: 'Nod' },
+    { threshold: 10n ** 57n, symbol: 'Ocd' },
+    { threshold: 10n ** 54n, symbol: 'Spd' },
+    { threshold: 10n ** 51n, symbol: 'Sxd' },
+    { threshold: 10n ** 48n, symbol: 'Qid' },
+    { threshold: 10n ** 45n, symbol: 'Qad' },
+    { threshold: 10n ** 42n, symbol: 'Td' },
+    { threshold: 10n ** 39n, symbol: 'Dd' },
+    { threshold: 10n ** 36n, symbol: 'Ud' },
+    { threshold: 10n ** 33n, symbol: 'Dc' },
+    { threshold: 10n ** 30n, symbol: 'No' },
+    { threshold: 10n ** 27n, symbol: 'Oc' },
+    { threshold: 10n ** 24n, symbol: 'Sp' },
     { threshold: 10n ** 21n, symbol: 'Sx' },
     { threshold: 10n ** 18n, symbol: 'Qi' },
     { threshold: 10n ** 15n, symbol: 'Qa' },
     { threshold: 10n ** 12n, symbol: 'T' },
     { threshold: 10n ** 9n, symbol: 'B' },
     { threshold: 10n ** 6n, symbol: 'M' }
-  ]
+  ];
 
   for (const { threshold, symbol } of tiers) {
     if (absN >= threshold) {
-      const val = Number(absN) / Number(threshold)
-      return `${sign}${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}${symbol}`
+      const val = Number(absN) / Number(threshold);
+      return `${sign}${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}${symbol}`;
     }
   }
 
-  return sign + absN.toLocaleString('en-US')
+  return sign + absN.toLocaleString('en-US');
 }
 
 // Formats large point values into human-readable strings.

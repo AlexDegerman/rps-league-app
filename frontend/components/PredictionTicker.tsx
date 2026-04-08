@@ -19,16 +19,19 @@ export interface TickerEvent {
 
 const demoTemplates = [
   (name: string, amt: string) => `${name} won ${amt} points`,
-  (name: string, amt: string) => `${name} lost ${amt} points`,
+  (name: string, amt: string) => `${name} lost ${amt} points`
 ]
 
 const parseMessageWithGem = (message: string) => {
   const parts = message.split('points')
   return parts.map((part, index, array) => (
-    <span key={index} className="flex items-center">
+    <span key={index} className="inline-flex items-center">
       {part}
       {index < array.length - 1 && (
-        <GemIcon size={14} className="mx-1 text-purple-500! -translate-y-px shrink-0" />
+        <GemIcon
+          size={14}
+          className="mx-1 text-purple-500! -translate-y-px shrink-0"
+        />
       )}
     </span>
   ))
@@ -55,16 +58,18 @@ export default function PredictionTicker() {
 
       const data = JSON.parse(event.data)
       const isMe = data.userId === getUserId()
+
       const amount = BigInt(data.amount)
 
-      // Filter out the "welcome/floor" points
       if (isMe && data.result === 'LOSE' && amount === 50000n) return
 
       const name = data.nickname ?? 'Someone'
       const displayName = isMe ? 'You' : name
 
       const verb = data.result === 'WIN' ? 'won' : 'lost'
-      const rawMsg = `${displayName} ${verb} ${formatTickerPoints(amount)} points`
+
+      const formattedAmt = formatTickerPoints(amount)
+      const rawMsg = `${displayName} ${verb} ${formattedAmt} points`
 
       pendingRef.current.unshift({
         id: crypto.randomUUID(),
@@ -222,24 +227,28 @@ export default function PredictionTicker() {
         </span>
 
         <div
-          className="flex-1 relative h-8 overflow-hidden"
+          className="flex-1 relative h-9 overflow-hidden"
           style={{ clipPath: 'inset(0)' }}
         >
           {active.map((event) => (
             <div
               key={event.id}
-              className={`absolute whitespace-nowrap text-sm top-1/2 -translate-y-1/2 left-0 flex items-center gap-1 ${getAmountColor(
-                event.amount
-              )} ${event.isReal ? 'font-black' : 'font-medium'}`}
+              className="absolute whitespace-nowrap text-sm font-medium top-1/2 -translate-y-1/2 left-0 inline-flex items-center gap-1"
               style={{
                 animation: `ticker-ltr ${event.duration}ms linear forwards`,
                 willChange: 'transform'
               }}
             >
               {event.isReal && (
-                <span className="text-red-500 animate-pulse">●</span>
+                <span className="text-red-500 animate-pulse leading-none shrink-0">
+                  ●
+                </span>
               )}
-              {event.parsedMessage}
+              <span
+                className={`inline-flex items-center gap-0 ${getAmountColor(event.amount)}`}
+              >
+                {event.parsedMessage}
+              </span>
             </div>
           ))}
         </div>
