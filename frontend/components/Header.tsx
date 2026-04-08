@@ -14,15 +14,12 @@ const allNavItems = [
   { label: 'Analysis', href: '/analysis' }
 ]
 
-// Items shown in the hamburger menu on mobile (everything except the two pinned links)
-const mobileMenuItems = allNavItems.slice(2)
-
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
   const navClass = (href: string) =>
-    `px-3 py-2 rounded font-bold transition text-xs uppercase tracking-tight ${
+    `px-3 py-2 rounded font-bold transition text-xs uppercase tracking-tight whitespace-nowrap ${
       pathname === href
         ? 'bg-yellow-400 text-gray-900 shadow-sm'
         : 'bg-indigo-600 text-white hover:bg-indigo-700'
@@ -44,23 +41,40 @@ const Header = () => {
             />
           </Link>
 
-          {/* Full nav — hidden below 550px */}
-          <nav className="hidden min-[550px]:flex gap-2">
+          {/* Desktop/Full Nav - Displays all links and removes burger above 460px */}
+          <nav className="hidden min-[460px]:flex gap-2">
             {allNavItems.map(({ label, href }) => (
               <Link key={href} href={href} className={navClass(href)}>
-                {label}
+                {label === 'Leaderboard' ? 'Ranks' : label}
               </Link>
             ))}
           </nav>
 
-          {/* Compact nav — two pinned links + hamburger below 550px */}
-          <div className="flex min-[550px]:hidden items-center gap-1.5 flex-1">
+          {/* Dynamic Mobile Nav - Logic for 360px and 420px */}
+          <div className="flex min-[460px]:hidden items-center gap-1.5 flex-1">
             <Link href="/" className={navClass('/')}>
               Newest
             </Link>
             <Link href="/leaderboard" className={navClass('/leaderboard')}>
               Ranks
             </Link>
+
+            {/* Show Profile starting at 360px */}
+            <Link
+              href="/profile"
+              className={`${navClass('/profile')} hidden min-[360px]:block`}
+            >
+              Profile
+            </Link>
+
+            {/* Show Search starting at 420px */}
+            <Link
+              href="/search"
+              className={`${navClass('/search')} hidden min-[420px]:block`}
+            >
+              Search
+            </Link>
+
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="ml-auto p-2 bg-gray-50 rounded-lg text-gray-600 border border-gray-200 active:bg-gray-200 transition-colors"
@@ -70,23 +84,47 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Dropdown for the remaining nav items on mobile */}
+        {/* Dropdown - Dynamically hides items already shown in the header */}
         {isOpen && (
-          <nav className="min-[600px]:hidden mt-3 py-2 flex flex-col gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
-            {mobileMenuItems.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setIsOpen(false)}
-                className={`px-4 py-3 rounded-xl font-bold text-sm transition ${
-                  pathname === href
-                    ? 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400'
-                    : 'bg-white text-gray-600 border border-gray-100'
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
+          <nav className="min-[460px]:hidden mt-3 py-2 flex flex-col gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
+            {/* Hide Profile in menu if width > 360px */}
+            <Link
+              href="/profile"
+              onClick={() => setIsOpen(false)}
+              className={`px-4 py-3 rounded-xl font-bold text-sm transition min-[360px]:hidden ${
+                pathname === '/profile'
+                  ? 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400'
+                  : 'bg-white text-gray-600 border border-gray-100'
+              }`}
+            >
+              Profile
+            </Link>
+
+            {/* Hide Search in menu if width > 420px */}
+            <Link
+              href="/search"
+              onClick={() => setIsOpen(false)}
+              className={`px-4 py-3 rounded-xl font-bold text-sm transition min-[420px]:hidden ${
+                pathname === '/search'
+                  ? 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400'
+                  : 'bg-white text-gray-600 border border-gray-100'
+              }`}
+            >
+              Search
+            </Link>
+
+            {/* Analysis always in menu until 460px breakpoint clears everything */}
+            <Link
+              href="/analysis"
+              onClick={() => setIsOpen(false)}
+              className={`px-4 py-3 rounded-xl font-bold text-sm transition ${
+                pathname === '/analysis'
+                  ? 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400'
+                  : 'bg-white text-gray-600 border border-gray-100'
+              }`}
+            >
+              Analysis
+            </Link>
           </nav>
         )}
       </div>
