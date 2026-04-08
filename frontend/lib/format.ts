@@ -328,7 +328,7 @@ export const getBonusStyles = (tier: string) => {
     case 'RARE':
       return {
         label: 'RARE BONUS',
-        text: 'text-blue-400',
+        text: 'text-cyan-400',
         containerClass: `${base} text-2xl`,
         scale: 'scale-110',
         glow: 'drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]'
@@ -337,8 +337,8 @@ export const getBonusStyles = (tier: string) => {
       return {
         label: 'LUCKY SAVE',
         text: 'text-green-300',
-        containerClass: `${base} text-sm sm:text-base`,
-        scale: 'scale-90',
+        containerClass: `${base} text-xs sm:text-sm`, 
+        scale: 'scale-100', 
         glow: 'drop-shadow-md'
       }
     default:

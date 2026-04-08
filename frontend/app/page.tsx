@@ -433,20 +433,30 @@ export default function HomePage() {
           {resultAnim.bonus && (
             <div
               className={`flex flex-col items-center mb-3 animate-in zoom-in slide-in-from-bottom-4 
-          ${getBonusStyles(resultAnim.bonus.tier).containerClass}
-          ${getBonusStyles(resultAnim.bonus.tier).scale}
-          ${getBonusStyles(resultAnim.bonus.tier).glow}`}
+                ${getBonusStyles(resultAnim.bonus.tier).containerClass}
+                ${getBonusStyles(resultAnim.bonus.tier).scale}
+                ${getBonusStyles(resultAnim.bonus.tier).glow}`}
             >
-              <span
-                className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}
-              >
+              <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}>
                 {getBonusStyles(resultAnim.bonus.tier).label}
               </span>
-              <span
-                className={`text-lg sm:text-2xl font-black ${resultAnim.win ? 'text-green-300' : 'text-blue-300'}`}
+
+              {!resultAnim.win && (
+              <span 
+                className={`
+                  text-[10px] sm:text-[12px] 
+                  font-black uppercase 
+                  tracking-[0.3em] 
+                  mt-1 -mb-1 
+                  ${getBonusStyles(resultAnim.bonus.tier).text} 
+                  opacity-95
+                `}
               >
-                {resultAnim.win ? '+' : 'SAVED '}
-                {formatPoints(resultAnim.bonus.amount)}
+                SAVED
+              </span>
+            )}
+              <span className={`text-lg sm:text-2xl font-black ${resultAnim.win ? 'text-green-300' : 'text-blue-300'}`}>
+                {resultAnim.win ? '+' : ''}{formatPoints(resultAnim.bonus.amount)}
               </span>
             </div>
           )}

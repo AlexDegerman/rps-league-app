@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
 const allNavItems = [
-  { label: 'Newest', href: '/' },
+  { label: 'Live', href: '/' },
   { label: 'Leaderboard', href: '/leaderboard' },
   { label: 'Profile', href: '/profile' },
   { label: 'Search', href: '/search' },
@@ -53,7 +53,7 @@ const Header = () => {
           {/* Dynamic Mobile Nav - Logic for 360px and 420px */}
           <div className="flex min-[460px]:hidden items-center gap-1.5 flex-1">
             <Link href="/" className={navClass('/')}>
-              Newest
+              Live
             </Link>
             <Link href="/leaderboard" className={navClass('/leaderboard')}>
               Ranks
@@ -62,7 +62,7 @@ const Header = () => {
             {/* Show Profile starting at 360px */}
             <Link
               href="/profile"
-              className={`${navClass('/profile')} hidden min-[360px]:block`}
+              className={`${navClass('/profile')} hidden min-[320px]:block`}
             >
               Profile
             </Link>
@@ -70,7 +70,7 @@ const Header = () => {
             {/* Show Search starting at 420px */}
             <Link
               href="/search"
-              className={`${navClass('/search')} hidden min-[420px]:block`}
+              className={`${navClass('/search')} hidden min-[400px]:block`}
             >
               Search
             </Link>
@@ -87,7 +87,6 @@ const Header = () => {
         {/* Dropdown - Dynamically hides items already shown in the header */}
         {isOpen && (
           <nav className="min-[460px]:hidden mt-3 py-2 flex flex-col gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
-            {/* Hide Profile in menu if width > 360px */}
             <Link
               href="/profile"
               onClick={() => setIsOpen(false)}
@@ -100,7 +99,7 @@ const Header = () => {
               Profile
             </Link>
 
-            {/* Hide Search in menu if width > 420px */}
+            {/* Hide Search in menu if width > 400px */}
             <Link
               href="/search"
               onClick={() => setIsOpen(false)}
