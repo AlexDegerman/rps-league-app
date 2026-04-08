@@ -326,7 +326,8 @@ router.get('/:userId/stats', async (req, res) => {
       biggest_win: stats.biggest_win.toString(),
       total_gain: stats.total_gain.toString(),
       avg_return: stats.avg_return.toString(),
-      total_pities_earned: stats.total_pities_earned || 0
+      total_pities_earned: stats.total_pities_earned || 0,
+      joined_date: stats.joined_date
     }
 
     res.json(sanitizedStats)

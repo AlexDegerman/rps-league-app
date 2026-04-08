@@ -320,13 +320,19 @@ Global user profiles with persistent point tracking and account recovery logic.
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | **user_id** (PK) | TEXT | Unique persistent identifier |
-| **points** | BIGINT | Current balance (**100,000 floor enforced**) |
-| **peak_points** | BIGINT | All-time highest balance achieved |
-| **daily_peak** | BIGINT | Highest balance today (reset via GitHub Cron) |
-| **weekly_peak** | BIGINT | Highest balance this week (reset via GitHub Cron) |
-| **nickname** | TEXT | Auto-generated display name (adjective + color + animal). Users can randomize to a new combination. |
-| **recovery_code** | TEXT | Unique slug (e.g., `swift-tiger-1234`) |
-| **bonus_pity_count** | INTEGER | Consecutive bets without a bonus |
+| **points** | NUMERIC | Current balance (**100,000 floor enforced**) |
+| **peak_points** | NUMERIC | All-time highest balance achieved |
+| **daily_peak** | NUMERIC | Highest balance today (reset via GitHub Cron) |
+| **weekly_peak** | NUMERIC | Highest balance this week (reset via GitHub Cron) |
+| **nickname** | TEXT | Auto-generated display name (adjective + color + animal) |
+| **recovery_code** | TEXT (UQ) | Unique slug for account recovery (e.g., `swift-tiger-1234`) |
+| **total_volume** | NUMERIC | Total cumulative points risked across all bets |
+| **biggest_win** | NUMERIC | Single largest point gain from a single prediction |
+| **current_win_streak** | INTEGER | Current number of consecutive wins |
+| **max_win_streak** | INTEGER | All-time highest win streak |
+| **bonus_pity_count** | INTEGER | Consecutive bets without a bonus (Bad Luck Protection) |
+| **total_pities_earned** | INTEGER | Total times the natural pity limit (4) was reached |
+| **joined_date** | BIGINT | Unix timestamp (ms) of when the profile was first created |
 
 ---
 
@@ -340,9 +346,9 @@ Tracks all user wagers. Composite constraints prevent multiple bets on the same 
 | **user_id** | TEXT | Bettor ID (references `users.user_id`) |
 | **game_id** | TEXT | Match ID (references `matches.game_id`) |
 | **pick** | TEXT | Chosen winner (`Player A` or `Player B`) |
-| **bet_amount** | BIGINT | Points wagered |
+| **bet_amount** | NUMERIC | Points wagered |
 | **result** | TEXT | Outcome: `WIN`, `LOSE`, or `NULL` (if pending) |
-| **gain_loss** | BIGINT | Net change (Win: +100% / Loss: -50% of bet) |
+| **gain_loss** | NUMERIC | Net change (Win: +100% / Loss: -50% of bet) |
 | **created_at** | BIGINT | Timestamp for volume and daily stats |
 
 ---

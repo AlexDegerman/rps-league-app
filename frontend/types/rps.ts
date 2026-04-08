@@ -43,6 +43,7 @@ export interface SinglePlayerStats {
 }
 
 export interface UserStats {
+  joined_date: string
   // Basic Aggregates
   total: number
   wins: number

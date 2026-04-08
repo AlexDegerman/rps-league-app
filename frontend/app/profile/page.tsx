@@ -35,6 +35,7 @@ export default function ProfilePage() {
   const [recoverConfirm, setRecoverConfirm] = useState(false)
   const [resetConfirm, setResetConfirm] = useState(false)
   const [resetError, setResetError] = useState('')
+
   // Compact "k" formatting for very small screens (≤362px)
   const [useK, setUseK] = useState(false)
 
@@ -109,6 +110,7 @@ export default function ProfilePage() {
   const handleRegenerate = async () => {
     let newNickname = ''
     let attempts = 0
+
     // Try up to 10 names until we find one not already taken
     while (attempts < 10) {
       newNickname = regenerateNickname()
@@ -142,6 +144,7 @@ export default function ProfilePage() {
         setRecoverError(data.error ?? 'Invalid recovery code')
         return
       }
+
       // Swap identity then hard-reload so all state reinitializes cleanly
       localStorage.setItem('rps_user_id', data.userId)
       if (data.nickname) localStorage.setItem('rps_nickname', data.nickname)
@@ -200,9 +203,9 @@ export default function ProfilePage() {
       {/* ── Main profile card ── */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-10 mb-4 mt-0 transition-all">
         {/* Identity + points header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-6 mb-4 sm:mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-6 mb-4 sm:mb-10 relative">
           <div className="flex flex-col">
-            <div className="flex items-center gap-3 mb-1 sm:mb-2">
+            <div className="flex items-center gap-3 mb-1 sm:mb-2 relative w-full">
               <p className="text-[9px] sm:text-[10px] text-black/40 uppercase font-black tracking-[0.15em]">
                 Current Identity
               </p>
@@ -212,6 +215,16 @@ export default function ProfilePage() {
               >
                 Randomize
               </button>
+              {stats?.joined_date && (
+                <span className="absolute left-50 sm:right-auto sm:left-full top-0 sm:ml-4 text-[9px] sm:text-[11px] text-indigo-400/80 font-black uppercase tracking-widest flex flex-col items-end sm:items-start whitespace-nowrap">
+                  <span>joined at:</span>
+                  <span>
+                    {new Date(Number(stats.joined_date)).getDate()}.
+                    {new Date(Number(stats.joined_date)).getMonth() + 1}.
+                    {new Date(Number(stats.joined_date)).getFullYear()}
+                  </span>
+                </span>
+              )}
             </div>
             <p className="text-[1.5rem] sm:text-[clamp(1.25rem,5vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tight">
               {nickname}

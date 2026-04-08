@@ -312,6 +312,7 @@ export const getUserStats = async (userId: string) => {
         u.max_win_streak,
         u.bonus_pity_count,
         u.total_pities_earned,
+        u.joined_date, -- Added this
         COALESCE(p_stats.total, 0) as total,
         COALESCE(p_stats.wins, 0) as wins,
         COALESCE(p_stats.losses, 0) as losses,
@@ -334,7 +335,6 @@ export const getUserStats = async (userId: string) => {
 
   const row = result.rows[0]
 
-  // Default if user doesn't exist in DB yet
   if (!row) {
     return {
       total: 0,
@@ -352,6 +352,7 @@ export const getUserStats = async (userId: string) => {
       max_win_streak: 0,
       bonus_pity_count: 0,
       total_pities_earned: 0,
+      joined_date: Date.now().toString(),
       avg_return: '0'
     }
   }
@@ -376,6 +377,7 @@ export const getUserStats = async (userId: string) => {
     max_win_streak: Number(row.max_win_streak),
     bonus_pity_count: Number(row.bonus_pity_count),
     total_pities_earned: Number(row.total_pities_earned || 0),
+    joined_date: row.joined_date.toString(),
     avg_return: total > 0 ? (BigInt(totalGain) / BigInt(total)).toString() : '0'
   }
 }
