@@ -59,7 +59,11 @@ export default function HomePage() {
   const [isFocused, setIsFocused] = useState(false)
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
   const [showBonusExplainer, setShowBonusExplainer] = useState(false)
-  const [showAutoNotice, setShowAutoNotice] = useState(!_hasShownAutoNotice)
+  const [showAutoNotice, setShowAutoNotice] = useState(() => {
+    if (_hasShownAutoNotice) return false
+    _hasShownAutoNotice = true
+    return true
+  })
 
   const triggerErrorRef = useRef((msg: string) => {
     setErrorMessage(msg)
@@ -130,10 +134,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (showAutoNotice) {
-      const timer = setTimeout(() => {
-        setShowAutoNotice(false)
-        _hasShownAutoNotice = true
-      }, 4000)
+      const timer = setTimeout(() => setShowAutoNotice(false), 4000)
       return () => clearTimeout(timer)
     }
   }, [showAutoNotice])

@@ -209,6 +209,8 @@ export const resolvePrediction = async (
     const totalBets = Number(row.total_bets)
     const currentPity = Number(row.bonus_pity_count)
 
+    const isNaturalPityHit = currentPity >= 3
+
     const bonus = rollBonus(
       isWin,
       totalBets <= 3 ? 3 : currentPity,
@@ -243,13 +245,29 @@ export const resolvePrediction = async (
     // Single UPDATE keeps all peak columns in sync atomically
     await pool.query(
       `UPDATE users
-        SET points            = points + $1,
-            peak_points       = GREATEST(peak_points, points + $1),
-            daily_peak        = GREATEST(daily_peak,  points + $1),
-            weekly_peak       = GREATEST(weekly_peak, points + $1),
-            bonus_pity_count  = $3
+        SET points             = points + $1,
+            peak_points        = GREATEST(peak_points, points + $1),
+            daily_peak         = GREATEST(daily_peak,  points + $1),
+            weekly_peak        = GREATEST(weekly_peak, points + $1),
+            bonus_pity_count   = $3,
+            total_volume       = total_volume + $4,
+            biggest_win        = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
+            current_win_streak = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
+            max_win_streak     = CASE 
+                                    WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
+                                    THEN current_win_streak + 1 
+                                    ELSE max_win_streak 
+                                  END,
+            total_pities_earned = total_pities_earned + $6
         WHERE user_id = $2`,
-      [gainLoss.toString(), row.user_id, bonus ? 0 : currentPity + 1]
+      [
+        gainLoss.toString(),
+        row.user_id,
+        bonus ? 0 : currentPity + 1,
+        bet.toString(),
+        result,
+        isNaturalPityHit ? 1 : 0
+      ]
     )
 
     broadcast(
@@ -283,20 +301,41 @@ export const getUserPredictions = async (userId: string) => {
 
 export const getUserStats = async (userId: string) => {
   const result = await pool.query(
-    `SELECT
-        COUNT(*) AS total,
-        COUNT(*) FILTER (WHERE result = 'WIN') AS wins,
-        COUNT(*) FILTER (WHERE result = 'LOSE') AS losses,
-        COALESCE(SUM(gain_loss), 0) AS total_gain,
-        (SELECT points      FROM users WHERE user_id = $1) AS points,
-        (SELECT peak_points FROM users WHERE user_id = $1) AS peak_points
-      FROM predictions
-      WHERE user_id = $1 AND result IS NOT NULL`,
+    `SELECT 
+        u.points,
+        u.peak_points,
+        u.daily_peak,
+        u.weekly_peak,
+        u.total_volume,
+        u.biggest_win,
+        u.current_win_streak,
+        u.max_win_streak,
+        u.bonus_pity_count,
+        u.total_pities_earned,
+        COALESCE(p_stats.total, 0) as total,
+        COALESCE(p_stats.wins, 0) as wins,
+        COALESCE(p_stats.losses, 0) as losses,
+        COALESCE(p_stats.total_gain, 0) as total_gain
+      FROM users u
+      LEFT JOIN (
+        SELECT 
+            user_id,
+            COUNT(*) AS total,
+            COUNT(*) FILTER (WHERE result = 'WIN') AS wins,
+            COUNT(*) FILTER (WHERE result = 'LOSE') AS losses,
+            SUM(gain_loss) FILTER (WHERE gain_loss > 0) AS total_gain
+        FROM predictions
+        WHERE result IS NOT NULL
+        GROUP BY user_id
+      ) p_stats ON u.user_id = p_stats.user_id
+      WHERE u.user_id = $1`,
     [userId]
   )
 
   const row = result.rows[0]
-  if (!row)
+
+  // Default if user doesn't exist in DB yet
+  if (!row) {
     return {
       total: 0,
       wins: 0,
@@ -304,19 +343,40 @@ export const getUserStats = async (userId: string) => {
       winRate: 0,
       total_gain: '0',
       points: '200000',
-      peak_points: '200000'
+      peak_points: '200000',
+      daily_peak: '100000',
+      weekly_peak: '100000',
+      total_volume: '0',
+      biggest_win: '0',
+      current_win_streak: 0,
+      max_win_streak: 0,
+      bonus_pity_count: 0,
+      total_pities_earned: 0,
+      avg_return: '0'
     }
+  }
 
   const total = Number(row.total)
   const wins = Number(row.wins)
+  const totalGain = row.total_gain.toString()
+
   return {
     total,
     wins,
     losses: Number(row.losses),
     winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
-    total_gain: row.total_gain,
-    points: row.points,
-    peak_points: row.peak_points
+    total_gain: totalGain,
+    points: row.points.toString(),
+    peak_points: row.peak_points.toString(),
+    daily_peak: row.daily_peak.toString(),
+    weekly_peak: row.weekly_peak.toString(),
+    total_volume: row.total_volume.toString(),
+    biggest_win: row.biggest_win.toString(),
+    current_win_streak: Number(row.current_win_streak),
+    max_win_streak: Number(row.max_win_streak),
+    bonus_pity_count: Number(row.bonus_pity_count),
+    total_pities_earned: Number(row.total_pities_earned || 0),
+    avg_return: total > 0 ? (BigInt(totalGain) / BigInt(total)).toString() : '0'
   }
 }
 

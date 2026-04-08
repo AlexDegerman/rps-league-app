@@ -15,7 +15,7 @@ interface Ranks {
 }
 
 export default function ProfilePage() {
-  const [nickname, setNickname] = useState<string>('')
+  const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
   const [stats, setStats] = useState<UserStats | null>(null)
@@ -35,20 +35,25 @@ export default function ProfilePage() {
   const [recoverConfirm, setRecoverConfirm] = useState(false)
   const [resetConfirm, setResetConfirm] = useState(false)
   const [resetError, setResetError] = useState('')
+  // Compact "k" formatting for very small screens (≤362px)
+  const [useK, setUseK] = useState(false)
 
   useEffect(() => {
     const user = getOrCreateUser()
     setNickname(user.nickname)
-    // Gate rendering on mount to avoid SSR/localStorage mismatch
     setMounted(true)
 
-    const userId = user.userId
+    const { userId } = user
     if (!userId) return
 
+    const checkWidth = () => setUseK(window.innerWidth <= 362)
+    checkWidth()
+    window.addEventListener('resize', checkWidth)
+
+    // Retry until the user row exists in the DB (cold start delay)
     const fetchRecovery = async () => {
       try {
         const res = await fetch(`${API}/api/predictions/recovery/${userId}`)
-
         if (res.ok) {
           const data = await res.json()
           setRecoveryCode(data.recoveryCode)
@@ -59,8 +64,7 @@ export default function ProfilePage() {
         setTimeout(fetchRecovery, 3000)
       }
     }
-
-    const initialDelay = setTimeout(fetchRecovery, 800)
+    const recoveryTimer = setTimeout(fetchRecovery, 800)
 
     fetch(`${API}/api/predictions/${userId}/points`)
       .then((res) => (res.ok ? res.json() : { points: '200000' }))
@@ -72,8 +76,8 @@ export default function ProfilePage() {
       .then(setStats)
       .catch(() => setStats(null))
       .finally(() => setStatsLoading(false))
-      
-    // Rank is derived client-side from the leaderboard array position
+
+    // Rank is position in the leaderboard array, not stored in DB
     const fetchRank = async (tab: string) => {
       try {
         const res = await fetch(
@@ -96,16 +100,17 @@ export default function ProfilePage() {
       fetchRank('alltime')
     ]).then(([d, w, a]) => setRanks({ daily: d, weekly: w, allTime: a }))
 
-    return () => clearTimeout(initialDelay)
+    return () => {
+      clearTimeout(recoveryTimer)
+      window.removeEventListener('resize', checkWidth)
+    }
   }, [])
 
   const handleRegenerate = async () => {
-    let isAvailable = false
     let newNickname = ''
     let attempts = 0
-    const maxAttempts = 10
-
-    while (!isAvailable && attempts < maxAttempts) {
+    // Try up to 10 names until we find one not already taken
+    while (attempts < 10) {
       newNickname = regenerateNickname()
       attempts++
       try {
@@ -113,9 +118,8 @@ export default function ProfilePage() {
           `${API}/api/predictions/check-name/${newNickname}`
         )
         const data = await res.json()
-        if (data.available) isAvailable = true
-      } catch (err) {
-        console.error('Name check failed:', err)
+        if (data.available) break
+      } catch {
         break
       }
     }
@@ -138,7 +142,7 @@ export default function ProfilePage() {
         setRecoverError(data.error ?? 'Invalid recovery code')
         return
       }
-      // Swap localStorage identity then hard-reload so all state reinitializes cleanly
+      // Swap identity then hard-reload so all state reinitializes cleanly
       localStorage.setItem('rps_user_id', data.userId)
       if (data.nickname) localStorage.setItem('rps_nickname', data.nickname)
       window.location.reload()
@@ -152,8 +156,9 @@ export default function ProfilePage() {
   const handleResetProfile = () => {
     const now = Date.now()
     const oneHour = 60 * 60 * 1000
-    let timestamps: number[] = []
 
+    // Rate limit: max 3 resets per hour stored in localStorage
+    let timestamps: number[] = []
     try {
       const stored = localStorage.getItem('rps_restart_timestamps')
       if (stored) timestamps = JSON.parse(stored)
@@ -162,24 +167,19 @@ export default function ProfilePage() {
     }
 
     timestamps = timestamps.filter((t) => now - t < oneHour)
-
     if (timestamps.length >= 3) {
-      const oldest = timestamps[0]
-      const waitTimeMin = Math.ceil((oneHour - (now - oldest)) / 60000)
-      setResetError(
-        `Rate limit reached. Please wait ${waitTimeMin} minutes before creating another identity.`
-      )
+      const waitMin = Math.ceil((oneHour - (now - timestamps[0])) / 60000)
+      setResetError(`Rate limit reached. Wait ${waitMin}m.`)
       return
     }
 
     timestamps.push(now)
     localStorage.setItem('rps_restart_timestamps', JSON.stringify(timestamps))
-
     localStorage.removeItem('rps_user_id')
     localStorage.removeItem('rps_nickname')
     localStorage.removeItem('autoAllIn')
     setTimeout(() => {
-      window.location.href = window.location.pathname 
+      window.location.href = window.location.pathname
     }, 50)
   }
 
@@ -196,106 +196,149 @@ export default function ProfilePage() {
     showPointsExplainer && numberName && numberName !== 'Points'
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 pb-20">
-      <h1 className="text-3xl font-bold text-gray-900 mb-1">Profile</h1>
-      <p className="text-gray-500 mb-6">Your identity</p>
-
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-        <div className="flex flex-col mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <p className="text-[10px] text-black uppercase font-black tracking-widest">
-              Current Identity
-            </p>
-            <button
-              onClick={handleRegenerate}
-              className="text-[8px] px-2 py-1 bg-gray-900 text-white rounded-md hover:bg-black active:scale-95 transition cursor-pointer font-black uppercase tracking-wider shadow-sm"
-            >
-              Randomize
-            </button>
-          </div>
-          <p className="text-[clamp(1rem,4vw,1.4rem)] font-black text-gray-900 leading-tight">
-            {nickname}
-          </p>
-        </div>
-
-        <div className="relative flex flex-col gap-4 mb-10 w-full">
-          <div
-            className="flex items-center gap-4 cursor-pointer select-none group"
-            onMouseEnter={() => setShowPointsExplainer(true)}
-            onMouseLeave={() => setShowPointsExplainer(false)}
-            onClick={() => setShowPointsExplainer(!showPointsExplainer)}
-          >
-            <div className="shrink-0">
-              <GemIcon size={32} />
-            </div>
-            <span
-              className={`text-3xl font-black leading-none ${points !== null ? getAmountColor(points) : 'text-purple-600'}`}
-            >
-              {points !== null ? formatPoints(points) : '...'}
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <p className="text-[10px] font-black uppercase text-black/30 tracking-widest">
-              Ranks
-            </p>
-            <div className="flex items-center gap-4 text-[11px] font-black uppercase text-black">
-              <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="text-black/40">Daily</span>
-                <span className="text-black">
-                  {ranks.daily ? `#${ranks.daily}` : '-'}
-                </span>
-              </div>
-              <div className="w-px h-2 bg-black/10" />
-              <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="text-black/40">Weekly</span>
-                <span className="text-black">
-                  {ranks.weekly ? `#${ranks.weekly}` : '-'}
-                </span>
-              </div>
-              <div className="w-px h-2 bg-black/10" />
-              <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="text-black/40">All-Time</span>
-                <span className="text-black">
-                  {ranks.allTime ? `#${ranks.allTime}` : '-'}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {statsLoading ? (
-            <div className="h-16 bg-gray-50 rounded-2xl animate-pulse mt-2" />
-          ) : !stats || stats.total === 0 ? null : (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
-              <StatBox label="Predictions" value={stats.total} />
-              <StatBox label="Wins" value={stats.wins} color="text-green-600" />
-              <StatBox label="Losses" value={stats.losses} color="text-red-500" />
-              <StatBox label="Win Rate" value={`${stats.winRate}%`} color="text-indigo-600" />
-            </div>
-          )}
-
-          {shouldShowTooltip && (
-            <div className="absolute -top-12 left-12 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200">
-              <span
-                className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points ?? '0')}`}
+    <div className="max-w-2xl mx-auto px-4 pt-0 pb-10">
+      {/* ── Main profile card ── */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-10 mb-4 mt-0 transition-all">
+        {/* Identity + points header */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-6 mb-4 sm:mb-10">
+          <div className="flex flex-col">
+            <div className="flex items-center gap-3 mb-1 sm:mb-2">
+              <p className="text-[9px] sm:text-[10px] text-black/40 uppercase font-black tracking-[0.15em]">
+                Current Identity
+              </p>
+              <button
+                onClick={handleRegenerate}
+                className="text-[8px] sm:text-[9px] px-2.5 py-1 bg-gray-900 text-white rounded-lg hover:bg-black active:scale-95 transition-all cursor-pointer font-black uppercase tracking-wider shadow-sm"
               >
-                {numberName}
-              </span>
-              <div className="absolute -bottom-1 left-6 w-2 h-2 bg-white border-b border-r border-gray-100 rotate-45" />
+                Randomize
+              </button>
             </div>
-          )}
+            <p className="text-[1.5rem] sm:text-[clamp(1.25rem,5vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tight">
+              {nickname}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:items-end gap-2 relative">
+            {shouldShowTooltip && (
+              <div className="absolute -top-12 sm:right-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
+                <span
+                  className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points ?? '0')}`}
+                >
+                  {numberName}
+                </span>
+                <div className="absolute -bottom-1 sm:right-6 left-6 sm:left-auto w-2 h-2 bg-white border-b border-r border-gray-100 rotate-45" />
+              </div>
+            )}
+
+            <div
+              className="flex items-center gap-3 cursor-pointer select-none group"
+              onClick={() => setShowPointsExplainer(!showPointsExplainer)}
+            >
+              <div className="shrink-0 transition-transform group-hover:scale-110">
+                <GemIcon size={32} />
+              </div>
+              <span
+                className={`text-3xl sm:text-4xl font-black leading-none tracking-tighter ${points !== null ? getAmountColor(points) : 'text-purple-600'}`}
+              >
+                {points !== null ? formatPoints(points) : '...'}
+              </span>
+            </div>
+
+            {/* Rank badges */}
+            <div className="flex items-center gap-2.5 text-[10px] sm:text-[11px] font-black uppercase text-black">
+              {(['daily', 'weekly', 'allTime'] as const).map((key, i) => (
+                <div key={key} className="flex items-center gap-1.5">
+                  {i > 0 && <div className="w-px h-2.5 bg-black/10" />}
+                  <span className="text-black/30">
+                    {key === 'allTime'
+                      ? 'All-Time'
+                      : key.charAt(0).toUpperCase() + key.slice(1)}
+                  </span>
+                  <span className="bg-gray-100 px-1.5 py-0.5 rounded-md">
+                    {ranks[key] ? `#${ranks[key]}` : '-'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="border-t border-gray-50 pt-6">
-          <p className="text-[10px] uppercase font-black tracking-widest text-black mb-1">
-            Recovery code
+        {/* Stats */}
+        {statsLoading ? (
+          <div className="h-64 bg-gray-50 rounded-3xl animate-pulse" />
+        ) : stats && stats.total > 0 ? (
+          <div className="flex flex-col gap-5 sm:gap-8">
+            <StatSection label="Records">
+              <StatBox
+                label="Peak"
+                value={formatPoints(stats.peak_points, useK)}
+                color="text-amber-500"
+              />
+              <StatBox
+                label="Weekly"
+                value={formatPoints(stats.weekly_peak, useK)}
+                color="text-indigo-600"
+              />
+              <StatBox
+                label="Daily"
+                value={formatPoints(stats.daily_peak, useK)}
+                color="text-indigo-400"
+              />
+            </StatSection>
+
+            <StatSection label="Wealth">
+              <StatBox
+                label="Gained"
+                value={formatPoints(stats.total_gain, useK)}
+                color="text-emerald-600"
+              />
+              <StatBox
+                label="Risked"
+                value={formatPoints(stats.total_volume, useK)}
+                color="text-gray-600"
+              />
+              <StatBox
+                label="Best Win"
+                value={formatPoints(stats.biggest_win, useK)}
+                color="text-emerald-500"
+              />
+            </StatSection>
+
+            <StatSection label="Performance">
+              <StatBox
+                label="Max Streak"
+                value={stats.max_win_streak}
+                color="text-orange-500"
+              />
+              <StatBox
+                label="Win Rate"
+                value={`${stats.winRate}%`}
+                color="text-indigo-600"
+              />
+              <StatBox
+                label="Pities Hit"
+                value={stats.total_pities_earned}
+                color="text-red-400"
+              />
+              <StatBox label="Total Plays" value={stats.total} />
+              <StatBox label="Wins" value={stats.wins} color="text-green-600" />
+              <StatBox
+                label="Losses"
+                value={stats.losses}
+                color="text-red-500"
+              />
+            </StatSection>
+          </div>
+        ) : null}
+
+        {/* Recovery code */}
+        <div className="border-t border-gray-50 mt-8 pt-6">
+          <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-2 ml-1">
+            Recovery Access
           </p>
-          <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-            Essential for switching devices. This code is your permanent key.
-          </p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div
-              className={`bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 font-mono text-sm font-bold text-gray-800 tracking-wider flex-1 md:flex-none ${!codeRevealed ? 'blur-md select-none' : ''}`}
+              className={`bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100 font-mono text-[11px] font-bold text-gray-800 tracking-wider flex-1 transition-all ${!codeRevealed ? 'blur-md select-none' : 'bg-white shadow-inner'}`}
             >
               {recoveryCode ?? 'generating-code-0000'}
             </div>
@@ -303,20 +346,19 @@ export default function ProfilePage() {
               <button
                 onClick={() => setCodeRevealed(true)}
                 disabled={!recoveryCode}
-                className="text-xs px-4 py-3 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold hover:bg-gray-50 transition cursor-pointer disabled:opacity-50"
+                className="text-[10px] px-5 py-3 bg-white border border-gray-200 text-gray-600 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50"
               >
                 Reveal
               </button>
             ) : (
               <button
                 onClick={() => {
-                  if (recoveryCode) {
-                    navigator.clipboard.writeText(recoveryCode)
-                    setCodeCopied(true)
-                    setTimeout(() => setCodeCopied(false), 2000)
-                  }
+                  if (!recoveryCode) return
+                  navigator.clipboard.writeText(recoveryCode)
+                  setCodeCopied(true)
+                  setTimeout(() => setCodeCopied(false), 2000)
                 }}
-                className="text-xs px-4 py-3 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl font-bold hover:bg-indigo-100 transition cursor-pointer min-w-20"
+                className="text-[10px] px-5 py-3 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-md min-w-25"
               >
                 {codeCopied ? 'Copied!' : 'Copy'}
               </button>
@@ -325,131 +367,110 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
-        <p className="text-[10px] uppercase font-black tracking-widest text-black mb-1">
-          Switch Profile
-        </p>
-        <p className="text-xs text-gray-400 mb-4">
-          Load an existing profile from another device.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="text"
-            value={recoverInput}
-            onChange={(e) => {
-              setRecoverInput(e.target.value)
-              setRecoverConfirm(false)
-              setRecoverError('')
-            }}
-            placeholder="word-word-1234"
-            className="flex-1 bg-gray-50 border-none rounded-xl px-4 py-3.5 text-sm text-gray-800 font-mono focus:ring-2 focus:ring-indigo-500 transition-all"
-          />
-          <button
-            onClick={() => recoverInput.trim() && setRecoverConfirm(true)}
-            disabled={!recoverInput.trim() || recoverLoading}
-            className="px-6 py-3.5 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 active:scale-95 transition disabled:opacity-50 cursor-pointer shadow-lg shadow-indigo-100"
-          >
-            {recoverLoading ? 'Loading...' : 'Recover'}
-          </button>
+      {/* ── Account actions ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Switch profile */}
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+          <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-4 ml-1">
+            Switch Profile
+          </p>
+          {recoverError && (
+            <p className="text-red-500 text-[10px] mb-2 ml-1 uppercase font-black">
+              {recoverError}
+            </p>
+          )}
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              value={recoverInput}
+              onChange={(e) => {
+                setRecoverInput(e.target.value)
+                setRecoverConfirm(false)
+                setRecoverError('')
+              }}
+              placeholder="word-word-1234"
+              className="w-full bg-gray-50 border-gray-100 rounded-2xl px-4 py-3.5 text-[12px] font-mono focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none"
+            />
+            <button
+              onClick={() => {
+                if (recoverConfirm) handleRecoverConfirm()
+                else if (recoverInput.trim()) setRecoverConfirm(true)
+              }}
+              disabled={!recoverInput.trim() || recoverLoading}
+              className={`w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 ${recoverConfirm ? 'bg-amber-500 text-white animate-pulse' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}
+            >
+              {recoverLoading
+                ? '...'
+                : recoverConfirm
+                  ? 'Click to Confirm Load'
+                  : 'Load Identity'}
+            </button>
+          </div>
         </div>
 
-        {recoverConfirm && (
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-xl animate-in fade-in slide-in-from-top-2">
-            <p className="text-xs font-black text-yellow-800 mb-1 uppercase tracking-wider">
-              🚨 Warning
+        {/* Danger zone */}
+        <div className="bg-white rounded-3xl border border-red-50 shadow-sm p-6">
+          <h2 className="text-[10px] font-black text-red-400/60 uppercase tracking-widest mb-4 ml-1">
+            Danger Zone
+          </h2>
+          {resetError && (
+            <p className="text-red-500 text-[10px] mb-2 ml-1 uppercase font-black">
+              {resetError}
             </p>
-            <p className="text-xs text-yellow-700 mb-4 leading-relaxed">
-              This will end your current session. You can return using your own
-              recovery code.
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={handleRecoverConfirm}
-                className="text-xs px-4 py-2.5 bg-yellow-500 text-white rounded-lg font-black uppercase hover:bg-yellow-600 transition"
-              >
-                Yes, Switch
-              </button>
-              <button
-                onClick={() => setRecoverConfirm(false)}
-                className="text-xs px-4 py-2.5 bg-white border border-yellow-200 text-yellow-700 rounded-lg font-black uppercase hover:bg-yellow-100 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-        {recoverError && (
-          <p className="text-xs font-bold text-red-500 mt-3 ml-1">
-            ✕ {recoverError}
-          </p>
-        )}
-      </div>
-
-      <div className="pt-8 border-t border-red-50">
-        <h2 className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em] mb-4 px-1">
-          Danger Zone
-        </h2>
-        {!resetConfirm ? (
+          )}
           <button
-            onClick={() => setResetConfirm(true)}
-            className="w-full sm:w-auto px-6 py-3 border-2 border-red-50 text-red-400 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-50 hover:border-red-100 transition active:scale-95"
+            onClick={() => {
+              if (resetConfirm) handleResetProfile()
+              else setResetConfirm(true)
+            }}
+            className={`w-full py-3.5 border rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${resetConfirm ? 'bg-red-600 text-white border-red-600 animate-pulse' : 'border-red-100 text-red-400 hover:bg-red-50'}`}
           >
-            Start Fresh (New Identity)
+            {resetConfirm ? 'Confirm Full Reset' : 'Reset All'}
           </button>
-        ) : (
-          <div className="p-5 bg-red-50 border border-red-100 rounded-2xl">
-            <p className="text-xs font-black text-red-800 mb-2 uppercase">
-              Confirm Identity Reset
-            </p>
-            <p className="text-xs text-red-700 mb-4 leading-relaxed">
-              This generates a brand-new profile with 200,000 points. Your
-              current progress will be unreachable without your code:{' '}
-              <span className="font-mono font-black">{recoveryCode}</span>
-            </p>
-            {resetError && (
-              <p className="text-xs font-bold text-red-600 mb-4 bg-red-100 p-2 rounded-lg inline-block">
-                {resetError}
-              </p>
-            )}
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                onClick={handleResetProfile}
-                className="px-6 py-3 bg-red-600 text-white rounded-xl text-xs font-black uppercase hover:bg-red-700 transition shadow-lg shadow-red-200"
-              >
-                Yes, Create New Identity
-              </button>
-              <button
-                onClick={() => {
-                  setResetConfirm(false)
-                  setResetError('')
-                }}
-                className="px-6 py-3 bg-white text-red-400 rounded-xl text-xs font-black uppercase hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   )
+}
 
-  function StatBox({
-    label,
-    value,
-    color = 'text-gray-900'
-  }: {
-    label: string
-    value: string | number
-    color?: string
-  }) {
-    return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
-        <p className={`text-2xl font-black ${color} leading-none`}>{value}</p>
-        <p className="text-[10px] text-black mt-2 uppercase font-black tracking-tighter">
-          {label}
-        </p>
-      </div>
-    )
-  }
+// ── Sub-components ──
+
+function StatSection({
+  label,
+  children
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-black/30 mb-3 ml-1">
+        {label}
+      </h3>
+      <div className="grid grid-cols-3 gap-2">{children}</div>
+    </div>
+  )
+}
+
+function StatBox({
+  label,
+  value,
+  color = 'text-gray-900'
+}: {
+  label: string
+  value: string | number
+  color?: string
+}) {
+  return (
+    <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-2 py-2 sm:py-6 flex flex-col items-center justify-center text-center transition-all">
+      <p
+        className={`text-lg sm:text-xl font-black ${color} leading-tight truncate w-full px-1 tracking-tight`}
+      >
+        {value}
+      </p>
+      <p className="text-[8px] sm:text-[10px] text-black/40 mt-0.5 sm:mt-2 uppercase font-black tracking-widest">
+        {label}
+      </p>
+    </div>
+  )
 }

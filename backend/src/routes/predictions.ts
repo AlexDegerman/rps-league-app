@@ -287,19 +287,24 @@ router.get('/recovery/:userId', async (req, res) => {
 router.get('/:userId/points', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT points, peak_points FROM users WHERE user_id = $1`,
+      `SELECT points, peak_points, daily_peak, weekly_peak FROM users WHERE user_id = $1`,
       [req.params.userId]
     )
     if (result.rows.length === 0) {
       const points = await getUserPoints(req.params.userId)
       return res.json({
         points: points.toString(),
-        peak_points: points.toString()
+        peak_points: points.toString(),
+        daily_peak: points.toString(),
+        weekly_peak: points.toString()
       })
     }
+    const row = result.rows[0]
     res.json({
-      points: result.rows[0].points.toString(),
-      peak_points: result.rows[0].peak_points.toString()
+      points: row.points.toString(),
+      peak_points: row.peak_points.toString(),
+      daily_peak: row.daily_peak.toString(),
+      weekly_peak: row.weekly_peak.toString()
     })
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch points' })
@@ -310,12 +315,20 @@ router.get('/:userId/points', async (req, res) => {
 router.get('/:userId/stats', async (req, res) => {
   try {
     const stats = await getUserStats(req.params.userId)
+
     const sanitizedStats = {
       ...stats,
-      points: stats.points?.toString(),
-      peak_points: stats.peak_points?.toString(),
-      total_gain: stats.total_gain?.toString()
+      points: stats.points.toString(),
+      peak_points: stats.peak_points.toString(),
+      daily_peak: stats.daily_peak.toString(),
+      weekly_peak: stats.weekly_peak.toString(),
+      total_volume: stats.total_volume.toString(),
+      biggest_win: stats.biggest_win.toString(),
+      total_gain: stats.total_gain.toString(),
+      avg_return: stats.avg_return.toString(),
+      total_pities_earned: stats.total_pities_earned || 0
     }
+
     res.json(sanitizedStats)
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch user stats' })

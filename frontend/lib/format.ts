@@ -120,7 +120,8 @@ export const formatTickerPoints = (n: number | bigint | string): string => {
   return sign + absN.toLocaleString('en-US')
 }
 
-export const formatPoints = (n: number | bigint | string): string => {
+// Formats large point values into human-readable strings.
+export const formatPoints = (n: number | bigint | string, useK: boolean = false): string => {
   const bigN = BigInt(n)
   if (bigN === 0n) return '0'
 
@@ -149,6 +150,13 @@ export const formatPoints = (n: number | bigint | string): string => {
     { threshold: 10n ** 9n, symbol: 'B' },
     { threshold: 10n ** 6n, symbol: 'M' }
   ]
+
+  if (useK && absN >= 1000n && absN < 1000000n) {
+    const whole = absN / 1000n
+    const tenth = (absN % 1000n) / 100n
+    const decimalStr = tenth > 0n ? `.${tenth}` : ''
+    return `${sign}${whole}${decimalStr}K`
+  }
 
   for (const { threshold, symbol } of tiers) {
     if (absN >= threshold) {

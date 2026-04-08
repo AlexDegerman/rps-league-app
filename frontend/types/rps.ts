@@ -43,8 +43,26 @@ export interface SinglePlayerStats {
 }
 
 export interface UserStats {
+  // Basic Aggregates
   total: number
   wins: number
   losses: number
   winRate: number
+
+  // Wealth & Volume (Strings for High Precision)
+  points: string
+  total_gain: string
+  total_volume: string
+  biggest_win: string
+  avg_return: string
+
+  // Peak Records (Strings for High Precision)
+  peak_points: string
+  daily_peak: string
+  weekly_peak: string
+
+  // Skill & IQ (Numbers)
+  current_win_streak: number
+  max_win_streak: number
+  total_pities_earned: number
 }
