@@ -429,7 +429,7 @@ export default function HomePage() {
 
       {/* Result Animation Overlay */}
       {resultAnim && (
-        <div className="fixed top-[50%] sm:top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none flex flex-col items-center justify-center w-full max-w-md">
+        <div className="fixed top-91  left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center w-full max-w-md">
           {resultAnim.bonus && (
             <div
               className={`flex flex-col items-center mb-3 animate-in zoom-in slide-in-from-bottom-4 
