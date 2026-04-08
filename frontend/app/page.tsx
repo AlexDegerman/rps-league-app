@@ -437,13 +437,15 @@ export default function HomePage() {
                 ${getBonusStyles(resultAnim.bonus.tier).scale}
                 ${getBonusStyles(resultAnim.bonus.tier).glow}`}
             >
-              <span className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}>
+              <span
+                className={`text-[8px] sm:text-[10px] font-black uppercase tracking-[0.25em] ${getBonusStyles(resultAnim.bonus.tier).text}`}
+              >
                 {getBonusStyles(resultAnim.bonus.tier).label}
               </span>
 
               {!resultAnim.win && (
-              <span 
-                className={`
+                <span
+                  className={`
                   text-[10px] sm:text-[12px] 
                   font-black uppercase 
                   tracking-[0.3em] 
@@ -451,12 +453,15 @@ export default function HomePage() {
                   ${getBonusStyles(resultAnim.bonus.tier).text} 
                   opacity-95
                 `}
+                >
+                  SAVED
+                </span>
+              )}
+              <span
+                className={`text-lg sm:text-2xl font-black ${resultAnim.win ? 'text-green-300' : 'text-blue-300'}`}
               >
-                SAVED
-              </span>
-            )}
-              <span className={`text-lg sm:text-2xl font-black ${resultAnim.win ? 'text-green-300' : 'text-blue-300'}`}>
-                {resultAnim.win ? '+' : ''}{formatPoints(resultAnim.bonus.amount)}
+                {resultAnim.win ? '+' : ''}
+                {formatPoints(resultAnim.bonus.amount)}
               </span>
             </div>
           )}
@@ -713,7 +718,7 @@ export default function HomePage() {
                     Bonus System Active
                   </span>
                   <p className="text-[10px] leading-relaxed text-gray-500 font-medium whitespace-normal">
-                    25% chance per match to trigger a{' '}
+                    40% chance per match to trigger a{' '}
                     <span className="text-gray-800 font-bold">
                       Tiered Bonus
                     </span>
@@ -732,6 +737,7 @@ export default function HomePage() {
                       </span>{' '}
                       points lost on Loss
                     </li>
+                    <li>Bad luck protection: 4th bet</li>
                   </ul>
 
                   <div className="mt-1 pt-1 border-t border-gray-50 flex gap-1 items-center justify-around text-[8px] font-black uppercase text-gray-400">
