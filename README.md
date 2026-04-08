@@ -71,6 +71,19 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
 
 ---
 
+## 📊 Player Analytics & Deep Profiles
+
+Each profile surfaces 16 tracked data points, powering both competitive rankings and long-term progression.
+
+- **Identity & Longevity:** Nickname and joined date, with instant randomization for quick identity swaps  
+- **Ranking Snapshot:** Live position across Daily, Weekly, and All-Time leaderboards  
+- **Record Tracking:** Peak, Daily High, and Weekly High balances to reflect historical performance  
+- **Wealth Metrics:** Total gained, total risked, and largest single win  
+- **Performance Stats:** Win rate, max streak, and total wins vs losses  
+- **Pity Tracking:** Counts how often the guaranteed bonus system is triggered  
+
+---
+
 ## ⚡ Live Activity Feed
 
 High-frequency, concurrency-aware event stream handling:
@@ -138,6 +151,8 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 - **PWA Install Experience**: Configured via `manifest` and Next.js Metadata API, enabling installable app behavior on mobile and desktop. Includes optimized icons and rich metadata for a polished, native-like installation prompt.
 
 - **Native-Feel Interactions**: Touch-friendly UI with optimized tap targets for betting actions (e.g., "ALL IN") and a real-time live feed that prepends new matches instantly, designed for seamless thumb-based navigation.
+
+- **Mobile Profile UI**: Player profiles are fully optimized for small screens, using a compact card-based layout to surface identity, rankings, records, and performance stats without clutter. High-contrast metrics and grouped sections ensure fast readability during live play.
 
 ---
 
