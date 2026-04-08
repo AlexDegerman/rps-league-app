@@ -319,10 +319,11 @@ function LeaderboardContent() {
                         <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500 font-bold">
                           {entry.win_rate}%
                         </td>
-                        <td
-                          className={`hidden min-[600px]:table-cell px-3 py-3 text-right font-bold ${getAmountColor(entry.points)}`}
-                        >
-                          {formatPoints(entry.points)}
+
+                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
+                          <span className={getAmountColor(entry.points)}>
+                            {formatPoints(entry.points)}
+                          </span>
                         </td>
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
                           <span
@@ -334,10 +335,11 @@ function LeaderboardContent() {
                             {formatPoints(entry.gained)}
                           </span>
                         </td>
-                        <td
-                          className={`hidden min-[600px]:table-cell px-3 py-3 text-right font-bold ${getAmountColor(entry.peak_points)}`}
-                        >
-                          {formatPoints(entry.peak_points)}
+
+                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
+                          <span className={getAmountColor(entry.peak_points)}>
+                            {formatPoints(entry.peak_points)}
+                          </span>
                         </td>
                       </tr>
                     )
