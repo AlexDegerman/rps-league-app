@@ -247,7 +247,7 @@ export default function ProfilePage() {
               className="flex items-center gap-3 cursor-pointer select-none group"
               onClick={() => setShowPointsExplainer(!showPointsExplainer)}
             >
-              <div className="shrink-0 transition-transform group-hover:scale-110">
+              <div className="shrink-0 transition-transform">
                 <GemIcon size={32} />
               </div>
               <span

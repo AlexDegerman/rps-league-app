@@ -212,88 +212,141 @@ export const getAmountColor = (amount?: number | bigint | string): string => {
 
   const a = BigInt(amount) < 0n ? -BigInt(amount) : BigInt(amount)
 
-  if (a >= 10n ** 63n) {
+  // 1 Vigintillion (Vg)
+  if (a >= 10n ** 63n) { // 1 Vigintillion (Vg)
     return `
-        text-transparent bg-clip-text bg-gradient-to-br from-white via-purple-100 to-purple-400 
-        font-black animate-pulse 
-        drop-shadow-[0_0_10px_rgba(168,85,247,0.8)] 
-        [-webkit-text-stroke:0.5px_#9333ea] 
-        filter brightness-110
-      `
-  } // 1 Vigintillion (Vg)
+    inline-block
+    font-black
+    animate-[holy-bloom_5s_linear_infinite]
+    `
+  }
 
+  // 1 Novemdecillion (Nod)
   if (a >= 10n ** 60n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-yellow-500 to-yellow-800 font-black drop-shadow-[0_0_12px_rgba(254,240,138,0.8)]'
-  } // 1 Novemdecillion (Nod)
-
-  if (a >= 10n ** 57n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-green-500 to-blue-500 font-black animate-[hue-rotate_1s_linear_infinite] drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]' // 1 Octodecillion (Ocd)
+    return `
+      inline-block
+      text-transparent bg-clip-text
+      bg-[radial-gradient(circle_at_center,_#fcd34d_0%,_#f59e0b_50%,_#78350f_100%)]
+      bg-size-[100%_100%]
+      font-black
+      animate-[nod-bloom_5s_linear_infinite]
+      [-webkit-text-stroke:0.6px_#78350f]
+    `
   }
 
-  if (a >= 10n ** 54n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-900 font-black drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]'
-  } // 1 Septendecillion (Spd)
+  if (a >= 10n ** 57n) { // 1 Octodecillion (Ocd)
+    return `
+      inline-block
+      text-transparent bg-clip-text 
+      bg-gradient-to-r from-red-500 via-green-500 to-blue-500 
+      font-black 
+      animate-[ocd-glow_3s_linear_infinite] 
+      [-webkit-text-stroke:0.5px_rgba(0,0,0,0.1)]
+    `
+  }
 
+  if (a >= 10n ** 54n) { // 1 Septendecillion (Spd)
+  return `
+    text-[#6366f1] 
+    font-black 
+    animate-pulse
+    [filter:drop-shadow(0_0_8px_rgba(168,85,247,0.9))_drop-shadow(0_0_15px_rgba(168,85,247,0.5))]
+    [-webkit-text-stroke:1px_#3730a3]
+    `
+  }
+
+  // 1 Sexdecillion (Sxd) - Deep Red Shimmer
   if (a >= 10n ** 51n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-br from-red-400 to-red-900 font-black drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]'
-  } // 1 Sexdecillion (Sxd)
+    return `inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-800 to-red-500 bg-[length:200%_auto] font-black animate-[shimmer-slide_4s_linear_infinite] [filter:drop-shadow(0_-2px_10px_rgba(239,68,68,0.7))_drop-shadow(0_2px_5px_rgba(239,68,68,0.4))]`;
+  }
 
+  // 1 Quindecillion (Qid) - Emerald Wave
   if (a >= 10n ** 48n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-t from-emerald-400 to-cyan-400 font-black drop-shadow-[0_0_8px_rgba(52,211,153,0.7)]'
-  } // 1 Quindecillion (Qid)
+    return `inline-block text-transparent bg-clip-text bg-gradient-to-b from-emerald-400 via-cyan-400 to-emerald-400 bg-[length:auto_200%] font-black animate-[emerald-wave_3s_ease-in-out_infinite] [filter:drop-shadow(0_-3px_12px_rgba(52,211,153,0.8))_drop-shadow(0_2px_6px_rgba(52,211,153,0.4))]`;
+  }
 
+  // 1 Quattuordecillion (Qud) - Cyan Pulse
   if (a >= 10n ** 45n) {
-    return 'text-cyan-400 font-black animate-pulse drop-shadow-[0_0_12px_rgba(34,211,238,0.9)]'
-  } // 1 Quattuordecillion
+    return `inline-block text-cyan-600 font-black animate-[soft-glow_3s_ease-in-out_infinite] [--glow-color-upper:rgba(8,145,178,0.8)] [--glow-color-lower:rgba(8,145,178,0.4)]`;
+  }
 
+  // 1 Tredecillion (Td) - Sunset Flow
   if (a >= 10n ** 42n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-rose-600 font-black drop-shadow-[0_0_10px_rgba(245,158,11,0.4)]'
-  } // 1 Tredecillion (Td)
+    return `inline-block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-rose-600 bg-[length:200%_auto] font-black animate-[shimmer-slide_5s_linear_infinite] [filter:drop-shadow(0_-2px_8px_rgba(245,158,11,0.6))_drop-shadow(0_2px_4px_rgba(245,158,11,0.3))]`;
+  }
 
+  // 1 Duodecillion (Dd) - Purple Breathe
   if (a >= 10n ** 39n) {
-    return 'text-purple-500 font-black drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]'
-  } // 1 Duodecillion (Dd)
+    return `inline-block text-purple-500 font-black animate-[soft-glow_4s_ease-in-out_infinite] [--glow-color-upper:rgba(168,85,247,0.7)] [--glow-color-lower:rgba(168,85,247,0.3)]`;
+  }
 
+  // 1 Undecillion (Ud) - Steel Shimmer
   if (a >= 10n ** 36n) {
     return `
-    text-transparent bg-clip-text bg-gradient-to-b from-slate-200 via-slate-400 to-slate-600 
-    font-black 
-    drop-shadow-[0_1px_3px_rgba(0,0,0,0.1)]
-    [-webkit-text-stroke:0.8px_#334155] 
-    filter brightness-110
-  `
-  } // 1 Undecillion (Ud)
+      inline-block text-transparent bg-clip-text 
+      bg-gradient-to-b from-slate-300 via-slate-500 to-slate-800 
+      bg-[length:200%_200%] font-black 
+      animate-[shimmer-glow_4s_ease-in-out_infinite]
+      [--glow-top:rgba(148,163,184,0.8)] [--glow-bottom:rgba(71,85,105,0.4)]
+      [-webkit-text-stroke:0.8px_#1e293b]
+    `
+  }
 
-  if (a >= 10n ** 36n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-blue-300 font-black drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]'
-  } // 1 Undecillion (Ud)
-
+  // 1 Nonillion (No) - The Mini Rainbow
   if (a >= 10n ** 30n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-yellow-500 via-green-400 via-blue-500 to-purple-500 font-black drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]'
-  } // 1 Nonillion (No)
+    return `
+      inline-block text-transparent bg-clip-text 
+      bg-gradient-to-r from-red-500 via-green-500 to-purple-500 
+      bg-[length:200%_auto] font-black 
+      animate-[shimmer-glow_6s_linear_infinite] 
+      [--glow-top:rgba(239,68,68,0.5)] [--glow-bottom:rgba(168,85,247,0.4)]
+    `
+  }
 
+  // 1 Octillion (Oc) - Orange Flicker
   if (a >= 10n ** 27n) {
-    return 'text-orange-400 font-black drop-shadow-[0_0_6px_rgba(251,146,60,0.5)]' // 1 Octillion (Oc)
+    return `
+      inline-block text-orange-500 font-black 
+      animate-[static-breathe_3s_ease-in-out_infinite] 
+      [--glow-top:rgba(251,146,60,0.7)] [--glow-bottom:rgba(251,146,60,0.4)]
+    `
   }
 
+  // 1 Septillion (Sp) - Ocean Shine
   if (a >= 10n ** 24n) {
-    return 'text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 font-black drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]' // 1 Septillion (Sp)
+    return `
+      inline-block text-transparent bg-clip-text 
+      bg-gradient-to-r from-cyan-400 to-blue-600 font-black 
+      animate-[shimmer-glow_5s_ease-in-out_infinite]
+      [--glow-top:rgba(34,211,238,0.6)] [--glow-bottom:rgba(37,99,235,0.3)]
+    `
   }
 
+  // 1 Sextillion (Sx) - Fuchsia Pulse
   if (a >= 10n ** 21n) {
-    return 'text-fuchsia-400 font-black animate-pulse' // 1 Sextillion (Sx)
+    return `
+      inline-block text-fuchsia-600 font-black 
+      animate-[static-breathe_3s_ease-in-out_infinite] 
+      [--glow-top:rgba(192,38,211,0.6)] [--glow-bottom:rgba(192,38,211,0.3)]
+    `
   }
 
+  // 1 Quintillion (Qi) - Rose Glow
   if (a >= 10n ** 18n) {
-    return 'text-rose-500 font-black' // 1 Quintillion (Qi)
+    return `
+      inline-block text-rose-600 font-black 
+      animate-[static-breathe_4s_ease-in-out_infinite]
+      [--glow-top:rgba(225,29,72,0.5)] [--glow-bottom:rgba(225,29,72,0.2)]
+    `
   }
 
+  // 1 Quadrillion (Qd)
   if (a >= 10n ** 15n) {
-    return 'text-pink-500 font-extrabold' // 1 Quadrillion
+    return 'inline-block text-pink-600 font-extrabold [filter:drop-shadow(0_0_5px_rgba(219,39,119,0.3))]'
   }
 
-  if (a >= 10n ** 12n) return 'text-red-500 font-bold' // Trillion
-  if (a >= 1_000_000_000_000n) return 'text-red-600 font-bold'
+  // 1 Trillion
+  if (a >= 10n ** 12n) return 'text-red-500 font-bold'
   if (a >= 100_000_000_000n) return 'text-orange-600 font-bold'
   if (a >= 10_000_000_000n) return 'text-orange-500 font-semibold'
   if (a >= 1_000_000_000n) return 'text-amber-500'
