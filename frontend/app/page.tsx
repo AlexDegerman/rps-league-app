@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { fetchLatestMatches } from '@/lib/api'
+import { fetchLatestMatches, fetchPendingMatches, fetchUserPoints, postPrediction } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
 import GemIcon from '@/components/icons/GemIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { getOrCreateUser, getUserId, getNickname } from '@/lib/user'
+import { getOrCreateUser } from '@/lib/user'
 import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
 import {
   formatPoints,
@@ -129,7 +129,7 @@ export default function HomePage() {
       setBetAmount(resetTo)
       if (!isFocused) setInputString(resetTo.toString())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoAllIn, isHydrated])
 
   useEffect(() => {
@@ -159,29 +159,36 @@ export default function HomePage() {
   const animatedResult = useAnimatedBigInt(resultAnim?.amount ?? 0n, 600, true)
 
   useEffect(() => {
-    getOrCreateUser()
-    const userId = getUserId()
+    const { userId, shortId } = getOrCreateUser()
     if (!userId) return
 
-    fetch(`${API_BASE}/api/predictions/${userId}/points`)
-      .then((res) => res.json())
+    fetchUserPoints(userId, shortId)
       .then((data) => {
+        if (!data) return
         const p = BigInt(data.points)
         setPoints(p)
-        setPeakPoints(BigInt(data.peak_points))
+        setPeakPoints(BigInt(data.peakPoints))
+
         const initialBet = autoAllInRef.current ? p : p < 100000n ? p : 100000n
         setBetAmount(initialBet)
-        setInputString(initialBet.toString())
+
+        if (!isFocused) setInputString(initialBet.toString())
         setPointsLoaded(true)
       })
       .catch((err) => {
-        console.error('Failed to fetch points, falling back to 100k', err)
+        console.error('Failed to fetch points:', err)
         setPointsLoaded(true)
       })
 
-    fetch(`${API_BASE}/api/matches/pending`)
-      .then((res) => res.json())
-      .then((data: PendingMatch[]) => {
+    fetchLatestMatches(1).then((data) => {
+      if (data && data.matches.length > 0) markReady()
+      loadMatches(1)
+    })
+
+    fetchPendingMatches()
+      .then((data) => {
+        if (!data) return
+
         setPendingMatches((prev) => {
           const existingIds = new Set(prev.map((p) => p.gameId))
           const freshMatches = data.filter((m) => !existingIds.has(m.gameId))
@@ -192,17 +199,16 @@ export default function HomePage() {
           return prev
         })
       })
-
-    fetchLatestMatches(1).then((data) => {
-      if (data.matches.length > 0) markReady()
-      loadMatches(1)
-    })
+      .catch((err) => {
+        console.error('Failed to fetch pending matches:', err)
+        triggerErrorRef.current('LIVE FEED ERROR')
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
 
   const handlePick = async (gameId: string, playerName: string) => {
-    const userId = getUserId()
-    const nickname = getNickname()
-    if (!userId || !nickname || betAmount <= 0n) return
+    const { userId, shortId, nickname } = getOrCreateUser()
+    if (!userId || !nickname || !shortId || betAmount <= 0n) return
 
     setPredictions((prev) =>
       new Map(prev).set(gameId, { gameId, pick: playerName, confirmed: false })
@@ -213,23 +219,21 @@ export default function HomePage() {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 5000)
 
-      const res = await fetch(`${API_BASE}/api/predictions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { ok, data } = await postPrediction(
+        {
           userId,
           gameId,
           pick: playerName,
           betAmount: betAmountRef.current.toString(),
-          nickname
-        }),
-        signal: controller.signal
-      })
+          nickname,
+          shortId
+        },
+        controller.signal
+      )
 
       clearTimeout(timeout)
-      const data = await res.json()
 
-      if (res.ok && data.success === true) {
+      if (ok && data?.success === true) {
         succeeded = true
         setPredictions((prev) => {
           const next = new Map(prev)
@@ -238,7 +242,7 @@ export default function HomePage() {
           return next
         })
       } else {
-        triggerErrorRef.current(data.error || 'MATCH ALREADY ENDED')
+        triggerErrorRef.current(data?.error || 'MATCH ALREADY ENDED')
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
@@ -261,12 +265,18 @@ export default function HomePage() {
     newPoints: bigint
     isNewPeak: boolean
   }> => {
-    const userId = getUserId()
-    if (!userId) return { newPoints: pointsRef.current, isNewPeak: false }
-    const res = await fetch(`${API_BASE}/api/predictions/${userId}/points`)
-    const data = await res.json()
+    const { userId, shortId } = getOrCreateUser()
+    if (!userId || !shortId)
+      return { newPoints: pointsRef.current, isNewPeak: false }
+
+    const data = await fetchUserPoints(userId, shortId)
+
+    if (!data) {
+      return { newPoints: pointsRef.current, isNewPeak: false }
+    }
+
     const newPoints = BigInt(data.points)
-    const newPeak = BigInt(data.peak_points)
+    const newPeak = BigInt(data.peakPoints)
     const isNewPeak = newPeak > peakPointsRef.current
 
     setPointsLoaded(true)
@@ -316,7 +326,7 @@ export default function HomePage() {
 
     es.addEventListener('prediction_result', (event) => {
       const data = JSON.parse(event.data)
-      const userId = getUserId()
+      const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
 
       const isWin = data.result === 'WIN'
@@ -362,10 +372,7 @@ export default function HomePage() {
       }
 
       const displayTime = data.bonus?.tier === 'LEGENDARY' ? 4000 : 2000
-
-      setTimeout(() => {
-        setResultAnim(null)
-      }, displayTime)
+      setTimeout(() => setResultAnim(null), displayTime)
 
       setPredictions((prev) => {
         const newMap = new Map(prev)
@@ -391,7 +398,7 @@ export default function HomePage() {
     })
 
     return () => es.close()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getConfettiColors = (tier?: string) => {

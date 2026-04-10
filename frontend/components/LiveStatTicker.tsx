@@ -19,18 +19,25 @@ export default function LiveStatsTicker() {
     const load = () => {
       fetchDailyStats()
         .then((data) => {
+          if (!data) return
+
           setStats({
-            ...data,
             totalVolume: BigInt(data.totalVolume),
             dailyPayout: BigInt(data.dailyPayout),
-            mvp: data.mvp ? { ...data.mvp, gain: BigInt(data.mvp.gain) } : null
+            totalBets: data.totalBets ?? 0,
+            winRate: data.winRate ?? 0,
+            mvp: data.mvp
+              ? {
+                  nickname: data.mvp.nickname,
+                  gain: BigInt(data.mvp.gain)
+                }
+              : null
           })
         })
         .catch(console.error)
     }
 
     load()
-    // Refresh every 15s — frequent enough to feel live without hammering the DB
     const interval = setInterval(load, 15000)
     return () => clearInterval(interval)
   }, [])
@@ -85,7 +92,6 @@ export default function LiveStatsTicker() {
           <span className="text-[8px] text-gray-400 uppercase font-bold tracking-tight">
             Win Rate
           </span>
-          {/* Pulsing dot signals the stats are live-updated */}
           <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />

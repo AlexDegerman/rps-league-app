@@ -9,21 +9,11 @@ import GemIcon from '@/components/icons/GemIcon'
 import { getUserId } from '@/lib/user'
 import { formatPoints, getAmountColor } from '@/lib/format'
 import Link from 'next/link'
+import { LeaderboardEntry } from '@/types/rps'
 
 type Tab = 'daily' | 'weekly' | 'alltime'
 type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
 type SortDir = 'asc' | 'desc'
-
-interface PredictorEntry {
-  user_id: string
-  nickname: string
-  points: string
-  peak_points: string
-  gained: string
-  wins: number
-  losses: number
-  win_rate: number
-}
 
 // Each tab defaults to its most meaningful sort column
 const DEFAULT_SORT: Record<Tab, SortKey> = {
@@ -65,7 +55,7 @@ function LeaderboardContent() {
   const [dir, setDir] = useState<SortDir>(
     (searchParams.get('dir') as SortDir) || 'desc'
   )
-  const [data, setData] = useState<PredictorEntry[]>([])
+  const [data, setData] = useState<LeaderboardEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [myUserId, setMyUserId] = useState<string | null>(null)
 
@@ -233,12 +223,12 @@ function LeaderboardContent() {
                   </tr>
                 ) : (
                   data.map((entry, index) => {
-                    const isMe = entry.user_id === myUserId
+                    const isMe = entry.userId === myUserId
                     const gainedBI = BigInt(entry.gained)
 
                     return (
                       <tr
-                        key={entry.user_id}
+                        key={entry.userId}
                         className={`border-b border-gray-50 ${isMe ? 'bg-purple-50' : ''}`}
                       >
                         <td className="px-3 py-3 align-top text-gray-400 font-bold text-xs">
@@ -248,11 +238,16 @@ function LeaderboardContent() {
                         <td className="px-3 py-3">
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2">
-                              <span
-                                className={`font-medium ${isMe ? 'text-purple-600 font-bold' : 'text-gray-800'}`}
+                              <Link
+                                href={`/profile/${entry.shortId}`}
+                                className={`font-medium transition hover:underline decoration-purple-400 underline-offset-4 text-current! ${
+                                  isMe
+                                    ? 'text-purple-600! font-bold'
+                                    : 'text-indigo-600 hover:text-indigo-800'
+                                }`}
                               >
-                                {entry.nickname ?? entry.user_id.slice(0, 8)}
-                              </span>
+                                {entry.nickname ?? entry.userId.slice(0, 8)}
+                              </Link>
                               {isMe && (
                                 <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase">
                                   YOU
@@ -286,7 +281,7 @@ function LeaderboardContent() {
                                   {entry.losses}
                                 </div>
                                 <div className="hidden min-[380px]:block min-[380px]:col-span-2 text-indigo-500 font-bold">
-                                  {entry.win_rate}%
+                                  {entry.winRate}%
                                 </div>
                                 <div
                                   className={`col-span-4 min-[380px]:col-span-3 font-bold flex items-center gap-0.5 whitespace-nowrap ${getAmountColor(entry.points)}`}
@@ -301,9 +296,9 @@ function LeaderboardContent() {
                                   {formatPoints(entry.gained)}
                                 </div>
                                 <div
-                                  className={`col-span-2 font-bold whitespace-nowrap text-right ${getAmountColor(entry.peak_points)}`}
+                                  className={`col-span-2 font-bold whitespace-nowrap text-right ${getAmountColor(entry.peakPoints)}`}
                                 >
-                                  {formatPoints(entry.peak_points)}
+                                  {formatPoints(entry.peakPoints)}
                                 </div>
                               </div>
                             </div>
@@ -317,7 +312,7 @@ function LeaderboardContent() {
                           {entry.losses}
                         </td>
                         <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500 font-bold">
-                          {entry.win_rate}%
+                          {entry.winRate}%
                         </td>
 
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
@@ -337,8 +332,8 @@ function LeaderboardContent() {
                         </td>
 
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                          <span className={getAmountColor(entry.peak_points)}>
-                            {formatPoints(entry.peak_points)}
+                          <span className={getAmountColor(entry.peakPoints)}>
+                            {formatPoints(entry.peakPoints)}
                           </span>
                         </td>
                       </tr>

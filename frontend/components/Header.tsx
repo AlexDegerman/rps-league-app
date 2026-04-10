@@ -1,28 +1,45 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
-
-const allNavItems = [
-  { label: 'Live', href: '/' },
-  { label: 'Leaderboard', href: '/leaderboard' },
-  { label: 'Profile', href: '/profile' },
-  { label: 'Search', href: '/search' },
-  { label: 'Analysis', href: '/analysis' }
-]
+import { getOrCreateUser } from '@/lib/user'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [profileHref, setProfileHref] = useState('/profile')
   const pathname = usePathname()
+
+  useEffect(() => {
+    const user = getOrCreateUser()
+    if (user?.shortId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setProfileHref(`/profile/${user.shortId}`)
+    }
+  }, [])
+
+  const allNavItems = [
+    { label: 'Live', href: '/' },
+    { label: 'Leaderboard', href: '/leaderboard' },
+    { label: 'Profile', href: profileHref },
+    { label: 'Search', href: '/search' },
+    { label: 'Analysis', href: '/analysis' }
+  ]
 
   const navClass = (href: string) =>
     `px-3 py-2 rounded font-bold transition text-xs uppercase tracking-tight whitespace-nowrap ${
       pathname === href
         ? 'bg-yellow-400 text-gray-900 shadow-sm'
         : 'bg-indigo-600 text-white hover:bg-indigo-700'
+    }`
+
+  const menuRowItemClass = (href: string) =>
+    `px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider transition border ${
+      pathname === href
+        ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
+        : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
     }`
 
   return (
@@ -41,7 +58,7 @@ const Header = () => {
             />
           </Link>
 
-          {/* Desktop/Full Nav - Displays all links and removes burger above 460px */}
+          {/* Desktop/Full Nav */}
           <nav className="hidden min-[460px]:flex gap-2">
             {allNavItems.map(({ label, href }) => (
               <Link key={href} href={href} className={navClass(href)}>
@@ -50,7 +67,7 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Dynamic Mobile Nav - Logic for 360px and 420px */}
+          {/* Mobile Main Bar */}
           <div className="flex min-[460px]:hidden items-center gap-1.5 flex-1">
             <Link href="/" className={navClass('/')}>
               Live
@@ -59,15 +76,13 @@ const Header = () => {
               Ranks
             </Link>
 
-            {/* Show Profile starting at 360px */}
             <Link
-              href="/profile"
-              className={`${navClass('/profile')} hidden min-[320px]:block`}
+              href={profileHref}
+              className={`${navClass(profileHref)} hidden min-[320px]:block`}
             >
               Profile
             </Link>
 
-            {/* Show Search starting at 420px */}
             <Link
               href="/search"
               className={`${navClass('/search')} hidden min-[400px]:block`}
@@ -84,43 +99,28 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Dropdown - Dynamically hides items already shown in the header */}
         {isOpen && (
-          <nav className="min-[460px]:hidden mt-3 py-2 flex flex-col gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
+          <nav className="min-[460px]:hidden mt-3 pt-3 flex flex-row flex-wrap items-center justify-end gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
             <Link
-              href="/profile"
+              href={profileHref}
               onClick={() => setIsOpen(false)}
-              className={`px-4 py-3 rounded-xl font-bold text-sm transition min-[360px]:hidden ${
-                pathname === '/profile'
-                  ? 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400'
-                  : 'bg-white text-gray-600 border border-gray-100'
-              }`}
+              className={`${menuRowItemClass(profileHref)} min-[320px]:hidden`}
             >
               Profile
             </Link>
 
-            {/* Hide Search in menu if width > 400px */}
             <Link
               href="/search"
               onClick={() => setIsOpen(false)}
-              className={`px-4 py-3 rounded-xl font-bold text-sm transition min-[420px]:hidden ${
-                pathname === '/search'
-                  ? 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400'
-                  : 'bg-white text-gray-600 border border-gray-100'
-              }`}
+              className={`${menuRowItemClass('/search')} min-[400px]:hidden`}
             >
               Search
             </Link>
 
-            {/* Analysis always in menu until 460px breakpoint clears everything */}
             <Link
               href="/analysis"
               onClick={() => setIsOpen(false)}
-              className={`px-4 py-3 rounded-xl font-bold text-sm transition ${
-                pathname === '/analysis'
-                  ? 'bg-yellow-50 text-yellow-800 border-l-4 border-yellow-400'
-                  : 'bg-white text-gray-600 border border-gray-100'
-              }`}
+              className={menuRowItemClass('/analysis')}
             >
               Analysis
             </Link>

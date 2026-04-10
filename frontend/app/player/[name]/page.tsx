@@ -85,7 +85,6 @@ interface StatCardProps {
   color?: string
 }
 
-// Extracted to avoid repeating the card markup for each stat
 function StatCard({ label, value, color = 'text-gray-900' }: StatCardProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">

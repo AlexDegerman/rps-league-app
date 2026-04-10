@@ -1,28 +1,43 @@
+import { nanoid } from 'nanoid'
 import { generateNickname } from './nicknames'
 
 const USER_ID_KEY = 'rps_user_id'
+const SHORT_ID_KEY = 'rps_short_id'
 const NICKNAME_KEY = 'rps_nickname'
 
 const generateUserId = (): string => crypto.randomUUID()
+const generateShortId = (): string => nanoid(10)
 
 // Returns existing identity or creates a new one on first visit.
 // Guards against SSR by returning empty strings when window is unavailable.
-export const getOrCreateUser = (): { userId: string; nickname: string } => {
-  if (typeof window === 'undefined') return { userId: '', nickname: '' }
+export const getOrCreateUser = (): {
+  userId: string
+  shortId: string
+  nickname: string
+} => {
+  if (typeof window === 'undefined')
+    return { userId: '', shortId: '', nickname: '' }
 
   let userId = localStorage.getItem(USER_ID_KEY)
+  let shortId = localStorage.getItem(SHORT_ID_KEY)
   let nickname = localStorage.getItem(NICKNAME_KEY)
 
   if (!userId) {
     userId = generateUserId()
     localStorage.setItem(USER_ID_KEY, userId)
   }
+
+  if (!shortId) {
+    shortId = generateShortId()
+    localStorage.setItem(SHORT_ID_KEY, shortId)
+  }
+
   if (!nickname) {
     nickname = generateNickname()
     localStorage.setItem(NICKNAME_KEY, nickname)
   }
 
-  return { userId, nickname }
+  return { userId, shortId, nickname }
 }
 
 export const regenerateNickname = (): string => {

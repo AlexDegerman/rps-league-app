@@ -1,92 +1,17 @@
 import pool from '../utils/db.js'
-
-const wordList = [
-  'swift',
-  'bold',
-  'calm',
-  'fierce',
-  'brave',
-  'clever',
-  'mighty',
-  'nimble',
-  'silent',
-  'loyal',
-  'wild',
-  'sharp',
-  'bright',
-  'sly',
-  'wise',
-  'agile',
-  'steady',
-  'noble',
-  'quick',
-  'keen',
-  'proud',
-  'royal',
-  'tough',
-  'vivid',
-  'tiger',
-  'falcon',
-  'wolf',
-  'eagle',
-  'fox',
-  'bear',
-  'hawk',
-  'lynx',
-  'raven',
-  'cobra',
-  'panda',
-  'crane',
-  'viper',
-  'bison',
-  'moose',
-  'otter'
-]
-
-export const generateRecoveryCode = (): string => {
-  const rand = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)]!
-  const num = Math.floor(Math.random() * 9000 + 1000)
-  return `${rand(wordList)}-${rand(wordList)}-${num}`
-}
+import { getOrCreateUser } from './userService.js';
 
 const POINTS_FLOOR = 100000n
-const STARTING_POINTS = 200000n
-
-// Creates user with 200k points on first visit, returns current points otherwise.
-// Second SELECT after INSERT handles the race where ON CONFLICT DO NOTHING fires.
-const getOrCreateUser = async (userId: string): Promise<bigint> => {
-  const existing = await pool.query(
-    `SELECT points FROM users WHERE user_id = $1`,
-    [userId]
-  )
-  if (existing.rows.length > 0) return BigInt(existing.rows[0].points)
-
-  const recoveryCode = generateRecoveryCode()
-  await pool.query(
-    `INSERT INTO users (user_id, points, peak_points, recovery_code)
-      VALUES ($1, $2, $2, $3)
-      ON CONFLICT (user_id) DO NOTHING`,
-    [userId, STARTING_POINTS.toString(), recoveryCode]
-  )
-  const result = await pool.query(
-    `SELECT points FROM users WHERE user_id = $1`,
-    [userId]
-  )
-  return BigInt(result.rows[0].points)
-}
-
-export const getUserPoints = async (userId: string): Promise<bigint> => {
-  return getOrCreateUser(userId)
-}
 
 export const savePrediction = async (
   userId: string,
   gameId: string,
   pick: string,
   betAmount: bigint,
-  nickname: string
+  nickname: string,
+  shortId: string
 ): Promise<{ success: boolean; error?: string }> => {
-  const balance = await getOrCreateUser(userId)
+  const { points: balance } = await getOrCreateUser(userId, shortId)
 
   if (betAmount <= 0n)
     return { success: false, error: 'Bet amount must be greater than 0' }
@@ -299,7 +224,11 @@ export const getUserPredictions = async (userId: string) => {
   return result.rows
 }
 
-export const getUserStats = async (userId: string) => {
+export const getUserStats = async (userId: string, shortId: string) => {
+  // Ensure the user exists and has their shortId synced before fetching stats
+  // This handles the "creation" side using the new 2-argument signature
+  await getOrCreateUser(userId, shortId)
+
   const result = await pool.query(
     `SELECT 
         u.points,
@@ -312,7 +241,7 @@ export const getUserStats = async (userId: string) => {
         u.max_win_streak,
         u.bonus_pity_count,
         u.total_pities_earned,
-        u.joined_date, -- Added this
+        u.joined_date,
         COALESCE(p_stats.total, 0) as total,
         COALESCE(p_stats.wins, 0) as wins,
         COALESCE(p_stats.losses, 0) as losses,
@@ -335,25 +264,26 @@ export const getUserStats = async (userId: string) => {
 
   const row = result.rows[0]
 
+  // Fallback if the query somehow fails after creation
   if (!row) {
     return {
       total: 0,
       wins: 0,
       losses: 0,
       winRate: 0,
-      total_gain: '0',
+      totalGain: '0',
       points: '200000',
-      peak_points: '200000',
-      daily_peak: '100000',
-      weekly_peak: '100000',
-      total_volume: '0',
-      biggest_win: '0',
-      current_win_streak: 0,
-      max_win_streak: 0,
-      bonus_pity_count: 0,
-      total_pities_earned: 0,
-      joined_date: Date.now().toString(),
-      avg_return: '0'
+      peakPoints: '200000',
+      dailyPeak: '100000',
+      weeklyPeak: '100000',
+      totalVolume: '0',
+      biggestWin: '0',
+      currentWinStreak: 0,
+      maxWinStreak: 0,
+      bonusPityCount: 0,
+      totalPitiesEarned: 0,
+      joinedDate: Date.now().toString(),
+      avgReturn: '0'
     }
   }
 
@@ -366,19 +296,19 @@ export const getUserStats = async (userId: string) => {
     wins,
     losses: Number(row.losses),
     winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
-    total_gain: totalGain,
+    totalGain: totalGain,
     points: row.points.toString(),
-    peak_points: row.peak_points.toString(),
-    daily_peak: row.daily_peak.toString(),
-    weekly_peak: row.weekly_peak.toString(),
-    total_volume: row.total_volume.toString(),
-    biggest_win: row.biggest_win.toString(),
-    current_win_streak: Number(row.current_win_streak),
-    max_win_streak: Number(row.max_win_streak),
-    bonus_pity_count: Number(row.bonus_pity_count),
-    total_pities_earned: Number(row.total_pities_earned || 0),
-    joined_date: row.joined_date.toString(),
-    avg_return: total > 0 ? (BigInt(totalGain) / BigInt(total)).toString() : '0'
+    peakPoints: row.peak_points.toString(),
+    dailyPeak: row.daily_peak.toString(),
+    weeklyPeak: row.weekly_peak.toString(),
+    totalVolume: row.total_volume.toString(),
+    biggestWin: row.biggest_win.toString(),
+    currentWinStreak: Number(row.current_win_streak),
+    maxWinStreak: Number(row.max_win_streak),
+    bonusPityCount: Number(row.bonus_pity_count),
+    totalPitiesEarned: Number(row.total_pities_earned || 0),
+    joinedDate: row.joined_date.toString(),
+    avgReturn: total > 0 ? (BigInt(totalGain) / BigInt(total)).toString() : '0'
   }
 }
 

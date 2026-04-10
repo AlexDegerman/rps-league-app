@@ -2,7 +2,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import HomePage from './page'
 
-// Proper constructor mock — vi.fn() alone can't be new'd
 class MockEventSource {
   static instances: MockEventSource[] = []
   listeners: Record<string, ((e: { data: string }) => void)[]> = {}
@@ -24,26 +23,31 @@ class MockEventSource {
 
 vi.stubGlobal('EventSource', MockEventSource)
 
-// The input has no htmlFor/id pair, so getByRole('textbox') is the reliable selector
 const getBetInput = () => screen.getByRole('textbox') as HTMLInputElement
 
 describe('HomePage', () => {
   beforeEach(() => {
     vi.restoreAllMocks()
     MockEventSource.instances = []
-    // Clear localStorage so autoAllIn=true default is never overridden by a saved 'false'
     localStorage.clear()
 
     vi.stubGlobal(
       'fetch',
       vi.fn((url: string) => {
-        if (url.includes('/api/predictions') && url.includes('/points')) {
+        // Points endpoint — camelCase to match updated API response
+        if (url.includes('/api/users') && url.includes('/points')) {
           return Promise.resolve({
             ok: true,
             json: () =>
-              Promise.resolve({ points: '500000', peak_points: '500000' })
+              Promise.resolve({
+                points: '500000',
+                peakPoints: '500000',
+                dailyPeak: '500000',
+                weeklyPeak: '500000'
+              })
           })
         }
+        // Daily stats for LiveStatsTicker
         if (url.includes('/api/predictions/stats/daily')) {
           return Promise.resolve({
             ok: true,
@@ -57,34 +61,36 @@ describe('HomePage', () => {
               })
           })
         }
+        // Pending matches
         if (url.includes('/api/matches/pending')) {
-          return Promise.resolve({ ok: true, json: () => Promise.resolve([]) })
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve([])
+          })
         }
+        // Match history
         if (url.includes('/api/matches')) {
           return Promise.resolve({
             ok: true,
-            json: () => Promise.resolve({ matches: [], totalPages: 1 })
+            json: () => Promise.resolve({ matches: [], total: 0 })
           })
         }
-        return Promise.reject(new Error(`Unhandled API call: ${url}`))
+        return Promise.reject(new Error(`Unhandled fetch: ${url}`))
       })
     )
   })
 
   it('sets bet to full balance on load because AUTO ALL-IN defaults to on', async () => {
     render(<HomePage />)
-    // AUTO is on by default, so bet = full points balance (500k)
+    // AUTO is on by default → bet = full points balance (500k)
     await waitFor(() => expect(getBetInput().value).toBe('500.000'))
-    // Points display should also reflect the full 500k balance
     await waitFor(() => expect(screen.getByText(/499|500/)).toBeInTheDocument())
   })
 
   it('clamps bet to 100k floor when AUTO is turned off', async () => {
     render(<HomePage />)
-    // Wait for points to load (AUTO on → bet = 500k)
     await waitFor(() => expect(getBetInput().value).toBe('500.000'))
 
-    // Turn off AUTO — bet should clamp to min(points, 100k) = 100k
     fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
     await waitFor(() => expect(getBetInput().value).toBe('100.000'))
   })
@@ -93,7 +99,6 @@ describe('HomePage', () => {
     render(<HomePage />)
     await waitFor(() => expect(getBetInput().value).toBe('500.000'))
 
-    // Turn off AUTO first so we can test ALL IN independently
     fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
     await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 
@@ -105,7 +110,6 @@ describe('HomePage', () => {
     render(<HomePage />)
     const autoButton = screen.getByRole('button', { name: /AUTO/i })
 
-    // Default is ON
     expect(autoButton).toHaveClass('bg-green-600')
     fireEvent.click(autoButton)
     await waitFor(() => expect(autoButton).not.toHaveClass('bg-green-600'))
@@ -117,7 +121,6 @@ describe('HomePage', () => {
     render(<HomePage />)
     await waitFor(() => expect(getBetInput().value).toBe('500.000'))
 
-    // Turn off AUTO so manual input is respected
     fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
     await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 
@@ -132,7 +135,6 @@ describe('HomePage', () => {
     render(<HomePage />)
     await waitFor(() => expect(getBetInput().value).toBe('500.000'))
 
-    // Turn off, then back on
     fireEvent.click(screen.getByRole('button', { name: /AUTO/i }))
     await waitFor(() => expect(getBetInput().value).toBe('100.000'))
 

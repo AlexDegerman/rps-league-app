@@ -20,6 +20,13 @@ export interface PlayerStats {
   winRate: number
 }
 
+export interface SinglePlayerStats {
+  total: number
+  wins: number
+  losses: number
+  winRate: number
+}
+
 export interface PendingMatch {
   gameId: string
   time: number
@@ -35,35 +42,87 @@ export interface PredictionRecord {
   confirmed: boolean
 }
 
-export interface SinglePlayerStats {
+export interface UserStats {
+  joinedDate: string
   total: number
+  wins: number
+  losses: number
+  winRate: number
+  points: string
+  totalGain: string
+  totalVolume: string
+  biggestWin: string
+  avgReturn: string
+  peakPoints: string
+  dailyPeak: string
+  weeklyPeak: string
+  currentWinStreak: number
+  maxWinStreak: number
+  totalPitiesEarned: number
+}
+
+export interface UserPointsData {
+  nickname: string
+  userId: string
+  shortId: string
+  points: string
+  peakPoints: string
+  dailyPeak: string
+  weeklyPeak: string
+}
+
+export interface LeaderboardEntry {
+  userId: string
+  shortId: string
+  nickname: string
+  points: string
+  peakPoints: string
+  gained: string
   wins: number
   losses: number
   winRate: number
 }
 
-export interface UserStats {
-  joined_date: string
-  // Basic Aggregates
-  total: number
-  wins: number
-  losses: number
-  winRate: number
-
-  // Wealth & Volume (Strings for High Precision)
+export interface ProfileData {
+  userId: string
+  shortId: string
+  nickname: string
   points: string
-  total_gain: string
-  total_volume: string
-  biggest_win: string
-  avg_return: string
+  peakPoints: string
+  biggestWin: string
+  maxWinStreak: number
+  joinedDate: number
+}
 
-  // Peak Records (Strings for High Precision)
-  peak_points: string
-  daily_peak: string
-  weekly_peak: string
+export interface RecoverResponse {
+  userId: string
+  shortId: string
+  nickname?: string
+}
 
-  // Skill & IQ (Numbers)
-  current_win_streak: number
-  max_win_streak: number
-  total_pities_earned: number
+export interface PredictionResponse {
+  success: boolean
+  gameId: string
+  userId: string
+  pointsAfter: string
+  error?: string
+}
+
+export interface ApiResponse<T> {
+  success: boolean
+  data?: T
+  error?: string
+}
+
+export interface PublicProfile {
+  nickname: string
+  shortId: string
+  stats: UserStats
+  recentHistory: {
+    gameId: string
+    pick: string
+    result: 'WIN' | 'LOSE'
+    betAmount: string
+    gain: string
+  }[]
 }

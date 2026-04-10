@@ -2,7 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Match } from '@/types/rps'
 
 interface UseInfiniteScrollProps {
-  fetchFn: (page: number) => Promise<{ matches: Match[]; hasMore: boolean }>
+  fetchFn: (page: number) => Promise<{ matches: Match[]; total: number } | null>
   enabled?: boolean
 }
 
@@ -24,6 +24,11 @@ export const useInfiniteScroll = ({
 
       try {
         const data = await fetchFn(targetPage)
+        if (!data) {
+          setHasMore(false)
+          return
+        }
+
         setMatches((prev) => {
           if (targetPage === 1) return data.matches
           // Dedup by gameId to guard against SSE races delivering a match
@@ -32,7 +37,9 @@ export const useInfiniteScroll = ({
           const unique = data.matches.filter((m) => !existingIds.has(m.gameId))
           return [...prev, ...unique]
         })
-        setHasMore(data.hasMore)
+
+        const loadedCount = targetPage * 20
+        setHasMore(loadedCount < data.total)
       } catch (err) {
         console.error('Failed to load matches:', err)
       } finally {

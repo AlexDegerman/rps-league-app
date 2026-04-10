@@ -23,24 +23,24 @@ vi.mock('@/lib/user', () => ({
 
 const mockPredictors = [
   {
-    user_id: 'user-1',
+    userId: 'user-1',
     nickname: 'Alice',
     points: 1000,
-    peak_points: 1100,
+    peakPoints: 1100,
     gained: 100,
     wins: 5,
     losses: 2,
-    win_rate: 71
+    winRate: 71
   },
   {
-    user_id: 'my-id',
+    userId: 'my-id',
     nickname: 'Me',
     points: 500,
-    peak_points: 600,
+    peakPoints: 600,
     gained: -50,
     wins: 2,
     losses: 5,
-    win_rate: 28
+    winRate: 28
   }
 ]
 

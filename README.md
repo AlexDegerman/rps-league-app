@@ -45,6 +45,7 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
 
 - Players bet virtual points on fast-paced Rock Paper Scissors matches
 - Matches appear every 5 seconds, with a 3-second betting window
+- No ties ever occur, every match always produces a clear winner to keep gameplay fast, decisive, and more exciting
 - Dynamic odds:
   - **WIN:** +100% of your bet
   - **LOSE:** -50% of your bet
@@ -232,34 +233,49 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 | GET | `/api/matches/players` | List all unique player names |
 | GET | `/api/matches/players/:name/stats` | Player career stats |
 
+---
+
 ### Leaderboards & Rankings
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/leaderboard/today` | Today's player leaderboard |
 | GET | `/api/leaderboard/historical` | Historical player leaderboard |
-| GET | `/api/predictions/leaderboard/unified?tab=[period]&sort=[metric]` | Unified predictor leaderboard with time filters and sortable metrics |
+| GET | `/api/leaderboard/unified?tab=[period]&sort=[metric]` | Unified leaderboard with filters and sorting |
 
-### User Predictions
+---
+
+### Users & Accounts
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/users/recover` | Recover user profile using recovery code |
+| POST | `/api/users/update-nickname` | Update user nickname |
+| GET | `/api/users/profile/:shortId` | Fetch full user profile |
+| GET | `/api/users/recovery/:userId` | Get recovery code |
+| GET | `/api/users/check-name/:nickname` | Check nickname availability |
+| GET | `/api/users/:userId/points` | Get user points and peak stats |
+
+---
+
+### Predictions
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/predictions` | Submit a prediction |
-| GET | `/api/predictions/:userId/points` | Get user points and peak |
-| GET | `/api/predictions/:userId/stats` | User prediction stats |
-| GET | `/api/predictions/recovery/:userId` | Get recovery code |
-| POST | `/api/predictions/recover` | Recover profile by code |
-| GET | `/api/predictions/check-name/:nickname` | Check nickname availability |
+
+---
 
 ### Automated Peak Resets
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/predictions/reset/daily` | Reset `daily_peak` (called by GitHub Actions cron) |
-| POST | `/api/predictions/reset/weekly` | Reset `weekly_peak` (called by GitHub Actions cron) |
+| POST | `/api/predictions/reset/daily` | Reset daily peak (cron job) |
+| POST | `/api/predictions/reset/weekly` | Reset weekly peak (cron job) |
+
+---
 
 ### Stats & Analytics
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/predictions/stats` | Platform-wide statistics |
-| GET | `/api/predictions/stats/daily` | Daily betting stats and MVP |
+| GET | `/api/stats` | Platform-wide statistics |
+| GET | `/api/stats/daily` | Daily betting stats and MVP |
 | POST | `/api/analysis` | AI Oracle query (Gemini) |
 
 ---
@@ -344,6 +360,7 @@ Global user profiles with persistent point tracking and account recovery logic.
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | **user_id** (PK) | TEXT | Unique persistent identifier |
+| **short_id** (UQ) | TEXT | Public ID used for shareable profile URLs (/profile/:shortId) |
 | **points** | NUMERIC | Current balance (**100,000 floor enforced**) |
 | **peak_points** | NUMERIC | All-time highest balance achieved |
 | **daily_peak** | NUMERIC | Highest balance today (reset via GitHub Cron) |
