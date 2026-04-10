@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -27,6 +27,7 @@ jobs:
       - name: Run Vitest
         run: npm test
         env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
           NODE_ENV: test
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
           CORS_ORIGIN: "http://localhost:3000"
