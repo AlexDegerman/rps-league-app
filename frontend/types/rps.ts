@@ -40,8 +40,14 @@ export interface PredictionRecord {
   pick: string
   result?: 'WIN' | 'LOSE'
   confirmed: boolean
+  // Bet history fields (populated from DB, not from live SSE)
+  id?: number
+  betAmount?: string
+  gainLoss?: string
+  bonusTier?: string | null
+  bonusMultiplier?: number
+  createdAt?: number
 }
-
 export interface UserStats {
   joinedDate: string
   total: number

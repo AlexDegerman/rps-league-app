@@ -43,6 +43,8 @@ export const initDb = async (): Promise<void> => {
       bet_amount NUMERIC NOT NULL DEFAULT 0,
       result TEXT,
       gain_loss NUMERIC DEFAULT 0,
+      bonus_tier TEXT,
+      bonus_multiplier NUMERIC DEFAULT 0,
       created_at BIGINT NOT NULL,
       UNIQUE(user_id, game_id)
     )

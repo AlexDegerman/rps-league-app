@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { getUserStats, savePrediction } from '../services/predictionService.js'
+import { getPaginatedUserPredictions, getUserBiggestMultipliers, getUserBiggestWins, getUserStats, savePrediction } from '../services/predictionService.js'
 import pool from '../utils/db.js'
 
 const router = Router()
@@ -144,6 +144,20 @@ router.get('/:userId/stats', async (req, res) => {
   } catch (err) {
     console.error('Stats fetch error:', err)
     res.status(500).json({ error: 'Failed to fetch user stats' })
+  }
+})
+
+router.get('/user/:userId/history', async (req, res) => {
+  try {
+    const { userId } = req.params
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string) || 20
+    const sort = (req.query.sort as string) || 'recent'
+    res.json(
+      await getPaginatedUserPredictions(userId, page, limit, sort as any)
+    )
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch bet history' })
   }
 })
 

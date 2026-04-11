@@ -1,5 +1,5 @@
 import pool from '../utils/db.js'
-import { getOrCreateUser } from './userService.js';
+import { getOrCreateUser } from './userService.js'
 
 const POINTS_FLOOR = 100000n
 
@@ -163,8 +163,20 @@ export const resolvePrediction = async (
     }
 
     await pool.query(
-      `UPDATE predictions SET result = $1, gain_loss = $2 WHERE user_id = $3 AND game_id = $4`,
-      [result, gainLoss.toString(), row.user_id, row.game_id]
+      `UPDATE predictions 
+        SET result = $1, 
+            gain_loss = $2,
+            bonus_tier = $3,
+            bonus_multiplier = $4
+        WHERE user_id = $5 AND game_id = $6`,
+      [
+        result,
+        gainLoss.toString(),
+        bonus ? bonus.tier : null,
+        bonus ? Number(effectiveMult) : 0,
+        row.user_id,
+        row.game_id
+      ]
     )
 
     // Single UPDATE keeps all peak columns in sync atomically
@@ -216,12 +228,128 @@ export const resolvePrediction = async (
   }
 }
 
-export const getUserPredictions = async (userId: string) => {
-  const result = await pool.query(
-    `SELECT * FROM predictions WHERE user_id = $1 ORDER BY created_at DESC`,
-    [userId]
-  )
-  return result.rows
+export const getPaginatedUserPredictions = async (
+  userId: string,
+  page: number,
+  limit: number,
+  sort: 'recent' | 'wins' | 'multipliers' = 'recent'
+) => {
+  const offset = (page - 1) * limit
+
+  // Build separate queries per sort mode to avoid dynamic SQL injection issues
+  let dataQuery: string
+  let countQuery: string
+  const baseParams = [userId, limit, offset]
+  const countParams = [userId]
+
+  if (sort === 'wins') {
+    dataQuery = `
+      SELECT 
+        p.id,
+        p.game_id          AS "gameId",
+        p.pick,
+        p.bet_amount       AS "betAmount",
+        p.gain_loss        AS "gainLoss",
+        p.result,
+        p.bonus_tier       AS "bonusTier",
+        p.bonus_multiplier AS "bonusMultiplier",
+        p.created_at       AS "createdAt",
+        m.player_a_name,
+        m.player_a_played,
+        m.player_b_name,
+        m.player_b_played,
+        m.time,
+        m.type
+      FROM predictions p
+      LEFT JOIN matches m ON p.game_id = m.game_id
+      WHERE p.user_id = $1 AND p.result = 'WIN'
+      ORDER BY p.gain_loss DESC
+      LIMIT $2 OFFSET $3`
+    countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN'`
+  } else if (sort === 'multipliers') {
+    dataQuery = `
+      SELECT 
+        p.id,
+        p.game_id          AS "gameId",
+        p.pick,
+        p.bet_amount       AS "betAmount",
+        p.gain_loss        AS "gainLoss",
+        p.result,
+        p.bonus_tier       AS "bonusTier",
+        p.bonus_multiplier AS "bonusMultiplier",
+        p.created_at       AS "createdAt",
+        m.player_a_name,
+        m.player_a_played,
+        m.player_b_name,
+        m.player_b_played,
+        m.time,
+        m.type
+      FROM predictions p
+      LEFT JOIN matches m ON p.game_id = m.game_id
+      WHERE p.user_id = $1 AND p.result = 'WIN' AND p.bonus_multiplier > 0
+      ORDER BY p.bonus_multiplier DESC
+      LIMIT $2 OFFSET $3`
+    countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN' AND bonus_multiplier > 0`
+  } else {
+    dataQuery = `
+      SELECT 
+        p.id,
+        p.game_id          AS "gameId",
+        p.pick,
+        p.bet_amount       AS "betAmount",
+        p.gain_loss        AS "gainLoss",
+        p.result,
+        p.bonus_tier       AS "bonusTier",
+        p.bonus_multiplier AS "bonusMultiplier",
+        p.created_at       AS "createdAt",
+        m.player_a_name,
+        m.player_a_played,
+        m.player_b_name,
+        m.player_b_played,
+        m.time,
+        m.type
+      FROM predictions p
+      LEFT JOIN matches m ON p.game_id = m.game_id
+      WHERE p.user_id = $1 AND p.result IS NOT NULL
+      ORDER BY p.created_at DESC
+      LIMIT $2 OFFSET $3`
+    countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result IS NOT NULL`
+  }
+
+  const [data, count] = await Promise.all([
+    pool.query(dataQuery, baseParams),
+    pool.query(countQuery, countParams)
+  ])
+
+  const total = Number(count.rows[0].count)
+
+  const matches = data.rows.map((row) => ({
+    gameId: row.gameId,
+    time: Number(row.time),
+    type: row.type || 'GAME_RESULT',
+    playerA: {
+      name: row.player_a_name || 'Unknown',
+      played: row.player_a_played || 'ROCK'
+    },
+    playerB: {
+      name: row.player_b_name || 'Unknown',
+      played: row.player_b_played || 'SCISSORS'
+    }
+  }))
+
+  const predictions = data.rows.map((row) => ({
+    id: row.id,
+    gameId: row.gameId,
+    pick: row.pick,
+    betAmount: row.betAmount?.toString() ?? '0',
+    gainLoss: row.gainLoss?.toString() ?? '0',
+    result: row.result,
+    bonusTier: row.bonusTier ?? null,
+    bonusMultiplier: Number(row.bonusMultiplier ?? 0),
+    createdAt: Number(row.createdAt)
+  }))
+
+  return { matches, predictions, total, hasMore: offset + limit < total }
 }
 
 export const getUserStats = async (userId: string, shortId: string) => {
@@ -326,4 +454,60 @@ export const getGlobalBettingStats = async () => {
     total_volume: row.total_volume.toString(),
     winning_bets: Number(row.winning_bets)
   }
+}
+
+export const getUserBiggestWins = async (userId: string, limit = 5) => {
+  const result = await pool.query(
+    `SELECT 
+      p.game_id AS "gameId",
+      p.gain_loss AS "gainLoss",
+      p.bet_amount AS "betAmount",
+      p.bonus_tier AS "bonusTier",
+      p.bonus_multiplier AS "bonusMultiplier",
+      p.created_at AS "createdAt",
+      m.player_a_name, m.player_b_name
+    FROM predictions p
+    LEFT JOIN matches m ON p.game_id = m.game_id
+    WHERE p.user_id = $1 AND p.result = 'WIN'
+    ORDER BY p.gain_loss DESC
+    LIMIT $2`,
+    [userId, limit]
+  )
+  return result.rows.map((row) => ({
+    gameId: row.gameId,
+    gainLoss: row.gainLoss.toString(),
+    betAmount: row.betAmount.toString(),
+    bonusTier: row.bonusTier,
+    bonusMultiplier: Number(row.bonusMultiplier),
+    createdAt: Number(row.createdAt),
+    players: `${row.player_a_name} vs ${row.player_b_name}`
+  }))
+}
+
+export const getUserBiggestMultipliers = async (userId: string, limit = 5) => {
+  const result = await pool.query(
+    `SELECT 
+      p.game_id AS "gameId",
+      p.gain_loss AS "gainLoss",
+      p.bet_amount AS "betAmount",
+      p.bonus_tier AS "bonusTier",
+      p.bonus_multiplier AS "bonusMultiplier",
+      p.created_at AS "createdAt",
+      m.player_a_name, m.player_b_name
+    FROM predictions p
+    LEFT JOIN matches m ON p.game_id = m.game_id
+    WHERE p.user_id = $1 AND p.bonus_multiplier > 0
+    ORDER BY p.bonus_multiplier DESC
+    LIMIT $2`,
+    [userId, limit]
+  )
+  return result.rows.map((row) => ({
+    gameId: row.gameId,
+    gainLoss: row.gainLoss.toString(),
+    betAmount: row.betAmount.toString(),
+    bonusTier: row.bonusTier,
+    bonusMultiplier: Number(row.bonusMultiplier),
+    createdAt: Number(row.createdAt),
+    players: `${row.player_a_name} vs ${row.player_b_name}`
+  }))
 }

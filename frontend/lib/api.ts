@@ -56,6 +56,18 @@ export async function updateNickname(shortId: string, nickname: string) {
   })
 }
 
+export const fetchUserBetHistory = async (
+  userId: string,
+  page: number,
+  sort: 'recent' | 'wins' | 'multipliers' = 'recent'
+) => {
+  const res = await fetch(
+    `${API_BASE}/api/predictions/user/${userId}/history?page=${page}&limit=20&sort=${sort}`
+  )
+  if (!res.ok) throw new Error('Failed to fetch bet history')
+  return res.json()
+}
+
 /* --- AUTH & RECOVERY --- */
 
 export async function fetchRecoveryCode(userId: string) {

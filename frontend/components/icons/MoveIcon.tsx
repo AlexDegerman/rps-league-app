@@ -1,6 +1,7 @@
 interface MoveIconProps {
   move: string
   size?: number
+  className?: string
 }
 
 const RockIcon = () => (

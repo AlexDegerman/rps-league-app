@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getOrCreateUser, regenerateNickname } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { UserStats } from '@/types/rps'
 import { formatPoints, getAmountColor, getFullNumberName } from '@/lib/format'
 import {
@@ -13,7 +14,9 @@ import {
   fetchRecoveryCode,
   updateNickname,
   handleRecoverProfile,
+  fetchUserBetHistory
 } from '@/lib/api'
+import BetHistory from '@/components/BetHistory'
 
 interface Ranks {
   daily: number | null
@@ -26,14 +29,12 @@ export default function ProfilePage() {
   const router = useRouter()
   const targetShortId = params.shortId as string
 
-  // Identity
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [useK, setUseK] = useState(false)
 
-  // Stats & ranks
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [ranks, setRanks] = useState<Ranks>({
@@ -42,23 +43,21 @@ export default function ProfilePage() {
     allTime: null
   })
 
-  // UI state
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
 
-  // Owner-only: recovery
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null)
   const [codeRevealed, setCodeRevealed] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
 
-  // Owner-only: switch profile
   const [recoverInput, setRecoverInput] = useState('')
   const [recoverError, setRecoverError] = useState('')
   const [recoverLoading, setRecoverLoading] = useState(false)
   const [recoverConfirm, setRecoverConfirm] = useState(false)
 
-  // Owner-only: reset
   const [resetConfirm, setResetConfirm] = useState(false)
   const [resetError, setResetError] = useState('')
+
+  const [profileUserId, setProfileUserId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!targetShortId) return
@@ -72,7 +71,6 @@ export default function ProfilePage() {
     checkWidth()
     window.addEventListener('resize', checkWidth)
 
-    // Load profile
     const loadProfile = async () => {
       try {
         const profileData = await fetchUserProfile(targetShortId)
@@ -80,6 +78,7 @@ export default function ProfilePage() {
         if (profileData) {
           setNickname(profileData.nickname)
           setPoints(profileData.points)
+          setProfileUserId(profileData.userId)
           const statsData = await fetchUserStats(
             profileData.userId,
             targetShortId
@@ -93,6 +92,7 @@ export default function ProfilePage() {
           setPoints('200000')
           const local = getOrCreateUser()
           setNickname(local.nickname || 'New Player')
+          setProfileUserId(local.userId)
         }
       } finally {
         setStatsLoading(false)
@@ -129,9 +129,33 @@ export default function ProfilePage() {
       if (recoveryTimer) clearTimeout(recoveryTimer)
       window.removeEventListener('resize', checkWidth)
     }
-  }, [targetShortId]) // Linter is now happy because isOwnProfile isn't used inside anymore
+  }, [targetShortId])
 
-  // Owner actions
+  const fetchFn = useCallback(
+    async (page: number) => {
+      if (!profileUserId) return { matches: [], total: 0, hasMore: false }
+      const data = await fetchUserBetHistory(profileUserId, page)
+
+      return {
+        matches: data.matches,
+        total: data.total,
+        hasMore: data.hasMore
+      }
+    },
+    [profileUserId]
+  )
+
+  const {
+    matches,
+    isLoading: historyLoading,
+    loadMatches
+  } = useInfiniteScroll({ fetchFn, enabled: !!profileUserId })
+  
+  useEffect(() => {
+    if (profileUserId) {
+      loadMatches(1)
+    }
+  }, [profileUserId, loadMatches])
 
   const handleRegenerate = async () => {
     if (!isOwnProfile) return
@@ -224,8 +248,6 @@ export default function ProfilePage() {
     }, 50)
   }
 
-  // Render guards
-
   if (!mounted) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center animate-pulse">
@@ -240,9 +262,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-0 pb-10">
-      {/* Main profile card */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-10 mb-4 mt-0 transition-all">
-        {/* Identity + points header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-6 mb-4 sm:mb-10 relative">
           <div className="flex flex-col">
             <div className="flex items-center gap-3 mb-1 sm:mb-2 relative w-full">
@@ -250,7 +270,6 @@ export default function ProfilePage() {
                 {isOwnProfile ? 'Current Identity' : 'Player Identity'}
               </p>
 
-              {/* Only owner sees randomize */}
               {isOwnProfile && (
                 <button
                   onClick={handleRegenerate}
@@ -302,7 +321,6 @@ export default function ProfilePage() {
               </span>
             </div>
 
-            {/* Rank badges */}
             <div className="flex items-center gap-2.5 text-[10px] sm:text-[11px] font-black uppercase text-black">
               {(['daily', 'weekly', 'allTime'] as const).map((key, i) => (
                 <div key={key} className="flex items-center gap-1.5">
@@ -321,7 +339,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Stats grid */}
         {statsLoading ? (
           <div className="h-64 bg-gray-50 rounded-3xl animate-pulse" />
         ) : (
@@ -393,7 +410,6 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* Recovery code - owner only */}
         {isOwnProfile && (
           <div className="border-t border-gray-50 mt-8 pt-6">
             <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-2 ml-1">
@@ -431,10 +447,8 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Owner-only account actions*/}
       {isOwnProfile && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Switch profile */}
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
             <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-4 ml-1">
               Switch Profile
@@ -473,7 +487,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Danger zone */}
           <div className="bg-white rounded-3xl border border-red-50 shadow-sm p-6">
             <h2 className="text-[10px] font-black text-red-400/60 uppercase tracking-widest mb-4 ml-1">
               Danger Zone
@@ -495,11 +508,22 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">
+          Bet History
+        </h2>
+        {historyLoading && matches.length === 0 ? (
+          <p className="text-center text-gray-400 py-8 text-xs uppercase font-black tracking-widest">
+            Loading history...
+          </p>
+        ) : (
+          <BetHistory userId={profileUserId} />
+        )}
+      </div>
     </div>
   )
 }
-
-//Sub-components
 
 function StatSection({
   label,

@@ -64,6 +64,7 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
   - Other players
   - Demo traffic for continuous activity
 - Zero-friction onboarding with instant anonymous play (random nickname, no login)
+- User profiles with persistent identity system including unique shareable URLs, nickname randomization, recovery codes for account restoration, and full stats tracking (points, win rate, streaks, peak performance, and complete bet history with bonus and multiplier outcomes)
 
 ---
 
@@ -73,7 +74,6 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
 - Instant user creation with persistent ID and nickname
 - Massive Match History: Optimized to handle and query a dataset of 10,000+ matches.
 - Unified Ranking Engine: Dual leaderboards for Players and Predictors with deep-linkable URL state, supporting dynamic time-filtering (Daily/Weekly/All-Time) and multi-metric sorting (Points, Gained, Peak, Win Rate).
-- Player profiles with nickname randomization and recovery codes
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
@@ -379,7 +379,7 @@ Global user profiles with persistent point tracking and account recovery logic.
 
 ### `predictions`
 
-Tracks all user wagers. Composite constraints prevent multiple bets on the same game.
+Tracks all user wagers. Each user can place only one bet per game.
 
 | Column | Type | Description |
 | :--- | :--- | :--- |
@@ -388,8 +388,10 @@ Tracks all user wagers. Composite constraints prevent multiple bets on the same 
 | **game_id** | TEXT | Match ID (references `matches.game_id`) |
 | **pick** | TEXT | Chosen winner (`Player A` or `Player B`) |
 | **bet_amount** | NUMERIC | Points wagered |
-| **result** | TEXT | Outcome: `WIN`, `LOSE`, or `NULL` (if pending) |
-| **gain_loss** | NUMERIC | Net change (Win: +100% / Loss: -50% of bet) |
+| **result** | TEXT | Outcome: `WIN`, `LOSE`, or `NULL` (pending) |
+| **gain_loss** | NUMERIC | Net change after resolution |
+| **bonus_tier** | TEXT | Bonus tier applied to the bet (if any) |
+| **bonus_multiplier** | NUMERIC | Multiplier applied to winnings (e.g. 5x, 10x) |
 | **created_at** | BIGINT | Timestamp for volume and daily stats |
 
 ---
