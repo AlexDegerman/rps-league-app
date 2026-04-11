@@ -226,6 +226,12 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/live` | SSE stream for live match events |
+
+---
+
+### Matches
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | GET | `/api/matches/pending` | Active pending match |
 | GET | `/api/matches` | Paginated match history |
 | GET | `/api/matches/by-date` | Matches filtered by date |
@@ -240,7 +246,7 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 |--------|----------|-------------|
 | GET | `/api/leaderboard/today` | Today's player leaderboard |
 | GET | `/api/leaderboard/historical` | Historical player leaderboard |
-| GET | `/api/leaderboard/unified?tab=[period]&sort=[metric]` | Unified leaderboard with filters and sorting |
+| GET | `/api/leaderboard/unified?tab=[period]&sort=[metric]&dir=[asc|desc]` | Unified leaderboard with filtering, sorting, and direction control |
 
 ---
 
@@ -249,6 +255,7 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 |--------|----------|-------------|
 | POST | `/api/users/recover` | Recover user profile using recovery code |
 | POST | `/api/users/update-nickname` | Update user nickname |
+| POST | `/api/users/update-linkedin` | Set LinkedIn URL and badge visibility |
 | GET | `/api/users/profile/:shortId` | Fetch full user profile |
 | GET | `/api/users/recovery/:userId` | Get recovery code |
 | GET | `/api/users/check-name/:nickname` | Check nickname availability |
@@ -260,6 +267,8 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/predictions` | Submit a prediction |
+| GET | `/api/predictions/:userId/stats` | Get user prediction statistics |
+| GET | `/api/predictions/user/:userId/history` | Get paginated user prediction history |
 
 ---
 
@@ -276,7 +285,7 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 |--------|----------|-------------|
 | GET | `/api/stats` | Platform-wide statistics |
 | GET | `/api/stats/daily` | Daily betting stats and MVP |
-| POST | `/api/analysis` | AI Oracle query (Gemini) |
+| POST | `/api/analysis` | AI Oracle query (Gemini-powered insights) |
 
 ---
 
@@ -360,13 +369,13 @@ Global user profiles with persistent point tracking and account recovery logic.
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | **user_id** (PK) | TEXT | Unique persistent identifier |
-| **short_id** (UQ) | TEXT | Public ID used for shareable profile URLs (/profile/:shortId) |
+| **short_id** (UQ) | TEXT | Public ID used for shareable profile URLs (`/profile/:shortId`). Guaranteed unique |
 | **points** | NUMERIC | Current balance (**100,000 floor enforced**) |
 | **peak_points** | NUMERIC | All-time highest balance achieved |
 | **daily_peak** | NUMERIC | Highest balance today (reset via GitHub Cron) |
 | **weekly_peak** | NUMERIC | Highest balance this week (reset via GitHub Cron) |
 | **nickname** | TEXT | Auto-generated display name (adjective + color + animal) |
-| **recovery_code** | TEXT (UQ) | Unique slug for account recovery (e.g., `swift-tiger-1234`) |
+| **recovery_code** (UQ) | TEXT | Unique slug for account recovery (e.g., `swift-tiger-1234`) |
 | **total_volume** | NUMERIC | Total cumulative points risked across all bets |
 | **biggest_win** | NUMERIC | Single largest point gain from a single prediction |
 | **current_win_streak** | INTEGER | Current number of consecutive wins |
@@ -374,6 +383,8 @@ Global user profiles with persistent point tracking and account recovery logic.
 | **bonus_pity_count** | INTEGER | Consecutive bets without a bonus (Bad Luck Protection) |
 | **total_pities_earned** | INTEGER | Total times the natural pity limit (4) was reached |
 | **joined_date** | BIGINT | Unix timestamp (ms) of when the profile was first created |
+| **linkedin_url** | TEXT | Optional LinkedIn profile URL |
+| **badge_setting** | TEXT | Determines whether the user’s LinkedIn badge is displayed on the leaderboard |
 
 ---
 
@@ -396,12 +407,17 @@ Tracks all user wagers. Each user can place only one bet per game.
 
 ---
 
-**Relationships:**
+### Relationships
 
-- `predictions.user_id` → `users.user_id`  
+- `predictions.user_id` → `users.user_id`
 - `predictions.game_id` → `matches.game_id`
 
 ---
+
+### Notes
+
+- `short_id` is a unique public identifier, but not used as a foreign key
+- All internal relationships rely on `user_id` for consistency
 
 ## 📱 Device Compatibility
 

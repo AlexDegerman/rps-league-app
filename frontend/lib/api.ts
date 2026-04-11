@@ -49,14 +49,14 @@ export async function fetchUserPoints(userId: string, shortId: string, nickname?
 }
 
 export async function updateNickname(
-  shortId: string,
-  nickname: string,
-  userId: string
+  userId: string,
+  newNickname: string,
+  shortId: string
 ) {
   return fetch(`${API_BASE}/api/users/update-nickname`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ shortId, nickname, userId })
+    body: JSON.stringify({ userId, nickname: newNickname, shortId })
   })
 }
 

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
-import { getOrCreateUser } from '@/lib/user'
+import { getOrCreateUser, isUserValid } from '@/lib/user'
 import { fetchUserPoints } from '@/lib/api'
 
 const Header = () => {
@@ -15,14 +15,12 @@ const Header = () => {
 
   useEffect(() => {
     const user = getOrCreateUser()
-    if (user?.shortId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setProfileHref(`/profile/${user.shortId}`)
-    }
-    // Ensure DB row exists regardless of which page user lands on
-    if (user.userId && user.shortId) {
-      fetchUserPoints(user.userId, user.shortId, user.nickname).catch(() => {})
-    }
+
+    if (!isUserValid(user)) return
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProfileHref(`/profile/${user.shortId}`)
+    fetchUserPoints(user.userId, user.shortId, user.nickname).catch(() => {})
   }, [])
   
   const allNavItems = [

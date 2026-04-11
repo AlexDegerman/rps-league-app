@@ -256,6 +256,11 @@ function LeaderboardContent() {
                                   size="sm"
                                 />
                               )}
+                              {entry.shortId === 'Hqo7qUSe38' && (
+                                <span className="mt-1 self-start text-[8px] px-2 py-0.5 bg-gray-900 text-white rounded-full font-black uppercase tracking-wider">
+                                  Dev
+                                </span>
+                              )}
                             </div>
 
                             {/* Mobile stats grid — hidden at 600px+ where the table columns take over */}

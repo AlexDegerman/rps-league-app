@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { getOrCreateUser, regenerateNickname } from '@/lib/user'
+import { clearUserCache, getOrCreateUser, regenerateNickname, resetUser } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { UserStats } from '@/types/rps'
@@ -179,11 +179,13 @@ export default function ProfilePage() {
     while (attempts < 10) {
       newNickname = regenerateNickname()
       attempts++
+
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/users/check-name/${newNickname}`
         )
         const data = await res.json()
+
         if (data.available) break
       } catch {
         break
@@ -194,7 +196,7 @@ export default function ProfilePage() {
     localStorage.setItem('rps_nickname', newNickname)
 
     try {
-      await updateNickname(targetShortId, newNickname, user.userId)
+      await updateNickname(user.userId, newNickname, user.shortId)
     } catch (err) {
       console.error('Failed to sync nickname:', err)
     }
@@ -207,26 +209,36 @@ export default function ProfilePage() {
 
     try {
       const data = await handleRecoverProfile(recoverInput.trim())
+
       if (!data) {
         setRecoverError('Invalid recovery code')
         return
       }
+
       localStorage.setItem('rps_user_id', data.userId)
       localStorage.setItem('rps_short_id', data.shortId)
-      if (data.nickname) localStorage.setItem('rps_nickname', data.nickname)
-      router.push(`/profile/${data.shortId}`)
+
+      if (data.nickname) {
+        localStorage.setItem('rps_nickname', data.nickname)
+      }
+
+      clearUserCache()
+
+      const freshUser = getOrCreateUser()
+
+      router.push(`/profile/${freshUser.shortId}`)
     } catch {
       setRecoverError('Failed to recover profile')
     } finally {
       setRecoverLoading(false)
     }
   }
-
   const handleResetProfile = async () => {
     const now = Date.now()
     const oneHour = 60 * 60 * 1000
 
     let timestamps: number[] = []
+
     try {
       const stored = localStorage.getItem('rps_restart_timestamps')
       if (stored) timestamps = JSON.parse(stored)
@@ -235,6 +247,7 @@ export default function ProfilePage() {
     }
 
     timestamps = timestamps.filter((t) => now - t < oneHour)
+
     if (timestamps.length >= 3) {
       const waitMin = Math.ceil((oneHour - (now - timestamps[0])) / 60000)
       setResetError(`Rate limit reached. Wait ${waitMin}m.`)
@@ -244,22 +257,24 @@ export default function ProfilePage() {
     timestamps.push(now)
     localStorage.setItem('rps_restart_timestamps', JSON.stringify(timestamps))
 
-    localStorage.removeItem('rps_user_id')
-    localStorage.removeItem('rps_short_id')
-    localStorage.removeItem('rps_nickname')
-    localStorage.removeItem('autoAllIn')
-
-    const newUser = getOrCreateUser()
-
     try {
-      await updateNickname(newUser.shortId, newUser.nickname, newUser.userId)
-    } catch {
-      console.error('Initial sync failed')
-    }
+      setResetError('')
+      resetUser()
+      const newUser = getOrCreateUser()
 
-    setTimeout(() => {
+      try {
+        await updateNickname(newUser.userId, newUser.nickname, newUser.shortId)
+      } catch {
+        console.error('Initial sync failed')
+      }
+
+      await new Promise((res) => setTimeout(res, 0))
+
       window.location.href = `/profile/${newUser.shortId}`
-    }, 50)
+    } catch (err) {
+      console.error(err)
+      setResetError('Failed to reset profile. Please try again.')
+    }
   }
 
   if (!mounted) {
@@ -307,6 +322,12 @@ export default function ProfilePage() {
             <p className="text-[1.5rem] sm:text-[clamp(1.25rem,5vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tight">
               {nickname}
             </p>
+            {/* Dev badge — hardcoded to your shortId */}
+            {targetShortId === 'Hqo7qUSe38' && (
+              <span className="mt-1 self-start text-[8px] px-2 py-0.5 bg-gray-900 text-white rounded-full font-black uppercase tracking-wider">
+                Dev
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col sm:items-end gap-2 relative">
@@ -354,7 +375,15 @@ export default function ProfilePage() {
         </div>
 
         {statsLoading ? (
-          <div className="h-64 bg-gray-50 rounded-3xl animate-pulse" />
+          <div className="h-100 flex flex-col items-center justify-center bg-gray-50/30 rounded-3xl border border-dashed border-gray-100">
+            <div className="relative">
+              <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse" />
+              <div className="w-10 h-10 border-4 border-gray-100 border-t-indigo-600 rounded-full animate-spin relative z-10" />
+            </div>
+            <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600/50 animate-pulse">
+              Loading stats...
+            </p>
+          </div>
         ) : (
           <div className="flex flex-col gap-5 sm:gap-8">
             <StatSection label="Records">

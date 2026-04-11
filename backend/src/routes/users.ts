@@ -36,22 +36,24 @@ router.post('/recover', async (req, res) => {
 
 // POST /api/users/update-nickname
 router.post('/update-nickname', async (req, res) => {
-  const { shortId, nickname, userId } = req.body
-  
+  const { userId, nickname, shortId } = req.body
+
   try {
     const result = await pool.query(
-      `INSERT INTO users (user_id, short_id, nickname, points) 
-        VALUES ($1, $2, $3, '200000') 
-        ON CONFLICT (short_id) 
-        DO UPDATE SET nickname = EXCLUDED.nickname 
+      `INSERT INTO users (user_id, short_id, nickname, points, peak_points) 
+        VALUES ($1, $2, $3, 200000, 200000) 
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          nickname = EXCLUDED.nickname,
+          short_id = COALESCE(users.short_id, EXCLUDED.short_id)
         RETURNING nickname`,
       [userId, shortId, nickname]
     )
 
     res.json({ ok: true, nickname: result.rows[0].nickname })
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Database error' })
+    console.error('Update Nickname/UPSERT Error:', err)
+    res.status(500).json({ error: 'Internal server error' })
   }
 })
 
