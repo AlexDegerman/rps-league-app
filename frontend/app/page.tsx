@@ -426,14 +426,7 @@ export default function HomePage() {
     showPointsExplainer && numberName && numberName !== 'Points'
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 pb-24">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
-        Latest Matches
-      </h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Live results from the RPS League
-      </p>
-
+    <div className="max-w-2xl mx-auto px-4 pb-24">
       {/* Result Animation Overlay */}
       {resultAnim && (
         <div className="fixed top-91  left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center w-full max-w-md">
@@ -512,8 +505,8 @@ export default function HomePage() {
       )}
 
       {/* Main Controls Container */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-2 overflow-hidden">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative group flex items-center">
               <div
@@ -581,7 +574,7 @@ export default function HomePage() {
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-1">
           <div className="flex items-center gap-2 flex-1">
             <label className="text-xs font-bold text-gray-400 uppercase shrink-0">
               Bet
@@ -628,14 +621,14 @@ export default function HomePage() {
                 setBetAmount(points)
                 setInputString(points.toString())
               }}
-              className="flex-1 sm:flex-none px-4 py-2.5 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 active:scale-95 transition-all shadow-sm"
+              className="flex-1 sm:flex-none px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 active:scale-95 transition-all shadow-sm"
             >
               ALL IN
             </button>
             <div className="relative flex-1 sm:flex-none flex">
               <button
                 onClick={() => setAutoAllIn((prev) => !prev)}
-                className={`flex-1 w-full sm:w-auto px-3 py-2.5 text-[10px] font-bold rounded-lg border transition-all ${autoAllIn ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
+                className={`flex-1 w-full sm:w-auto px-3 py-2 text-[10px] font-bold rounded-lg border transition-all ${autoAllIn ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
               >
                 AUTO {autoAllIn ? 'ON' : 'OFF'}
               </button>
@@ -769,7 +762,7 @@ export default function HomePage() {
         ) : (
           <>
             {showConnectionWarning && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
                 <div className="w-2 h-2 bg-red-500 rounded-full" />
                 <p className="text-xs font-bold text-red-900 uppercase">
                   {isOffline

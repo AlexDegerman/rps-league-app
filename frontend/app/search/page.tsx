@@ -124,10 +124,6 @@ function SearchContent() {
 
   return (
     <div className="max-w-2xl mx-auto px-4">
-      <div className="py-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">Search</h1>
-        <p className="text-gray-500">Find matches by date or player</p>
-      </div>
 
       <div className="sticky top-16 z-40 bg-gray-100 pb-4">
         <div className="flex gap-2 mb-4">

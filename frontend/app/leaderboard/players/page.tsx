@@ -88,11 +88,6 @@ function PlayerLeaderboardContent() {
 
   return (
     <div className="max-w-4xl mx-auto px-4">
-      <div className="py-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">Leaderboard</h1>
-        <p className="text-gray-500 text-sm">RPS player standings by wins</p>
-      </div>
-
       <div className="flex gap-2 mb-4">
         <Link
           href="/leaderboard"

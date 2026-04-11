@@ -219,7 +219,7 @@ export default function PredictionTicker() {
     )
 
   return (
-    <div className="fixed bottom-8 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-12">
+    <div className="fixed bottom-8 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-8">
       <div className="w-full flex items-center gap-3">
         <span className="text-[10px] font-black text-gray-400 shrink-0 uppercase tracking-widest flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />

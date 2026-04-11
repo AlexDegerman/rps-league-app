@@ -98,9 +98,9 @@ export default function AnalysisPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      <div className="text-center mb-10">
-        <div className="flex items-center justify-center gap-1 mb-4">
+    <div className="max-w-2xl mx-auto px-4">
+      <div className="text-center">
+        <div className="flex items-center justify-center gap-1 mb-2">
           <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold uppercase tracking-widest">
             Powered by Gemini 1.5
           </span>
@@ -132,8 +132,7 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        <h1 className="text-4xl font-black text-gray-900 mb-2">The Oracle</h1>
-        <p className="text-gray-500">Real-time betting telemetry & player analysis.</p>
+        <h1 className="text-3xl font-black text-gray-900 mb-2">The Oracle</h1>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-8 justify-center">

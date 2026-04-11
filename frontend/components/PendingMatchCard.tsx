@@ -41,13 +41,13 @@ export default function PendingMatchCard({
   const canPick = timeLeft > 0 && !prediction
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-indigo-200 p-3 sm:p-4 mb-3 animate-in fade-in zoom-in duration-300">
-      <div className="flex justify-between items-center mb-4 gap-2">
+    <div className="bg-white rounded-lg shadow-sm border border-indigo-200 p-2 sm:p-4 mb-3 animate-in fade-in zoom-in duration-300">
+      <div className="flex justify-between items-center gap-2">
         <span className="text-xs text-gray-400 shrink-0">
           {formatDateTime(pending.time)}
         </span>
         <span
-          className={`text-[13px] font-black px-3 py-1.5 rounded-md shrink-0 transition-colors min-w-18.75 text-center shadow-sm ${
+          className={`text-[13px] font-black px-3 py-1 rounded-md shrink-0 transition-colors min-w-18.75 text-center shadow-sm ${
             timeLeft > 0
               ? timeLeft <= 2
                 ? 'bg-red-500 text-white animate-pulse'
@@ -62,13 +62,13 @@ export default function PendingMatchCard({
       <div className="flex items-start justify-between gap-0.5 sm:gap-3">
         {/* Left Side Column */}
         <div className="flex flex-col items-center flex-1 gap-2">
-          <span className="font-bold text-sm text-gray-800 text-center leading-tight min-h-10 flex items-center">
+          <span className="font-bold text-sm text-gray-800 text-center leading-tight min-h-7 flex items-center">
             {pending.playerA}
           </span>
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerA)}
-              className="w-full py-3.5 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 active:scale-95 shadow-sm"
+              className="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 active:scale-95 shadow-sm"
             >
               BET
             </button>
@@ -98,13 +98,13 @@ export default function PendingMatchCard({
 
         {/* Right Side Column */}
         <div className="flex flex-col items-center flex-1 gap-2">
-          <span className="font-bold text-sm text-gray-800 text-center leading-tight min-h-10 flex items-center">
+          <span className="font-bold text-sm text-gray-800 text-center leading-tight min-h-7 flex items-center">
             {pending.playerB}
           </span>
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerB)}
-              className="w-full py-3.5 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 active:scale-95 shadow-sm"
+              className="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-sm hover:bg-indigo-700 active:scale-95 shadow-sm"
             >
               BET
             </button>
