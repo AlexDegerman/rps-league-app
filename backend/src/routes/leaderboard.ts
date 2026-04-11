@@ -56,6 +56,8 @@ router.get('/unified', async (req, res) => {
         u.nickname,
         u.short_id,
         u.points,
+        u.linkedin_url,
+        u.show_linkedin_badge,
         ${peakColumn} AS peak_points,
         COALESCE(SUM(p.gain_loss) FILTER (WHERE p.gain_loss > 0 ${hasPeriod ? 'AND p.created_at >= $1' : ''}), 0) AS gained,
         COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS wins,
@@ -65,7 +67,7 @@ router.get('/unified', async (req, res) => {
             COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
             COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''})
           ) > 0
-          Then ROUND(
+          THEN ROUND(
             COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''})::numeric /
             (
               COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
@@ -81,7 +83,9 @@ router.get('/unified', async (req, res) => {
         WHERE p2.user_id = u.user_id
         ${hasPeriod ? 'AND p2.created_at >= $1' : ''}
       )
-      GROUP BY u.user_id, u.nickname, u.short_id, u.points, u.peak_points, u.daily_peak, u.weekly_peak
+      GROUP BY u.user_id, u.nickname, u.short_id, u.points,
+              u.peak_points, u.daily_peak, u.weekly_peak,
+              u.linkedin_url, u.show_linkedin_badge
       ORDER BY ${sortKey} ${dir}, u.nickname ASC
       LIMIT 100
     `,
@@ -97,7 +101,9 @@ router.get('/unified', async (req, res) => {
       gained: row.gained.toString(),
       wins: Number(row.wins),
       losses: Number(row.losses),
-      winRate: Number(row.win_rate)
+      winRate: Number(row.win_rate),
+      // Only expose LinkedIn URL if user has opted in to show badge publicly
+      linkedinUrl: row.show_linkedin_badge ? (row.linkedin_url ?? null) : null
     }))
 
     res.json(sanitizedRows)

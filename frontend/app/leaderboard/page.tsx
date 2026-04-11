@@ -10,6 +10,7 @@ import { getUserId } from '@/lib/user'
 import { formatPoints, getAmountColor } from '@/lib/format'
 import Link from 'next/link'
 import { LeaderboardEntry } from '@/types/rps'
+import { LinkedInBadge } from '@/components/LinkedInBadge'
 
 type Tab = 'daily' | 'weekly' | 'alltime'
 type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
@@ -233,7 +234,7 @@ function LeaderboardContent() {
 
                         <td className="px-3 py-3">
                           <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <Link
                                 href={`/profile/${entry.shortId}`}
                                 className={`font-medium transition hover:underline decoration-purple-400 underline-offset-4 text-current! ${
@@ -248,6 +249,12 @@ function LeaderboardContent() {
                                 <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase">
                                   YOU
                                 </span>
+                              )}
+                              {entry.linkedinUrl && (
+                                <LinkedInBadge
+                                  url={entry.linkedinUrl}
+                                  size="sm"
+                                />
                               )}
                             </div>
 

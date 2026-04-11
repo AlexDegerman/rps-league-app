@@ -87,6 +87,7 @@ export interface LeaderboardEntry {
   wins: number
   losses: number
   winRate: number
+  linkedinUrl: string | null
 }
 
 export interface ProfileData {
@@ -94,10 +95,11 @@ export interface ProfileData {
   shortId: string
   nickname: string
   points: string
-  peakPoints: string
   biggestWin: string
   maxWinStreak: number
   joinedDate: number
+  linkedinUrl: string | null
+  showLinkedinBadge: boolean
 }
 
 export interface RecoverResponse {

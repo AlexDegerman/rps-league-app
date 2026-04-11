@@ -14,9 +14,11 @@ import {
   fetchRecoveryCode,
   updateNickname,
   handleRecoverProfile,
-  fetchUserBetHistory
+  fetchUserBetHistory,
+  updateLinkedin
 } from '@/lib/api'
 import BetHistory from '@/components/BetHistory'
+import { LinkedInBadge } from '@/components/LinkedInBadge'
 
 interface Ranks {
   daily: number | null
@@ -59,6 +61,12 @@ export default function ProfilePage() {
 
   const [profileUserId, setProfileUserId] = useState<string | null>(null)
 
+  const [linkedinUrl, setLinkedinUrl] = useState<string | null>(null)
+  const [showLinkedinBadge, setShowLinkedinBadge] = useState(true)
+  const [linkedinInput, setLinkedinInput] = useState('')
+  const [linkedinSaved, setLinkedinSaved] = useState(false)
+  const [linkedinError, setLinkedinError] = useState('')
+
   useEffect(() => {
     if (!targetShortId) return
 
@@ -84,6 +92,9 @@ export default function ProfilePage() {
             targetShortId
           )
           if (statsData) setStats(statsData)
+            setLinkedinUrl(profileData.linkedinUrl)
+            setShowLinkedinBadge(profileData.showLinkedinBadge ?? true)
+            setLinkedinInput(profileData.linkedinUrl ?? '')
         }
       } catch (err) {
         console.error('Profile load error:', err)
@@ -409,6 +420,112 @@ export default function ProfilePage() {
             </StatSection>
           </div>
         )}
+
+        {/* LinkedIn section */}
+        <div className="border-t border-gray-50 mt-8 pt-6">
+          <div className="flex items-center gap-2 mb-3 ml-1">
+            <p className="text-[10px] uppercase font-black tracking-widest text-black/40">
+              LinkedIn
+            </p>
+            {!isOwnProfile && linkedinUrl && (
+              <span className="text-[8px] text-amber-500 font-bold uppercase tracking-wide">
+                ⚠ Unverified
+              </span>
+            )}
+          </div>
+
+          {isOwnProfile ? (
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={linkedinInput}
+                  onChange={(e) => {
+                    setLinkedinInput(e.target.value)
+                    setLinkedinSaved(false)
+                    setLinkedinError('')
+                  }}
+                  placeholder="https://linkedin.com/in/yourname"
+                  className="flex-1 bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2.5 text-[11px] font-mono focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none"
+                />
+                <button
+                  onClick={async () => {
+                    let url = linkedinInput.trim()
+                    if (
+                      url &&
+                      !url.startsWith('http://') &&
+                      !url.startsWith('https://')
+                    ) {
+                      url = `https://${url}`
+                      setLinkedinInput(url)
+                    }
+                    if (url && !url.includes('linkedin.com')) {
+                      setLinkedinError('Must be a linkedin.com URL')
+                      return
+                    }
+                    try {
+                      await updateLinkedin(
+                        targetShortId,
+                        url || null,
+                        showLinkedinBadge
+                      )
+                      setLinkedinUrl(url || null)
+                      setLinkedinSaved(true)
+                      setTimeout(() => setLinkedinSaved(false), 2000)
+                    } catch {
+                      setLinkedinError('Failed to save')
+                    }
+                  }}
+                  className="text-[10px] px-4 py-2.5 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-sm whitespace-nowrap"
+                >
+                  {linkedinSaved ? 'Saved!' : 'Save'}
+                </button>
+              </div>
+
+              {linkedinError && (
+                <p className="text-red-500 text-[10px] ml-1 uppercase font-black">
+                  {linkedinError}
+                </p>
+              )}
+
+              <label className="flex items-center gap-3 ml-1 cursor-pointer select-none">
+                <div
+                  onClick={() => {
+                    const next = !showLinkedinBadge
+                    setShowLinkedinBadge(next)
+                    updateLinkedin(
+                      targetShortId,
+                      linkedinInput.trim() || null,
+                      next
+                    )
+                  }}
+                  className={`relative w-8 h-4 rounded-full transition-colors ${showLinkedinBadge ? 'bg-[#0A66C2]' : 'bg-gray-200'}`}
+                >
+                  <div
+                    className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${showLinkedinBadge ? 'translate-x-4' : 'translate-x-0.5'}`}
+                  />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                  Show LinkedIn badge publicly
+                </span>
+              </label>
+
+              {linkedinUrl && showLinkedinBadge && (
+                <div className="ml-1">
+                  <LinkedInBadge url={linkedinUrl} size="md" />
+                </div>
+              )}
+            </div>
+          ) : linkedinUrl ? (
+            <div className="flex items-center gap-2 ml-1">
+              <LinkedInBadge url={linkedinUrl} size="md" />
+            </div>
+          ) : (
+            <p className="text-[10px] text-gray-300 ml-1 font-bold">
+              No LinkedIn linked
+            </p>
+          )}
+        </div>
 
         {isOwnProfile && (
           <div className="border-t border-gray-50 mt-8 pt-6">

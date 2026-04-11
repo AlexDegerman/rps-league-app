@@ -68,6 +68,18 @@ export const fetchUserBetHistory = async (
   return res.json()
 }
 
+export async function updateLinkedin(
+  shortId: string,
+  linkedinUrl: string | null,
+  showLinkedinBadge: boolean
+) {
+  return fetch(`${API_BASE}/api/users/update-linkedin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ shortId, linkedinUrl, showLinkedinBadge })
+  })
+}
+
 /* --- AUTH & RECOVERY --- */
 
 export async function fetchRecoveryCode(userId: string) {

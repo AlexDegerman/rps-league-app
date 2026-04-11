@@ -30,7 +30,9 @@ export const initDb = async (): Promise<void> => {
       max_win_streak INTEGER NOT NULL DEFAULT 0,
       bonus_pity_count INTEGER DEFAULT 0,
       total_pities_earned INTEGER DEFAULT 0,
-      joined_date BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT
+      joined_date BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT,
+      linkedin_url TEXT,
+      show_linkedin_badge BOOLEAN DEFAULT true
     )
   `)
 

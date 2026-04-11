@@ -46,38 +46,78 @@ router.post('/update-nickname', async (req, res) => {
   res.json({ ok: true, nickname: result.rows[0].nickname })
 })
 
-// Add this to your usersRouter (the one mounted at /api/users)
+// POST /api/users/update-linkedin
+router.post('/update-linkedin', async (req, res) => {
+  try {
+    const { shortId, linkedinUrl, showLinkedinBadge } = req.body
+    if (!shortId) return res.status(400).json({ error: 'shortId required' })
+
+    // Normalize URL — add https:// if missing protocol
+    let normalizedUrl = linkedinUrl?.trim() || null
+    if (
+      normalizedUrl &&
+      !normalizedUrl.startsWith('http://') &&
+      !normalizedUrl.startsWith('https://')
+    ) {
+      normalizedUrl = `https://${normalizedUrl}`
+    }
+
+    // Validate it's actually a LinkedIn URL
+    if (normalizedUrl && !normalizedUrl.includes('linkedin.com')) {
+      return res.status(400).json({ error: 'Must be a LinkedIn URL' })
+    }
+
+    await pool.query(
+      `UPDATE users SET linkedin_url = $1, show_linkedin_badge = $2 WHERE short_id = $3`,
+      [normalizedUrl, showLinkedinBadge ?? true, shortId]
+    )
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update LinkedIn' })
+  }
+})
 
 // GET /api/users/profile/:shortId
 router.get('/profile/:shortId', async (req, res) => {
   try {
-    const { shortId } = req.params;
+    const { shortId } = req.params
 
     const result = await pool.query(
-      `SELECT user_id, short_id, nickname, points, peak_points, daily_peak, weekly_peak 
-        FROM users 
-        WHERE short_id = $1`,
+      `SELECT 
+        user_id,
+        short_id,
+        nickname,
+        points,
+        biggest_win,
+        max_win_streak,
+        joined_date,
+        linkedin_url,
+        show_linkedin_badge
+      FROM users 
+      WHERE short_id = $1`,
       [shortId]
     )
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Profile not found' });
+      return res.status(404).json({ error: 'Profile not found' })
     }
 
-    const user = result.rows[0];
+    const user = result.rows[0]
 
     res.json({
       userId: user.user_id,
       shortId: user.short_id,
       nickname: user.nickname,
       points: user.points.toString(),
-      peakPoints: user.peak_points.toString(),
-      dailyPeak: user.daily_peak.toString(),
-      weeklyPeak: user.weekly_peak.toString()
+      biggestWin: user.biggest_win?.toString() ?? '0',
+      maxWinStreak: user.max_win_streak ?? 0,
+      joinedDate: user.joined_date ?? null,
+      linkedinUrl: user.linkedin_url ?? null,
+      showLinkedinBadge: user.show_linkedin_badge ?? true
     })
   } catch (err) {
-    console.error('Profile fetch error:', err);
-    res.status(500).json({ error: 'Failed to fetch profile' });
+    console.error('Profile fetch error:', err)
+    res.status(500).json({ error: 'Failed to fetch profile' })
   }
 })
 
