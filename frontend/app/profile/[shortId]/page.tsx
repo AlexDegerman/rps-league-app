@@ -173,6 +173,9 @@ export default function ProfilePage() {
 
     let newNickname = ''
     let attempts = 0
+
+    const user = getOrCreateUser()
+
     while (attempts < 10) {
       newNickname = regenerateNickname()
       attempts++
@@ -191,7 +194,7 @@ export default function ProfilePage() {
     localStorage.setItem('rps_nickname', newNickname)
 
     try {
-      await updateNickname(targetShortId, newNickname)
+      await updateNickname(targetShortId, newNickname, user.userId)
     } catch (err) {
       console.error('Failed to sync nickname:', err)
     }
@@ -249,9 +252,9 @@ export default function ProfilePage() {
     const newUser = getOrCreateUser()
 
     try {
-      await updateNickname(newUser.shortId, newUser.nickname)
+      await updateNickname(newUser.shortId, newUser.nickname, newUser.userId)
     } catch {
-      console.error('Silent sync failed, will retry on first bet')
+      console.error('Initial sync failed')
     }
 
     setTimeout(() => {

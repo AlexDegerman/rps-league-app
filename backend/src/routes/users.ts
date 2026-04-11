@@ -36,14 +36,23 @@ router.post('/recover', async (req, res) => {
 
 // POST /api/users/update-nickname
 router.post('/update-nickname', async (req, res) => {
-  const { shortId, nickname } = req.body
-  const result = await pool.query(
-    'UPDATE users SET nickname = $1 WHERE short_id = $2 RETURNING nickname',
-    [nickname, shortId]
-  )
-  if (result.rowCount === 0)
-    return res.status(404).json({ error: 'User not found' })
-  res.json({ ok: true, nickname: result.rows[0].nickname })
+  const { shortId, nickname, userId } = req.body
+  
+  try {
+    const result = await pool.query(
+      `INSERT INTO users (user_id, short_id, nickname, points) 
+        VALUES ($1, $2, $3, '200000') 
+        ON CONFLICT (short_id) 
+        DO UPDATE SET nickname = EXCLUDED.nickname 
+        RETURNING nickname`,
+      [userId, shortId, nickname]
+    )
+
+    res.json({ ok: true, nickname: result.rows[0].nickname })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Database error' })
+  }
 })
 
 // POST /api/users/update-linkedin

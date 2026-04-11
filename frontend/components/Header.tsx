@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { getOrCreateUser } from '@/lib/user'
+import { fetchUserPoints } from '@/lib/api'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -18,8 +19,12 @@ const Header = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setProfileHref(`/profile/${user.shortId}`)
     }
+    // Ensure DB row exists regardless of which page user lands on
+    if (user.userId && user.shortId) {
+      fetchUserPoints(user.userId, user.shortId, user.nickname).catch(() => {})
+    }
   }, [])
-
+  
   const allNavItems = [
     { label: 'Live', href: '/' },
     { label: 'Leaderboard', href: '/leaderboard' },

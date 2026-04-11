@@ -168,10 +168,8 @@ export default function HomePage() {
         const p = BigInt(data.points)
         setPoints(p)
         setPeakPoints(BigInt(data.peakPoints))
-
         const initialBet = autoAllInRef.current ? p : p < 100000n ? p : 100000n
         setBetAmount(initialBet)
-
         if (!isFocused) setInputString(initialBet.toString())
         setPointsLoaded(true)
       })
@@ -188,7 +186,6 @@ export default function HomePage() {
     fetchPendingMatches()
       .then((data) => {
         if (!data) return
-
         setPendingMatches((prev) => {
           const existingIds = new Set(prev.map((p) => p.gameId))
           const freshMatches = data.filter((m) => !existingIds.has(m.gameId))
@@ -203,9 +200,9 @@ export default function HomePage() {
         console.error('Failed to fetch pending matches:', err)
         triggerErrorRef.current('LIVE FEED ERROR')
       })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
-
+  
   const handlePick = async (gameId: string, playerName: string) => {
     const { userId, shortId, nickname } = getOrCreateUser()
     if (!userId || !nickname || !shortId || betAmount <= 0n) return
