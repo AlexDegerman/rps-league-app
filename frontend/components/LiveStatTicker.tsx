@@ -47,7 +47,7 @@ export default function LiveStatsTicker() {
   return (
     <div className="bg-gray-50/80 border-x border-b border-gray-100 rounded-b-xl py-1.5 px-3 mb-2 flex items-center gap-4 shadow-sm">
       <div className="flex items-center shrink-0">
-        <span className="text-[9px] text-gray-400 font-black uppercase tracking-wider">
+        <span className="text-[9px] text-cyan-600 font-black uppercase tracking-wider">
           Daily
         </span>
       </div>

@@ -5,25 +5,8 @@ import { formatDateTime, formatPoints, getAmountColor } from '@/lib/format'
 import GemIcon from '@/components/icons/GemIcon'
 import MoveIcon from '@/components/icons/MoveIcon'
 import { fetchUserBetHistory } from '@/lib/api'
-import { Match, PredictionRecord } from '@/types/rps'
-
-// Types & Constants
-
-export interface BetHistoryEntry {
-  id: number
-  gameId: string
-  pick: string
-  result: 'WIN' | 'LOSE' | null
-  createdAt: number
-  betAmount: string
-  gainLoss: string
-  bonusTier: string | null
-  bonusMultiplier: number
-  playerAName: string
-  playerBName: string
-  playerAPlayed: 'ROCK' | 'PAPER' | 'SCISSORS'
-  playerBPlayed: 'ROCK' | 'PAPER' | 'SCISSORS'
-}
+import { Match, PredictionRecord, BonusTier, BetHistoryEntry } from '@/types/rps'
+import { BONUS_TIER_STYLES } from '@/lib/constants'
 
 type Tab = 'recent' | 'wins' | 'multipliers'
 
@@ -31,37 +14,6 @@ const TAB_LABELS: Record<Tab, string> = {
   recent: 'Recent',
   wins: 'Biggest Wins',
   multipliers: 'Best Multipliers'
-}
-
-const BONUS_TIER_STYLES: Record<
-  string,
-  { label: string; color: string; bg: string; cardClass: string }
-> = {
-  LEGENDARY: {
-    label: 'Legendary',
-    color: 'text-amber-700',
-    bg: 'bg-amber-50',
-    cardClass: 'card-legendary-premium'
-  },
-  EPIC: {
-    label: 'Epic',
-    color: 'text-purple-700',
-    bg: 'bg-purple-50',
-    cardClass:
-      'border-purple-200 shadow-[0_0_20px_rgba(168,85,247,0.15)] bg-gradient-to-br from-white via-purple-50/30 to-white'
-  },
-  RARE: {
-    label: 'Rare',
-    color: 'text-blue-700',
-    bg: 'bg-blue-50',
-    cardClass: 'border-blue-100 shadow-sm bg-slate-50'
-  },
-  COMMON: {
-    label: 'Common',
-    color: 'text-slate-600',
-    bg: 'bg-slate-100/50',
-    cardClass: 'card-grey-wash'
-  }
 }
 
 // Sub-Components
@@ -75,10 +27,11 @@ function BonusBadge({
 }) {
   if (!tier || multiplier === 0) return null
 
-  const style = BONUS_TIER_STYLES[tier] ?? BONUS_TIER_STYLES.COMMON
+  const tierKey = tier as BonusTier
+  const style = BONUS_TIER_STYLES[tierKey] ?? BONUS_TIER_STYLES.COMMON
+
   const displayMult = (multiplier / 100).toFixed(1)
   const isHighTier = tier === 'LEGENDARY' || tier === 'EPIC'
-
   const auraClass = `aura-${tier.toLowerCase()}`
 
   return (
@@ -111,10 +64,12 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
     ? 'text-red-500 font-black'
     : getAmountColor(absGainLoss)
 
-  const tierKey =
+  // Fix: Safety check using the imported BonusTier type
+  const tierKey = (
     entry.bonusTier && entry.bonusTier in BONUS_TIER_STYLES
-      ? (entry.bonusTier as keyof typeof BONUS_TIER_STYLES)
+      ? entry.bonusTier
       : 'COMMON'
+  ) as BonusTier
 
   const tierStyle = BONUS_TIER_STYLES[tierKey]
 

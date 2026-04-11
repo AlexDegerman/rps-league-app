@@ -134,3 +134,30 @@ export interface PublicProfile {
     gain: string
   }[]
 }
+
+export interface BonusStyle {
+  label: string
+  color: string
+  bg: string
+  cardClass: string
+  auraClass?: string
+  amountColor?: string
+}
+
+export interface BetHistoryEntry {
+  id: number
+  gameId: string
+  pick: string
+  result: 'WIN' | 'LOSE' | null
+  createdAt: number
+  betAmount: string
+  gainLoss: string
+  bonusTier: string | null
+  bonusMultiplier: number
+  playerAName: string
+  playerBName: string
+  playerAPlayed: 'ROCK' | 'PAPER' | 'SCISSORS'
+  playerBPlayed: 'ROCK' | 'PAPER' | 'SCISSORS'
+}
+
+export type BonusTier = 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON'

@@ -10,7 +10,7 @@ import { getUserId } from '@/lib/user'
 import { formatPoints, getAmountColor } from '@/lib/format'
 import Link from 'next/link'
 import { LeaderboardEntry } from '@/types/rps'
-import { LinkedInBadge } from '@/components/LinkedInBadge'
+import { IdentityBadges } from '@/components/IdentityBadges'
 
 type Tab = 'daily' | 'weekly' | 'alltime'
 type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
@@ -250,17 +250,11 @@ function LeaderboardContent() {
                                   YOU
                                 </span>
                               )}
-                              {entry.linkedinUrl && (
-                                <LinkedInBadge
-                                  url={entry.linkedinUrl}
-                                  size="sm"
-                                />
-                              )}
-                              {entry.shortId === 'Hqo7qUSe38' && (
-                                <span className="mt-1 self-start text-[8px] px-2 py-0.5 bg-gray-900 text-white rounded-full font-black uppercase tracking-wider">
-                                  Dev
-                                </span>
-                              )}
+                              <IdentityBadges
+                                targetShortId={entry.shortId}
+                                linkedinUrl={entry.linkedinUrl}
+                                size="sm"
+                              />
                             </div>
 
                             {/* Mobile stats grid — hidden at 600px+ where the table columns take over */}

@@ -63,7 +63,7 @@ const rollBonus = (
   const forceBonus = pityCount >= 3
 
   // STARTER BOOST: 80% for players < 2M, 40% for everyone else
-  const bonusChance = currentPoints < 2000000n ? 0.8 : 0.4
+  const bonusChance = currentPoints < 2000000n ? 0.8 : 1 // change back to 0.4
   if (!forceBonus && Math.random() > bonusChance) return null
 
   const roll = Math.random() * 100

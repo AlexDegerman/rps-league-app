@@ -19,6 +19,7 @@ import {
 } from '@/lib/api'
 import BetHistory from '@/components/BetHistory'
 import { LinkedInBadge } from '@/components/LinkedInBadge'
+import { IdentityBadges } from '@/components/IdentityBadges'
 
 interface Ranks {
   daily: number | null
@@ -293,41 +294,42 @@ export default function ProfilePage() {
     <div className="max-w-2xl mx-auto px-4 pt-0 pb-10">
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-10 mb-4 mt-0 transition-all">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-6 mb-4 sm:mb-10 relative">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-3 mb-1 sm:mb-2 relative w-full">
-              <p className="text-[9px] sm:text-[10px] text-black/40 uppercase font-black tracking-[0.15em]">
+          <div className="flex flex-col w-full">
+            <div className="flex items-center gap-3 mb-1 sm:mb-2 w-full">
+              <p className="text-[9px] sm:text-[10px] text-black/40 uppercase font-black tracking-[0.15em] shrink-0">
                 {isOwnProfile ? 'Current Identity' : 'Player Identity'}
               </p>
 
               {isOwnProfile && (
                 <button
                   onClick={handleRegenerate}
-                  className="text-[8px] sm:text-[9px] px-2.5 py-1 bg-gray-900 text-white rounded-lg hover:bg-black active:scale-95 transition-all cursor-pointer font-black uppercase tracking-wider shadow-sm"
+                  className="text-[8px] sm:text-[9px] px-2.5 py-1 bg-gray-900 text-white rounded-lg hover:bg-black active:scale-95 transition-all cursor-pointer font-black uppercase tracking-wider shadow-sm shrink-0"
                 >
                   Randomize
                 </button>
               )}
 
               {stats?.joinedDate && (
-                <span className="absolute left-50 sm:right-auto sm:left-full top-0 sm:ml-4 text-[9px] sm:text-[11px] text-indigo-400/80 font-black uppercase tracking-widest flex flex-col items-end sm:items-start whitespace-nowrap">
-                  <span>joined at:</span>
+                <div className="text-[9px] sm:text-[11px] text-indigo-400/80 font-black uppercase tracking-widest flex flex-col leading-tight whitespace-nowrap ml-1">
+                  <span className="opacity-70">joined at:</span>
                   <span>
                     {new Date(Number(stats.joinedDate)).getDate()}.
                     {new Date(Number(stats.joinedDate)).getMonth() + 1}.
                     {new Date(Number(stats.joinedDate)).getFullYear()}
                   </span>
-                </span>
+                </div>
               )}
             </div>
-            <p className="text-[1.5rem] sm:text-[clamp(1.25rem,5vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tight">
+            <p className="text-[1.4rem] min-[375px]:text-[1.5rem] sm:text-[clamp(1.5rem,6vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tighter wrap-break-word max-w-full">
               {nickname}
             </p>
-            {/* Dev badge — hardcoded to your shortId */}
-            {targetShortId === 'Hqo7qUSe38' && (
-              <span className="mt-1 self-start text-[8px] px-2 py-0.5 bg-gray-900 text-white rounded-full font-black uppercase tracking-wider">
-                Dev
-              </span>
-            )}
+
+            <IdentityBadges
+              targetShortId={targetShortId}
+              linkedinUrl={linkedinUrl}
+              isOwnProfile={isOwnProfile}
+              showLinkedinBadge={showLinkedinBadge}
+            />
           </div>
 
           <div className="flex flex-col sm:items-end gap-2 relative">
