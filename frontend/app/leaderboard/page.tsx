@@ -122,7 +122,6 @@ function LeaderboardContent() {
 
   return (
     <div className="max-w-4xl mx-auto px-4">
-
       <div className="flex gap-2 mb-4">
         <button className="px-6 py-2 rounded font-bold text-xs uppercase bg-yellow-400 text-gray-900 shadow-sm">
           Predictors
@@ -228,11 +227,11 @@ function LeaderboardContent() {
                         key={entry.userId}
                         className={`border-b border-gray-50 ${isMe ? 'bg-purple-50' : ''}`}
                       >
-                        <td className="px-3 py-3 align-top text-gray-400 font-bold text-xs">
+                        <td className="px-1 min-[600px]:px-3 py-3 align-top text-gray-400 font-bold text-xs">
                           {index === 0 ? '🏆' : index + 1}
                         </td>
 
-                        <td className="px-3 py-3">
+                        <td className="px-1 min-[600px]:px-3 py-3">
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2 flex-wrap">
                               <Link
@@ -259,48 +258,47 @@ function LeaderboardContent() {
 
                             {/* Mobile stats grid — hidden at 600px+ where the table columns take over */}
                             <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
-                              <div className="grid grid-cols-14 gap-1 text-gray-400 font-bold uppercase tracking-wider text-left">
-                                <div className="col-span-2">W</div>
-                                <div className="col-span-2">L</div>
-                                <div className="hidden min-[380px]:block min-[380px]:col-span-2">
-                                  Win%
-                                </div>
-                                <div className="col-span-4 min-[380px]:col-span-3">
-                                  Pts
-                                </div>
-                                <div className="col-span-4 min-[380px]:col-span-3">
-                                  Gain
-                                </div>
-                                <div className="col-span-2 text-right">
-                                  Peak
-                                </div>
+                              <div className="flex gap-2 text-gray-400 font-bold uppercase tracking-wider">
+                                <div className="w-6">W</div>
+                                <div className="w-6">L</div>
+                                <div className="w-14">Pts</div>
+                                <div className="w-14">Gain</div>
+                                <div className="w-14">Peak</div>
                               </div>
-                              <div className="grid grid-cols-14 gap-1 font-medium text-left items-center">
-                                <div className="col-span-2 text-green-600 font-bold truncate">
+                              <div className="flex gap-2 font-medium items-center">
+                                <div className="w-6 text-green-600 font-bold">
                                   {entry.wins}
                                 </div>
-                                <div className="col-span-2 text-red-500 font-bold truncate">
+                                <div className="w-6 text-red-500 font-bold">
                                   {entry.losses}
                                 </div>
-                                <div className="hidden min-[380px]:block min-[380px]:col-span-2 text-indigo-500 font-bold">
-                                  {entry.winRate}%
-                                </div>
                                 <div
-                                  className={`col-span-4 min-[380px]:col-span-3 font-bold flex items-center gap-0.5 whitespace-nowrap ${getAmountColor(entry.points)}`}
+                                  className={`w-14 font-bold flex items-center gap-0.5 ${getAmountColor(entry.points)}`}
                                 >
                                   <GemIcon size={8} className="shrink-0" />
-                                  {formatPoints(entry.points)}
+                                  {(() => {
+                                    const { display, full, capped } =
+                                      formatPoints(entry.points)
+                                    return (
+                                      <span
+                                        title={capped ? full : undefined}
+                                        style={{ position: 'relative' }}
+                                      >
+                                        {display}
+                                      </span>
+                                    )
+                                  })()}
                                 </div>
                                 <div
-                                  className={`col-span-4 min-[380px]:col-span-3 font-bold whitespace-nowrap ${gainedBI >= 0n ? 'text-green-500' : 'text-red-500'}`}
+                                  className={`w-14 font-bold ${gainedBI >= 0n ? 'text-green-500' : 'text-red-500'}`}
                                 >
                                   {gainedBI >= 0n ? '+' : ''}
-                                  {formatPoints(entry.gained)}
+                                  {formatPoints(entry.gained).display}
                                 </div>
                                 <div
-                                  className={`col-span-2 font-bold whitespace-nowrap text-right ${getAmountColor(entry.peakPoints)}`}
+                                  className={`w-14 font-bold ${getAmountColor(entry.peakPoints)}`}
                                 >
-                                  {formatPoints(entry.peakPoints)}
+                                  {formatPoints(entry.peakPoints).display}
                                 </div>
                               </div>
                             </div>
@@ -318,10 +316,22 @@ function LeaderboardContent() {
                         </td>
 
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                          <span className={getAmountColor(entry.points)}>
-                            {formatPoints(entry.points)}
-                          </span>
+                          {(() => {
+                            const { display, full, capped } = formatPoints(
+                              entry.points
+                            )
+                            return (
+                              <span
+                                className={getAmountColor(entry.points)}
+                                title={capped ? full : undefined}
+                                style={{ position: 'relative' }}
+                              >
+                                {display}
+                              </span>
+                            )
+                          })()}
                         </td>
+
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
                           <span
                             className={
@@ -329,14 +339,25 @@ function LeaderboardContent() {
                             }
                           >
                             {gainedBI >= 0n ? '+' : ''}
-                            {formatPoints(entry.gained)}
+                            {formatPoints(entry.gained).display}
                           </span>
                         </td>
 
                         <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                          <span className={getAmountColor(entry.peakPoints)}>
-                            {formatPoints(entry.peakPoints)}
-                          </span>
+                          {(() => {
+                            const { display, full, capped } = formatPoints(
+                              entry.peakPoints
+                            )
+                            return (
+                              <span
+                                className={getAmountColor(entry.peakPoints)}
+                                title={capped ? full : undefined}
+                                style={{ position: 'relative' }}
+                              >
+                                {display}
+                              </span>
+                            )
+                          })()}
                         </td>
                       </tr>
                     )

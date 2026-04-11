@@ -2,11 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { clearUserCache, getOrCreateUser, regenerateNickname, resetUser } from '@/lib/user'
+import {
+  clearUserCache,
+  getOrCreateUser,
+  regenerateNickname,
+  resetUser
+} from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { UserStats } from '@/types/rps'
-import { formatPoints, getAmountColor, getFullNumberName } from '@/lib/format'
+import { getAmountColor, getFullNumberName, formatPoints } from '@/lib/format'
 import {
   fetchUserProfile,
   fetchUserStats,
@@ -67,6 +72,7 @@ export default function ProfilePage() {
   const [linkedinInput, setLinkedinInput] = useState('')
   const [linkedinSaved, setLinkedinSaved] = useState(false)
   const [linkedinError, setLinkedinError] = useState('')
+  const { display, full, capped } = formatPoints(points ?? '0')
 
   useEffect(() => {
     if (!targetShortId) return
@@ -93,9 +99,9 @@ export default function ProfilePage() {
             targetShortId
           )
           if (statsData) setStats(statsData)
-            setLinkedinUrl(profileData.linkedinUrl)
-            setShowLinkedinBadge(profileData.showLinkedinBadge ?? true)
-            setLinkedinInput(profileData.linkedinUrl ?? '')
+          setLinkedinUrl(profileData.linkedinUrl)
+          setShowLinkedinBadge(profileData.showLinkedinBadge ?? true)
+          setLinkedinInput(profileData.linkedinUrl ?? '')
         }
       } catch (err) {
         console.error('Profile load error:', err)
@@ -162,7 +168,7 @@ export default function ProfilePage() {
     isLoading: historyLoading,
     loadMatches
   } = useInfiniteScroll({ fetchFn, enabled: !!profileUserId })
-  
+
   useEffect(() => {
     if (profileUserId) {
       loadMatches(1)
@@ -346,15 +352,23 @@ export default function ProfilePage() {
 
             <div
               className="flex items-center gap-3 cursor-pointer select-none group"
-              onClick={() => setShowPointsExplainer(!showPointsExplainer)}
+              onMouseEnter={() => {
+                if (!capped) setShowPointsExplainer(true)
+              }}
+              onMouseLeave={() => setShowPointsExplainer(false)}
+              onClick={() => {
+                if (!capped) setShowPointsExplainer(!showPointsExplainer)
+              }}
             >
               <div className="shrink-0 transition-transform">
                 <GemIcon size={32} />
               </div>
               <span
                 className={`text-3xl sm:text-4xl font-black leading-none tracking-tighter ${points !== null ? getAmountColor(points) : 'text-purple-600'}`}
+                title={capped ? full : undefined}
+                style={{ position: 'relative' }}
               >
-                {points !== null ? formatPoints(points) : '...'}
+                {points !== null ? display : '...'}
               </span>
             </div>
 
@@ -391,36 +405,42 @@ export default function ProfilePage() {
             <StatSection label="Records">
               <StatBox
                 label="Peak"
-                value={stats ? formatPoints(stats.peakPoints, useK) : '0'}
+                value={stats ? stats.peakPoints : '0'}
                 color="text-amber-500"
+                useK={useK}
               />
               <StatBox
                 label="Weekly"
-                value={stats ? formatPoints(stats.weeklyPeak, useK) : '0'}
+                value={stats ? stats.weeklyPeak : '0'}
                 color="text-indigo-600"
+                useK={useK}
               />
               <StatBox
                 label="Daily"
-                value={stats ? formatPoints(stats.dailyPeak, useK) : '0'}
+                value={stats ? stats.dailyPeak : '0'}
                 color="text-indigo-400"
+                useK={useK}
               />
             </StatSection>
 
             <StatSection label="Wealth">
               <StatBox
                 label="Gained"
-                value={stats ? formatPoints(stats.totalGain, useK) : '0'}
+                value={stats ? stats.totalGain : '0'}
                 color="text-emerald-600"
+                useK={useK}
               />
               <StatBox
                 label="Risked"
-                value={stats ? formatPoints(stats.totalVolume, useK) : '0'}
+                value={stats ? stats.totalVolume : '0'}
                 color="text-gray-600"
+                useK={useK}
               />
               <StatBox
                 label="Best Win"
-                value={stats ? formatPoints(stats.biggestWin, useK) : '0'}
+                value={stats ? stats.biggestWin : '0'}
                 color="text-emerald-500"
+                useK={useK}
               />
             </StatSection>
 
@@ -696,18 +716,28 @@ function StatSection({
 function StatBox({
   label,
   value,
-  color = 'text-gray-900'
+  color = 'text-gray-900',
+  useK = false
 }: {
   label: string
   value: string | number
   color?: string
+  useK?: boolean
 }) {
+  const isPointValue =
+    typeof value === 'string' && /^\d/.test(value) && !value.includes('%')
+  const { display, full, capped } = isPointValue
+    ? formatPoints(value, useK)
+    : { display: String(value), full: String(value), capped: false }
+
   return (
-    <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-1 sm:p-2 py-2 sm:py-6 flex flex-col items-center justify-center text-center transition-all overflow-hidden">
+    <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-1 sm:p-2 py-2 sm:py-6 flex flex-col items-center justify-center text-center transition-all overflow-visible relative">
       <p
-        className={`${value.toString().length >= 8 ? 'text-[13px] tracking-tighter [@media(min-width:375px)]:text-lg [@media(min-width:375px)]:tracking-tight' : 'text-[15px] tracking-tight [@media(min-width:375px)]:text-lg'} font-black ${color} leading-tight whitespace-nowrap w-full px-0.5`}
+        title={capped ? full : undefined}
+        style={{ position: 'relative' }}
+        className={`${display.toString().length >= 8 ? 'text-[13px] tracking-tighter [@media(min-width:375px)]:text-lg [@media(min-width:375px)]:tracking-tight' : 'text-[15px] tracking-tight [@media(min-width:375px)]:text-lg'} font-black ${color} leading-tight whitespace-nowrap w-full px-0.5`}
       >
-        {value}
+        {display}
       </p>
       <p className="text-[8px] sm:text-[10px] text-black/40 mt-0.5 sm:mt-2 uppercase font-black tracking-widest">
         {label}

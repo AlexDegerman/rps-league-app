@@ -13,7 +13,12 @@ import PendingMatchCard from '@/components/PendingMatchCard'
 import GemIcon from '@/components/icons/GemIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import type { BonusTier, Match, PendingMatch, PredictionRecord } from '@/types/rps'
+import type {
+  BonusTier,
+  Match,
+  PendingMatch,
+  PredictionRecord
+} from '@/types/rps'
 import {
   formatPoints,
   getAmountColor,
@@ -162,8 +167,10 @@ export default function HomePage() {
     useInfiniteScroll({ fetchFn })
 
   const animatedPoints = useAnimatedBigInt(points, 1000)
-  const animatedResult = useAnimatedBigInt(resultAnim?.amount ?? 0n, 600, true)
+  const { full, capped } = formatPoints(points)
 
+  const { display: animatedDisplay } = formatPoints(animatedPoints)
+  const animatedResult = useAnimatedBigInt(resultAnim?.amount ?? 0n, 600, true)
 
   useEffect(() => {
     const user = getOrCreateUser()
@@ -443,188 +450,197 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
-      {/* Result Animation Overlay */}
-      {resultAnim && (
-        <div className="fixed top-45 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center w-full max-w-sm px-4">
-          {resultAnim.bonus &&
-            (() => {
-              const visualTierKey = bonusTierKey
-              const visual = getBonusStyles(visualTierKey)
-              const coreStyle = bonusTierStyle
-
-              const adjustedScale =
-                visualTierKey === 'LEGENDARY'
-                  ? 'scale-[1.1]'
-                  : visualTierKey === 'EPIC'
-                    ? 'scale-[1.05]'
-                    : 'scale-100'
-
-              return (
-                <div
-                  className={`relative overflow-hidden w-fit mx-auto p-4 rounded-3xl border-2 mb-3 
-              animate-in zoom-in slide-in-from-bottom-4 duration-300
-              ${coreStyle.cardClass} ${adjustedScale} ${visual.glow}`}
-                >
-                  <div className="flex flex-col items-center px-4 text-center">
-                    <div
-                      className={`badge-aura-wrapper ${coreStyle.auraClass} inline-flex items-center mb-1`}
-                    >
-                      <span
-                        className={`text-[10px] px-2.5 py-0.5 font-black uppercase tracking-widest rounded-full border relative z-10
-                    ${
-                      visualTierKey === 'LEGENDARY'
-                        ? 'text-yellow-700 border-yellow-500 bg-yellow-50'
-                        : `${coreStyle.color} ${coreStyle.bg} border-black/5`
-                    }`}
-                      >
-                        {visual.label}
-                      </span>
-                    </div>
-
-                    {!resultAnim.win && (
-                      <div
-                        className={`text-[14px] font-black uppercase italic tracking-tighter mb-1 leading-none ${coreStyle.color}`}
-                      >
-                        Lucky Save
-                      </div>
-                    )}
-
-                    <div
-                      className={`flex items-center gap-2 mt-1 transition-all ${visual.glow}`}
-                    >
-                      <span
-                        className={`text-2xl sm:text-3xl font-black tabular-nums tracking-tighter ${coreStyle.amountColor}`}
-                      >
-                        {resultAnim.win ? '+' : ''}
-                        <span
-                          className={getAmountColor(resultAnim.bonus.amount)}
-                        >
-                          {formatPoints(resultAnim.bonus.amount)}
-                        </span>
-                      </span>
-                      <GemIcon size={20} />
-                    </div>
-                  </div>
-                </div>
-              )
-            })()}
-
-          <span
-            className={`text-5xl sm:text-6xl font-black animate-bounce leading-tight drop-shadow-lg
-      ${resultAnim.win ? 'text-green-500' : 'text-red-500'}`}
-          >
-            <span
-              className={`text-5xl sm:text-6xl font-black animate-bounce leading-tight drop-shadow-lg flex items-center gap-1
-              ${getAmountColor(animatedResult)}`}
-            >
+      {/* Wrap controls + result anim together */}
+      <div className="relative">
+        {/* Result Animation Overlay */}
+        {resultAnim && (
+          <div className="absolute -bottom-35 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col-reverse items-center w-full max-w-sm px-4">
+            {/* Win/loss number — visually anchored at bottom */}
+            <span className="flex items-center gap-1 text-5xl sm:text-6xl font-black animate-bounce leading-tight drop-shadow-lg">
               {resultAnim.win ? (
                 <>
                   <span className="text-green-500">+</span>
-                  <span>{formatPoints(animatedResult)}</span>
+                  <span className={getAmountColor(animatedResult)}>
+                    {formatPoints(animatedResult).display}
+                  </span>
                 </>
               ) : (
                 <>
                   <span className="text-red-500">-</span>
-                  <span>{formatPoints(animatedResult)}</span>
+                  <span className={getAmountColor(animatedResult)}>
+                    {formatPoints(animatedResult).display}
+                  </span>
                 </>
               )}
             </span>
-          </span>
 
-          {resultAnim.win && (
-            <div className="relative w-0 h-0">
-              {resultAnim.confetti?.map((c, i) => {
-                const colors = getConfettiColors(resultAnim.bonus?.tier)
+            {/* Bonus card — grows upward above the number */}
+            {resultAnim.bonus &&
+              (() => {
+                const visualTierKey = bonusTierKey
+                const visual = getBonusStyles(visualTierKey)
+                const coreStyle = bonusTierStyle
+                const adjustedScale =
+                  visualTierKey === 'LEGENDARY'
+                    ? 'scale-[1.1]'
+                    : visualTierKey === 'EPIC'
+                      ? 'scale-[1.05]'
+                      : 'scale-100'
                 return (
                   <div
-                    key={i}
-                    className="absolute rounded-sm pointer-events-none"
-                    style={
-                      {
-                        width: `${i % 3 === 0 ? 8 : 6}px`,
-                        height: `${i % 3 === 0 ? 10 : 8}px`,
-                        left: `${c.leftOffset}px`,
-                        top: 0,
-                        backgroundColor: colors[i % colors.length],
-                        animation: `confetti-burst 1.2s ease-out ${c.delay}s forwards`,
-                        '--vx': `${c.vx}px`,
-                        '--vy': `${c.vy}px`
-                      } as React.CSSProperties
-                    }
-                  />
-                )
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Main Controls */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-2 overflow-hidden">
-        <div className="flex items-center gap-3 mb-1">
-          <div>
-            <div className="flex items-center gap-2 shrink-0 min-w-31.25 sm:min-w-36.25">
-              <div className="relative group flex items-center">
-                <div
-                  className="flex items-center gap-2 cursor-pointer select-none"
-                  onMouseEnter={() => setShowPointsExplainer(true)}
-                  onMouseLeave={() => setShowPointsExplainer(false)}
-                  onClick={() => setShowPointsExplainer(!showPointsExplainer)}
-                >
-                  <GemIcon size={24} className="shrink-0" />
-                  <span
-                    className={`text-xl font-bold tabular-nums ${getAmountColor(points)}`}
+                    className={`relative overflow-hidden w-fit mx-auto p-4 rounded-3xl border-2 mb-3
+                animate-in zoom-in slide-in-from-bottom-4 duration-300
+                ${coreStyle.cardClass} ${adjustedScale} ${visual.glow}`}
                   >
-                    {pointsLoaded ? formatPoints(animatedPoints) : '...'}
-                  </span>
-                </div>
-
-                {shouldShowTooltip && (
-                  <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
-                    <span
-                      className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points)}`}
-                    >
-                      {numberName}
-                    </span>
-                    <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
+                    <div className="flex flex-col items-center px-4 text-center">
+                      <div
+                        className={`badge-aura-wrapper ${coreStyle.auraClass} inline-flex items-center mb-1`}
+                      >
+                        <span
+                          className={`text-[10px] px-2.5 py-0.5 font-black uppercase tracking-widest rounded-full border relative z-10
+                      ${
+                        visualTierKey === 'LEGENDARY'
+                          ? 'text-yellow-700 border-yellow-500 bg-yellow-50'
+                          : `${coreStyle.color} ${coreStyle.bg} border-black/5`
+                      }`}
+                        >
+                          {visual.label}
+                        </span>
+                      </div>
+                      {!resultAnim.win && (
+                        <div
+                          className={`text-[14px] font-black uppercase italic tracking-tighter mb-1 leading-none ${coreStyle.color}`}
+                        >
+                          Lucky Save
+                        </div>
+                      )}
+                      <div
+                        className={`flex items-center gap-2 mt-1 transition-all ${visual.glow}`}
+                      >
+                        <span
+                          className={`text-2xl sm:text-3xl font-black tabular-nums tracking-tighter ${coreStyle.amountColor}`}
+                        >
+                          {resultAnim.win ? '+' : ''}
+                          <span
+                            className={getAmountColor(resultAnim.bonus.amount)}
+                          >
+                            {formatPoints(resultAnim.bonus.amount).display}
+                          </span>
+                        </span>
+                        <GemIcon size={20} />
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
+                )
+              })()}
 
-              <div className="relative group flex items-center ml-1">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowPointsInfo(!showPointsInfo)
-                  }}
-                  onBlur={() => setShowPointsInfo(false)}
-                  className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            {/* Confetti */}
+            {resultAnim.win && (
+              <div className="relative w-0 h-0">
+                {resultAnim.confetti?.map((c, i) => {
+                  const colors = getConfettiColors(resultAnim.bonus?.tier)
+                  return (
+                    <div
+                      key={i}
+                      className="absolute rounded-sm pointer-events-none"
+                      style={
+                        {
+                          width: `${i % 3 === 0 ? 8 : 6}px`,
+                          height: `${i % 3 === 0 ? 10 : 8}px`,
+                          left: `${c.leftOffset}px`,
+                          top: 0,
+                          backgroundColor: colors[i % colors.length],
+                          animation: `confetti-burst 1.2s ease-out ${c.delay}s forwards`,
+                          '--vx': `${c.vx}px`,
+                          '--vy': `${c.vy}px`
+                        } as React.CSSProperties
+                      }
                     />
-                  </svg>
-                </button>
-                <div
-                  className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
-                >
-                  Virtual simulation points. No real-world currency or value.
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900" />
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Main Controls */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-2 overflow-hidden">
+          {/* Top row: points + nickname/rank + sound button */}
+          <div className="flex items-start justify-between gap-3 mb-1">
+            {/* Left: points + nickname/rank */}
+            <div className="flex flex-col gap-1">
+              {/* Points + info icon */}
+              <div className="flex items-center gap-2 shrink-0 min-w-31.25 sm:min-w-36.25">
+                <div className="relative group flex items-center">
+                  <div
+                    className="flex items-center gap-2 cursor-pointer select-none"
+                    onMouseEnter={() => {
+                      if (!capped) setShowPointsExplainer(true)
+                    }}
+                    onMouseLeave={() => setShowPointsExplainer(false)}
+                    onClick={() => {
+                      if (!capped) setShowPointsExplainer(!showPointsExplainer)
+                    }}
+                  >
+                    <GemIcon size={24} className="shrink-0" />
+                    <span
+                      className={`text-xl font-bold tabular-nums ${getAmountColor(points)}`}
+                    >
+                      <span
+                        title={capped ? full : undefined}
+                        style={{ position: 'relative' }}
+                      >
+                        {pointsLoaded ? animatedDisplay : '...'}
+                      </span>
+                    </span>
+                  </div>
+
+                  {shouldShowTooltip && (
+                    <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
+                      <span
+                        className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points)}`}
+                      >
+                        {numberName}
+                      </span>
+                      <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative group flex items-center ml-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowPointsInfo(!showPointsInfo)
+                    }}
+                    onBlur={() => setShowPointsInfo(false)}
+                    className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </button>
+                  <div
+                    className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
+                  >
+                    Virtual simulation points. No real-world currency or value.
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900" />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+              {/* Nickname + rank */}
               {displayNickname && (
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span
@@ -633,7 +649,6 @@ export default function HomePage() {
                   >
                     {displayNickname}
                   </span>
-
                   {dailyRank && (
                     <span className="shrink-0 text-[9px] font-black px-1.5 py-0.5 bg-purple-100 text-purple-600 rounded-full uppercase tracking-wide whitespace-nowrap">
                       #{dailyRank} today
@@ -641,138 +656,144 @@ export default function HomePage() {
                   )}
                 </div>
               )}
+            </div>
 
+            {/* Right: sound button pinned to far right */}
+            <button
+              onClick={toggleSound}
+              className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
+              title="Toggle sound effects"
+            >
+              <SoundIcon muted={!soundOn} />
+            </button>
+          </div>
+
+          {/* Bet input row */}
+          <div className="flex flex-col sm:flex-row gap-1">
+            <div className="flex items-center gap-2 flex-1">
+              <label className="text-xs font-bold text-gray-400 uppercase shrink-0">
+                Bet
+              </label>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={
+                    isFocused ? inputString : formatPoints(betAmount).display
+                  }
+                  onFocus={() => {
+                    setIsFocused(true)
+                    setInputString('')
+                  }}
+                  placeholder={!autoAllIn ? '100k → 100.000' : ''}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setInputString(val)
+                    const parsed = parseShorthand(val)
+                    if (parsed > 0n) {
+                      const validBet = parsed > points ? points : parsed
+                      setBetAmount(validBet)
+                    }
+                  }}
+                  onBlur={() => {
+                    setIsFocused(false)
+                    let final = parseShorthand(inputString)
+                    if (final > points) final = points
+                    const floor = 100000n
+                    if (final < floor) final = points < floor ? points : floor
+                    setBetAmount(final)
+                    setInputString(final.toString())
+                  }}
+                  className={`relative overflow-hidden w-fit mx-auto p-4 border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
+                />
+                {isFocused && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400 pointer-events-none">
+                    ({formatPoints(betAmount).display})
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
-                onClick={toggleSound}
-                className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
+                onClick={() => {
+                  setBetAmount(points)
+                  setInputString(points.toString())
+                }}
+                className="flex-1 sm:flex-none px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 active:scale-95 transition-all shadow-sm"
               >
-                <SoundIcon muted={!soundOn} />
+                ALL IN
+              </button>
+              <button
+                onClick={() => setAutoAllIn((prev) => !prev)}
+                className={`flex-1 sm:flex-none px-3 py-2 text-[10px] font-bold rounded-lg border transition-all ${autoAllIn ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
+              >
+                AUTO {autoAllIn ? 'ON' : 'OFF'}
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Bet input row */}
-        <div className="flex flex-col sm:flex-row gap-1">
-          <div className="flex items-center gap-2 flex-1">
-            <label className="text-xs font-bold text-gray-400 uppercase shrink-0">
-              Bet
-            </label>
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={isFocused ? inputString : formatPoints(betAmount)}
-                onFocus={() => {
-                  setIsFocused(true)
-                  setInputString('')
-                }}
-                placeholder={!autoAllIn ? '100k → 100.000' : ''}
-                onChange={(e) => {
-                  const val = e.target.value
-                  setInputString(val)
-                  const parsed = parseShorthand(val)
-                  if (parsed > 0n) {
-                    const validBet = parsed > points ? points : parsed
-                    setBetAmount(validBet)
-                  }
-                }}
-                onBlur={() => {
-                  setIsFocused(false)
-                  let final = parseShorthand(inputString)
-                  if (final > points) final = points
-                  const floor = 100000n
-                  if (final < floor) final = points < floor ? points : floor
-                  setBetAmount(final)
-                  setInputString(final.toString())
-                }}
-                className={`relative overflow-hidden w-fit mx-auto p-4 border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
-              />
-              {isFocused && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400 pointer-events-none">
-                  ({formatPoints(betAmount)})
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={() => {
-                setBetAmount(points)
-                setInputString(points.toString())
-              }}
-              className="flex-1 sm:flex-none px-4 py-2 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-700 active:scale-95 transition-all shadow-sm"
+          {/* Notification */}
+          {notification && isHydrated && (
+            <div
+              className={`mt-3 flex items-start justify-between gap-3 rounded-xl px-4 py-3 border animate-in fade-in slide-in-from-top-2 duration-400
+              ${notification === 'no_bigint' ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-200'}`}
             >
-              ALL IN
-            </button>
-            <button
-              onClick={() => setAutoAllIn((prev) => !prev)}
-              className={`flex-1 sm:flex-none px-3 py-2 text-[10px] font-bold rounded-lg border transition-all ${autoAllIn ? 'bg-green-600 text-white border-green-700' : 'bg-gray-50 text-gray-500 border-gray-200'}`}
-            >
-              AUTO {autoAllIn ? 'ON' : 'OFF'}
-            </button>
-          </div>
-        </div>
-
-        {/* Notification */}
-        {notification && isHydrated && (
-          <div
-            className={`mt-3 flex items-start justify-between gap-3 rounded-xl px-4 py-3 border animate-in fade-in slide-in-from-top-2 duration-400
-            ${notification === 'no_bigint' ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-200'}`}
-          >
-            <div className="flex items-start gap-3 min-w-0">
-              <span className="text-xl flex-none mt-0.5">
-                {notification === 'no_bigint' ? '⚠️' : '🎉'}
-              </span>
-              <div className="flex flex-col gap-0.5 min-w-0">
-                <span
-                  className={`text-[11px] font-black uppercase tracking-widest leading-tight
-                  ${notification === 'no_bigint' ? 'text-red-700' : 'text-indigo-700'}`}
-                >
-                  {notification === 'no_bigint'
-                    ? 'Browser Not Supported'
-                    : "You've been granted 200,000 points!"}
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="text-xl flex-none mt-0.5">
+                  {notification === 'no_bigint' ? '⚠️' : '🎉'}
                 </span>
-                <p
-                  className={`text-[10px] font-medium leading-snug
-                  ${notification === 'no_bigint' ? 'text-red-600' : 'text-indigo-500'}`}
-                >
-                  {notification === 'no_bigint'
-                    ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
-                    : 'Start betting to rank up the leaderboard. No login needed — your progress is saved automatically.'}
-                </p>
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span
+                    className={`text-[11px] font-black uppercase tracking-widest leading-tight
+                    ${notification === 'no_bigint' ? 'text-red-700' : 'text-indigo-700'}`}
+                  >
+                    {notification === 'no_bigint'
+                      ? 'Browser Not Supported'
+                      : "You've been granted 200,000 points!"}
+                  </span>
+                  <p
+                    className={`text-[10px] font-medium leading-snug
+                    ${notification === 'no_bigint' ? 'text-red-600' : 'text-indigo-500'}`}
+                  >
+                    {notification === 'no_bigint'
+                      ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
+                      : 'Start betting to rank up the leaderboard. No login needed — your progress is saved automatically.'}
+                  </p>
+                </div>
               </div>
-            </div>
-            <button
-              onClick={() => {
-                if (notification === 'new_visitor')
-                  localStorage.setItem('rps_welcomed', '1')
-                setNotification(null)
-              }}
-              className={`flex-none p-1.5 rounded-lg transition-colors shrink-0
-                ${
-                  notification === 'no_bigint'
-                    ? 'text-red-400 hover:text-red-700 hover:bg-red-100'
-                    : 'text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100'
-                }`}
-              aria-label="Close"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+              <button
+                onClick={() => {
+                  if (notification === 'new_visitor')
+                    localStorage.setItem('rps_welcomed', '1')
+                  setNotification(null)
+                }}
+                className={`flex-none p-1.5 rounded-lg transition-colors shrink-0
+                  ${
+                    notification === 'no_bigint'
+                      ? 'text-red-400 hover:text-red-700 hover:bg-red-100'
+                      : 'text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100'
+                  }`}
+                aria-label="Close"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+        {/* END Main Controls */}
       </div>
+      {/* END relative wrapper */}
 
       <LiveStatsTicker />
 
@@ -801,7 +822,7 @@ export default function HomePage() {
               onClick={() => setShowBonusExplainer(!showBonusExplainer)}
             >
               <span className="text-red-500">LOSE: -50%</span>
-              <span className="bg-gray-100 hover:bg-gray-200 text-purple-600  text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-md transition-colors tracking-tighter">
+              <span className="bg-gray-100 hover:bg-gray-200 text-purple-600 text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-md transition-colors tracking-tighter">
                 BONUS INFO
               </span>
             </div>

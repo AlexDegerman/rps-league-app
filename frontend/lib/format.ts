@@ -138,9 +138,14 @@ export const formatTickerPoints = (n: number | bigint | string): string => {
 export const formatPoints = (
   n: number | bigint | string,
   useK: boolean = false
-): string => {
-  const bigN = BigInt(n)
-  if (bigN === 0n) return '0'
+): { display: string; full: string; capped: boolean } => {
+  let bigN: bigint
+  try {
+    bigN = BigInt(typeof n === 'string' ? n.split('.')[0].replace(/,/g, '') : n)
+  } catch {
+    return { display: '0', full: '0', capped: false }
+  }
+  if (bigN === 0n) return { display: '0', full: '0', capped: false }
 
   const absN = bigN < 0n ? -bigN : bigN
   const sign = bigN < 0n ? '-' : ''
@@ -168,24 +173,33 @@ export const formatPoints = (
     { threshold: 10n ** 6n, symbol: 'M' }
   ]
 
-  if (useK && absN >= 1000n && absN < 1000000n) {
-    const whole = absN / 1000n
-    const tenth = (absN % 1000n) / 100n
+  const getFormattedValue = (value: bigint, divisor: bigint, sym: string) => {
+    const whole = value / divisor
+    if (whole >= 100n) return `${sign}${whole}${sym}`
+    const unit = divisor / 10n
+    const tenth = unit > 0n ? (value % divisor) / unit : 0n
     const decimalStr = tenth > 0n ? `.${tenth}` : ''
-    return `${sign}${whole}${decimalStr}K`
+    return `${sign}${whole}${decimalStr}${sym}`
+  }
+  
+  if (useK && absN >= 1000n && absN < 1000000n) {
+    const full = getFormattedValue(absN, 1000n, 'K')
+    const whole = absN / 1000n
+    const capped = whole >= 10000n
+    return { display: capped ? `${sign}9999+K` : full, full, capped }
   }
 
   for (const { threshold, symbol } of tiers) {
     if (absN >= threshold) {
+      const full = getFormattedValue(absN, threshold, symbol)
       const whole = absN / threshold
-      const divisor = threshold / 10n
-      const tenth = divisor > 0n ? (absN % threshold) / divisor : 0n
-      const decimalStr = tenth > 0n ? `.${tenth}` : ''
-      return `${sign}${whole}${decimalStr}${symbol}`
+      const capped = whole >= 10000n
+      return { display: capped ? `${sign}9999+${symbol}` : full, full, capped }
     }
   }
 
-  return `${sign}${new Intl.NumberFormat('de-DE').format(absN)}`
+  const full = `${sign}${new Intl.NumberFormat('de-DE').format(absN)}`
+  return { display: full, full, capped: false }
 }
 
 export const getFullNumberName = (n: number | bigint | string): string => {
@@ -240,82 +254,56 @@ const QUINTILLION = 10n ** 18n
 const QUADRILLION = 10n ** 15n
 const TRILLION = 10n ** 12n
 
+/**
+ * Maps a points amount to the corresponding CSS class for "RPS League" tier styling.
+ * Prioritizes BigInt for Vigintillion-scale precision and avoids quick-fix error handling.
+ */
 export const getAmountColor = (amount?: number | bigint | string): string => {
   if (amount == null || amount === '') return 'text-gray-400'
-  
+
   let raw: bigint
-  if (typeof amount === 'bigint') {
-    raw = amount
-  } else if (typeof amount === 'number') {
-    raw = BigInt(Math.trunc(amount))
-  } else if (
-    typeof amount === 'string' &&
-    amount.length > 0 &&
-    /^-?\d+$/.test(amount)
-  ) {
-    raw = BigInt(amount)
-  } else {
+  try {
+    if (typeof amount === 'bigint') {
+      raw = amount
+    } else if (typeof amount === 'number') {
+      raw = BigInt(Math.trunc(amount))
+    } else {
+      const cleanStr = String(amount).split('.')[0].replace(/,/g, '')
+      raw = BigInt(cleanStr)
+    }
+  } catch {
     return 'text-gray-400'
   }
 
   const a = raw < ZERO ? -raw : raw
-
   if (a === ZERO) return 'text-gray-400'
 
-  if (a >= VIGINTILLION) {
-    return 'inline-block font-black animate-[holy-bloom_5s_linear_infinite]'
-  }
-  if (a >= NOVEMDECILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-[radial-gradient(circle_at_center,_#fcd34d_0%,_#f59e0b_50%,_#78350f_100%)] bg-size-[100%_100%] font-black animate-[nod-bloom_5s_linear_infinite] [-webkit-text-stroke:0.6px_#78350f]'
-  }
-  if (a >= OCTODECILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-green-500 to-blue-500 font-black animate-[ocd-glow_3s_linear_infinite] [-webkit-text-stroke:0.5px_rgba(0,0,0,0.1)]'
-  }
-  if (a >= SEPTENDECILLION) {
-    return 'text-[#6366f1] font-black animate-pulse [filter:drop-shadow(0_0_8px_rgba(168,85,247,0.9))_drop-shadow(0_0_15px_rgba(168,85,247,0.5))] [-webkit-text-stroke:1px_#3730a3]'
-  }
-  if (a >= SEXDECILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-800 to-red-500 bg-[length:200%_auto] font-black animate-[shimmer-slide_4s_linear_infinite] [filter:drop-shadow(0_-2px_10px_rgba(239,68,68,0.7))_drop-shadow(0_2px_5px_rgba(239,68,68,0.4))]'
-  }
-  if (a >= QUINDECILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-gradient-to-b from-emerald-400 via-cyan-400 to-emerald-400 bg-[length:auto_200%] font-black animate-[emerald-wave_3s_ease-in-out_infinite] [filter:drop-shadow(0_-3px_12px_rgba(52,211,153,0.8))_drop-shadow(0_2px_6px_rgba(52,211,153,0.4))]'
-  }
-  if (a >= QUATTUORDECILLION) {
-    return 'inline-block text-cyan-600 font-black animate-[soft-glow_3s_ease-in-out_infinite] [--glow-color-upper:rgba(8,145,178,0.8)] [--glow-color-lower:rgba(8,145,178,0.4)]'
-  }
-  if (a >= TREDECILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-rose-600 bg-[length:200%_auto] font-black animate-[shimmer-slide_5s_linear_infinite] [filter:drop-shadow(0_-2px_8px_rgba(245,158,11,0.6))_drop-shadow(0_2px_4px_rgba(245,158,11,0.3))]'
-  }
-  if (a >= DUODECILLION) {
-    return 'inline-block text-purple-500 font-black animate-[soft-glow_4s_ease-in-out_infinite] [--glow-color-upper:rgba(168,85,247,0.7)] [--glow-color-lower:rgba(168,85,247,0.3)]'
-  }
-  if (a >= UNDECILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-gradient-to-b from-slate-300 via-slate-500 to-slate-800 bg-[length:200%_200%] font-black animate-[shimmer-glow_4s_ease-in-out_infinite] [--glow-top:rgba(148,163,184,0.8)] [--glow-bottom:rgba(71,85,105,0.4)] [-webkit-text-stroke:0.8px_#1e293b]'
-  }
-  if (a >= NONILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-green-500 to-purple-500 bg-[length:200%_auto] font-black animate-[shimmer-glow_6s_linear_infinite] [--glow-top:rgba(239,68,68,0.5)] [--glow-bottom:rgba(168,85,247,0.4)]'
-  }
-  if (a >= OCTILLION) {
-    return 'inline-block text-orange-500 font-black animate-[static-breathe_3s_ease-in-out_infinite] [--glow-top:rgba(251,146,60,0.7)] [--glow-bottom:rgba(251,146,60,0.4)]'
-  }
-  if (a >= SEPTILLION) {
-    return 'inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 font-black animate-[shimmer-glow_5s_ease-in-out_infinite] [--glow-top:rgba(34,211,238,0.6)] [--glow-bottom:rgba(37,99,235,0.3)]'
-  }
-  if (a >= SEXTILLION) {
-    return 'inline-block text-fuchsia-600 font-black animate-[static-breathe_3s_ease-in-out_infinite] [--glow-top:rgba(192,38,211,0.6)] [--glow-bottom:rgba(192,38,211,0.3)]'
-  }
-  if (a >= QUINTILLION) {
-    return 'inline-block text-rose-600 font-black animate-[static-breathe_4s_ease-in-out_infinite] [--glow-top:rgba(225,29,72,0.5)] [--glow-bottom:rgba(225,29,72,0.2)]'
-  }
-  if (a >= QUADRILLION)
-    return 'inline-block text-pink-600 font-extrabold [filter:drop-shadow(0_0_5px_rgba(219,39,119,0.3))]'
-  if (a >= TRILLION) return 'text-red-500 font-bold'
-  if (a >= 100_000_000_000n) return 'text-orange-600 font-bold'
-  if (a >= 10_000_000_000n) return 'text-orange-500 font-semibold'
-  if (a >= 1_000_000_000n) return 'text-amber-500'
-  if (a >= 100_000_000n) return 'text-lime-500'
-  if (a >= 10_000_000n) return 'text-emerald-500'
-  if (a >= 1_000_000n) return 'text-cyan-500'
+  // High Tiers
+  if (a >= VIGINTILLION) return 'g-vg'
+  if (a >= NOVEMDECILLION) return 'g-nod'
+  if (a >= OCTODECILLION) return 'g-ocd'
+  if (a >= SEPTENDECILLION) return 'g-spd'
+  if (a >= SEXDECILLION) return 'g-sxd'
+  if (a >= QUINDECILLION) return 'g-qid'
+  if (a >= QUATTUORDECILLION) return 'g-qud'
+  if (a >= TREDECILLION) return 'g-td'
+  if (a >= DUODECILLION) return 'g-dd'
+  if (a >= UNDECILLION) return 'g-ud'
+  if (a >= NONILLION) return 'g-no'
+  if (a >= OCTILLION) return 'g-oc'
+  if (a >= SEPTILLION) return 'g-sp'
+  if (a >= SEXTILLION) return 'g-sx'
+  if (a >= QUINTILLION) return 'g-qi'
+  if (a >= QUADRILLION) return 'g-qd'
+
+  // Base Tiers
+  if (a >= TRILLION) return 'g-t'
+  if (a >= 100_000_000_000n) return 'g-b3'
+  if (a >= 10_000_000_000n) return 'g-b2'
+  if (a >= 1_000_000_000n) return 'g-b1'
+  if (a >= 100_000_000n) return 'g-m3'
+  if (a >= 10_000_000n) return 'g-m2'
+  if (a >= 1_000_000n) return 'g-m1'
 
   return 'text-gray-400'
 }

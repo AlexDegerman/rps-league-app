@@ -5,7 +5,12 @@ import { formatDateTime, formatPoints, getAmountColor } from '@/lib/format'
 import GemIcon from '@/components/icons/GemIcon'
 import MoveIcon from '@/components/icons/MoveIcon'
 import { fetchUserBetHistory } from '@/lib/api'
-import { Match, PredictionRecord, BonusTier, BetHistoryEntry } from '@/types/rps'
+import {
+  Match,
+  PredictionRecord,
+  BonusTier,
+  BetHistoryEntry
+} from '@/types/rps'
 import { BONUS_TIER_STYLES } from '@/lib/constants'
 
 type Tab = 'recent' | 'wins' | 'multipliers'
@@ -101,12 +106,21 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
         <BonusBadge tier={entry.bonusTier} multiplier={entry.bonusMultiplier} />
 
         <div className="flex items-center justify-center gap-3 mt-1">
-          <span
-            className={`text-4xl min-[425px]:text-5xl font-black tabular-nums tracking-tighter ${amountAnimationClass}`}
-          >
-            {isWin ? '+' : isLoss ? '-' : ''}
-            {formatPoints(gainLossBig < 0n ? -gainLossBig : gainLossBig)}
-          </span>
+          {(() => {
+            const { display, full, capped } = formatPoints(
+              gainLossBig < 0n ? -gainLossBig : gainLossBig
+            )
+            return (
+              <span
+                className={`text-4xl min-[425px]:text-5xl font-black tabular-nums tracking-tighter ${amountAnimationClass}`}
+                title={capped ? full : undefined}
+                style={{ position: 'relative' }}
+              >
+                {isWin ? '+' : isLoss ? '-' : ''}
+                {display}
+              </span>
+            )
+          })()}
           <div className="w-6 h-6 min-[425px]:w-8 min-[425px]:h-8">
             <GemIcon size={32} />
           </div>
@@ -117,7 +131,7 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
             Stake:
           </span>
           <span className={getAmountColor(stakeBig)}>
-            {formatPoints(entry.betAmount)}
+            {formatPoints(entry.betAmount).display}
           </span>
         </div>
       </div>

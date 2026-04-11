@@ -22,13 +22,14 @@ const Header = () => {
     setProfileHref(`/profile/${user.shortId}`)
     fetchUserPoints(user.userId, user.shortId, user.nickname).catch(() => {})
   }, [])
-  
+
   const allNavItems = [
     { label: 'Live', href: '/' },
-    { label: 'Leaderboard', href: '/leaderboard' },
+    { label: 'Ranks', href: '/leaderboard' },
     { label: 'Profile', href: profileHref },
     { label: 'Search', href: '/search' },
-    { label: 'Analysis', href: '/analysis' }
+    { label: 'Analysis', href: '/analysis' },
+    { label: 'Tiers', href: '/showcase' }
   ]
 
   const navClass = (href: string) =>
@@ -61,17 +62,17 @@ const Header = () => {
             />
           </Link>
 
-          {/* Desktop/Full Nav */}
-          <nav className="hidden min-[460px]:flex gap-2">
+          {/* Desktop/Full Nav - Now includes Tiers */}
+          <nav className="hidden min-[540px]:flex gap-2">
             {allNavItems.map(({ label, href }) => (
               <Link key={href} href={href} className={navClass(href)}>
-                {label === 'Leaderboard' ? 'Ranks' : label}
+                {label}
               </Link>
             ))}
           </nav>
 
           {/* Mobile Main Bar */}
-          <div className="flex min-[460px]:hidden items-center gap-1.5 flex-1">
+          <div className="flex min-[540px]:hidden items-center gap-1.5 flex-1">
             <Link href="/" className={navClass('/')}>
               Live
             </Link>
@@ -103,7 +104,7 @@ const Header = () => {
         </div>
 
         {isOpen && (
-          <nav className="min-[460px]:hidden mt-3 pt-3 flex flex-row flex-wrap items-center justify-end gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
+          <nav className="min-[540px]:hidden mt-3 pt-3 flex flex-row flex-wrap items-center justify-end gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1">
             <Link
               href={profileHref}
               onClick={() => setIsOpen(false)}
@@ -126,6 +127,14 @@ const Header = () => {
               className={menuRowItemClass('/analysis')}
             >
               Analysis
+            </Link>
+
+            <Link
+              href="/showcase"
+              onClick={() => setIsOpen(false)}
+              className={menuRowItemClass('/showcase')}
+            >
+              Tiers
             </Link>
           </nav>
         )}
