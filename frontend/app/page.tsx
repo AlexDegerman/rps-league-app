@@ -756,7 +756,7 @@ export default function HomePage() {
                   >
                     {notification === 'no_bigint'
                       ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
-                      : 'Start betting to rank up the leaderboard. No login needed — your progress is saved automatically.'}
+                      : 'Start betting to rank up the leaderboard. No login needed, your progress is saved automatically.'}
                   </p>
                 </div>
               </div>
