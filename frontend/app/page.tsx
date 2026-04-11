@@ -174,7 +174,6 @@ export default function HomePage() {
     fetchUserPoints(user.userId, user.shortId)
       .then((data) => {
         if (!data) return
-        console.log(data)
         if (data.nickname) {
           setDisplayNickname(data.nickname)
         }
