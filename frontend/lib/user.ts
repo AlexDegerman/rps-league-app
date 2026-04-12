@@ -24,7 +24,13 @@ export const getOrCreateUser = (): {
     return { userId: '', shortId: '', nickname: '' }
   }
 
-  if (cachedUser) return cachedUser
+  if (cachedUser) {
+    const freshNickname = localStorage.getItem(NICKNAME_KEY)
+    if (freshNickname && freshNickname !== cachedUser.nickname) {
+      cachedUser = { ...cachedUser, nickname: freshNickname }
+    }
+    return cachedUser
+  }
 
   const validate = (v: string | null) =>
     v && v !== 'null' && v !== 'undefined' && v.trim() !== '' ? v : null
@@ -75,6 +81,7 @@ export const regenerateNickname = (): string => {
   if (typeof window === 'undefined') return ''
   const nickname = generateNickname()
   localStorage.setItem(NICKNAME_KEY, nickname)
+  if (cachedUser) cachedUser = { ...cachedUser, nickname }
   return nickname
 }
 
