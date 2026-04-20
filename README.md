@@ -307,7 +307,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 Backend (`/backend/.env`)
 ```bash
 # Database & Security
-DATABASE_URL=your_supabase_connection_string
+DATABASE_URL=postgresql://postgres.your-project-ref:[password]@aws-1-eu-west-1.pooler.supabase.com:6543/postgres
 CORS_ORIGIN=http://localhost:3000
 
 # Infrastructure Automation
@@ -426,12 +426,20 @@ Tracks all user wagers. Each user can place one bet per game.
 - `predictions.user_id` → `users.user_id`
 - `predictions.game_id` → `matches.game_id`
 
+### Indexes
+
+| Table | Column(s) | Reason |
+| :--- | :--- | :--- |
+| `predictions` | `user_id` | Speeds up per-user bet lookups and leaderboard aggregates |
+| `predictions` | `created_at` | Speeds up time-windowed queries (daily/weekly leaderboard tabs) |
+
 ---
 
 ### Notes
 
 - `short_id` is a unique public identifier, but not used as a foreign key
 - All internal relationships rely on `user_id` for consistency
+- `predictions.user_id` and `predictions.created_at` are indexed to support high-frequency leaderboard aggregation across 250k+ match rows
 
 ## 📱 Device Compatibility
 
