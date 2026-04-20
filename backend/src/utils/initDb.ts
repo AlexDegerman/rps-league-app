@@ -32,7 +32,11 @@ export const initDb = async (): Promise<void> => {
       total_pities_earned INTEGER DEFAULT 0,
       joined_date BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT,
       linkedin_url TEXT,
-      show_linkedin_badge BOOLEAN DEFAULT true
+      show_linkedin_badge BOOLEAN DEFAULT true,
+      biggest_single_win NUMERIC NOT NULL DEFAULT 0,
+      biggest_multiplier_win NUMERIC NOT NULL DEFAULT 0,
+      biggest_multiplier_tier TEXT,
+      total_flash_events_caught INTEGER NOT NULL DEFAULT 0
     )
   `)
 
@@ -48,7 +52,9 @@ export const initDb = async (): Promise<void> => {
       bonus_tier TEXT,
       bonus_multiplier NUMERIC DEFAULT 0,
       created_at BIGINT NOT NULL,
-      UNIQUE(user_id, game_id)
+      UNIQUE(user_id, game_id),
+      flash_event_type TEXT,
+      flash_multiplier NUMERIC DEFAULT 1
     )
   `)
 

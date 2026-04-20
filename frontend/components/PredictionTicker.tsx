@@ -5,6 +5,8 @@ import { generateNickname } from '@/lib/nicknames'
 import { formatTickerPoints, getAmountColor } from '@/lib/format'
 import { getUserId } from '@/lib/user'
 import GemIcon from './icons/GemIcon'
+import { useEventTheme } from '@/lib/EventThemeContext'
+import { EVENT_TICKER_CONFIG } from '@/lib/eventConfig'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -49,7 +51,9 @@ export default function PredictionTicker() {
   const cleanupTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(
     new Set()
   )
-
+  const { liveTheme } = useEventTheme()
+  const tcfg = liveTheme ? EVENT_TICKER_CONFIG[liveTheme] : null
+  
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
 
@@ -58,16 +62,13 @@ export default function PredictionTicker() {
 
       const data = JSON.parse(event.data)
       const isMe = data.userId === getUserId()
-
       const amount = BigInt(data.amount)
 
       if (isMe && data.result === 'LOSE' && amount === 50000n) return
 
       const name = data.nickname ?? 'Someone'
       const displayName = isMe ? 'You' : name
-
       const verb = data.result === 'WIN' ? 'won' : 'lost'
-
       const formattedAmt = formatTickerPoints(amount)
       const rawMsg = `${displayName} ${verb} ${formattedAmt} points`
 
@@ -95,7 +96,6 @@ export default function PredictionTicker() {
     return () => window.removeEventListener('resize', updateVelocity)
   }, [])
 
-  // 3. Generator
   useEffect(() => {
     let demoTimer: ReturnType<typeof setTimeout>
     const scheduleDemoEvent = () => {
@@ -107,22 +107,17 @@ export default function PredictionTicker() {
           let amount = 0n
 
           if (tierRoll < 15) {
-            // 200k to 1M
             amount = BigInt(Math.floor(Math.random() * 801) + 200) * 10n ** 3n
           } else if (tierRoll < 75) {
-            // 1M to 999M
             amount = BigInt(Math.floor(Math.random() * 998) + 1) * 10n ** 6n
           } else if (tierRoll < 90) {
-            // 1B to 900B
             amount = BigInt(Math.floor(Math.random() * 900) + 1) * 10n ** 9n
           } else if (tierRoll < 99) {
-            // 1T to 900Qi
             const isQi = Math.random() > 0.7
             amount =
               BigInt(Math.floor(Math.random() * 900) + 1) *
               (isQi ? 10n ** 18n : 10n ** 12n)
           } else {
-            // 1Sx to 50Sx
             amount = BigInt(Math.floor(Math.random() * 50) + 1) * 10n ** 21n
           }
 
@@ -219,10 +214,35 @@ export default function PredictionTicker() {
     )
 
   return (
-    <div className="fixed bottom-8 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-8">
-      <div className="w-full flex items-center gap-3">
+    <div
+      className={`fixed bottom-8 left-0 right-0 z-50 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-8 overflow-hidden
+      ${tcfg?.bgClass ?? 'bg-white/95'}
+      ${tcfg?.borderClass ?? 'border-t border-gray-100'}
+    `}
+    >
+      {/* Top edge glow */}
+      {tcfg?.topGlowClass && (
+        <div
+          className={`absolute top-0 left-0 right-0 h-px pointer-events-none ${tcfg.topGlowClass}`}
+        />
+      )}
+
+      {/* Hellfire ember particles */}
+      {tcfg?.particleClass && (
+        <div
+          className={`absolute inset-0 pointer-events-none ${tcfg.particleClass}`}
+        />
+      )}
+
+      {/* Background base */}
+      <div className="absolute inset-0 bg-white/80 -z-10" />
+
+      <div className="w-full flex items-center gap-3 relative z-10">
         <span className="text-[10px] font-black text-gray-400 shrink-0 uppercase tracking-widest flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+          {/* Live dot — event themed or default green */}
+          <span
+            className={`w-1.5 h-1.5 rounded-full animate-pulse ${tcfg?.dotClass ?? 'bg-green-500'}`}
+          />
           <span className="hidden min-[400px]:inline">Live</span>
         </span>
 

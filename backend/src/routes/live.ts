@@ -5,9 +5,26 @@ import {
 } from '../utils/matchGenerator.js'
 import { resolvePrediction } from '../services/predictionService.js'
 import type { Match } from '../types/rps.js'
+import { getFlashEventForUser } from '../services/flashEventService.js'
 
 const router = Router()
 
+router.get('/flash-state', (req, res) => {
+  const { userId } = req.query
+  if (!userId || typeof userId !== 'string') {
+    return res.json(null)
+  }
+  const event = getFlashEventForUser(userId)
+  res.json(
+    event
+      ? {
+          type: event.type,
+          betsRemaining: event.betsRemaining,
+          multiplier: event.multiplier
+        }
+      : null
+  )
+})
 type SSEClient = (event: string, data: string) => void
 const clients = new Set<SSEClient>()
 
@@ -54,7 +71,8 @@ router.get('/', (req, res) => {
         // prediction_result and result events in the correct order
         await resolvePrediction(match.gameId, winner, broadcast)
         broadcast('result', JSON.stringify(match))
-      }
+      },
+      broadcast
     )
   }
 

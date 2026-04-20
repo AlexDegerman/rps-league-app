@@ -45,7 +45,7 @@ export const parseShorthand = (val: string): bigint => {
   if (!clean) return 0n
 
   const match = clean.match(
-    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg)?$/
+    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg|uvg|dvg|tvg|qvg|qiv|svg|spv|ovg)?$/
   )
   if (!match) return 0n
 
@@ -72,7 +72,20 @@ export const parseShorthand = (val: string): bigint => {
     spd: 10n ** 54n,
     ocd: 10n ** 57n,
     nod: 10n ** 60n,
-    vg: 10n ** 63n
+    vg: 10n ** 63n,
+    // --- SEASONAL TIERS (enable one per week) ---
+    // W1 — Moon theme
+   // uvg: 10n ** 66n,   // Unvigintillion
+    //dvg: 10n ** 69n,   // Duovigintillion
+     // W2 — Electric theme
+    //tvg: 10n ** 72n,   // Trevigintillion
+    //qag: 10n ** 75n,  // Quattuorvigintillion
+    // W3 — Cards theme
+    //qiv: 10n ** 78n,  // Quinvigintillion
+    //svg: 10n ** 81n,  // Sexvigintillion
+     // W4 — Hellfire theme
+    //spv: 10n ** 84n,  // Septenvigintillion
+    //ovg: 10n ** 87n,  // Octovigintillion
   }
 
   if (suffix && multipliers[suffix]) {
@@ -97,41 +110,8 @@ export const parseShorthand = (val: string): bigint => {
 }
 
 export const formatTickerPoints = (n: number | bigint | string): string => {
-  const bigN = BigInt(n);
-  const absN = bigN < 0n ? -bigN : bigN;
-  const sign = bigN < 0n ? '-' : '';
-
-  const tiers = [
-    { threshold: 10n ** 63n, symbol: 'Vg' },
-    { threshold: 10n ** 60n, symbol: 'Nod' },
-    { threshold: 10n ** 57n, symbol: 'Ocd' },
-    { threshold: 10n ** 54n, symbol: 'Spd' },
-    { threshold: 10n ** 51n, symbol: 'Sxd' },
-    { threshold: 10n ** 48n, symbol: 'Qid' },
-    { threshold: 10n ** 45n, symbol: 'Qad' },
-    { threshold: 10n ** 42n, symbol: 'Td' },
-    { threshold: 10n ** 39n, symbol: 'Dd' },
-    { threshold: 10n ** 36n, symbol: 'Ud' },
-    { threshold: 10n ** 33n, symbol: 'Dc' },
-    { threshold: 10n ** 30n, symbol: 'No' },
-    { threshold: 10n ** 27n, symbol: 'Oc' },
-    { threshold: 10n ** 24n, symbol: 'Sp' },
-    { threshold: 10n ** 21n, symbol: 'Sx' },
-    { threshold: 10n ** 18n, symbol: 'Qi' },
-    { threshold: 10n ** 15n, symbol: 'Qa' },
-    { threshold: 10n ** 12n, symbol: 'T' },
-    { threshold: 10n ** 9n, symbol: 'B' },
-    { threshold: 10n ** 6n, symbol: 'M' }
-  ];
-
-  for (const { threshold, symbol } of tiers) {
-    if (absN >= threshold) {
-      const val = Number(absN) / Number(threshold);
-      return `${sign}${val % 1 === 0 ? val.toFixed(0) : val.toFixed(1)}${symbol}`;
-    }
-  }
-
-  return sign + absN.toLocaleString('en-US');
+  const { display } = formatPoints(n)
+  return display
 }
 
 // Formats large point values into human-readable strings.
@@ -151,6 +131,19 @@ export const formatPoints = (
   const sign = bigN < 0n ? '-' : ''
 
   const tiers = [
+    // W4 — Hellfire theme
+    //{ threshold: 10n ** 87n, symbol: 'Ovg' },   // Octovigintillion
+    //{ threshold: 10n ** 84n, symbol: 'Spv' },   // Septenvigintillion
+     // W3 — Cards theme
+    //{ threshold: 10n ** 81n, symbol: 'Svg' },   // Sexvigintillion
+    //{ threshold: 10n ** 78n, symbol: 'Qiv' },   // Quinvigintillion
+    // W2 — Electric theme
+    //{ threshold: 10n ** 75n, symbol: 'Qvg' },   // Quattuorvigintillion
+    //{ threshold: 10n ** 72n, symbol: 'Tvg' },    // Trevigintillion
+    // W1 — Moon theme
+    //{ threshold: 10n ** 69n, symbol: 'Dvg' },    // Duovigintillion
+    //{ threshold: 10n ** 66n, symbol: 'Uvg' },    // Unvigintillion
+    // --- LIVE TIERS ---
     { threshold: 10n ** 63n, symbol: 'Vg' },
     { threshold: 10n ** 60n, symbol: 'Nod' },
     { threshold: 10n ** 57n, symbol: 'Ocd' },
@@ -175,13 +168,18 @@ export const formatPoints = (
 
   const getFormattedValue = (value: bigint, divisor: bigint, sym: string) => {
     const whole = value / divisor
+
+    // FORCE: No decimals if the number is 100 or larger (e.g., 100M, 500Vg)
     if (whole >= 100n) return `${sign}${whole}${sym}`
+
     const unit = divisor / 10n
     const tenth = unit > 0n ? (value % divisor) / unit : 0n
+
+    // Only show decimal if it's non-zero AND we are under the 100 threshold
     const decimalStr = tenth > 0n ? `.${tenth}` : ''
     return `${sign}${whole}${decimalStr}${sym}`
   }
-  
+
   if (useK && absN >= 1000n && absN < 1000000n) {
     const full = getFormattedValue(absN, 1000n, 'K')
     const whole = absN / 1000n
@@ -207,6 +205,20 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   const absN = bigN < 0n ? -bigN : bigN
 
   const names = [
+    // --- SEASONAL TIERS (uncomment matching block when enabling above) ---
+    // W4 — Hellfire
+    //{ t: 87, n: 'Octovigintillion' },
+    //{ t: 84, n: 'Septenvigintillion' },
+    // W3 — Cards
+    //{ t: 81, n: 'Sexvigintillion' },
+    //{ t: 78, n: 'Quinvigintillion' },
+    // W2 — Electric
+    //{ t: 75, n: 'Quattuorvigintillion' },
+    //{ t: 72, n: 'Trevigintillion' },
+    // W1 — Moon
+    //{ t: 69, n: 'Duovigintillion' },
+    //{ t: 66, n: 'Unvigintillion' },
+    // --- LIVE ---
     { t: 63, n: 'Vigintillion' },
     { t: 60, n: 'Novemdecillion' },
     { t: 57, n: 'Octodecillion' },
@@ -237,6 +249,19 @@ export const getFullNumberName = (n: number | bigint | string): string => {
 
 const ZERO = 0n
 const VIGINTILLION = 10n ** 63n
+// --- SEASONAL TIER CONSTANTS (uncomment to enable) ---
+// W1 — Moon
+//const UNVIGINTILLION = 10n ** 66n
+//const DUOVIGINTILLION = 10n ** 69n
+// W2 — Electric
+//const TREVIGINTILLION = 10n ** 72n
+//const QUATTUORVIGINTILLION = 10n ** 75n
+// W3 — Cards
+//const QUINVIGINTILLION = 10n ** 78n
+//const SEXVIGINTILLION = 10n ** 81n
+// W4 — Hellfire
+//const SEPTENVIGINTILLION = 10n ** 84n
+//const OCTOVIGINTILLION = 10n ** 87n
 const NOVEMDECILLION = 10n ** 60n
 const OCTODECILLION = 10n ** 57n
 const SEPTENDECILLION = 10n ** 54n
@@ -246,6 +271,7 @@ const QUATTUORDECILLION = 10n ** 45n
 const TREDECILLION = 10n ** 42n
 const DUODECILLION = 10n ** 39n
 const UNDECILLION = 10n ** 36n
+const DECILLION = 10n ** 33n
 const NONILLION = 10n ** 30n
 const OCTILLION = 10n ** 27n
 const SEPTILLION = 10n ** 24n
@@ -257,6 +283,9 @@ const TRILLION = 10n ** 12n
 /**
  * Maps a points amount to the corresponding CSS class for "RPS League" tier styling.
  * Prioritizes BigInt for Vigintillion-scale precision and avoids quick-fix error handling.
+ *
+ * SEASONAL TIERS: To enable a new week's tiers, uncomment the matching constants above
+ * AND the corresponding if-blocks below. Always keep top-down order (highest first).
  */
 export const getAmountColor = (amount?: number | bigint | string): string => {
   if (amount == null || amount === '') return 'text-gray-400'
@@ -278,23 +307,42 @@ export const getAmountColor = (amount?: number | bigint | string): string => {
   const a = raw < ZERO ? -raw : raw
   if (a === ZERO) return 'text-gray-400'
 
-  // High Tiers
+  // --- SEASONAL TIERS (uncomment top-down as they go live) ---
+
+  // W4 — Hellfire theme
+   //if (a >= OCTOVIGINTILLION) return 'g-ovg'
+   //if (a >= SEPTENVIGINTILLION) return 'g-spv'
+
+  // W3 — Cards theme
+   //if (a >= SEXVIGINTILLION) return 'g-svg
+  //if (a >= QUINVIGINTILLION) return 'g-qiv'
+
+  // W2 — Electric theme
+   //if (a >= QUATTUORVIGINTILLION) return 'g-qvg'
+  //if (a >= TREVIGINTILLION) return 'g-tvg' 
+
+  // W1 — Moon theme
+  //if (a >= DUOVIGINTILLION) return 'g-dvg' 
+   //if (a >= UNVIGINTILLION) return 'g-uvg' 
+
+  // --- LIVE TIERS ---
   if (a >= VIGINTILLION) return 'g-vg'
   if (a >= NOVEMDECILLION) return 'g-nod'
   if (a >= OCTODECILLION) return 'g-ocd'
   if (a >= SEPTENDECILLION) return 'g-spd'
   if (a >= SEXDECILLION) return 'g-sxd'
   if (a >= QUINDECILLION) return 'g-qid'
-  if (a >= QUATTUORDECILLION) return 'g-qud'
+  if (a >= QUATTUORDECILLION) return 'g-qad'
   if (a >= TREDECILLION) return 'g-td'
   if (a >= DUODECILLION) return 'g-dd'
   if (a >= UNDECILLION) return 'g-ud'
+  if (a >= DECILLION) return 'g-dc'
   if (a >= NONILLION) return 'g-no'
   if (a >= OCTILLION) return 'g-oc'
   if (a >= SEPTILLION) return 'g-sp'
   if (a >= SEXTILLION) return 'g-sx'
   if (a >= QUINTILLION) return 'g-qi'
-  if (a >= QUADRILLION) return 'g-qd'
+  if (a >= QUADRILLION) return 'g-qa'
 
   // Base Tiers
   if (a >= TRILLION) return 'g-t'
@@ -354,4 +402,16 @@ export const getBonusStyles = (tier: string) => {
         glow: 'drop-shadow-sm'
       }
   }
+}
+
+export const getEventColor = (key: string, alpha: number) => {
+  const colors: Record<string, string> = {
+    lunar: `rgba(144,205,244,${alpha})`,
+    electric: `rgba(159,122,234,${alpha})`,
+    cards: `rgba(236,201,75,${alpha})`,
+    hellfire: `rgba(220,38,38,${alpha})`,
+    fever: `rgba(34,197,94,${alpha})`,
+    inferno: `rgba(249,115,22,${alpha})`
+  }
+  return colors[key] ?? `rgba(150,150,150,${alpha})`
 }

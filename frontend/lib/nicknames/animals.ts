@@ -54,7 +54,7 @@ export const animals = [
   'Platypus',
   'Kiwi',
   'Phoenix',
-
+  'Dragon',
   'Griffin',
   'Hydra',
   'Kraken',

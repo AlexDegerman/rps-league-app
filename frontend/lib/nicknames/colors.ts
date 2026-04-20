@@ -41,7 +41,7 @@ export const colors = [
   'Amethyst',
   'Onyx',
   'Pearl',
-
+  'Jade',
   'Cobalt',
   'Sand',
   'Rust',

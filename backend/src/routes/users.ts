@@ -159,7 +159,7 @@ router.get('/:userId/points', async (req, res) => {
     const { shortId, nickname } = req.query
 
     const result = await pool.query(
-      `SELECT nickname, points, peak_points, daily_peak, weekly_peak FROM users WHERE user_id = $1`,
+      `SELECT nickname, points, peak_points, daily_peak, weekly_peak, current_win_streak FROM users WHERE user_id = $1`,
       [userId]
     )
 
@@ -173,7 +173,8 @@ router.get('/:userId/points', async (req, res) => {
         points: user.points.toString(),
         peakPoints: user.points.toString(),
         dailyPeak: user.points.toString(),
-        weeklyPeak: user.points.toString()
+        weeklyPeak: user.points.toString(),
+        currentWinStreak: Number(user.points.toString() ?? 0)
       })
     }
 
@@ -184,7 +185,8 @@ router.get('/:userId/points', async (req, res) => {
       points: row.points.toString(),
       peakPoints: row.peak_points.toString(),
       dailyPeak: row.daily_peak.toString(),
-      weeklyPeak: row.weekly_peak.toString()
+      weeklyPeak: row.weekly_peak.toString(),
+      currentWinStreak: Number(row.current_win_streak ?? 0)
     })
   } catch (err) {
     console.error('Points fetch error:', err)

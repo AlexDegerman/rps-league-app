@@ -47,6 +47,8 @@ export interface PredictionRecord {
   bonusTier?: string | null
   bonusMultiplier?: number
   createdAt?: number
+  flashEventType?: string | null
+  flashMult?: number
 }
 export interface UserStats {
   joinedDate: string
@@ -75,6 +77,7 @@ export interface UserPointsData {
   peakPoints: string
   dailyPeak: string
   weeklyPeak: string
+  currentWinStreak: number
 }
 
 export interface LeaderboardEntry {
@@ -158,6 +161,17 @@ export interface BetHistoryEntry {
   playerBName: string
   playerAPlayed: 'ROCK' | 'PAPER' | 'SCISSORS'
   playerBPlayed: 'ROCK' | 'PAPER' | 'SCISSORS'
+  flashMult: number
+  flashEventType: string | null
 }
 
 export type BonusTier = 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON'
+
+export interface MatchRowProps {
+  match: Match
+  highlightPlayer?: string
+  prediction?: PredictionRecord
+  alwaysLeft?: boolean
+  winStreak?: number
+  visualMode?: string | null
+}

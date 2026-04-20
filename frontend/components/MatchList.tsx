@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { formatDateTime, getPlayerResult, resultColor } from '@/lib/format'
-import type { Match, PredictionRecord } from '@/types/rps'
+import type { Match, MatchRowProps, PredictionRecord } from '@/types/rps'
 import MoveIcon from '@/components/icons/MoveIcon'
+import { MODE_CONFIG } from '@/lib/constants'
 
 const getMatchWinner = (match: Match): string => {
   const { playerA, playerB } = match
@@ -14,18 +15,13 @@ const getMatchWinner = (match: Match): string => {
   return aWins ? playerA.name : playerB.name
 }
 
-interface MatchRowProps {
-  match: Match
-  highlightPlayer?: string
-  prediction?: PredictionRecord
-  alwaysLeft?: boolean
-}
-
 const MatchRow = ({
   match,
   highlightPlayer,
   prediction,
-  alwaysLeft
+  alwaysLeft,
+  winStreak = 0,
+  visualMode = null
 }: MatchRowProps) => {
   const isFlipped =
     alwaysLeft && highlightPlayer && match.playerB.name === highlightPlayer
@@ -33,25 +29,63 @@ const MatchRow = ({
   const right = isFlipped ? match.playerA : match.playerB
   const winner = getMatchWinner(match)
 
+  // Only apply themed styling to rows where the user has a prediction
+  const hasPrediction = !!prediction
+  const isFlash = visualMode?.startsWith('flash_') ?? false
+  const isInferno = !isFlash && winStreak >= 5
+  const isFever = !isFlash && winStreak >= 3 && winStreak < 5
+  const isActive = hasPrediction && (isFlash || isInferno || isFever)
+
+  const activeKey = (
+    isActive
+      ? visualMode && visualMode in MODE_CONFIG
+        ? visualMode
+        : isInferno
+          ? 'inferno'
+          : isFever
+            ? 'fever'
+            : 'default'
+      : 'default'
+  ) as keyof typeof MODE_CONFIG
+
+  const cfg = MODE_CONFIG[activeKey]
+
   return (
-    <li className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-      {/* Top row: date and winner badge swap sides based on who won */}
-      <div className="flex justify-between items-center mb-2 gap-2">
+    <li
+      className={`relative rounded-xl shadow-sm border-2 p-4 overflow-hidden transition-all duration-300
+        ${cfg.border} ${cfg.bg} ${isActive ? cfg.cardAnim : ''}`}
+    >
+      {/* Ambient glow */}
+      {isActive && cfg.glowColor && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(ellipse at 50% 0%, ${cfg.glowColor} 0%, transparent 60%)`
+          }}
+        />
+      )}
+
+      {/* Top row: winner badge + date */}
+      <div className="flex justify-between items-center mb-2 gap-2 relative z-10">
         {winner === left.name ? (
           <>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-500 text-white shrink-0">
+            <span
+              className={`text-xs font-black px-2.5 py-0.5 rounded-lg shrink-0 text-white ${cfg.winnerBadge}`}
+            >
               {winner.split(' ')[0]} wins
             </span>
-            <span className="text-xs text-gray-400 shrink-0">
+            <span className={`text-xs shrink-0 ${cfg.dateText}`}>
               {formatDateTime(match.time)}
             </span>
           </>
         ) : (
           <>
-            <span className="text-xs text-gray-400 shrink-0">
+            <span className={`text-xs shrink-0 ${cfg.dateText}`}>
               {formatDateTime(match.time)}
             </span>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-500 text-white shrink-0">
+            <span
+              className={`text-xs font-black px-2.5 py-0.5 rounded-lg shrink-0 text-white ${cfg.winnerBadge}`}
+            >
               {winner.split(' ')[0]} wins
             </span>
           </>
@@ -59,17 +93,20 @@ const MatchRow = ({
       </div>
 
       {/* Players + moves */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 relative z-10">
         {/* Left player */}
         <div className="flex flex-col items-start flex-1">
           <Link
             href={`/player/${encodeURIComponent(left.name)}`}
             onClick={(e) => e.stopPropagation()}
-            className={`font-medium text-sm underline decoration-gray-300 hover:decoration-indigo-600 hover:text-indigo-600 transition ${
-              winner === left.name
-                ? 'text-green-600 font-bold'
-                : 'text-gray-800'
-            }`}
+            className={`font-medium text-sm underline decoration-gray-300 transition
+              ${
+                winner === left.name && isActive
+                  ? cfg.winnerText
+                  : winner === left.name
+                    ? 'text-green-600 font-bold hover:decoration-green-600'
+                    : 'text-gray-800 hover:decoration-indigo-600 hover:text-indigo-600'
+              }`}
           >
             {left.name}
           </Link>
@@ -82,12 +119,11 @@ const MatchRow = ({
           )}
           {prediction?.pick === left.name && prediction.result && (
             <span
-              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white
-                inline-flex items-center justify-center
-                whitespace-nowrap w-fit leading-none
-                ${prediction.result === 'WIN' ? 'bg-green-500' : 'bg-red-500'}`}
+              className={`text-xs font-black mt-1 px-2.5 py-0.5 rounded-lg text-white
+              inline-flex items-center justify-center whitespace-nowrap w-fit leading-none tracking-wide
+              ${prediction.result === 'WIN' ? cfg.youWon : 'bg-red-500'}`}
             >
-              {prediction.result === 'WIN' ? 'You won!' : 'You lost'}
+              {prediction.result === 'WIN' ? '✨ You won!' : 'You lost'}
             </span>
           )}
         </div>
@@ -95,7 +131,11 @@ const MatchRow = ({
         {/* Move icons */}
         <div className="flex items-center gap-2 shrink-0">
           <MoveIcon move={left.played} />
-          <span className="text-gray-300 text-sm font-bold">vs</span>
+          <span
+            className={`text-sm font-black ${isActive ? cfg.vsText : 'text-gray-300'}`}
+          >
+            vs
+          </span>
           <MoveIcon move={right.played} />
         </div>
 
@@ -104,11 +144,14 @@ const MatchRow = ({
           <Link
             href={`/player/${encodeURIComponent(right.name)}`}
             onClick={(e) => e.stopPropagation()}
-            className={`font-medium text-sm text-right underline decoration-gray-300 hover:decoration-indigo-600 hover:text-indigo-600 transition ${
-              winner === right.name
-                ? 'text-green-600 font-bold'
-                : 'text-gray-800'
-            }`}
+            className={`font-medium text-sm text-right underline decoration-gray-300 transition
+              ${
+                winner === right.name && isActive
+                  ? cfg.winnerText
+                  : winner === right.name
+                    ? 'text-green-600 font-bold hover:decoration-green-600'
+                    : 'text-gray-800 hover:decoration-indigo-600 hover:text-indigo-600'
+              }`}
           >
             {right.name}
           </Link>
@@ -121,12 +164,11 @@ const MatchRow = ({
           )}
           {prediction?.pick === right.name && prediction.result && (
             <span
-              className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white
-                inline-flex items-center justify-center
-                whitespace-nowrap w-fit leading-none
-                ${prediction.result === 'WIN' ? 'bg-green-500' : 'bg-red-500'}`}
+              className={`text-xs font-black mt-1 px-2.5 py-0.5 rounded-lg text-white
+              inline-flex items-center justify-center whitespace-nowrap w-fit leading-none tracking-wide
+              ${prediction.result === 'WIN' ? cfg.youWon : 'bg-red-500'}`}
             >
-              {prediction.result === 'WIN' ? 'You won!' : 'You lost'}
+              {prediction.result === 'WIN' ? '✨ You won!' : 'You lost'}
             </span>
           )}
         </div>
@@ -142,6 +184,8 @@ interface MatchListProps {
   hasMore?: boolean
   predictions?: Map<string, PredictionRecord>
   alwaysLeft?: boolean
+  winStreak?: number
+  visualMode?: string | null
 }
 
 const MatchList = ({
@@ -150,7 +194,9 @@ const MatchList = ({
   isLoadingMore,
   hasMore,
   predictions,
-  alwaysLeft
+  alwaysLeft,
+  winStreak = 0,
+  visualMode = null
 }: MatchListProps) => {
   return (
     <>
@@ -162,6 +208,8 @@ const MatchList = ({
             highlightPlayer={highlightPlayer}
             prediction={predictions?.get(match.gameId)}
             alwaysLeft={alwaysLeft}
+            winStreak={winStreak}
+            visualMode={visualMode}
           />
         ))}
       </ul>

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { fetchDailyStats } from '@/lib/api'
-import { formatPoints, getAmountColor } from '@/lib/format'
+import { formatPoints, getAmountColor, getEventColor } from '@/lib/format'
+import { useEventTheme } from '@/lib/EventThemeContext'
 
 interface DailyStats {
   totalVolume: bigint
@@ -14,7 +15,9 @@ interface DailyStats {
 
 export default function LiveStatsTicker() {
   const [stats, setStats] = useState<DailyStats | null>(null)
-
+  const { visualMode } = useEventTheme()
+  const modeKey = visualMode?.replace('flash_', '') ?? null
+  
   useEffect(() => {
     const load = () => {
       fetchDailyStats()
@@ -45,7 +48,21 @@ export default function LiveStatsTicker() {
   if (!stats) return null
 
   return (
-    <div className="bg-gray-50/80 border-x border-b border-gray-100 rounded-b-xl py-1.5 px-3 mb-2 flex items-center gap-2 shadow-sm">
+    <div
+      className={`rounded-b-xl py-1.5 px-3 mb-2 flex items-center gap-2 shadow-sm relative overflow-hidden
+      bg-gray-50/80 border-x border-b border-gray-100
+      ${modeKey ? `event-side-${modeKey}` : ''}
+    `}
+    >
+      {modeKey && (
+        <div
+          className="absolute bottom-0 left-0 right-0 h-px"
+          style={{
+            background: getEventColor(modeKey, 0.6),
+            boxShadow: `0 0 6px ${getEventColor(modeKey, 0.4)}`
+          }}
+        />
+      )}
       <div className="shrink-0">
         <span className="text-[9px] text-cyan-600 font-black uppercase tracking-wider">
           Daily

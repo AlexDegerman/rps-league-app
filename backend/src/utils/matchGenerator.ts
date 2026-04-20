@@ -30,7 +30,7 @@ const generateMatch = (
 
   const moveA = randomItem(MOVES) as Move
   let moveB = randomItem(MOVES) as Move
-  // Re-roll until moves differ — ties are excluded by design
+  // Re-roll until moves differ - ties are excluded by design
   while (moveB === moveA) moveB = randomItem(MOVES) as Move
 
   return {
@@ -48,9 +48,9 @@ const saveMatch = async (
   match: Match & { expiresAt: number }
 ): Promise<void> => {
   await pool.query(
-    `INSERT INTO matches (game_id, type, time, expires_at, player_a_name, player_a_played, player_b_name, player_b_played)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     ON CONFLICT (game_id) DO NOTHING`,
+    `INSERT INTO matches (game_id, type, time, expires_at, player_a_name, player_a_played,      player_b_name, player_b_played)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      ON CONFLICT (game_id) DO NOTHING`,
     [
       match.gameId,
       match.type,
@@ -67,16 +67,14 @@ const saveMatch = async (
 export const startMatchGenerator = (
   onPending: (pendingMatch: PendingMatch) => void,
   onResult: (match: Match) => void,
+  broadcast: (event: string, data: string) => void,
   intervalMs = 5000
 ): void => {
   setInterval(async () => {
     const BETTING_DURATION = 3000
     const startTime = Date.now()
     const match = generateMatch(startTime, BETTING_DURATION)
-
-    // Save before broadcasting so the betting window is already open in the DB
     await saveMatch(match)
-
     const pendingMatch: PendingMatch = {
       gameId: match.gameId,
       time: match.time,
@@ -84,13 +82,9 @@ export const startMatchGenerator = (
       playerA: match.playerA.name,
       playerB: match.playerB.name
     }
-
     currentPendingMatch = pendingMatch
     onPending(pendingMatch)
-
-    // Wait for the betting window to close before resolving
     await new Promise((resolve) => setTimeout(resolve, BETTING_DURATION))
-
     currentPendingMatch = null
     onResult(match)
   }, intervalMs)

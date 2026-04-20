@@ -1,8 +1,8 @@
 # 🎲 RPS League App
 
-A fast-paced Rock Paper Scissors league web app where players bet virtual cosmetic points on live matches, track rankings, and explore analytics.
+A fast-paced live-service Rock Paper Scissors league web app where players bet virtual cosmetic points on live matches, track rankings, and explore analytics.
 
-> 🚨 **Project Evolution:** This application is a full-scale rebuilding of my original **[RPS League](https://github.com/AlexDegerman/rps-league)** (originally built for a Reaktor developer assignment). While the initial version served as a static match viewer, this "App" version is a concurrency-aware betting engine engineered for **Infinite Scaling** and real-time user engagement.
+> 🚨 **Project Evolution:** This application is a full-scale rebuilding of my original **[RPS League](https://github.com/AlexDegerman/rps-league)** (originally built for a Reaktor developer assignment). While the initial version served as a static match viewer, this version is a concurrency-aware betting engine engineered for **Infinite Scaling** and real-time user engagement.
 
 **Live demo:** [https://rpsleaguegame.vercel.app/](https://rpsleaguegame.vercel.app/)
 
@@ -10,7 +10,7 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
 
 | Desktop Gameplay | Mobile (320px) |
 | :---: | :---: |
-| <img src="./assets/rps.gif" width="450" /> | <img src="./assets/rpsmobile.gif" width="220" /> |
+| <img src="./assets/rps.gif" width="450" /> | <video src="./assets/rpsmobile.mp4" width="220" autoplay loop muted playsinline></video> |
 
 <p><em>Showcasing selected tier colors with live transitions.</em></p>
 <img src="./assets/rpscolor.gif" width="300" />
@@ -55,6 +55,13 @@ A fast-paced Rock Paper Scissors league web app where players bet virtual cosmet
     - On Loss: Lose 20% to 100% fewer points.
     - Tiers: Common, Rare, Epic, and Legendary (with unique UI glows and confetti).
     - Guarantees a bonus at least every 4 bets if it doesn’t occur naturally from the 40% base chance
+- Win streak system:
+  - Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x3, x6, x10)
+  - x10 multiplier persists until the streak is broken
+  - Longest win streak is permanently tracked in player profiles
+  - Momentum changes the UI color theme in real time as streak increases
+  - Streak badge evolves visually with each tier
+  - Core action buttons adapt to the active streak color state
 - Points contribute to:
   - Current points
   - Weekly gains
@@ -260,6 +267,8 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 | GET | `/api/users/recovery/:userId` | Get recovery code |
 | GET | `/api/users/check-name/:nickname` | Check nickname availability |
 | GET | `/api/users/:userId/points` | Get user points and peak stats |
+| GET | `/api/users/recovery/:userId` | Get recovery code for user |
+| GET | `/api/users/check-name/:nickname` | Check nickname availability |
 
 ---
 
@@ -285,6 +294,7 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 |--------|----------|-------------|
 | GET | `/api/stats` | Platform-wide statistics |
 | GET | `/api/stats/daily` | Daily betting stats and MVP |
+| GET | `/api/stats/monthly?year=<year>&month=<month>` | Monthly platform stats with key metrics and top performers |
 | POST | `/api/analysis` | AI Oracle query (Gemini-powered insights) |
 
 ---
@@ -345,7 +355,7 @@ This project uses **Supabase PostgreSQL** to manage real-time betting, match his
 
 ---
 
-### `matches`
+## `matches`
 
 The source of truth for the league's match history. Each row represents a completed match.
 
@@ -354,7 +364,7 @@ The source of truth for the league's match history. Each row represents a comple
 | **game_id** (PK) | TEXT | Unique UUID v4 for the match |
 | **type** | TEXT | Event discriminator (hardcoded as `GAME_RESULT`) |
 | **time** | BIGINT | Unix timestamp (ms) of match creation |
-| **expires_at** | BIGINT | End of 3-second betting window (start + duration) |
+| **expires_at** | BIGINT | End of betting window (start + duration) |
 | **player_a_name** | TEXT | Name of the first competitor |
 | **player_a_played** | TEXT | Move: `ROCK`, `PAPER`, or `SCISSORS` |
 | **player_b_name** | TEXT | Name of the second competitor |
@@ -362,48 +372,52 @@ The source of truth for the league's match history. Each row represents a comple
 
 ---
 
-### `users`
+## `users`
 
 Global user profiles with persistent point tracking and account recovery logic.
 
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | **user_id** (PK) | TEXT | Unique persistent identifier |
-| **short_id** (UQ) | TEXT | Public ID used for shareable profile URLs (`/profile/:shortId`). Guaranteed unique |
-| **points** | NUMERIC | Current balance (**100,000 floor enforced**) |
+| **short_id** (UQ) | TEXT | Public ID used for profile URLs (`/profile/:shortId`) |
+| **points** | NUMERIC | Current balance (100,000 floor enforced) |
 | **peak_points** | NUMERIC | All-time highest balance achieved |
-| **daily_peak** | NUMERIC | Highest balance today (reset via GitHub Cron) |
-| **weekly_peak** | NUMERIC | Highest balance this week (reset via GitHub Cron) |
-| **nickname** | TEXT | Auto-generated display name (adjective + color + animal) |
-| **recovery_code** (UQ) | TEXT | Unique slug for account recovery (e.g., `swift-tiger-1234`) |
-| **total_volume** | NUMERIC | Total cumulative points risked across all bets |
-| **biggest_win** | NUMERIC | Single largest point gain from a single prediction |
-| **current_win_streak** | INTEGER | Current number of consecutive wins |
-| **max_win_streak** | INTEGER | All-time highest win streak |
-| **bonus_pity_count** | INTEGER | Consecutive bets without a bonus (Bad Luck Protection) |
-| **total_pities_earned** | INTEGER | Total times the natural pity limit (4) was reached |
-| **joined_date** | BIGINT | Unix timestamp (ms) of when the profile was first created |
+| **daily_peak** | NUMERIC | Highest balance today |
+| **weekly_peak** | NUMERIC | Highest balance this week |
+| **nickname** | TEXT | Auto-generated display name |
+| **recovery_code** (UQ) | TEXT | Unique recovery slug |
+| **total_volume** | NUMERIC | Total cumulative points risked |
+| **biggest_win** | NUMERIC | Largest single win |
+| **current_win_streak** | INTEGER | Current consecutive wins |
+| **max_win_streak** | INTEGER | Highest win streak achieved |
+| **bonus_pity_count** | INTEGER | Consecutive bets without bonus |
+| **total_pities_earned** | INTEGER | Total pity rewards triggered |
+| **joined_date** | BIGINT | Account creation timestamp (ms) |
 | **linkedin_url** | TEXT | Optional LinkedIn profile URL |
-| **badge_setting** | TEXT | Determines whether the user’s LinkedIn badge is displayed on the leaderboard |
+| **show_linkedin_badge** | BOOLEAN | Controls LinkedIn badge visibility |
+| **biggest_single_win** | NUMERIC | Largest single resolved win |
+| **biggest_multiplier_win** | NUMERIC | Largest multiplier-based win |
+| **biggest_multiplier_tier** | TEXT | Highest multiplier tier achieved |
+
 
 ---
 
-### `predictions`
+## `predictions`
 
-Tracks all user wagers. Each user can place only one bet per game.
+Tracks all user wagers. Each user can place one bet per game.
 
 | Column | Type | Description |
 | :--- | :--- | :--- |
-| **id** (PK) | SERIAL | Internal unique incrementing ID |
-| **user_id** | TEXT | Bettor ID (references `users.user_id`) |
-| **game_id** | TEXT | Match ID (references `matches.game_id`) |
-| **pick** | TEXT | Chosen winner (`Player A` or `Player B`) |
+| **id** (PK) | SERIAL | Internal unique ID |
+| **user_id** | TEXT | Bettor ID |
+| **game_id** | TEXT | Match ID |
+| **pick** | TEXT | Chosen outcome (`Player A` or `Player B`) |
 | **bet_amount** | NUMERIC | Points wagered |
-| **result** | TEXT | Outcome: `WIN`, `LOSE`, or `NULL` (pending) |
-| **gain_loss** | NUMERIC | Net change after resolution |
-| **bonus_tier** | TEXT | Bonus tier applied to the bet (if any) |
-| **bonus_multiplier** | NUMERIC | Multiplier applied to winnings (e.g. 5x, 10x) |
-| **created_at** | BIGINT | Timestamp for volume and daily stats |
+| **result** | TEXT | `WIN`, `LOSE`, or `NULL` (pending) |
+| **gain_loss** | NUMERIC | Net result after resolution |
+| **bonus_tier** | TEXT | Bonus tier applied |
+| **bonus_multiplier** | NUMERIC | Winnings multiplier |
+| **created_at** | BIGINT | Timestamp for analytics |
 
 ---
 

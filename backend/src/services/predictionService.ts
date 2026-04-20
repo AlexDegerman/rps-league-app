@@ -1,5 +1,10 @@
 import pool from '../utils/db.js'
 import { getOrCreateUser } from './userService.js'
+import {
+  getFlashEventForUser,
+  consumeFlashBetForUser,
+  tryTriggerFlashEventForUser
+} from './flashEventService.js'
 
 const POINTS_FLOOR = 100000n
 
@@ -58,8 +63,12 @@ export const savePrediction = async (
 const rollBonus = (
   isWin: boolean,
   pityCount: number,
-  currentPoints: bigint
+  currentPoints: bigint,
+  flashType?: string | null
 ): { multiplier: number; tier: string } | null => {
+    if (flashType === 'CARDS' && isWin) {
+      return { multiplier: 10.0, tier: 'LEGENDARY' }
+    }
   const forceBonus = pityCount >= 3
 
   // STARTER BOOST: 80% for players < 2M, 40% for everyone else
@@ -119,6 +128,7 @@ export const resolvePrediction = async (
       u.nickname,
       u.points AS current_points,
       u.bonus_pity_count,
+      u.current_win_streak,
       (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) AS total_bets
       FROM predictions p
       JOIN users u ON p.user_id = u.user_id
@@ -127,8 +137,17 @@ export const resolvePrediction = async (
   )
 
   for (const row of predictions.rows) {
-    const result = row.pick === winnerName ? 'WIN' : 'LOSE'
+    const flashEvent = getFlashEventForUser(row.user_id)
+    const flashEventType = flashEvent?.type ?? null
+
+    const flashActive = !!flashEvent
+    const result = flashActive
+      ? 'WIN'
+      : row.pick === winnerName
+        ? 'WIN'
+        : 'LOSE'
     const isWin = result === 'WIN'
+
     const currentPoints = BigInt(row.current_points)
     const bet = BigInt(row.bet_amount)
     const totalBets = Number(row.total_bets)
@@ -139,7 +158,8 @@ export const resolvePrediction = async (
     const bonus = rollBonus(
       isWin,
       totalBets <= 3 ? 3 : currentPity,
-      currentPoints
+      currentPoints,
+      flashEventType
     )
 
     const effectiveMult = bonus
@@ -162,12 +182,35 @@ export const resolvePrediction = async (
           : -actualLoss
     }
 
+    const streakAfter = isWin ? Number(row.current_win_streak) + 1 : 0
+    const streakMult =
+      streakAfter >= 5
+        ? 10n
+        : streakAfter >= 4
+          ? 6n
+          : streakAfter >= 3
+            ? 3n
+            : 1n
+
+    if (isWin && streakMult > 1n) {
+      gainLoss = gainLoss * streakMult
+    }
+
+    const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
+
+    if (isWin && flashEvent) {
+      gainLoss = gainLoss * BigInt(flashMult)
+      consumeFlashBetForUser(row.user_id)
+    }
+
     await pool.query(
       `UPDATE predictions 
         SET result = $1, 
-            gain_loss = $2,
-            bonus_tier = $3,
-            bonus_multiplier = $4
+          gain_loss = $2,
+          bonus_tier = $3,
+          bonus_multiplier = $4,
+          flash_event_type = $7,
+          flash_multiplier = $8
         WHERE user_id = $5 AND game_id = $6`,
       [
         result,
@@ -175,35 +218,40 @@ export const resolvePrediction = async (
         bonus ? bonus.tier : null,
         bonus ? Number(effectiveMult) : 0,
         row.user_id,
-        row.game_id
+        row.game_id,
+        flashEventType,
+        flashMult
       ]
     )
 
     // Single UPDATE keeps all peak columns in sync atomically
     await pool.query(
       `UPDATE users
-        SET points             = points + $1,
-            peak_points        = GREATEST(peak_points, points + $1),
-            daily_peak         = GREATEST(daily_peak,  points + $1),
-            weekly_peak        = GREATEST(weekly_peak, points + $1),
-            bonus_pity_count   = $3,
-            total_volume       = total_volume + $4,
-            biggest_win        = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
-            current_win_streak = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
-            max_win_streak     = CASE 
-                                    WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
-                                    THEN current_win_streak + 1 
-                                    ELSE max_win_streak 
-                                  END,
-            total_pities_earned = total_pities_earned + $6
-        WHERE user_id = $2`,
+    SET points               = points + $1,
+        peak_points          = GREATEST(peak_points, points + $1),
+        daily_peak           = GREATEST(daily_peak,  points + $1),
+        weekly_peak          = GREATEST(weekly_peak, points + $1),
+        bonus_pity_count     = $3,
+        total_volume         = total_volume + $4,
+        biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
+        biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
+        current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
+        max_win_streak       = CASE 
+                                  WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
+                                  THEN current_win_streak + 1 
+                                  ELSE max_win_streak 
+                                END,
+        total_pities_earned  = total_pities_earned + $6,
+        total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
+    WHERE user_id = $2`,
       [
         gainLoss.toString(),
         row.user_id,
         bonus ? 0 : currentPity + 1,
         bet.toString(),
         result,
-        isNaturalPityHit ? 1 : 0
+        isNaturalPityHit ? 1 : 0,
+        flashEventType
       ]
     )
 
@@ -214,7 +262,7 @@ export const resolvePrediction = async (
         nickname: row.nickname,
         result,
         gameId,
-        amount: baseChange.toString(),
+        amount: gainLoss > 0n ? gainLoss.toString() : (-gainLoss).toString(),
         bonus: bonus
           ? {
               amount: bonusAmount.toString(),
@@ -222,9 +270,14 @@ export const resolvePrediction = async (
               visualMultiplier: Number(effectiveMult)
             }
           : null,
-        wasAllIn: bet === currentPoints
+        wasAllIn: bet === currentPoints,
+        streakAfter,
+        streakMult: Number(streakMult),
+        flashEventType,
+        flashMult
       })
     )
+    tryTriggerFlashEventForUser(row.user_id, broadcast)
   }
 }
 
@@ -253,6 +306,8 @@ export const getPaginatedUserPredictions = async (
         p.result,
         p.bonus_tier       AS "bonusTier",
         p.bonus_multiplier AS "bonusMultiplier",
+        p.flash_event_type AS "flashEventType",
+        p.flash_multiplier AS "flashMult",
         p.created_at       AS "createdAt",
         m.player_a_name,
         m.player_a_played,
@@ -277,6 +332,8 @@ export const getPaginatedUserPredictions = async (
         p.result,
         p.bonus_tier       AS "bonusTier",
         p.bonus_multiplier AS "bonusMultiplier",
+        p.flash_event_type AS "flashEventType",
+        p.flash_multiplier AS "flashMult",
         p.created_at       AS "createdAt",
         m.player_a_name,
         m.player_a_played,
@@ -301,6 +358,8 @@ export const getPaginatedUserPredictions = async (
         p.result,
         p.bonus_tier       AS "bonusTier",
         p.bonus_multiplier AS "bonusMultiplier",
+        p.flash_event_type AS "flashEventType",
+        p.flash_multiplier AS "flashMult",
         p.created_at       AS "createdAt",
         m.player_a_name,
         m.player_a_played,
@@ -346,12 +405,13 @@ export const getPaginatedUserPredictions = async (
     result: row.result,
     bonusTier: row.bonusTier ?? null,
     bonusMultiplier: Number(row.bonusMultiplier ?? 0),
+    flashEventType: row.flashEventType ?? null,
+    flashMult: Number(row.flashMult ?? 1),
     createdAt: Number(row.createdAt)
   }))
 
   return { matches, predictions, total, hasMore: offset + limit < total }
 }
-
 export const getUserStats = async (userId: string, shortId: string) => {
   // Ensure the user exists and has their shortId synced before fetching stats
   // This handles the "creation" side using the new 2-argument signature
@@ -368,6 +428,7 @@ export const getUserStats = async (userId: string, shortId: string) => {
         u.current_win_streak,
         u.max_win_streak,
         u.bonus_pity_count,
+        u.current_win_streak,
         u.total_pities_earned,
         u.joined_date,
         COALESCE(p_stats.total, 0) as total,

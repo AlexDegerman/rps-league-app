@@ -52,7 +52,7 @@ export const adjectives = [
   'Golden',
   'Hidden',
   'Infernal',
-
+  'Jade',
   'Primal',
   'Runic',
   'Solar',
