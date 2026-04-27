@@ -73,10 +73,8 @@ export const parseShorthand = (val: string): bigint => {
     ocd: 10n ** 57n,
     nod: 10n ** 60n,
     vg: 10n ** 63n,
-    // --- SEASONAL TIERS (enable one per week) ---
-    // W1 — Moon theme
-   // uvg: 10n ** 66n,   // Unvigintillion
-    //dvg: 10n ** 69n,   // Duovigintillion
+    uvg: 10n ** 66n,
+    dvg: 10n ** 69n,
      // W2 — Electric theme
     //tvg: 10n ** 72n,   // Trevigintillion
     //qag: 10n ** 75n,  // Quattuorvigintillion
@@ -140,10 +138,8 @@ export const formatPoints = (
     // W2 — Electric theme
     //{ threshold: 10n ** 75n, symbol: 'Qvg' },   // Quattuorvigintillion
     //{ threshold: 10n ** 72n, symbol: 'Tvg' },    // Trevigintillion
-    // W1 — Moon theme
-    //{ threshold: 10n ** 69n, symbol: 'Dvg' },    // Duovigintillion
-    //{ threshold: 10n ** 66n, symbol: 'Uvg' },    // Unvigintillion
-    // --- LIVE TIERS ---
+    { threshold: 10n ** 69n, symbol: 'Dvg' },
+    { threshold: 10n ** 66n, symbol: 'Uvg' },
     { threshold: 10n ** 63n, symbol: 'Vg' },
     { threshold: 10n ** 60n, symbol: 'Nod' },
     { threshold: 10n ** 57n, symbol: 'Ocd' },
@@ -169,7 +165,7 @@ export const formatPoints = (
   const getFormattedValue = (value: bigint, divisor: bigint, sym: string) => {
     const whole = value / divisor
 
-    // FORCE: No decimals if the number is 100 or larger (e.g., 100M, 500Vg)
+    // No decimals if the number is 100 or larger (e.g., 100M, 500Vg)
     if (whole >= 100n) return `${sign}${whole}${sym}`
 
     const unit = divisor / 10n
@@ -205,7 +201,6 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   const absN = bigN < 0n ? -bigN : bigN
 
   const names = [
-    // --- SEASONAL TIERS (uncomment matching block when enabling above) ---
     // W4 — Hellfire
     //{ t: 87, n: 'Octovigintillion' },
     //{ t: 84, n: 'Septenvigintillion' },
@@ -215,10 +210,8 @@ export const getFullNumberName = (n: number | bigint | string): string => {
     // W2 — Electric
     //{ t: 75, n: 'Quattuorvigintillion' },
     //{ t: 72, n: 'Trevigintillion' },
-    // W1 — Moon
-    //{ t: 69, n: 'Duovigintillion' },
-    //{ t: 66, n: 'Unvigintillion' },
-    // --- LIVE ---
+    { t: 69, n: 'Duovigintillion' },
+    { t: 66, n: 'Unvigintillion' },
     { t: 63, n: 'Vigintillion' },
     { t: 60, n: 'Novemdecillion' },
     { t: 57, n: 'Octodecillion' },
@@ -247,21 +240,19 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   return 'Points'
 }
 
-const ZERO = 0n
-const VIGINTILLION = 10n ** 63n
-// --- SEASONAL TIER CONSTANTS (uncomment to enable) ---
-// W1 — Moon
-//const UNVIGINTILLION = 10n ** 66n
-//const DUOVIGINTILLION = 10n ** 69n
-// W2 — Electric
-//const TREVIGINTILLION = 10n ** 72n
-//const QUATTUORVIGINTILLION = 10n ** 75n
-// W3 — Cards
-//const QUINVIGINTILLION = 10n ** 78n
-//const SEXVIGINTILLION = 10n ** 81n
 // W4 — Hellfire
 //const SEPTENVIGINTILLION = 10n ** 84n
 //const OCTOVIGINTILLION = 10n ** 87n
+// W3 — Cards
+//const QUINVIGINTILLION = 10n ** 78n
+//const SEXVIGINTILLION = 10n ** 81n
+// W2 — Electric
+//const TREVIGINTILLION = 10n ** 72n
+//const QUATTUORVIGINTILLION = 10n ** 75n
+
+const UNVIGINTILLION = 10n ** 66n
+const DUOVIGINTILLION = 10n ** 69n
+const VIGINTILLION = 10n ** 63n
 const NOVEMDECILLION = 10n ** 60n
 const OCTODECILLION = 10n ** 57n
 const SEPTENDECILLION = 10n ** 54n
@@ -279,13 +270,11 @@ const SEXTILLION = 10n ** 21n
 const QUINTILLION = 10n ** 18n
 const QUADRILLION = 10n ** 15n
 const TRILLION = 10n ** 12n
+const ZERO = 0n
 
 /**
  * Maps a points amount to the corresponding CSS class for "RPS League" tier styling.
  * Prioritizes BigInt for Vigintillion-scale precision and avoids quick-fix error handling.
- *
- * SEASONAL TIERS: To enable a new week's tiers, uncomment the matching constants above
- * AND the corresponding if-blocks below. Always keep top-down order (highest first).
  */
 export const getAmountColor = (amount?: number | bigint | string): string => {
   if (amount == null || amount === '') return 'text-gray-400'
@@ -307,25 +296,20 @@ export const getAmountColor = (amount?: number | bigint | string): string => {
   const a = raw < ZERO ? -raw : raw
   if (a === ZERO) return 'text-gray-400'
 
-  // --- SEASONAL TIERS (uncomment top-down as they go live) ---
-
   // W4 — Hellfire theme
-   //if (a >= OCTOVIGINTILLION) return 'g-ovg'
-   //if (a >= SEPTENVIGINTILLION) return 'g-spv'
+  //if (a >= OCTOVIGINTILLION) return 'g-ovg'
+  //if (a >= SEPTENVIGINTILLION) return 'g-spv'
 
   // W3 — Cards theme
-   //if (a >= SEXVIGINTILLION) return 'g-svg
+  //if (a >= SEXVIGINTILLION) return 'g-svg
   //if (a >= QUINVIGINTILLION) return 'g-qiv'
 
   // W2 — Electric theme
-   //if (a >= QUATTUORVIGINTILLION) return 'g-qvg'
+  //if (a >= QUATTUORVIGINTILLION) return 'g-qvg'
   //if (a >= TREVIGINTILLION) return 'g-tvg' 
 
-  // W1 — Moon theme
-  //if (a >= DUOVIGINTILLION) return 'g-dvg' 
-   //if (a >= UNVIGINTILLION) return 'g-uvg' 
-
-  // --- LIVE TIERS ---
+  if (a >= DUOVIGINTILLION) return 'g-dvg' 
+  if (a >= UNVIGINTILLION) return 'g-uvg' 
   if (a >= VIGINTILLION) return 'g-vg'
   if (a >= NOVEMDECILLION) return 'g-nod'
   if (a >= OCTODECILLION) return 'g-ocd'

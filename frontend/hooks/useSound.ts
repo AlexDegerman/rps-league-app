@@ -15,12 +15,12 @@ const fireAudioInstance =
 const moonAudioInstance =
   typeof window !== 'undefined' ? new Audio('/sounds/moon.wav') : null
 
-if (winAudioInstance) winAudioInstance.volume = 0.1
-if (lossAudioInstance) lossAudioInstance.volume = 0.1
-if (cardsAudioInstance) cardsAudioInstance.volume = 0.1
-if (electricAudioInstance) electricAudioInstance.volume = 0.1
-if (fireAudioInstance) fireAudioInstance.volume = 0.1
-if (moonAudioInstance) moonAudioInstance.volume = 0.1
+if (winAudioInstance) winAudioInstance.volume = 0.5
+if (lossAudioInstance) lossAudioInstance.volume = 0.5
+if (cardsAudioInstance) cardsAudioInstance.volume = 0.5
+if (electricAudioInstance) electricAudioInstance.volume = 0.5
+if (fireAudioInstance) fireAudioInstance.volume = 0.5
+if (moonAudioInstance) moonAudioInstance.volume = 0.5
 
 export const useSound = () => {
   const [soundOn, setOn] = useState(true)

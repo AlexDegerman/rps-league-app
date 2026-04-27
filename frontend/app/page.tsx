@@ -446,7 +446,6 @@ export default function HomePage() {
 
       if (isWin) {
         const currentFlash = activeFlashEventRef.current
-        console.log('flash at sound time:', currentFlash)
         if (currentFlash === 'LUNAR') playMoon()
         else if (currentFlash === 'CARDS') playCards()
         else if (currentFlash === 'ELECTRIC') playElectric()
@@ -590,7 +589,7 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
-      {/* Screen edge glow — flash takes priority */}
+      {/* Screen edge glow - flash takes priority */}
       {visualMode &&
         (() => {
           const edgeConfig = {
@@ -633,7 +632,7 @@ export default function HomePage() {
         })()}
 
       <div className="relative">
-        {/* Flash event confetti — sibling of result div, no transform parent */}
+        {/* Flash event confetti */}
         {resultAnim?.win &&
           (() => {
             const type = resultAnim.confettiType ?? 'normal'
@@ -667,7 +666,7 @@ export default function HomePage() {
                     }}
                   />
 
-                  {/* main flame columns — 100 particles in 3 size tiers */}
+                  {/* main flame columns - 100 particles in 3 size tiers */}
                   {Array.from({ length: 100 }).map((_, i) => {
                     const tier = i % 3 
                     const size = [6, 11, 18][tier]
@@ -709,7 +708,7 @@ export default function HomePage() {
                     )
                   })}
 
-                  {/* flying embers — 60 sparks */}
+                  {/* flying embers - 60 sparks */}
                   {Array.from({ length: 60 }).map((_, i) => {
                     const size = 2 + (i % 4)
                     return (
@@ -738,7 +737,7 @@ export default function HomePage() {
                     )
                   })}
 
-                  {/* heat shimmer columns — 14 vertical wisps */}
+                  {/* heat shimmer columns - 14 vertical wisps */}
                   {Array.from({ length: 14 }).map((_, i) => (
                     <div
                       key={`s${i}`}
@@ -759,7 +758,7 @@ export default function HomePage() {
                     />
                   ))}
 
-                  {/* ash floaters — 20 tiny grey flecks drifting up */}
+                  {/* ash floaters - 20 tiny grey flecks drifting up */}
                   {Array.from({ length: 20 }).map((_, i) => (
                     <div
                       key={`a${i}`}
@@ -786,7 +785,7 @@ export default function HomePage() {
               return (
                 <div
                   className="absolute inset-x-0 top-0 pointer-events-none z-50 overflow-hidden rounded-xl"
-                  style={{ height: '420px' }}
+                  style={{ top: '-20px', height: '600px' }}
                 >
                   {/* Moon source bloom */}
                   <div
@@ -800,7 +799,7 @@ export default function HomePage() {
                         transform: 'translateX(-50%)',
                         background:
                           'radial-gradient(ellipse, rgba(220,240,255,0.9) 0%, rgba(180,220,255,0.6) 35%, rgba(144,205,244,0.2) 65%, transparent 80%)',
-                        animation: 'lunar-bloom 3s ease-out 0.05s forwards'
+                        animation: 'lunar-bloom 3s ease-out 0.05s both'
                       } as React.CSSProperties
                     }
                   />
@@ -815,7 +814,7 @@ export default function HomePage() {
                         transform: 'translateX(-50%)',
                         background:
                           'radial-gradient(ellipse, rgba(255,255,255,1) 0%, rgba(220,240,255,0.8) 50%, transparent 75%)',
-                        animation: 'lunar-bloom 3s ease-out 0.1s forwards'
+                        animation: 'lunar-bloom 3s ease-out 0.1s both'
                       } as React.CSSProperties
                     }
                   />
@@ -981,7 +980,7 @@ export default function HomePage() {
                           transform: 'translateX(-50%)',
                           background: `linear-gradient(to bottom, rgba(180,220,255,${d.aG * 0.5}), rgba(144,205,244,${d.aG}), rgba(144,205,244,${d.aG * 0.5}), transparent)`,
                           filter: `blur(${d.blur * 1.8}px)`,
-                          animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s forwards`
+                          animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s both`
                         } as React.CSSProperties
                       }
                     />,
@@ -998,7 +997,7 @@ export default function HomePage() {
                           transform: 'translateX(-50%)',
                           background: `linear-gradient(to bottom, rgba(255,255,255,${d.aC}), rgba(210,235,255,${d.aC * 0.9}), rgba(180,220,255,${d.aC * 0.7}), rgba(144,205,244,${d.aC * 0.4}), transparent)`,
                           filter: `blur(${d.blur}px)`,
-                          animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s forwards`
+                          animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s both`
                         } as React.CSSProperties
                       }
                     />,
@@ -1018,7 +1017,7 @@ export default function HomePage() {
                                 background:
                                   'linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.7), rgba(220,240,255,0.3), transparent)',
                                 filter: 'blur(1px)',
-                                animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s forwards`
+                                animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s both`
                               } as React.CSSProperties
                             }
                           />
@@ -1044,7 +1043,7 @@ export default function HomePage() {
                             'rgba(144,205,244,0.9)'
                           ][i % 4],
                           boxShadow: `0 0 ${5 + (i % 3) * 3}px rgba(180,220,255,1), 0 0 ${10 + (i % 3) * 4}px rgba(144,205,244,0.8)`,
-                          animation: `lunar-mote-drift ${2.8 + (i % 5) * 0.25}s ease-in-out ${(i % 9) * 0.1}s forwards`,
+                          animation: `lunar-mote-drift ${2.8 + (i % 5) * 0.25}s ease-in-out ${(i % 9) * 0.1}s both`,
                           '--dx': `${((i * 41 + 13) % 70) - 35}px`,
                           opacity: 0
                         } as React.CSSProperties
@@ -1603,7 +1602,7 @@ export default function HomePage() {
                           </span>
                         </div>
 
-                        {/* Bottom row — cards gets special text */}
+                        {/* Bottom row - cards gets special text */}
                         <div className="flex items-center justify-between mt-1">
                           {visualMode === 'flash_cards' ? (
                             <>

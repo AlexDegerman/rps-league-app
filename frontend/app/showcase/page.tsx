@@ -26,7 +26,7 @@ export default function Showcase() {
                 <div className="h-px flex-1 bg-[#e8e6e1]/50"></div>
               </div>
 
-              {/* Octovigintillion — Hellfire Glow 2 */}
+              {/* Octovigintillion - Hellfire Glow 2 */}
               <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-3">
                   <div className="font-[DM_Mono]">
@@ -52,12 +52,12 @@ export default function Showcase() {
                   position wandering via magma-flow. Full-width sawtooth flame
                   crown above via clip-path, jittering on a 0.15s steps loop.
                   Ambient blur glow bleeds behind the number. Three animations
-                  desync deliberately — magma-flow, heat-flicker, micro-jitter
+                  desync deliberately - magma-flow, heat-flicker, micro-jitter
                   all run on different durations.
                 </div>
               </div>
 
-              {/* Septenvigintillion — Hellfire Glow 1 */}
+              {/* Septenvigintillion - Hellfire Glow 1 */}
               <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-3">
                   <div className="font-[DM_Mono]">
@@ -78,12 +78,12 @@ export default function Showcase() {
                 <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
                   Solid orange-red cycling through four color stops. Heat-haze
                   skewX distortion shifts direction each quarter-cycle. Blur
-                  filter pulses with contrast — peak at 75% where scale, skew,
+                  filter pulses with contrast - peak at 75% where scale, skew,
                   and contrast hit simultaneously.
                 </div>
               </div>
 
-              {/* Sexvigintillion — Cards Glow 2 */}
+              {/* Sexvigintillion - Cards Glow 2 */}
               <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-3">
                   <div className="font-[DM_Mono]">
@@ -106,13 +106,13 @@ export default function Showcase() {
                 </div>
                 <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
                   Gold-pink-teal holographic gradient streams continuously. Two
-                  🎲 satellites orbit on separate radii in opposite directions —
-                  one clockwise at 1.8em, one counter-clockwise at 2.2em — each
+                  🎲 satellites orbit on separate radii in opposite directions -
+                  one clockwise at 1.8em, one counter-clockwise at 2.2em - each
                   with an independent colored drop-shadow.
                 </div>
               </div>
 
-              {/* Quinvigintillion — Cards Glow 1 */}
+              {/* Quinvigintillion - Cards Glow 1 */}
               <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-3">
                   <div className="font-[DM_Mono]">
@@ -133,12 +133,12 @@ export default function Showcase() {
                 <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
                   7-stop oil-slick rainbow at 45° with 400% background-size
                   cycling diagonally. Drop-shadow color rotates each keyframe to
-                  track the dominant hue — pink at 0%, amber at 25%, green at
+                  track the dominant hue - pink at 0%, amber at 25%, green at
                   50%, cyan at 75%.
                 </div>
               </div>
 
-              {/* Quattuorvigintillion — Electric Glow 2 */}
+              {/* Quattuorvigintillion - Electric Glow 2 */}
               <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-3">
                   <div className="font-[DM_Mono]">
@@ -164,12 +164,12 @@ export default function Showcase() {
                 <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
                   Blue-purple gradient streams left to right continuously. A
                   repeating conic-gradient overlay fires in color-dodge mode via
-                  steps(1) — fractal lightning spokes rotate and reposition each
+                  steps(1) - fractal lightning spokes rotate and reposition each
                   burst. White-out filter at 63% simulates a direct strike.
                 </div>
               </div>
 
-              {/* Trevigintillion — Electric Glow 1 */}
+              {/* Trevigintillion - Electric Glow 1 */}
               <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
                 <div className="flex justify-between items-start mb-3">
                   <div className="font-[DM_Mono]">
@@ -188,65 +188,66 @@ export default function Showcase() {
                   </div>
                 </div>
                 <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Purple neon solid color with a scripted flicker sequence —
-                  double blink at 4–6%, opacity drop at 36%, stutter at 92–93%.
+                  Purple neon solid color with a scripted flicker sequence -
+                  double blink at 4-6%, opacity drop at 36%, stutter at 92-93%.
                   Scale and glow radius peak together at 60%.
-                </div>
-              </div>
-
-              {/* Duovigintillion — Moon Glow 2 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Duovigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁶⁹</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#eff6ff] text-[#1e3a8a] font-medium uppercase tracking-wider">
-                        full eclipse
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold leading-none tracking-tight">
-                    <span className="g-dvg">1.2Dvg</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Two gradients blended with screen mode — a radial white-core
-                  circle over a sweeping linear diagonal. Both background
-                  positions animate independently, making the bright lunar
-                  surface crawl across the letterforms on a 6s ease loop.
-                </div>
-              </div>
-
-              {/* Unvigintillion — Moon Glow 1 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Unvigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁶⁶</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#eff6ff] text-[#1e3a8a] font-medium uppercase tracking-wider">
-                        moonlit
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold leading-none tracking-tight">
-                    <span className="g-uvg">1.2Uvg</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Navy-to-white-to-navy gradient sweeps at 135° across 200%
-                  background-size on a 4s linear loop. Drop-shadow pulses from a
-                  tight blue edge glow to a wider soft cyan bloom and back.
                 </div>
               </div>
               {/* Move block ending up every week */}
             </>
           )}
+
+          {/* Duovigintillion - Moon Glow 2 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Duovigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁶⁹</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#eff6ff] text-[#1e3a8a] font-medium uppercase tracking-wider">
+                    full eclipse
+                  </span>
+                </div>
+              </div>
+              <div className="text-2xl font-bold leading-none tracking-tight">
+                <span className="g-dvg">1.2Dvg</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              Two gradients blended with screen mode - a radial white-core
+              circle over a sweeping linear diagonal. Both background positions
+              animate independently, making the bright lunar surface crawl
+              across the letterforms on a 6s ease loop.
+            </div>
+          </div>
+
+          {/* Unvigintillion - Moon Glow 1 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Unvigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁶⁶</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#eff6ff] text-[#1e3a8a] font-medium uppercase tracking-wider">
+                    moonlit
+                  </span>
+                </div>
+              </div>
+              <div className="text-2xl font-bold leading-none tracking-tight">
+                <span className="g-uvg">1.2Uvg</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              Navy-to-white-to-navy gradient sweeps at 135° across 200%
+              background-size on a 4s linear loop. Drop-shadow pulses from a
+              tight blue edge glow to a wider soft cyan bloom and back.
+            </div>
+          </div>
+
           {/* SECTION: ENDGAME */}
           <div className="pt-4 px-1 pb-2 text-[10px] tracking-[0.12em] uppercase text-[#bbb] font-[DM_Mono] flex items-center gap-2">
             <span>⚡ Endgame tiers</span>
@@ -576,7 +577,7 @@ export default function Showcase() {
               </div>
             </div>
             <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-              Orange gradient shimmer with irregular flicker — glow spikes at
+              Orange gradient shimmer with irregular flicker - glow spikes at
               33% and dips at 66%, mimicking real flame variance.
             </div>
           </div>
@@ -672,7 +673,7 @@ export default function Showcase() {
               </div>
             </div>
             <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-              Hot pink with animated pulse glow — shadow radius expands and
+              Hot pink with animated pulse glow - shadow radius expands and
               brightness flickers. First tier with a living glow.
             </div>
           </div>

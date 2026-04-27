@@ -8,9 +8,18 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 ## 🎮 Preview
 
-| Desktop Gameplay | Mobile (320px) |
-| :---: | :---: |
-| <img src="./assets/rps.gif" width="450" /> | <video src="./assets/rpsmobile.mp4" width="220" autoplay loop muted playsinline></video> |
+<table>
+  <tr>
+    <td valign="top">
+      <strong>Desktop Gameplay</strong><br />
+      <img src="./assets/rps.gif" width="450" />
+    </td>
+    <td valign="top">
+      <strong>Mobile (320px)</strong><br />
+      <video src="./assets/rpsmobile.mp4" width="220" autoplay loop muted playsinline></video>
+    </td>
+  </tr>
+</table>
 
 <p><em>Showcasing selected tier colors with live transitions.</em></p>
 <img src="./assets/rpscolor.gif" width="300" />
@@ -85,6 +94,30 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - Full test coverage across backend services and frontend components
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
 - Infinite Scaling: Engineered with native BigInt support to handle astronomical point values (Sextillions, Vigintillions, and beyond) without precision loss.
+
+---
+
+## ⚡ Flash Events
+
+Flash Events are live gameplay modifiers that can trigger during matches with a 5% chance per bet. When activated, a random event takes over the experience for the next 3 predictions, temporarily transforming the entire application through UI theme changes, particle system replacements, audio redesign, and gameplay modifiers such as win conditions and multipliers.
+
+---
+
+### 🌙 Moon’s Blessing
+A calm, lunar-inspired event wrapped in cool blue tones with serene visual and audio effects.
+
+Effect:
+- All bets during the event are guaranteed wins
+- x5 win multiplier applied
+- UI shifts into a moonlit blue theme with lunar styling
+- Win effects replaced with drifting luminous particles like moonlight or snow
+- Audio becomes soft and ethereal with a moonshine-like shimmer
+- Icons and UI elements adapt into crescent-inspired motifs
+
+<div>
+  <strong>Moon's Blessing Flash Event in Action</strong><br/>
+  <video src="./assets/moon_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
+</div>
 
 ---
 

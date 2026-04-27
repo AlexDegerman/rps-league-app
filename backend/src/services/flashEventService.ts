@@ -7,14 +7,14 @@ export interface FlashEventState {
   triggeredAt: number
 }
 
-const FLASH_EVENTS_ENABLED = false // TOGGLE TRUE ON WEEK 4
+const FLASH_EVENTS_ENABLED = true
 const FLASH_TRIGGER_CHANCE = 0.05
 
 
 const FLASH_EVENT_CONFIG: Partial<
   Record<FlashEventType, { multiplier: number }>
 > = {
-  // LUNAR: { multiplier: 5 }, // REMOVE ON WEEK 4
+  LUNAR: { multiplier: 5 },
   // ELECTRIC: { multiplier: 5 }, // REMOVE ON WEEK 5
   // CARDS: { multiplier: 1 }, // REMOVE ON WEEK 6
   //  HELLFIRE: { multiplier: 5 } // REMOVE ON WEEK 7
@@ -64,7 +64,7 @@ export const tryTriggerFlashEventForUser = (
 
   _userFlashEvents.set(userId, event)
 
-  // Broadcast only to the specific user — the userId in the payload
+  // Broadcast only to the specific user - the userId in the payload
   // means the frontend filters it client-side (only acts if data.userId === myId)
   broadcast(
     'flash_event',
