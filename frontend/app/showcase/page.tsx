@@ -137,65 +137,64 @@ export default function Showcase() {
                   50%, cyan at 75%.
                 </div>
               </div>
-
-              {/* Quattuorvigintillion - Electric Glow 2 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Quattuorvigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁷⁵</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f3f0ff] text-[#4c1d95] font-medium uppercase tracking-wider">
-                        supercell
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    className="text-2xl font-bold leading-none tracking-tight relative"
-                    style={{ overflow: 'visible' }}
-                  >
-                    <span className="g-qvg" data-text="1.2Qvg">
-                      1.2Qvg
-                    </span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Blue-purple gradient streams left to right continuously. A
-                  repeating conic-gradient overlay fires in color-dodge mode via
-                  steps(1) - fractal lightning spokes rotate and reposition each
-                  burst. White-out filter at 63% simulates a direct strike.
-                </div>
-              </div>
-
-              {/* Trevigintillion - Electric Glow 1 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Trevigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁷²</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f3f0ff] text-[#4c1d95] font-medium uppercase tracking-wider">
-                        charged
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold leading-none tracking-tight">
-                    <span className="g-tvg">1.2Tvg</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Purple neon solid color with a scripted flicker sequence -
-                  double blink at 4-6%, opacity drop at 36%, stutter at 92-93%.
-                  Scale and glow radius peak together at 60%.
-                </div>
-              </div>
               {/* Move block ending up every week */}
             </>
           )}
+          {/* Quattuorvigintillion - Electric Glow 2 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Quattuorvigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁷⁵</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f3f0ff] text-[#4c1d95] font-medium uppercase tracking-wider">
+                    supercell
+                  </span>
+                </div>
+              </div>
+              <div
+                className="text-2xl font-bold leading-none tracking-tight relative"
+                style={{ overflow: 'visible' }}
+              >
+                <span className="g-qvg" data-text="1.2Qvg">
+                  1.2Qvg
+                </span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              Blue-purple gradient streams left to right continuously. A
+              repeating conic-gradient overlay fires in color-dodge mode via
+              steps(1) - fractal lightning spokes rotate and reposition each
+              burst. White-out filter at 63% simulates a direct strike.
+            </div>
+          </div>
+
+          {/* Trevigintillion - Electric Glow 1 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Trevigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁷²</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f3f0ff] text-[#4c1d95] font-medium uppercase tracking-wider">
+                    charged
+                  </span>
+                </div>
+              </div>
+              <div className="text-2xl font-bold leading-none tracking-tight">
+                <span className="g-tvg">1.2Tvg</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              Purple neon solid color with a scripted flicker sequence - double
+              blink at 4-6%, opacity drop at 36%, stutter at 92-93%. Scale and
+              glow radius peak together at 60%.
+            </div>
+          </div>
 
           {/* Duovigintillion - Moon Glow 2 */}
           <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">

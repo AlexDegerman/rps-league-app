@@ -207,9 +207,8 @@ export const getFullNumberName = (n: number | bigint | string): string => {
     // W3 — Cards
     //{ t: 81, n: 'Sexvigintillion' },
     //{ t: 78, n: 'Quinvigintillion' },
-    // W2 — Electric
-    //{ t: 75, n: 'Quattuorvigintillion' },
-    //{ t: 72, n: 'Trevigintillion' },
+    { t: 75, n: 'Quattuorvigintillion' },
+    { t: 72, n: 'Trevigintillion' },
     { t: 69, n: 'Duovigintillion' },
     { t: 66, n: 'Unvigintillion' },
     { t: 63, n: 'Vigintillion' },
@@ -246,10 +245,9 @@ export const getFullNumberName = (n: number | bigint | string): string => {
 // W3 — Cards
 //const QUINVIGINTILLION = 10n ** 78n
 //const SEXVIGINTILLION = 10n ** 81n
-// W2 — Electric
-//const TREVIGINTILLION = 10n ** 72n
-//const QUATTUORVIGINTILLION = 10n ** 75n
 
+const TREVIGINTILLION = 10n ** 72n
+const QUATTUORVIGINTILLION = 10n ** 75n
 const UNVIGINTILLION = 10n ** 66n
 const DUOVIGINTILLION = 10n ** 69n
 const VIGINTILLION = 10n ** 63n
@@ -304,10 +302,9 @@ export const getAmountColor = (amount?: number | bigint | string): string => {
   //if (a >= SEXVIGINTILLION) return 'g-svg
   //if (a >= QUINVIGINTILLION) return 'g-qiv'
 
-  // W2 — Electric theme
-  //if (a >= QUATTUORVIGINTILLION) return 'g-qvg'
-  //if (a >= TREVIGINTILLION) return 'g-tvg' 
 
+  if (a >= QUATTUORVIGINTILLION) return 'g-qvg'
+  if (a >= TREVIGINTILLION) return 'g-tvg' 
   if (a >= DUOVIGINTILLION) return 'g-dvg' 
   if (a >= UNVIGINTILLION) return 'g-uvg' 
   if (a >= VIGINTILLION) return 'g-vg'

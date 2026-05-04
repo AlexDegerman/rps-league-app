@@ -119,6 +119,22 @@ Effect:
   <video src="./assets/moon_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
 </div>
 
+### ⚡ Electric Surge
+A fast-paced neon storm event with high-voltage visuals and reactive energy.
+
+Effect:
+- All bets during the event are guaranteed wins
+- x5 win multiplier applied
+- UI shifts into a neon electric storm aesthetic
+- Win effects replaced with vertical streams of electric static rain
+- Lightning audio feedback intensifies gameplay moments
+- Full interface transforms into a digital storm state
+
+<div>
+  <strong>Electric Surge Flash Event in Action</strong><br/>
+  <video src="./assets/electric_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
+</div>
+
 ---
 
 ## 📊 Player Analytics & Deep Profiles

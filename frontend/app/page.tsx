@@ -640,8 +640,8 @@ export default function HomePage() {
             if (type === 'hellfire')
               return (
                 <div
-                  className="absolute inset-x-0 top-0 pointer-events-none z-50 overflow-hidden rounded-xl"
-                  style={{ height: '420px' }}
+                  className="absolute inset-x-0 pointer-events-none z-50 overflow-hidden rounded-xl"
+                  style={{ top: '-20px', height: '600px' }}
                 >
                   {/* screen flash on ignition */}
                   <div
@@ -668,7 +668,7 @@ export default function HomePage() {
 
                   {/* main flame columns - 100 particles in 3 size tiers */}
                   {Array.from({ length: 100 }).map((_, i) => {
-                    const tier = i % 3 
+                    const tier = i % 3
                     const size = [6, 11, 18][tier]
                     const colors = [
                       ['#ef4444', '#f97316'],
@@ -1056,22 +1056,22 @@ export default function HomePage() {
             if (type === 'electric')
               return (
                 <div
-                  className="absolute inset-x-0 top-0 pointer-events-none z-50 overflow-hidden rounded-xl"
-                  style={{ height: '420px' }}
+                  className="absolute inset-x-0 pointer-events-none z-50 overflow-hidden rounded-xl"
+                  style={{ top: '-20px', height: '600px' }}
                 >
-                  {Array.from({ length: 22 }).map((_, i) => (
+                  {Array.from({ length: 40 }).map((_, i) => (
                     <div
                       key={i}
                       className="absolute"
                       style={
                         {
-                          left: `${(i / 21) * 98 + 1}%`,
+                          left: `${(i / 39) * 98 + 1}%`,
                           top: '-5%',
-                          width: `${2 + (i % 4)}px`,
+                          width: `${2 + (i % 3)}px`,
                           height: '0',
-                          background: `linear-gradient(to bottom, rgba(255,255,255,1), #e9d5ff, #b794f4, #9f7aea, rgba(127,156,245,0.5), transparent)`,
-                          boxShadow: `0 0 14px #b794f4, 0 0 28px rgba(159,122,234,0.8), 0 0 50px rgba(127,156,245,0.5)`,
-                          animation: `electric-bolt-fall 0.75s ease-in 0s forwards`
+                          background: `linear-gradient(to bottom, rgba(255,255,255,1), #e9d5ff, #b794f4, #9f7aea, rgba(127,156,245,0.3), transparent)`,
+                          boxShadow: `0 0 10px #b794f4, 0 0 22px rgba(159,122,234,0.9), 0 0 40px rgba(127,156,245,0.6)`,
+                          animation: `electric-bolt-fall ${0.6 + (i % 3) * 0.1}s ease-in ${(i % 4) * 0.04}s both`
                         } as React.CSSProperties
                       }
                     />
@@ -1124,8 +1124,8 @@ export default function HomePage() {
             if (type === 'cards')
               return (
                 <div
-                  className="absolute inset-x-0 top-0 pointer-events-none z-50 overflow-hidden rounded-xl"
-                  style={{ height: '420px' }}
+                  className="absolute inset-x-0 pointer-events-none z-50 overflow-hidden rounded-xl"
+                  style={{ top: '-20px', height: '600px' }}
                 >
                   {/* gold/silver particle burst from center-top */}
                   {Array.from({ length: 40 }).map((_, i) => {
@@ -1143,7 +1143,7 @@ export default function HomePage() {
                             top: '0%',
                             background: isGold ? '#ecc94b' : '#e8e8e8',
                             boxShadow: `0 0 ${size * 2}px ${isGold ? '#ecc94b' : '#c0c0c0'}`,
-                            animation: `card-particle-burst ${0.8 + (i % 5) * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 0.025}s forwards`,
+                            animation: `card-particle-burst ${0.8 + (i % 5) * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 0.025}s both`,
                             '--vx': `${((i * 41 + 13) % 300) - 150}px`,
                             '--vy': `${120 + ((i * 23 + 7) % 200)}px`
                           } as React.CSSProperties
@@ -1169,9 +1169,9 @@ export default function HomePage() {
                             color: colors[i % 4],
                             textShadow: `0 0 16px ${i % 2 === 0 ? 'rgba(236,201,75,0.95)' : 'rgba(192,192,192,0.85)'}, 0 0 30px ${i % 2 === 0 ? 'rgba(236,201,75,0.4)' : 'rgba(192,192,192,0.3)'}`,
                             filter: `drop-shadow(0 0 6px ${i % 2 === 0 ? 'rgba(236,201,75,0.6)' : 'rgba(192,192,192,0.5)'})`,
-                            animation: `card-cascade-fall ${1.4 + (i % 6) * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 0.04}s forwards`,
+                            animation: `card-cascade-fall ${1.4 + (i % 6) * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 0.04}s both`,
                             '--vx': `${((i * 31 + 9) % 100) - 50}px`,
-                            '--vy': `${300 + ((i * 17 + 5) % 200)}px`
+                            '--vy': `${450 + ((i * 17 + 5) % 200)}px`
                           } as React.CSSProperties
                         }
                       >
@@ -1212,9 +1212,9 @@ export default function HomePage() {
                             fontWeight: 800,
                             color: rankColor,
                             lineHeight: 1,
-                            animation: `card-cascade-fall ${1.2 + (i % 6) * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 0.055}s forwards`,
+                            animation: `card-cascade-fall ${1.2 + (i % 6) * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 0.055}s both`,
                             '--vx': `${((i * 23 + 7) % 80) - 40}px`,
-                            '--vy': `${280 + ((i * 13 + 11) % 180)}px`
+                            '--vy': `${420 + ((i * 13 + 11) % 180)}px`
                           } as React.CSSProperties
                         }
                       >
@@ -1915,16 +1915,16 @@ export default function HomePage() {
               </span>
             </div>
             {showBonusExplainer && (
-              <div className="absolute bottom-full -right-1 mb-3 z-50 p-3 bg-white border border-gray-100 rounded-xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 w-48 sm:w-56">
+              <div className="absolute bottom-full -right-1 mb-3 z-50 p-3 bg-white border border-gray-100 rounded-xl shadow-2xl animate-in fade-in zoom-in-95 duration-200 w-56 sm:w-64">
                 <div className="flex flex-col gap-3">
                   {/* Section 1: Random Tiered Bonuses */}
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] font-black text-purple-600 uppercase tracking-wider">
                       Bonus System Active
                     </span>
-                    <p className="text-[10px] leading-relaxed text-gray-500 font-medium whitespace-normal">
+                    <p className="text-[10px] leading-relaxed text-gray-500 font-medium break-normal">
                       40% chance per match to trigger a{' '}
-                      <span className="text-gray-800 font-bold">
+                      <span className="text-gray-800 font-bold whitespace-normal">
                         Tiered Bonus
                       </span>
                       :
@@ -1942,11 +1942,11 @@ export default function HomePage() {
                         </span>{' '}
                         points lost on Loss
                       </li>
-                      <li>Bad luck protection: 4th bet</li>
+                      <li>Bad luck protection: 4th bet guaranteed</li>
                     </ul>
                   </div>
 
-                  {/* Section 2: Performance Win Streaks */}
+                  {/* Section 2: Win Streaks */}
                   <div className="flex flex-col gap-1.5 pt-2 border-t border-gray-100">
                     <span className="text-[10px] font-black text-orange-600 uppercase tracking-wider">
                       Win Streaks
@@ -1963,9 +1963,66 @@ export default function HomePage() {
                         <span className="font-bold text-gray-800">
                           3 / 4 / 5+
                         </span>{' '}
-                        consecutive wins
+                        wins
                       </li>
                     </ul>
+                  </div>
+
+                  {/* Section 3: Flash Events */}
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-gray-100">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider">
+                        Flash Events
+                      </span>
+                      <span className="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
+                        5% Chance
+                      </span>
+                    </div>
+                    <p className="text-[9px] text-gray-500 font-medium italic">
+                      Lasts 3 rounds • Guaranteed Wins • Theme Shift
+                    </p>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-1.5 mt-1">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px]">🌙</span>
+                        <span className="text-[9px] font-bold text-gray-700">
+                          Moon
+                        </span>
+                        <span className="text-[8px] text-gray-400 font-medium">
+                          x5
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px]">⚡</span>
+                        <span className="text-[9px] font-bold text-gray-700">
+                          Electric
+                        </span>
+                        <span className="text-[8px] text-gray-400 font-medium">
+                          x5
+                        </span>
+                      </div>
+                      {/* 
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px]">🃏</span>
+                        <span className="text-[9px] font-bold text-gray-700">
+                          Luck
+                        </span>
+                        <span className="text-[7px] leading-none bg-amber-100 text-amber-700 px-1 py-0.5 rounded-sm font-black uppercase tracking-tighter border border-amber-200">
+                          Leg Bns
+                        </span>
+                      </div>
+                      */}
+                      {/* 
+                      <div className="flex items-center gap-1">
+                        <span className="text-[10px]">🔥</span>
+                        <span className="text-[9px] font-bold text-gray-700">
+                          Hellfire
+                        </span>
+                        <span className="text-[8px] text-gray-400 font-medium">
+                          x5
+                        </span>
+                      </div>
+                      */}
+                    </div>
                   </div>
                 </div>
               </div>

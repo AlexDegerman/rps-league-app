@@ -15,9 +15,9 @@ const FLASH_EVENT_CONFIG: Partial<
   Record<FlashEventType, { multiplier: number }>
 > = {
   LUNAR: { multiplier: 5 },
-  // ELECTRIC: { multiplier: 5 }, // REMOVE ON WEEK 5
+  ELECTRIC: { multiplier: 5 },
   // CARDS: { multiplier: 1 }, // REMOVE ON WEEK 6
-  //  HELLFIRE: { multiplier: 5 } // REMOVE ON WEEK 7
+  // HELLFIRE: { multiplier: 5 } // REMOVE ON WEEK 7
 }
 
 // Per-user flash event state — keyed by userId
