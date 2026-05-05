@@ -1,0 +1,58 @@
+type VisualMode =
+  | 'flash_lunar'
+  | 'flash_electric'
+  | 'flash_cards'
+  | 'flash_hellfire'
+  | 'inferno'
+  | 'fever'
+  | null
+
+interface EdgeGlowProps {
+  visualMode: VisualMode
+}
+
+const EDGE_CONFIG: Record<
+  NonNullable<VisualMode>,
+  { radial: string; shadow: string }
+> = {
+  flash_lunar: {
+    radial: 'rgba(144,205,244,0.2)',
+    shadow: 'rgba(144,205,244,0.35)'
+  },
+  flash_electric: {
+    radial: 'rgba(159,122,234,0.25)',
+    shadow: 'rgba(159,122,234,0.4)'
+  },
+  flash_cards: {
+    radial: 'rgba(236,201,75,0.18)',
+    shadow: 'rgba(236,201,75,0.3)'
+  },
+  flash_hellfire: {
+    radial: 'rgba(197,48,48,0.3)',
+    shadow: 'rgba(197,48,48,0.4)'
+  },
+  inferno: {
+    radial: 'rgba(249,115,22,0.25)',
+    shadow: 'rgba(239,68,68,0.35)'
+  },
+  fever: {
+    radial: 'rgba(34,197,94,0.15)',
+    shadow: 'rgba(34,197,94,0.2)'
+  }
+}
+
+export default function EdgeGlow({ visualMode }: EdgeGlowProps) {
+  if (!visualMode) return null
+  const e = EDGE_CONFIG[visualMode]
+  if (!e) return null
+
+  return (
+    <div
+      className="fixed inset-0 pointer-events-none z-30"
+      style={{
+        background: `radial-gradient(ellipse at center, transparent 55%, ${e.radial} 100%)`,
+        boxShadow: `inset 0 0 90px ${e.shadow}`
+      }}
+    />
+  )
+}

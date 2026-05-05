@@ -10,7 +10,7 @@ import { getUserId } from '@/lib/user'
 import { formatPoints, getAmountColor } from '@/lib/format'
 import Link from 'next/link'
 import { LeaderboardEntry } from '@/types/rps'
-import { IdentityBadges } from '@/components/IdentityBadges'
+import { IdentityBadges } from '@/components/badges/IdentityBadges'
 
 type Tab = 'daily' | 'weekly' | 'alltime'
 type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'

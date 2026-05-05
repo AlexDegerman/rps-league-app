@@ -20,7 +20,6 @@ const FLASH_EVENT_CONFIG: Partial<
   // HELLFIRE: { multiplier: 5 } // REMOVE ON WEEK 7
 }
 
-// Per-user flash event state — keyed by userId
 const _userFlashEvents = new Map<string, FlashEventState>()
 
 export const getFlashEventForUser = (userId: string): FlashEventState | null =>

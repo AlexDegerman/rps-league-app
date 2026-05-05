@@ -1,5 +1,6 @@
 'use client'
 
+import InfoIcon from '@/components/icons/InfoIcon'
 import { useState, useEffect } from 'react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -20,7 +21,6 @@ const SUGGESTIONS = [
   'Compare the dominance of the #1 ranked player against the rest of the Top 5.'
 ]
 
-// Source tag colors match the XML tags injected into the Gemini prompt context
 const SOURCE_STYLES: Record<string, string> = {
   active_match_history: 'bg-blue-50 text-blue-600 border-blue-200',
   predictor_leaderboard: 'bg-amber-50 text-amber-600 border-amber-200'
@@ -36,7 +36,6 @@ export default function AnalysisPage() {
   const [showPrivacyInfo, setShowPrivacyInfo] = useState(false)
   const [placeholder, setPlaceholder] = useState('Ask the Oracle...')
 
-  // Shorter placeholder on mobile to avoid overflow inside the input
   useEffect(() => {
     const handleResize = () => {
       setPlaceholder(
@@ -110,17 +109,14 @@ export default function AnalysisPage() {
               type="button"
               onClick={() => setShowPrivacyInfo(!showPrivacyInfo)}
               onBlur={() => setShowPrivacyInfo(false)}
-              // sm:pointer-events-none disables click on desktop so only hover works
               className="text-indigo-300 hover:text-indigo-600 transition-colors p-1 outline-none sm:pointer-events-none"
               aria-label="Privacy information"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <InfoIcon />
             </button>
 
             <div
-              className={`absolute right-0 sm:left-1/2 sm:-translate-x-1/2 bottom-full mb-2
+              className={`absolute right-0 sm:left-1/2 sm:-translate-x-1/2 top-full mb-2
                 w-48 sm:w-56 p-2.5 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl
                 transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed
                 ${showPrivacyInfo ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}

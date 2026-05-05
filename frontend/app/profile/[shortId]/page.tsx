@@ -23,8 +23,8 @@ import {
   updateLinkedin
 } from '@/lib/api'
 import BetHistory from '@/components/BetHistory'
-import { LinkedInBadge } from '@/components/LinkedInBadge'
-import { IdentityBadges } from '@/components/IdentityBadges'
+import { LinkedInBadge } from '@/components/badges/LinkedInBadge'
+import { IdentityBadges } from '@/components/badges/IdentityBadges'
 
 interface Ranks {
   daily: number | null
@@ -194,8 +194,7 @@ export default function ProfilePage() {
         )
         const data = await res.json()
         isAvailable = data.available
-      } catch {
-      }
+      } catch {}
     }
 
     if (!isAvailable) {
