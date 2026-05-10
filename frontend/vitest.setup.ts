@@ -41,3 +41,12 @@ window.scrollTo = vi.fn()
 Object.defineProperty(global, 'crypto', {
   value: { randomUUID: () => 'test-uuid' }
 })
+
+// Prevent any real network calls during tests.
+// Individual test files can override with vi.stubGlobal('fetch', ...) per test.
+vi.stubGlobal('fetch', vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({})
+  })
+))

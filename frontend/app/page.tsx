@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import {
   fetchLatestMatches,
   fetchPendingMatches,
@@ -16,7 +16,7 @@ import CloseIcon from '@/components/icons/CloseIcon'
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import type { Match, PendingMatch, PredictionRecord } from '@/types/rps'
+import type { Match, PendingMatch, ResultAnim } from '@/types/rps'
 import {
   formatPoints,
   getAmountColor,
@@ -36,44 +36,76 @@ import FlashBadge from '@/components/badges/FlashBadge'
 import StreakBadge from '@/components/badges/StreakBadge'
 import ModeButton from '@/components/ModeButton'
 import BonusExplainerPopover from '@/components/BonusExplainerPopover'
+import { useGameStore } from './stores/gameStore'
+import { useUserStore } from './stores/userStore'
+import { useUIStore } from './stores/uiStore'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
-let _backendReady = false
-
-interface BonusData {
-  amount: bigint
-  tier: string
-}
-
 export default function HomePage() {
-  const [backendReady, setBackendReady] = useState(_backendReady)
-  const [pendingMatches, setPendingMatches] = useState<PendingMatch[]>([])
-  const [predictions, setPredictions] = useState<Map<string, PredictionRecord>>(
-    new Map()
-  )
-  const [points, setPoints] = useState<bigint>(200000n)
-  const [pointsLoaded, setPointsLoaded] = useState(false)
-  const [betAmount, setBetAmount] = useState<bigint>(100000n)
-  const [serverOffset, setServerOffset] = useState<number>(0)
-  const [resultAnim, setResultAnim] = useState<{
-    win: boolean
-    amount: bigint
-    bonus?: BonusData | null
-    confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
-    streakAfter?: number
-    confettiType?:
-      | 'normal'
-      | 'hellfire'
-      | 'lunar'
-      | 'electric'
-      | 'cards'
-      | 'fever'
-      | 'inferno'
-  } | null>(null)
-  const [peakPoints, setPeakPoints] = useState<bigint>(200000n)
-  const [autoAllIn, setAutoAllIn] = useState(true)
-  const [isHydrated, setIsHydrated] = useState(false)
+  // — Game store —
+  const {
+    backendReady,
+    markReady,
+    pendingMatches,
+    addPendingMatch,
+    removePendingMatch,
+    predictions,
+    setPrediction,
+    updatePrediction,
+    deletePrediction,
+    activeFlashEvent,
+    setActiveFlashEvent,
+    flashBuffRemaining,
+    setFlashBuffRemaining,
+    decrementFlashBuff,
+    serverOffset,
+    setServerOffset,
+    now,
+    tickNow
+  } = useGameStore()
+
+  // — User store —
+  const {
+    points,
+    pointsLoaded,
+    betAmount,
+    setBetAmount,
+    autoAllIn,
+    setAutoAllIn,
+    isHydrated,
+    winStreak,
+    setWinStreak,
+    streakMult,
+    setStreakMult,
+    displayNickname,
+    dailyRank,
+    setDailyRank,
+    applyPointsUpdate
+  } = useUserStore()
+
+  // — UI store —
+  const {
+    resultAnim,
+    setResultAnim,
+    clearResultAnim,
+    notification,
+    setNotification,
+    errorMessage,
+    triggerError,
+    showJumpButton,
+    setShowJumpButton,
+    showPointsInfo,
+    setShowPointsInfo,
+    showPointsExplainer,
+    setShowPointsExplainer,
+    isFocused,
+    setIsFocused,
+    inputString,
+    setInputString
+  } = useUIStore()
+
+  const { setLiveTheme, setVisualMode } = useEventTheme()
   const {
     playWin,
     playLoss,
@@ -84,23 +116,11 @@ export default function HomePage() {
     soundOn,
     toggleSound
   } = useSound()
-  const [showJumpButton, setShowJumpButton] = useState(false)
-  const [now, setNow] = useState(() => Date.now())
-  const [inputString, setInputString] = useState('100000')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [showPointsInfo, setShowPointsInfo] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
-  const [showPointsExplainer, setShowPointsExplainer] = useState(false)
-  const [notification, setNotification] = useState<
-    'new_visitor' | 'no_bigint' | null
-  >(null)
-  const [dailyRank, setDailyRank] = useState<number | null>(null)
-  const [displayNickname, setDisplayNickname] = useState<string>('')
-  const [winStreak, setWinStreak] = useState(0)
-  const [streakMult, setStreakMult] = useState(1)
-  const [activeFlashEvent, setActiveFlashEvent] = useState<string | null>(null)
-  const [flashBuffRemaining, setFlashBuffRemaining] = useState(0)
-  const { setLiveTheme, setVisualMode } = useEventTheme()
+
+  const lastPacketRef = useRef(Date.now())
+  const isOffline = typeof window !== 'undefined' && !navigator.onLine
+  const isStreamStale = now - lastPacketRef.current > 10000
+  const showConnectionWarning = backendReady && (isOffline || isStreamStale)
 
   const getVisualMode = (flash: string | null, streak: number) => {
     if (flash === 'LUNAR') return 'flash_lunar' as const
@@ -126,58 +146,23 @@ export default function HomePage() {
     )
   }, [visualMode, setVisualMode, setLiveTheme])
 
-  const triggerErrorRef = useRef((msg: string) => {
-    setErrorMessage(msg)
-    setTimeout(() => setErrorMessage(null), 1200)
-  })
-  const lastPacketRef = useRef(Date.now())
-  const isOffline = typeof window !== 'undefined' && !navigator.onLine
-  const isStreamStale = now - lastPacketRef.current > 10000
-  const showConnectionWarning = backendReady && (isOffline || isStreamStale)
-
+  // now ticker
   useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 100)
+    const timer = setInterval(tickNow, 100)
     return () => clearInterval(timer)
-  }, [])
+  }, [tickNow])
 
-  const pointsRef = useRef(points)
-  const betAmountRef = useRef(betAmount)
-  const peakPointsRef = useRef(peakPoints)
-  const autoAllInRef = useRef(autoAllIn)
-  const predictionsRef = useRef(predictions)
-  const serverOffsetRef = useRef(serverOffset)
-  const flashBuffRemainingRef = useRef(flashBuffRemaining)
-  const activeFlashEventRef = useRef(activeFlashEvent)
+  // scroll-to-top button
+  useEffect(() => {
+    const handleScroll = () => setShowJumpButton(window.scrollY > 400)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [setShowJumpButton])
 
-  useEffect(() => {
-    activeFlashEventRef.current = activeFlashEvent
-  }, [activeFlashEvent])
-  useEffect(() => {
-    flashBuffRemainingRef.current = flashBuffRemaining
-  }, [flashBuffRemaining])
-  useEffect(() => {
-    serverOffsetRef.current = serverOffset
-  }, [serverOffset])
-  useEffect(() => {
-    pointsRef.current = points
-  }, [points])
-  useEffect(() => {
-    betAmountRef.current = betAmount
-  }, [betAmount])
-  useEffect(() => {
-    peakPointsRef.current = peakPoints
-  }, [peakPoints])
-  useEffect(() => {
-    autoAllInRef.current = autoAllIn
-  }, [autoAllIn])
-  useEffect(() => {
-    predictionsRef.current = predictions
-  }, [predictions])
-
+  // localStorage
   useEffect(() => {
     const saved = localStorage.getItem('autoAllIn')
     if (saved === 'false') setAutoAllIn(false)
-    setIsHydrated(true)
 
     if (typeof BigInt === 'undefined') {
       setNotification('no_bigint')
@@ -186,18 +171,19 @@ export default function HomePage() {
     if (!localStorage.getItem('rps_welcomed')) {
       setNotification('new_visitor')
     }
-  }, [])
+  }, [setAutoAllIn, setNotification])
 
   useEffect(() => {
     if (isHydrated) localStorage.setItem('autoAllIn', autoAllIn.toString())
   }, [autoAllIn, isHydrated])
 
+  // auto all-in sync
   useEffect(() => {
     if (isHydrated && autoAllIn) {
       setBetAmount(points)
       if (!isFocused) setInputString(points.toString())
     }
-  }, [autoAllIn, points, isHydrated, isFocused])
+  }, [autoAllIn, points, isHydrated, isFocused, setBetAmount, setInputString])
 
   useEffect(() => {
     if (isHydrated && !autoAllIn) {
@@ -209,17 +195,6 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoAllIn, isHydrated])
 
-  useEffect(() => {
-    const handleScroll = () => setShowJumpButton(window.scrollY > 400)
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  const markReady = () => {
-    _backendReady = true
-    setBackendReady(true)
-  }
-
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
   const { matches, setMatches, hasMore, isLoadingMore, loadMatches } =
     useInfiniteScroll({ fetchFn })
@@ -229,6 +204,7 @@ export default function HomePage() {
   const { display: animatedDisplay } = formatPoints(animatedPoints)
   const animatedResult = useAnimatedBigInt(resultAnim?.amount ?? 0n, 600, true)
 
+  // initial data fetch
   useEffect(() => {
     const user = getOrCreateUser()
     if (!isUserValid(user)) return
@@ -238,42 +214,11 @@ export default function HomePage() {
       .then((data) => {
         if (data?.type) {
           setActiveFlashEvent(data.type)
-          activeFlashEventRef.current = data.type
           setFlashBuffRemaining(data.betsRemaining)
           setLiveTheme(data.type as EventTheme)
         }
       })
       .catch(() => {})
-
-    setDisplayNickname(user.nickname)
-
-    fetchUserPoints(user.userId, user.shortId).then((data) => {
-      if (!data) return
-      if (data.nickname) setDisplayNickname(data.nickname)
-
-      const p = BigInt(data.points)
-      setPoints(p)
-      setPeakPoints(BigInt(data.peakPoints))
-
-      const savedStreak = data.currentWinStreak ?? 0
-      if (savedStreak > 0) {
-        setWinStreak(savedStreak)
-        setStreakMult(
-          savedStreak >= 5
-            ? 15
-            : savedStreak >= 4
-              ? 10
-              : savedStreak >= 3
-                ? 5
-                : 1
-        )
-      }
-
-      const initialBet = autoAllInRef.current ? p : p < 100000n ? p : 100000n
-      setBetAmount(initialBet)
-      if (!isFocused) setInputString(initialBet.toString())
-      setPointsLoaded(true)
-    })
 
     fetch(`${API_BASE}/api/live/flash-state`)
       .then((r) => r.json())
@@ -293,19 +238,17 @@ export default function HomePage() {
     fetchPendingMatches()
       .then((data) => {
         if (!data) return
-        setPendingMatches((prev) => {
-          const existingIds = new Set(prev.map((p) => p.gameId))
-          const freshMatches = data.filter((m) => !existingIds.has(m.gameId))
-          if (freshMatches.length > 0) {
-            markReady()
-            return [...freshMatches, ...prev]
-          }
-          return prev
-        })
+        const { pendingMatches: existing } = useGameStore.getState()
+        const existingIds = new Set(existing.map((p) => p.gameId))
+        const fresh = data.filter((m) => !existingIds.has(m.gameId))
+        if (fresh.length > 0) {
+          markReady()
+          fresh.forEach(addPendingMatch)
+        }
       })
       .catch((err) => {
         console.error('Failed to fetch pending matches:', err)
-        triggerErrorRef.current('LIVE FEED ERROR')
+        triggerError('LIVE FEED ERROR')
       })
 
     fetchUnifiedLeaderboard('daily')
@@ -318,121 +261,50 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
 
-  const handlePick = async (gameId: string, playerName: string) => {
-    const user = getOrCreateUser()
-    if (!isUserValid(user) || !user.nickname || betAmount <= 0n) return
-
-    if (notification === 'new_visitor') {
-      localStorage.setItem('rps_welcomed', '1')
-      setNotification(null)
-    }
-
-    setPredictions((prev) =>
-      new Map(prev).set(gameId, { gameId, pick: playerName, confirmed: false })
-    )
-
-    let succeeded = false
-    try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 5000)
-
-      const { ok, data } = await postPrediction(
-        {
-          userId: user.userId,
-          gameId,
-          pick: playerName,
-          betAmount: betAmountRef.current.toString(),
-          nickname: user.nickname,
-          shortId: user.shortId
-        },
-        controller.signal
-      )
-
-      clearTimeout(timeout)
-
-      if (ok && data?.success === true) {
-        succeeded = true
-        setPredictions((prev) => {
-          const next = new Map(prev)
-          const current = next.get(gameId)
-          if (current) next.set(gameId, { ...current, confirmed: true })
-          return next
-        })
-      } else {
-        triggerErrorRef.current(data?.error || 'MATCH ALREADY ENDED')
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        triggerErrorRef.current('CONNECTION TOO SLOW')
-      } else {
-        triggerErrorRef.current('CONNECTION FAILED')
-      }
-    } finally {
-      if (!succeeded) {
-        setPredictions((prev) => {
-          const next = new Map(prev)
-          next.delete(gameId)
-          return next
-        })
-      }
-    }
-  }
-
   const fetchUpdatedPoints = useCallback(async (): Promise<{
     newPoints: bigint
     isNewPeak: boolean
   }> => {
     const user = getOrCreateUser()
+    const { points: currentPoints, peakPoints: currentPeak } =
+      useUserStore.getState()
     if (!isUserValid(user))
-      return { newPoints: pointsRef.current, isNewPeak: false }
+      return { newPoints: currentPoints, isNewPeak: false }
 
     const data = await fetchUserPoints(user.userId, user.shortId)
-    if (!data) return { newPoints: pointsRef.current, isNewPeak: false }
+    if (!data) return { newPoints: currentPoints, isNewPeak: false }
 
     const newPoints = BigInt(data.points)
     const newPeak = BigInt(data.peakPoints)
-    const isNewPeak = newPeak > peakPointsRef.current
+    const isNewPeak = newPeak > currentPeak
 
-    setPointsLoaded(true)
-    setPeakPoints(newPeak)
-    setPoints(newPoints)
+    applyPointsUpdate(newPoints, newPeak)
 
-    if (autoAllInRef.current) {
-      setBetAmount(newPoints)
-      setInputString(newPoints.toString())
-    } else if (betAmountRef.current > newPoints) {
-      setBetAmount(newPoints)
-      setInputString(newPoints.toString())
-    }
+    // keep inputString in sync
+    const { autoAllIn: aa, betAmount: ba } = useUserStore.getState()
+    if (aa || ba > newPoints) setInputString(newPoints.toString())
 
     return { newPoints, isNewPeak }
-  }, [])
+  }, [applyPointsUpdate, setInputString])
 
+  // SSE live stream
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
 
     es.addEventListener('sync', (event) => {
       const { serverTime } = JSON.parse(event.data)
-      const newOffset = serverTime - Date.now()
-      setServerOffset(newOffset)
-      serverOffsetRef.current = newOffset
+      setServerOffset(serverTime - Date.now())
     })
 
     es.addEventListener('pending', (event) => {
       const pending: PendingMatch = JSON.parse(event.data)
       lastPacketRef.current = Date.now()
-      setPendingMatches((prev) => {
-        if (prev.find((p) => p.gameId === pending.gameId)) return prev
-        return [pending, ...prev]
-      })
-      const timeoutMs =
-        pending.expiresAt - (Date.now() + serverOffsetRef.current) + 5000
+      addPendingMatch(pending)
+
+      const { serverOffset: offset } = useGameStore.getState()
+      const timeoutMs = pending.expiresAt - (Date.now() + offset) + 5000
       setTimeout(
-        () => {
-          setPendingMatches((prev) =>
-            prev.filter((p) => p.gameId !== pending.gameId)
-          )
-        },
+        () => removePendingMatch(pending.gameId),
         Math.max(5000, timeoutMs)
       )
       markReady()
@@ -444,9 +316,9 @@ export default function HomePage() {
       if (data.userId !== userId) return
 
       const isWin = data.result === 'WIN'
+      const { activeFlashEvent: currentFlash } = useGameStore.getState()
 
       if (isWin) {
-        const currentFlash = activeFlashEventRef.current
         if (currentFlash === 'LUNAR') playMoon()
         else if (currentFlash === 'CARDS') playCards()
         else if (currentFlash === 'ELECTRIC') playElectric()
@@ -472,6 +344,7 @@ export default function HomePage() {
         const bonus = data.bonus
           ? { ...data.bonus, amount: BigInt(data.bonus.amount) }
           : null
+
         fetchUpdatedPoints()
         setResultAnim({
           win: true,
@@ -485,56 +358,52 @@ export default function HomePage() {
             vy: -(Math.random() * 200 + 100),
             delay: Math.random() * 0.2
           }))
-        })
+        } as ResultAnim)
       } else {
         playLoss()
         const bonus = data.bonus
           ? { ...data.bonus, amount: BigInt(data.bonus.amount) }
           : null
-        const pointsBefore = pointsRef.current
+        const { points: pointsBefore } = useUserStore.getState()
         new Promise<{ newPoints: bigint; isNewPeak: boolean }>((resolve) => {
           setTimeout(() => resolve(fetchUpdatedPoints()), 100)
         }).then(({ newPoints }) => {
           const actualLoss =
             pointsBefore > newPoints ? pointsBefore - newPoints : 0n
-          setResultAnim({ win: false, amount: actualLoss, bonus, confetti: [] })
+          setResultAnim({
+            win: false,
+            amount: actualLoss,
+            bonus,
+            confetti: []
+          } as ResultAnim)
         })
       }
 
-      const newStreak = data.streakAfter ?? 0
-      setWinStreak(newStreak)
+      setWinStreak(data.streakAfter ?? 0)
       setStreakMult(data.streakMult ?? 1)
 
-      if (activeFlashEventRef.current) {
-        const next = flashBuffRemainingRef.current - 1
-        setFlashBuffRemaining(next)
-        if (next <= 0) {
-          setActiveFlashEvent(null)
-          setLiveTheme(null)
-        }
+      if (currentFlash) {
+        decrementFlashBuff()
+        const { flashBuffRemaining: remaining } = useGameStore.getState()
+        if (remaining <= 0) setLiveTheme(null)
       }
 
       setTimeout(
-        () => setResultAnim(null),
+        () => clearResultAnim(),
         data.bonus?.tier === 'LEGENDARY' ? 3000 : 2000
       )
 
-      setPredictions((prev) => {
-        const newMap = new Map(prev)
-        const existing = prev.get(data.gameId)
-        if (existing)
-          newMap.set(data.gameId, {
-            ...existing,
-            result: isWin ? 'WIN' : 'LOSE'
-          })
-        return newMap
-      })
+      const { predictions: preds } = useGameStore.getState()
+      const existing = preds.get(data.gameId)
+      if (existing) {
+        updatePrediction(data.gameId, { result: isWin ? 'WIN' : 'LOSE' })
+      }
     })
 
     es.addEventListener('result', (event) => {
       const match: Match = JSON.parse(event.data)
       lastPacketRef.current = Date.now()
-      setPendingMatches((prev) => prev.filter((p) => p.gameId !== match.gameId))
+      removePendingMatch(match.gameId)
       setMatches((prev) => {
         if (prev.some((m) => m.gameId === match.gameId)) return prev
         return [match, ...prev].slice(0, 20)
@@ -546,7 +415,6 @@ export default function HomePage() {
       const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
       setActiveFlashEvent(data.type)
-      activeFlashEventRef.current = data.type
       setFlashBuffRemaining(data.betsRemaining)
       setLiveTheme(data.type as EventTheme)
     })
@@ -554,6 +422,54 @@ export default function HomePage() {
     return () => es.close()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handlePick = async (gameId: string, playerName: string) => {
+    const user = getOrCreateUser()
+    const { betAmount: currentBet } = useUserStore.getState()
+    if (!isUserValid(user) || !user.nickname || currentBet <= 0n) return
+
+    if (notification === 'new_visitor') {
+      localStorage.setItem('rps_welcomed', '1')
+      setNotification(null)
+    }
+
+    setPrediction(gameId, { gameId, pick: playerName, confirmed: false })
+
+    let succeeded = false
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 5000)
+
+      const { ok, data } = await postPrediction(
+        {
+          userId: user.userId,
+          gameId,
+          pick: playerName,
+          betAmount: currentBet.toString(),
+          nickname: user.nickname,
+          shortId: user.shortId
+        },
+        controller.signal
+      )
+
+      clearTimeout(timeout)
+
+      if (ok && data?.success === true) {
+        succeeded = true
+        updatePrediction(gameId, { confirmed: true })
+      } else {
+        triggerError(data?.error || 'MATCH ALREADY ENDED')
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        triggerError('CONNECTION TOO SLOW')
+      } else {
+        triggerError('CONNECTION FAILED')
+      }
+    } finally {
+      if (!succeeded) deletePrediction(gameId)
+    }
+  }
 
   const numberName = pointsLoaded ? getFullNumberName(points) : ''
   const shouldShowTooltip =
@@ -713,8 +629,7 @@ export default function HomePage() {
                     setInputString(val)
                     const parsed = parseShorthand(val)
                     if (parsed > 0n) {
-                      const validBet = parsed > points ? points : parsed
-                      setBetAmount(validBet)
+                      setBetAmount(parsed > points ? points : parsed)
                     }
                   }}
                   onBlur={() => {
@@ -748,7 +663,7 @@ export default function HomePage() {
               <ModeButton
                 visualMode={visualMode}
                 label={`AUTO ${autoAllIn ? 'ON' : 'OFF'}`}
-                onClick={() => setAutoAllIn((prev) => !prev)}
+                onClick={() => setAutoAllIn(!autoAllIn)}
               />
             </div>
           </div>

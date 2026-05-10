@@ -6,20 +6,20 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import { fetchUserPoints } from '@/lib/api'
 import { useEventTheme } from '@/lib/EventThemeContext'
 import { getEventColor } from '@/lib/format'
 import { EVENT_HEADER_CONFIG } from '@/lib/eventConfig'
+import { useUserStore } from '@/app/stores/userStore'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [profileHref, setProfileHref] = useState('/profile')
   const pathname = usePathname()
   const { visualMode, brandTheme } = useEventTheme()
+  const { initUser } = useUserStore()
 
   const brandCfg = brandTheme ? EVENT_HEADER_CONFIG[brandTheme] : null
   const modeKey = visualMode?.replace('flash_', '') ?? null
-
   const navGlow = modeKey ? `nav-glow-${modeKey}` : ''
   const borderCfg = visualMode
     ? EVENT_HEADER_CONFIG[
@@ -31,11 +31,10 @@ const Header = () => {
 
   useEffect(() => {
     const user = getOrCreateUser()
-    if (!isUserValid(user)) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProfileHref(`/profile/${user.shortId}`)
-    fetchUserPoints(user.userId, user.shortId, user.nickname).catch(() => {})
-  }, [])
+    if (isUserValid(user)) setProfileHref(`/profile/${user.shortId}`)
+    initUser()
+  }, [initUser])
 
   const allNavItems = [
     { label: 'Live', href: '/' },
@@ -70,7 +69,7 @@ const Header = () => {
 
       {modeKey && (
         <div
-          className={`absolute inset-0 -z-10 event-bg-${modeKey} event-side-${modeKey} `}
+          className={`absolute inset-0 -z-10 event-bg-${modeKey} event-side-${modeKey}`}
         />
       )}
 
@@ -111,6 +110,7 @@ const Header = () => {
           >
             RPS League
           </span>
+
           {/* Desktop nav */}
           <nav className="hidden min-[641px]:flex gap-2 ml-auto">
             {allNavItems.map(({ label, href }) => (

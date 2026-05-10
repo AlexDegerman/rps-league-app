@@ -12,8 +12,10 @@ export default defineConfig({
     environment: 'happy-dom',
     setupFiles: ['./vitest.setup.ts'],
     globals: true,
+    maxWorkers: 1,
+    execArgv: ['--max-old-space-size=4096'],
     css: false,
-    pool: 'threads',
+    pool: 'forks',
     exclude: [
       '**/node_modules/**',
       '**/.next/**',

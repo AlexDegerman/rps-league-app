@@ -1,21 +1,7 @@
 import GemIcon from '@/components/icons/GemIcon'
 import { formatPoints, getAmountColor, getBonusStyles } from '@/lib/format'
 import { BONUS_TIER_STYLES } from '@/lib/constants'
-import type { BonusTier } from '@/types/rps'
-
-type ConfettiType =
-  | 'normal'
-  | 'hellfire'
-  | 'lunar'
-  | 'electric'
-  | 'cards'
-  | 'fever'
-  | 'inferno'
-
-interface BonusData {
-  amount: bigint
-  tier: string
-}
+import type { BonusTier, ConfettiType, ResultAnim } from '@/types/rps'
 
 interface ConfettiParticle {
   vx: number
@@ -24,17 +10,8 @@ interface ConfettiParticle {
   delay: number
 }
 
-interface ResultAnimData {
-  win: boolean
-  amount: bigint
-  bonus?: BonusData | null
-  confetti?: ConfettiParticle[]
-  streakAfter?: number
-  confettiType?: ConfettiType
-}
-
 interface ResultAnimOverlayProps {
-  resultAnim: ResultAnimData | null
+  resultAnim: ResultAnim | null
   streakMult: number
   animatedResult: bigint
 }
@@ -63,7 +40,7 @@ function BottomConfetti({
 }: {
   confettiType: ConfettiType
   confetti: ConfettiParticle[]
-  bonus?: BonusData | null
+  bonus?: ResultAnim['bonus']
   streakAfter?: number
 }) {
   if (confettiType === 'fever') {

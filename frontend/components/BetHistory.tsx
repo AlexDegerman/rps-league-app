@@ -12,6 +12,7 @@ import {
   BetHistoryEntry
 } from '@/types/rps'
 import { BONUS_TIER_STYLES, FLASH_EVENT_CARD } from '@/lib/constants'
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 
 type Tab = 'recent' | 'wins' | 'multipliers'
 
@@ -79,16 +80,10 @@ function TotalMultiplierBadge({
 }) {
   if (!isWin) return null
 
-  // bonusMultiplier is stored as e.g. 150 = 1.5x, 1000 = 10x
   const bonusMult = bonusMultiplier > 0 ? bonusMultiplier / 100 : 0
   const effectiveFlash = flashMult > 1 ? flashMult : 1
 
-  // Only show if there's actually a meaningful multiplier to display
   if (bonusMult === 0 && effectiveFlash === 1) return null
-
-  const parts: string[] = []
-  if (bonusMult > 0) parts.push(`${bonusMult.toFixed(1)}× bonus`)
-  if (effectiveFlash > 1) parts.push(`${effectiveFlash}× flash`)
 
   const tierKey = (
     bonusTier && bonusTier in BONUS_TIER_STYLES ? bonusTier : 'COMMON'
@@ -153,7 +148,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
   const gainLossBig = BigInt(entry.gainLoss ?? '0')
   const stakeBig = BigInt(entry.betAmount ?? '0')
   const pickedA = entry.pick === entry.playerAName
-
   const absGainLoss = gainLossBig < 0n ? -gainLossBig : gainLossBig
 
   const amountAnimationClass = isLoss
@@ -167,7 +161,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
   ) as BonusTier
 
   const tierStyle = BONUS_TIER_STYLES[tierKey]
-
   const flashCfg = entry.flashEventType
     ? FLASH_EVENT_CARD[entry.flashEventType]
     : null
@@ -182,7 +175,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
     <li
       className={`relative overflow-hidden w-full p-3.5 rounded-4xl border-2 transition-all ${cardClass}`}
     >
-      {/* Top row: rank + timestamp */}
       <div className="flex justify-between items-start">
         <div className="min-h-6">
           {rank !== undefined && (
@@ -202,7 +194,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
         </span>
       </div>
 
-      {/* Flash event badge — shown above bonus badge when active */}
       {isWin && entry.flashEventType && (
         <FlashEventBadge
           flashEventType={entry.flashEventType}
@@ -210,7 +201,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
         />
       )}
 
-      {/* Center: bonus badge + amount + multiplier breakdown + stake */}
       <div className="flex flex-col items-center justify-center py-0.5">
         <BonusBadge tier={entry.bonusTier} multiplier={entry.bonusMultiplier} />
 
@@ -235,7 +225,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
           </div>
         </div>
 
-        {/* Total multiplier breakdown */}
         <TotalMultiplierBadge
           bonusMultiplier={entry.bonusMultiplier}
           flashMult={entry.flashMult ?? 1}
@@ -253,7 +242,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
         </div>
       </div>
 
-      {/* Bottom: matchup */}
       <div className="mt-2.5 grid grid-cols-[1fr_auto_1fr] items-center gap-4 pt-2.5 border-t border-gray-100/50">
         <div className="flex items-center gap-2 min-[425px]:gap-4">
           <MoveIcon
@@ -303,69 +291,66 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
   )
 }
 
+function useTabFetchFn(userId: string | null, tab: Tab) {
+  return useCallback(
+    async (page: number) => {
+      if (!userId) return { matches: [], total: 0, hasMore: false }
+
+      const data = await fetchUserBetHistory(userId, page, tab)
+
+      const predMap = new Map<string, PredictionRecord>(
+        data.predictions.map((p: PredictionRecord) => [p.gameId, p])
+      )
+
+      const entries: BetHistoryEntry[] = data.matches.map((m: Match) => {
+        const pred = predMap.get(m.gameId)
+        return {
+          id: pred?.id ?? 0,
+          gameId: m.gameId,
+          pick: pred?.pick ?? '',
+          result: (pred?.result as 'WIN' | 'LOSE') ?? null,
+          createdAt: pred?.createdAt ?? m.time,
+          betAmount: pred?.betAmount ?? '0',
+          gainLoss: pred?.gainLoss ?? '0',
+          bonusTier: pred?.bonusTier ?? null,
+          bonusMultiplier: pred?.bonusMultiplier ?? 0,
+          flashEventType: pred?.flashEventType ?? null,
+          flashMult: pred?.flashMult ?? 1,
+          playerAName: m.playerA.name,
+          playerBName: m.playerB.name,
+          playerAPlayed: m.playerA.played,
+          playerBPlayed: m.playerB.played
+        }
+      })
+
+      return {
+        matches: entries as unknown as Match[],
+        total: data.total,
+        hasMore: data.hasMore
+      }
+    },
+    [userId, tab]
+  )
+}
+
 // Main Component
 
 export default function BetHistory({ userId }: { userId: string | null }) {
   const [tab, setTab] = useState<Tab>('recent')
-  const [bets, setBets] = useState<BetHistoryEntry[]>([])
-  const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
 
-  const loadPage = useCallback(
-    async (pageNum: number, currentTab: Tab, append = false) => {
-      if (!userId) return
-      if (append) {
-        setIsLoadingMore(true)
-      } else {
-        setIsLoading(true)
-      }
+  const fetchFn = useTabFetchFn(userId, tab)
 
-      try {
-        const data = await fetchUserBetHistory(userId, pageNum, currentTab)
-        const predMap = new Map<string, PredictionRecord>(
-          data.predictions.map((p: PredictionRecord) => [p.gameId, p])
-        )
-        const entries: BetHistoryEntry[] = data.matches.map((m: Match) => {
-          const pred = predMap.get(m.gameId)
-          return {
-            id: pred?.id ?? 0,
-            gameId: m.gameId,
-            pick: pred?.pick ?? '',
-            result: (pred?.result as 'WIN' | 'LOSE') ?? null,
-            createdAt: pred?.createdAt ?? m.time,
-            betAmount: pred?.betAmount ?? '0',
-            gainLoss: pred?.gainLoss ?? '0',
-            bonusTier: pred?.bonusTier ?? null,
-            bonusMultiplier: pred?.bonusMultiplier ?? 0,
-            flashEventType: pred?.flashEventType ?? null,
-            flashMult: pred?.flashMult ?? 1,
-            playerAName: m.playerA.name,
-            playerBName: m.playerB.name,
-            playerAPlayed: m.playerA.played,
-            playerBPlayed: m.playerB.played
-          }
-        })
+  const { matches, isLoading, isLoadingMore, hasMore, loadMatches, reset } =
+    useInfiniteScroll({ fetchFn, enabled: !!userId })
 
-        setBets((prev) => (append ? [...prev, ...entries] : entries))
-        setHasMore(data.hasMore)
-        setPage(pageNum)
-      } catch (err) {
-        console.error('Bet history fetch failed:', err)
-      } finally {
-        setIsLoading(false)
-        setIsLoadingMore(false)
-      }
-    },
-    [userId]
-  )
-
+  // Reset and reload whenever tab or userId changes
   useEffect(() => {
-    setPage(1)
-    setHasMore(true)
-    loadPage(1, tab)
-  }, [tab, loadPage])
+    reset()
+    if (userId) loadMatches(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, userId])
+
+  const bets = matches as unknown as BetHistoryEntry[]
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -395,27 +380,25 @@ export default function BetHistory({ userId }: { userId: string | null }) {
             Empty Record
           </div>
         ) : (
-          <div className="space-y-4">
-            <ul className="space-y-4">
-              {bets.map((bet, i) => (
-                <BetRow
-                  key={`${bet.gameId}-${bet.id}`}
-                  entry={bet}
-                  rank={tab !== 'recent' ? i : undefined}
-                />
-              ))}
-            </ul>
-
-            {hasMore && (
-              <button
-                onClick={() => !isLoadingMore && loadPage(page + 1, tab, true)}
-                disabled={isLoadingMore}
-                className="w-full mt-6 py-4 rounded-3xl bg-white border-2 border-gray-100 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-indigo-600 transition-all"
-              >
-                {isLoadingMore ? 'Streaming Data...' : 'Load More Results'}
-              </button>
+          <ul className="space-y-4">
+            {bets.map((bet, i) => (
+              <BetRow
+                key={`${bet.gameId}-${bet.id}`}
+                entry={bet}
+                rank={tab !== 'recent' ? i : undefined}
+              />
+            ))}
+            {isLoadingMore && (
+              <li className="text-center py-6 text-[10px] font-black uppercase tracking-[0.3em] text-gray-300 animate-pulse">
+                Loading More
+              </li>
             )}
-          </div>
+            {!hasMore && bets.length > 0 && (
+              <li className="text-center py-6 text-[10px] font-black uppercase tracking-widest text-gray-200">
+                End of Record
+              </li>
+            )}
+          </ul>
         )}
       </div>
     </div>

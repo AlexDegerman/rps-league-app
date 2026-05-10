@@ -171,6 +171,7 @@ Guarantees:
 |-------|-------|
 | Database | Supabase PostgreSQL (Validated on 10k+ record datasets) |
 | Frontend | Next.js, React, TypeScript, Tailwind CSS |
+| State Management | Zustand (game, user, ui, stores)|
 | Backend | Node.js, Express, TypeScript, Google Gemini API |
 | Real-time | Server-Sent Events via `/api/live` |
 | Database | Supabase PostgreSQL |
@@ -232,7 +233,9 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 
 **Frontend (Vitest + React Testing Library)**
 - **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
-- **HomePage**: Tests core betting loop, "ALL IN" button logic, Auto All-In state persistence, and hydration-safe points display.
+- **HomePage**: Tests core betting loop ("ALL IN", floor clamping, AUTO toggle), 
+  user store integration (nickname display, bet amount sync), and 
+  live connection state rendering.
 - **Leaderboard Page**: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
 
 ---
@@ -270,7 +273,6 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 
 - Friends system with social leaderboard
 - Player vs player head-to-head statistics
-- Dynamic Risk & Multiplier Engine: Asymmetric betting system with “Flash Events” with increased gain and loss rates to enhance strategic depth.
 - Deeper AI-driven insights and trend detection
 - Cosmetic Prestige System: Spend earned points on profile customizations, including unique name colors, tiered badges, and exclusive icon sets to stand out on the leaderboards.
 

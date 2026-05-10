@@ -175,3 +175,31 @@ export interface MatchRowProps {
   winStreak?: number
   visualMode?: string | null
 }
+
+export type LeaderboardTab = 'daily' | 'weekly' | 'alltime'
+export type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
+export type SortDir = 'asc' | 'desc'
+
+export type ConfettiType =
+  | 'normal'
+  | 'hellfire'
+  | 'lunar'
+  | 'electric'
+  | 'cards'
+  | 'fever'
+  | 'inferno'
+
+export interface BonusData {
+  tier: BonusTier
+  amount: bigint
+  multiplier?: number
+}
+
+export interface ResultAnim {
+  win: boolean
+  amount: bigint
+  bonus?: BonusData | null
+  confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
+  streakAfter?: number
+  confettiType?: ConfettiType
+}

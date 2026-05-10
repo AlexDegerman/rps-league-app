@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   clearUserCache,
@@ -9,7 +9,6 @@ import {
   resetUser
 } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
-import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import type { UserStats } from '@/types/rps'
 import { getAmountColor, getFullNumberName, formatPoints } from '@/lib/format'
 import {
@@ -19,12 +18,12 @@ import {
   fetchRecoveryCode,
   updateNickname,
   handleRecoverProfile,
-  fetchUserBetHistory,
   updateLinkedin
 } from '@/lib/api'
 import BetHistory from '@/components/BetHistory'
 import { LinkedInBadge } from '@/components/badges/LinkedInBadge'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
+import { useUserStore } from '@/app/stores/userStore'
 
 interface Ranks {
   daily: number | null
@@ -72,6 +71,7 @@ export default function ProfilePage() {
   const [linkedinInput, setLinkedinInput] = useState('')
   const [linkedinSaved, setLinkedinSaved] = useState(false)
   const [linkedinError, setLinkedinError] = useState('')
+
   const { display, full, capped } = formatPoints(points ?? '0')
 
   useEffect(() => {
@@ -89,7 +89,6 @@ export default function ProfilePage() {
     const loadProfile = async () => {
       try {
         const profileData = await fetchUserProfile(targetShortId)
-
         if (profileData) {
           setNickname(profileData.nickname)
           setPoints(profileData.points)
@@ -105,7 +104,6 @@ export default function ProfilePage() {
         }
       } catch (err) {
         console.error('Profile load error:', err)
-
         if (own) {
           setPoints('200000')
           const local = getOrCreateUser()
@@ -149,45 +147,17 @@ export default function ProfilePage() {
     }
   }, [targetShortId])
 
-  const fetchFn = useCallback(
-    async (page: number) => {
-      if (!profileUserId) return { matches: [], total: 0, hasMore: false }
-      const data = await fetchUserBetHistory(profileUserId, page)
-
-      return {
-        matches: data.matches,
-        total: data.total,
-        hasMore: data.hasMore
-      }
-    },
-    [profileUserId]
-  )
-
-  const {
-    matches,
-    isLoading: historyLoading,
-    loadMatches
-  } = useInfiniteScroll({ fetchFn, enabled: !!profileUserId })
-
-  useEffect(() => {
-    if (profileUserId) {
-      loadMatches(1)
-    }
-  }, [profileUserId, loadMatches])
-
   const handleRegenerate = async () => {
     if (!isOwnProfile) return
 
     let newNickname = ''
     let attempts = 0
     let isAvailable = false
-
     const user = getOrCreateUser()
 
     while (attempts < 10 && !isAvailable) {
       newNickname = regenerateNickname()
       attempts++
-
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/users/check-name/${newNickname}`
@@ -204,9 +174,9 @@ export default function ProfilePage() {
 
     try {
       await updateNickname(user.userId, newNickname, user.shortId)
-
       setNickname(newNickname)
       localStorage.setItem('rps_nickname', newNickname)
+      useUserStore.getState().setDisplayNickname(newNickname)
     } catch (err) {
       console.error('Failed to sync nickname:', err)
     }
@@ -216,26 +186,18 @@ export default function ProfilePage() {
     setRecoverLoading(true)
     setRecoverError('')
     setRecoverConfirm(false)
-
     try {
       const data = await handleRecoverProfile(recoverInput.trim())
-
       if (!data) {
         setRecoverError('Invalid recovery code')
         return
       }
-
       localStorage.setItem('rps_user_id', data.userId)
       localStorage.setItem('rps_short_id', data.shortId)
-
-      if (data.nickname) {
-        localStorage.setItem('rps_nickname', data.nickname)
-      }
-
+      if (data.nickname) localStorage.setItem('rps_nickname', data.nickname)
       clearUserCache()
-
+      await useUserStore.getState().initUser()
       const freshUser = getOrCreateUser()
-
       router.push(`/profile/${freshUser.shortId}`)
     } catch {
       setRecoverError('Failed to recover profile')
@@ -243,43 +205,35 @@ export default function ProfilePage() {
       setRecoverLoading(false)
     }
   }
+
   const handleResetProfile = async () => {
     const now = Date.now()
     const oneHour = 60 * 60 * 1000
-
     let timestamps: number[] = []
-
     try {
       const stored = localStorage.getItem('rps_restart_timestamps')
       if (stored) timestamps = JSON.parse(stored)
     } catch {
       timestamps = []
     }
-
     timestamps = timestamps.filter((t) => now - t < oneHour)
-
     if (timestamps.length >= 3) {
       const waitMin = Math.ceil((oneHour - (now - timestamps[0])) / 60000)
       setResetError(`Rate limit reached. Wait ${waitMin}m.`)
       return
     }
-
     timestamps.push(now)
     localStorage.setItem('rps_restart_timestamps', JSON.stringify(timestamps))
-
     try {
       setResetError('')
       resetUser()
       const newUser = getOrCreateUser()
-
       try {
         await updateNickname(newUser.userId, newUser.nickname, newUser.shortId)
       } catch {
         console.error('Initial sync failed')
       }
-
-      await new Promise((res) => setTimeout(res, 0))
-
+      await useUserStore.getState().initUser()
       window.location.href = `/profile/${newUser.shortId}`
     } catch (err) {
       console.error(err)
@@ -688,13 +642,7 @@ export default function ProfilePage() {
         <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">
           Bet History
         </h2>
-        {historyLoading && matches.length === 0 ? (
-          <p className="text-center text-gray-400 py-8 text-xs uppercase font-black tracking-widest">
-            Loading history...
-          </p>
-        ) : (
-          <BetHistory userId={profileUserId} />
-        )}
+        <BetHistory userId={profileUserId} />
       </div>
     </div>
   )
