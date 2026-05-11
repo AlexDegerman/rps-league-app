@@ -93,47 +93,52 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
-- Infinite Scaling: Engineered with native BigInt support to handle astronomical point values (Sextillions, Vigintillions, and beyond) without precision loss.
+- Infinite Scaling: Engineered with native BigInt support to handle astronomical point values (Sextillions, Vigintillions, and beyond).
 
 ---
 
 ## ⚡ Flash Events
 
-Flash Events are live gameplay modifiers that can trigger during matches with a 5% chance per bet. When activated, a random event takes over the experience for the next 3 predictions, temporarily transforming the entire application through UI theme changes, particle system replacements, audio redesign, and gameplay modifiers such as win conditions and multipliers.
+Flash Events are live gameplay modifiers that can trigger during matches with a 5% chance per bet. When activated, a random event temporarily transforms the application for the next 3 predictions through:
 
----
+- Full UI theme overrides  
+- Custom particle systems  
+- Event-specific audio design  
+- Gameplay modifiers and multipliers  
+- Dynamic typography and visual effects  
+- Animated endgame number-tier styling  
 
-### 🌙 Moon’s Blessing
-A calm, lunar-inspired event wrapped in cool blue tones with serene visual and audio effects.
+Events are designed as evolving seasonal content and continuously expand over time.
+Event selection is weighted to support controlled rollout of new or seasonal events, allowing certain events to appear more frequently without changing the global trigger rate.
 
-Effect:
-- All bets during the event are guaranteed wins
-- x5 win multiplier applied
-- UI shifts into a moonlit blue theme with lunar styling
-- Win effects replaced with drifting luminous particles like moonlight or snow
-- Audio becomes soft and ethereal with a moonshine-like shimmer
-- Icons and UI elements adapt into crescent-inspired motifs
+> 📋 **[View all Flash Event showcases →](./EVENTS.md)**
+
+### Featured: Moon's Blessing
+
+A calm lunar-inspired event wrapped in cool blue tones with serene visual and audio effects.
 
 <div>
   <strong>Moon's Blessing Flash Event in Action</strong><br/>
   <video src="./assets/moon_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
 </div>
 
-### ⚡ Electric Surge
-A fast-paced neon storm event with high-voltage visuals and reactive energy.
+---
 
-Effect:
-- All bets during the event are guaranteed wins
-- x5 win multiplier applied
-- UI shifts into a neon electric storm aesthetic
-- Win effects replaced with vertical streams of electric static rain
-- Lightning audio feedback intensifies gameplay moments
-- Full interface transforms into a digital storm state
+## 🌌 Infinite Number Scaling & Visual Tier System
 
-<div>
-  <strong>Electric Surge Flash Event in Action</strong><br/>
-  <video src="./assets/electric_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
-</div>
+RPS League is engineered around native `BigInt` progression, allowing point values to scale far beyond traditional leaderboard systems without precision loss.
+
+Rather than stopping at millions or billions, the economy extends into astronomical numerical territory, reaching vigintillions and beyond through continuously expanding progression tiers.
+
+Each tier carries a distinct visual identity, expressed through fully animated styling systems that evolve as players progress deeper into the scale. Higher tiers grow increasingly intense and expressive, while lower tiers stay minimal and readable for clarity.
+
+Each major event introduces new number tiers, each styled around the theme of the event.
+
+These tiers extend the game’s visual language through themed gradients, glow behavior, and animation logic shaped by each event’s identity.
+
+For example, Moon’s Blessing introduces lunar glow systems, while other events explore directions such as electric storm effects or holographic styling. Over time, these systems form a growing library of distinct visual identities across the progression scale.
+
+Progression is designed to feel increasingly unstable, excessive, and visually alive as players push deeper into astronomical point territory.
 
 ---
 
@@ -165,6 +170,29 @@ Guarantees:
 
 ---
 
+## 🔢 Global Number Formatting Engine
+
+The entire economy, leaderboard system, and UI rendering pipeline is unified through a custom BigInt-first formatting engine. It acts as the single source of truth for all numeric parsing, scaling, and display logic across the application.
+
+It handles:
+
+- Parsing shorthand inputs into safe BigInt values across extreme scales  
+- Converting raw values into tiered human-readable formats (M, B, T, up to vigintillions and beyond)
+- Mapping numeric ranges directly to visual styles, gradients, and tier identities  
+- Ensuring consistent formatting across across all frontend rendering contexts
+
+Every visible number in the system flows through this engine, including:
+
+- Leaderboards  
+- Player profiles  
+- Live activity feed  
+- Bonus and multiplier outcomes  
+- Tier-based UI transitions  
+
+This guarantees deterministic behavior across all devices and prevents divergence between stored values and rendered output, even at extreme numerical ranges.
+
+---
+
 ## 🏗️ Architecture
 
 | Layer | Stack |
@@ -192,8 +220,12 @@ Designed a non-blocking feed that prioritizes real user actions over simulated d
 **Real-Time Connection Guarding & State Monitoring**
 Engineered a robust connection-state monitor to manage "stale" event streams and intermittent network drops. Implemented heartbeat tracking and active status messaging to ensure seamless UI transitions and zero-data-loss during session interruptions.
 
-**Handling Extreme Numbers (Quadrillions → Vigintillions)**
-Standard JavaScript Numbers (IEEE 754) lose integer precision past ~9 quadrillion (2⁵³−1). In a high-frequency betting system with 100%+ multipliers, this limit was exceeded within hours. I refactored the full stack—including PostgreSQL numeric fields (NUMERIC(100,0)), Node.js backend, and React frontend—to use native BigInt. This allows safe calculation, storage, and rendering of point values up to the Vigintillions, even under extreme betting volumes.
+**Handling Extreme Numbers (Quadrillions → Vigintillions)**  
+JavaScript Number (IEEE 754) loses integer precision beyond approximately 9 quadrillion (2⁵³−1). In a high-frequency betting system with compounding multipliers, this limit was reached quickly and began corrupting calculations across the stack.
+
+The entire system was refactored to remove floating-point risk and enforce exact arithmetic. This included database migration of numeric fields to `NUMERIC` in PostgreSQL, backend transition to native BigInt operations in Node.js, and frontend updates to ensure safe rendering and formatting of large values.
+
+This guarantees accurate computation, storage, and display of point values at extreme scales, including vigintillion-range totals under sustained gameplay pressure.
 
 ---
 
@@ -213,7 +245,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 RPS League is designed with a mobile-first approach, leveraging modern PWA standards to deliver a fast, app-like experience across devices.
 
-- **Adaptive Leaderboard Architecture**: On smaller screens, the leaderboard dynamically pivots from a wide table into a specialized 14-column grid. This ensures high-density data—including Wins, Losses, Points, and Peak Performance—remains perfectly aligned and readable without horizontal scrolling.
+- **Adaptive Leaderboard Architecture**: On smaller screens, the leaderboard dynamically pivots from a wide table into a specialized 14-column grid. This ensures high-density data such as Wins, Losses, Points, and Peak Performance remains perfectly aligned and readable without horizontal scrolling.
 
 - **PWA Install Experience**: Configured via `manifest` and Next.js Metadata API, enabling installable app behavior on mobile and desktop. Includes optimized icons and rich metadata for a polished, native-like installation prompt.
 
@@ -233,9 +265,7 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 
 **Frontend (Vitest + React Testing Library)**
 - **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
-- **HomePage**: Tests core betting loop ("ALL IN", floor clamping, AUTO toggle), 
-  user store integration (nickname display, bet amount sync), and 
-  live connection state rendering.
+- **HomePage**: Tests core betting loop ("ALL IN", floor clamping, AUTO toggle), user store integration (nickname display, bet amount sync), and live connection state rendering.
 - **Leaderboard Page**: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
 
 ---
@@ -494,12 +524,12 @@ Tracks all user wagers. Each user can place one bet per game.
 
 ## 📱 Device Compatibility
 
-This application uses native BigInt to safely handle extremely large point values (into the vigintillions) without precision loss.
+This application uses native BigInt to handle extremely large point values without precision loss, scaling into the vigintillions during extended gameplay.
 
-- Supported: Modern mobile and desktop browsers (iOS 14+, Android 9+, Chrome, Firefox, Safari)
-- Not supported: Older devices and browsers without BigInt support (e.g. iPhone 6/7, Internet Explorer)
+- Supported: Modern mobile and desktop browsers (iOS 14+, Android 9+, Chrome, Firefox, Safari)  
+- Not supported: Older browsers and devices without BigInt support, such as Internet Explorer and early iPhone models (iPhone 6 and 7)
 
-This ensures leaderboard accuracy and consistent gameplay at high point values.
+This ensures consistent leaderboard accuracy and stable gameplay across supported platforms.
 
 ---
 

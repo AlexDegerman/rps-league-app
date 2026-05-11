@@ -99,7 +99,6 @@ export default function BonusExplainerPopover() {
                     x5
                   </span>
                 </div>
-                {/* 
                 <div className="flex items-center gap-1">
                   <span className="text-[10px]">🃏</span>
                   <span className="text-[9px] font-bold text-gray-700">
@@ -109,7 +108,6 @@ export default function BonusExplainerPopover() {
                     Leg Bns
                   </span>
                 </div>
-                */}
                 {/* 
                 <div className="flex items-center gap-1">
                   <span className="text-[10px]">🔥</span>

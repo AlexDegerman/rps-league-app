@@ -1,30 +1,42 @@
 export type FlashEventType = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
-
 export interface FlashEventState {
   type: FlashEventType
   multiplier: number
   betsRemaining: number
   triggeredAt: number
 }
-
 const FLASH_EVENTS_ENABLED = true
 const FLASH_TRIGGER_CHANCE = 0.05
 
-
+// weight controls relative selection frequency among active events.
+// values are proportional: 1.5 fires ~43% vs ~29% each for weight-1 events.
+// fractional weights are supported.
 const FLASH_EVENT_CONFIG: Partial<
-  Record<FlashEventType, { multiplier: number }>
+  Record<FlashEventType, { multiplier: number; weight: number }>
 > = {
-  LUNAR: { multiplier: 5 },
-  ELECTRIC: { multiplier: 5 },
-  // CARDS: { multiplier: 1 }, // REMOVE ON WEEK 6
-  // HELLFIRE: { multiplier: 5 } // REMOVE ON WEEK 7
+  LUNAR: { multiplier: 5, weight: 1 },
+  ELECTRIC: { multiplier: 5, weight: 1 },
+  CARDS: { multiplier: 1, weight: 1.5 }
+  // HELLFIRE: { multiplier: 5, weight: 1 } // REMOVE ON WEEK 7
+}
+
+// Weighted random pick, avoids uniform distribution when weights differ
+const pickWeightedFlashEvent = (types: FlashEventType[]): FlashEventType => {
+  const totalWeight = types.reduce(
+    (sum, t) => sum + (FLASH_EVENT_CONFIG[t]?.weight ?? 1),
+    0
+  )
+  let roll = Math.random() * totalWeight
+  for (const t of types) {
+    roll -= FLASH_EVENT_CONFIG[t]?.weight ?? 1
+    if (roll <= 0) return t
+  }
+  return types[types.length - 1]!
 }
 
 const _userFlashEvents = new Map<string, FlashEventState>()
-
 export const getFlashEventForUser = (userId: string): FlashEventState | null =>
   _userFlashEvents.get(userId) ?? null
-
 export const consumeFlashBetForUser = (userId: string): boolean => {
   const event = _userFlashEvents.get(userId)
   if (!event) return false
@@ -45,24 +57,17 @@ export const tryTriggerFlashEventForUser = (
   if (!FLASH_EVENTS_ENABLED) return
   if (_userFlashEvents.has(userId)) return // already has active event
   if (Math.random() > FLASH_TRIGGER_CHANCE) return
-
   const activeTypes = Object.keys(FLASH_EVENT_CONFIG) as FlashEventType[]
-
-
   if (activeTypes.length === 0) return
-
-  const type = activeTypes[Math.floor(Math.random() * activeTypes.length)]!
+  const type = pickWeightedFlashEvent(activeTypes)
   const config = FLASH_EVENT_CONFIG[type]!
-
   const event: FlashEventState = {
     type,
     multiplier: config.multiplier,
     betsRemaining: 3,
     triggeredAt: Date.now()
   }
-
   _userFlashEvents.set(userId, event)
-
   // Broadcast only to the specific user - the userId in the payload
   // means the frontend filters it client-side (only acts if data.userId === myId)
   broadcast(

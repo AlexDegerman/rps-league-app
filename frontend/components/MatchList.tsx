@@ -52,7 +52,7 @@ const MatchRow = ({
 
   return (
     <li
-      className={`relative rounded-xl shadow-sm border-2 p-4 overflow-hidden transition-all duration-300
+      className={`relative rounded-xl shadow-sm border-2 p-3 overflow-hidden transition-all duration-300
         ${cfg.border} ${cfg.bg} ${isActive ? cfg.cardAnim : ''}`}
     >
       {/* Ambient glow */}
@@ -66,7 +66,7 @@ const MatchRow = ({
       )}
 
       {/* Top row: winner badge + date */}
-      <div className="flex justify-between items-center mb-2 gap-2 relative z-10">
+      <div className="flex justify-between items-center mb-1 gap-2 relative z-10">
         {winner === left.name ? (
           <>
             <span
@@ -95,11 +95,11 @@ const MatchRow = ({
       {/* Players + moves */}
       <div className="flex items-center justify-between gap-2 relative z-10">
         {/* Left player */}
-        <div className="flex flex-col items-start flex-1">
+        <div className="flex flex-col items-start flex-1 min-w-0">
           <Link
             href={`/player/${encodeURIComponent(left.name)}`}
             onClick={(e) => e.stopPropagation()}
-            className={`font-medium text-sm underline decoration-gray-300 transition
+            className={`font-medium text-sm underline decoration-gray-300 transition truncate max-w-full
               ${
                 winner === left.name && isActive
                   ? cfg.winnerText
@@ -117,15 +117,6 @@ const MatchRow = ({
               {getPlayerResult(match, left.name)}
             </span>
           )}
-          {prediction?.pick === left.name && prediction.result && (
-            <span
-              className={`text-xs font-black mt-1 px-2.5 py-0.5 rounded-lg text-white
-              inline-flex items-center justify-center whitespace-nowrap w-fit leading-none tracking-wide
-              ${prediction.result === 'WIN' ? cfg.youWon : 'bg-red-500'}`}
-            >
-              {prediction.result === 'WIN' ? '✨ You won!' : 'You lost'}
-            </span>
-          )}
         </div>
 
         {/* Move icons */}
@@ -140,11 +131,11 @@ const MatchRow = ({
         </div>
 
         {/* Right player */}
-        <div className="flex flex-col items-end flex-1">
+        <div className="flex flex-col items-end flex-1 min-w-0">
           <Link
             href={`/player/${encodeURIComponent(right.name)}`}
             onClick={(e) => e.stopPropagation()}
-            className={`font-medium text-sm text-right underline decoration-gray-300 transition
+            className={`font-medium text-sm text-right underline decoration-gray-300 transition truncate max-w-full
               ${
                 winner === right.name && isActive
                   ? cfg.winnerText
@@ -162,17 +153,25 @@ const MatchRow = ({
               {getPlayerResult(match, right.name)}
             </span>
           )}
-          {prediction?.pick === right.name && prediction.result && (
-            <span
-              className={`text-xs font-black mt-1 px-2.5 py-0.5 rounded-lg text-white
-              inline-flex items-center justify-center whitespace-nowrap w-fit leading-none tracking-wide
-              ${prediction.result === 'WIN' ? cfg.youWon : 'bg-red-500'}`}
-            >
-              {prediction.result === 'WIN' ? '✨ You won!' : 'You lost'}
-            </span>
-          )}
         </div>
       </div>
+
+      {/* Prediction result badge — own row, aligned to whichever side the pick was */}
+      {prediction?.result && (
+        <div
+          className={`flex mt-1 relative z-10 ${
+            prediction.pick === left.name ? 'justify-start' : 'justify-end'
+          }`}
+        >
+          <span
+            className={`text-xs font-black px-2.5 py-0.5 rounded-lg text-white
+            inline-flex items-center justify-center whitespace-nowrap leading-none tracking-wide
+            ${prediction.result === 'WIN' ? cfg.youWon : 'bg-red-500'}`}
+          >
+            {prediction.result === 'WIN' ? '✨ You won!' : 'You lost'}
+          </span>
+        </div>
+      )}
     </li>
   )
 }

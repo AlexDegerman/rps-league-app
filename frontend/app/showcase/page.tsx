@@ -82,64 +82,64 @@ export default function Showcase() {
                   and contrast hit simultaneously.
                 </div>
               </div>
-
-              {/* Sexvigintillion - Cards Glow 2 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Sexvigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁸¹</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fdf4ff] text-[#7e1d9c] font-medium uppercase tracking-wider">
-                        the jackpot
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    className="text-2xl font-bold leading-none tracking-tight relative"
-                    style={{ overflow: 'visible' }}
-                  >
-                    <span className="g-svg">1.2Svg</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Gold-pink-teal holographic gradient streams continuously. Two
-                  🎲 satellites orbit on separate radii in opposite directions -
-                  one clockwise at 1.8em, one counter-clockwise at 2.2em - each
-                  with an independent colored drop-shadow.
-                </div>
-              </div>
-
-              {/* Quinvigintillion - Cards Glow 1 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Quinvigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁷⁸</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fdf4ff] text-[#7e1d9c] font-medium uppercase tracking-wider">
-                        holographic foil
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold leading-none tracking-tight">
-                    <span className="g-qiv">1.2Qiv</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  7-stop oil-slick rainbow at 45° with 400% background-size
-                  cycling diagonally. Drop-shadow color rotates each keyframe to
-                  track the dominant hue - pink at 0%, amber at 25%, green at
-                  50%, cyan at 75%.
-                </div>
-              </div>
               {/* Move block ending up every week */}
             </>
           )}
+          {/* Sexvigintillion - Cards Glow 2 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Sexvigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁸¹</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fdf4ff] text-[#7e1d9c] font-medium uppercase tracking-wider">
+                    the jackpot
+                  </span>
+                </div>
+              </div>
+              <div
+                className="text-2xl font-bold leading-none tracking-tight relative"
+                style={{ overflow: 'visible' }}
+              >
+                <span className="g-svg">1.2Svg</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              Gold-pink-teal holographic gradient streams continuously. Two 🎲
+              satellites orbit on separate radii in opposite directions - one
+              clockwise at 1.8em, one counter-clockwise at 2.2em - each with an
+              independent colored drop-shadow.
+            </div>
+          </div>
+
+          {/* Quinvigintillion - Cards Glow 1 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Quinvigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁷⁸</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fdf4ff] text-[#7e1d9c] font-medium uppercase tracking-wider">
+                    holographic foil
+                  </span>
+                </div>
+              </div>
+              <div className="text-2xl font-bold leading-none tracking-tight">
+                <span className="g-qiv">1.2Qiv</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              7-stop oil-slick rainbow at 45° with 400% background-size cycling
+              diagonally. Drop-shadow color rotates each keyframe to track the
+              dominant hue - pink at 0%, amber at 25%, green at 50%, cyan at
+              75%.
+            </div>
+          </div>
+
           {/* Quattuorvigintillion - Electric Glow 2 */}
           <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">

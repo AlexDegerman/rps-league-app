@@ -75,13 +75,11 @@ export const parseShorthand = (val: string): bigint => {
     vg: 10n ** 63n,
     uvg: 10n ** 66n,
     dvg: 10n ** 69n,
-     // W2 — Electric theme
-    //tvg: 10n ** 72n,   // Trevigintillion
-    //qag: 10n ** 75n,  // Quattuorvigintillion
-    // W3 — Cards theme
-    //qiv: 10n ** 78n,  // Quinvigintillion
-    //svg: 10n ** 81n,  // Sexvigintillion
-     // W4 — Hellfire theme
+    tvg: 10n ** 72n,
+    qag: 10n ** 75n,
+    qiv: 10n ** 78n,
+    svg: 10n ** 81n,
+    // W4 — Hellfire theme
     //spv: 10n ** 84n,  // Septenvigintillion
     //ovg: 10n ** 87n,  // Octovigintillion
   }
@@ -132,12 +130,10 @@ export const formatPoints = (
     // W4 — Hellfire theme
     //{ threshold: 10n ** 87n, symbol: 'Ovg' },   // Octovigintillion
     //{ threshold: 10n ** 84n, symbol: 'Spv' },   // Septenvigintillion
-     // W3 — Cards theme
-    //{ threshold: 10n ** 81n, symbol: 'Svg' },   // Sexvigintillion
-    //{ threshold: 10n ** 78n, symbol: 'Qiv' },   // Quinvigintillion
-    // W2 — Electric theme
-    //{ threshold: 10n ** 75n, symbol: 'Qvg' },   // Quattuorvigintillion
-    //{ threshold: 10n ** 72n, symbol: 'Tvg' },    // Trevigintillion
+    { threshold: 10n ** 81n, symbol: 'Svg' },
+    { threshold: 10n ** 78n, symbol: 'Qiv' },
+    { threshold: 10n ** 75n, symbol: 'Qvg' }, 
+    { threshold: 10n ** 72n, symbol: 'Tvg' }, 
     { threshold: 10n ** 69n, symbol: 'Dvg' },
     { threshold: 10n ** 66n, symbol: 'Uvg' },
     { threshold: 10n ** 63n, symbol: 'Vg' },
@@ -204,9 +200,8 @@ export const getFullNumberName = (n: number | bigint | string): string => {
     // W4 — Hellfire
     //{ t: 87, n: 'Octovigintillion' },
     //{ t: 84, n: 'Septenvigintillion' },
-    // W3 — Cards
-    //{ t: 81, n: 'Sexvigintillion' },
-    //{ t: 78, n: 'Quinvigintillion' },
+    { t: 81, n: 'Sexvigintillion' },
+    { t: 78, n: 'Quinvigintillion' },
     { t: 75, n: 'Quattuorvigintillion' },
     { t: 72, n: 'Trevigintillion' },
     { t: 69, n: 'Duovigintillion' },
@@ -242,10 +237,9 @@ export const getFullNumberName = (n: number | bigint | string): string => {
 // W4 — Hellfire
 //const SEPTENVIGINTILLION = 10n ** 84n
 //const OCTOVIGINTILLION = 10n ** 87n
-// W3 — Cards
-//const QUINVIGINTILLION = 10n ** 78n
-//const SEXVIGINTILLION = 10n ** 81n
 
+const QUINVIGINTILLION = 10n ** 78n
+const SEXVIGINTILLION = 10n ** 81n
 const TREVIGINTILLION = 10n ** 72n
 const QUATTUORVIGINTILLION = 10n ** 75n
 const UNVIGINTILLION = 10n ** 66n
@@ -298,11 +292,8 @@ export const getAmountColor = (amount?: number | bigint | string): string => {
   //if (a >= OCTOVIGINTILLION) return 'g-ovg'
   //if (a >= SEPTENVIGINTILLION) return 'g-spv'
 
-  // W3 — Cards theme
-  //if (a >= SEXVIGINTILLION) return 'g-svg
-  //if (a >= QUINVIGINTILLION) return 'g-qiv'
-
-
+  if (a >= SEXVIGINTILLION) return 'g-svg'
+  if (a >= QUINVIGINTILLION) return 'g-qiv'
   if (a >= QUATTUORVIGINTILLION) return 'g-qvg'
   if (a >= TREVIGINTILLION) return 'g-tvg' 
   if (a >= DUOVIGINTILLION) return 'g-dvg' 
