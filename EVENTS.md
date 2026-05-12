@@ -17,8 +17,8 @@ A calm lunar-inspired event wrapped in cool blue tones with serene visual and au
 - Interface elements adapt into crescent-inspired motifs
 
 <div>
-  <strong>Moon's Blessing in Action</strong><br/>
-  <video src="./assets/moon_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
+  <strong>Moon's Blessing Flash Event in Action</strong><br/>
+  <img src="./assets/moon_event_demo.gif" width="220" />
 </div>
 
 **Introduced Tiers**
@@ -44,7 +44,7 @@ A fast-paced, volatile energy theme infused with neon violet and electric purple
 
 <div>
   <strong>Electric Surge in Action</strong><br/>
-  <video src="./assets/electric_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
+  <img src="./assets/electric_event_demo.gif" width="220" />
 </div>
 
 **Introduced Tiers**
@@ -69,7 +69,7 @@ A premium high-roller casino event styled in rich gold and amber tones. On win m
 
 <div>
   <strong>Luck in the Card in Action</strong><br/>
-  <video src="./assets/cards_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
+  <img src="./assets/cards_event_demo.gif" width="220" />
 </div>
 
 **Introduced Tiers**

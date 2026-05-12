@@ -16,7 +16,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
     </td>
     <td valign="top">
       <strong>Mobile (320px)</strong><br />
-      <video src="./assets/rpsmobile.mp4" width="220" autoplay loop muted playsinline></video>
+      <img src="./assets/rpsmobile.gif" width="220" />
     </td>
   </tr>
 </table>
@@ -120,7 +120,7 @@ A calm lunar-inspired event wrapped in cool blue tones with serene visual and au
 
 <div>
   <strong>Moon's Blessing Flash Event in Action</strong><br/>
-  <video src="./assets/moon_event_demo.mp4" width="220" autoplay loop muted playsinline></video>
+  <img src="./assets/moon_event_demo.gif" width="220" />
 </div>
 
 ---
