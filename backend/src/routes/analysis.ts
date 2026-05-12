@@ -111,9 +111,11 @@ async function generateWithFallback(query: string, contextString: string) {
         1. ROLE & BOUNDARIES:
         You ONLY analyze the RPS league. If the prompt is unrelated, refuse with a short dismissive response and redirect to league-related queries.
 
-        2. DEFINITIONS:
-        - "PREDICTORS": users who bet points (<predictor_leaderboard>)
-        - "PLAYERS": competitors in matches (<top_players_by_wins>)
+        2. DEFINITIONS — CRITICAL, NEVER MIX THESE:
+        - "PREDICTORS" (<predictor_leaderboard>): users who BET points against the house. House edge applies to THEM only.
+        - "PLAYERS" (<top_players_by_wins>): competitors who physically play RPS matches. They have NO relationship to betting, volume, or house edge.
+        - NEVER apply betting/house/volume language to PLAYERS.
+        - NEVER apply win/loss/match language to PREDICTORS.
 
         3. GROUNDING:
         Use ONLY the provided data. Do NOT invent stats.
@@ -123,18 +125,18 @@ async function generateWithFallback(query: string, contextString: string) {
         For move trends, use ONLY <active_match_history>.
 
         5. STRUCTURE:
-        - Sentence 1: direct insight or conclusion
-        - Sentence 2: justification using data
+        - Sentence 1: one sharp claim using a specific number from the data
+        - Sentence 2: one contrasting fact or consequence. No subordinate clauses. No "and" chaining.
 
         6. TONE:
         Sharp, confident, slightly sarcastic. Never rude.
         Sound like a competitive analyst reviewing performance.
 
         7. CONSTRAINTS:
-        Maximum 2 sentences. No emojis. No generic advice.
+        Maximum 2 sentences. Hard stop after the second sentence — do not continue. No emojis. No generic advice.
         
         8. SOURCE TAGGING: 
-        Always end the response with exactly one source tag from this list based on the primary data used: [SOURCE: league_telemetry], [SOURCE: predictor_leaderboard], [SOURCE: active_match_history].`
+        Always end the response with exactly one source tag from this list based on the primary data used: [SOURCE: league_telemetry], [SOURCE: predictor_leaderboard], [SOURCE: active_match_history], [SOURCE: flash_event_stats].`
       })
       const result = await model.generateContent(query)
       return result.response.text()
@@ -182,20 +184,27 @@ router.post('/', async (req: Request, res: Response) => {
       return res.json({ result: cached.result, cached: true })
     }
 
-    const [matchesData, statsRes, topPredictorsRes, topPlayersRes] =
-      await Promise.all([
-        getLatestMatches(1, 30).catch(() => ({ matches: [] })),
-        pool.query(`
+    const [
+      matchesData,
+      statsRes,
+      matchCountRes,
+      topPredictorsRes,
+      topPlayersRes,
+      flashStatsRes
+    ] = await Promise.all([
+      getLatestMatches(1, 30).catch(() => ({ matches: [] })),
+      pool.query(`
         SELECT 
           COUNT(*)::text as total_count, 
           COALESCE(SUM(bet_amount), 0)::text as total_volume,
           COUNT(*) FILTER (WHERE result = 'WIN')::text as win_count
         FROM predictions
       `),
-        pool.query(
-          `SELECT nickname, points FROM users ORDER BY points DESC LIMIT 10`
-        ),
-        pool.query(`
+      pool.query(`SELECT COUNT(*)::text FROM matches`),
+      pool.query(
+        `SELECT nickname, points FROM users ORDER BY points DESC LIMIT 10`
+      ),
+      pool.query(`
         SELECT name, COUNT(*) as wins FROM (
           SELECT player_a_name as name FROM matches 
           WHERE (player_a_played = 'ROCK' AND player_b_played = 'SCISSORS')
@@ -210,10 +219,21 @@ router.post('/', async (req: Request, res: Response) => {
         GROUP BY name
         ORDER BY wins DESC
         LIMIT 5
+      `),
+      pool.query(`
+        SELECT
+          COUNT(*) FILTER (WHERE flash_event_type IS NOT NULL)::text as total_flash_events,
+          COUNT(DISTINCT flash_event_type) FILTER (WHERE flash_event_type IS NOT NULL)::text as unique_event_types,
+          MODE() WITHIN GROUP (ORDER BY flash_event_type) FILTER (WHERE flash_event_type IS NOT NULL) as most_common_event,
+          MAX(flash_multiplier)::text as highest_multiplier_seen,
+          COUNT(*) FILTER (WHERE flash_event_type IS NOT NULL AND result = 'WIN')::text as flash_event_wins
+        FROM predictions
       `)
-      ])
+    ])
 
     const stats = statsRes.rows[0]
+    const flashStats = flashStatsRes.rows[0]
+    const actualMatches = matchCountRes.rows[0].count
     const winRate =
       (Number(stats.win_count) / (Number(stats.total_count) || 1)) * 100
     const houseEdge = (100 - winRate).toFixed(1)
@@ -225,10 +245,11 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Construct Context with explicit XML tags for Gemini
     const context = `
-    <league_telemetry>Total Volume: ${stats.total_volume}, House Edge: ${houseEdge}%</league_telemetry>
+    <league_telemetry>Total Matches: ${actualMatches}, Total Prediction Volume: ${stats.total_volume}, House Edge: ${houseEdge}%</league_telemetry>
     <predictor_leaderboard>${JSON.stringify(topPredictorsRes.rows)}</predictor_leaderboard>
     <top_players_by_wins>${JSON.stringify(topPlayersRes.rows)}</top_players_by_wins>
     <active_match_history>${JSON.stringify(history)}</active_match_history>
+    <flash_event_stats>Total Flash Events Triggered: ${flashStats.total_flash_events}, Unique Event Types Active: ${flashStats.unique_event_types}, Most Common Event: ${flashStats.most_common_event ?? 'none'}, Highest Multiplier Seen: ${flashStats.highest_multiplier_seen ?? '1'}, Flash Event Wins: ${flashStats.flash_event_wins}</flash_event_stats>
     `
 
     const responseText = await generateWithFallback(query, context)
@@ -238,8 +259,15 @@ router.post('/', async (req: Request, res: Response) => {
 
     const sourceMatch = responseText.match(/\[SOURCE:\s*(.*?)\]/)
     const source = sourceMatch ? sourceMatch[1] : 'league_telemetry'
-    const cleanText = responseText.replace(/\[SOURCE:.*?\]/, '').trim()
-    
+    const stripped = responseText.replace(/\[SOURCE:.*?\]/, '').trim()
+
+    // Enforce 2-sentence hard limit regardless of model compliance
+    const sentences = stripped.match(/[^.!?]+[.!?]+/g)
+    const cleanText =
+      sentences && sentences.length > 2
+        ? sentences.slice(0, 2).join('').trim()
+        : stripped
+
     queryCache.set(normalizedQuery, { result: cleanText, timestamp: now })
     res.json({ result: cleanText, source, cached: false })
   } catch (err: any) {
