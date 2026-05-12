@@ -161,7 +161,7 @@ export default function AnalysisPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={placeholder}
-          className="w-full p-4 pr-20 sm:p-5 sm:pr-28 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 outline-none text-base sm:text-lg shadow-xl"
+          className="w-full p-4 pr-24 sm:p-5 sm:pr-32 rounded-2xl border-2 border-gray-100 focus:border-indigo-500 outline-none text-base sm:text-lg shadow-xl"
         />
         <button
           type="submit"
