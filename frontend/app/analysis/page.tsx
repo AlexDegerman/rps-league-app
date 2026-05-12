@@ -104,7 +104,7 @@ export default function AnalysisPage() {
       <div className="text-center">
         <div className="flex items-center justify-center gap-1 mb-2">
           <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold uppercase tracking-widest">
-            Powered by Gemini 1.5
+            Powered by Gemini
           </span>
 
           <div className="relative group flex items-center">

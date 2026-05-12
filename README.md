@@ -240,6 +240,9 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 - **Performance Optimization**: In-memory TTL cache and IP-based rate limiting to prevent abuse and minimize latency.
 - **Strategic Analytical Presets**: Includes a curated set of “one-tap” queries designed to reveal hidden league patterns. These presets guide users in exploring underlying PostgreSQL telemetry, such as move frequency heatmaps and real-time house edge, transforming raw data into actionable betting insights.
 
+<p><em>Showcasing AI Analysis.</em></p>
+<img src="./assets/ai_analysis_showcase.gif" width="220" />
+
 ---
 
 ## 📱 Mobile & PWA Experience
