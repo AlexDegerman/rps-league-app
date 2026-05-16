@@ -35,13 +35,13 @@ let generatorStarted = false
 const broadcast = (event: string, data: string) =>
   clients.forEach((client) => client(event, data))
 
-router.get('/', (req, res) => {
-  res.setHeader('Content-Type', 'text/event-stream')
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-  res.setHeader('Connection', 'keep-alive')
-  // Disables Nginx response buffering so events reach the client immediately
-  res.setHeader('X-Accel-Buffering', 'no')
-  res.flushHeaders()
+  router.get('/', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+    res.setHeader('Connection', 'keep-alive')
+    // Disables Nginx response buffering so events reach the client immediately
+    res.setHeader('X-Accel-Buffering', 'no')
+    res.flushHeaders()
 
   const send: SSEClient = (event, data) =>
     res.write(`event: ${event}\ndata: ${data}\n\n`)

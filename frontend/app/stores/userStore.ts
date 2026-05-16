@@ -13,7 +13,7 @@ interface UserState {
   displayNickname: string
   dailyRank: number | null
   isHydrated: boolean
-
+  
   setPoints: (p: bigint) => void
   setPointsLoaded: (v: boolean) => void
   setBetAmount: (b: bigint) => void

@@ -28,12 +28,14 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 ## 📑 Table of Contents
 
+- [⚡ Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
 - [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
 - [📋 Overview](#-overview)
 - [⚡ Flash Events](#-flash-events)
 - [🌌 Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
 - [🔢 Global Number Formatting Engine](#-global-number-formatting-engine)
-- [📊 Player Analytics & Deep Profiles](#-player-analytics--deep-profiles)
+- [📊 Competitive Analytics & Profiles](#-competitive-analytics--profiles)
+- [🧾 Match History Timeline](#-match-history-timeline)
 - [⚡ Live Activity Feed](#-live-activity-feed)
 - [🏗️ Architecture](#️-architecture)
 - [🛠️ Technical Challenges & Solutions](#️-technical-challenges--solutions)
@@ -50,6 +52,31 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - [📱 Device Compatibility](#-device-compatibility)
 - [⚠️ Disclaimer](#️-disclaimer)
 - [🔮 Oracle Privacy & Monitoring](#-oracle-privacy--monitoring)
+
+---
+
+## ⚡ Identity & Zero-Friction Account System
+
+RPS League is designed around instant participation and persistent progression without traditional account friction.
+
+Players can enter the league immediately with no registration, no email verification, and no login flow. A persistent identity is automatically created on first visit, allowing users to begin predicting within seconds while still retaining long-term progression, statistics, and leaderboard presence.
+
+Instead of relying on conventional authentication, the platform uses a lightweight identity architecture built around:
+
+- Instant anonymous onboarding
+- Persistent local identity storage
+- Recovery-code based account restoration
+- Shareable public profile URLs
+- Optional LinkedIn profile integration
+- Public leaderboard identity persistence
+
+To preserve social identity without requiring username registration, players are automatically assigned procedurally generated nicknames built from adjective, color, and creature pools, producing millions of possible combinations instantly. Nicknames can be re-randomized at any time while preserving all progression history, rankings, and statistics.
+
+Profiles can optionally attach a LinkedIn account, allowing players to display a clickable professional badge across public profiles and leaderboard placements — creating a hybrid identity layer where users can remain fully anonymous or selectively surface a real professional presence.
+
+This philosophy shapes the entire platform architecture. Match cadence, live feeds, leaderboard systems, profile persistence, and mobile UX are all optimized to minimize friction between discovering the app and participating in the live competition loop.
+
+---
 
 ## 🕹️ Gameplay & Betting Mechanics
 
@@ -80,15 +107,12 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
   - Your own bets (instant feedback)
   - Other players
   - Demo traffic for continuous activity
-- Zero-friction onboarding with instant anonymous play (random nickname, no login)
-- User profiles with persistent identity system including unique shareable URLs, nickname randomization, recovery codes for account restoration, and full stats tracking (points, win rate, streaks, peak performance, and complete bet history with bonus and multiplier outcomes)
 
 ---
 
 ## 📋 Overview
 
 - High-frequency match system (5s intervals, 17,000+ daily events)
-- Instant user creation with persistent ID and nickname
 - Massive Match History: Optimized to handle and query a dataset of 10,000+ matches.
 - Unified Ranking Engine: Dual leaderboards for Players and Predictors with deep-linkable URL state, supporting dynamic time-filtering (Daily/Weekly/All-Time) and multi-metric sorting (Points, Gained, Peak, Win Rate).
 - AI-powered analysis using Gemini
@@ -143,20 +167,36 @@ Progression is designed to feel increasingly unstable, excessive, and visually a
 
 ---
 
-## 📊 Player Analytics & Deep Profiles
+## 📊 Competitive Analytics & Profiles
 
-Each profile surfaces 16 tracked data points, powering both competitive rankings and long-term progression.
+Each profile surfaces 16 tracked data points, powering competitive rankings, progression tracking, and long-term performance analysis.
 
-- **Identity & Longevity:** Nickname and joined date, with instant randomization for quick identity swaps  
-- **Ranking Snapshot:** Live position across Daily, Weekly, and All-Time leaderboards  
-- **Record Tracking:** Peak, Daily High, and Weekly High balances to reflect historical performance  
-- **Wealth Metrics:** Total gained, total risked, and largest single win  
-- **Performance Stats:** Win rate, max streak, and total wins vs losses  
-- **Pity Tracking:** Counts how often the guaranteed bonus system is triggered  
+- **Progression Snapshot:** Joined date, longest recorded streak, and long-term peak milestones
+- **Ranking Snapshot:** Live placement across Daily, Weekly, and All-Time leaderboards
+- **Record Tracking:** Peak, Daily High, and Weekly High balances to reflect historical performance
+- **Wealth Metrics:** Total gained, total risked, biggest single win, and multiplier-based milestones
+- **Performance Stats:** Win rate, max streak, and total wins vs losses
+- **Bonus Telemetry:** Pity-system triggers, multiplier outcomes, and bonus-tier history
+
+### 🧾 Match History Timeline
+
+Each player profile includes a fully interactive match history system that visualizes every prediction as a rich event card.
+
+The history view is structured into three contextual tabs:
+
+- **Recent** — chronological activity feed
+- **Biggest Wins** — highest-value outcomes ranked
+- **Best Multipliers** — peak bonus and flash event combinations
+
+Each entry renders as a high-density match card containing outcome state, stake and gain/loss breakdown, bonus tier and multiplier effects, flash event overlays with themed styling, player move comparison with pick highlighting, and timestamped match context.
+
+The system uses infinite scrolling with progressive loading to support large historical datasets while maintaining smooth UI performance.
+
+All economic systems — bonus tiers, flash events, multipliers — are visually embedded directly into each match entry, turning player history into a replayable progression timeline rather than a static log.
 
 ---
 
-## ⚡ Live Activity Feed
+## 🔴 Live Activity Feed
 
 High-frequency, concurrency-aware event stream handling:
 
@@ -282,6 +322,7 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 - **Profile recovery system** for cross-device portability
 - **Mock match generator** for self-contained deployment
 - **Production-hardened AI**: Resilient, grounded, and rate-limited analytics engine
+- **Single-tab enforcement**: BroadcastChannel detects duplicate tabs, closes the redundant SSE connection, and surfaces a non-blocking in-app notice.
 
 ---
 
@@ -305,10 +346,10 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 
 ## 🚀 Future Improvements
 
-- Friends system with social leaderboard
-- Player vs player head-to-head statistics
-- Deeper AI-driven insights and trend detection
-- Cosmetic Prestige System: Spend earned points on profile customizations, including unique name colors, tiered badges, and exclusive icon sets to stand out on the leaderboards.
+* **Multi-Tiered League Layers:** A structured progression system with multiple leaderboard brackets tailored to different point thresholds, ensuring players at all stages have a relevant, competitive space to climb before hitting the main vigintillion-scale rankings.
+* **Custom Cosmetic Marketplace:** A dedicated points-based store allowing players to purchase and equip various profile customizations—such as unique leaderboard card backgrounds, exclusive text neon shimmers, custom tier badges, and premium name colors, without diluting the prestige of event-exclusive victory animations.
+* **Social Group Hubs:** Custom, isolated group and friend leaderboards designed to foster close-knit, high-frequency competition outside the global ecosystem.
+* **Unified OAuth Integration:** Optional Google Authentication built into the profile settings to streamline secure profile recovery alongside the existing short-ID architecture.
 
 ---
 
@@ -550,3 +591,11 @@ To maintain system stability and fine-tune AI behavior, anonymized queries are l
 - **Privacy**: IP addresses are masked (e.g., `192.168.x.x`). 
 - **Security**: No authentication tokens, passwords, or personally identifiable information are logged or stored
 - **Observability**: Enables real-time monitoring of model behavior, including hallucinations and edge-case detection during live matches
+
+---
+
+## License
+
+This project is proprietary software.
+
+Source code is not licensed for public reuse, modification, or distribution.

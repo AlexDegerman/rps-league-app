@@ -79,9 +79,8 @@ export const parseShorthand = (val: string): bigint => {
     qag: 10n ** 75n,
     qiv: 10n ** 78n,
     svg: 10n ** 81n,
-    // W4 — Hellfire theme
-    //spv: 10n ** 84n,  // Septenvigintillion
-    //ovg: 10n ** 87n,  // Octovigintillion
+    spv: 10n ** 84n,
+    ovg: 10n ** 87n, 
   }
 
   if (suffix && multipliers[suffix]) {
@@ -127,9 +126,8 @@ export const formatPoints = (
   const sign = bigN < 0n ? '-' : ''
 
   const tiers = [
-    // W4 — Hellfire theme
-    //{ threshold: 10n ** 87n, symbol: 'Ovg' },   // Octovigintillion
-    //{ threshold: 10n ** 84n, symbol: 'Spv' },   // Septenvigintillion
+    { threshold: 10n ** 87n, symbol: 'Ovg' },
+    { threshold: 10n ** 84n, symbol: 'Spv' }, 
     { threshold: 10n ** 81n, symbol: 'Svg' },
     { threshold: 10n ** 78n, symbol: 'Qiv' },
     { threshold: 10n ** 75n, symbol: 'Qvg' }, 
@@ -197,9 +195,8 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   const absN = bigN < 0n ? -bigN : bigN
 
   const names = [
-    // W4 — Hellfire
-    //{ t: 87, n: 'Octovigintillion' },
-    //{ t: 84, n: 'Septenvigintillion' },
+    { t: 87, n: 'Octovigintillion' },
+    { t: 84, n: 'Septenvigintillion' },
     { t: 81, n: 'Sexvigintillion' },
     { t: 78, n: 'Quinvigintillion' },
     { t: 75, n: 'Quattuorvigintillion' },
@@ -234,10 +231,8 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   return 'Points'
 }
 
-// W4 — Hellfire
-//const SEPTENVIGINTILLION = 10n ** 84n
-//const OCTOVIGINTILLION = 10n ** 87n
-
+const SEPTENVIGINTILLION = 10n ** 84n
+const OCTOVIGINTILLION = 10n ** 87n
 const QUINVIGINTILLION = 10n ** 78n
 const SEXVIGINTILLION = 10n ** 81n
 const TREVIGINTILLION = 10n ** 72n
@@ -288,10 +283,8 @@ export const getAmountColor = (amount?: number | bigint | string): string => {
   const a = raw < ZERO ? -raw : raw
   if (a === ZERO) return 'text-gray-400'
 
-  // W4 — Hellfire theme
-  //if (a >= OCTOVIGINTILLION) return 'g-ovg'
-  //if (a >= SEPTENVIGINTILLION) return 'g-spv'
-
+  if (a >= OCTOVIGINTILLION) return 'g-ovg'
+  if (a >= SEPTENVIGINTILLION) return 'g-spv'
   if (a >= SEXVIGINTILLION) return 'g-svg'
   if (a >= QUINVIGINTILLION) return 'g-qiv'
   if (a >= QUATTUORVIGINTILLION) return 'g-qvg'

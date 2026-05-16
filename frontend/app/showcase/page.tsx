@@ -19,72 +19,69 @@ export default function Showcase() {
 
         <div className="flex flex-col gap-2 pb-20">
           {/* SECTION: SEASON 1 */}
-          {false && (
-            <>
-              <div className="pt-4 px-1 pb-2 text-[10px] tracking-[0.12em] uppercase text-[#bbb] font-[DM_Mono] flex items-center gap-2">
-                <span> Season 1 tiers</span>
-                <div className="h-px flex-1 bg-[#e8e6e1]/50"></div>
-              </div>
+          {false && <>{/* Hidden block prepared for future season usage*/}</>}
+          <div className="pt-4 px-1 pb-2 text-[10px] tracking-[0.12em] uppercase text-[#bbb] font-[DM_Mono] flex items-center gap-2">
+            <span> Season 1 tiers</span>
+            <div className="h-px flex-1 bg-[#e8e6e1]/50"></div>
+          </div>
 
-              {/* Octovigintillion - Hellfire Glow 2 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Octovigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁸⁷</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fff4f0] text-[#9a2a00] font-medium uppercase tracking-wider">
-                        lava overload
-                      </span>
-                    </div>
-                  </div>
-                  <div
-                    className="text-2xl font-bold leading-none tracking-tight relative"
-                    style={{ overflow: 'visible' }}
-                  >
-                    <span className="g-ovg">1.2Ovg</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Radial gradient from gold core to deep crimson, background
-                  position wandering via magma-flow. Full-width sawtooth flame
-                  crown above via clip-path, jittering on a 0.15s steps loop.
-                  Ambient blur glow bleeds behind the number. Three animations
-                  desync deliberately - magma-flow, heat-flicker, micro-jitter
-                  all run on different durations.
+          {/* Octovigintillion - Hellfire Glow 2 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Octovigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁸⁷</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fff4f0] text-[#9a2a00] font-medium uppercase tracking-wider">
+                    lava overload
+                  </span>
                 </div>
               </div>
+              <div
+                className="text-2xl font-bold leading-none tracking-tight relative"
+                style={{ overflow: 'visible' }}
+              >
+                <span className="g-ovg">1.2Ovg</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              Radial gradient from gold core to deep crimson, background
+              position wandering via magma-flow. Full-width sawtooth flame crown
+              above via clip-path, jittering on a 0.15s steps loop. Ambient blur
+              glow bleeds behind the number. Three animations desync
+              deliberately - magma-flow, heat-flicker, micro-jitter all run on
+              different durations.
+            </div>
+          </div>
 
-              {/* Septenvigintillion - Hellfire Glow 1 */}
-              <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div className="font-[DM_Mono]">
-                    <span className="text-xs text-[#444] font-bold block mb-0.5">
-                      Septenvigintillion
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[#aaa]">10⁸⁴</span>
-                      <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fff4f0] text-[#9a2a00] font-medium uppercase tracking-wider">
-                        molten
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-bold leading-none tracking-tight">
-                    <span className="g-spv">1.2Spv</span>
-                  </div>
-                </div>
-                <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
-                  Solid orange-red cycling through four color stops. Heat-haze
-                  skewX distortion shifts direction each quarter-cycle. Blur
-                  filter pulses with contrast - peak at 75% where scale, skew,
-                  and contrast hit simultaneously.
+          {/* Septenvigintillion - Hellfire Glow 1 */}
+          <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div className="font-[DM_Mono]">
+                <span className="text-xs text-[#444] font-bold block mb-0.5">
+                  Septenvigintillion
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-[#aaa]">10⁸⁴</span>
+                  <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fff4f0] text-[#9a2a00] font-medium uppercase tracking-wider">
+                    molten
+                  </span>
                 </div>
               </div>
-              {/* Move block ending up every week */}
-            </>
-          )}
+              <div className="text-2xl font-bold leading-none tracking-tight">
+                <span className="g-spv">1.2Spv</span>
+              </div>
+            </div>
+            <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+              Solid orange-red cycling through four color stops. Heat-haze skewX
+              distortion shifts direction each quarter-cycle. Blur filter pulses
+              with contrast - peak at 75% where scale, skew, and contrast hit
+              simultaneously.
+            </div>
+          </div>
+
           {/* Sexvigintillion - Cards Glow 2 */}
           <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
             <div className="flex justify-between items-start mb-3">

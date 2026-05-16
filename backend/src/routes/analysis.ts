@@ -179,6 +179,13 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid query' })
 
     const normalizedQuery = query.toLowerCase().trim()
+
+    if (query.length > 500) {
+      return res
+        .status(400)
+        .json({ error: 'The Oracle does not accept essays.' })
+    }
+    
     const cached = queryCache.get(normalizedQuery)
     if (cached && now - cached.timestamp < CACHE_TTL) {
       return res.json({ result: cached.result, cached: true })

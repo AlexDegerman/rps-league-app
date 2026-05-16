@@ -16,8 +16,8 @@ const FLASH_EVENT_CONFIG: Partial<
 > = {
   LUNAR: { multiplier: 5, weight: 1 },
   ELECTRIC: { multiplier: 5, weight: 1 },
-  CARDS: { multiplier: 1, weight: 1.5 }
-  // HELLFIRE: { multiplier: 5, weight: 1 } // REMOVE ON WEEK 7
+  CARDS: { multiplier: 1, weight: 1 },
+  HELLFIRE: { multiplier: 5, weight: 1.5 }
 }
 
 // Weighted random pick, avoids uniform distribution when weights differ

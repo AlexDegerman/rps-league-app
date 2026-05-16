@@ -39,6 +39,7 @@ import BonusExplainerPopover from '@/components/BonusExplainerPopover'
 import { useGameStore } from './stores/gameStore'
 import { useUserStore } from './stores/userStore'
 import { useUIStore } from './stores/uiStore'
+import { useTabGuard } from '@/hooks/useTabGuard'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -102,7 +103,9 @@ export default function HomePage() {
     isFocused,
     setIsFocused,
     inputString,
-    setInputString
+    setInputString,
+    persistentError,
+    setPersistentError
   } = useUIStore()
 
   const { setLiveTheme, setVisualMode } = useEventTheme()
@@ -116,11 +119,21 @@ export default function HomePage() {
     soundOn,
     toggleSound
   } = useSound()
+  
+  const esRef = useRef<EventSource | null>(null)
+
+  const isDuplicate = useTabGuard(() => {
+    esRef.current?.close()
+  })
 
   const lastPacketRef = useRef(Date.now())
   const isOffline = typeof window !== 'undefined' && !navigator.onLine
   const isStreamStale = now - lastPacketRef.current > 10000
-  const showConnectionWarning = backendReady && (isOffline || isStreamStale)
+  const showConnectionWarning =
+    backendReady &&
+    !isDuplicate &&
+    !persistentError &&
+    (isOffline || isStreamStale)
 
   const getVisualMode = (flash: string | null, streak: number) => {
     if (flash === 'LUNAR') return 'flash_lunar' as const
@@ -289,11 +302,14 @@ export default function HomePage() {
 
   // SSE live stream
   useEffect(() => {
+    if (isDuplicate) return
     const es = new EventSource(`${API_BASE}/api/live`)
+    esRef.current = es  
 
     es.addEventListener('sync', (event) => {
       const { serverTime } = JSON.parse(event.data)
       setServerOffset(serverTime - Date.now())
+      setPersistentError(null)
     })
 
     es.addEventListener('pending', (event) => {
@@ -419,9 +435,18 @@ export default function HomePage() {
       setLiveTheme(data.type as EventTheme)
     })
 
-    return () => es.close()
+    es.onerror = () => {
+      if (es.readyState === EventSource.CLOSED) {
+        setPersistentError('TOO MANY PLAYERS - TRY AGAIN IN A MOMENT')
+      }
+    }
+
+    return () => {
+      es.close()
+      esRef.current = null
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isDuplicate])
 
   const handlePick = async (gameId: string, playerName: string) => {
     const user = getOrCreateUser()
@@ -713,10 +738,11 @@ export default function HomePage() {
       <LiveStatsTicker />
 
       {errorMessage && (
-        <div className="my-4 transition-all duration-300">
-          <div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg font-bold border-2 border-red-400 flex items-center justify-center gap-2 animate-in fade-in zoom-in duration-200">
-            <span className="animate-pulse">🚨</span> {errorMessage}
-          </div>
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-200">
+          <div className="w-2 h-2 bg-red-500 rounded-full" />
+          <p className="text-xs font-bold text-red-900 uppercase">
+            {errorMessage}
+          </p>
         </div>
       )}
 
@@ -740,6 +766,24 @@ export default function HomePage() {
           </div>
         ) : (
           <>
+            {persistentError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                <p className="text-xs font-bold text-red-900 uppercase">
+                  {persistentError}
+                </p>
+              </div>
+            )}
+
+            {isDuplicate && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
+                <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                <p className="text-xs font-bold text-amber-900 uppercase">
+                  RPS League is open in another tab. Close this tab to continue.
+                </p>
+              </div>
+            )}
+
             {showConnectionWarning && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
                 <div className="w-2 h-2 bg-red-500 rounded-full" />

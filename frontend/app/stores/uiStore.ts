@@ -11,7 +11,9 @@ interface UIState {
   showPointsExplainer: boolean
   isFocused: boolean
   inputString: string
+  persistentError: string | null
 
+  setPersistentError: (msg: string | null) => void
   setResultAnim: (anim: ResultAnim | null) => void
   clearResultAnim: () => void
   setNotification: (n: 'new_visitor' | 'no_bigint' | null) => void
@@ -27,11 +29,15 @@ export const useUIStore = create<UIState>((set) => ({
   resultAnim: null,
   notification: null,
   errorMessage: null,
+  persistentError: null,
+
   showJumpButton: false,
   showPointsInfo: false,
   showPointsExplainer: false,
   isFocused: false,
   inputString: '100000',
+
+  setPersistentError: (msg) => set({ persistentError: msg }),
 
   setResultAnim: (anim) => set({ resultAnim: anim }),
   clearResultAnim: () => set({ resultAnim: null }),

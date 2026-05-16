@@ -17,8 +17,8 @@ const rowToMatch = (row: Record<string, unknown>): Match => ({
   }
 })
 
-// Computes win/loss tallies from a match list in memory rather than SQL
-// because the leaderboard is already scoped to a small time window.
+// Tallies wins/losses from an in-memory match list rather than SQL aggregation.
+// Acceptable because callers already scope the query to a small time window.
 const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
   const stats = new Map<string, PlayerStats>()
 
@@ -49,7 +49,7 @@ const buildLeaderboard = (matches: Match[]): PlayerStats[] => {
             ? Math.round((p.wins / (p.wins + p.losses)) * 100)
             : 0
       }))
-      // Primary: most wins. Tiebreaker: alphabetical so order is deterministic.
+      // Primary sort: most wins. Tiebreaker: alphabetical for deterministic ordering.
       .sort((a, b) => b.wins - a.wins || a.name.localeCompare(b.name))
   )
 }
@@ -58,45 +58,24 @@ export const getHistoricalLeaderboard = async (
   startDate?: string,
   endDate?: string
 ): Promise<PlayerStats[]> => {
-  const params: unknown[] = []
+  // Build query params and WHERE clause together so indices always stay in sync.
+  // endDate is treated as inclusive, so we add one full day in ms.
+  const values: unknown[] = []
+  const conditions: string[] = []
 
-  // Helper to build conditions with dynamic parameter indexing
-  const buildConditions = () => {
-    const conds: string[] = []
-    if (startDate) {
-      // We only push to params if they aren't already there for this specific segment
-      // But it's cleaner to just build the whole list once and map the indexes
-      conds.push(`time >= $${params.length + 1}`)
-    }
-    if (endDate) {
-      conds.push(`time < $${params.length + 2}`)
-    }
-    return conds.length ? `WHERE ${conds.join(' AND ')}` : ''
+  if (startDate) {
+    values.push(new Date(startDate).getTime())
+    conditions.push(`time >= $${values.length}`)
+  }
+  if (endDate) {
+    values.push(new Date(endDate).getTime() + 86_400_000)
+    conditions.push(`time < $${values.length}`)
   }
 
-  // Proper way: Build the param list once, then use the same indices in both queries
-  const values: any[] = []
-  if (startDate) values.push(new Date(startDate).getTime())
-  if (endDate) values.push(new Date(endDate).getTime() + 86400000)
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
-  // Since the parameters are the same for both halves of the UNION,
-  // we can use the same placeholders ($1, $2) in both SELECTs.
-  const where = values.length
-    ? `WHERE ${values.map((_, i) => `time ${i === 0 && startDate ? '>=' : '<'} $${i + 1}`).join(' AND ')}`
-    : ''
-
-  // Logic adjustment: If you have BOTH startDate and endDate, the map above needs
-  // to be more explicit than just checking index.
-  const explicitWhere = () => {
-    const parts = []
-    let i = 1
-    if (startDate) parts.push(`time >= $${i++}`)
-    if (endDate) parts.push(`time < $${i++}`)
-    return parts.length ? `WHERE ${parts.join(' AND ')}` : ''
-  }
-
-  const finalWhere = explicitWhere()
-
+  // UNION ALL covers both sides of each match (player A and player B) so a
+  // single GROUP BY gives the full win/loss record for every player.
   const query = `
     SELECT
       name,
@@ -107,19 +86,19 @@ export const getHistoricalLeaderboard = async (
         player_a_name AS name,
         (
           (player_a_played = 'ROCK'     AND player_b_played = 'SCISSORS') OR
-          (player_a_played = 'SCISSORS' AND player_b_played = 'PAPER') OR
+          (player_a_played = 'SCISSORS' AND player_b_played = 'PAPER')    OR
           (player_a_played = 'PAPER'    AND player_b_played = 'ROCK')
         ) AS won
-      FROM matches ${finalWhere}
+      FROM matches ${where}
       UNION ALL
       SELECT
         player_b_name AS name,
         NOT (
           (player_a_played = 'ROCK'     AND player_b_played = 'SCISSORS') OR
-          (player_a_played = 'SCISSORS' AND player_b_played = 'PAPER') OR
+          (player_a_played = 'SCISSORS' AND player_b_played = 'PAPER')    OR
           (player_a_played = 'PAPER'    AND player_b_played = 'ROCK')
         ) AS won
-      FROM matches ${finalWhere}
+      FROM matches ${where}
     ) results
     GROUP BY name
     ORDER BY wins DESC, name ASC`
@@ -137,9 +116,11 @@ export const getHistoricalLeaderboard = async (
   }))
 }
 
+// Delegates to buildLeaderboard rather than SQL aggregation, today's window
+// is small enough that the in-memory tally is fast and simpler to maintain.
 export const getTodayLeaderboard = async (): Promise<PlayerStats[]> => {
   const start = new Date().setUTCHours(0, 0, 0, 0)
-  const end = start + 86400000
+  const end = start + 86_400_000
   const result = await pool.query(
     `SELECT * FROM matches WHERE time >= $1 AND time < $2`,
     [start, end]
