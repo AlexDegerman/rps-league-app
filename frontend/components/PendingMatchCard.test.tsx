@@ -40,7 +40,7 @@ describe('PendingMatchCard', () => {
     expect(screen.getByText(/vs/i)).toBeInTheDocument()
   })
 
-  it('calls onPick with the correct player when a Bet button is clicked', () => {
+  it('calls onPick with the correct player when a Pick button is clicked', () => {
     render(
       <PendingMatchCard
         pending={mockPending}
@@ -50,11 +50,11 @@ describe('PendingMatchCard', () => {
       />
     )
     // First button corresponds to playerA (Alice)
-    fireEvent.click(screen.getAllByRole('button', { name: /Bet/i })[0])
+    fireEvent.click(screen.getAllByRole('button', { name: /Pick/i })[0])
     expect(mockOnPick).toHaveBeenCalledWith('game-123', 'Alice')
   })
 
-  it('hides Bet buttons and shows confirmation when a prediction is already placed', () => {
+  it('hides Pick buttons and shows confirmation when a prediction is already placed', () => {
     const prediction: PredictionRecord = {
       gameId: 'game-123',
       pick: 'Bob',
@@ -71,9 +71,9 @@ describe('PendingMatchCard', () => {
     )
 
     expect(
-      screen.queryByRole('button', { name: /Bet/i })
+      screen.queryByRole('button', { name: /PICK/i })
     ).not.toBeInTheDocument()
-    expect(screen.getByText(/Bet placed/i)).toBeInTheDocument()
+    expect(screen.getByText(/PICKED/i)).toBeInTheDocument()
   })
 
   it('counts down the timer as time advances', () => {

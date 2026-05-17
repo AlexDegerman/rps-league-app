@@ -253,6 +253,7 @@ function LeaderboardContent() {
                                 targetShortId={entry.shortId}
                                 linkedinUrl={entry.linkedinUrl}
                                 size="sm"
+                                disabledLinkedin={true}
                               />
                             </div>
 

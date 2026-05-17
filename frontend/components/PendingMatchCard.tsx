@@ -56,7 +56,7 @@ export default function PendingMatchCard({
       dateText: 'text-blue-400/70',
       vsText: 'text-blue-200',
       btnClass: 'lunar-btn',
-      label: '🌙 BET',
+      label: '🌙 PICK',
       confirmBg: 'bg-blue-500'
     },
     flash_electric: {
@@ -67,7 +67,7 @@ export default function PendingMatchCard({
       dateText: 'text-purple-400/70',
       vsText: 'text-purple-200',
       btnClass: 'electric-btn',
-      label: '⚡ BET',
+      label: '⚡ PICK',
       confirmBg: 'bg-purple-500'
     },
     flash_cards: {
@@ -78,7 +78,7 @@ export default function PendingMatchCard({
       dateText: 'text-yellow-600/70',
       vsText: 'text-yellow-300',
       btnClass: 'cards-btn',
-      label: '🃏 BET',
+      label: '🃏 PICK',
       confirmBg: 'bg-yellow-500'
     },
     flash_hellfire: {
@@ -89,7 +89,7 @@ export default function PendingMatchCard({
       dateText: 'text-red-400/70',
       vsText: 'text-red-200',
       btnClass: 'flash-hellfire-btn',
-      label: '🔥 BET',
+      label: '🔥 PICK',
       confirmBg: 'bg-red-600'
     },
     inferno: {
@@ -100,7 +100,7 @@ export default function PendingMatchCard({
       dateText: 'text-orange-400/70',
       vsText: 'text-orange-300',
       btnClass: 'inferno-btn',
-      label: '🔥 BET',
+      label: '🔥 PICK',
       confirmBg: 'bg-orange-500'
     },
     fever: {
@@ -111,7 +111,7 @@ export default function PendingMatchCard({
       dateText: 'text-green-600/70',
       vsText: 'text-green-300',
       btnClass: 'fever-btn',
-      label: '⚡ BET',
+      label: '⚡ PICK',
       confirmBg: 'bg-green-500'
     },
     default: {
@@ -122,7 +122,7 @@ export default function PendingMatchCard({
       dateText: 'text-gray-400',
       vsText: 'text-gray-300',
       btnClass: 'bg-indigo-600 hover:bg-indigo-700 text-white',
-      label: 'BET',
+      label: 'PICK',
       confirmBg: 'bg-indigo-400'
     }
   } as const
@@ -196,7 +196,7 @@ export default function PendingMatchCard({
               <span
                 className={`text-[10px] font-black px-3 py-1 rounded-lg text-white uppercase tracking-widest ${cfg.confirmBg}`}
               >
-                {prediction.confirmed ? 'BET PLACED' : 'CONFIRMING...'}
+                {prediction.confirmed ? 'PICKED' : 'CONFIRMING...'}
               </span>
             )
           )}
@@ -240,7 +240,7 @@ export default function PendingMatchCard({
               <span
                 className={`text-[10px] font-black px-3 py-1 rounded-lg text-white uppercase tracking-widest ${cfg.confirmBg}`}
               >
-                {prediction.confirmed ? 'BET PLACED' : 'CONFIRMING...'}
+                {prediction.confirmed ? 'PICKED' : 'CONFIRMING...'}
               </span>
             )
           )}

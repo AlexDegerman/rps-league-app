@@ -636,7 +636,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-1">
             <div className="flex items-center gap-2 flex-1">
               <label className="text-xs font-bold text-gray-400 uppercase shrink-0">
-                Bet
+                Pick
               </label>
               <div className="relative flex-1">
                 <input
