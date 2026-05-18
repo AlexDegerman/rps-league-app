@@ -16,7 +16,7 @@ import CloseIcon from '@/components/icons/CloseIcon'
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import type { Match, PendingMatch, ResultAnim } from '@/types/rps'
+import type { Match, PendingMatch, ResultAnim, EventTheme } from '@/types/rps'
 import {
   formatPoints,
   getAmountColor,
@@ -27,7 +27,6 @@ import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
 import LiveStatsTicker from '@/components/LiveStatTicker'
 import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
-import { EventTheme } from '@/lib/eventTheme'
 import EdgeGlow from '@/components/overlays/EdgeGlow'
 import ConfettiOverlay from '@/components/overlays/ConfettiOverlay'
 import ResultAnimOverlay from '@/components/overlays/ResultAnimOverlay'
