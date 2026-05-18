@@ -8,6 +8,7 @@ import liveRouter from './routes/live.js'
 import predictionsRouter from './routes/predictions.js'
 import aiRouter from './routes/analysis.js'
 import usersRouter from './routes/users.js'
+import feedbackRouter from './routes/feedback.js'
 import { initDb } from './utils/initDb.js'
 
 const app = express()
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
   next()
 })
 
+app.set('trust proxy', 1) 
 app.use(express.json())
 
 // Route Registration
@@ -38,7 +40,7 @@ app.use('/api/live', liveRouter)
 app.use('/api/predictions', predictionsRouter)
 app.use('/api/analysis', aiRouter)
 app.use('/api/users', usersRouter)
-
+app.use('/api/feedback', feedbackRouter)
 
 // Sentry Error Handler (Must be after all routes, but before other error middleware)
 Sentry.setupExpressErrorHandler(app)

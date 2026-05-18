@@ -24,8 +24,8 @@ A high-intensity pressure state dominated by deep crimson and glowing orange gra
 
 | Tier | Scale | Tag | Preview | Description |
 |------|-------|-----|---------|-------------|
-| Septenvigintillion | 10⁸⁴ | molten | <img src="./assets/glow7.gif" width="250" /> | Solid orange-red cycling through four color stops. Heat-haze skewX distortion shifts direction each quarter-cycle. Blur filter pulses with contrast, peak at 75% where scale, skew, and contrast hit simultaneously. |
-| Octovigintillion | 10⁸⁷ | lava overload | <img src="./assets/glow8.gif" width="250" /> | Radial gradient from gold core to deep crimson, background position wandering via magma-flow. Full-width sawtooth flame crown above via clip-path, jittering on a 0.15s steps loop. Ambient blur glow bleeds behind the number. Three animations desync deliberately, magma-flow, heat-flicker, micro-jitter all run on different durations. |
+| Septenvigintillion | 10⁸⁴ | molten | <img src="./assets/glow7.gif"/> | Solid orange-red cycling through four color stops. Heat-haze skewX distortion shifts direction each quarter-cycle. Blur filter pulses with contrast, peak at 75% where scale, skew, and contrast hit simultaneously. |
+| Octovigintillion | 10⁸⁷ | lava overload | <img src="./assets/glow8.gif"/> | Radial gradient from gold core to deep crimson, background position wandering via magma-flow. Full-width sawtooth flame crown above via clip-path, jittering on a 0.15s steps loop. Ambient blur glow bleeds behind the number. Three animations desync deliberately, magma-flow, heat-flicker, micro-jitter all run on different durations. |
 
 ---
 
@@ -50,8 +50,8 @@ A premium high-roller casino event styled in rich gold and amber tones. On win m
 
 | Tier | Scale | Tag | Preview | Description |
 |------|-------|-----|---------|-------------|
-| Quinvigintillion | 10⁷⁸ | holographic foil | <img src="./assets/glow5.gif" width="250" /> | 7-stop oil-slick rainbow at 45° with 400% background-size cycling diagonally. Drop-shadow color rotates each keyframe to track the dominant hue, pink at 0%, amber at 25%, green at 50%, cyan at 75%. |
-| Sexvigintillion | 10⁸¹ | the jackpot | <img src="./assets/glow6.gif" width="250" /> | Gold-pink-teal holographic gradient streams continuously. Two 🎲 satellites orbit on separate radii in opposite directions, one clockwise at 1.8em, one counter-clockwise at 2.2em, each with an independent colored drop-shadow. |
+| Quinvigintillion | 10⁷⁸ | holographic foil | <img src="./assets/glow5.gif"/> | 7-stop oil-slick rainbow at 45° with 400% background-size cycling diagonally. Drop-shadow color rotates each keyframe to track the dominant hue, pink at 0%, amber at 25%, green at 50%, cyan at 75%. |
+| Sexvigintillion | 10⁸¹ | the jackpot | <img src="./assets/glow6.gif"/> | Gold-pink-teal holographic gradient streams continuously. Two 🎲 satellites orbit on separate radii in opposite directions, one clockwise at 1.8em, one counter-clockwise at 2.2em, each with an independent colored drop-shadow. |
 
 ---
 
@@ -76,8 +76,8 @@ A fast-paced, volatile energy theme infused with neon violet and electric purple
 
 | Tier | Scale | Tag | Preview | Description |
 |------|-------|-----|---------|-------------|
-| Trevigintillion | 10⁷² | charged | <img src="./assets/glow3.gif" width="250" /> | Purple neon solid color with a scripted flicker sequence, double blink at 4-6%, opacity drop at 36%, stutter at 92-93%. Scale and glow radius peak together at 60%. |
-| Quattuorvigintillion | 10⁷⁵ | supercell | <img src="./assets/glow4.gif" width="250" /> | Blue-purple gradient streams left to right continuously. A repeating conic-gradient overlay fires in color-dodge mode via steps(1), fractal lightning spokes rotate and reposition each burst. White-out filter at 63% simulates a direct strike. |
+| Trevigintillion | 10⁷² | charged | <img src="./assets/glow3.gif"/> | Purple neon solid color with a scripted flicker sequence, double blink at 4-6%, opacity drop at 36%, stutter at 92-93%. Scale and glow radius peak together at 60%. |
+| Quattuorvigintillion | 10⁷⁵ | supercell | <img src="./assets/glow4.gif"/> | Blue-purple gradient streams left to right continuously. A repeating conic-gradient overlay fires in color-dodge mode via steps(1), fractal lightning spokes rotate and reposition each burst. White-out filter at 63% simulates a direct strike. |
 
 ---
 
@@ -102,5 +102,5 @@ A calm lunar-inspired event wrapped in cool blue tones with serene visual and au
 
 | Tier | Scale | Tag | Preview | Description |
 |------|-------|-----|---------|-------------|
-| Unvigintillion | 10⁶⁶ | moonlit | <img src="./assets/glow1.gif" width="250" /> | Navy-to-white-to-navy gradient sweeps at 135° across 200% background-size on a 4s linear loop. Drop-shadow pulses from a tight blue edge glow to a wider soft cyan bloom and back. |
-| Duovigintillion | 10⁶⁹ | full eclipse | <img src="./assets/glow2.gif" width="250" /> | Two gradients blended with screen mode, a radial white-core circle over a sweeping linear diagonal. Both background positions animate independently, making the bright lunar surface crawl across the letterforms on a 6s ease loop. |
+| Unvigintillion | 10⁶⁶ | moonlit | <img src="./assets/glow1.gif"/> | Navy-to-white-to-navy gradient sweeps at 135° across 200% background-size on a 4s linear loop. Drop-shadow pulses from a tight blue edge glow to a wider soft cyan bloom and back. |
+| Duovigintillion | 10⁶⁹ | full eclipse | <img src="./assets/glow2.gif"/> | Two gradients blended with screen mode, a radial white-core circle over a sweeping linear diagonal. Both background positions animate independently, making the bright lunar surface crawl across the letterforms on a 6s ease loop. |

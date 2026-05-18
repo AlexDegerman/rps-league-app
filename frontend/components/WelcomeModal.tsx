@@ -154,6 +154,9 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
             <p className="text-[9px] text-black/30 font-medium leading-snug">
               Save your recovery code from your profile to restore it.
             </p>
+            <p className="text-[9px] text-black/30 font-medium leading-snug">
+              Leave feedback of any kind in the feedback page
+            </p>
           </div>
         </div>
       </div>

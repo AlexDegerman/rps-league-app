@@ -227,3 +227,20 @@ export async function fetchDailyStats() {
     mvp: { nickname: string; gain: string } | null
   }>(fetch(`${API_BASE}/api/predictions/stats/daily`))
 }
+
+export async function submitFeedback(formData: FormData): Promise<
+  | { ok: true }
+  | { error: 'BANNED' | 'RATE_LIMITED' | 'CONNECTION_FAILED' | string }
+> {
+  try {
+    const res = await fetch(`${API_BASE}/api/feedback`, {
+      method: 'POST',
+      body: formData,
+    })
+    if (res.ok) return { ok: true }
+    const d = await res.json().catch(() => ({}))
+    return { error: d.error ?? 'UNKNOWN' }
+  } catch {
+    return { error: 'CONNECTION_FAILED' }
+  }
+}

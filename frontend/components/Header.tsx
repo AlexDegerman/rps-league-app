@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
+import { getEventColor } from '@/lib/format'
 import { EVENT_HEADER_CONFIG } from '@/lib/eventConfig'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
@@ -49,7 +50,15 @@ const Header = () => {
     }`
 
   const burgerColorClass = modeKey
-    ? `text-${modeKey === 'hellfire' ? 'red-600' : modeKey === 'lunar' ? 'blue-600' : modeKey === 'electric' ? 'purple-600' : 'yellow-600'}`
+    ? `text-${
+        modeKey === 'hellfire'
+          ? 'red-600'
+          : modeKey === 'lunar'
+            ? 'blue-600'
+            : modeKey === 'electric'
+              ? 'purple-600'
+              : 'yellow-600'
+      }`
     : 'text-gray-600'
 
   const allNavItems = [
@@ -58,7 +67,8 @@ const Header = () => {
     { label: 'Profile', href: profileHref },
     { label: 'Search', href: '/search' },
     { label: 'Analysis', href: '/analysis' },
-    { label: 'Tiers', href: '/showcase' }
+    { label: 'Tiers', href: '/showcase' },
+    { label: 'Feedback', href: '/feedback' }
   ]
 
   return (
@@ -75,11 +85,21 @@ const Header = () => {
         />
       )}
 
-      {modeKey && (
-        <div className={`event-dynamic-particles particles-${modeKey}`} />
+      {modeKey === 'hellfire' ? (
+        <div className="event-hellfire-ember" />
+      ) : (
+        modeKey && (
+          <div
+            className="event-particle event-particle-down-1 absolute top-1 left-[15%]"
+            style={{
+              background: getEventColor(modeKey, 0.8),
+              boxShadow: `0 0 6px ${getEventColor(modeKey, 0.6)}`
+            }}
+          />
+        )
       )}
 
-      <div className={`max-w-2xl mx-auto px-4 py-3 relative z-10 ${navGlow}`}>
+      <div className={`max-w-177.5 mx-auto px-4 py-3 relative z-10 ${navGlow}`}>
         <div className="flex items-center gap-2 sm:gap-3">
           <Link href="/" className="shrink-0" onClick={() => setIsOpen(false)}>
             <Image
@@ -95,15 +115,16 @@ const Header = () => {
 
           <span
             data-text="RPS League"
-            className={`hidden! min-[400px]:inline-block! relative text-sm font-black uppercase tracking-widest select-none ${brandCfg?.textClass ?? 'text-gray-300'}`}
+            className={`hidden! min-[380px]:inline-block! relative text-sm font-black uppercase tracking-widest select-none ${brandCfg?.textClass ?? 'text-gray-300'}`}
           >
             RPS League
           </span>
 
-          <div className="flex min-[640px]:hidden items-center gap-1.5 flex-1 ml-auto justify-end">
+          <div className="flex min-[704px]:hidden items-center gap-1.5 flex-1 ml-auto justify-end">
             <Link href="/" className={navClass('/')}>
               Live
             </Link>
+
             <Link href="/leaderboard" className={navClass('/leaderboard')}>
               Ranks
             </Link>
@@ -117,20 +138,31 @@ const Header = () => {
 
             <Link
               href="/search"
-              className={`${navClass('/search')} hidden! min-[520px]:block!`}
+              className={`${navClass('/search')} hidden! min-[500px]:block!`}
             >
               Search
             </Link>
 
+            <Link
+              href="/analysis"
+              className={`${navClass('/analysis')} hidden! min-[580px]:block!`}
+            >
+              Analysis
+            </Link>
+
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`p-2 rounded-lg border transition-colors ${burgerColorClass} ${modeKey ? 'bg-white/40 border-current' : 'bg-gray-50 border-gray-200 active:bg-gray-200'}`}
+              className={`p-2 rounded-lg border transition-colors ${burgerColorClass} ${
+                modeKey
+                  ? 'bg-white/40 border-current'
+                  : 'bg-gray-50 border-gray-200 active:bg-gray-200'
+              }`}
             >
               {isOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
 
-          <nav className="hidden min-[641px]:flex gap-2 ml-auto">
+          <nav className="hidden min-[704px]:flex gap-2 ml-auto">
             {allNavItems.map(({ label, href }) => (
               <Link key={href} href={href} className={navClass(href)}>
                 {label}
@@ -141,9 +173,12 @@ const Header = () => {
 
         {isOpen && (
           <nav
-            className={`min-[640px]:hidden mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-end gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${modeKey ? `event-bg-${modeKey}` : ''}`}
+            className={`min-[704px]:hidden mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-end gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${
+              modeKey ? `event-bg-${modeKey}` : ''
+            }`}
           >
             <div className="absolute inset-0 bg-white -z-20" />
+
             <Link
               href={profileHref}
               onClick={() => setIsOpen(false)}
@@ -151,26 +186,37 @@ const Header = () => {
             >
               Profile
             </Link>
+
             <Link
               href="/search"
               onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/search')} min-[520px]:hidden`}
+              className={`${menuRowItemClass('/search')} min-[490px]:hidden`}
             >
               Search
             </Link>
+
             <Link
               href="/analysis"
               onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/analysis')} min-[590px]:hidden`}
+              className={`${menuRowItemClass('/analysis')} min-[560px]:hidden`}
             >
               Analysis
             </Link>
+
             <Link
               href="/showcase"
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/showcase')}
             >
               Tiers
+            </Link>
+
+            <Link
+              href="/feedback"
+              onClick={() => setIsOpen(false)}
+              className={menuRowItemClass('/feedback')}
+            >
+              Feedback
             </Link>
           </nav>
         )}

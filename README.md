@@ -16,7 +16,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
     </td>
     <td valign="top">
       <strong>Mobile (320px)</strong><br />
-      <img src="./assets/rpsmobile.gif" width="220" />
+      <img src="./assets/mobile_fevertime_demo.gif" width="220" />
     </td>
   </tr>
 </table>
@@ -45,10 +45,9 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - [🎨 Design Decisions](#-design-decisions)
 - [🚀 CI/CD & Automation](#-cicd--automation)
 - [🚀 Future Improvements](#-future-improvements)
-- [🔌 API Endpoints](#-api-endpoints)
-- [🔑 Environment Variables](#-environment-variables)
 - [📦 How to Run](#-how-to-run)
-- [🗄️ Database Schema](#️-database-schema)
+- [🔮 Reliability & Feedback](#-reliability--feedback)
+- [🔌 API Reference](#-api-reference)
 - [📱 Device Compatibility](#-device-compatibility)
 - [⚠️ Disclaimer](#️-disclaimer)
 - [🔮 Oracle Privacy & Monitoring](#-oracle-privacy--monitoring)
@@ -344,102 +343,6 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 
 ---
 
-## 🔌 API Endpoints
-
-### Live Events
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/live` | SSE stream for live match events |
-
----
-
-### Matches
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/matches/pending` | Active pending match |
-| GET | `/api/matches` | Paginated match history |
-| GET | `/api/matches/by-date` | Matches filtered by date |
-| GET | `/api/matches/by-player` | Matches filtered by player |
-| GET | `/api/matches/players` | List all unique player names |
-| GET | `/api/matches/players/:name/stats` | Player career stats |
-
----
-
-### Leaderboards & Rankings
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/leaderboard/today` | Today's player leaderboard |
-| GET | `/api/leaderboard/historical` | Historical player leaderboard |
-| GET | `/api/leaderboard/unified?tab=[period]&sort=[metric]&dir=[asc|desc]` | Unified leaderboard with filtering, sorting, and direction control |
-
----
-
-### Users & Accounts
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/users/recover` | Recover user profile using recovery code |
-| POST | `/api/users/update-nickname` | Update user nickname |
-| POST | `/api/users/update-linkedin` | Set LinkedIn URL and badge visibility |
-| GET | `/api/users/profile/:shortId` | Fetch full user profile |
-| GET | `/api/users/recovery/:userId` | Get recovery code |
-| GET | `/api/users/check-name/:nickname` | Check nickname availability |
-| GET | `/api/users/:userId/points` | Get user points and peak stats |
-| GET | `/api/users/recovery/:userId` | Get recovery code for user |
-| GET | `/api/users/check-name/:nickname` | Check nickname availability |
-
----
-
-### Predictions
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/predictions` | Submit a prediction |
-| GET | `/api/predictions/:userId/stats` | Get user prediction statistics |
-| GET | `/api/predictions/user/:userId/history` | Get paginated user prediction history |
-
----
-
-### Automated Peak Resets
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/predictions/reset/daily` | Reset daily peak (cron job) |
-| POST | `/api/predictions/reset/weekly` | Reset weekly peak (cron job) |
-
----
-
-### Stats & Analytics
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/stats` | Platform-wide statistics |
-| GET | `/api/stats/daily` | Daily betting stats and MVP |
-| GET | `/api/stats/monthly?year=<year>&month=<month>` | Monthly platform stats with key metrics and top performers |
-| POST | `/api/analysis` | AI Oracle query (Gemini-powered insights) |
-
----
-
-## 🔑 Environment Variables
-Frontend (`/frontend/.env.local`)
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:5000
-```
-Backend (`/backend/.env`)
-```bash
-# Database & Security
-DATABASE_URL=postgresql://postgres.your-project-ref:[password]@aws-1-eu-west-1.pooler.supabase.com:6543/postgres
-CORS_ORIGIN=http://localhost:3000
-
-# Infrastructure Automation
-# Secret key for GitHub Actions reset workflows
-RESET_SECRET=your_long_random_secret
-
-# AI Integration
-GEMINI_API_KEY=your_gemini_api_key
-
-# Observability (Optional)
-# Leave blank to disable administrative audit logging
-DISCORD_LOG_WEBHOOK=your_discord_webhook_url
-```
----
-
 ## 📦 How to Run
 ```bash
 git clone https://github.com/AlexDegerman/rps-league-app.git
@@ -466,97 +369,26 @@ Open http://localhost:3000
 
 ---
 
-# 🗄️ Database Schema
+## 🔮 Reliability & Feedback
 
-This project uses **Supabase PostgreSQL** to manage real-time betting, match history, and global leaderboards. The schema is optimized for high-frequency writes and real-time state synchronization.
+To maintain a professional live-service standard and close the loop between user experience and system logs:
 
----
-
-## `matches`
-
-The source of truth for the league's match history. Each row represents a completed match.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| **game_id** (PK) | TEXT | Unique UUID v4 for the match |
-| **type** | TEXT | Event discriminator (hardcoded as `GAME_RESULT`) |
-| **time** | BIGINT | Unix timestamp (ms) of match creation |
-| **expires_at** | BIGINT | End of betting window (start + duration) |
-| **player_a_name** | TEXT | Name of the first competitor |
-| **player_a_played** | TEXT | Move: `ROCK`, `PAPER`, or `SCISSORS` |
-| **player_b_name** | TEXT | Name of the second competitor |
-| **player_b_played** | TEXT | Move: `ROCK`, `PAPER`, or `SCISSORS` |
+- **Unified Observability**: Integrated **Sentry** for full-stack error tracking and performance monitoring, specifically guarding against BigInt overflows and SSE heartbeat fatigue.
+- **Context-Aware Feedback**: An in-app portal for bug reports and suggestions. Submissions automatically bundle game state (points, streak, active events) and environment metadata (route, viewport, browser).
+- **Trace-Link Debugging**: Manual feedback is linked directly to Sentry’s `associatedEventId`, allowing for instantaneous lookup of the exact line of code that failed during a reported user session.
+- **Visual Reporting**: Support for screenshot attachments via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop functionality.
+- **Operational Monitoring**: Automated real-time alerts for feedback and AI Oracle queries are dispatched via **Discord Webhooks** to a private administrative channel.
+- **Privacy & Security**: IP addresses are masked (e.g., `192.168.x.x`) for audit logs. No authentication tokens, passwords, or PII are ever logged or stored.
 
 ---
 
-## `users`
+## 🔌 API Reference
 
-Global user profiles with persistent point tracking and account recovery logic.
+Full API documentation for RPS League is available in a dedicated file covering all endpoints, database schema, and environment configuration.
 
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| **user_id** (PK) | TEXT | Unique persistent identifier |
-| **short_id** (UQ) | TEXT | Public ID used for profile URLs (`/profile/:shortId`) |
-| **points** | NUMERIC | Current balance (100,000 floor enforced) |
-| **peak_points** | NUMERIC | All-time highest balance achieved |
-| **daily_peak** | NUMERIC | Highest balance today |
-| **weekly_peak** | NUMERIC | Highest balance this week |
-| **nickname** | TEXT | Auto-generated display name |
-| **recovery_code** (UQ) | TEXT | Unique recovery slug |
-| **total_volume** | NUMERIC | Total cumulative points risked |
-| **biggest_win** | NUMERIC | Largest single win |
-| **current_win_streak** | INTEGER | Current consecutive wins |
-| **max_win_streak** | INTEGER | Highest win streak achieved |
-| **bonus_pity_count** | INTEGER | Consecutive bets without bonus |
-| **total_pities_earned** | INTEGER | Total pity rewards triggered |
-| **joined_date** | BIGINT | Account creation timestamp (ms) |
-| **linkedin_url** | TEXT | Optional LinkedIn profile URL |
-| **show_linkedin_badge** | BOOLEAN | Controls LinkedIn badge visibility |
-| **biggest_single_win** | NUMERIC | Largest single resolved win |
-| **biggest_multiplier_win** | NUMERIC | Largest multiplier-based win |
-| **biggest_multiplier_tier** | TEXT | Highest multiplier tier achieved |
-
+📄 [View API Documentation](./api.md)
 
 ---
-
-## `predictions`
-
-Tracks all user wagers. Each user can place one bet per game.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| **id** (PK) | SERIAL | Internal unique ID |
-| **user_id** | TEXT | Bettor ID |
-| **game_id** | TEXT | Match ID |
-| **pick** | TEXT | Chosen outcome (`Player A` or `Player B`) |
-| **bet_amount** | NUMERIC | Points wagered |
-| **result** | TEXT | `WIN`, `LOSE`, or `NULL` (pending) |
-| **gain_loss** | NUMERIC | Net result after resolution |
-| **bonus_tier** | TEXT | Bonus tier applied |
-| **bonus_multiplier** | NUMERIC | Winnings multiplier |
-| **created_at** | BIGINT | Timestamp for analytics |
-
----
-
-### Relationships
-
-- `predictions.user_id` → `users.user_id`
-- `predictions.game_id` → `matches.game_id`
-
-### Indexes
-
-| Table | Column(s) | Reason |
-| :--- | :--- | :--- |
-| `predictions` | `user_id` | Speeds up per-user bet lookups and leaderboard aggregates |
-| `predictions` | `created_at` | Speeds up time-windowed queries (daily/weekly leaderboard tabs) |
-
----
-
-### Notes
-
-- `short_id` is a unique public identifier, but not used as a foreign key
-- All internal relationships rely on `user_id` for consistency
-- `predictions.user_id` and `predictions.created_at` are indexed to support high-frequency leaderboard aggregation across 250k+ match rows
 
 ## 📱 Device Compatibility
 
