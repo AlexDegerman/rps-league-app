@@ -1,19 +1,22 @@
+import './utils/instrument.js'
 import 'dotenv/config'
 import express from 'express'
+import * as Sentry from '@sentry/node'
 import matchesRouter from './routes/matches.js'
 import leaderboardRouter from './routes/leaderboard.js'
 import liveRouter from './routes/live.js'
 import predictionsRouter from './routes/predictions.js'
 import aiRouter from './routes/analysis.js'
-import { initDb } from './utils/initDb.js'
 import usersRouter from './routes/users.js'
+import { initDb } from './utils/initDb.js'
 
 const app = express()
 
+// Health check
 app.get('/health', (_req, res) => res.status(200).send('OK'))
 
+// CORS Middleware
 const allowedOrigin = process.env.CORS_ORIGIN || '*'
-
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
   res.setHeader(
@@ -22,19 +25,23 @@ app.use((req, res, next) => {
   )
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
   res.setHeader('Access-Control-Allow-Credentials', 'false')
-  // Preflight — browsers send OPTIONS before cross-origin POST/PUT
   if (req.method === 'OPTIONS') return res.sendStatus(204)
   next()
 })
 
 app.use(express.json())
 
+// Route Registration
 app.use('/api/matches', matchesRouter)
 app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/live', liveRouter)
 app.use('/api/predictions', predictionsRouter)
 app.use('/api/analysis', aiRouter)
 app.use('/api/users', usersRouter)
+
+
+// Sentry Error Handler (Must be after all routes, but before other error middleware)
+Sentry.setupExpressErrorHandler(app)
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, async () => {
