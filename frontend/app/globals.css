@@ -1124,7 +1124,7 @@
 
 /* ── SEASON 1 NUMBER TIER STYLING EFFECTS ──────────────────────────────────────── */
 
-.g-uvg {
+.g-uvg, .event-header-lunar {
   font-weight: 900;
   display: inline-block;
   background: linear-gradient(135deg, #224488 0%, #ffffff 50%, #224488 100%);
@@ -1246,7 +1246,7 @@
   100% { color: #dd88ff; text-shadow: 0 0 5px #dd88ff, 0 0 16px #aa44ff, 0 0 32px #7700ee; opacity: 1; }
 }
 
-.g-qvg {
+.g-qvg, .event-header-electric {
   font-weight: 900;
   display: inline-block;
   position: relative;
@@ -1361,7 +1361,7 @@
   100% { background-position: 0% 50%;    filter: drop-shadow(0 0 5px #ff0088) drop-shadow(0 0 14px #8800ff); }
 }
 
-.g-svg {
+.g-svg, .event-header-cards {
   font-weight: 900;
   display: inline-block;
   position: relative;
@@ -1482,7 +1482,7 @@
   }
 }
 
-.g-ovg {
+.g-ovg, .event-header-hellfire {
   font-weight: 900;
   display: inline-block;
   position: relative;
@@ -1513,7 +1513,6 @@
   animation: 
     magma-flow 5s ease-in-out infinite,
     heat-flicker 2.2s infinite alternate,
-    micro-jitter 0.25s infinite;
 }
 
 @keyframes heat-flicker {
@@ -1600,15 +1599,6 @@
   100% { background-position: 85% 85%; }
 }
 
-@keyframes micro-jitter {
-  0%   { transform: translate(0px, 0px)     skewX(0deg);   }
-  20%  { transform: translate(0.4px, -0.3px) skewX(0.3deg);  }
-  40%  { transform: translate(-0.3px, 0.2px) skewX(-0.2deg); }
-  60%  { transform: translate(0.2px, 0.4px)  skewX(0.15deg); }
-  80%  { transform: translate(-0.4px, -0.2px) skewX(-0.3deg);}
-  100% { transform: translate(0px, 0px)     skewX(0deg);   }
-}
-
 @keyframes lunar-bloom {
   0% { opacity: 0; transform: scaleY(0); }
   25% { opacity: 1; transform: scaleY(1); }
@@ -1675,3 +1665,130 @@
   50% { opacity: 1; }
 }
 
+
+/* EVENT BORDERS */
+.event-border-lunar {
+  border-image: linear-gradient(to right, transparent, #90cdf4, #ebf8ff, #90cdf4, transparent) 1;
+}
+.event-border-electric {
+  border-image: linear-gradient(to right, transparent, #9f7aea, #e9d8fd, #9f7aea, transparent) 1;
+}
+.event-border-cards {
+  border-image: linear-gradient(to right, transparent, #ecc94b, #fefce8, #ecc94b, transparent) 1;
+}
+.event-border-hellfire {
+  border-image: linear-gradient(to right, transparent, #dc2626, #fca5a5, #dc2626, transparent) 1;
+}
+
+/* EVENT BACKGROUNDS */
+.event-bg-lunar { background: radial-gradient(circle at center, rgba(144, 205, 244, 0.12), transparent 70%); }
+.event-bg-electric { background: radial-gradient(circle at center, rgba(159, 122, 234, 0.12), transparent 70%); }
+.event-bg-cards { background: radial-gradient(circle at center, rgba(236, 201, 75, 0.12), transparent 70%); }
+.event-bg-hellfire { background: radial-gradient(circle at center, rgba(220, 38, 38, 0.12), transparent 70%); }
+
+/* SIDE GLOWS*/
+.event-side-lunar { box-shadow: inset 50px 0 80px -50px rgba(144,205,244,0.3), inset -50px 0 80px -50px rgba(144,205,244,0.3); }
+.event-side-electric { box-shadow: inset 50px 0 80px -50px rgba(159,122,234,0.3), inset -50px 0 80px -50px rgba(159,122,234,0.3); }
+.event-side-cards { box-shadow: inset 50px 0 80px -50px rgba(236,201,75,0.3), inset -50px 0 80px -50px rgba(236,201,75,0.3); }
+.event-side-hellfire { box-shadow: inset 50px 0 80px -50px rgba(220,38,38,0.3), inset -50px 0 80px -50px rgba(220,38,38,0.3); }
+
+/* NAV GLOWS */
+.nav-glow-lunar { box-shadow: 0 10px 30px -10px rgba(144, 205, 244, 0.3); }
+.nav-glow-electric { box-shadow: 0 10px 30px -10px rgba(159, 122, 234, 0.3); }
+.nav-glow-cards { box-shadow: 0 10px 30px -10px rgba(236, 201, 75, 0.3); }
+.nav-glow-hellfire { box-shadow: 0 10px 30px -10px rgba(220, 38, 38, 0.3); }
+
+/* TICKER SPECIFICS */
+.ticker-glow-lunar { background: linear-gradient(90deg, transparent, #90cdf4, transparent); }
+.ticker-glow-electric { background: linear-gradient(90deg, transparent, #9f7aea, transparent); }
+.ticker-glow-cards { background: linear-gradient(90deg, transparent, #ecc94b, transparent); }
+.ticker-glow-hellfire { background: linear-gradient(90deg, transparent, #dc2626, transparent); }
+
+/* --- UNIFIED DYNAMIC EVENT PARTICLES --- */
+.event-dynamic-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.event-dynamic-particles::before,
+.event-dynamic-particles::after {
+  content: '';
+  position: absolute;
+  inset: -30px 0; 
+  background-size: 100px 50px;
+  animation: ember-drift 4s linear infinite;
+}
+
+.event-dynamic-particles::after {
+  background-size: 140px 80px;
+  animation-duration: 6s;
+  animation-delay: -2s;
+  opacity: 0.5;
+  filter: blur(0.5px);
+  transform: scaleX(-1);
+}
+
+/* LUNAR: Blue Embers */
+.particles-lunar::before, .particles-lunar::after {
+  background-image: 
+    radial-gradient(ellipse 1.5px 3px at 15% 90%, #fff 0%, #ebf8ff 30%, transparent 80%),
+    radial-gradient(ellipse 2px 4px at 35% 50%, #bee3f8 0%, #90cdf4 50%, transparent 100%),
+    radial-gradient(ellipse 1px 3px at 60% 80%, #ebf8ff 0%, #63b3ed 40%, transparent 100%),
+    radial-gradient(ellipse 1.5px 3.5px at 85% 30%, #ffffff 0%, #4299e1 60%, transparent 100%);
+}
+
+/* ELECTRIC: Purple Embers */
+.particles-electric::before, .particles-electric::after {
+  background-image: 
+    radial-gradient(ellipse 1.5px 3px at 15% 90%, #fff 0%, #f3e8ff 30%, transparent 80%),
+    radial-gradient(ellipse 2px 4px at 35% 50%, #e9d8fd 0%, #d6bcfa 50%, transparent 100%),
+    radial-gradient(ellipse 1px 3px at 60% 80%, #f3e8ff 0%, #b794f4 40%, transparent 100%),
+    radial-gradient(ellipse 1.5px 3.5px at 85% 30%, #ffffff 0%, #9f7aea 60%, transparent 100%);
+}
+
+/* CARDS: Gold Embers */
+.particles-cards::before, .particles-cards::after {
+  background-image: 
+    radial-gradient(ellipse 1.5px 3px at 15% 90%, #fff 0%, #fefce8 30%, transparent 80%),
+    radial-gradient(ellipse 2px 4px at 35% 50%, #fef3c7 0%, #f6e05e 50%, transparent 100%),
+    radial-gradient(ellipse 1px 3px at 60% 80%, #fefce8 0%, #ecc94b 40%, transparent 100%),
+    radial-gradient(ellipse 1.5px 3.5px at 85% 30%, #ffffff 0%, #d69e2e 60%, transparent 100%);
+}
+
+/* HELLFIRE: Red Embers */
+.particles-hellfire::before, .particles-hellfire::after {
+  background-image: 
+    radial-gradient(ellipse 1.5px 3px at 15% 90%, #fff 0%, #ffcc00 30%, transparent 80%),
+    radial-gradient(ellipse 2px 4px at 35% 50%, #ff4400 0%, #dc2626 50%, transparent 100%),
+    radial-gradient(ellipse 1px 3px at 60% 80%, #ffcc00 0%, #f97316 40%, transparent 100%),
+    radial-gradient(ellipse 1.5px 3.5px at 85% 30%, #ffffff 0%, #ff4400 60%, transparent 100%);
+}
+
+@keyframes ember-drift {
+  0% {
+    transform: translateY(30px) translateX(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(0px) translateX(4px);
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-30px) translateX(-2px);
+    opacity: 0;
+  }
+}
+
+/* --- THEMED BACKGROUND SILKS --- */
+.event-bg-lunar { background: linear-gradient(to bottom, rgba(144, 205, 244, 0.05), rgba(144, 205, 244, 0.15), rgba(144, 205, 244, 0.2)) !important; }
+.event-bg-electric { background: linear-gradient(to bottom, rgba(159, 122, 234, 0.05), rgba(159, 122, 234, 0.15), rgba(159, 122, 234, 0.2)) !important; }
+.event-bg-cards { background: linear-gradient(to bottom, rgba(236, 201, 75, 0.05), rgba(236, 201, 75, 0.15), rgba(236, 201, 75, 0.2)) !important; }
+.event-bg-hellfire { background: linear-gradient(to bottom, rgba(220, 38, 38, 0.05), rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.2)) !important; }

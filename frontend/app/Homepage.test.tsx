@@ -19,17 +19,19 @@ import HomePage from './page'
 
 interface StoreMock extends Mock {
   getState: Mock
-  setState: Mock
 }
 
-// 1. Store Mocking Logic
 const { mockUserStore, mockGameStore, mockUIStore } = vi.hoisted(() => {
-  const makeMock = () =>
-    Object.assign(vi.fn(), { getState: vi.fn(), setState: vi.fn() })
+  const createMockStore = () => {
+    const mock = vi.fn() as unknown as StoreMock
+    mock.getState = vi.fn()
+    return mock
+  }
+
   return {
-    mockUserStore: makeMock() as StoreMock,
-    mockGameStore: makeMock() as StoreMock,
-    mockUIStore: makeMock() as StoreMock
+    mockUserStore: createMockStore(),
+    mockGameStore: createMockStore(),
+    mockUIStore: createMockStore()
   }
 })
 
@@ -37,7 +39,6 @@ vi.mock('./stores/userStore', () => ({ useUserStore: mockUserStore }))
 vi.mock('./stores/gameStore', () => ({ useGameStore: mockGameStore }))
 vi.mock('./stores/uiStore', () => ({ useUIStore: mockUIStore }))
 
-// 2. Component Isolation
 vi.mock('@/components/MatchList', () => ({ default: () => null }))
 vi.mock('@/components/PendingMatchCard', () => ({ default: () => null }))
 vi.mock('@/components/LiveStatTicker', () => ({ default: () => null }))
@@ -56,23 +57,34 @@ vi.mock('@/components/overlays/ResultAnimOverlay', () => ({
 vi.mock('@/components/badges/FlashBadge', () => ({ default: () => null }))
 vi.mock('@/components/badges/StreakBadge', () => ({ default: () => null }))
 vi.mock('@/components/BonusExplainerPopover', () => ({ default: () => null }))
+vi.mock('@/components/WelcomeModal', () => ({ default: () => null }))
 
-// 3. Lib & Hook Mocks
 vi.mock('@/hooks/useSound', () => ({
-  useSound: () => ({ soundOn: true, toggleSound: vi.fn() })
+  useSound: () => ({
+    soundOn: true,
+    toggleSound: vi.fn(),
+    playWin: vi.fn(),
+    playLoss: vi.fn(),
+    playCards: vi.fn(),
+    playElectric: vi.fn(),
+    playFire: vi.fn(),
+    playMoon: vi.fn()
+  })
 }))
 vi.mock('@/hooks/useInfiniteScroll', () => ({
   useInfiniteScroll: () => ({
     matches: [],
     hasMore: false,
-    loadMatches: vi.fn()
+    loadMatches: vi.fn(),
+    setMatches: vi.fn(),
+    isLoadingMore: false
   })
 }))
 vi.mock('@/hooks/useAnimatedBigInt', () => ({
   useAnimatedBigInt: (v: bigint) => v
 }))
-vi.mock('@/lib/EventThemeContext', () => ({
-  useEventTheme: () => ({ setLiveTheme: vi.fn(), setVisualMode: vi.fn() })
+vi.mock('@/hooks/useTabGuard', () => ({
+  useTabGuard: () => false
 }))
 vi.mock('@/lib/user', () => ({
   getOrCreateUser: () => ({
@@ -86,14 +98,22 @@ vi.mock('@/lib/api', () => ({
   fetchLatestMatches: vi.fn(() => Promise.resolve({ matches: [], total: 0 })),
   fetchPendingMatches: vi.fn(() => Promise.resolve([])),
   fetchUserPoints: vi.fn(() =>
-    Promise.resolve({ points: '500000', nickname: 'TestGuy' })
+    Promise.resolve({
+      points: '500000',
+      peakPoints: '500000',
+      nickname: 'TestGuy'
+    })
   ),
   fetchUnifiedLeaderboard: vi.fn(() => Promise.resolve([])),
   postPrediction: vi.fn()
 }))
 
 describe('HomePage', () => {
-  const setupMocks = (userOverrides = {}, gameOverrides = {}) => {
+  const setupMocks = (
+    userOverrides = {},
+    gameOverrides = {},
+    uiOverrides = {}
+  ) => {
     const userState = {
       points: 500000n,
       pointsLoaded: true,
@@ -133,6 +153,8 @@ describe('HomePage', () => {
       decrementFlashBuff: vi.fn(),
       setServerOffset: vi.fn(),
       setMatches: vi.fn(),
+      setVisualMode: vi.fn(),
+      setLiveTheme: vi.fn(),
       ...gameOverrides
     }
     const uiState = {
@@ -144,6 +166,8 @@ describe('HomePage', () => {
       showPointsInfo: false,
       showPointsExplainer: false,
       isFocused: false,
+      persistentError: null,
+      showWelcomeModal: false,
       setResultAnim: vi.fn(),
       clearResultAnim: vi.fn(),
       setNotification: vi.fn(),
@@ -152,7 +176,10 @@ describe('HomePage', () => {
       setShowPointsInfo: vi.fn(),
       setShowPointsExplainer: vi.fn(),
       setIsFocused: vi.fn(),
-      setInputString: vi.fn()
+      setInputString: vi.fn(),
+      setPersistentError: vi.fn(),
+      setShowWelcomeModal: vi.fn(),
+      ...uiOverrides
     }
 
     mockUserStore.mockReturnValue(userState)
@@ -166,6 +193,16 @@ describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
+
+    global.EventSource = vi.fn().mockImplementation(function () {
+      return {
+        addEventListener: vi.fn(),
+        close: vi.fn(),
+        removeEventListener: vi.fn(),
+        readyState: 0
+      }
+    }) as unknown as typeof EventSource
+
     setupMocks()
   })
 

@@ -10,13 +10,13 @@ const FLASH_TRIGGER_CHANCE = 0.05
 
 // weight controls relative selection frequency among active events.
 // values are proportional: 1.5 fires ~43% vs ~29% each for weight-1 events.
-// fractional weights are supported.
+// fractional numbers  are supported.
 const FLASH_EVENT_CONFIG: Partial<
   Record<FlashEventType, { multiplier: number; weight: number }>
 > = {
-  LUNAR: { multiplier: 5, weight: 1 },
-  ELECTRIC: { multiplier: 5, weight: 1 },
-  CARDS: { multiplier: 1, weight: 1 },
+  LUNAR: { multiplier: 5, weight: 1.0 },
+  ELECTRIC: { multiplier: 5, weight: 1.0 },
+  CARDS: { multiplier: 1.5, weight: 1.0 },
   HELLFIRE: { multiplier: 5, weight: 1.5 }
 }
 

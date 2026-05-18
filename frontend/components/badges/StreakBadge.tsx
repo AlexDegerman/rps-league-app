@@ -13,7 +13,7 @@ export default function StreakBadge({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border-2 px-2 py-1.5 flex-1 ${
+      className={`relative overflow-hidden rounded-xl border-2 px-2 py-1.5 w-full max-w-40 min-w-0 ${
         isInferno
           ? 'bg-linear-to-br from-orange-950 via-red-950 to-orange-950 border-orange-500'
           : 'bg-linear-to-br from-green-950 via-emerald-950 to-green-950 border-green-500'

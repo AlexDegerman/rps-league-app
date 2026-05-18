@@ -67,44 +67,53 @@ function FlashEventBadge({
   )
 }
 
-function TotalMultiplierBadge({
+function TotalMultiplierHeader({
   bonusMultiplier,
   flashMult,
-  bonusTier,
   isWin
 }: {
   bonusMultiplier: number
   flashMult: number
-  bonusTier: string | null
   isWin: boolean
 }) {
   if (!isWin) return null
 
-  const bonusMult = bonusMultiplier > 0 ? bonusMultiplier / 100 : 0
+  const bonusMult = bonusMultiplier > 0 ? bonusMultiplier / 100 : 1
   const effectiveFlash = flashMult > 1 ? flashMult : 1
+  const totalMult = bonusMult * effectiveFlash
 
-  if (bonusMult === 0 && effectiveFlash === 1) return null
+  if (totalMult < 1.01) return null
 
-  const tierKey = (
-    bonusTier && bonusTier in BONUS_TIER_STYLES ? bonusTier : 'COMMON'
-  ) as BonusTier
-  const tierStyle = BONUS_TIER_STYLES[tierKey]
+  const tier =
+    totalMult >= 10 ? 'LEGENDARY' :
+    totalMult >= 5  ? 'EPIC' :
+    totalMult >= 2  ? 'RARE' :
+    'COMMON'
+
+  const isHighTier = tier === 'LEGENDARY' || tier === 'EPIC'
+  const auraClass = `aura-${tier.toLowerCase()}`
+
+  const tierColors: Record<string, string> = {
+    LEGENDARY: 'text-yellow-400 border-yellow-500 bg-[#fdfcf0]',
+    EPIC:      'text-purple-500 border-purple-400/60 bg-purple-50',
+    RARE:      'text-blue-500 border-blue-400/60 bg-blue-50',
+    COMMON:    'text-gray-500 border-gray-300 bg-gray-50',
+  }
 
   return (
-    <div className="flex items-center justify-center gap-1.5 mt-0.5">
-      {bonusMult > 0 && (
+    <div className="flex items-center justify-center mb-1">
+      <div className={`badge-aura-wrapper ${auraClass} inline-flex items-center`}>
         <span
-          className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest
-            ${tierStyle.color} ${tierStyle.bg} border border-black/5`}
+          className={`
+            ${isHighTier ? 'text-[15px] px-4 py-1.5' : 'text-[13px] px-3 py-1'}
+            font-black uppercase tracking-tight rounded-full border-2
+            ${tierColors[tier]}
+            relative z-10 inline-flex items-center gap-1 transition-colors duration-500
+          `}
         >
-          {bonusMult.toFixed(1)}× bonus
+          {totalMult.toFixed(1)}× TOTAL
         </span>
-      )}
-      {effectiveFlash > 1 && (
-        <span className="text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest bg-white/10 text-white border border-white/20">
-          {effectiveFlash}× flash
-        </span>
-      )}
+      </div>
     </div>
   )
 }
@@ -194,6 +203,12 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
         </span>
       </div>
 
+      <TotalMultiplierHeader
+        bonusMultiplier={entry.bonusMultiplier}
+        flashMult={entry.flashMult ?? 1}
+        isWin={isWin}
+      />
+
       {isWin && entry.flashEventType && (
         <FlashEventBadge
           flashEventType={entry.flashEventType}
@@ -224,13 +239,6 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
             <GemIcon size={32} />
           </div>
         </div>
-
-        <TotalMultiplierBadge
-          bonusMultiplier={entry.bonusMultiplier}
-          flashMult={entry.flashMult ?? 1}
-          bonusTier={entry.bonusTier}
-          isWin={isWin}
-        />
 
         <div className="mt-1 flex items-center gap-2 px-3 py-0.5 rounded-full bg-black/3">
           <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">

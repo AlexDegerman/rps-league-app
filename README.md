@@ -87,11 +87,11 @@ This philosophy shapes the entire platform architecture. Match cadence, live fee
   - **WIN:** +100% of your bet
   - **LOSE:** -50% of your bet
   - **Floor:** points never drop below 100,000
-  - **Bonus System**: 40% chance per match to trigger a Tiered Bonus.
-    - On Win: Gain an extra 100% to 1000% bonus points.
-    - On Loss: Lose 20% to 100% fewer points.
-    - Tiers: Common, Rare, Epic, and Legendary (with unique UI glows and confetti).
-    - Guarantees a bonus at least every 4 bets if it doesn’t occur naturally from the 40% base chance
+  - **Bonus System**: 40% chance per match to trigger a Tiered Bonus multiplier.
+    - On Win: Multiply your payout by 2×–10× depending on tier.
+    - On Loss: Reduce your loss to 60%–0% of the base loss depending on tier.
+    - Tiers: Common (2–3×), Rare (3–5×), Epic (5–8×), Legendary (10×, guaranteed).
+    - Guarantees a bonus at least every 4 bets if it doesn't occur naturally from the 40% base chance
 - Win streak system:
   - Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x3, x6, x10)
   - x10 multiplier persists until the streak is broken

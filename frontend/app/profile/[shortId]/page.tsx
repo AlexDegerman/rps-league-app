@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import {
   clearUserCache,
   getOrCreateUser,
-  regenerateNickname,
   resetUser
 } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
@@ -35,13 +34,12 @@ export default function ProfilePage() {
   const params = useParams()
   const router = useRouter()
   const targetShortId = params.shortId as string
-
+  const { rerollNickname } = useUserStore()
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const [useK, setUseK] = useState(false)
-
   const [stats, setStats] = useState<UserStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [ranks, setRanks] = useState<Ranks>({
@@ -76,7 +74,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!targetShortId) return
-
     const user = getOrCreateUser()
     const own = user.shortId === targetShortId
     setIsOwnProfile(own)
@@ -149,37 +146,8 @@ export default function ProfilePage() {
 
   const handleRegenerate = async () => {
     if (!isOwnProfile) return
-
-    let newNickname = ''
-    let attempts = 0
-    let isAvailable = false
-    const user = getOrCreateUser()
-
-    while (attempts < 10 && !isAvailable) {
-      newNickname = regenerateNickname()
-      attempts++
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/users/check-name/${newNickname}`
-        )
-        const data = await res.json()
-        isAvailable = data.available
-      } catch {}
-    }
-
-    if (!isAvailable) {
-      console.warn('Could not find available nickname')
-      return
-    }
-
-    try {
-      await updateNickname(user.userId, newNickname, user.shortId)
-      setNickname(newNickname)
-      localStorage.setItem('rps_nickname', newNickname)
-      useUserStore.getState().setDisplayNickname(newNickname)
-    } catch (err) {
-      console.error('Failed to sync nickname:', err)
-    }
+    const newName = await rerollNickname()
+    if (newName) setNickname(newName)
   }
 
   const onRecoverConfirm = async () => {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { fetchDailyStats } from '@/lib/api'
 import { formatPoints, getAmountColor, getEventColor } from '@/lib/format'
-import { useEventTheme } from '@/lib/EventThemeContext'
+import { useGameStore } from '@/app/stores/gameStore'
 
 interface DailyStats {
   totalVolume: bigint
@@ -15,7 +15,7 @@ interface DailyStats {
 
 export default function LiveStatsTicker() {
   const [stats, setStats] = useState<DailyStats | null>(null)
-  const { visualMode } = useEventTheme()
+  const visualMode = useGameStore((s) => s.visualMode)
   const modeKey = visualMode?.replace('flash_', '') ?? null
   
   useEffect(() => {

@@ -5,7 +5,7 @@ import { generateNickname } from '@/lib/nicknames'
 import { formatTickerPoints, getAmountColor } from '@/lib/format'
 import { getUserId } from '@/lib/user'
 import GemIcon from './icons/GemIcon'
-import { useEventTheme } from '@/lib/EventThemeContext'
+import { useGameStore } from '@/app/stores/gameStore'
 import { EVENT_TICKER_CONFIG } from '@/lib/eventConfig'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -51,9 +51,10 @@ export default function PredictionTicker() {
   const cleanupTimeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(
     new Set()
   )
-  const { liveTheme } = useEventTheme()
+  const liveTheme = useGameStore((s) => s.liveTheme)
   const tcfg = liveTheme ? EVENT_TICKER_CONFIG[liveTheme] : null
-  
+  const modeKey = liveTheme?.toLowerCase() ?? null
+
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)
 
@@ -106,20 +107,17 @@ export default function PredictionTicker() {
           const tierRoll = Math.random() * 100
           let amount = 0n
 
-          if (tierRoll < 15) {
+          if (tierRoll < 15)
             amount = BigInt(Math.floor(Math.random() * 801) + 200) * 10n ** 3n
-          } else if (tierRoll < 75) {
+          else if (tierRoll < 75)
             amount = BigInt(Math.floor(Math.random() * 998) + 1) * 10n ** 6n
-          } else if (tierRoll < 90) {
+          else if (tierRoll < 90)
             amount = BigInt(Math.floor(Math.random() * 900) + 1) * 10n ** 9n
-          } else if (tierRoll < 99) {
-            const isQi = Math.random() > 0.7
+          else if (tierRoll < 99)
             amount =
               BigInt(Math.floor(Math.random() * 900) + 1) *
-              (isQi ? 10n ** 18n : 10n ** 12n)
-          } else {
-            amount = BigInt(Math.floor(Math.random() * 50) + 1) * 10n ** 21n
-          }
+              (Math.random() > 0.7 ? 10n ** 18n : 10n ** 12n)
+          else amount = BigInt(Math.floor(Math.random() * 50) + 1) * 10n ** 21n
 
           const template =
             demoTemplates[Math.floor(Math.random() * demoTemplates.length)]
@@ -143,16 +141,6 @@ export default function PredictionTicker() {
 
   useEffect(() => {
     const currentTimeouts = cleanupTimeoutsRef.current
-    const handleVisibility = () => {
-      if (document.hidden) {
-        pendingRef.current = []
-        setActive([])
-        lastEventRef.current = null
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibility)
-
     const interval = setInterval(() => {
       if (pendingRef.current.length === 0 || !visible || document.hidden) return
 
@@ -161,12 +149,10 @@ export default function PredictionTicker() {
       const lastEvent = lastEventRef.current
       let minDelay = 650
 
-      if (lastEvent) {
-        const charCount = lastEvent.message.length
-        const estimatedWidth = charCount * 8 + 60
-        const buffer = isMobile ? 500 : 200
-        minDelay = (estimatedWidth / velocity) * 1000 + buffer
-      }
+      if (lastEvent)
+        minDelay =
+          ((lastEvent.message.length * 8 + 60) / velocity) * 1000 +
+          (isMobile ? 500 : 200)
 
       const hasRealEvent = pendingRef.current.some((e) => e.isReal)
       const finalDelay = hasRealEvent ? Math.max(300, minDelay * 0.7) : minDelay
@@ -197,7 +183,6 @@ export default function PredictionTicker() {
 
     return () => {
       clearInterval(interval)
-      document.removeEventListener('visibilitychange', handleVisibility)
       currentTimeouts.forEach(clearTimeout)
       currentTimeouts.clear()
     }
@@ -215,33 +200,30 @@ export default function PredictionTicker() {
 
   return (
     <div
-      className={`fixed bottom-8 left-0 right-0 z-50 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-8 overflow-hidden
-      ${tcfg?.bgClass ?? 'bg-white/95'}
-      ${tcfg?.borderClass ?? 'border-t border-gray-100'}
-    `}
+      className={`fixed bottom-8 left-0 right-0 z-50 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-8 overflow-hidden 
+      ${tcfg?.borderClass ?? 'border-t border-gray-100'} 
+      ${modeKey ? `event-side-${modeKey}` : ''}`}
     >
-      {/* Top edge glow */}
-      {tcfg?.topGlowClass && (
+      <div className="absolute inset-0 bg-white -z-20" />
+
+      {modeKey && (
+        <div className={`absolute inset-0 -z-10 event-bg-${modeKey}`} />
+      )}
+
+      {modeKey && (
+        <div className={`event-dynamic-particles particles-${modeKey}`} />
+      )}
+
+      {tcfg?.topGlowClass && modeKey && (
         <div
           className={`absolute top-0 left-0 right-0 h-px pointer-events-none ${tcfg.topGlowClass}`}
         />
       )}
 
-      {/* Hellfire ember particles */}
-      {tcfg?.particleClass && (
-        <div
-          className={`absolute inset-0 pointer-events-none ${tcfg.particleClass}`}
-        />
-      )}
-
-      {/* Background base */}
-      <div className="absolute inset-0 bg-white/80 -z-10" />
-
       <div className="w-full flex items-center gap-3 relative z-10">
         <span className="text-[10px] font-black text-gray-400 shrink-0 uppercase tracking-widest flex items-center gap-1.5">
-          {/* Live dot — event themed or default green */}
           <span
-            className={`w-1.5 h-1.5 rounded-full animate-pulse ${tcfg?.dotClass ?? 'bg-green-500'}`}
+            className={`w-1.5 h-1.5 rounded-full animate-pulse ${modeKey && tcfg?.dotClass ? tcfg.dotClass : 'bg-green-500'}`}
           />
           <span className="hidden min-[400px]:inline">Live</span>
         </span>

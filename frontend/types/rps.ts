@@ -177,7 +177,13 @@ export interface MatchRowProps {
 }
 
 export type LeaderboardTab = 'daily' | 'weekly' | 'alltime'
-export type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
+export type SortKey =
+  | 'points'
+  | 'gained'
+  | 'peak'
+  | 'wins'
+  | 'losses'
+  | 'winrate'
 export type SortDir = 'asc' | 'desc'
 
 export type ConfettiType =
@@ -193,6 +199,7 @@ export interface BonusData {
   tier: BonusTier
   amount: bigint
   multiplier?: number
+  visualMultiplier?: number
 }
 
 export interface ResultAnim {
@@ -202,4 +209,17 @@ export interface ResultAnim {
   confetti?: { vx: number; vy: number; leftOffset: number; delay: number }[]
   streakAfter?: number
   confettiType?: ConfettiType
+  flashMult?: number
+  flashEventType?: string | null
 }
+
+export type EventTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE' | null
+
+export type VisualMode =
+  | 'flash_lunar'
+  | 'flash_electric'
+  | 'flash_cards'
+  | 'flash_hellfire'
+  | 'inferno'
+  | 'fever'
+  | null

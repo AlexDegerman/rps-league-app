@@ -70,7 +70,7 @@ export default function FlashBadge({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border-2 px-2 py-1.5 flex-[1.2] ${cfg.containerClass}`}
+      className={`relative overflow-hidden rounded-xl border-2 px-2 py-1.5 w-full max-w-50 min-w-0 ${cfg.containerClass}`}
       style={{
         animation: 'fever-badge-in 0.4s cubic-bezier(.34,1.56,.64,1) both'
       }}

@@ -1,15 +1,11 @@
 'use client'
 
 import { EVENT_FOOTER_CONFIG } from '@/lib/eventConfig'
-import { useEventTheme } from '@/lib/EventThemeContext'
-import { getEventColor } from '@/lib/format'
+import { useGameStore } from '@/app/stores/gameStore'
 import Link from 'next/link'
 
-const ACTIVE_EVENT: 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE' | null = 'LUNAR'
-
-
 const Footer = () => {
-  const { visualMode } = useEventTheme()
+  const visualMode = useGameStore((s) => s.visualMode)
   const modeKey = visualMode?.replace('flash_', '') ?? null
   const bgClass = modeKey ? `event-bg-${modeKey}` : 'bg-white'
   const sideClass = modeKey ? `event-side-${modeKey}` : ''
@@ -20,11 +16,11 @@ const Footer = () => {
     borderKey && EVENT_FOOTER_CONFIG[borderKey]
       ? EVENT_FOOTER_CONFIG[borderKey]
       : null
-  
+
   return (
     <footer
       className={`fixed bottom-0 left-0 w-full z-60 h-8 flex items-center overflow-hidden
-      ${cfg?.borderClass ?? 'border-t border-gray-200'}
+      ${modeKey && cfg?.borderClass ? cfg.borderClass : 'border-t border-gray-200'}
     `}
     >
       <div className="absolute inset-0 bg-white -z-20" />
@@ -34,29 +30,14 @@ const Footer = () => {
       )}
 
       {modeKey && (
-        <>
-          <div
-            className="event-particle event-particle-up-1 absolute bottom-1 left-[20%]"
-            style={{
-              background: getEventColor(modeKey, 0.7),
-              boxShadow: `0 0 5px ${getEventColor(modeKey, 0.5)}`
-            }}
-          />
-          <div
-            className="event-particle event-particle-up-2 absolute bottom-1 left-[65%]"
-            style={{
-              background: getEventColor(modeKey, 0.5),
-              boxShadow: `0 0 4px ${getEventColor(modeKey, 0.3)}`
-            }}
-          />
-        </>
+        <div className={`event-dynamic-particles particles-${modeKey}`} />
       )}
 
       <div className="max-w-2xl mx-auto w-full px-4 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2">
-          {ACTIVE_EVENT && (
+          {modeKey && cfg && (
             <span
-              className={`w-1.5 h-1.5 rounded-full animate-pulse ${cfg?.dotClass}`}
+              className={`w-1.5 h-1.5 rounded-full animate-pulse ${cfg.dotClass}`}
             />
           )}
           <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tight">
@@ -127,7 +108,9 @@ function FooterLink({ href, label, icon, hoverClass }: FooterLinkProps) {
       className={`flex items-center gap-1.5 text-gray-400 ${hoverClass} transition-colors group`}
     >
       {icon}
-      <span className="text-[9px] font-bold uppercase tracking-tight">{label}</span>
+      <span className="text-[9px] font-bold uppercase tracking-tight">
+        {label}
+      </span>
     </Link>
   )
 }

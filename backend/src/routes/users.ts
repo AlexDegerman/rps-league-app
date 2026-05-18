@@ -174,7 +174,7 @@ router.get('/:userId/points', async (req, res) => {
         peakPoints: user.points.toString(),
         dailyPeak: user.points.toString(),
         weeklyPeak: user.points.toString(),
-        currentWinStreak: Number(user.points.toString() ?? 0)
+        currentWinStreak: 0
       })
     }
 

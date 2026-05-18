@@ -105,7 +105,7 @@ export default function BonusExplainerPopover() {
                     Luck
                   </span>
                   <span className="text-[7px] leading-none bg-amber-100 text-amber-700 px-1 py-0.5 rounded-sm font-black uppercase tracking-tighter border border-amber-200">
-                    Leg Bns
+                    x1.5 + Leg Bns
                   </span>
                 </div>
                 <div className="flex items-center gap-1">

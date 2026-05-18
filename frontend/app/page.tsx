@@ -27,7 +27,6 @@ import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
 import LiveStatsTicker from '@/components/LiveStatTicker'
 import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
-import { useEventTheme } from '@/lib/EventThemeContext'
 import { EventTheme } from '@/lib/eventTheme'
 import EdgeGlow from '@/components/overlays/EdgeGlow'
 import ConfettiOverlay from '@/components/overlays/ConfettiOverlay'
@@ -40,6 +39,7 @@ import { useGameStore } from './stores/gameStore'
 import { useUserStore } from './stores/userStore'
 import { useUIStore } from './stores/uiStore'
 import { useTabGuard } from '@/hooks/useTabGuard'
+import WelcomeModal from '@/components/WelcomeModal'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -63,7 +63,9 @@ export default function HomePage() {
     serverOffset,
     setServerOffset,
     now,
-    tickNow
+    tickNow,
+    setVisualMode,
+    setLiveTheme
   } = useGameStore()
 
   // — User store —
@@ -105,10 +107,11 @@ export default function HomePage() {
     inputString,
     setInputString,
     persistentError,
-    setPersistentError
+    setPersistentError,
+    showWelcomeModal,
+    setShowWelcomeModal
   } = useUIStore()
 
-  const { setLiveTheme, setVisualMode } = useEventTheme()
   const {
     playWin,
     playLoss,
@@ -181,10 +184,11 @@ export default function HomePage() {
       setNotification('no_bigint')
       return
     }
-    if (!localStorage.getItem('rps_welcomed')) {
-      setNotification('new_visitor')
+      if (!localStorage.getItem('rps_welcomed')) {
+    setShowWelcomeModal(true)
     }
-  }, [setAutoAllIn, setNotification])
+
+  }, [setAutoAllIn, setNotification, setShowWelcomeModal])
 
   useEffect(() => {
     if (isHydrated) localStorage.setItem('autoAllIn', autoAllIn.toString())
@@ -496,12 +500,20 @@ export default function HomePage() {
     }
   }
 
+  const handleWelcomeContinue = () => {
+    localStorage.setItem('rps_welcomed', '1')
+    setShowWelcomeModal(false)
+    setNotification('new_visitor') 
+  }
+
   const numberName = pointsLoaded ? getFullNumberName(points) : ''
   const shouldShowTooltip =
     showPointsExplainer && numberName && numberName !== 'Points'
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
+      {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}
+
       <EdgeGlow visualMode={visualMode} />
 
       <div className="relative">
@@ -516,7 +528,6 @@ export default function HomePage() {
           animatedResult={animatedResult}
         />
 
-        {/* Main Controls */}
         <div
           className={`bg-white rounded-xl border shadow-sm p-2 transition-all duration-500 ${
             visualMode === 'flash_lunar'
@@ -534,68 +545,72 @@ export default function HomePage() {
                         : 'border-gray-100'
           }`}
         >
-          <div className="flex items-start justify-between gap-3 mb-1">
-            <div className="flex flex-col gap-1">
-              {/* Points display */}
-              <div className="flex items-center gap-2 shrink-0 min-w-31.25 sm:min-w-36.25">
-                <div className="relative group flex items-center">
-                  <div
-                    className="flex items-center gap-2 cursor-pointer select-none"
-                    onMouseEnter={() => {
-                      if (!capped) setShowPointsExplainer(true)
-                    }}
-                    onMouseLeave={() => setShowPointsExplainer(false)}
-                    onClick={() => {
-                      if (!capped) setShowPointsExplainer(!showPointsExplainer)
-                    }}
-                  >
-                    <GemIcon size={24} className="shrink-0" />
-                    <span className="text-xl font-bold tabular-nums">
-                      <span
-                        className={getAmountColor(points)}
-                        title={capped ? full : undefined}
-                        style={{ position: 'relative' }}
-                      >
-                        {pointsLoaded ? animatedDisplay : '...'}
-                      </span>
-                    </span>
-                  </div>
-                  {shouldShowTooltip && (
-                    <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-                        <span className={getAmountColor(points)}>
-                          {numberName}
+          {/* Top section */}
+          <div className="mb-1">
+            {/* Row 1: points + mute */}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                {/* Points display */}
+                <div className="flex items-center gap-2">
+                  <div className="relative group flex items-center">
+                    <div
+                      className="flex items-center gap-2 cursor-pointer select-none"
+                      onMouseEnter={() => {
+                        if (!capped) setShowPointsExplainer(true)
+                      }}
+                      onMouseLeave={() => setShowPointsExplainer(false)}
+                      onClick={() => {
+                        if (!capped)
+                          setShowPointsExplainer(!showPointsExplainer)
+                      }}
+                    >
+                      <GemIcon size={24} className="shrink-0" />
+                      <span className="text-xl font-bold tabular-nums">
+                        <span
+                          className={getAmountColor(points)}
+                          title={capped ? full : undefined}
+                          style={{ position: 'relative' }}
+                        >
+                          {pointsLoaded ? animatedDisplay : '...'}
                         </span>
                       </span>
-                      <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
                     </div>
-                  )}
-                </div>
+                    {shouldShowTooltip && (
+                      <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                          <span className={getAmountColor(points)}>
+                            {numberName}
+                          </span>
+                        </span>
+                        <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
+                      </div>
+                    )}
+                  </div>
 
-                <div className="relative group flex items-center ml-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setShowPointsInfo(!showPointsInfo)
-                    }}
-                    onBlur={() => setShowPointsInfo(false)}
-                    className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
-                  >
-                    <InfoIcon />
-                  </button>
-                  <div
-                    className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
-                  >
-                    Virtual simulation points. No real-world currency or value.
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900" />
+                  <div className="relative group flex items-center ml-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowPointsInfo(!showPointsInfo)
+                      }}
+                      onBlur={() => setShowPointsInfo(false)}
+                      className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
+                    >
+                      <InfoIcon />
+                    </button>
+                    <div
+                      className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
+                    >
+                      Virtual simulation points. No real-world currency or
+                      value.
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Nickname + rank + badges */}
-              {displayNickname && (
-                <div className="flex flex-col gap-1 min-w-0">
+                {/* Nickname + rank */}
+                {displayNickname && (
                   <div className="flex items-center gap-1.5 min-w-0">
                     <span
                       className="text-[10px] font-black text-gray-500 tracking-wider overflow-hidden whitespace-nowrap block min-w-0"
@@ -609,34 +624,36 @@ export default function HomePage() {
                       </span>
                     )}
                   </div>
-                  <div className="flex gap-1 sm:flex-row flex-row">
-                    <FlashBadge
-                      visualMode={visualMode}
-                      flashBuffRemaining={flashBuffRemaining}
-                    />
-                    <StreakBadge
-                      winStreak={winStreak}
-                      streakMult={streakMult}
-                    />
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* Mute — top right, doesn't affect badge row */}
+              <button
+                onClick={toggleSound}
+                className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
+                title="Toggle sound effects"
+              >
+                <SoundIcon muted={!soundOn} />
+              </button>
             </div>
 
-            <button
-              onClick={toggleSound}
-              className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
-              title="Toggle sound effects"
-            >
-              <SoundIcon muted={!soundOn} />
-            </button>
+            {/* Row 2: badges — fully separate row, full width, no mute competition */}
+            {displayNickname && (
+              <div className="flex gap-1 mt-1 max-w-sm">
+                <FlashBadge
+                  visualMode={visualMode}
+                  flashBuffRemaining={flashBuffRemaining}
+                />
+                <StreakBadge winStreak={winStreak} streakMult={streakMult} />
+              </div>
+            )}
           </div>
 
           {/* Bet input row */}
           <div className="flex flex-col sm:flex-row gap-1">
             <div className="flex items-center gap-2 flex-1">
               <label className="text-xs font-bold text-gray-400 uppercase shrink-0">
-                Pick
+                Amount
               </label>
               <div className="relative flex-1">
                 <input
@@ -666,7 +683,7 @@ export default function HomePage() {
                     setBetAmount(final)
                     setInputString(final.toString())
                   }}
-                  className={`relative overflow-hidden w-fit mx-auto p-4 border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
+                  className={`relative overflow-hidden w-full mx-auto p-4 border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
                 />
                 {isFocused && (
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400 pointer-events-none">
@@ -715,7 +732,7 @@ export default function HomePage() {
                   >
                     {notification === 'no_bigint'
                       ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
-                      : 'Start betting to rank up the leaderboard. No login needed, your progress is saved automatically.'}
+                      : 'Start making predictions to climb the leaderboard.'}
                   </p>
                 </div>
               </div>

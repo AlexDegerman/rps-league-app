@@ -59,57 +59,56 @@ export const savePrediction = async (
   return { success: true }
 }
 
-// 40% chance of a bonus. Tier determines the multiplier range applied on top of the base payout.
+// 40% chance of a bonus. Tier determines the multiplier range applied to the win amount.
 const rollBonus = (
   isWin: boolean,
   pityCount: number,
   currentPoints: bigint,
   flashType?: string | null
 ): { multiplier: number; tier: string } | null => {
-    if (flashType === 'CARDS' && isWin) {
-      return { multiplier: 10.0, tier: 'LEGENDARY' }
-    }
-  const forceBonus = pityCount >= 3
+  if (flashType === 'CARDS' && isWin) {
+    return { multiplier: 10.0, tier: 'LEGENDARY' }
+  }
 
-  // STARTER BOOST: 80% for players < 2M, 40% for everyone else
+  const forceBonus = pityCount >= 3
   const bonusChance = currentPoints < 2000000n ? 0.8 : 0.4
   if (!forceBonus && Math.random() > bonusChance) return null
 
   const roll = Math.random() * 100
 
-  // 0 - 60 (60% chance)
-  if (roll < 60) {
-    // COMMON: Win 100-200% bonus | Loss 20-40% reduction
+  // 0 - 59.5 (59.5% chance)
+  if (roll < 59.5) {
+    // COMMON: Win 2.0–3.0× | Loss keep 60–80% (lose 20–40%)
     return {
-      multiplier: isWin ? 1.0 + Math.random() * 1.0 : 0.2 + Math.random() * 0.2,
+      multiplier: isWin ? 2.0 + Math.random() * 1.0 : 0.6 + Math.random() * 0.2,
       tier: 'COMMON'
     }
   }
 
-  // 60 - 85 (25% chance)
-  if (roll < 85) {
-    // RARE: Win 201-349% bonus | Loss 41-70% reduction
+  // 59.5 - 84.5 (25% chance)
+  if (roll < 84.5) {
+    // RARE: Win 3.0–5.0× | Loss keep 30–59% (lose 41–70%)
     return {
       multiplier: isWin
-        ? 2.01 + Math.random() * 1.48
-        : 0.41 + Math.random() * 0.29,
+        ? 3.0 + Math.random() * 2.0
+        : 0.3 + Math.random() * 0.29,
       tier: 'RARE'
     }
   }
 
-  // 85 - 98 (13% chance)
-  if (roll < 98) {
-    // EPIC: Win 350-499% bonus | Loss 71-99% reduction
+  // 84.5 - 97.5 (13% chance)
+  if (roll < 97.5) {
+    // EPIC: Win 5.0–8.0× | Loss keep 1–29% (lose 71–99%)
     return {
       multiplier: isWin
-        ? 3.5 + Math.random() * 1.49
-        : 0.71 + Math.random() * 0.28,
+        ? 5.0 + Math.random() * 3.0
+        : 0.01 + Math.random() * 0.28,
       tier: 'EPIC'
     }
   }
 
-  // 98 - 100 (2% chance -> 1/50)
-  // LEGENDARY: 100% Loss protection (1.0) or 1000% Win Bonus (10.0)
+  // 97.5 - 100 (2.5% chance)
+  // LEGENDARY: Win 10.0× | Loss full protection (keep 100%)
   return {
     multiplier: isWin ? 10.0 : 1.0,
     tier: 'LEGENDARY'
@@ -167,20 +166,27 @@ export const resolvePrediction = async (
       : 0n
 
     const baseChange = isWin ? bet : bet / 2n
-    const bonusAmount = (baseChange * effectiveMult) / 100n
 
     let gainLoss: bigint
 
     if (isWin) {
-      gainLoss = baseChange + bonusAmount
+      gainLoss = bonus ? (baseChange * effectiveMult) / 100n : baseChange
     } else {
-      const actualLoss = baseChange - bonusAmount
+      const actualLoss = bonus
+        ? (baseChange * effectiveMult) / 100n
+        : baseChange
       const provisionalPoints = currentPoints - actualLoss
       gainLoss =
         provisionalPoints < POINTS_FLOOR
           ? POINTS_FLOOR - currentPoints
           : -actualLoss
     }
+
+    const bonusDisplayAmount = bonus
+      ? isWin
+        ? gainLoss - baseChange
+        : baseChange - -gainLoss
+      : 0n
 
     const streakAfter = isWin ? Number(row.current_win_streak) + 1 : 0
     const streakMult =
@@ -199,7 +205,8 @@ export const resolvePrediction = async (
     const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
 
     if (isWin && flashEvent) {
-      gainLoss = gainLoss * BigInt(flashMult)
+      const effectiveFlashMult = BigInt(Math.floor(flashMult * 100))
+      gainLoss = (gainLoss * effectiveFlashMult) / 100n
       consumeFlashBetForUser(row.user_id)
     }
 
@@ -224,7 +231,6 @@ export const resolvePrediction = async (
       ]
     )
 
-    // Single UPDATE keeps all peak columns in sync atomically
     await pool.query(
       `UPDATE users
     SET points               = points + $1,
@@ -265,7 +271,8 @@ export const resolvePrediction = async (
         amount: gainLoss > 0n ? gainLoss.toString() : (-gainLoss).toString(),
         bonus: bonus
           ? {
-              amount: bonusAmount.toString(),
+              amount:
+                bonusDisplayAmount > 0n ? bonusDisplayAmount.toString() : '0',
               tier: bonus.tier,
               visualMultiplier: Number(effectiveMult)
             }
@@ -343,10 +350,10 @@ export const getPaginatedUserPredictions = async (
         m.type
       FROM predictions p
       LEFT JOIN matches m ON p.game_id = m.game_id
-      WHERE p.user_id = $1 AND p.result = 'WIN' AND p.bonus_multiplier > 0
-      ORDER BY p.bonus_multiplier DESC
+      WHERE p.user_id = $1 AND p.result = 'WIN' AND (p.bonus_multiplier > 0 OR p.flash_multiplier > 1)
+      ORDER BY (p.bonus_multiplier * GREATEST(p.flash_multiplier, 1)) DESC
       LIMIT $2 OFFSET $3`
-    countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN' AND bonus_multiplier > 0`
+    countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN' AND (bonus_multiplier > 0 OR flash_multiplier > 1)`
   } else {
     dataQuery = `
       SELECT 
@@ -558,7 +565,7 @@ export const getUserBiggestMultipliers = async (userId: string, limit = 5) => {
     FROM predictions p
     LEFT JOIN matches m ON p.game_id = m.game_id
     WHERE p.user_id = $1 AND p.bonus_multiplier > 0
-    ORDER BY p.bonus_multiplier DESC
+    ORDER BY (p.bonus_multiplier * GREATEST(p.flash_multiplier, 1)) DESC
     LIMIT $2`,
     [userId, limit]
   )

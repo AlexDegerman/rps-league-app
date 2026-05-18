@@ -35,6 +35,7 @@ A premium high-roller casino event styled in rich gold and amber tones. On win m
 
 **Effects**
 - Guaranteed wins during the event
+- 1.5x win multiplier
 - Legendary Bonus guaranteed (10x reward)
 - UI transforms into gold and amber casino styling
 - Win effects replaced with cascading suit symbols, mini card rectangles, gold/silver particle bursts, and shimmer trails
