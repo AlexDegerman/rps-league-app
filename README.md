@@ -57,24 +57,15 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 ## ⚡ Identity & Zero-Friction Account System
 
-RPS League is designed around instant participation and persistent progression without traditional account friction.
+RPS League is built for instant participation without traditional account friction. A persistent identity is automatically created on first visit, allowing users to enter the competition loop in seconds with no email or registration required.
 
-Players can enter the league immediately with no registration, no email verification, and no login flow. A persistent identity is automatically created on first visit, allowing users to begin predicting within seconds while still retaining long-term progression, statistics, and leaderboard presence.
+- **Interactive Onboarding**: A Welcome Modal for first-time visitors that introduces the virtual economy and allows for immediate nickname "Rerolling" to establish identity before the first match.
+- **Anonymous Persistence**: Native `localStorage` identity architecture ensures long-term session and progression continuity without a central database login.
+- **Recovery-Code Restoration**: Simple alphanumeric slugs generated on the backend allowing users to securely migrate or restore profiles and statistics across different devices.
+- **Hybrid Identity Layer**: Optional professional signaling using URL-validated links to display identity badges on leaderboards for social proof and fully clickable external links on public profiles.
+- **Shareable Performance Dashboards**: Unique public profile URLs featuring 16 tracked data points and a context-aware match history (Recent, Biggest Wins, Best Multipliers), visualizing predictions through rich event cards that track tiered bonuses, flash event overlays, and move-set comparisons.
 
-Instead of relying on conventional authentication, the platform uses a lightweight identity architecture built around:
-
-- Instant anonymous onboarding
-- Persistent local identity storage
-- Recovery-code based account restoration
-- Shareable public profile URLs
-- Optional LinkedIn profile integration
-- Public leaderboard identity persistence
-
-To preserve social identity without requiring username registration, players are automatically assigned procedurally generated nicknames built from adjective, color, and creature pools, producing millions of possible combinations instantly. Nicknames can be re-randomized at any time while preserving all progression history, rankings, and statistics.
-
-Profiles can optionally attach a LinkedIn account, allowing players to display a clickable professional badge across public profiles and leaderboard placements — creating a hybrid identity layer where users can remain fully anonymous or selectively surface a real professional presence.
-
-This philosophy shapes the entire platform architecture. Match cadence, live feeds, leaderboard systems, profile persistence, and mobile UX are all optimized to minimize friction between discovering the app and participating in the live competition loop.
+This architecture eliminates the barrier to entry while preserving a robust layer of social identity and competitive status across the league ecosystem.
 
 ---
 
@@ -184,15 +175,15 @@ Each player profile includes a fully interactive match history system that visua
 
 The history view is structured into three contextual tabs:
 
-- **Recent** — chronological activity feed
-- **Biggest Wins** — highest-value outcomes ranked
-- **Best Multipliers** — peak bonus and flash event combinations
+- **Recent** - chronological activity feed
+- **Biggest Wins** - highest-value outcomes ranked
+- **Best Multipliers** - peak bonus and flash event combinations
 
 Each entry renders as a high-density match card containing outcome state, stake and gain/loss breakdown, bonus tier and multiplier effects, flash event overlays with themed styling, player move comparison with pick highlighting, and timestamped match context.
 
 The system uses infinite scrolling with progressive loading to support large historical datasets while maintaining smooth UI performance.
 
-All economic systems — bonus tiers, flash events, multipliers — are visually embedded directly into each match entry, turning player history into a replayable progression timeline rather than a static log.
+All economic systems - bonus tiers, flash events, multipliers - are visually embedded directly into each match entry, turning player history into a replayable progression timeline rather than a static log.
 
 ---
 
@@ -347,7 +338,7 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 ## 🚀 Future Improvements
 
 * **Multi-Tiered League Layers:** A structured progression system with multiple leaderboard brackets tailored to different point thresholds, ensuring players at all stages have a relevant, competitive space to climb before hitting the main vigintillion-scale rankings.
-* **Custom Cosmetic Marketplace:** A dedicated points-based store allowing players to purchase and equip various profile customizations—such as unique leaderboard card backgrounds, exclusive text neon shimmers, custom tier badges, and premium name colors, without diluting the prestige of event-exclusive victory animations.
+* **Custom Cosmetic Marketplace:** A dedicated points-based store allowing players to purchase and equip various profile customizations, such as unique leaderboard card backgrounds, exclusive text neon shimmers, custom tier badges, and premium name colors, without diluting the prestige of event-exclusive victory animations.
 * **Social Group Hubs:** Custom, isolated group and friend leaderboards designed to foster close-knit, high-frequency competition outside the global ecosystem.
 * **Unified OAuth Integration:** Optional Google Authentication built into the profile settings to streamline secure profile recovery alongside the existing short-ID architecture.
 
