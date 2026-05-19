@@ -222,8 +222,8 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pb-24 pt-6">
-      <div className="mb-5">
+    <div className="max-w-2xl mx-auto px-3 sm:px-4 pb-16 sm:pb-24">
+      <div className="mb-3 sm:mb-5">
         <h1 className="text-lg font-black text-gray-900 uppercase tracking-tight">
           Feedback
         </h1>
@@ -232,13 +232,37 @@ export default function FeedbackPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-4">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 sm:p-4 flex flex-col gap-3 sm:gap-4">
         {/* Category pills */}
         <div className="flex flex-col gap-1">
           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
             Category
           </label>
-          <div className="flex flex-wrap gap-1.5">
+
+          <div className="relative sm:hidden">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as CategoryKey)}
+              className="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-indigo-700 bg-indigo-50 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all"
+            >
+              {CATEGORIES.map(({ key, label }) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-indigo-600">
+              <svg
+                className="fill-current h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex flex-wrap gap-1.5">
             {CATEGORIES.map(({ key, label }) => (
               <button
                 key={key}
@@ -269,7 +293,7 @@ export default function FeedbackPage() {
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             placeholder="Anonymous"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all"
+            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 sm:py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all"
           />
         </div>
 
@@ -286,7 +310,7 @@ export default function FeedbackPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all"
+            className="w-full border border-gray-200 rounded-lg px-3 py-1.5 sm:py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all"
           />
         </div>
 
@@ -299,7 +323,7 @@ export default function FeedbackPage() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={PLACEHOLDERS[category]}
-            rows={4}
+            rows={3}
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all resize-none"
           />
         </div>
@@ -319,7 +343,7 @@ export default function FeedbackPage() {
               <img
                 src={screenshotPreview}
                 alt="Screenshot preview"
-                className="rounded-lg border border-gray-200 max-h-48 object-contain"
+                className="rounded-lg border border-gray-200 max-h-40 sm:max-h-48 object-contain"
               />
               <button
                 onClick={removeScreenshot}
@@ -338,18 +362,18 @@ export default function FeedbackPage() {
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center gap-2 cursor-pointer transition-all select-none ${
+              className={`border-2 border-dashed rounded-lg p-4 sm:p-6 flex flex-col items-center gap-1.5 sm:gap-2 cursor-pointer transition-all select-none ${
                 isDragging
                   ? 'border-purple-400 bg-purple-50'
                   : 'border-gray-200 hover:border-purple-300 hover:bg-gray-50'
               }`}
             >
-              <span className="text-2xl">📎</span>
-              <p className="text-xs font-bold text-gray-500 text-center">
+              <span className="text-xl sm:text-2xl">📎</span>
+              <p className="text-[11px] sm:text-xs font-bold text-gray-500 text-center">
                 Drop, paste (Ctrl+V), or{' '}
                 <span className="text-purple-600 underline">pick a file</span>
               </p>
-              <p className="text-[10px] text-gray-400">
+              <p className="text-[9px] sm:text-[10px] text-gray-400">
                 PNG, JPG, WEBP, max 5 MB
               </p>
             </div>
@@ -378,12 +402,12 @@ export default function FeedbackPage() {
         <button
           onClick={handleSubmit}
           disabled={status === 'submitting' || !message.trim()}
-          className="w-full py-3 rounded-xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-40 bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]"
+          className="w-full py-2.5 sm:py-3 mt-1 sm:mt-0 rounded-xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-40 bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]"
         >
           {status === 'submitting' ? 'Sending...' : 'Send Feedback'}
         </button>
 
-        <p className="text-[10px] text-gray-400 text-center leading-relaxed">
+        <p className="text-[9px] sm:text-[10px] text-gray-400 text-center leading-relaxed">
           Game state and environment data are attached automatically to help
           with debugging. No personal data beyond what you enter here.
         </p>

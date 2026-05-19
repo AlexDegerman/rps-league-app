@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from 'express'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getLatestMatches } from '../services/matchService.js'
 import pool from '../utils/db.js'
+import { logger } from '../utils/logger.js'
 
 const router = Router()
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
@@ -63,8 +64,10 @@ const logToDiscord = async (query: string, ip: string, response: string) => {
           }
         ]
       })
-    }).catch((err) => console.error('Discord Webhook Error:', err))
-  } catch (err) {
+    }).catch((err) =>
+      logger.warn('Discord webhook failed', { error: String(err) })
+    )
+  } catch {
     // Silent fail to ensure app stability
   }
 }
@@ -98,7 +101,7 @@ async function generateWithFallback(query: string, contextString: string) {
 
   for (const modelName of modelNames) {
     try {
-      console.log(`[ORACLE] Attempting generation with ${modelName}...`)
+      logger.info('Oracle attempting model', { model: modelName })
       const model = genAI.getGenerativeModel({
         model: modelName,
         systemInstruction: `You are "The Oracle," a snarky, data-driven RPS league analyst.
@@ -111,7 +114,7 @@ async function generateWithFallback(query: string, contextString: string) {
         1. ROLE & BOUNDARIES:
         You ONLY analyze the RPS league. If the prompt is unrelated, refuse with a short dismissive response and redirect to league-related queries.
 
-        2. DEFINITIONS — CRITICAL, NEVER MIX THESE:
+        2. DEFINITIONS - CRITICAL, NEVER MIX THESE:
         - "PREDICTORS" (<predictor_leaderboard>): users who BET points against the house. House edge applies to THEM only.
         - "PLAYERS" (<top_players_by_wins>): competitors who physically play RPS matches. They have NO relationship to betting, volume, or house edge.
         - NEVER apply betting/house/volume language to PLAYERS.
@@ -133,7 +136,7 @@ async function generateWithFallback(query: string, contextString: string) {
         Sound like a competitive analyst reviewing performance.
 
         7. CONSTRAINTS:
-        Maximum 2 sentences. Hard stop after the second sentence — do not continue. No emojis. No generic advice.
+        Maximum 2 sentences. Hard stop after the second sentence - do not continue. No emojis. No generic advice.
         
         8. SOURCE TAGGING: 
         Always end the response with exactly one source tag from this list based on the primary data used: [SOURCE: league_telemetry], [SOURCE: predictor_leaderboard], [SOURCE: active_match_history], [SOURCE: flash_event_stats].`
@@ -141,7 +144,10 @@ async function generateWithFallback(query: string, contextString: string) {
       const result = await model.generateContent(query)
       return result.response.text()
     } catch (err: any) {
-      console.warn(`[ORACLE] Model ${modelName} failed/busy:`, err.message)
+      logger.warn('Oracle model failed', {
+        model: modelName,
+        error: err.message
+      })
       if (err.message.includes('503') || err.message.includes('429')) continue
       throw err
     }
@@ -156,7 +162,7 @@ router.post('/', async (req: Request, res: Response) => {
       'anonymous') as string
     const now = Date.now()
 
-    // Rate Limiting Logic
+    // Rate limiting logic
     const userRate = rateLimitMap.get(ip) || {
       count: 0,
       resetTime: now + 60000
@@ -180,12 +186,11 @@ router.post('/', async (req: Request, res: Response) => {
 
     const normalizedQuery = query.toLowerCase().trim()
 
-    if (query.length > 500) {
+    if (query.length > 500)
       return res
         .status(400)
         .json({ error: 'The Oracle does not accept essays.' })
-    }
-    
+
     const cached = queryCache.get(normalizedQuery)
     if (cached && now - cached.timestamp < CACHE_TTL) {
       return res.json({ result: cached.result, cached: true })
@@ -199,7 +204,12 @@ router.post('/', async (req: Request, res: Response) => {
       topPlayersRes,
       flashStatsRes
     ] = await Promise.all([
-      getLatestMatches(1, 30).catch(() => ({ matches: [] })),
+      getLatestMatches(1, 30).catch((err) => {
+        logger.warn('Oracle: getLatestMatches failed, using empty fallback', {
+          error: String(err)
+        })
+        return { matches: [] }
+      }),
       pool.query(`
         SELECT 
           COUNT(*)::text as total_count, 
@@ -250,7 +260,7 @@ router.post('/', async (req: Request, res: Response) => {
       moves: `${m.playerA.played} vs ${m.playerB.played}`
     }))
 
-    // Construct Context with explicit XML tags for Gemini
+    // Construct context with explicit XML tags for Gemini
     const context = `
     <league_telemetry>Total Matches: ${actualMatches}, Total Prediction Volume: ${stats.total_volume}, House Edge: ${houseEdge}%</league_telemetry>
     <predictor_leaderboard>${JSON.stringify(topPredictorsRes.rows)}</predictor_leaderboard>
@@ -261,7 +271,6 @@ router.post('/', async (req: Request, res: Response) => {
 
     const responseText = await generateWithFallback(query, context)
 
-    // Discord Webhook
     logToDiscord(query, ip, responseText)
 
     const sourceMatch = responseText.match(/\[SOURCE:\s*(.*?)\]/)
@@ -278,7 +287,7 @@ router.post('/', async (req: Request, res: Response) => {
     queryCache.set(normalizedQuery, { result: cleanText, timestamp: now })
     res.json({ result: cleanText, source, cached: false })
   } catch (err: any) {
-    console.error('--- ORACLE CRITICAL ERROR ---', err.message)
+    logger.error('Oracle critical error', err, { query: req.body?.query })
     res
       .status(500)
       .json({ error: 'The Oracle is currently blinded by the stars.' })

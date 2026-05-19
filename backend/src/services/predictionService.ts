@@ -5,6 +5,7 @@ import {
   consumeFlashBetForUser,
   tryTriggerFlashEventForUser
 } from './flashEventService.js'
+import { logger } from '../utils/logger.js'
 
 const POINTS_FLOOR = 100000n
 
@@ -23,40 +24,50 @@ export const savePrediction = async (
   if (betAmount > balance)
     return { success: false, error: 'Bet amount exceeds balance' }
 
-  const nameCheck = await pool.query(
-    `SELECT user_id FROM users WHERE nickname = $1 AND user_id != $2`,
-    [nickname, userId]
-  )
+  try {
+    const nameCheck = await pool.query(
+      `SELECT user_id FROM users WHERE nickname = $1 AND user_id != $2`,
+      [nickname, userId]
+    )
 
-  if (nameCheck.rows.length > 0) {
-    return { success: false, error: 'NICKNAME ALREADY TAKEN' }
+    if (nameCheck.rows.length > 0) {
+      return { success: false, error: 'NICKNAME ALREADY TAKEN' }
+    }
+
+    const matchRes = await pool.query(
+      `SELECT expires_at FROM matches WHERE game_id = $1`,
+      [gameId]
+    )
+    if (matchRes.rows.length === 0)
+      return { success: false, error: 'MATCH NOT FOUND' }
+    if (Date.now() > Number(matchRes.rows[0].expires_at))
+      return { success: false, error: 'BETTING WINDOW CLOSED' }
+
+    await pool.query(`UPDATE users SET nickname = $1 WHERE user_id = $2`, [
+      nickname,
+      userId
+    ])
+
+    const insertResult = await pool.query(
+      `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (user_id, game_id) DO NOTHING`,
+      [userId, gameId, pick, betAmount.toString(), Date.now()]
+    )
+
+    if (insertResult.rowCount === 0)
+      return { success: false, error: 'BET ALREADY PLACED' }
+
+    return { success: true }
+  } catch (err) {
+    logger.errorWithPoints('savePrediction failed', err, {
+      userId,
+      gameId,
+      points: balance,
+      betAmount
+    })
+    return { success: false, error: 'Internal error' }
   }
-
-  const matchRes = await pool.query(
-    `SELECT expires_at FROM matches WHERE game_id = $1`,
-    [gameId]
-  )
-  if (matchRes.rows.length === 0)
-    return { success: false, error: 'MATCH NOT FOUND' }
-  if (Date.now() > Number(matchRes.rows[0].expires_at))
-    return { success: false, error: 'BETTING WINDOW CLOSED' }
-
-  await pool.query(`UPDATE users SET nickname = $1 WHERE user_id = $2`, [
-    nickname,
-    userId
-  ])
-
-  const insertResult = await pool.query(
-    `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
-      VALUES ($1, $2, $3, $4, $5)
-      ON CONFLICT (user_id, game_id) DO NOTHING`,
-    [userId, gameId, pick, betAmount.toString(), Date.now()]
-  )
-
-  if (insertResult.rowCount === 0)
-    return { success: false, error: 'BET ALREADY PLACED' }
-
-  return { success: true }
 }
 
 // 40% chance of a bonus. Tier determines the multiplier range applied to the win amount.
@@ -120,171 +131,189 @@ export const resolvePrediction = async (
   winnerName: string,
   broadcast: (event: string, data: string) => void
 ): Promise<void> => {
-  // JOIN fetches balance and bet count in one query to avoid N+1 calls per bettor
-  const predictions = await pool.query(
-    `SELECT
-      p.*,
-      u.nickname,
-      u.points AS current_points,
-      u.bonus_pity_count,
-      u.current_win_streak,
-      (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) AS total_bets
-      FROM predictions p
-      JOIN users u ON p.user_id = u.user_id
-      WHERE p.game_id = $1 AND p.result IS NULL`,
-    [gameId]
-  )
+  let predictions
+  try {
+    // JOIN fetches balance and bet count in one query to avoid N+1 calls per bettor
+    predictions = await pool.query(
+      `SELECT
+        p.*,
+        u.nickname,
+        u.points AS current_points,
+        u.bonus_pity_count,
+        u.current_win_streak,
+        (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) AS total_bets
+        FROM predictions p
+        JOIN users u ON p.user_id = u.user_id
+        WHERE p.game_id = $1 AND p.result IS NULL`,
+      [gameId]
+    )
+  } catch (err) {
+    logger.error('resolvePrediction: failed to fetch predictions', err, {
+      gameId
+    })
+    return
+  }
 
   for (const row of predictions.rows) {
-    const flashEvent = getFlashEventForUser(row.user_id)
-    const flashEventType = flashEvent?.type ?? null
+    try {
+      const flashEvent = getFlashEventForUser(row.user_id)
+      const flashEventType = flashEvent?.type ?? null
 
-    const flashActive = !!flashEvent
-    const result = flashActive
-      ? 'WIN'
-      : row.pick === winnerName
+      const flashActive = !!flashEvent
+      const result = flashActive
         ? 'WIN'
-        : 'LOSE'
-    const isWin = result === 'WIN'
+        : row.pick === winnerName
+          ? 'WIN'
+          : 'LOSE'
+      const isWin = result === 'WIN'
 
-    const currentPoints = BigInt(row.current_points)
-    const bet = BigInt(row.bet_amount)
-    const totalBets = Number(row.total_bets)
-    const currentPity = Number(row.bonus_pity_count)
+      const currentPoints = BigInt(row.current_points)
+      const bet = BigInt(row.bet_amount)
+      const totalBets = Number(row.total_bets)
+      const currentPity = Number(row.bonus_pity_count)
 
-    const isNaturalPityHit = currentPity >= 3
+      const isNaturalPityHit = currentPity >= 3
 
-    const bonus = rollBonus(
-      isWin,
-      totalBets <= 3 ? 3 : currentPity,
-      currentPoints,
-      flashEventType
-    )
-
-    const effectiveMult = bonus
-      ? BigInt(Math.floor(bonus.multiplier * 100))
-      : 0n
-
-    const baseChange = isWin ? bet : bet / 2n
-
-    let gainLoss: bigint
-
-    if (isWin) {
-      gainLoss = bonus ? (baseChange * effectiveMult) / 100n : baseChange
-    } else {
-      const actualLoss = bonus
-        ? (baseChange * effectiveMult) / 100n
-        : baseChange
-      const provisionalPoints = currentPoints - actualLoss
-      gainLoss =
-        provisionalPoints < POINTS_FLOOR
-          ? POINTS_FLOOR - currentPoints
-          : -actualLoss
-    }
-
-    const bonusDisplayAmount = bonus
-      ? isWin
-        ? gainLoss - baseChange
-        : baseChange - -gainLoss
-      : 0n
-
-    const streakAfter = isWin ? Number(row.current_win_streak) + 1 : 0
-    const streakMult =
-      streakAfter >= 5
-        ? 10n
-        : streakAfter >= 4
-          ? 6n
-          : streakAfter >= 3
-            ? 3n
-            : 1n
-
-    if (isWin && streakMult > 1n) {
-      gainLoss = gainLoss * streakMult
-    }
-
-    const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
-
-    if (isWin && flashEvent) {
-      const effectiveFlashMult = BigInt(Math.floor(flashMult * 100))
-      gainLoss = (gainLoss * effectiveFlashMult) / 100n
-      consumeFlashBetForUser(row.user_id)
-    }
-
-    await pool.query(
-      `UPDATE predictions 
-        SET result = $1, 
-          gain_loss = $2,
-          bonus_tier = $3,
-          bonus_multiplier = $4,
-          flash_event_type = $7,
-          flash_multiplier = $8
-        WHERE user_id = $5 AND game_id = $6`,
-      [
-        result,
-        gainLoss.toString(),
-        bonus ? bonus.tier : null,
-        bonus ? Number(effectiveMult) : 0,
-        row.user_id,
-        row.game_id,
-        flashEventType,
-        flashMult
-      ]
-    )
-
-    await pool.query(
-      `UPDATE users
-    SET points               = points + $1,
-        peak_points          = GREATEST(peak_points, points + $1),
-        daily_peak           = GREATEST(daily_peak,  points + $1),
-        weekly_peak          = GREATEST(weekly_peak, points + $1),
-        bonus_pity_count     = $3,
-        total_volume         = total_volume + $4,
-        biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
-        biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
-        current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
-        max_win_streak       = CASE 
-                                  WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
-                                  THEN current_win_streak + 1 
-                                  ELSE max_win_streak 
-                                END,
-        total_pities_earned  = total_pities_earned + $6,
-        total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
-    WHERE user_id = $2`,
-      [
-        gainLoss.toString(),
-        row.user_id,
-        bonus ? 0 : currentPity + 1,
-        bet.toString(),
-        result,
-        isNaturalPityHit ? 1 : 0,
+      const bonus = rollBonus(
+        isWin,
+        totalBets <= 3 ? 3 : currentPity,
+        currentPoints,
         flashEventType
-      ]
-    )
+      )
 
-    broadcast(
-      'prediction_result',
-      JSON.stringify({
+      const effectiveMult = bonus
+        ? BigInt(Math.floor(bonus.multiplier * 100))
+        : 0n
+
+      const baseChange = isWin ? bet : bet / 2n
+
+      let gainLoss: bigint
+
+      if (isWin) {
+        gainLoss = bonus ? (baseChange * effectiveMult) / 100n : baseChange
+      } else {
+        const actualLoss = bonus
+          ? (baseChange * effectiveMult) / 100n
+          : baseChange
+        const provisionalPoints = currentPoints - actualLoss
+        gainLoss =
+          provisionalPoints < POINTS_FLOOR
+            ? POINTS_FLOOR - currentPoints
+            : -actualLoss
+      }
+
+      const bonusDisplayAmount = bonus
+        ? isWin
+          ? gainLoss - baseChange
+          : baseChange - -gainLoss
+        : 0n
+
+      const streakAfter = isWin ? Number(row.current_win_streak) + 1 : 0
+      const streakMult =
+        streakAfter >= 5
+          ? 10n
+          : streakAfter >= 4
+            ? 6n
+            : streakAfter >= 3
+              ? 3n
+              : 1n
+
+      if (isWin && streakMult > 1n) {
+        gainLoss = gainLoss * streakMult
+      }
+
+      const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
+
+      if (isWin && flashEvent) {
+        const effectiveFlashMult = BigInt(Math.floor(flashMult * 100))
+        gainLoss = (gainLoss * effectiveFlashMult) / 100n
+        consumeFlashBetForUser(row.user_id)
+      }
+
+      await pool.query(
+        `UPDATE predictions 
+          SET result = $1, 
+            gain_loss = $2,
+            bonus_tier = $3,
+            bonus_multiplier = $4,
+            flash_event_type = $7,
+            flash_multiplier = $8
+          WHERE user_id = $5 AND game_id = $6`,
+        [
+          result,
+          gainLoss.toString(),
+          bonus ? bonus.tier : null,
+          bonus ? Number(effectiveMult) : 0,
+          row.user_id,
+          row.game_id,
+          flashEventType,
+          flashMult
+        ]
+      )
+
+      await pool.query(
+        `UPDATE users
+      SET points               = points + $1,
+          peak_points          = GREATEST(peak_points, points + $1),
+          daily_peak           = GREATEST(daily_peak,  points + $1),
+          weekly_peak          = GREATEST(weekly_peak, points + $1),
+          bonus_pity_count     = $3,
+          total_volume         = total_volume + $4,
+          biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
+          biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
+          current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
+          max_win_streak       = CASE 
+                                    WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
+                                    THEN current_win_streak + 1 
+                                    ELSE max_win_streak 
+                                  END,
+          total_pities_earned  = total_pities_earned + $6,
+          total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
+      WHERE user_id = $2`,
+        [
+          gainLoss.toString(),
+          row.user_id,
+          bonus ? 0 : currentPity + 1,
+          bet.toString(),
+          result,
+          isNaturalPityHit ? 1 : 0,
+          flashEventType
+        ]
+      )
+
+      broadcast(
+        'prediction_result',
+        JSON.stringify({
+          userId: row.user_id,
+          nickname: row.nickname,
+          result,
+          gameId,
+          amount: gainLoss > 0n ? gainLoss.toString() : (-gainLoss).toString(),
+          bonus: bonus
+            ? {
+                amount:
+                  bonusDisplayAmount > 0n ? bonusDisplayAmount.toString() : '0',
+                tier: bonus.tier,
+                visualMultiplier: Number(effectiveMult)
+              }
+            : null,
+          wasAllIn: bet === currentPoints,
+          streakAfter,
+          streakMult: Number(streakMult),
+          flashEventType,
+          flashMult
+        })
+      )
+      tryTriggerFlashEventForUser(row.user_id, broadcast)
+    } catch (err) {
+      logger.errorWithPoints('resolvePrediction: failed for user', err, {
         userId: row.user_id,
-        nickname: row.nickname,
-        result,
         gameId,
-        amount: gainLoss > 0n ? gainLoss.toString() : (-gainLoss).toString(),
-        bonus: bonus
-          ? {
-              amount:
-                bonusDisplayAmount > 0n ? bonusDisplayAmount.toString() : '0',
-              tier: bonus.tier,
-              visualMultiplier: Number(effectiveMult)
-            }
-          : null,
-        wasAllIn: bet === currentPoints,
-        streakAfter,
-        streakMult: Number(streakMult),
-        flashEventType,
-        flashMult
+        points: BigInt(row.current_points),
+        betAmount: BigInt(row.bet_amount)
       })
-    )
-    tryTriggerFlashEventForUser(row.user_id, broadcast)
+      // continue loop - one user failing shouldn't block others
+    }
   }
 }
 
@@ -419,6 +448,7 @@ export const getPaginatedUserPredictions = async (
 
   return { matches, predictions, total, hasMore: offset + limit < total }
 }
+
 export const getUserStats = async (userId: string, shortId: string) => {
   // Ensure the user exists and has their shortId synced before fetching stats
   // This handles the "creation" side using the new 2-argument signature
@@ -522,60 +552,4 @@ export const getGlobalBettingStats = async () => {
     total_volume: row.total_volume.toString(),
     winning_bets: Number(row.winning_bets)
   }
-}
-
-export const getUserBiggestWins = async (userId: string, limit = 5) => {
-  const result = await pool.query(
-    `SELECT 
-      p.game_id AS "gameId",
-      p.gain_loss AS "gainLoss",
-      p.bet_amount AS "betAmount",
-      p.bonus_tier AS "bonusTier",
-      p.bonus_multiplier AS "bonusMultiplier",
-      p.created_at AS "createdAt",
-      m.player_a_name, m.player_b_name
-    FROM predictions p
-    LEFT JOIN matches m ON p.game_id = m.game_id
-    WHERE p.user_id = $1 AND p.result = 'WIN'
-    ORDER BY p.gain_loss DESC
-    LIMIT $2`,
-    [userId, limit]
-  )
-  return result.rows.map((row) => ({
-    gameId: row.gameId,
-    gainLoss: row.gainLoss.toString(),
-    betAmount: row.betAmount.toString(),
-    bonusTier: row.bonusTier,
-    bonusMultiplier: Number(row.bonusMultiplier),
-    createdAt: Number(row.createdAt),
-    players: `${row.player_a_name} vs ${row.player_b_name}`
-  }))
-}
-
-export const getUserBiggestMultipliers = async (userId: string, limit = 5) => {
-  const result = await pool.query(
-    `SELECT 
-      p.game_id AS "gameId",
-      p.gain_loss AS "gainLoss",
-      p.bet_amount AS "betAmount",
-      p.bonus_tier AS "bonusTier",
-      p.bonus_multiplier AS "bonusMultiplier",
-      p.created_at AS "createdAt",
-      m.player_a_name, m.player_b_name
-    FROM predictions p
-    LEFT JOIN matches m ON p.game_id = m.game_id
-    WHERE p.user_id = $1 AND p.bonus_multiplier > 0
-    ORDER BY (p.bonus_multiplier * GREATEST(p.flash_multiplier, 1)) DESC
-    LIMIT $2`,
-    [userId, limit]
-  )
-  return result.rows.map((row) => ({
-    gameId: row.gameId,
-    gainLoss: row.gainLoss.toString(),
-    betAmount: row.betAmount.toString(),
-    bonusTier: row.bonusTier,
-    bonusMultiplier: Number(row.bonusMultiplier),
-    createdAt: Number(row.createdAt),
-    players: `${row.player_a_name} vs ${row.player_b_name}`
-  }))
 }

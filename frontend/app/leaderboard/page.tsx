@@ -11,6 +11,7 @@ import { formatPoints, getAmountColor } from '@/lib/format'
 import Link from 'next/link'
 import { LeaderboardEntry } from '@/types/rps'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
+import { logger } from '@/lib/logger'
 
 type Tab = 'daily' | 'weekly' | 'alltime'
 type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
@@ -79,7 +80,11 @@ function LeaderboardContent() {
     try {
       setData(await fetchUnifiedLeaderboard(t, s, d))
     } catch (err) {
-      console.error(err)
+      logger.error(
+        'Failed to load leaderboard',
+        err instanceof Error ? err : undefined,
+        { tab: t, sort: s, dir: d }
+      )
     } finally {
       setIsLoading(false)
     }
@@ -257,7 +262,7 @@ function LeaderboardContent() {
                               />
                             </div>
 
-                            {/* Mobile stats grid — hidden at 600px+ where the table columns take over */}
+                            {/* Mobile stats grid - hidden at 600px+ where the table columns take over */}
                             <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
                               <div className="flex gap-2 text-gray-400 font-bold uppercase tracking-wider">
                                 <div className="w-6">W</div>

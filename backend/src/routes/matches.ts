@@ -7,6 +7,7 @@ import {
   getPlayerStats
 } from '../services/matchService.js'
 import { getActivePendingMatch } from '../utils/matchGenerator.js'
+import { logger } from '../utils/logger.js'
 
 const router = Router()
 
@@ -24,6 +25,10 @@ router.get('/', async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 20
     res.json(await getLatestMatches(page, limit))
   } catch (err) {
+    logger.error('GET /matches failed', err, {
+      page: req.query.page,
+      limit: req.query.limit
+    })
     res.status(500).json({ error: 'Failed to fetch matches' })
   }
 })
@@ -40,6 +45,7 @@ router.get('/by-date', async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 20
     res.json(await getMatchesByDate(date, page, limit))
   } catch (err) {
+    logger.error('GET /matches/by-date failed', err, { date: req.query.date })
     res.status(500).json({ error: 'Failed to fetch matches by date' })
   }
 })
@@ -49,6 +55,7 @@ router.get('/players', async (req, res) => {
   try {
     res.json(await getAllPlayerNames())
   } catch (err) {
+    logger.error('GET /matches/players failed', err)
     res.status(500).json({ error: 'Failed to fetch players' })
   }
 })
@@ -63,6 +70,7 @@ router.get('/by-player', async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 20
     res.json(await getMatchesByPlayer(name, page, limit))
   } catch (err) {
+    logger.error('GET /matches/by-player failed', err, { name: req.query.name })
     res.status(500).json({ error: 'Failed to fetch matches by player' })
   }
 })
@@ -73,6 +81,9 @@ router.get('/players/:name/stats', async (req, res) => {
     const name = decodeURIComponent(req.params.name)
     res.json(await getPlayerStats(name))
   } catch (err) {
+    logger.error('GET /matches/players/:name/stats failed', err, {
+      name: req.params.name
+    })
     res.status(500).json({ error: 'Failed to fetch player stats' })
   }
 })

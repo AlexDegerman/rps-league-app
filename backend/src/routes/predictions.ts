@@ -1,14 +1,19 @@
 import { Router } from 'express'
-import { getPaginatedUserPredictions, getUserBiggestMultipliers, getUserBiggestWins, getUserStats, savePrediction } from '../services/predictionService.js'
+import {
+  getPaginatedUserPredictions,
+  getUserStats,
+  savePrediction
+} from '../services/predictionService.js'
 import pool from '../utils/db.js'
+import { logger } from '../utils/logger.js'
 
 const router = Router()
 
 // POST /api/predictions
 router.post('/', async (req, res) => {
   try {
-    const { userId, gameId, pick, betAmount, nickname, shortId } = req.body 
-    
+    const { userId, gameId, pick, betAmount, nickname, shortId } = req.body
+
     if (!userId || !gameId || !pick || !betAmount || !nickname || !shortId)
       return res.status(400).json({
         error: 'userId, gameId, pick, betAmount, nickname and shortId required'
@@ -25,7 +30,7 @@ router.post('/', async (req, res) => {
     if (!result.success) return res.status(400).json({ error: result.error })
     res.json({ success: true })
   } catch (err) {
-    console.error('Prediction error:', err)
+    logger.error('POST /predictions failed', err, { body: req.body })
     res.status(500).json({ error: 'Failed to save prediction' })
   }
 })
@@ -98,7 +103,7 @@ router.get('/stats', async (req, res) => {
       )
     ])
 
-    const stats = {
+    res.json({
       summary: {
         users: Number(users.rows[0].count),
         predictions: Number(predictions.rows[0].count),
@@ -126,22 +131,20 @@ router.get('/stats', async (req, res) => {
           value: topStreakUser.rows[0]?.max_win_streak
         }
       }
-    }
-
-    res.json(stats)
+    })
   } catch (err) {
+    logger.error('GET /stats failed', err)
     res.status(500).json({ error: 'Failed to fetch stats' })
   }
 })
 
-// GET api/stats/monthly?year=<year>&month=<month>
+// GET /api/stats/monthly?year=<year>&month=<month>
 router.get('/stats/monthly', async (req, res, next) => {
   try {
     const { year, month } = req.query
 
-    if (!year || !month) {
+    if (!year || !month)
       return res.status(400).json({ error: 'Year and month are required.' })
-    }
 
     const startTimestamp = new Date(
       Date.UTC(Number(year), Number(month) - 1, 1)
@@ -160,7 +163,6 @@ router.get('/stats/monthly', async (req, res, next) => {
       monthlyHighRoller,
       monthlyTopWinRate
     ] = await Promise.all([
-      // Summary Stats
       pool.query(
         `SELECT COUNT(*) FROM users WHERE joined_date >= $1 AND joined_date < $2`,
         [startTimestamp, endTimestamp]
@@ -173,11 +175,8 @@ router.get('/stats/monthly', async (req, res, next) => {
         `SELECT SUM(bet_amount) as volume FROM predictions WHERE created_at >= $1 AND created_at < $2`,
         [startTimestamp, endTimestamp]
       ),
-
-      // 1.Biggest Single Win
       pool.query(
-        `
-        SELECT u.nickname, u.short_id, p.gain_loss 
+        `SELECT u.nickname, u.short_id, p.gain_loss 
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
         WHERE p.created_at >= $1 AND p.created_at < $2
@@ -185,21 +184,15 @@ router.get('/stats/monthly', async (req, res, next) => {
         ORDER BY p.gain_loss DESC LIMIT 1`,
         [startTimestamp, endTimestamp]
       ),
-
-      // Highest Streak among active players this month
       pool.query(
-        `
-        SELECT u.nickname, u.short_id, u.max_win_streak 
+        `SELECT u.nickname, u.short_id, u.max_win_streak 
         FROM users u
         WHERE u.user_id IN (SELECT DISTINCT user_id FROM predictions WHERE created_at >= $1 AND created_at < $2)
         ORDER BY u.max_win_streak DESC LIMIT 1`,
         [startTimestamp, endTimestamp]
       ),
-
-      // Most predictions made
       pool.query(
-        `
-        SELECT u.nickname, u.short_id, COUNT(p.id) as count
+        `SELECT u.nickname, u.short_id, COUNT(p.id) as count
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
         WHERE p.created_at >= $1 AND p.created_at < $2
@@ -207,11 +200,8 @@ router.get('/stats/monthly', async (req, res, next) => {
         ORDER BY count DESC LIMIT 1`,
         [startTimestamp, endTimestamp]
       ),
-
-      // Highest total bet volume
       pool.query(
-        `
-        SELECT u.nickname, u.short_id, SUM(p.bet_amount) as total_bet
+        `SELECT u.nickname, u.short_id, SUM(p.bet_amount) as total_bet
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
         WHERE p.created_at >= $1 AND p.created_at < $2
@@ -219,11 +209,8 @@ router.get('/stats/monthly', async (req, res, next) => {
         ORDER BY total_bet DESC LIMIT 1`,
         [startTimestamp, endTimestamp]
       ),
-
-      // Best Win Rate - min 10 bets to qualify
       pool.query(
-        `
-        SELECT u.nickname, u.short_id, 
+        `SELECT u.nickname, u.short_id, 
         ROUND((COUNT(CASE WHEN LOWER(p.result) = 'win' THEN 1 END)::numeric / COUNT(p.id)) * 100, 1) as win_rate
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
@@ -288,6 +275,10 @@ router.get('/stats/monthly', async (req, res, next) => {
       }
     })
   } catch (err) {
+    logger.error('GET /stats/monthly failed', err, {
+      year: req.query.year,
+      month: req.query.month
+    })
     next(err)
   }
 })
@@ -301,27 +292,23 @@ router.get('/stats/daily', async (req, res) => {
 
     const [volumeRes, mvpRes] = await Promise.all([
       pool.query(
-        `
-        SELECT
+        `SELECT
           COALESCE(SUM(bet_amount), 0) AS total_volume,
           COALESCE(SUM(gain_loss), 0) AS daily_payout,
           COUNT(*) AS total_bets,
           COUNT(*) FILTER (WHERE result = 'WIN') AS wins
         FROM predictions
-        WHERE created_at >= $1
-      `,
+        WHERE created_at >= $1`,
         [todayStartMs]
       ),
       pool.query(
-        `
-        SELECT u.nickname, SUM(p.gain_loss) AS total_gain
+        `SELECT u.nickname, SUM(p.gain_loss) AS total_gain
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
         WHERE p.created_at >= $1 AND p.gain_loss IS NOT NULL
         GROUP BY u.nickname
         ORDER BY total_gain DESC
-        LIMIT 1
-      `,
+        LIMIT 1`,
         [todayStartMs]
       )
     ])
@@ -343,6 +330,7 @@ router.get('/stats/daily', async (req, res) => {
         : null
     })
   } catch (err) {
+    logger.error('GET /stats/daily failed', err)
     res.status(500).json({ error: 'Failed to fetch daily stats' })
   }
 })
@@ -357,6 +345,7 @@ router.post('/reset/daily', async (req, res) => {
     await pool.query(`UPDATE users SET daily_peak = points`)
     res.json({ success: true, reset: 'daily' })
   } catch (err) {
+    logger.error('POST /reset/daily failed', err)
     res.status(500).json({ error: 'Failed to reset daily peak' })
   }
 })
@@ -371,6 +360,7 @@ router.post('/reset/weekly', async (req, res) => {
     await pool.query(`UPDATE users SET weekly_peak = points`)
     res.json({ success: true, reset: 'weekly' })
   } catch (err) {
+    logger.error('POST /reset/weekly failed', err)
     res.status(500).json({ error: 'Failed to reset weekly peak' })
   }
 })
@@ -380,16 +370,17 @@ router.get('/:userId/stats', async (req, res) => {
   try {
     const { userId } = req.params
     const { shortId } = req.query
-
     const stats = await getUserStats(userId, shortId as string)
     res.json(stats)
   } catch (err) {
-    console.error('Stats fetch error:', err)
+    logger.error('GET /:userId/stats failed', err, {
+      userId: req.params.userId
+    })
     res.status(500).json({ error: 'Failed to fetch user stats' })
   }
 })
 
-// GET /api/predictions/:userId/history
+// GET /api/predictions/user/:userId/history
 router.get('/user/:userId/history', async (req, res) => {
   try {
     const { userId } = req.params
@@ -400,6 +391,9 @@ router.get('/user/:userId/history', async (req, res) => {
       await getPaginatedUserPredictions(userId, page, limit, sort as any)
     )
   } catch (err) {
+    logger.error('GET /user/:userId/history failed', err, {
+      userId: req.params.userId
+    })
     res.status(500).json({ error: 'Failed to fetch bet history' })
   }
 })

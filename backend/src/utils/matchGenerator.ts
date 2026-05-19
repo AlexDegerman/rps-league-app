@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { playerNames } from './playerNames.js'
 import pool from './db.js'
 import type { Match, Move } from '../types/rps.js'
+import { logger } from '../utils/logger.js'
 
 export interface PendingMatch {
   gameId: string
@@ -47,45 +48,63 @@ const generateMatch = (
 const saveMatch = async (
   match: Match & { expiresAt: number }
 ): Promise<void> => {
-  await pool.query(
-    `INSERT INTO matches (game_id, type, time, expires_at, player_a_name, player_a_played,      player_b_name, player_b_played)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      ON CONFLICT (game_id) DO NOTHING`,
-    [
-      match.gameId,
-      match.type,
-      match.time,
-      match.expiresAt,
-      match.playerA.name,
-      match.playerA.played,
-      match.playerB.name,
-      match.playerB.played
-    ]
-  )
+  try {
+    await pool.query(
+      `INSERT INTO matches (game_id, type, time, expires_at, player_a_name, player_a_played, player_b_name, player_b_played)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (game_id) DO NOTHING`,
+      [
+        match.gameId,
+        match.type,
+        match.time,
+        match.expiresAt,
+        match.playerA.name,
+        match.playerA.played,
+        match.playerB.name,
+        match.playerB.played
+      ]
+    )
+  } catch (err) {
+    logger.error('saveMatch failed', err, { gameId: match.gameId })
+    throw err // re-throw - if match isn't saved, betting window is invalid
+  }
 }
 
 export const startMatchGenerator = (
   onPending: (pendingMatch: PendingMatch) => void,
   onResult: (match: Match) => void,
-  broadcast: (event: string, data: string) => void,
+  broadcast: (event: string, data: string) => void, // passed to resolvePrediction via onResult for flash event SSE
   intervalMs = 5000
 ): void => {
   setInterval(async () => {
     const BETTING_DURATION = 3000
     const startTime = Date.now()
-    const match = generateMatch(startTime, BETTING_DURATION)
-    await saveMatch(match)
-    const pendingMatch: PendingMatch = {
-      gameId: match.gameId,
-      time: match.time,
-      expiresAt: match.expiresAt,
-      playerA: match.playerA.name,
-      playerB: match.playerB.name
+
+    try {
+      const match = generateMatch(startTime, BETTING_DURATION)
+      await saveMatch(match)
+
+      const pendingMatch: PendingMatch = {
+        gameId: match.gameId,
+        time: match.time,
+        expiresAt: match.expiresAt,
+        playerA: match.playerA.name,
+        playerB: match.playerB.name
+      }
+
+      currentPendingMatch = pendingMatch
+      onPending(pendingMatch)
+
+      await new Promise((resolve) => setTimeout(resolve, BETTING_DURATION))
+
+      currentPendingMatch = null
+      onResult(match)
+    } catch (err) {
+      logger.error('matchGenerator: interval tick failed', err, {
+        tick: startTime
+      })
+      currentPendingMatch = null
+      // don't re-throw - interval must keep running
     }
-    currentPendingMatch = pendingMatch
-    onPending(pendingMatch)
-    await new Promise((resolve) => setTimeout(resolve, BETTING_DURATION))
-    currentPendingMatch = null
-    onResult(match)
   }, intervalMs)
 }

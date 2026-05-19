@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Match } from '@/types/rps'
+import { logger } from '@/lib/logger';
 
 interface UseInfiniteScrollProps {
   fetchFn: (page: number) => Promise<{ matches: Match[]; total: number } | null>
@@ -41,7 +42,7 @@ export const useInfiniteScroll = ({
         const loadedCount = targetPage * 20
         setHasMore(loadedCount < data.total)
       } catch (err) {
-        console.error('Failed to load matches:', err)
+        logger.warn('Failed to load matches', { error: String(err) })
       } finally {
         setIsLoading(false)
         setIsLoadingMore(false)
@@ -62,7 +63,7 @@ export const useInfiniteScroll = ({
     setHasMore(true)
   }, [])
 
-  // After initial load, check if the page is too short to trigger scroll events —
+  // After initial load, check if the page is too short to trigger scroll events -
   // if so, proactively fetch the next page to fill the viewport
   const checkIfMoreNeeded = useCallback(() => {
     if (isLoading || isLoadingMore || !hasMore || !enabled) return

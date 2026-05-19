@@ -43,7 +43,7 @@ const Header = () => {
     }`
 
   const menuRowItemClass = (href: string) =>
-    `px-3 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wider transition border ${
+    `px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition border text-center justify-center flex items-center min-w-[calc(50%-6px)] sm:min-w-[140px] flex-1 ${
       pathname === href
         ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
         : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
@@ -173,7 +173,7 @@ const Header = () => {
 
         {isOpen && (
           <nav
-            className={`min-[704px]:hidden mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-end gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${
+            className={`min-[704px]:hidden mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-center gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${
               modeKey ? `event-bg-${modeKey}` : ''
             }`}
           >
@@ -190,7 +190,7 @@ const Header = () => {
             <Link
               href="/search"
               onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/search')} min-[490px]:hidden`}
+              className={`${menuRowItemClass('/search')} min-[500px]:hidden`}
             >
               Search
             </Link>
@@ -198,7 +198,7 @@ const Header = () => {
             <Link
               href="/analysis"
               onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/analysis')} min-[560px]:hidden`}
+              className={`${menuRowItemClass('/analysis')} min-[580px]:hidden`}
             >
               Analysis
             </Link>

@@ -373,7 +373,7 @@ Open http://localhost:3000
 
 To maintain a professional live-service standard and close the loop between user experience and system logs:
 
-- **Unified Observability**: Integrated **Sentry** for full-stack error tracking and performance monitoring, specifically guarding against BigInt overflows and SSE heartbeat fatigue.
+- **Unified Observability**: Integrated Sentry for full-stack error tracking and performance monitoring across the entire stack, frontend React/Next.js and backend Express, specifically guarding against BigInt overflows and SSE connection failures. Structured logging captures SSE client lifecycle events (connect, disconnect, client count) and match resolution errors in real time.
 - **Context-Aware Feedback**: An in-app portal for bug reports and suggestions. Submissions automatically bundle game state (points, streak, active events) and environment metadata (route, viewport, browser).
 - **Trace-Link Debugging**: Manual feedback is linked directly to Sentry’s `associatedEventId`, allowing for instantaneous lookup of the exact line of code that failed during a reported user session.
 - **Visual Reporting**: Support for screenshot attachments via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop functionality.
@@ -403,9 +403,10 @@ This ensures consistent leaderboard accuracy and stable gameplay across supporte
 
 ## ⚠️ Disclaimer
 
-This project is a non-commercial portfolio piece created for educational purposes.  
-All points are strictly virtual and have no real-world value.  
-No real-money gambling or payouts are offered.
+RPS League is a virtual points-based game experience.
+
+All points, multipliers, and rewards are purely cosmetic and hold no monetary value.  
+No real-money gambling, cash payouts, or withdrawable rewards are supported.
 
 ---
 

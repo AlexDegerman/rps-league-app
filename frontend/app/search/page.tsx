@@ -11,6 +11,7 @@ import {
 } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { logger } from '@/lib/logger'
 
 const TODAY = new Date().toISOString().split('T')[0]
 const FIRST_MATCH_DATE = '2026-02-16'
@@ -56,7 +57,9 @@ function SearchContent() {
   useEffect(() => {
     fetchPlayerNames()
       .then(setPlayerNames)
-      .catch((err) => console.error('Failed to load player names:', err))
+      .catch((err) =>
+        logger.warn('Failed to load player names', { error: String(err) })
+      )
   }, [])
 
   useEffect(() => {

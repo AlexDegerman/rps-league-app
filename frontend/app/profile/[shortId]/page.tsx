@@ -23,6 +23,7 @@ import BetHistory from '@/components/BetHistory'
 import { LinkedInBadge } from '@/components/badges/LinkedInBadge'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
 import { useUserStore } from '@/app/stores/userStore'
+import { logger } from '@/lib/logger'
 
 interface Ranks {
   daily: number | null
@@ -100,7 +101,7 @@ export default function ProfilePage() {
           setLinkedinInput(profileData.linkedinUrl ?? '')
         }
       } catch (err) {
-        console.error('Profile load error:', err)
+        logger.error('Failed to load profile', err instanceof Error ? err : undefined, { targetShortId })
         if (own) {
           setPoints('200000')
           const local = getOrCreateUser()
@@ -167,7 +168,8 @@ export default function ProfilePage() {
       await useUserStore.getState().initUser()
       const freshUser = getOrCreateUser()
       router.push(`/profile/${freshUser.shortId}`)
-    } catch {
+    } catch (err) {
+      logger.error('Profile recovery failed', err instanceof Error ? err : undefined)
       setRecoverError('Failed to recover profile')
     } finally {
       setRecoverLoading(false)
@@ -198,13 +200,18 @@ export default function ProfilePage() {
       const newUser = getOrCreateUser()
       try {
         await updateNickname(newUser.userId, newUser.nickname, newUser.shortId)
-      } catch {
-        console.error('Initial sync failed')
+      } catch (err) {
+        logger.warn('Initial nickname sync failed after reset', {
+          error: String(err)
+        })
       }
       await useUserStore.getState().initUser()
       window.location.href = `/profile/${newUser.shortId}`
     } catch (err) {
-      console.error(err)
+      logger.error(
+        'Failed to reset profile',
+        err instanceof Error ? err : undefined
+      )
       setResetError('Failed to reset profile. Please try again.')
     }
   }

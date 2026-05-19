@@ -4,6 +4,7 @@ import multer, { type FileFilterCallback } from 'multer'
 import * as Sentry from '@sentry/node'
 import pool from '../utils/db.js'
 import rateLimit from 'express-rate-limit'
+import { logger } from '../utils/logger.js'
 
 /**
  * CONFIGURATION
@@ -18,9 +19,7 @@ const API_BASE = process.env.API_BASE_URL || 'http://localhost:5000'
  * Ensures admin links are not broken in deployed environments.
  */
 if (!process.env.API_BASE_URL && process.env.NODE_ENV === 'production') {
-  console.warn(
-    '[FEEDBACK] WARNING: API_BASE_URL is missing. Admin links may break.'
-  )
+  logger.warn('API_BASE_URL is missing. Admin links may break.')
 }
 
 /**
@@ -75,6 +74,7 @@ const feedbackLimiter = rateLimit({
     res.status(429).json({ error: 'RATE_LIMITED' })
   }
 })
+
 const router = Router()
 
 /**
@@ -95,15 +95,11 @@ const maskIp = (ip: string): string => {
 
   // IPv4-mapped IPv6 (::ffff:127.0.0.1)
   const v4Match = ip.match(/(\d{1,3}\.\d{1,3})\.\d{1,3}\.\d{1,3}$/)
-  if (v4Match) {
-    return `${v4Match[1]}.x.x`
-  }
+  if (v4Match) return `${v4Match[1]}.x.x`
 
   // Generic IPv6 (keep first 2 blocks, mask rest)
   const parts = ip.split(':').filter(Boolean)
-  if (parts.length >= 2) {
-    return `${parts[0]}:${parts[1]}::x:x`
-  }
+  if (parts.length >= 2) return `${parts[0]}:${parts[1]}::x:x`
 
   return 'anonymous'
 }
@@ -119,7 +115,8 @@ async function isBanned(userId: string): Promise<boolean> {
       [userId]
     )
     return (result.rowCount ?? 0) > 0
-  } catch {
+  } catch (err) {
+    logger.error('isBanned check failed', err, { userId })
     return false
   }
 }
@@ -225,7 +222,6 @@ router.post(
       const blob = new Blob([new Uint8Array(multerReq.file.buffer)], {
         type: multerReq.file.mimetype
       })
-
       discordData.append(
         'file',
         blob,
@@ -241,13 +237,18 @@ router.post(
 
       if (!discordRes.ok) {
         const errorText = await discordRes.text()
-        console.error('[DISCORD ERROR]', discordRes.status, errorText)
+        logger.error('Discord webhook returned error', undefined, {
+          status: discordRes.status,
+          body: errorText,
+          userId,
+          category
+        })
         throw new Error('Discord dispatch failed')
       }
 
       res.json({ ok: true })
     } catch (err) {
-      console.error('[FEEDBACK] Error:', err)
+      logger.error('POST /feedback failed', err, { userId, category })
       res.status(500).json({ error: 'System busy' })
     }
   }
@@ -270,11 +271,13 @@ router.get('/ban/:userId', async (req: Request, res: Response) => {
       [userId]
     )
 
+    logger.info('User banned via admin endpoint', { userId })
+
     res.send(
       `<html><body style="font-family:monospace;text-align:center;padding:50px;"><h2>✅ User Banned</h2><p>${safeUserId}</p></body></html>`
     )
   } catch (err) {
-    console.error('[FEEDBACK] Ban failed:', err)
+    logger.error('GET /feedback/ban/:userId failed', err, { userId })
     res.status(500).send('DB Error')
   }
 })

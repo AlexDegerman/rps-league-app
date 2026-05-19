@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import pool from '../utils/db.js'
 import { getUserPoints } from '../services/userService.js'
+import { logger } from '../utils/logger.js'
 
 const router = Router()
 
@@ -29,7 +30,7 @@ router.post('/recover', async (req, res) => {
       points: user.points.toString()
     })
   } catch (err) {
-    console.error('Recovery error:', err)
+    logger.error('POST /users/recover failed', err)
     res.status(500).json({ error: 'Failed to recover profile' })
   }
 })
@@ -52,7 +53,7 @@ router.post('/update-nickname', async (req, res) => {
 
     res.json({ ok: true, nickname: result.rows[0].nickname })
   } catch (err) {
-    console.error('Update Nickname/UPSERT Error:', err)
+    logger.error('POST /users/update-nickname failed', err, { userId, shortId })
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -63,7 +64,7 @@ router.post('/update-linkedin', async (req, res) => {
     const { shortId, linkedinUrl, showLinkedinBadge } = req.body
     if (!shortId) return res.status(400).json({ error: 'shortId required' })
 
-    // Normalize URL — add https:// if missing protocol
+    // Normalize URL - add https:// if missing protocol
     let normalizedUrl = linkedinUrl?.trim() || null
     if (
       normalizedUrl &&
@@ -84,6 +85,9 @@ router.post('/update-linkedin', async (req, res) => {
     )
     res.json({ success: true })
   } catch (err) {
+    logger.error('POST /users/update-linkedin failed', err, {
+      shortId: req.body?.shortId
+    })
     res.status(500).json({ error: 'Failed to update LinkedIn' })
   }
 })
@@ -109,9 +113,8 @@ router.get('/profile/:shortId', async (req, res) => {
       [shortId]
     )
 
-    if (result.rows.length === 0) {
+    if (result.rows.length === 0)
       return res.status(404).json({ error: 'Profile not found' })
-    }
 
     const user = result.rows[0]
 
@@ -127,29 +130,45 @@ router.get('/profile/:shortId', async (req, res) => {
       showLinkedinBadge: user.show_linkedin_badge ?? true
     })
   } catch (err) {
-    console.error('Profile fetch error:', err)
+    logger.error('GET /users/profile/:shortId failed', err, {
+      shortId: req.params.shortId
+    })
     res.status(500).json({ error: 'Failed to fetch profile' })
   }
 })
 
 // GET /api/users/recovery/:userId
 router.get('/recovery/:userId', async (req, res) => {
-  const result = await pool.query(
-    `SELECT recovery_code FROM users WHERE user_id = $1`,
-    [req.params.userId]
-  )
-  if (result.rows.length === 0)
-    return res.status(404).json({ error: 'User not found' })
-  res.json({ recoveryCode: result.rows[0].recovery_code })
+  try {
+    const result = await pool.query(
+      `SELECT recovery_code FROM users WHERE user_id = $1`,
+      [req.params.userId]
+    )
+    if (result.rows.length === 0)
+      return res.status(404).json({ error: 'User not found' })
+    res.json({ recoveryCode: result.rows[0].recovery_code })
+  } catch (err) {
+    logger.error('GET /users/recovery/:userId failed', err, {
+      userId: req.params.userId
+    })
+    res.status(500).json({ error: 'Failed to fetch recovery code' })
+  }
 })
 
 // GET /api/users/check-name/:nickname
 router.get('/check-name/:nickname', async (req, res) => {
-  const result = await pool.query(
-    'SELECT user_id FROM users WHERE nickname = $1',
-    [req.params.nickname]
-  )
-  res.json({ available: result.rows.length === 0 })
+  try {
+    const result = await pool.query(
+      'SELECT user_id FROM users WHERE nickname = $1',
+      [req.params.nickname]
+    )
+    res.json({ available: result.rows.length === 0 })
+  } catch (err) {
+    logger.error('GET /users/check-name/:nickname failed', err, {
+      nickname: req.params.nickname
+    })
+    res.status(500).json({ error: 'Failed to check nickname' })
+  }
 })
 
 // GET /api/users/:userId/points
@@ -165,9 +184,13 @@ router.get('/:userId/points', async (req, res) => {
 
     if (result.rows.length === 0) {
       if (!shortId) return res.status(400).json({ error: 'shortId required' })
-      
-      const user = await getUserPoints(userId, shortId as string, nickname as string)
-      
+
+      const user = await getUserPoints(
+        userId,
+        shortId as string,
+        nickname as string
+      )
+
       return res.json({
         nickname: user.nickname ?? (nickname as string) ?? 'New Player',
         points: user.points.toString(),
@@ -189,7 +212,9 @@ router.get('/:userId/points', async (req, res) => {
       currentWinStreak: Number(row.current_win_streak ?? 0)
     })
   } catch (err) {
-    console.error('Points fetch error:', err)
+    logger.error('GET /users/:userId/points failed', err, {
+      userId: req.params.userId
+    })
     res.status(500).json({ error: 'Failed to fetch points' })
   }
 })

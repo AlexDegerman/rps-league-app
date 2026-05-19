@@ -7,7 +7,7 @@ const mockQuery = vi.mocked(pool.query)
 
 describe('Leaderboard Service', () => {
   it('ranks players by wins descending, then alphabetically on ties', async () => {
-    // Ant wins once, Zebra wins once — tied on wins, so alphabetical order applies
+    // Ant wins once, Zebra wins once - tied on wins, so alphabetical order applies
     mockQuery.mockResolvedValue(
       mockDbResponse([
         {

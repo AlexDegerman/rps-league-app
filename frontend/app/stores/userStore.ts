@@ -12,6 +12,7 @@ import {
   updateNickname,
   handleRecoverProfile
 } from '@/lib/api'
+import { logger } from '@/lib/logger'
 
 interface UserState {
   // Identity State
@@ -87,11 +88,9 @@ export const useUserStore = create<UserState>((set, get) => ({
 
   // Actions - Initialization
   initUser: async () => {
-    // 1. Load identity from localStorage library
     const user = getOrCreateUser()
     if (!isUserValid(user)) return
 
-    // 2. Sync store and Sentry context immediately
     set({
       userId: user.userId,
       shortId: user.shortId,
@@ -105,31 +104,32 @@ export const useUserStore = create<UserState>((set, get) => ({
     })
     Sentry.setTag('shortId', user.shortId)
 
-    // 3. Fetch fresh stats from API (Points, Peak, WinStreak)
     const data = await fetchUserPoints(
       user.userId,
       user.shortId,
       user.nickname
     ).catch((err) => {
-      console.error('Failed to fetch user points during init:', err)
-      Sentry.captureException(err, { tags: { section: 'initUser' } })
+      logger.error(
+        'Failed to fetch user points during init',
+        err instanceof Error ? err : undefined,
+        {
+          section: 'initUser'
+        }
+      )
       return null
     })
 
     if (!data) return
 
-    // 4. Update balance and peaks
     const newPoints = BigInt(data.points)
     const newPeak = BigInt(data.peakPoints)
     get().applyPointsUpdate(newPoints, newPeak)
 
-    // 5. Update display name if server has a different one
     if (data.nickname) {
       set({ displayNickname: data.nickname })
       Sentry.setContext('user', { username: data.nickname })
     }
 
-    // 6. Restore win streak progress
     const savedStreak = data.currentWinStreak ?? 0
     if (savedStreak > 0) {
       set({
@@ -153,9 +153,8 @@ export const useUserStore = create<UserState>((set, get) => ({
     let attempts = 0
     let isAvailable = false
 
-    // Try to find an available random name
     while (attempts < 10 && !isAvailable) {
-      newName = regenerateNickname() // Updates lib/localStorage
+      newName = regenerateNickname()
       attempts++
       try {
         const res = await fetch(
@@ -164,24 +163,24 @@ export const useUserStore = create<UserState>((set, get) => ({
         const data = await res.json()
         isAvailable = data.available
       } catch (err) {
-        console.warn(`Attempt ${attempts} to check name failed:`, err)
+        logger.warn(`Name check attempt ${attempts} failed`, {
+          error: String(err)
+        })
       }
     }
 
     if (!isAvailable) return null
 
     try {
-      // Sync name change to backend leaderboard
       await updateNickname(userId, newName, shortId)
       set({ displayNickname: newName })
-
-      // Update Sentry identity
       Sentry.setContext('user', { username: newName })
-
       return newName
     } catch (err) {
-      console.error('Failed to sync nickname:', err)
-      Sentry.captureException(err, { tags: { section: 'rerollNickname' } })
+      logger.error(
+        'Failed to sync nickname',
+        err instanceof Error ? err : undefined
+      )
       return null
     }
   },
@@ -191,44 +190,40 @@ export const useUserStore = create<UserState>((set, get) => ({
       const data = await handleRecoverProfile(code.trim())
       if (!data) return { success: false, error: 'Invalid recovery code' }
 
-      // 1. Update the "Disk" (localStorage)
       localStorage.setItem('rps_user_id', data.userId)
       localStorage.setItem('rps_short_id', data.shortId)
       if (data.nickname) localStorage.setItem('rps_nickname', data.nickname)
 
-      // 2. Clear memory cache to force fresh identity read
       clearUserCache()
-
-      // 3. Re-initialize the store and Sentry with the recovered data
       await get().initUser()
       return { success: true }
     } catch (err) {
-      console.error('Profile recovery failed:', err)
-      Sentry.captureException(err, { tags: { section: 'recoverProfile' } })
+      logger.error(
+        'Profile recovery failed',
+        err instanceof Error ? err : undefined
+      )
       return { success: false, error: 'Failed to recover profile' }
     }
   },
 
   resetProfile: async () => {
     try {
-      // 1. Wipe local identity completely
       resetUser()
       const newUser = getOrCreateUser()
 
-      // 2. Sync new starting identity to backend
       try {
         await updateNickname(newUser.userId, newUser.nickname, newUser.shortId)
       } catch (e) {
-        console.error('Initial reset sync failed:', e)
-        Sentry.captureException(e, { tags: { section: 'resetProfile_sync' } })
+        logger.warn('Initial reset sync failed', { error: String(e) })
       }
 
-      // 3. Refresh reactive state and Sentry back to starting values
       await get().initUser()
       return { success: true }
     } catch (err) {
-      console.error('Profile reset failed:', err)
-      Sentry.captureException(err, { tags: { section: 'resetProfile' } })
+      logger.error(
+        'Profile reset failed',
+        err instanceof Error ? err : undefined
+      )
       return { success: false, error: 'Failed to reset profile' }
     }
   },
@@ -237,7 +232,6 @@ export const useUserStore = create<UserState>((set, get) => ({
   applyPointsUpdate: (newPoints, newPeak) =>
     set((s) => {
       const isNewPeak = newPeak > s.peakPoints
-      // Handle bet safety: ensure bet isn't higher than new balance
       const newBet = s.autoAllIn
         ? newPoints
         : s.betAmount > newPoints

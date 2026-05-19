@@ -1,5 +1,6 @@
 import pool from '../utils/db.js'
 import { getWinner } from './matchService.js'
+import { logger } from '../utils/logger.js'
 import type { Match, Move, PlayerStats } from '../types/rps.js'
 
 const rowToMatch = (row: Record<string, unknown>): Match => ({
@@ -103,17 +104,21 @@ export const getHistoricalLeaderboard = async (
     GROUP BY name
     ORDER BY wins DESC, name ASC`
 
-  const result = await pool.query(query, values)
-
-  return result.rows.map((row) => ({
-    name: row.name as string,
-    wins: row.wins,
-    losses: row.losses,
-    winRate:
-      row.wins + row.losses > 0
-        ? Math.round((row.wins / (row.wins + row.losses)) * 100)
-        : 0
-  }))
+  try {
+    const result = await pool.query(query, values)
+    return result.rows.map((row) => ({
+      name: row.name as string,
+      wins: row.wins,
+      losses: row.losses,
+      winRate:
+        row.wins + row.losses > 0
+          ? Math.round((row.wins / (row.wins + row.losses)) * 100)
+          : 0
+    }))
+  } catch (err) {
+    logger.error('getHistoricalLeaderboard failed', err, { startDate, endDate })
+    throw err
+  }
 }
 
 // Delegates to buildLeaderboard rather than SQL aggregation, today's window
@@ -121,9 +126,15 @@ export const getHistoricalLeaderboard = async (
 export const getTodayLeaderboard = async (): Promise<PlayerStats[]> => {
   const start = new Date().setUTCHours(0, 0, 0, 0)
   const end = start + 86_400_000
-  const result = await pool.query(
-    `SELECT * FROM matches WHERE time >= $1 AND time < $2`,
-    [start, end]
-  )
-  return buildLeaderboard(result.rows.map(rowToMatch))
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM matches WHERE time >= $1 AND time < $2`,
+      [start, end]
+    )
+    return buildLeaderboard(result.rows.map(rowToMatch))
+  } catch (err) {
+    logger.error('getTodayLeaderboard failed', err)
+    throw err
+  }
 }

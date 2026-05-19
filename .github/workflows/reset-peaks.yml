@@ -2,10 +2,10 @@ name: Reset Peak Points
 
 on:
   schedule:
-    # Daily reset — runs at 00:01 UTC every day
-    - cron: "1 0 * * *"
-    # Weekly reset — runs at 00:02 UTC every Monday
-    - cron: "2 0 * * 1"
+    # Daily reset - runs at 00:01 UTC every day
+    - cron: '1 0 * * *'
+    # Weekly reset - runs at 00:02 UTC every Monday
+    - cron: '2 0 * * 1'
   workflow_dispatch:
     inputs:
       reset_type:

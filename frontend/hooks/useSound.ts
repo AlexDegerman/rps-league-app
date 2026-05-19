@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 
-// Module-level singletons — avoids re-creating Audio nodes on every render
+// Module-level singletons - avoids re-creating Audio nodes on every render
 // and prevents overlapping playback from stacking instances
 const winAudioInstance =
   typeof window !== 'undefined' ? new Audio('/sounds/win.wav') : null
@@ -44,7 +44,7 @@ export const useSound = () => {
 
   const playWin = () => {
     if (!soundOnRef.current || !winAudioInstance) return
-    // Reset currentTime so rapid wins don't queue — always plays from start
+    // Reset currentTime so rapid wins don't queue - always plays from start
     winAudioInstance.currentTime = 0
     winAudioInstance.play().catch(() => {
       // Browsers block autoplay until the user has interacted with the page

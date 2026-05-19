@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { fetchDailyStats } from '@/lib/api'
 import { formatPoints, getAmountColor, getEventColor } from '@/lib/format'
 import { useGameStore } from '@/app/stores/gameStore'
+import { logger } from '@/lib/logger'
 
 interface DailyStats {
   totalVolume: bigint
@@ -37,7 +38,9 @@ export default function LiveStatsTicker() {
               : null
           })
         })
-        .catch(console.error)
+        .catch((err) =>
+          logger.warn('Failed to load daily stats', { error: String(err) })
+        )
     }
 
     load()

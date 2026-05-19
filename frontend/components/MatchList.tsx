@@ -156,7 +156,7 @@ const MatchRow = ({
         </div>
       </div>
 
-      {/* Prediction result badge — own row, aligned to whichever side the pick was */}
+      {/* Prediction result badge - own row, aligned to whichever side the pick was */}
       {prediction?.result && (
         <div
           className={`flex mt-1 relative z-10 ${

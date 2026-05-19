@@ -9,6 +9,7 @@ import type {
   SinglePlayerStats,
   PendingMatch
 } from '@/types/rps'
+import { logger } from '@/lib/logger'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -20,7 +21,10 @@ async function handleResponse<T>(
     if (!res.ok) return null
     return await res.json()
   } catch (error) {
-    console.error('API Error:', error)
+    logger.error(
+      'API request failed',
+      error instanceof Error ? error : undefined
+    )
     return null
   }
 }
@@ -39,9 +43,13 @@ export async function fetchUserStats(userId: string, shortId: string) {
   )
 }
 
-export async function fetchUserPoints(userId: string, shortId: string, nickname?: string) {
-  const params = new URLSearchParams({ shortId });
-  if (nickname) params.append('nickname', nickname);
+export async function fetchUserPoints(
+  userId: string,
+  shortId: string,
+  nickname?: string
+) {
+  const params = new URLSearchParams({ shortId })
+  if (nickname) params.append('nickname', nickname)
 
   return handleResponse<UserPointsData>(
     fetch(`${API_BASE}/api/users/${userId}/points?${params.toString()}`)
@@ -228,14 +236,16 @@ export async function fetchDailyStats() {
   }>(fetch(`${API_BASE}/api/predictions/stats/daily`))
 }
 
-export async function submitFeedback(formData: FormData): Promise<
+export async function submitFeedback(
+  formData: FormData
+): Promise<
   | { ok: true }
   | { error: 'BANNED' | 'RATE_LIMITED' | 'CONNECTION_FAILED' | string }
 > {
   try {
     const res = await fetch(`${API_BASE}/api/feedback`, {
       method: 'POST',
-      body: formData,
+      body: formData
     })
     if (res.ok) return { ok: true }
     const d = await res.json().catch(() => ({}))

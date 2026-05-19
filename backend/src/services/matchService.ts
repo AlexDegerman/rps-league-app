@@ -1,4 +1,5 @@
 import pool from '../utils/db.js'
+import { logger } from '../utils/logger.js'
 import type { Match, Move } from '../types/rps.js'
 
 const rowToMatch = (row: Record<string, unknown>): Match => ({
@@ -31,19 +32,24 @@ export const getWinner = (match: Match): 'A' | 'B' => {
 }
 
 export const getLatestMatches = async (page: number, limit: number) => {
-  const offset = (page - 1) * limit
-  const [data, count] = await Promise.all([
-    pool.query(`SELECT * FROM matches ORDER BY time DESC LIMIT $1 OFFSET $2`, [
-      limit,
-      offset
-    ]),
-    pool.query(`SELECT COUNT(*) FROM matches`)
-  ])
-  const total = Number(count.rows[0].count)
-  return {
-    matches: data.rows.map(rowToMatch),
-    total,
-    hasMore: offset + limit < total
+  try {
+    const offset = (page - 1) * limit
+    const [data, count] = await Promise.all([
+      pool.query(
+        `SELECT * FROM matches ORDER BY time DESC LIMIT $1 OFFSET $2`,
+        [limit, offset]
+      ),
+      pool.query(`SELECT COUNT(*) FROM matches`)
+    ])
+    const total = Number(count.rows[0].count)
+    return {
+      matches: data.rows.map(rowToMatch),
+      total,
+      hasMore: offset + limit < total
+    }
+  } catch (err) {
+    logger.error('getLatestMatches failed', err, { page, limit })
+    throw err
   }
 }
 
@@ -52,25 +58,29 @@ export const getMatchesByDate = async (
   page: number,
   limit: number
 ): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
-  const offset = (page - 1) * limit
-  const start = new Date(date).getTime()
-  const end = start + 86400000
-
-  const [data, count] = await Promise.all([
-    pool.query(
-      `SELECT * FROM matches WHERE time >= $1 AND time < $2 ORDER BY time DESC LIMIT $3 OFFSET $4`,
-      [start, end, limit, offset]
-    ),
-    pool.query(`SELECT COUNT(*) FROM matches WHERE time >= $1 AND time < $2`, [
-      start,
-      end
+  try {
+    const offset = (page - 1) * limit
+    const start = new Date(date).getTime()
+    const end = start + 86400000
+    const [data, count] = await Promise.all([
+      pool.query(
+        `SELECT * FROM matches WHERE time >= $1 AND time < $2 ORDER BY time DESC LIMIT $3 OFFSET $4`,
+        [start, end, limit, offset]
+      ),
+      pool.query(
+        `SELECT COUNT(*) FROM matches WHERE time >= $1 AND time < $2`,
+        [start, end]
+      )
     ])
-  ])
-  const total = Number(count.rows[0].count)
-  return {
-    matches: data.rows.map(rowToMatch),
-    total,
-    hasMore: offset + limit < total
+    const total = Number(count.rows[0].count)
+    return {
+      matches: data.rows.map(rowToMatch),
+      total,
+      hasMore: offset + limit < total
+    }
+  } catch (err) {
+    logger.error('getMatchesByDate failed', err, { date, page, limit })
+    throw err
   }
 }
 
@@ -79,57 +89,71 @@ export const getMatchesByPlayer = async (
   page: number,
   limit: number
 ): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
-  const offset = (page - 1) * limit
-  const [data, count] = await Promise.all([
-    pool.query(
-      `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1 ORDER BY time DESC LIMIT $2 OFFSET $3`,
-      [name, limit, offset]
-    ),
-    pool.query(
-      `SELECT COUNT(*) FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
-      [name]
-    )
-  ])
-  const total = Number(count.rows[0].count)
-  return {
-    matches: data.rows.map(rowToMatch),
-    total,
-    hasMore: offset + limit < total
+  try {
+    const offset = (page - 1) * limit
+    const [data, count] = await Promise.all([
+      pool.query(
+        `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1 ORDER BY time DESC LIMIT $2 OFFSET $3`,
+        [name, limit, offset]
+      ),
+      pool.query(
+        `SELECT COUNT(*) FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
+        [name]
+      )
+    ])
+    const total = Number(count.rows[0].count)
+    return {
+      matches: data.rows.map(rowToMatch),
+      total,
+      hasMore: offset + limit < total
+    }
+  } catch (err) {
+    logger.error('getMatchesByPlayer failed', err, { name, page, limit })
+    throw err
   }
 }
 
 export const getAllPlayerNames = async (): Promise<string[]> => {
-  const result = await pool.query(
-    `SELECT DISTINCT player_a_name AS name FROM matches
-      UNION
-      SELECT DISTINCT player_b_name AS name FROM matches
-      ORDER BY name ASC`
-  )
-  return result.rows.map((r) => r.name as string)
+  try {
+    const result = await pool.query(
+      `SELECT DISTINCT player_a_name AS name FROM matches
+        UNION
+        SELECT DISTINCT player_b_name AS name FROM matches
+        ORDER BY name ASC`
+    )
+    return result.rows.map((r) => r.name as string)
+  } catch (err) {
+    logger.error('getAllPlayerNames failed', err)
+    throw err
+  }
 }
 
 export const getPlayerStats = async (name: string) => {
-  const result = await pool.query(
-    `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
-    [name]
-  )
-  const matches = result.rows.map(rowToMatch)
-  let wins = 0,
-    losses = 0
-
-  for (const m of matches) {
-    const winner = getWinner(m)
-    const playerWon =
-      (winner === 'A' && m.playerA.name === name) ||
-      (winner === 'B' && m.playerB.name === name)
-    if (playerWon) wins++
-    else losses++
-  }
-
-  return {
-    total: matches.length,
-    wins,
-    losses,
-    winRate: matches.length > 0 ? Math.round((wins / matches.length) * 100) : 0
+  try {
+    const result = await pool.query(
+      `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
+      [name]
+    )
+    const matches = result.rows.map(rowToMatch)
+    let wins = 0,
+      losses = 0
+    for (const m of matches) {
+      const winner = getWinner(m)
+      const playerWon =
+        (winner === 'A' && m.playerA.name === name) ||
+        (winner === 'B' && m.playerB.name === name)
+      if (playerWon) wins++
+      else losses++
+    }
+    return {
+      total: matches.length,
+      wins,
+      losses,
+      winRate:
+        matches.length > 0 ? Math.round((wins / matches.length) * 100) : 0
+    }
+  } catch (err) {
+    logger.error('getPlayerStats failed', err, { name })
+    throw err
   }
 }

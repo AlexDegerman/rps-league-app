@@ -1,6 +1,7 @@
 'use client'
 
 import InfoIcon from '@/components/icons/InfoIcon'
+import { logger } from '@/lib/logger'
 import { useState, useEffect } from 'react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -78,9 +79,15 @@ export default function AnalysisPage() {
       setCurrentResult(data.result)
       setCurrentSource(data.source)
 
-      // Keep only the 5 most recent queries — avoids unbounded localStorage growth
+      // Keep only the 5 most recent queries - avoids unbounded localStorage growth
       const newHistory: HistoryItem[] = [
-        { id: Date.now(), query: activeQuery, result: data.result, source: data.source, timestamp: Date.now() },
+        {
+          id: Date.now(),
+          query: activeQuery,
+          result: data.result,
+          source: data.source,
+          timestamp: Date.now()
+        },
         ...history
       ].slice(0, 5)
 
@@ -88,7 +95,11 @@ export default function AnalysisPage() {
       localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
       if (!overrideQuery) setQuery('')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An unknown error occurred')
+      const message = err instanceof Error ? err.message : 'An unknown error occurred'
+      logger.error('Oracle query failed', err instanceof Error ? err : undefined, {
+        query: activeQuery
+        })
+        setError(message)
     } finally {
       setLoading(false)
     }

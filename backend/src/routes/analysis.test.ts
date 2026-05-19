@@ -86,7 +86,7 @@ describe('Analysis Route', () => {
       .send(payload)
 
     expect(res.body.cached).toBe(true)
-    // AI should only have been called once — second request hit the cache
+    // AI should only have been called once - second request hit the cache
     expect(mockGenerateContent).toHaveBeenCalledTimes(1)
   })
 

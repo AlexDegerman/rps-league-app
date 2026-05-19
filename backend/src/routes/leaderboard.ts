@@ -4,6 +4,7 @@ import {
   getTodayLeaderboard
 } from '../services/leaderboardService.js'
 import pool from '../utils/db.js'
+import { logger } from '../utils/logger.js'
 
 const router = Router()
 
@@ -108,7 +109,10 @@ router.get('/unified', async (req, res) => {
 
     res.json(sanitizedRows)
   } catch (err) {
-    console.error('Unified leaderboard error:', err)
+    logger.error('GET /leaderboard/unified failed', err, {
+      tab: req.query.tab,
+      sort: req.query.sort
+    })
     res.status(500).json({ error: 'Failed to fetch leaderboard' })
   }
 })
@@ -120,6 +124,10 @@ router.get('/historical', async (req, res) => {
     const endDate = req.query.endDate as string | undefined
     res.json(await getHistoricalLeaderboard(startDate, endDate))
   } catch (err) {
+    logger.error('GET /leaderboard/historical failed', err, {
+      startDate: req.query.startDate,
+      endDate: req.query.endDate
+    })
     res.status(500).json({ error: 'Failed to fetch historical leaderboard' })
   }
 })
@@ -129,6 +137,7 @@ router.get('/today', async (req, res) => {
   try {
     res.json(await getTodayLeaderboard())
   } catch (err) {
+    logger.error('GET /leaderboard/today failed', err)
     res.status(500).json({ error: 'Failed to fetch today leaderboard' })
   }
 })

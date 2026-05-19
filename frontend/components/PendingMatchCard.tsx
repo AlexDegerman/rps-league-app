@@ -46,7 +46,7 @@ export default function PendingMatchCard({
   const isFever = !isFlash && winStreak >= 3 && winStreak < 5
   const isActive = isFlash || isInferno || isFever
 
-  // Mode config table — one place to update per flash event
+  // Mode config table - one place to update per flash event
   const modeConfig = {
     flash_lunar: {
       border: 'border-blue-300',

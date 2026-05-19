@@ -39,11 +39,12 @@ import { useUserStore } from './stores/userStore'
 import { useUIStore } from './stores/uiStore'
 import { useTabGuard } from '@/hooks/useTabGuard'
 import WelcomeModal from '@/components/WelcomeModal'
+import { logger } from '@/lib/logger'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
-  // — Game store —
+  // - Game store -
   const {
     backendReady,
     markReady,
@@ -67,7 +68,7 @@ export default function HomePage() {
     setLiveTheme
   } = useGameStore()
 
-  // — User store —
+  // - User store -
   const {
     points,
     pointsLoaded,
@@ -86,7 +87,7 @@ export default function HomePage() {
     applyPointsUpdate
   } = useUserStore()
 
-  // — UI store —
+  // - UI store -
   const {
     resultAnim,
     setResultAnim,
@@ -121,7 +122,7 @@ export default function HomePage() {
     soundOn,
     toggleSound
   } = useSound()
-  
+
   const esRef = useRef<EventSource | null>(null)
 
   const isDuplicate = useTabGuard(() => {
@@ -183,10 +184,9 @@ export default function HomePage() {
       setNotification('no_bigint')
       return
     }
-      if (!localStorage.getItem('rps_welcomed')) {
-    setShowWelcomeModal(true)
+    if (!localStorage.getItem('rps_welcomed')) {
+      setShowWelcomeModal(true)
     }
-
   }, [setAutoAllIn, setNotification, setShowWelcomeModal])
 
   useEffect(() => {
@@ -234,7 +234,12 @@ export default function HomePage() {
           setLiveTheme(data.type as EventTheme)
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        logger.warn('Failed to fetch flash state', {
+          userId: user.userId,
+          error: String(err)
+        })
+      })
 
     fetch(`${API_BASE}/api/live/flash-state`)
       .then((r) => r.json())
@@ -244,7 +249,11 @@ export default function HomePage() {
           setFlashBuffRemaining(data.betsRemaining)
         }
       })
-      .catch(() => {})
+      .catch((err) => {
+        logger.warn('Failed to fetch flash state (global)', {
+          error: String(err)
+        })
+      })
 
     fetchLatestMatches(1).then((data) => {
       if (data && data.matches.length > 0) markReady()
@@ -263,7 +272,7 @@ export default function HomePage() {
         }
       })
       .catch((err) => {
-        console.error('Failed to fetch pending matches:', err)
+        logger.error('Failed to fetch pending matches', err)
         triggerError('LIVE FEED ERROR')
       })
 
@@ -272,7 +281,9 @@ export default function HomePage() {
         const idx = data.findIndex((e) => e.shortId === user.shortId)
         setDailyRank(idx !== -1 ? idx + 1 : null)
       })
-      .catch(() => {})
+      .catch((err) => {
+        logger.error('Failed to fetch leaderboard rank', err)
+      })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
@@ -288,7 +299,10 @@ export default function HomePage() {
       return { newPoints: currentPoints, isNewPeak: false }
 
     const data = await fetchUserPoints(user.userId, user.shortId)
-    if (!data) return { newPoints: currentPoints, isNewPeak: false }
+    if (!data) {
+      logger.warn('fetchUserPoints returned null', { userId: user.userId })
+      return { newPoints: currentPoints, isNewPeak: false }
+    }
 
     const newPoints = BigInt(data.points)
     const newPeak = BigInt(data.peakPoints)
@@ -307,7 +321,7 @@ export default function HomePage() {
   useEffect(() => {
     if (isDuplicate) return
     const es = new EventSource(`${API_BASE}/api/live`)
-    esRef.current = es  
+    esRef.current = es
 
     es.addEventListener('sync', (event) => {
       const { serverTime } = JSON.parse(event.data)
@@ -440,7 +454,19 @@ export default function HomePage() {
 
     es.onerror = () => {
       if (es.readyState === EventSource.CLOSED) {
+        logger.error(
+          'SSE connection closed (too many players or server drop)',
+          undefined,
+          {
+            readyState: es.readyState,
+            url: `${API_BASE}/api/live`
+          }
+        )
         setPersistentError('TOO MANY PLAYERS - TRY AGAIN IN A MOMENT')
+      } else {
+        logger.warn('SSE connection error (will retry)', {
+          readyState: es.readyState
+        })
       }
     }
 
@@ -490,8 +516,14 @@ export default function HomePage() {
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
+        logger.warn('Prediction POST aborted (timeout)', { gameId, playerName })
         triggerError('CONNECTION TOO SLOW')
       } else {
+        logger.error(
+          'Prediction POST failed',
+          err instanceof Error ? err : undefined,
+          { gameId, playerName }
+        )
         triggerError('CONNECTION FAILED')
       }
     } finally {
@@ -502,7 +534,7 @@ export default function HomePage() {
   const handleWelcomeContinue = () => {
     localStorage.setItem('rps_welcomed', '1')
     setShowWelcomeModal(false)
-    setNotification('new_visitor') 
+    setNotification('new_visitor')
   }
 
   const numberName = pointsLoaded ? getFullNumberName(points) : ''
@@ -626,7 +658,7 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Mute — top right, doesn't affect badge row */}
+              {/* Mute - top right, doesn't affect badge row */}
               <button
                 onClick={toggleSound}
                 className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
@@ -636,7 +668,7 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* Row 2: badges — fully separate row, full width, no mute competition */}
+            {/* Row 2: badges - fully separate row, full width, no mute competition */}
             {displayNickname && (
               <div className="flex gap-1 mt-1 max-w-sm">
                 <FlashBadge
