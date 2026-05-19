@@ -25,6 +25,8 @@ interface UIState {
   // Modals & UI Flags
   showWelcomeModal: boolean
   setShowWelcomeModal: (v: boolean) => void
+  showUpdateModal: boolean
+  setShowUpdateModal: (v: boolean) => void
   showJumpButton: boolean
   setShowJumpButton: (v: boolean) => void
   showPointsInfo: boolean
@@ -52,6 +54,7 @@ export const useUIStore = create<UIState>((set) => ({
   isFocused: false,
   inputString: '100000',
   showWelcomeModal: false,
+  showUpdateModal: false,
 
   // Actions
   setBrandTheme: (t) => set({ brandTheme: t }),
@@ -72,6 +75,7 @@ export const useUIStore = create<UIState>((set) => ({
   setPersistentError: (msg) => set({ persistentError: msg }),
 
   setShowWelcomeModal: (v) => set({ showWelcomeModal: v }),
+  setShowUpdateModal: (v) => set({ showUpdateModal: v }),
   setShowJumpButton: (v) => set({ showJumpButton: v }),
   setShowPointsInfo: (v) => set({ showPointsInfo: v }),
   setShowPointsExplainer: (v) => set({ showPointsExplainer: v }),

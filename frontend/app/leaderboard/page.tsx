@@ -133,7 +133,7 @@ function LeaderboardContent() {
         </button>
         <Link
           href="/leaderboard/players"
-          className="px-6 py-2 rounded font-bold text-xs uppercase bg-indigo-600 text-white hover:bg-indigo-700 transition"
+          className="px-6 py-2 rounded font-bold text-xs uppercase border border-indigo-200 text-indigo-600 bg-white hover:bg-indigo-50 transition"
         >
           Players
         </Link>

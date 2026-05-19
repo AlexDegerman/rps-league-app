@@ -14,7 +14,6 @@ import { useUIStore } from '@/app/stores/uiStore'
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-
   const { initUser, shortId } = useUserStore()
   const { brandTheme, randomizeBrandTheme } = useUIStore()
   const visualMode = useGameStore((s) => s.visualMode)
@@ -36,7 +35,7 @@ const Header = () => {
     : null
 
   const navClass = (href: string) =>
-    `px-3 py-2 rounded font-bold transition text-xs uppercase tracking-tight whitespace-nowrap ${
+    `px-3 py-2 rounded font-bold transition text-xs uppercase tracking-tight whitespace-nowrap shrink-0 ${
       pathname === href
         ? 'bg-yellow-400 text-gray-900 shadow-sm'
         : 'bg-indigo-600 text-white hover:bg-indigo-700'
@@ -61,21 +60,9 @@ const Header = () => {
       }`
     : 'text-gray-600'
 
-  const allNavItems = [
-    { label: 'Live', href: '/' },
-    { label: 'Ranks', href: '/leaderboard' },
-    { label: 'Profile', href: profileHref },
-    { label: 'Search', href: '/search' },
-    { label: 'Analysis', href: '/analysis' },
-    { label: 'Tiers', href: '/showcase' },
-    { label: 'Feedback', href: '/feedback' }
-  ]
-
   return (
     <header
-      className={`w-full shadow sticky top-0 z-50 transition-colors duration-500
-      ${borderCfg?.borderClass ?? 'border-b border-gray-200'}
-      `}
+      className={`w-full shadow sticky top-0 z-50 transition-colors duration-500 ${borderCfg?.borderClass ?? 'border-b border-gray-200'}`}
     >
       <div className="absolute inset-0 bg-white -z-20" />
 
@@ -99,8 +86,9 @@ const Header = () => {
         )
       )}
 
-      <div className={`max-w-177.5 mx-auto px-4 py-3 relative z-10 ${navGlow}`}>
+      <div className={`max-w-110 mx-auto px-4 py-3 relative z-10 ${navGlow}`}>
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* LOGO */}
           <Link href="/" className="shrink-0" onClick={() => setIsOpen(false)}>
             <Image
               src="/rpslogo.png"
@@ -113,96 +101,63 @@ const Header = () => {
             />
           </Link>
 
+          {/* BRANDING: Hidden <380, Wrapped 380-419, 1-Line 420+ */}
           <span
             data-text="RPS League"
-            className={`hidden! min-[380px]:inline-block! relative text-sm font-black uppercase tracking-widest select-none ${brandCfg?.textClass ?? 'text-gray-300'}`}
+            className={`hidden! min-[380px]:inline-block! relative text-sm font-black uppercase tracking-widest select-none leading-[1.1]
+              min-[380px]:w-17.5 min-[420px]:w-auto min-[420px]:whitespace-nowrap
+              ${brandCfg?.textClass ?? 'text-gray-300'}
+            `}
           >
             RPS League
           </span>
 
-          <div className="flex min-[704px]:hidden items-center gap-1.5 flex-1 ml-auto justify-end">
+          {/* RIGHT SIDE ACTIONS */}
+          <div className="flex items-center gap-1.5 flex-1 ml-auto justify-end">
             <Link href="/" className={navClass('/')}>
               Live
             </Link>
-
             <Link href="/leaderboard" className={navClass('/leaderboard')}>
               Ranks
             </Link>
-
-            <Link
-              href={profileHref}
-              className={`${navClass(profileHref)} hidden! min-[320px]:block!`}
-            >
+            <Link href={profileHref} className={navClass(profileHref)}>
               Profile
             </Link>
 
-            <Link
-              href="/search"
-              className={`${navClass('/search')} hidden! min-[500px]:block!`}
-            >
-              Search
-            </Link>
-
-            <Link
-              href="/analysis"
-              className={`${navClass('/analysis')} hidden! min-[580px]:block!`}
-            >
-              Analysis
-            </Link>
-
+            {/* Smart More Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`p-2 rounded-lg border transition-colors ${burgerColorClass} ${
-                modeKey
-                  ? 'bg-white/40 border-current'
-                  : 'bg-gray-50 border-gray-200 active:bg-gray-200'
-              }`}
+              className={`flex items-center justify-center p-2 rounded-lg border transition-all shrink-0 ${
+                isOpen
+                  ? 'bg-gray-800 text-white border-gray-800 shadow-inner'
+                  : modeKey
+                    ? 'bg-white/50 border-current backdrop-blur-sm ' +
+                      burgerColorClass
+                    : 'bg-gray-50 border-gray-200 active:bg-gray-200'
+              } min-[480px]:px-3 min-[480px]:gap-2`}
             >
-              {isOpen ? <X size={20} /> : <Menu size={20} />}
+              <span className="hidden min-[480px]:block text-[10px] font-black uppercase tracking-widest">
+                More
+              </span>
+              {isOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
-
-          <nav className="hidden min-[704px]:flex gap-2 ml-auto">
-            {allNavItems.map(({ label, href }) => (
-              <Link key={href} href={href} className={navClass(href)}>
-                {label}
-              </Link>
-            ))}
-          </nav>
         </div>
 
+        {/* DROPDOWN MENU */}
         {isOpen && (
           <nav
-            className={`min-[704px]:hidden mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-center gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${
-              modeKey ? `event-bg-${modeKey}` : ''
-            }`}
+            className={`mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-center gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${modeKey ? `event-bg-${modeKey}` : ''}`}
           >
             <div className="absolute inset-0 bg-white -z-20" />
 
             <Link
-              href={profileHref}
-              onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass(profileHref)} min-[320px]:hidden`}
-            >
-              Profile
-            </Link>
-
-            <Link
-              href="/search"
-              onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/search')} min-[500px]:hidden`}
-            >
-              Search
-            </Link>
-
-            <Link
               href="/analysis"
               onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/analysis')} min-[580px]:hidden`}
+              className={menuRowItemClass('/analysis')}
             >
               Analysis
             </Link>
-
             <Link
               href="/showcase"
               onClick={() => setIsOpen(false)}
@@ -210,13 +165,26 @@ const Header = () => {
             >
               Tiers
             </Link>
-
             <Link
               href="/feedback"
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/feedback')}
             >
               Feedback
+            </Link>
+            <Link
+              href="/updates"
+              onClick={() => setIsOpen(false)}
+              className={menuRowItemClass('/updates')}
+            >
+              Updates
+            </Link>
+            <Link
+              href="/search"
+              onClick={() => setIsOpen(false)}
+              className={`${menuRowItemClass('/search')} opacity-60`}
+            >
+              Search
             </Link>
           </nav>
         )}

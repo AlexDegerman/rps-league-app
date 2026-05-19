@@ -37,20 +37,24 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - [📊 Competitive Analytics & Profiles](#-competitive-analytics--profiles)
 - [🧾 Match History Timeline](#-match-history-timeline)
 - [⚡ Live Activity Feed](#-live-activity-feed)
+
 - [🏗️ Architecture](#️-architecture)
+- [🎨 Design Decisions](#-design-decisions)
 - [🛠️ Technical Challenges & Solutions](#️-technical-challenges--solutions)
+- [🔮 Reliability & Feedback](#-reliability--feedback)
 - [🤖 AI Oracle & Analytics](#-ai-oracle--analytics)
 - [📱 Mobile & PWA Experience](#-mobile--pwa-experience)
+
 - [🧪 Tests](#-tests)
-- [🎨 Design Decisions](#-design-decisions)
 - [🚀 CI/CD & Automation](#-cicd--automation)
 - [🚀 Future Improvements](#-future-improvements)
+
 - [📦 How to Run](#-how-to-run)
-- [🔮 Reliability & Feedback](#-reliability--feedback)
 - [🔌 API Reference](#-api-reference)
 - [📱 Device Compatibility](#-device-compatibility)
 - [⚠️ Disclaimer](#️-disclaimer)
 - [🔮 Oracle Privacy & Monitoring](#-oracle-privacy--monitoring)
+- [📜 License](#-license)
 
 ---
 
@@ -63,7 +67,9 @@ RPS League is built for instant participation without traditional account fricti
 - **Recovery-Code Restoration**: Simple alphanumeric slugs generated on the backend allowing users to securely migrate or restore profiles and statistics across different devices.
 - **Hybrid Identity Layer**: Optional professional signaling using URL-validated links to display identity badges on leaderboards for social proof and fully clickable external links on public profiles.
 - **Shareable Performance Dashboards**: Unique public profile URLs featuring 16 tracked data points and a context-aware match history (Recent, Biggest Wins, Best Multipliers), visualizing predictions through rich event cards that track tiered bonuses, flash event overlays, and move-set comparisons.
-
+- **Adaptive Entry Flow**: First-time players are introduced through an interactive onboarding modal with nickname rerolling and instant identity generation, while returning users receive contextual "What's New" overlays tied to the latest acknowledged release version.
+- **Client-Side Version Tracking**: Lightweight release acknowledgement system powered by `localStorage`, ensuring update notifications are only surfaced once per deployed version without requiring authentication or backend session state.
+- **Integrated Update Log**: Dedicated in-app update history page documenting major gameplay systems, live-service features, infrastructure upgrades, and seasonal content rollouts.
 This architecture eliminates the barrier to entry while preserving a robust layer of social identity and competitive status across the league ecosystem.
 
 ---
@@ -157,6 +163,29 @@ Progression is designed to feel increasingly unstable, excessive, and visually a
 
 ---
 
+## 🔢 Global Number Formatting Engine
+
+The entire economy, leaderboard system, and UI rendering pipeline is unified through a custom BigInt-first formatting engine. It acts as the single source of truth for all numeric parsing, scaling, and display logic across the application.
+
+It handles:
+
+- Parsing shorthand inputs into safe BigInt values across extreme scales  
+- Converting raw values into tiered human-readable formats (M, B, T, up to vigintillions and beyond)
+- Mapping numeric ranges directly to visual styles, gradients, and tier identities  
+- Ensuring consistent formatting across across all frontend rendering contexts
+
+Every visible number in the system flows through this engine, including:
+
+- Leaderboards  
+- Player profiles  
+- Live activity feed  
+- Bonus and multiplier outcomes  
+- Tier-based UI transitions  
+
+This guarantees deterministic behavior across all devices and prevents divergence between stored values and rendered output, even at extreme numerical ranges.
+
+---
+
 ## 📊 Competitive Analytics & Profiles
 
 Each profile surfaces 16 tracked data points, powering competitive rankings, progression tracking, and long-term performance analysis.
@@ -168,7 +197,9 @@ Each profile surfaces 16 tracked data points, powering competitive rankings, pro
 - **Performance Stats:** Win rate, max streak, and total wins vs losses
 - **Bonus Telemetry:** Pity-system triggers, multiplier outcomes, and bonus-tier history
 
-### 🧾 Match History Timeline
+---
+
+## 🧾 Match History Timeline
 
 Each player profile includes a fully interactive match history system that visualizes every prediction as a rich event card.
 
@@ -201,29 +232,6 @@ Guarantees:
 
 ---
 
-## 🔢 Global Number Formatting Engine
-
-The entire economy, leaderboard system, and UI rendering pipeline is unified through a custom BigInt-first formatting engine. It acts as the single source of truth for all numeric parsing, scaling, and display logic across the application.
-
-It handles:
-
-- Parsing shorthand inputs into safe BigInt values across extreme scales  
-- Converting raw values into tiered human-readable formats (M, B, T, up to vigintillions and beyond)
-- Mapping numeric ranges directly to visual styles, gradients, and tier identities  
-- Ensuring consistent formatting across across all frontend rendering contexts
-
-Every visible number in the system flows through this engine, including:
-
-- Leaderboards  
-- Player profiles  
-- Live activity feed  
-- Bonus and multiplier outcomes  
-- Tier-based UI transitions  
-
-This guarantees deterministic behavior across all devices and prevents divergence between stored values and rendered output, even at extreme numerical ranges.
-
----
-
 ## 🏗️ Architecture
 
 | Layer | Stack |
@@ -236,6 +244,20 @@ This guarantees deterministic behavior across all devices and prevents divergenc
 | Database | Supabase PostgreSQL |
 | Testing | Vitest, React Testing Library |
 | Match system | Custom generator feeding SSE stream |
+
+---
+
+## 🎨 Design Decisions
+
+- **Zero-friction onboarding**: Instant anonymous play with random nickname generation
+- **SSE over WebSockets**: Chosen for simplicity, lower overhead, and better serverless compatibility
+- **Concurrency-aware event stream**: Guaranteed stability and zero overlap between real user bets and demo traffic
+- **Profile recovery system** for cross-device portability
+- **Mock match generator** for self-contained deployment
+- **Production-hardened AI**: Resilient, grounded, and rate-limited analytics engine
+- **Single-tab enforcement**: BroadcastChannel detects duplicate tabs, closes the redundant SSE connection, and surfaces a non-blocking in-app notice.
+
+---
 
 ## 🛠️ Technical Challenges & Solutions
 
@@ -257,6 +279,19 @@ JavaScript Number (IEEE 754) loses integer precision beyond approximately 9 quad
 The entire system was refactored to remove floating-point risk and enforce exact arithmetic. This included database migration of numeric fields to `NUMERIC` in PostgreSQL, backend transition to native BigInt operations in Node.js, and frontend updates to ensure safe rendering and formatting of large values.
 
 This guarantees accurate computation, storage, and display of point values at extreme scales, including vigintillion-range totals under sustained gameplay pressure.
+
+---
+
+## 🔮 Reliability & Feedback
+
+To maintain a professional live-service standard and close the loop between user experience and system logs:
+
+- **Unified Observability**: Integrated Sentry for full-stack error tracking and performance monitoring across the entire stack, frontend React/Next.js and backend Express, specifically guarding against BigInt overflows and SSE connection failures. Structured logging captures SSE client lifecycle events (connect, disconnect, client count) and match resolution errors in real time.
+- **Context-Aware Feedback**: An in-app portal for bug reports and suggestions. Submissions automatically bundle game state (points, streak, active events) and environment metadata (route, viewport, browser).
+- **Trace-Link Debugging**: Manual feedback is linked directly to Sentry’s `associatedEventId`, allowing for instantaneous lookup of the exact line of code that failed during a reported user session.
+- **Visual Reporting**: Support for screenshot attachments via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop functionality.
+- **Operational Monitoring**: Automated real-time alerts for feedback and AI Oracle queries are dispatched via **Discord Webhooks** to a private administrative channel.
+- **Privacy & Security**: IP addresses are masked (e.g., `192.168.x.x`) for audit logs. No authentication tokens, passwords, or PII are ever logged or stored.
 
 ---
 
@@ -301,18 +336,6 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 - **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
 - **HomePage**: Tests core betting loop ("ALL IN", floor clamping, AUTO toggle), user store integration (nickname display, bet amount sync), and live connection state rendering.
 - **Leaderboard Page**: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
-
----
-
-## 🎨 Design Decisions
-
-- **Zero-friction onboarding**: Instant anonymous play with random nickname generation
-- **SSE over WebSockets**: Chosen for simplicity, lower overhead, and better serverless compatibility
-- **Concurrency-aware event stream**: Guaranteed stability and zero overlap between real user bets and demo traffic
-- **Profile recovery system** for cross-device portability
-- **Mock match generator** for self-contained deployment
-- **Production-hardened AI**: Resilient, grounded, and rate-limited analytics engine
-- **Single-tab enforcement**: BroadcastChannel detects duplicate tabs, closes the redundant SSE connection, and surfaces a non-blocking in-app notice.
 
 ---
 
@@ -369,19 +392,6 @@ Open http://localhost:3000
 
 ---
 
-## 🔮 Reliability & Feedback
-
-To maintain a professional live-service standard and close the loop between user experience and system logs:
-
-- **Unified Observability**: Integrated Sentry for full-stack error tracking and performance monitoring across the entire stack, frontend React/Next.js and backend Express, specifically guarding against BigInt overflows and SSE connection failures. Structured logging captures SSE client lifecycle events (connect, disconnect, client count) and match resolution errors in real time.
-- **Context-Aware Feedback**: An in-app portal for bug reports and suggestions. Submissions automatically bundle game state (points, streak, active events) and environment metadata (route, viewport, browser).
-- **Trace-Link Debugging**: Manual feedback is linked directly to Sentry’s `associatedEventId`, allowing for instantaneous lookup of the exact line of code that failed during a reported user session.
-- **Visual Reporting**: Support for screenshot attachments via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop functionality.
-- **Operational Monitoring**: Automated real-time alerts for feedback and AI Oracle queries are dispatched via **Discord Webhooks** to a private administrative channel.
-- **Privacy & Security**: IP addresses are masked (e.g., `192.168.x.x`) for audit logs. No authentication tokens, passwords, or PII are ever logged or stored.
-
----
-
 ## 🔌 API Reference
 
 Full API documentation for RPS League is available in a dedicated file covering all endpoints, database schema, and environment configuration.
@@ -418,7 +428,7 @@ To maintain system stability and fine-tune AI behavior, anonymized queries are l
 
 ---
 
-## License
+## 📜 License
 
 This project is proprietary software.
 

@@ -118,31 +118,35 @@ function PlayerLeaderboardContent() {
         </div>
 
         {playerSubTab === 'alltime' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <div className="flex flex-col sm:flex-row gap-3 items-end">
-              <div className="flex-1 w-full">
-                <label className="block text-xs text-gray-500 mb-1">From</label>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 sm:p-4">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-end sm:gap-3">
+              <div className="w-full">
+                <label className="block text-[10px] text-gray-400 uppercase font-black mb-1">
+                  From
+                </label>
                 <input
                   type="date"
                   value={startDate}
                   min={FIRST_MATCH_DATE}
                   max={TODAY}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full border border-gray-200 rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
-              <div className="flex-1 w-full">
-                <label className="block text-xs text-gray-500 mb-1">To</label>
+              <div className="w-full">
+                <label className="block text-[10px] text-gray-400 uppercase font-black mb-1">
+                  To
+                </label>
                 <input
                   type="date"
                   value={endDate}
                   min={FIRST_MATCH_DATE}
                   max={TODAY}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full border border-gray-200 rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                 />
               </div>
-              <div className="flex gap-2 w-full sm:w-auto">
+              <div className="col-span-2 flex gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleFilter}
                   disabled={isLoading}
@@ -153,7 +157,7 @@ function PlayerLeaderboardContent() {
                 <button
                   onClick={handleClear}
                   disabled={isLoading}
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded font-bold text-xs uppercase text-gray-600"
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded font-bold text-xs uppercase text-gray-600 hover:bg-gray-50"
                 >
                   Clear
                 </button>
@@ -167,7 +171,9 @@ function PlayerLeaderboardContent() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4" />
-            <p className="text-gray-400 text-sm">Fetching standings...</p>
+            <p className="text-gray-400 text-sm uppercase font-bold tracking-tight">
+              Fetching standings...
+            </p>
           </div>
         ) : (
           <>
@@ -188,7 +194,7 @@ export default function PlayerLeaderboardPage() {
   return (
     <Suspense
       fallback={
-        <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-400">
+        <div className="max-w-4xl mx-auto px-4 py-12 text-center text-gray-400 uppercase font-bold tracking-tighter">
           Loading...
         </div>
       }

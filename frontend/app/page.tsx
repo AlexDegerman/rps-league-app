@@ -40,7 +40,9 @@ import { useUIStore } from './stores/uiStore'
 import { useTabGuard } from '@/hooks/useTabGuard'
 import WelcomeModal from '@/components/WelcomeModal'
 import { logger } from '@/lib/logger'
+import UpdateModal from '@/components/UpdateModal'
 
+const CURRENT_VERSION = '1.7'
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
@@ -109,7 +111,9 @@ export default function HomePage() {
     persistentError,
     setPersistentError,
     showWelcomeModal,
-    setShowWelcomeModal
+    setShowWelcomeModal,
+    showUpdateModal,
+    setShowUpdateModal
   } = useUIStore()
 
   const {
@@ -176,18 +180,20 @@ export default function HomePage() {
   }, [setShowJumpButton])
 
   // localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('autoAllIn')
-    if (saved === 'false') setAutoAllIn(false)
+    useEffect(() => {
+      const welcomed = localStorage.getItem('rps_welcomed')
+      const lastSeenVersion = localStorage.getItem('rps_last_version')
 
-    if (typeof BigInt === 'undefined') {
-      setNotification('no_bigint')
-      return
-    }
-    if (!localStorage.getItem('rps_welcomed')) {
-      setShowWelcomeModal(true)
-    }
-  }, [setAutoAllIn, setNotification, setShowWelcomeModal])
+      if (!welcomed) {
+        setShowWelcomeModal(true)
+      } else if (lastSeenVersion !== CURRENT_VERSION) {
+        setShowUpdateModal(true)
+      }
+
+      if (typeof BigInt === 'undefined') {
+        setNotification('no_bigint')
+      }
+    }, [setNotification, setShowUpdateModal, setShowWelcomeModal])
 
   useEffect(() => {
     if (isHydrated) localStorage.setItem('autoAllIn', autoAllIn.toString())
@@ -533,11 +539,17 @@ export default function HomePage() {
     }
   }
 
-  const handleWelcomeContinue = () => {
-    localStorage.setItem('rps_welcomed', '1')
-    setShowWelcomeModal(false)
-    setNotification('new_visitor')
-  }
+    const handleWelcomeContinue = () => {
+      localStorage.setItem('rps_welcomed', '1')
+      localStorage.setItem('rps_last_version', CURRENT_VERSION)
+      setShowWelcomeModal(false)
+      setNotification('new_visitor')
+    }
+
+    const handleUpdateClose = () => {
+      localStorage.setItem('rps_last_version', CURRENT_VERSION)
+      setShowUpdateModal(false)
+    }
 
   const numberName = pointsLoaded ? getFullNumberName(points) : ''
   const shouldShowTooltip =
@@ -545,7 +557,9 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
+
       {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}
+      {showUpdateModal && <UpdateModal onClose={handleUpdateClose} />}
 
       <EdgeGlow visualMode={visualMode} />
 
@@ -580,7 +594,7 @@ export default function HomePage() {
         >
           {/* Top section */}
           <div className="mb-1">
-            {/* Row 1: points + mute */}
+            {/* Points + Mute */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex flex-col gap-1 min-w-0 flex-1">
                 {/* Points display */}
@@ -660,7 +674,7 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Mute - top right, doesn't affect badge row */}
+              {/* Mute */}
               <button
                 onClick={toggleSound}
                 className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
@@ -670,7 +684,7 @@ export default function HomePage() {
               </button>
             </div>
 
-            {/* Row 2: badges - fully separate row, full width, no mute competition */}
+            {/* Badges */}
             {displayNickname && (
               <div className="flex gap-1 mt-1 max-w-sm">
                 <FlashBadge
