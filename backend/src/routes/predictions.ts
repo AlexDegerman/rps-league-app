@@ -6,6 +6,7 @@ import {
 } from '../services/predictionService.js'
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
+import { formatStat } from '../utils/formatStat.js'
 
 const router = Router()
 
@@ -34,45 +35,6 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to save prediction' })
   }
 })
-
-// Utility to turn massive strings into readable stats
-const formatStat = (val: string | number | null | undefined) => {
-  if (!val || val === '0' || val === 0) return { formatted: '0', name: 'None' }
-
-  const b = BigInt(val.toString())
-
-  const tiers = [
-    { n: 10n ** 63n, s: 'Vg', name: 'Vigintillion' },
-    { n: 10n ** 60n, s: 'No', name: 'Novemdecillion' },
-    { n: 10n ** 57n, s: 'Oc', name: 'Octodecillion' },
-    { n: 10n ** 54n, s: 'Sp', name: 'Septendecillion' },
-    { n: 10n ** 51n, s: 'Sx', name: 'Sexdecillion' },
-    { n: 10n ** 48n, s: 'Qi', name: 'Quindecillion' },
-    { n: 10n ** 45n, s: 'Qa', name: 'Quattuordecillion' },
-    { n: 10n ** 42n, s: 'Td', name: 'Tredecillion' },
-    { n: 10n ** 39n, s: 'Dd', name: 'Duodecillion' },
-    { n: 10n ** 36n, s: 'Ud', name: 'Undecillion' },
-    { n: 10n ** 33n, s: 'Dc', name: 'Decillion' },
-    { n: 10n ** 30n, s: 'No', name: 'Nonillion' },
-    { n: 10n ** 27n, s: 'Oc', name: 'Octillion' },
-    { n: 10n ** 24n, s: 'Sp', name: 'Septillion' },
-    { n: 10n ** 21n, s: 'Sx', name: 'Sextillion' },
-    { n: 10n ** 18n, s: 'Qi', name: 'Quintillion' },
-    { n: 10n ** 15n, s: 'Qa', name: 'Quadrillion' },
-    { n: 10n ** 12n, s: 'T', name: 'Trillion' },
-    { n: 10n ** 9n, s: 'B', name: 'Billion' },
-    { n: 10n ** 6n, s: 'M', name: 'Million' }
-  ]
-
-  for (const t of tiers) {
-    if (b >= t.n) {
-      const head = Number((b * 100n) / t.n) / 100
-      return { formatted: `${head}${t.s}`, name: t.name }
-    }
-  }
-
-  return { formatted: b.toString(), name: 'Points' }
-}
 
 // GET /api/stats
 router.get('/stats', async (req, res) => {

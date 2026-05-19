@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/node'
 import pool from '../utils/db.js'
 import rateLimit from 'express-rate-limit'
 import { logger } from '../utils/logger.js'
+import { formatStat } from '../utils/formatStat.js'
 
 /**
  * CONFIGURATION
@@ -198,7 +199,14 @@ router.post(
           value: `**${nickname || 'Anonymous'}**\n\`${shortId || 'n/a'}\``,
           inline: true
         },
-        { name: '💰 Points', value: `\`${points || 'n/a'}\``, inline: true },
+        {
+          name: '💰 Points',
+          value:
+            points !== undefined && points !== null
+              ? `\`${formatStat(points).formatted}\``
+              : '`n/a`',
+          inline: true
+        },
         { name: '🔥 Streak', value: `\`x${streak || 0}\``, inline: true },
         {
           name: '🌐 Context',

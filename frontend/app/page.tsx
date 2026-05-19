@@ -347,7 +347,7 @@ export default function HomePage() {
       const data = JSON.parse(event.data)
       const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
-
+      console.log('prediction_result payload:', data)
       const isWin = data.result === 'WIN'
       const { activeFlashEvent: currentFlash } = useGameStore.getState()
 
@@ -385,6 +385,8 @@ export default function HomePage() {
           bonus,
           streakAfter: currentStreak,
           confettiType: capturedConfettiType,
+          flashMult: data.flashMult,
+          flashEventType: data.flashEventType,
           confetti: Array.from({ length: 100 }).map(() => ({
             leftOffset: Math.random() * 100 - 50,
             vx: (Math.random() - 0.5) * 300,

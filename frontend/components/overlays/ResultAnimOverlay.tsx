@@ -19,7 +19,6 @@ interface ResultAnimOverlayProps {
 function getConfettiColors(tier?: string, streak?: number): string[] {
   if (streak && streak >= 5) return ['#f97316', '#ef4444', '#fbbf24', '#fb923c']
   if (streak && streak >= 3) return ['#22c55e', '#4ade80', '#86efac', '#16a34a']
-
   switch (tier) {
     case 'LEGENDARY':
       return ['#FFD700', '#FCD34D', '#F59E0B', '#FBBF24']
@@ -76,7 +75,6 @@ function BottomConfetti({
       </div>
     )
   }
-
   if (confettiType === 'inferno') {
     const colors = [
       '#f97316',
@@ -110,11 +108,8 @@ function BottomConfetti({
       </div>
     )
   }
-
-  if (['hellfire', 'lunar', 'electric', 'cards'].includes(confettiType)) {
+  if (['hellfire', 'lunar', 'electric', 'cards'].includes(confettiType))
     return null
-  }
-
   const colors = getConfettiColors(bonus?.tier, streakAfter)
   return (
     <div className="relative w-0 h-0">
@@ -140,13 +135,6 @@ function BottomConfetti({
   )
 }
 
-const FLASH_BADGE_STYLES: Record<string, string> = {
-  HELLFIRE: 'bg-red-900/80 text-red-200 border-red-500/40',
-  LUNAR: 'bg-blue-900/80 text-blue-200 border-blue-400/40',
-  ELECTRIC: 'bg-purple-900/80 text-purple-200 border-purple-400/40',
-  CARDS: 'bg-yellow-900/80 text-yellow-200 border-yellow-400/40'
-}
-
 export default function ResultAnimOverlay({
   resultAnim,
   streakMult,
@@ -163,7 +151,56 @@ export default function ResultAnimOverlay({
 
   return (
     <div className="absolute -bottom-35 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col-reverse items-center w-full max-w-sm px-4">
-      <span className="flex items-center gap-1 text-5xl sm:text-6xl font-black animate-bounce leading-tight drop-shadow-lg">
+      {/* Confetti */}
+      {resultAnim.win && (
+        <BottomConfetti
+          confettiType={confettiType}
+          confetti={resultAnim.confetti ?? []}
+          bonus={resultAnim.bonus}
+          streakAfter={resultAnim.streakAfter}
+        />
+      )}
+
+      {/* Flash label */}
+      {flashMult > 1 && flashType && (
+        <div
+          className={`mb-2 px-4 py-1.5 rounded-xl border font-black text-sm uppercase tracking-widest text-center animate-in zoom-in duration-200 ${
+            flashType === 'LUNAR'
+              ? 'bg-blue-950/80 border-[rgba(144,205,244,0.7)]'
+              : flashType === 'ELECTRIC'
+                ? 'bg-purple-950/80 border-[rgba(159,122,234,0.7)]'
+                : flashType === 'CARDS'
+                  ? 'bg-yellow-950/80 border-[rgba(236,201,75,0.7)]'
+                  : 'bg-red-950/80 border-[rgba(220,38,38,0.7)]'
+          }`}
+        >
+          <span className="text-white/50 font-bold text-xs mr-1.5">
+            x{flashMult}
+          </span>
+          <span
+            className={
+              flashType === 'LUNAR'
+                ? 'g-dvg'
+                : flashType === 'ELECTRIC'
+                  ? 'g-tvg'
+                  : flashType === 'CARDS'
+                    ? 'g-qiv'
+                    : 'g-spv'
+            }
+          >
+            {flashType === 'LUNAR'
+              ? "Moon's Blessing"
+              : flashType === 'ELECTRIC'
+                ? 'Electric Surge'
+                : flashType === 'CARDS'
+                  ? 'Luck in the Cards'
+                  : 'Hellfire'}
+          </span>
+        </div>
+      )}
+
+      {/* Streak badge + result number */}
+      <div className="flex flex-col items-center">
         {resultAnim.win && (resultAnim.streakAfter ?? 0) >= 3 && (
           <div
             className={`mb-2 px-3 py-1 rounded-lg border font-black text-xs uppercase tracking-widest text-center animate-in zoom-in duration-200 ${
@@ -175,27 +212,30 @@ export default function ResultAnimOverlay({
             x{streakMult} STREAK BONUS
           </div>
         )}
-        {resultAnim.win ? (
-          <>
-            <span className="text-green-500">+</span>
-            <span className="text-5xl sm:text-6xl font-black">
-              <span className={getAmountColor(animatedResult)}>
-                {formatPoints(animatedResult).display}
+        <span className="flex items-center gap-1 text-5xl sm:text-6xl font-black animate-bounce leading-tight drop-shadow-lg">
+          {resultAnim.win ? (
+            <>
+              <span className="text-green-500">+</span>
+              <span className="text-5xl sm:text-6xl font-black">
+                <span className={getAmountColor(animatedResult)}>
+                  {formatPoints(animatedResult).display}
+                </span>
               </span>
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="text-red-500">-</span>
-            <span className="text-5xl sm:text-6xl font-black">
-              <span className={getAmountColor(animatedResult)}>
-                {formatPoints(animatedResult).display}
+            </>
+          ) : (
+            <>
+              <span className="text-red-500">-</span>
+              <span className="text-5xl sm:text-6xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                <span className={getAmountColor(animatedResult)}>
+                  {formatPoints(animatedResult).display}
+                </span>
               </span>
-            </span>
-          </>
-        )}
-      </span>
+            </>
+          )}
+        </span>
+      </div>
 
+      {/* bonus card */}
       {resultAnim.bonus &&
         (() => {
           const visual = getBonusStyles(bonusTierKey)
@@ -251,35 +291,10 @@ export default function ResultAnimOverlay({
                   </span>
                   <GemIcon size={20} />
                 </div>
-
-                {resultAnim.win && flashMult > 1 && flashType && (
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-white/40">
-                      then
-                    </span>
-                    <span
-                      className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
-                        FLASH_BADGE_STYLES[flashType] ??
-                        'bg-gray-800 text-white border-gray-600'
-                      }`}
-                    >
-                      {flashMult}× {flashType}
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           )
         })()}
-
-      {resultAnim.win && (
-        <BottomConfetti
-          confettiType={confettiType}
-          confetti={resultAnim.confetti ?? []}
-          bonus={resultAnim.bonus}
-          streakAfter={resultAnim.streakAfter}
-        />
-      )}
     </div>
   )
 }
