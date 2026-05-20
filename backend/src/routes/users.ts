@@ -92,6 +92,22 @@ router.post('/update-linkedin', async (req, res) => {
   }
 })
 
+// PATCH /api/users/style-preference
+router.patch('/style-preference', async (req, res) => {
+  try {
+    const { shortId, stylePreference } = req.body
+    if (!shortId) return res.status(400).json({ error: 'shortId required' })
+    // null clears it (auto mode), string sets it
+    await pool.query(
+      `UPDATE users SET point_style_preference = $1 WHERE short_id = $2`,
+      [stylePreference ?? null, shortId]
+    )
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update style preference' })
+  }
+})
+
 // GET /api/users/profile/:shortId
 router.get('/profile/:shortId', async (req, res) => {
   try {
@@ -107,7 +123,9 @@ router.get('/profile/:shortId', async (req, res) => {
         max_win_streak,
         joined_date,
         linkedin_url,
-        show_linkedin_badge
+        show_linkedin_badge,
+        point_style_preference,
+        all_time_peak
       FROM users 
       WHERE short_id = $1`,
       [shortId]
@@ -127,7 +145,9 @@ router.get('/profile/:shortId', async (req, res) => {
       maxWinStreak: user.max_win_streak ?? 0,
       joinedDate: user.joined_date ?? null,
       linkedinUrl: user.linkedin_url ?? null,
-      showLinkedinBadge: user.show_linkedin_badge ?? true
+      showLinkedinBadge: user.show_linkedin_badge ?? true,
+      pointStylePreference: user.point_style_preference ?? null,
+      allTimePeak: user.all_time_peak?.toString() ?? '200000'
     })
   } catch (err) {
     logger.error('GET /users/profile/:shortId failed', err, {
@@ -178,7 +198,9 @@ router.get('/:userId/points', async (req, res) => {
     const { shortId, nickname } = req.query
 
     const result = await pool.query(
-      `SELECT nickname, points, peak_points, daily_peak, weekly_peak, current_win_streak FROM users WHERE user_id = $1`,
+      `SELECT nickname, points, peak_points, daily_peak, weekly_peak,
+              current_win_streak, all_time_peak, point_style_preference
+        FROM users WHERE user_id = $1`,
       [userId]
     )
 
@@ -197,7 +219,9 @@ router.get('/:userId/points', async (req, res) => {
         peakPoints: user.points.toString(),
         dailyPeak: user.points.toString(),
         weeklyPeak: user.points.toString(),
-        currentWinStreak: 0
+        currentWinStreak: 0,
+        allTimePeak: user.points.toString(),
+        pointStylePreference: null
       })
     }
 
@@ -209,7 +233,9 @@ router.get('/:userId/points', async (req, res) => {
       peakPoints: row.peak_points.toString(),
       dailyPeak: row.daily_peak.toString(),
       weeklyPeak: row.weekly_peak.toString(),
-      currentWinStreak: Number(row.current_win_streak ?? 0)
+      currentWinStreak: Number(row.current_win_streak ?? 0),
+      allTimePeak: row.all_time_peak.toString(),
+      pointStylePreference: row.point_style_preference ?? null
     })
   } catch (err) {
     logger.error('GET /users/:userId/points failed', err, {

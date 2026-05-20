@@ -59,6 +59,7 @@ router.get('/unified', async (req, res) => {
         u.points,
         u.linkedin_url,
         u.show_linkedin_badge,
+        u.point_style_preference,
         ${peakColumn} AS peak_points,
         COALESCE(SUM(p.gain_loss) FILTER (WHERE p.gain_loss > 0 ${hasPeriod ? 'AND p.created_at >= $1' : ''}), 0) AS gained,
         COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS wins,
@@ -86,7 +87,8 @@ router.get('/unified', async (req, res) => {
       )
       GROUP BY u.user_id, u.nickname, u.short_id, u.points,
               u.peak_points, u.daily_peak, u.weekly_peak,
-              u.linkedin_url, u.show_linkedin_badge
+              u.linkedin_url, u.show_linkedin_badge,
+              u.point_style_preference
       ORDER BY ${sortKey} ${dir}, u.nickname ASC
       LIMIT 100
     `,
@@ -104,7 +106,8 @@ router.get('/unified', async (req, res) => {
       losses: Number(row.losses),
       winRate: Number(row.win_rate),
       // Only expose LinkedIn URL if user has opted in to show badge publicly
-      linkedinUrl: row.show_linkedin_badge ? (row.linkedin_url ?? null) : null
+      linkedinUrl: row.show_linkedin_badge ? (row.linkedin_url ?? null) : null,
+      pointStylePreference: row.point_style_preference ?? null
     }))
 
     res.json(sanitizedRows)

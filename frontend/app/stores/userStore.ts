@@ -10,7 +10,8 @@ import {
 import {
   fetchUserPoints,
   updateNickname,
-  handleRecoverProfile
+  handleRecoverProfile,
+  updateStylePreference
 } from '@/lib/api'
 import { logger } from '@/lib/logger'
 
@@ -43,6 +44,11 @@ interface UserState {
   setStreakMult: (n: number) => void
   setDailyRank: (rank: number | null) => void
 
+  // Style Preference State
+  stylePreference: string | null
+  allTimePeak: bigint
+  setStylePreference: (pref: string | null) => void
+
   // Core Identity Actions
   initUser: () => Promise<void>
   rerollNickname: () => Promise<string | null>
@@ -69,6 +75,8 @@ export const useUserStore = create<UserState>((set, get) => ({
   winStreak: 0,
   streakMult: 1,
   dailyRank: null,
+  stylePreference: null,
+  allTimePeak: 200000n,
 
   // Setters - Identity
   setDisplayNickname: (name) => set({ displayNickname: name }),
@@ -86,6 +94,19 @@ export const useUserStore = create<UserState>((set, get) => ({
   setStreakMult: (n) => set({ streakMult: n }),
   setDailyRank: (rank) => set({ dailyRank: rank }),
 
+  // Setters - Style
+  setStylePreference: (pref) => {
+    const { shortId } = get()
+    set({ stylePreference: pref })
+    if (shortId)
+      updateStylePreference(shortId, pref).catch((err) =>
+        logger.error(
+          'Failed to persist style preference',
+          err instanceof Error ? err : undefined
+        )
+      )
+  },
+
   // Actions - Initialization
   initUser: async () => {
     const user = getOrCreateUser()
@@ -98,10 +119,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       isHydrated: true
     })
 
-    Sentry.setUser({
-      id: user.userId,
-      username: user.nickname
-    })
+    Sentry.setUser({ id: user.userId, username: user.nickname })
     Sentry.setTag('shortId', user.shortId)
 
     const data = await fetchUserPoints(
@@ -112,9 +130,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       logger.error(
         'Failed to fetch user points during init',
         err instanceof Error ? err : undefined,
-        {
-          section: 'initUser'
-        }
+        { section: 'initUser' }
       )
       return null
     })
@@ -124,6 +140,10 @@ export const useUserStore = create<UserState>((set, get) => ({
     const newPoints = BigInt(data.points)
     const newPeak = BigInt(data.peakPoints)
     get().applyPointsUpdate(newPoints, newPeak)
+
+    if (data.allTimePeak) set({ allTimePeak: BigInt(data.allTimePeak) })
+    if (data.pointStylePreference !== undefined)
+      set({ stylePreference: data.pointStylePreference })
 
     if (data.nickname) {
       set({ displayNickname: data.nickname })
@@ -210,13 +230,11 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       resetUser()
       const newUser = getOrCreateUser()
-
       try {
         await updateNickname(newUser.userId, newUser.nickname, newUser.shortId)
       } catch (e) {
         logger.warn('Initial reset sync failed', { error: String(e) })
       }
-
       await get().initUser()
       return { success: true }
     } catch (err) {
@@ -237,7 +255,6 @@ export const useUserStore = create<UserState>((set, get) => ({
         : s.betAmount > newPoints
           ? newPoints
           : s.betAmount
-
       return {
         points: newPoints,
         peakPoints: isNewPeak ? newPeak : s.peakPoints,

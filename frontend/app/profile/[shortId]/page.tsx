@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  clearUserCache,
-  getOrCreateUser,
-  resetUser
-} from '@/lib/user'
+import { clearUserCache, getOrCreateUser, resetUser } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import type { UserStats } from '@/types/rps'
-import { getAmountColor, getFullNumberName, formatPoints } from '@/lib/format'
+import {
+  getDisplayTierClass,
+  getFullNumberName,
+  formatPoints,
+  getUnlockedTiers
+} from '@/lib/format'
 import {
   fetchUserProfile,
   fetchUserStats,
@@ -35,7 +36,9 @@ export default function ProfilePage() {
   const params = useParams()
   const router = useRouter()
   const targetShortId = params.shortId as string
-  const { rerollNickname } = useUserStore()
+  const { rerollNickname, setStylePreference: setStoreStylePreference } =
+    useUserStore()
+
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
@@ -48,28 +51,28 @@ export default function ProfilePage() {
     weekly: null,
     allTime: null
   })
-
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
-
   const [recoveryCode, setRecoveryCode] = useState<string | null>(null)
   const [codeRevealed, setCodeRevealed] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
-
   const [recoverInput, setRecoverInput] = useState('')
   const [recoverError, setRecoverError] = useState('')
   const [recoverLoading, setRecoverLoading] = useState(false)
   const [recoverConfirm, setRecoverConfirm] = useState(false)
-
   const [resetConfirm, setResetConfirm] = useState(false)
   const [resetError, setResetError] = useState('')
-
   const [profileUserId, setProfileUserId] = useState<string | null>(null)
-
   const [linkedinUrl, setLinkedinUrl] = useState<string | null>(null)
   const [showLinkedinBadge, setShowLinkedinBadge] = useState(true)
   const [linkedinInput, setLinkedinInput] = useState('')
   const [linkedinSaved, setLinkedinSaved] = useState(false)
   const [linkedinError, setLinkedinError] = useState('')
+
+  const [profileStylePreference, setProfileStylePreference] = useState<
+    string | null
+  >(null)
+  const [allTimePeak, setAllTimePeak] = useState<bigint>(200000n)
+  const [autoStyle, setAutoStyle] = useState(true)
 
   const { display, full, capped } = formatPoints(points ?? '0')
 
@@ -91,17 +94,25 @@ export default function ProfilePage() {
           setNickname(profileData.nickname)
           setPoints(profileData.points)
           setProfileUserId(profileData.userId)
+          setLinkedinUrl(profileData.linkedinUrl)
+          setShowLinkedinBadge(profileData.showLinkedinBadge ?? true)
+          setLinkedinInput(profileData.linkedinUrl ?? '')
+          setProfileStylePreference(profileData.pointStylePreference ?? null)
+          setAutoStyle(profileData.pointStylePreference === null)
+          setAllTimePeak(BigInt(profileData.allTimePeak ?? '200000'))
+
           const statsData = await fetchUserStats(
             profileData.userId,
             targetShortId
           )
           if (statsData) setStats(statsData)
-          setLinkedinUrl(profileData.linkedinUrl)
-          setShowLinkedinBadge(profileData.showLinkedinBadge ?? true)
-          setLinkedinInput(profileData.linkedinUrl ?? '')
         }
       } catch (err) {
-        logger.error('Failed to load profile', err instanceof Error ? err : undefined, { targetShortId })
+        logger.error(
+          'Failed to load profile',
+          err instanceof Error ? err : undefined,
+          { targetShortId }
+        )
         if (own) {
           setPoints('200000')
           const local = getOrCreateUser()
@@ -169,7 +180,10 @@ export default function ProfilePage() {
       const freshUser = getOrCreateUser()
       router.push(`/profile/${freshUser.shortId}`)
     } catch (err) {
-      logger.error('Profile recovery failed', err instanceof Error ? err : undefined)
+      logger.error(
+        'Profile recovery failed',
+        err instanceof Error ? err : undefined
+      )
       setRecoverError('Failed to recover profile')
     } finally {
       setRecoverLoading(false)
@@ -227,6 +241,10 @@ export default function ProfilePage() {
   const numberName = points ? getFullNumberName(points) : ''
   const shouldShowTooltip =
     showPointsExplainer && numberName && numberName !== 'Points'
+  const pointsColorClass = getDisplayTierClass(
+    BigInt(points ?? '0'),
+    profileStylePreference
+  )
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-0 pb-10">
@@ -237,7 +255,6 @@ export default function ProfilePage() {
               <p className="text-[9px] sm:text-[10px] text-black/40 uppercase font-black tracking-[0.15em] shrink-0">
                 {isOwnProfile ? 'Current Identity' : 'Player Identity'}
               </p>
-
               {isOwnProfile && (
                 <button
                   onClick={handleRegenerate}
@@ -246,7 +263,6 @@ export default function ProfilePage() {
                   Randomize
                 </button>
               )}
-
               {stats?.joinedDate && (
                 <div className="text-[9px] sm:text-[11px] text-indigo-400/80 font-black uppercase tracking-widest flex flex-col leading-tight whitespace-nowrap ml-1">
                   <span className="opacity-70">joined at:</span>
@@ -258,11 +274,9 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-
             <p className="text-[1.4rem] min-[375px]:text-[1.5rem] sm:text-[clamp(1.5rem,6vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tighter">
               {nickname}
             </p>
-
             <IdentityBadges
               targetShortId={targetShortId}
               linkedinUrl={linkedinUrl}
@@ -275,16 +289,16 @@ export default function ProfilePage() {
             {shouldShowTooltip && (
               <div className="absolute -top-12 sm:right-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
                 <span
-                  className={`text-[10px] font-black uppercase tracking-[0.2em] ${getAmountColor(points ?? '0')}`}
+                  className={`text-[10px] font-black uppercase tracking-[0.2em] ${pointsColorClass} tier-clean-text`}
                 >
                   {numberName}
                 </span>
                 <div className="absolute -bottom-1 sm:right-6 left-6 sm:left-auto w-2 h-2 bg-white border-b border-r border-gray-100 rotate-45" />
               </div>
             )}
-
             <div
               className="flex items-center gap-3 cursor-pointer select-none group"
+              title={capped ? full : undefined}
               onMouseEnter={() => {
                 if (!capped) setShowPointsExplainer(true)
               }}
@@ -297,14 +311,12 @@ export default function ProfilePage() {
                 <GemIcon size={32} />
               </div>
               <span
-                className={`text-3xl sm:text-4xl font-black leading-none tracking-tighter ${points !== null ? getAmountColor(points) : 'text-purple-600'}`}
-                title={capped ? full : undefined}
+                className={`text-3xl sm:text-4xl font-black leading-none tracking-tighter ${points !== null ? pointsColorClass : 'text-purple-600'}`}
                 style={{ position: 'relative' }}
               >
                 {points !== null ? display : '...'}
               </span>
             </div>
-
             <div className="flex items-center gap-2.5 text-[10px] sm:text-[11px] font-black uppercase text-black">
               {(['daily', 'weekly', 'allTime'] as const).map((key, i) => (
                 <div key={key} className="flex items-center gap-1.5">
@@ -355,7 +367,6 @@ export default function ProfilePage() {
                 useK={useK}
               />
             </StatSection>
-
             <StatSection label="Wealth">
               <StatBox
                 label="Gained"
@@ -376,7 +387,6 @@ export default function ProfilePage() {
                 useK={useK}
               />
             </StatSection>
-
             <StatSection label="Performance">
               <StatBox
                 label="Max Streak"
@@ -408,6 +418,78 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Point Style section - own profile only */}
+        {isOwnProfile && (
+          <>
+            {getUnlockedTiers(allTimePeak).length === 0 ? (
+              <p className="text-[10px] text-black/30 font-black uppercase tracking-widest mt-3">
+                Reach 1,000,000 points to unlock style selection
+              </p>
+            ) : (
+              <div className="border-t border-gray-50 mt-8 pt-6">
+                <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-4 ml-1">
+                  Point Style
+                </p>
+                <div className="flex flex-col gap-3 ml-1">
+                  <label className="flex items-center gap-3 cursor-pointer select-none">
+                    <div
+                      onClick={() => {
+                        const next = !autoStyle
+                        setAutoStyle(next)
+                        if (next) {
+                          setProfileStylePreference(null)
+                          setStoreStylePreference(null)
+                        }
+                      }}
+                      className={`relative w-8 h-4 rounded-full transition-colors ${autoStyle ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                    >
+                      <div
+                        className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${autoStyle ? 'translate-x-4' : 'translate-x-0.5'}`}
+                      />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-black/40">
+                      Auto-update style when reaching new tiers
+                    </span>
+                  </label>
+
+                  <div className="relative overflow-hidden rounded-2xl">
+                    <select
+                      value={profileStylePreference ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value || null
+                        setProfileStylePreference(val)
+                        setStoreStylePreference(val)
+                        if (val) setAutoStyle(false)
+                      }}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2.5 text-[11px] font-black uppercase tracking-wider focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none"
+                    >
+                      <option value=""> Select a style </option>
+                      {getUnlockedTiers(allTimePeak).map((tier) => (
+                        <option key={tier.cls} value={tier.cls}>
+                          {tier.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {profileStylePreference && (
+                    <div className="flex items-center gap-2 ml-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-black/30">
+                        Preview:
+                      </span>
+                      <span
+                        className={`text-sm font-black ${profileStylePreference}`}
+                      >
+                        1,000,000
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
         {/* LinkedIn section */}
         <div className="border-t border-gray-50 mt-8 pt-6">
           <div className="flex items-center gap-2 mb-3 ml-1">
@@ -420,7 +502,6 @@ export default function ProfilePage() {
               </span>
             )}
           </div>
-
           {isOwnProfile ? (
             <div className="flex flex-col gap-3">
               <div className="flex gap-2">
@@ -468,13 +549,11 @@ export default function ProfilePage() {
                   {linkedinSaved ? 'Saved!' : 'Save'}
                 </button>
               </div>
-
               {linkedinError && (
                 <p className="text-red-500 text-[10px] ml-1 uppercase font-black">
                   {linkedinError}
                 </p>
               )}
-
               <label className="flex items-center gap-3 ml-1 cursor-pointer select-none">
                 <div
                   onClick={() => {
@@ -496,7 +575,6 @@ export default function ProfilePage() {
                   Show LinkedIn badge publicly
                 </span>
               </label>
-
               {linkedinUrl && showLinkedinBadge && (
                 <div className="ml-1">
                   <LinkedInBadge url={linkedinUrl} size="md" />
@@ -514,6 +592,7 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* Recovery section */}
         {isOwnProfile && (
           <div className="border-t border-gray-50 mt-8 pt-6">
             <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-2 ml-1">
@@ -617,7 +696,10 @@ export default function ProfilePage() {
         <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">
           Bet History
         </h2>
-        <BetHistory userId={profileUserId} />
+        <BetHistory
+          userId={profileUserId}
+          stylePreference={profileStylePreference}
+        />
       </div>
     </div>
   )

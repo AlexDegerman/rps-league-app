@@ -253,23 +253,24 @@ export const resolvePrediction = async (
 
       await pool.query(
         `UPDATE users
-      SET points               = points + $1,
-          peak_points          = GREATEST(peak_points, points + $1),
-          daily_peak           = GREATEST(daily_peak,  points + $1),
-          weekly_peak          = GREATEST(weekly_peak, points + $1),
-          bonus_pity_count     = $3,
-          total_volume         = total_volume + $4,
-          biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
-          biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
-          current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
-          max_win_streak       = CASE 
-                                    WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
-                                    THEN current_win_streak + 1 
-                                    ELSE max_win_streak 
-                                  END,
-          total_pities_earned  = total_pities_earned + $6,
-          total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
-      WHERE user_id = $2`,
+        SET points               = points + $1,
+            peak_points          = GREATEST(peak_points, points + $1),
+            all_time_peak        = GREATEST(all_time_peak, points + $1),
+            daily_peak           = GREATEST(daily_peak,  points + $1),
+            weekly_peak          = GREATEST(weekly_peak, points + $1),
+            bonus_pity_count     = $3,
+            total_volume         = total_volume + $4,
+            biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
+            biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
+            current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
+            max_win_streak       = CASE 
+                                      WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
+                                      THEN current_win_streak + 1 
+                                      ELSE max_win_streak 
+                                    END,
+            total_pities_earned  = total_pities_earned + $6,
+            total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
+        WHERE user_id = $2`,
         [
           gainLoss.toString(),
           row.user_id,
@@ -312,7 +313,6 @@ export const resolvePrediction = async (
         points: BigInt(row.current_points),
         betAmount: BigInt(row.bet_amount)
       })
-      // continue loop - one user failing shouldn't block others
     }
   }
 }

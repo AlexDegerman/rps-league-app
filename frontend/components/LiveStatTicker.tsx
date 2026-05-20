@@ -77,7 +77,7 @@ export default function LiveStatsTicker() {
             Vol
           </span>
           <span
-            className={`text-[9px] font-black whitespace-nowrap tracking-tighter truncate ${getAmountColor(stats.totalVolume)}`}
+            className={`text-[9px] font-black whitespace-nowrap tracking-tighter w-fit ${getAmountColor(stats.totalVolume)}`}
           >
             {formatPoints(stats.totalVolume).display}
           </span>

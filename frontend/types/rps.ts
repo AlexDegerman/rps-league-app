@@ -78,6 +78,8 @@ export interface UserPointsData {
   dailyPeak: string
   weeklyPeak: string
   currentWinStreak: number
+  allTimePeak: string
+  pointStylePreference: string | null
 }
 
 export interface LeaderboardEntry {
@@ -91,6 +93,7 @@ export interface LeaderboardEntry {
   losses: number
   winRate: number
   linkedinUrl: string | null
+  pointStylePreference: string | null
 }
 
 export interface ProfileData {
@@ -103,6 +106,8 @@ export interface ProfileData {
   joinedDate: number
   linkedinUrl: string | null
   showLinkedinBadge: boolean
+  pointStylePreference: string | null
+  allTimePeak: string
 }
 
 export interface RecoverResponse {

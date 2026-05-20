@@ -161,3 +161,38 @@ export const MODE_CONFIG = {
   }
 }
 
+export const TIER_THRESHOLDS = [
+  { label: 'Octovigintillion', cls: 'g-ovg', min: 10n ** 87n },
+  { label: 'Septenvigintillion', cls: 'g-spv', min: 10n ** 84n },
+  { label: 'Sexvigintillion', cls: 'g-svg', min: 10n ** 81n },
+  { label: 'Quinvigintillion', cls: 'g-qiv', min: 10n ** 78n },
+  { label: 'Quattuorvigintillion', cls: 'g-qvg', min: 10n ** 75n },
+  { label: 'Trevigintillion', cls: 'g-tvg', min: 10n ** 72n },
+  { label: 'Duovigintillion', cls: 'g-dvg', min: 10n ** 69n },
+  { label: 'Unvigintillion', cls: 'g-uvg', min: 10n ** 66n },
+  { label: 'Vigintillion', cls: 'g-vg', min: 10n ** 63n },
+  { label: 'Novemdecillion', cls: 'g-nod', min: 10n ** 60n },
+  { label: 'Octodecillion', cls: 'g-ocd', min: 10n ** 57n },
+  { label: 'Septendecillion', cls: 'g-spd', min: 10n ** 54n },
+  { label: 'Sexdecillion', cls: 'g-sxd', min: 10n ** 51n },
+  { label: 'Quindecillion', cls: 'g-qid', min: 10n ** 48n },
+  { label: 'Quattuordecillion', cls: 'g-qad', min: 10n ** 45n },
+  { label: 'Tredecillion', cls: 'g-td', min: 10n ** 42n },
+  { label: 'Duodecillion', cls: 'g-dd', min: 10n ** 39n },
+  { label: 'Undecillion', cls: 'g-ud', min: 10n ** 36n },
+  { label: 'Decillion', cls: 'g-dc', min: 10n ** 33n },
+  { label: 'Nonillion', cls: 'g-no', min: 10n ** 30n },
+  { label: 'Octillion', cls: 'g-oc', min: 10n ** 27n },
+  { label: 'Septillion', cls: 'g-sp', min: 10n ** 24n },
+  { label: 'Sextillion', cls: 'g-sx', min: 10n ** 21n },
+  { label: 'Quintillion', cls: 'g-qi', min: 10n ** 18n },
+  { label: 'Quadrillion', cls: 'g-qa', min: 10n ** 15n },
+  { label: 'Trillion', cls: 'g-t', min: 10n ** 12n },
+  { label: '100 Billion', cls: 'g-b3', min: 100_000_000_000n },
+  { label: '10 Billion', cls: 'g-b2', min: 10_000_000_000n },
+  { label: 'Billion', cls: 'g-b1', min: 1_000_000_000n },
+  { label: '100 Million', cls: 'g-m3', min: 100_000_000n },
+  { label: '10 Million', cls: 'g-m2', min: 10_000_000n },
+  { label: 'Million', cls: 'g-m1', min: 1_000_000n }
+] as const
+

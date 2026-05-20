@@ -254,3 +254,14 @@ export async function submitFeedback(
     return { error: 'CONNECTION_FAILED' }
   }
 }
+
+export async function updateStylePreference(
+  shortId: string,
+  stylePreference: string | null
+) {
+  return fetch(`${API_BASE}/api/users/style-preference`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ shortId, stylePreference })
+  })
+}

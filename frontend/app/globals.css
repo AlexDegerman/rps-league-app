@@ -58,7 +58,8 @@
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.9);
-    color: white;
+    -webkit-text-fill-color: white !important;
+    background-clip: border-box !important;
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 14px;
@@ -69,6 +70,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 }
+
 /* --- TIER KEYFRAMES --- */
 
 @keyframes qa-pulse {
@@ -1792,3 +1794,17 @@
 .event-bg-electric { background: linear-gradient(to bottom, rgba(159, 122, 234, 0.05), rgba(159, 122, 234, 0.15), rgba(159, 122, 234, 0.2)) !important; }
 .event-bg-cards { background: linear-gradient(to bottom, rgba(236, 201, 75, 0.05), rgba(236, 201, 75, 0.15), rgba(236, 201, 75, 0.2)) !important; }
 .event-bg-hellfire { background: linear-gradient(to bottom, rgba(220, 38, 38, 0.05), rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.2)) !important; }
+
+/* A variant that keeps colors but removes effects/clipping for tooltips/icons */
+.tier-clean-text {
+  background-clip: initial !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  color: inherit !important; 
+}
+
+.tier-clean-text::before,
+.tier-clean-text::after {
+  content: none !important;
+  display: none !important;
+}

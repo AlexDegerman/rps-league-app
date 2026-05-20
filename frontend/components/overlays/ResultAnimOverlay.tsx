@@ -1,7 +1,8 @@
 import GemIcon from '@/components/icons/GemIcon'
-import { formatPoints, getAmountColor, getBonusStyles } from '@/lib/format'
+import { formatPoints, getAmountColor, getBonusStyles, getDisplayTierClass } from '@/lib/format'
 import { BONUS_TIER_STYLES } from '@/lib/constants'
 import type { BonusTier, ConfettiType, ResultAnim } from '@/types/rps'
+import { useUserStore } from '@/app/stores/userStore'
 
 interface ConfettiParticle {
   vx: number
@@ -140,6 +141,8 @@ export default function ResultAnimOverlay({
   streakMult,
   animatedResult
 }: ResultAnimOverlayProps) {
+  const { stylePreference } = useUserStore()
+
   if (!resultAnim) return null
 
   const bonusTierKey = (resultAnim.bonus?.tier ?? 'COMMON') as BonusTier
@@ -217,7 +220,12 @@ export default function ResultAnimOverlay({
             <>
               <span className="text-green-500">+</span>
               <span className="text-5xl sm:text-6xl font-black">
-                <span className={getAmountColor(animatedResult)}>
+                <span
+                  className={getDisplayTierClass(
+                    animatedResult,
+                    stylePreference
+                  )}
+                >
                   {formatPoints(animatedResult).display}
                 </span>
               </span>
@@ -226,7 +234,12 @@ export default function ResultAnimOverlay({
             <>
               <span className="text-red-500">-</span>
               <span className="text-5xl sm:text-6xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-                <span className={getAmountColor(animatedResult)}>
+                <span
+                  className={getDisplayTierClass(
+                    animatedResult,
+                    stylePreference
+                  )}
+                >
                   {formatPoints(animatedResult).display}
                 </span>
               </span>

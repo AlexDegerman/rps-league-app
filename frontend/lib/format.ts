@@ -1,4 +1,5 @@
 import type { Match } from '../types/rps'
+import { TIER_THRESHOLDS } from './constants'
 
 // Fallback conversion in case a raw timestamp reaches the frontend unnormalized.
 // Under normal conditions all timestamps are normalized to milliseconds on ingest.
@@ -80,7 +81,7 @@ export const parseShorthand = (val: string): bigint => {
     qiv: 10n ** 78n,
     svg: 10n ** 81n,
     spv: 10n ** 84n,
-    ovg: 10n ** 87n, 
+    ovg: 10n ** 87n
   }
 
   if (suffix && multipliers[suffix]) {
@@ -127,11 +128,11 @@ export const formatPoints = (
 
   const tiers = [
     { threshold: 10n ** 87n, symbol: 'Ovg' },
-    { threshold: 10n ** 84n, symbol: 'Spv' }, 
+    { threshold: 10n ** 84n, symbol: 'Spv' },
     { threshold: 10n ** 81n, symbol: 'Svg' },
     { threshold: 10n ** 78n, symbol: 'Qiv' },
-    { threshold: 10n ** 75n, symbol: 'Qvg' }, 
-    { threshold: 10n ** 72n, symbol: 'Tvg' }, 
+    { threshold: 10n ** 75n, symbol: 'Qvg' },
+    { threshold: 10n ** 72n, symbol: 'Tvg' },
     { threshold: 10n ** 69n, symbol: 'Dvg' },
     { threshold: 10n ** 66n, symbol: 'Uvg' },
     { threshold: 10n ** 63n, symbol: 'Vg' },
@@ -231,93 +232,25 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   return 'Points'
 }
 
-const SEPTENVIGINTILLION = 10n ** 84n
-const OCTOVIGINTILLION = 10n ** 87n
-const QUINVIGINTILLION = 10n ** 78n
-const SEXVIGINTILLION = 10n ** 81n
-const TREVIGINTILLION = 10n ** 72n
-const QUATTUORVIGINTILLION = 10n ** 75n
-const UNVIGINTILLION = 10n ** 66n
-const DUOVIGINTILLION = 10n ** 69n
-const VIGINTILLION = 10n ** 63n
-const NOVEMDECILLION = 10n ** 60n
-const OCTODECILLION = 10n ** 57n
-const SEPTENDECILLION = 10n ** 54n
-const SEXDECILLION = 10n ** 51n
-const QUINDECILLION = 10n ** 48n
-const QUATTUORDECILLION = 10n ** 45n
-const TREDECILLION = 10n ** 42n
-const DUODECILLION = 10n ** 39n
-const UNDECILLION = 10n ** 36n
-const DECILLION = 10n ** 33n
-const NONILLION = 10n ** 30n
-const OCTILLION = 10n ** 27n
-const SEPTILLION = 10n ** 24n
-const SEXTILLION = 10n ** 21n
-const QUINTILLION = 10n ** 18n
-const QUADRILLION = 10n ** 15n
-const TRILLION = 10n ** 12n
-const ZERO = 0n
-
 /**
  * Maps a points amount to the corresponding CSS class for "RPS League" tier styling.
  * Prioritizes BigInt for Vigintillion-scale precision and avoids quick-fix error handling.
  */
 export const getAmountColor = (amount?: number | bigint | string): string => {
   if (amount == null || amount === '') return 'text-gray-400'
-
   let raw: bigint
   try {
-    if (typeof amount === 'bigint') {
-      raw = amount
-    } else if (typeof amount === 'number') {
-      raw = BigInt(Math.trunc(amount))
-    } else {
-      const cleanStr = String(amount).split('.')[0].replace(/,/g, '')
-      raw = BigInt(cleanStr)
-    }
+    if (typeof amount === 'bigint') raw = amount
+    else if (typeof amount === 'number') raw = BigInt(Math.trunc(amount))
+    else raw = BigInt(String(amount).split('.')[0].replace(/,/g, ''))
   } catch {
     return 'text-gray-400'
   }
-
-  const a = raw < ZERO ? -raw : raw
-  if (a === ZERO) return 'text-gray-400'
-
-  if (a >= OCTOVIGINTILLION) return 'g-ovg'
-  if (a >= SEPTENVIGINTILLION) return 'g-spv'
-  if (a >= SEXVIGINTILLION) return 'g-svg'
-  if (a >= QUINVIGINTILLION) return 'g-qiv'
-  if (a >= QUATTUORVIGINTILLION) return 'g-qvg'
-  if (a >= TREVIGINTILLION) return 'g-tvg' 
-  if (a >= DUOVIGINTILLION) return 'g-dvg' 
-  if (a >= UNVIGINTILLION) return 'g-uvg' 
-  if (a >= VIGINTILLION) return 'g-vg'
-  if (a >= NOVEMDECILLION) return 'g-nod'
-  if (a >= OCTODECILLION) return 'g-ocd'
-  if (a >= SEPTENDECILLION) return 'g-spd'
-  if (a >= SEXDECILLION) return 'g-sxd'
-  if (a >= QUINDECILLION) return 'g-qid'
-  if (a >= QUATTUORDECILLION) return 'g-qad'
-  if (a >= TREDECILLION) return 'g-td'
-  if (a >= DUODECILLION) return 'g-dd'
-  if (a >= UNDECILLION) return 'g-ud'
-  if (a >= DECILLION) return 'g-dc'
-  if (a >= NONILLION) return 'g-no'
-  if (a >= OCTILLION) return 'g-oc'
-  if (a >= SEPTILLION) return 'g-sp'
-  if (a >= SEXTILLION) return 'g-sx'
-  if (a >= QUINTILLION) return 'g-qi'
-  if (a >= QUADRILLION) return 'g-qa'
-
-  // Base Tiers
-  if (a >= TRILLION) return 'g-t'
-  if (a >= 100_000_000_000n) return 'g-b3'
-  if (a >= 10_000_000_000n) return 'g-b2'
-  if (a >= 1_000_000_000n) return 'g-b1'
-  if (a >= 100_000_000n) return 'g-m3'
-  if (a >= 10_000_000n) return 'g-m2'
-  if (a >= 1_000_000n) return 'g-m1'
-
+  const a = raw < 0n ? -raw : raw
+  if (a === 0n) return 'text-gray-400'
+  for (const tier of TIER_THRESHOLDS) {
+    if (a >= tier.min) return tier.cls
+  }
   return 'text-gray-400'
 }
 
@@ -354,8 +287,8 @@ export const getBonusStyles = (tier: string) => {
       return {
         label: 'LUCKY SAVE',
         text: 'text-green-300',
-        containerClass: `${base} text-xs sm:text-sm`, 
-        scale: 'scale-100', 
+        containerClass: `${base} text-xs sm:text-sm`,
+        scale: 'scale-100',
         glow: 'drop-shadow-md'
       }
     default:
@@ -380,3 +313,14 @@ export const getEventColor = (key: string, alpha: number) => {
   }
   return colors[key] ?? `rgba(150,150,150,${alpha})`
 }
+
+export const getDisplayTierClass = (
+  amount: bigint | string,
+  ownerStylePreference: string | null
+): string => {
+  if (ownerStylePreference) return ownerStylePreference
+  return getAmountColor(amount)
+}
+
+export const getUnlockedTiers = (allTimePeak: bigint) =>
+  TIER_THRESHOLDS.filter((t) => allTimePeak >= t.min)

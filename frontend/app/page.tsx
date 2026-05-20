@@ -19,7 +19,7 @@ import { getOrCreateUser, isUserValid } from '@/lib/user'
 import type { Match, PendingMatch, ResultAnim, EventTheme } from '@/types/rps'
 import {
   formatPoints,
-  getAmountColor,
+  getDisplayTierClass,
   getFullNumberName,
   parseShorthand
 } from '@/lib/format'
@@ -86,7 +86,8 @@ export default function HomePage() {
     displayNickname,
     dailyRank,
     setDailyRank,
-    applyPointsUpdate
+    applyPointsUpdate,
+    stylePreference
   } = useUserStore()
 
   // - UI store -
@@ -353,7 +354,6 @@ export default function HomePage() {
       const data = JSON.parse(event.data)
       const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
-      console.log('prediction_result payload:', data)
       const isWin = data.result === 'WIN'
       const { activeFlashEvent: currentFlash } = useGameStore.getState()
 
@@ -557,7 +557,6 @@ export default function HomePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
-
       {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}
       {showUpdateModal && <UpdateModal onClose={handleUpdateClose} />}
 
@@ -602,6 +601,7 @@ export default function HomePage() {
                   <div className="relative group flex items-center">
                     <div
                       className="flex items-center gap-2 cursor-pointer select-none"
+                      title={capped ? full : undefined}
                       onMouseEnter={() => {
                         if (!capped) setShowPointsExplainer(true)
                       }}
@@ -614,8 +614,10 @@ export default function HomePage() {
                       <GemIcon size={24} className="shrink-0" />
                       <span className="text-xl font-bold tabular-nums">
                         <span
-                          className={getAmountColor(points)}
-                          title={capped ? full : undefined}
+                          className={getDisplayTierClass(
+                            points,
+                            stylePreference
+                          )}
                           style={{ position: 'relative' }}
                         >
                           {pointsLoaded ? animatedDisplay : '...'}
@@ -625,7 +627,9 @@ export default function HomePage() {
                     {shouldShowTooltip && (
                       <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-                          <span className={getAmountColor(points)}>
+                          <span
+                            className={`${getDisplayTierClass(points, stylePreference)} tier-clean-text`}
+                          >
                             {numberName}
                           </span>
                         </span>
@@ -697,22 +701,26 @@ export default function HomePage() {
           </div>
 
           {/* Bet input row */}
-          <div className="flex flex-col sm:flex-row gap-1">
-            <div className="flex items-center gap-2 flex-1">
-              <label className="text-xs font-bold text-gray-400 uppercase shrink-0">
+          <div className="flex flex-row items-center gap-1 sm:gap-2 h-10">
+            <div className="flex items-center gap-2 flex-1 min-w-0 h-full">
+              <label className="hidden min-[370px]:block text-xs font-bold text-gray-400 uppercase shrink-0">
                 Amount
               </label>
-              <div className="relative flex-1">
+              <div className="relative flex-1 min-w-0 h-full">
                 <input
                   type="text"
-                  value={
-                    isFocused ? inputString : formatPoints(betAmount).display
-                  }
+                  value={isFocused ? inputString : ''}
                   onFocus={() => {
                     setIsFocused(true)
                     setInputString('')
                   }}
-                  placeholder={!autoAllIn ? '100k → 100.000' : ''}
+                  placeholder={
+                    !isFocused
+                      ? formatPoints(betAmount).display
+                      : !autoAllIn
+                        ? '100k → 100.000'
+                        : ''
+                  }
                   onChange={(e) => {
                     const val = e.target.value
                     setInputString(val)
@@ -730,17 +738,16 @@ export default function HomePage() {
                     setBetAmount(final)
                     setInputString(final.toString())
                   }}
-                  className={`relative overflow-hidden w-full mx-auto p-4 border border-gray-200 rounded-lg pl-3 pr-16 py-2.5 font-bold text-gray-800 focus:ring-2 focus:ring-purple-300 transition-all ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
+                  className={`block w-full h-full border border-gray-200 rounded-lg pl-3 pr-2 py-0 font-bold focus:ring-2 focus:ring-purple-300 transition-all bg-white ${
+                    !isFocused
+                      ? 'placeholder:text-gray-800'
+                      : 'placeholder:text-gray-400'
+                  } ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
                 />
-                {isFocused && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-gray-400 pointer-events-none">
-                    ({formatPoints(betAmount).display})
-                  </span>
-                )}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-1 shrink-0 h-full">
               <ModeButton
                 visualMode={visualMode}
                 label="ALL IN"
@@ -751,7 +758,7 @@ export default function HomePage() {
               />
               <ModeButton
                 visualMode={visualMode}
-                label={`AUTO ${autoAllIn ? 'ON' : 'OFF'}`}
+                label={`AUTO\u00A0${autoAllIn ? 'ON' : 'OFF'}`}
                 onClick={() => setAutoAllIn(!autoAllIn)}
               />
             </div>

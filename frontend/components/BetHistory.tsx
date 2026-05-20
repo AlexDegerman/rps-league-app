@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { formatDateTime, formatPoints, getAmountColor } from '@/lib/format'
+import { formatDateTime, formatPoints, getAmountColor, getDisplayTierClass } from '@/lib/format'
 import GemIcon from '@/components/icons/GemIcon'
 import MoveIcon from '@/components/icons/MoveIcon'
 import { fetchUserBetHistory } from '@/lib/api'
@@ -150,7 +150,15 @@ function BonusBadge({
   )
 }
 
-function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
+function BetRow({
+  entry,
+  rank,
+  stylePreference
+}: {
+  entry: BetHistoryEntry
+  rank?: number
+  stylePreference: string | null
+}) {
   const isWin = entry.result === 'WIN'
   const isLoss = entry.result === 'LOSE'
 
@@ -161,7 +169,7 @@ function BetRow({ entry, rank }: { entry: BetHistoryEntry; rank?: number }) {
 
   const amountAnimationClass = isLoss
     ? 'text-red-500 font-black'
-    : getAmountColor(absGainLoss)
+    : getDisplayTierClass(absGainLoss, stylePreference)
 
   const tierKey = (
     entry.bonusTier && entry.bonusTier in BONUS_TIER_STYLES
@@ -343,9 +351,14 @@ function useTabFetchFn(userId: string | null, tab: Tab) {
 
 // Main Component
 
-export default function BetHistory({ userId }: { userId: string | null }) {
+export default function BetHistory({
+  userId,
+  stylePreference
+}: {
+  userId: string | null
+  stylePreference: string | null
+}) {
   const [tab, setTab] = useState<Tab>('recent')
-
   const fetchFn = useTabFetchFn(userId, tab)
 
   const { matches, isLoading, isLoadingMore, hasMore, loadMatches, reset } =
@@ -394,6 +407,7 @@ export default function BetHistory({ userId }: { userId: string | null }) {
                 key={`${bet.gameId}-${bet.id}`}
                 entry={bet}
                 rank={tab !== 'recent' ? i : undefined}
+                stylePreference={stylePreference}
               />
             ))}
             {isLoadingMore && (

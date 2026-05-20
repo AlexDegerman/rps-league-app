@@ -7,7 +7,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { fetchUnifiedLeaderboard } from '@/lib/api'
 import GemIcon from '@/components/icons/GemIcon'
 import { getUserId } from '@/lib/user'
-import { formatPoints, getAmountColor } from '@/lib/format'
+import { formatPoints, getAmountColor, getDisplayTierClass } from '@/lib/format'
 import Link from 'next/link'
 import { LeaderboardEntry } from '@/types/rps'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
@@ -278,20 +278,32 @@ function LeaderboardContent() {
                                 <div className="w-6 text-red-500 font-bold">
                                   {entry.losses}
                                 </div>
-                                <div
-                                  className={`w-14 font-bold flex items-center gap-0.5 ${getAmountColor(entry.points)}`}
-                                >
-                                  <GemIcon size={8} className="shrink-0" />
+                                <div className="w-14 font-bold flex items-center gap-0.5">
                                   {(() => {
                                     const { display, full, capped } =
                                       formatPoints(entry.points)
                                     return (
-                                      <span
+                                      <div
+                                        className="w-14 font-bold flex items-center gap-0.5"
                                         title={capped ? full : undefined}
-                                        style={{ position: 'relative' }}
                                       >
-                                        {display}
-                                      </span>
+                                        <GemIcon
+                                          size={8}
+                                          className="shrink-0 text-gray-400"
+                                        />
+                                        <span
+                                          className={getDisplayTierClass(
+                                            entry.points,
+                                            entry.pointStylePreference
+                                          )}
+                                          style={{
+                                            position: 'relative',
+                                            display: 'inline-block'
+                                          }}
+                                        >
+                                          {display}
+                                        </span>
+                                      </div>
                                     )
                                   })()}
                                 </div>
@@ -328,7 +340,10 @@ function LeaderboardContent() {
                             )
                             return (
                               <span
-                                className={getAmountColor(entry.points)}
+                                className={getDisplayTierClass(
+                                  entry.points,
+                                  entry.pointStylePreference
+                                )}
                                 title={capped ? full : undefined}
                                 style={{ position: 'relative' }}
                               >
