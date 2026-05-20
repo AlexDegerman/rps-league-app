@@ -5,6 +5,62 @@ import { logger } from '../utils/logger.js'
 
 const router = Router()
 
+// GET /api/admin/utm-stats
+router.get('/admin/utm-stats', async (req, res) => {
+  try {
+    const [usersResult, visitsResult] = await Promise.all([
+      pool.query(`
+        SELECT
+          COALESCE(utm_source, 'direct') AS source,
+          COUNT(*)                        AS signups,
+          SUM(points)                     AS total_points,
+          AVG(points)                     AS avg_points,
+          MAX(points)                     AS top_points
+        FROM users
+        GROUP BY COALESCE(utm_source, 'direct')
+        ORDER BY signups DESC
+      `),
+      pool.query(`
+        SELECT
+          utm_source AS source,
+          COUNT(*)   AS visits
+        FROM utm_visits
+        GROUP BY utm_source
+        ORDER BY visits DESC
+      `)
+    ])
+
+    const visitMap = Object.fromEntries(
+      visitsResult.rows.map((r) => [r.source, Number(r.visits)])
+    )
+
+    const platforms = usersResult.rows.map((r) => ({
+      source:       r.source,
+      signups:      Number(r.signups),
+      visits:       visitMap[r.source] ?? 0,
+      total_points: r.total_points?.toString() ?? '0',
+      avg_points:   Math.round(Number(r.avg_points)).toString(),
+      top_points:   r.top_points?.toString() ?? '0'
+    }))
+
+    const totals = {
+      signups: platforms.reduce((s: number, p) => s + p.signups, 0),
+      visits: Object.values(visitMap).reduce(
+        (s: number, v) => s + Number(v),
+        0
+      ),
+      total_points: platforms
+        .reduce((s: bigint, p) => s + BigInt(p.total_points), 0n)
+        .toString()
+    }
+
+    res.json({ totals, platforms })
+  } catch (err) {
+    logger.error('GET /admin/utm-stats failed', err)
+    res.status(500).json({ error: 'Failed to fetch UTM stats' })
+  }
+})
+
 // POST /api/users/recover
 router.post('/recover', async (req, res) => {
   try {
@@ -223,6 +279,24 @@ router.get('/:userId/points', async (req, res) => {
         allTimePeak: user.points.toString(),
         pointStylePreference: null
       })
+    }
+
+    const utmSource = req.query.utm_source as string | undefined
+    if (utmSource && result.rows.length > 0 && !result.rows[0].utm_source) {
+      await pool
+        .query(`UPDATE users SET utm_source = $1 WHERE user_id = $2`, [
+          utmSource,
+          userId
+        ])
+        .catch((err) =>
+          logger.warn('utm_source update failed', { userId, err })
+        )
+    }
+
+    if (utmSource) {
+      await pool
+        .query(`INSERT INTO utm_visits (utm_source) VALUES ($1)`, [utmSource])
+        .catch((err) => logger.warn('utm_visit insert failed', { err }))
     }
 
     const row = result.rows[0]

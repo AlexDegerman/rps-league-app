@@ -252,6 +252,7 @@ Guarantees:
 | Database | Supabase PostgreSQL |
 | Testing | Vitest, React Testing Library |
 | Match system | Custom generator feeding SSE stream |
+| Analytics | UTM attribution tracking, aggregated live statistics, admin dashboards |
 
 ---
 

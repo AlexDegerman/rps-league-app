@@ -122,10 +122,13 @@ export const useUserStore = create<UserState>((set, get) => ({
     Sentry.setUser({ id: user.userId, username: user.nickname })
     Sentry.setTag('shortId', user.shortId)
 
+    const utmSource = sessionStorage.getItem('utm_source') ?? undefined
+    
     const data = await fetchUserPoints(
       user.userId,
       user.shortId,
-      user.nickname
+      user.nickname,
+      utmSource
     ).catch((err) => {
       logger.error(
         'Failed to fetch user points during init',

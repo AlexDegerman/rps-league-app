@@ -46,10 +46,12 @@ export async function fetchUserStats(userId: string, shortId: string) {
 export async function fetchUserPoints(
   userId: string,
   shortId: string,
-  nickname?: string
+  nickname?: string,
+  utmSource?: string
 ) {
   const params = new URLSearchParams({ shortId })
   if (nickname) params.append('nickname', nickname)
+  if (utmSource) params.append('utm_source', utmSource)
 
   return handleResponse<UserPointsData>(
     fetch(`${API_BASE}/api/users/${userId}/points?${params.toString()}`)

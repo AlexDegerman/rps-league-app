@@ -166,21 +166,29 @@ export const resolvePrediction = async (
 
       const oracleUsed = await hasUserUsedOracle(row.user_id)
       let oracleRigged = false
+      let defiedOracle = false
+
       if (!oracleUsed) {
         const oracleState = getOracleState()
         const oracleWinnerName =
           oracleState.side === 'left' ? row.player_a_name : row.player_b_name
         if (row.pick === oracleWinnerName) {
           oracleRigged = true
+        } else {
+          defiedOracle = true
         }
       }
 
-      const result =
-        flashActive || oracleRigged
-          ? 'WIN'
-          : row.pick === winnerName
+      const result = oracleRigged
+        ? 'WIN'
+        : defiedOracle
+          ? 'LOSE'
+          : flashActive
             ? 'WIN'
-            : 'LOSE'
+            : row.pick === winnerName
+              ? 'WIN'
+              : 'LOSE'
+
       const isWin = result === 'WIN'
 
       const currentPoints = BigInt(row.current_points)
@@ -247,7 +255,7 @@ export const resolvePrediction = async (
       }
 
       // Consume oracle after all payout math - one use per day
-      if (oracleRigged) {
+      if (oracleRigged || defiedOracle) {
         await consumeOracleForUser(row.user_id)
       }
 

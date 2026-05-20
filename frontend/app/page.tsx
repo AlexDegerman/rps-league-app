@@ -197,11 +197,13 @@ export default function HomePage() {
       if (typeof BigInt === 'undefined') {
         setNotification('no_bigint')
       }
-    }, [setNotification, setShowUpdateModal, setShowWelcomeModal])
 
-  useEffect(() => {
-    if (isHydrated) localStorage.setItem('autoAllIn', autoAllIn.toString())
-  }, [autoAllIn, isHydrated])
+      const params = new URLSearchParams(window.location.search)
+      const utmSource = params.get('utm_source')
+      if (utmSource) {
+        sessionStorage.setItem('utm_source', utmSource)
+      }
+    }, [setNotification, setShowUpdateModal, setShowWelcomeModal])
 
   // auto all-in sync
   useEffect(() => {
