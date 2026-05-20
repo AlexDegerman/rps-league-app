@@ -4,6 +4,18 @@ import { generateRecoveryCode } from './userService.js'
 import pool from '../utils/db.js'
 import { mockDbResponse } from '../test/setup.js'
 
+vi.mock('./oracleService.js', () => ({
+  hasUserUsedOracle: vi.fn(() => Promise.resolve(true)),
+  consumeOracleForUser: vi.fn(() => Promise.resolve()),
+  getOracleState: vi.fn(() => ({ side: 'left' }))
+}))
+
+vi.mock('./flashEventService.js', () => ({
+  getFlashEventForUser: vi.fn(() => null),
+  consumeFlashBetForUser: vi.fn(),
+  tryTriggerFlashEventForUser: vi.fn()
+}))
+
 const mockQuery = vi.mocked(pool.query)
 
 const makeRow = (overrides = {}) => ({
