@@ -10,6 +10,7 @@ import aiRouter from './routes/analysis.js'
 import usersRouter from './routes/users.js'
 import feedbackRouter from './routes/feedback.js'
 import oracleRouter from './routes/oracle.js'
+import ascendRouter from './routes/ascend.js'
 import { initDb } from './utils/initDb.js'
 
 const app = express()
@@ -41,6 +42,7 @@ app.use('/api/live', liveRouter)
 app.use('/api/predictions', predictionsRouter)
 app.use('/api/analysis', aiRouter)
 app.use('/api/users', usersRouter)
+app.use('/api/users/ascend', ascendRouter)
 app.use('/api/feedback', feedbackRouter)
 app.use('/api/oracle', oracleRouter)
 

@@ -196,3 +196,4 @@ export const TIER_THRESHOLDS = [
   { label: 'Million', cls: 'g-m1', min: 1_000_000n }
 ] as const
 
+export const ASCENSION_THRESHOLD = 999n * 10n ** 87n

@@ -94,6 +94,20 @@ export async function updateLinkedin(
   })
 }
 
+export const ascendUser = async (userId: string, shortId: string) => {
+  const res = await fetch(`${API_BASE}/api/users/ascend`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId, shortId })
+  })
+  if (!res.ok) return null
+  return res.json() as Promise<{
+    success: boolean
+    laps: number
+    fastestLapBets: number
+  }>
+}
+
 /* --- AUTH & RECOVERY --- */
 
 export async function fetchRecoveryCode(userId: string) {

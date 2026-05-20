@@ -4,6 +4,8 @@ import type { ResultAnim } from '@/types/rps'
 type BrandTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
 
 interface UIState {
+  showAscensionPrompt: boolean
+  setShowAscensionPrompt: (v: boolean) => void
   // Brand State
   brandTheme: BrandTheme
   setBrandTheme: (t: BrandTheme) => void
@@ -55,6 +57,7 @@ export const useUIStore = create<UIState>((set) => ({
   inputString: '100000',
   showWelcomeModal: false,
   showUpdateModal: false,
+  showAscensionPrompt: false,
 
   // Actions
   setBrandTheme: (t) => set({ brandTheme: t }),
@@ -79,6 +82,7 @@ export const useUIStore = create<UIState>((set) => ({
   setShowJumpButton: (v) => set({ showJumpButton: v }),
   setShowPointsInfo: (v) => set({ showPointsInfo: v }),
   setShowPointsExplainer: (v) => set({ showPointsExplainer: v }),
+  setShowAscensionPrompt: (v) => set({ showAscensionPrompt: v }),
 
   setIsFocused: (v) => set({ isFocused: v }),
   setInputString: (s) => set({ inputString: s })

@@ -15,6 +15,102 @@ router.get('/unified', async (req, res) => {
     const sortParam = (req.query.sort as string) || ''
     const dir = req.query.dir === 'asc' ? 'ASC' : 'DESC'
 
+    if (tab === 'laps') {
+      const lapsSortWhitelist: Record<string, string> = {
+        laps: 'u.laps',
+        points: 'u.points',
+        peak: 'u.peak_points'
+      }
+      const sortKey = lapsSortWhitelist[sortParam] ?? 'u.laps'
+
+      const result = await pool.query(`
+        SELECT
+          u.user_id,
+          u.short_id,
+          u.nickname,
+          u.points,
+          u.peak_points,
+          u.laps,
+          u.fastest_lap_bets,
+          u.linkedin_url,
+          u.show_linkedin_badge,
+          u.point_style_preference
+        FROM users u
+        WHERE u.laps > 0
+        ORDER BY ${sortKey} ${dir}, u.nickname ASC
+        LIMIT 100
+      `)
+
+      return res.json(
+        result.rows.map((row) => ({
+          userId: row.user_id,
+          shortId: row.short_id,
+          nickname: row.nickname,
+          points: row.points.toString(),
+          peakPoints: row.peak_points.toString(),
+          gained: '0',
+          wins: 0,
+          losses: 0,
+          winRate: 0,
+          laps: Number(row.laps),
+          fastestLapBets:
+            row.fastest_lap_bets !== null ? Number(row.fastest_lap_bets) : null,
+          linkedinUrl: row.show_linkedin_badge
+            ? (row.linkedin_url ?? null)
+            : null,
+          pointStylePreference: row.point_style_preference ?? null
+        }))
+      )
+    }
+
+    if (tab === 'speedrun') {
+      const speedSortWhitelist: Record<string, string> = {
+        fastest: 'u.fastest_lap_bets',
+        laps: 'u.laps',
+        points: 'u.points'
+      }
+      const sortKey = speedSortWhitelist[sortParam] ?? 'u.fastest_lap_bets'
+      const speedDir = req.query.dir === 'desc' ? 'DESC' : 'ASC'
+
+      const result = await pool.query(`
+        SELECT
+          u.user_id,
+          u.short_id,
+          u.nickname,
+          u.points,
+          u.peak_points,
+          u.laps,
+          u.fastest_lap_bets,
+          u.linkedin_url,
+          u.show_linkedin_badge,
+          u.point_style_preference
+        FROM users u
+        WHERE u.laps > 0 AND u.fastest_lap_bets IS NOT NULL
+        ORDER BY ${sortKey} ${speedDir}, u.laps DESC, u.nickname ASC
+        LIMIT 100
+      `)
+
+      return res.json(
+        result.rows.map((row) => ({
+          userId: row.user_id,
+          shortId: row.short_id,
+          nickname: row.nickname,
+          points: row.points.toString(),
+          peakPoints: row.peak_points.toString(),
+          gained: '0',
+          wins: 0,
+          losses: 0,
+          winRate: 0,
+          laps: Number(row.laps),
+          fastestLapBets: Number(row.fastest_lap_bets),
+          linkedinUrl: row.show_linkedin_badge
+            ? (row.linkedin_url ?? null)
+            : null,
+          pointStylePreference: row.point_style_preference ?? null
+        }))
+      )
+    }
+
     const peakColumn =
       tab === 'daily'
         ? 'u.daily_peak'
@@ -51,8 +147,7 @@ router.get('/unified', async (req, res) => {
     const sortKey = sortWhitelist[sortParam] ?? sortWhitelist[defaultSort]
 
     const result = await pool.query(
-      `
-      SELECT
+      `SELECT
         u.user_id,
         u.nickname,
         u.short_id,
@@ -62,17 +157,17 @@ router.get('/unified', async (req, res) => {
         u.point_style_preference,
         ${peakColumn} AS peak_points,
         COALESCE(SUM(p.gain_loss) FILTER (WHERE p.gain_loss > 0 ${hasPeriod ? 'AND p.created_at >= $1' : ''}), 0) AS gained,
-        COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS wins,
+        COUNT(p.id) FILTER (WHERE p.result = 'WIN'  ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS wins,
         COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS losses,
         CASE
           WHEN (
-            COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
+            COUNT(p.id) FILTER (WHERE p.result = 'WIN'  ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
             COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''})
           ) > 0
           THEN ROUND(
             COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''})::numeric /
             (
-              COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
+              COUNT(p.id) FILTER (WHERE p.result = 'WIN'  ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
               COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''})
             ) * 100
           )
@@ -87,30 +182,31 @@ router.get('/unified', async (req, res) => {
       )
       GROUP BY u.user_id, u.nickname, u.short_id, u.points,
               u.peak_points, u.daily_peak, u.weekly_peak,
-              u.linkedin_url, u.show_linkedin_badge,
-              u.point_style_preference
+              u.linkedin_url, u.show_linkedin_badge, u.point_style_preference
       ORDER BY ${sortKey} ${dir}, u.nickname ASC
-      LIMIT 100
-    `,
+      LIMIT 100`,
       hasPeriod ? [periodStart] : []
     )
 
-    const sanitizedRows = result.rows.map((row) => ({
-      userId: row.user_id,
-      shortId: row.short_id,
-      nickname: row.nickname,
-      points: row.points.toString(),
-      peakPoints: row.peak_points.toString(),
-      gained: row.gained.toString(),
-      wins: Number(row.wins),
-      losses: Number(row.losses),
-      winRate: Number(row.win_rate),
-      // Only expose LinkedIn URL if user has opted in to show badge publicly
-      linkedinUrl: row.show_linkedin_badge ? (row.linkedin_url ?? null) : null,
-      pointStylePreference: row.point_style_preference ?? null
-    }))
-
-    res.json(sanitizedRows)
+    res.json(
+      result.rows.map((row) => ({
+        userId: row.user_id,
+        shortId: row.short_id,
+        nickname: row.nickname,
+        points: row.points.toString(),
+        peakPoints: row.peak_points.toString(),
+        gained: row.gained.toString(),
+        wins: Number(row.wins),
+        losses: Number(row.losses),
+        winRate: Number(row.win_rate),
+        laps: null,
+        fastestLapBets: null,
+        linkedinUrl: row.show_linkedin_badge
+          ? (row.linkedin_url ?? null)
+          : null,
+        pointStylePreference: row.point_style_preference ?? null
+      }))
+    )
   } catch (err) {
     logger.error('GET /leaderboard/unified failed', err, {
       tab: req.query.tab,

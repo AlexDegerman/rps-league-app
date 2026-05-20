@@ -18,14 +18,18 @@ import {
   fetchRecoveryCode,
   updateNickname,
   handleRecoverProfile,
-  updateLinkedin
+  updateLinkedin,
+  ascendUser
 } from '@/lib/api'
 import BetHistory from '@/components/BetHistory'
 import { LinkedInBadge } from '@/components/badges/LinkedInBadge'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
 import { useUserStore } from '@/app/stores/userStore'
+import { useUIStore } from '@/app/stores/uiStore'
 import { logger } from '@/lib/logger'
 import { StyleSelect } from '@/components/StyleSelect'
+import { ASCENSION_THRESHOLD } from '@/lib/constants'
+import AscensionModal from '@/components/modals/AscensionModal'
 
 interface Ranks {
   daily: number | null
@@ -37,8 +41,18 @@ export default function ProfilePage() {
   const params = useParams()
   const router = useRouter()
   const targetShortId = params.shortId as string
-  const { rerollNickname, setStylePreference: setStoreStylePreference } =
-    useUserStore()
+
+  const {
+    rerollNickname,
+    setStylePreference: setStoreStylePreference,
+    laps,
+    setLaps,
+    fastestLapBets,
+    setFastestLapBets,
+    setPoints: setStorePoints
+  } = useUserStore()
+
+  const { showAscensionPrompt, setShowAscensionPrompt } = useUIStore()
 
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [nickname, setNickname] = useState('')
@@ -247,6 +261,8 @@ export default function ProfilePage() {
     profileStylePreference
   )
 
+  const canAscend = isOwnProfile && BigInt(points ?? '0') >= ASCENSION_THRESHOLD
+
   return (
     <div className="max-w-2xl mx-auto px-4 pt-0 pb-10">
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-10 mb-4 mt-0 transition-all">
@@ -333,6 +349,31 @@ export default function ProfilePage() {
                 </div>
               ))}
             </div>
+
+            {(laps > 0 || canAscend) && (
+              <div className="flex flex-col sm:items-end gap-1 mt-1">
+                <button
+                  onClick={() => {
+                    if (canAscend) setShowAscensionPrompt(true)
+                  }}
+                  className={`flex items-center gap-3 text-[10px] font-black uppercase tracking-widest transition-all ${canAscend ? 'hover:scale-105 active:scale-95 cursor-pointer' : 'cursor-default'}`}
+                >
+                  <span className="bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full border border-indigo-200">
+                    Lap {laps}
+                  </span>
+                  {canAscend && (
+                    <span className="g-uvg animate-pulse">
+                      Ascend Available!
+                    </span>
+                  )}
+                </button>
+                {fastestLapBets !== null && (
+                  <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                    Best: {fastestLapBets} bets
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -416,6 +457,21 @@ export default function ProfilePage() {
                 color="text-red-500"
               />
             </StatSection>
+          </div>
+        )}
+
+        {/* Manual Ascension Button for qualifying users */}
+        {canAscend && (
+          <div className="border-t border-gray-50 mt-8 pt-6">
+            <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-3 ml-1">
+              Ascension
+            </p>
+            <button
+              onClick={() => setShowAscensionPrompt(true)}
+              className="w-full py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-all border border-indigo-100 shadow-sm"
+            >
+              Initialize Ascension to Lap {laps + 1} →
+            </button>
           </div>
         )}
 
@@ -607,6 +663,24 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+
+      {showAscensionPrompt && (
+        <AscensionModal
+          laps={laps}
+          onAscend={async () => {
+            const user = getOrCreateUser()
+            const data = await ascendUser(user.userId, user.shortId)
+            if (data?.success) {
+              setLaps(data.laps)
+              setFastestLapBets(data.fastestLapBets ?? null)
+              setPoints('200000')
+              setStorePoints(200000n)
+            }
+            setShowAscensionPrompt(false)
+          }}
+          onDismiss={() => setShowAscensionPrompt(false)}
+        />
+      )}
 
       {isOwnProfile && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

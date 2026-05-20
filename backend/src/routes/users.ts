@@ -5,6 +5,10 @@ import { logger } from '../utils/logger.js'
 
 const router = Router()
 
+// 999 OVG. To raise cap: update exponent to match new max tier.
+// OVG = 10^87, so 999 OVG = 999 * 10^87.
+const ASCENSION_THRESHOLD = 999n * 10n ** 87n
+
 // GET /api/admin/utm-stats
 router.get('/admin/utm-stats', async (req, res) => {
   try {
@@ -35,12 +39,12 @@ router.get('/admin/utm-stats', async (req, res) => {
     )
 
     const platforms = usersResult.rows.map((r) => ({
-      source:       r.source,
-      signups:      Number(r.signups),
-      visits:       visitMap[r.source] ?? 0,
+      source: r.source,
+      signups: Number(r.signups),
+      visits: visitMap[r.source] ?? 0,
       total_points: r.total_points?.toString() ?? '0',
-      avg_points:   Math.round(Number(r.avg_points)).toString(),
-      top_points:   r.top_points?.toString() ?? '0'
+      avg_points: Math.round(Number(r.avg_points)).toString(),
+      top_points: r.top_points?.toString() ?? '0'
     }))
 
     const totals = {
@@ -65,7 +69,6 @@ router.get('/admin/utm-stats', async (req, res) => {
 router.post('/recover', async (req, res) => {
   try {
     const { recoveryCode } = req.body
-
     if (!recoveryCode)
       return res.status(400).json({ error: 'Recovery code required' })
 
@@ -78,7 +81,6 @@ router.post('/recover', async (req, res) => {
       return res.status(404).json({ error: 'Invalid recovery code' })
 
     const user = result.rows[0]
-
     res.json({
       userId: user.user_id,
       shortId: user.short_id,
@@ -94,19 +96,17 @@ router.post('/recover', async (req, res) => {
 // POST /api/users/update-nickname
 router.post('/update-nickname', async (req, res) => {
   const { userId, nickname, shortId } = req.body
-
   try {
     const result = await pool.query(
-      `INSERT INTO users (user_id, short_id, nickname, points, peak_points) 
-        VALUES ($1, $2, $3, 200000, 200000) 
-        ON CONFLICT (user_id) 
-        DO UPDATE SET 
+      `INSERT INTO users (user_id, short_id, nickname, points, peak_points)
+        VALUES ($1, $2, $3, 200000, 200000)
+        ON CONFLICT (user_id)
+        DO UPDATE SET
           nickname = EXCLUDED.nickname,
           short_id = COALESCE(users.short_id, EXCLUDED.short_id)
         RETURNING nickname`,
       [userId, shortId, nickname]
     )
-
     res.json({ ok: true, nickname: result.rows[0].nickname })
   } catch (err) {
     logger.error('POST /users/update-nickname failed', err, { userId, shortId })
@@ -120,7 +120,6 @@ router.post('/update-linkedin', async (req, res) => {
     const { shortId, linkedinUrl, showLinkedinBadge } = req.body
     if (!shortId) return res.status(400).json({ error: 'shortId required' })
 
-    // Normalize URL - add https:// if missing protocol
     let normalizedUrl = linkedinUrl?.trim() || null
     if (
       normalizedUrl &&
@@ -129,8 +128,6 @@ router.post('/update-linkedin', async (req, res) => {
     ) {
       normalizedUrl = `https://${normalizedUrl}`
     }
-
-    // Validate it's actually a LinkedIn URL
     if (normalizedUrl && !normalizedUrl.includes('linkedin.com')) {
       return res.status(400).json({ error: 'Must be a LinkedIn URL' })
     }
@@ -153,7 +150,6 @@ router.patch('/style-preference', async (req, res) => {
   try {
     const { shortId, stylePreference } = req.body
     if (!shortId) return res.status(400).json({ error: 'shortId required' })
-    // null clears it (auto mode), string sets it
     await pool.query(
       `UPDATE users SET point_style_preference = $1 WHERE short_id = $2`,
       [stylePreference ?? null, shortId]
@@ -164,13 +160,80 @@ router.patch('/style-preference', async (req, res) => {
   }
 })
 
+// POST /api/users/ascend
+router.post('/ascend', async (req, res) => {
+  try {
+    const { userId, shortId } = req.body
+    if (!userId || !shortId)
+      return res.status(400).json({ error: 'Missing userId or shortId' })
+
+    const userRes = await pool.query(
+      `SELECT points, laps, fastest_lap_bets, total_bets_at_last_ascension
+       FROM users WHERE user_id = $1`,
+      [userId]
+    )
+    if (userRes.rows.length === 0)
+      return res.status(404).json({ error: 'User not found' })
+
+    const row = userRes.rows[0]
+    const currentPoints = BigInt(row.points)
+
+    if (currentPoints < ASCENSION_THRESHOLD)
+      return res.status(400).json({ error: 'Not enough points to ascend' })
+
+    const totalBetsRes = await pool.query(
+      `SELECT COUNT(*) AS total FROM predictions WHERE user_id = $1 AND result IS NOT NULL`,
+      [userId]
+    )
+    const totalBets = Number(totalBetsRes.rows[0].total)
+    const betsThisLap = totalBets - Number(row.total_bets_at_last_ascension)
+
+    const currentFastest =
+      row.fastest_lap_bets !== null ? Number(row.fastest_lap_bets) : null
+    const newFastest =
+      currentFastest === null
+        ? betsThisLap
+        : Math.min(currentFastest, betsThisLap)
+
+    await pool.query(
+      `UPDATE users SET
+        points = 200000,
+        laps = laps + 1,
+        fastest_lap_bets = $1,
+        total_bets_at_last_ascension = $2,
+        peak_points = GREATEST(peak_points, $3)
+       WHERE user_id = $4`,
+      [newFastest, totalBets, currentPoints.toString(), userId]
+    )
+
+    const updated = await pool.query(
+      `SELECT laps, fastest_lap_bets FROM users WHERE user_id = $1`,
+      [userId]
+    )
+
+    logger.info('User ascended', { userId, laps: updated.rows[0].laps })
+
+    res.json({
+      success: true,
+      laps: Number(updated.rows[0].laps),
+      fastestLapBets:
+        updated.rows[0].fastest_lap_bets !== null
+          ? Number(updated.rows[0].fastest_lap_bets)
+          : null
+    })
+  } catch (err) {
+    logger.error('POST /users/ascend failed', err, { userId: req.body?.userId })
+    res.status(500).json({ error: 'Ascension failed' })
+  }
+})
+
 // GET /api/users/profile/:shortId
 router.get('/profile/:shortId', async (req, res) => {
   try {
     const { shortId } = req.params
 
     const result = await pool.query(
-      `SELECT 
+      `SELECT
         user_id,
         short_id,
         nickname,
@@ -181,8 +244,10 @@ router.get('/profile/:shortId', async (req, res) => {
         linkedin_url,
         show_linkedin_badge,
         point_style_preference,
-        all_time_peak
-      FROM users 
+        all_time_peak,
+        laps,
+        fastest_lap_bets
+      FROM users
       WHERE short_id = $1`,
       [shortId]
     )
@@ -203,7 +268,10 @@ router.get('/profile/:shortId', async (req, res) => {
       linkedinUrl: user.linkedin_url ?? null,
       showLinkedinBadge: user.show_linkedin_badge ?? true,
       pointStylePreference: user.point_style_preference ?? null,
-      allTimePeak: user.all_time_peak?.toString() ?? '200000'
+      allTimePeak: user.all_time_peak?.toString() ?? '200000',
+      laps: Number(user.laps ?? 0),
+      fastestLapBets:
+        user.fastest_lap_bets !== null ? Number(user.fastest_lap_bets) : null
     })
   } catch (err) {
     logger.error('GET /users/profile/:shortId failed', err, {
@@ -255,7 +323,8 @@ router.get('/:userId/points', async (req, res) => {
 
     const result = await pool.query(
       `SELECT nickname, points, peak_points, daily_peak, weekly_peak,
-              current_win_streak, all_time_peak, point_style_preference
+              current_win_streak, all_time_peak, point_style_preference,
+              laps, fastest_lap_bets
         FROM users WHERE user_id = $1`,
       [userId]
     )
@@ -277,7 +346,9 @@ router.get('/:userId/points', async (req, res) => {
         weeklyPeak: user.points.toString(),
         currentWinStreak: 0,
         allTimePeak: user.points.toString(),
-        pointStylePreference: null
+        pointStylePreference: null,
+        laps: 0,
+        fastestLapBets: null
       })
     }
 
@@ -292,7 +363,6 @@ router.get('/:userId/points', async (req, res) => {
           logger.warn('utm_source update failed', { userId, err })
         )
     }
-
     if (utmSource) {
       await pool
         .query(`INSERT INTO utm_visits (utm_source) VALUES ($1)`, [utmSource])
@@ -309,7 +379,10 @@ router.get('/:userId/points', async (req, res) => {
       weeklyPeak: row.weekly_peak.toString(),
       currentWinStreak: Number(row.current_win_streak ?? 0),
       allTimePeak: row.all_time_peak.toString(),
-      pointStylePreference: row.point_style_preference ?? null
+      pointStylePreference: row.point_style_preference ?? null,
+      laps: Number(row.laps ?? 0),
+      fastestLapBets:
+        row.fastest_lap_bets !== null ? Number(row.fastest_lap_bets) : null
     })
   } catch (err) {
     logger.error('GET /users/:userId/points failed', err, {

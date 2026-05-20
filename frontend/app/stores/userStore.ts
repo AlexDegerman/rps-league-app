@@ -11,12 +11,14 @@ import {
   fetchUserPoints,
   updateNickname,
   handleRecoverProfile,
-  updateStylePreference
+  updateStylePreference,
+  ascendUser
 } from '@/lib/api'
 import { logger } from '@/lib/logger'
+import { ASCENSION_THRESHOLD } from '@/lib/constants'
 
 interface UserState {
-  // Identity State
+  // Identity
   userId: string
   shortId: string
   displayNickname: string
@@ -24,7 +26,7 @@ interface UserState {
   setDisplayNickname: (name: string) => void
   setIsHydrated: (v: boolean) => void
 
-  // Balance & Betting State
+  // Balance & Betting
   points: bigint
   pointsLoaded: boolean
   peakPoints: bigint
@@ -36,7 +38,7 @@ interface UserState {
   setBetAmount: (b: bigint) => void
   setAutoAllIn: (v: boolean) => void
 
-  // Progression State
+  // Progression
   winStreak: number
   streakMult: number
   dailyRank: number | null
@@ -44,20 +46,25 @@ interface UserState {
   setStreakMult: (n: number) => void
   setDailyRank: (rank: number | null) => void
 
-  // Style Preference State
+  // Laps
+  laps: number
+  fastestLapBets: number | null
+  setLaps: (n: number) => void
+  setFastestLapBets: (n: number | null) => void
+  performAscension: () => Promise<{ success: boolean; error?: string }>
+
+  // Style
   stylePreference: string | null
   allTimePeak: bigint
   setStylePreference: (pref: string | null) => void
 
-  // Core Identity Actions
+  // Core Actions
   initUser: () => Promise<void>
   rerollNickname: () => Promise<string | null>
   recoverProfile: (
     code: string
   ) => Promise<{ success: boolean; error?: string }>
   resetProfile: () => Promise<{ success: boolean; error?: string }>
-
-  // Data Logic Actions
   applyPointsUpdate: (newPoints: bigint, newPeak: bigint) => void
 }
 
@@ -75,6 +82,8 @@ export const useUserStore = create<UserState>((set, get) => ({
   winStreak: 0,
   streakMult: 1,
   dailyRank: null,
+  laps: 0,
+  fastestLapBets: null,
   stylePreference: null,
   allTimePeak: 200000n,
 
@@ -82,7 +91,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   setDisplayNickname: (name) => set({ displayNickname: name }),
   setIsHydrated: (v) => set({ isHydrated: v }),
 
-  // Setters - Balance & Betting
+  // Setters - Balance
   setPoints: (p) => set({ points: p }),
   setPointsLoaded: (v) => set({ pointsLoaded: v }),
   setPeakPoints: (p) => set({ peakPoints: p }),
@@ -93,6 +102,10 @@ export const useUserStore = create<UserState>((set, get) => ({
   setWinStreak: (n) => set({ winStreak: n }),
   setStreakMult: (n) => set({ streakMult: n }),
   setDailyRank: (rank) => set({ dailyRank: rank }),
+
+  // Setters - Laps
+  setLaps: (n) => set({ laps: n }),
+  setFastestLapBets: (n) => set({ fastestLapBets: n }),
 
   // Setters - Style
   setStylePreference: (pref) => {
@@ -107,7 +120,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       )
   },
 
-  // Actions - Initialization
+  // Actions - Init
   initUser: async () => {
     const user = getOrCreateUser()
     if (!isUserValid(user)) return
@@ -123,7 +136,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     Sentry.setTag('shortId', user.shortId)
 
     const utmSource = sessionStorage.getItem('utm_source') ?? undefined
-    
+
     const data = await fetchUserPoints(
       user.userId,
       user.shortId,
@@ -133,7 +146,9 @@ export const useUserStore = create<UserState>((set, get) => ({
       logger.error(
         'Failed to fetch user points during init',
         err instanceof Error ? err : undefined,
-        { section: 'initUser' }
+        {
+          section: 'initUser'
+        }
       )
       return null
     })
@@ -147,6 +162,9 @@ export const useUserStore = create<UserState>((set, get) => ({
     if (data.allTimePeak) set({ allTimePeak: BigInt(data.allTimePeak) })
     if (data.pointStylePreference !== undefined)
       set({ stylePreference: data.pointStylePreference })
+    if (data.laps !== undefined) set({ laps: data.laps })
+    if (data.fastestLapBets !== undefined)
+      set({ fastestLapBets: data.fastestLapBets ?? null })
 
     if (data.nickname) {
       set({ displayNickname: data.nickname })
@@ -169,7 +187,40 @@ export const useUserStore = create<UserState>((set, get) => ({
     }
   },
 
-  // Actions - Identity Management
+  // Actions - Ascension
+  performAscension: async () => {
+    const { userId, shortId, peakPoints } = get()
+
+    if (peakPoints < ASCENSION_THRESHOLD) {
+      return { success: false, error: 'Ascension threshold not met' }
+    }
+
+    try {
+      const data = await ascendUser(userId, shortId)
+      if (!data?.success) return { success: false, error: 'Ascension failed' }
+
+      set({
+        laps: data.laps,
+        fastestLapBets: data.fastestLapBets ?? null,
+        points: 200000n,
+        betAmount: 200000n,
+        pointsLoaded: true
+      })
+
+      const { autoAllIn } = get()
+      if (!autoAllIn) set({ betAmount: 100000n })
+
+      return { success: true }
+    } catch (err) {
+      logger.error(
+        'performAscension failed',
+        err instanceof Error ? err : undefined
+      )
+      return { success: false, error: 'Ascension failed' }
+    }
+  },
+
+  // Actions - Identity
   rerollNickname: async () => {
     const { userId, shortId } = get()
     let newName = ''
@@ -249,7 +300,6 @@ export const useUserStore = create<UserState>((set, get) => ({
     }
   },
 
-  // Actions - Balance Logic
   applyPointsUpdate: (newPoints, newPeak) =>
     set((s) => {
       const isNewPeak = newPeak > s.peakPoints

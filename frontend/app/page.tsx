@@ -6,7 +6,8 @@ import {
   fetchPendingMatches,
   fetchUserPoints,
   postPrediction,
-  fetchUnifiedLeaderboard
+  fetchUnifiedLeaderboard,
+  ascendUser
 } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
@@ -38,12 +39,14 @@ import { useGameStore } from './stores/gameStore'
 import { useUserStore } from './stores/userStore'
 import { useUIStore } from './stores/uiStore'
 import { useTabGuard } from '@/hooks/useTabGuard'
-import WelcomeModal from '@/components/WelcomeModal'
+import WelcomeModal from '@/components/modals/WelcomeModal'
 import { logger } from '@/lib/logger'
-import UpdateModal from '@/components/UpdateModal'
+import UpdateModal from '@/components/modals/UpdateModal'
 import { oracleTemplates } from '@/lib/oracleTemplates'
+import AscensionModal from '@/components/modals/AscensionModal'
+import { ASCENSION_THRESHOLD } from '@/lib/constants'
+import { CURRENT_VERSION } from '@/lib/updates'
 
-const CURRENT_VERSION = '1.8'
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
@@ -90,7 +93,10 @@ export default function HomePage() {
     dailyRank,
     setDailyRank,
     applyPointsUpdate,
-    stylePreference
+    stylePreference,
+    laps,
+    setLaps,
+    setFastestLapBets
   } = useUserStore()
 
   // - UI store -
@@ -117,7 +123,9 @@ export default function HomePage() {
     showWelcomeModal,
     setShowWelcomeModal,
     showUpdateModal,
-    setShowUpdateModal
+    setShowUpdateModal,
+    showAscensionPrompt,
+    setShowAscensionPrompt
   } = useUIStore()
 
   const {
@@ -127,6 +135,7 @@ export default function HomePage() {
     playElectric,
     playFire,
     playMoon,
+    playFanfare,
     soundOn,
     toggleSound
   } = useSound()
@@ -338,8 +347,18 @@ export default function HomePage() {
     const { autoAllIn: aa, betAmount: ba } = useUserStore.getState()
     if (aa || ba > newPoints) setInputString(newPoints.toString())
 
+    // Trigger ascension prompt if user crosses threshold and it's not already showing
+    if (newPoints >= ASCENSION_THRESHOLD && !showAscensionPrompt) {
+      setShowAscensionPrompt(true)
+    }
+
     return { newPoints, isNewPeak }
-  }, [applyPointsUpdate, setInputString])
+  }, [
+    applyPointsUpdate,
+    setInputString,
+    showAscensionPrompt,
+    setShowAscensionPrompt
+  ])
 
   // SSE live stream
   useEffect(() => {
@@ -373,9 +392,17 @@ export default function HomePage() {
       if (data.userId !== userId) return
       const isWin = data.result === 'WIN'
       const { activeFlashEvent: currentFlash } = useGameStore.getState()
-
+      
       if (isWin) {
-        if (currentFlash === 'LUNAR') playMoon()
+        const { points: currentPoints } = useUserStore.getState()
+        const winAmt = BigInt(data.amount)
+        const isAscendingWin =
+          currentPoints < ASCENSION_THRESHOLD &&
+          currentPoints + winAmt >= ASCENSION_THRESHOLD
+
+        if (isAscendingWin)
+          playFanfare()
+        else if (currentFlash === 'LUNAR') playMoon()
         else if (currentFlash === 'CARDS') playCards()
         else if (currentFlash === 'ELECTRIC') playElectric()
         else if (currentFlash === 'HELLFIRE') playFire()
@@ -590,6 +617,23 @@ export default function HomePage() {
           confettiType={resultAnim?.confettiType ?? 'normal'}
           show={resultAnim?.win === true}
         />
+        {showAscensionPrompt && (
+          <AscensionModal
+            laps={laps}
+            onAscend={async () => {
+              const user = getOrCreateUser()
+              const data = await ascendUser(user.userId, user.shortId)
+              if (data?.success) {
+                setLaps(data.laps)
+                setFastestLapBets(data.fastestLapBets)
+                applyPointsUpdate(200000n, useUserStore.getState().peakPoints)
+                setInputString('200000')
+              }
+              setShowAscensionPrompt(false)
+            }}
+            onDismiss={() => setShowAscensionPrompt(false)}
+          />
+        )}
 
         <ResultAnimOverlay
           resultAnim={resultAnim}

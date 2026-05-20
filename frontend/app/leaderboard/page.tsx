@@ -13,28 +13,43 @@ import { LeaderboardEntry } from '@/types/rps'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
 import { logger } from '@/lib/logger'
 
-type Tab = 'daily' | 'weekly' | 'alltime'
-type SortKey = 'points' | 'gained' | 'peak' | 'wins' | 'losses' | 'winrate'
+type Tab = 'daily' | 'weekly' | 'alltime' | 'laps' | 'speedrun'
+type SortKey =
+  | 'points'
+  | 'gained'
+  | 'peak'
+  | 'wins'
+  | 'losses'
+  | 'winrate'
+  | 'laps'
+  | 'fastest'
 type SortDir = 'asc' | 'desc'
 
-// Each tab defaults to its most meaningful sort column
 const DEFAULT_SORT: Record<Tab, SortKey> = {
   daily: 'points',
   weekly: 'gained',
-  alltime: 'peak'
+  alltime: 'peak',
+  laps: 'laps',
+  speedrun: 'fastest'
 }
 
 const TAB_LABELS: Record<Tab, string> = {
   daily: 'Daily',
   weekly: 'Weekly',
-  alltime: 'All Time'
+  alltime: 'All Time',
+  laps: 'Total Laps',
+  speedrun: 'Speedrun'
 }
 
 const EMPTY_MESSAGES: Record<Tab, string> = {
   daily: 'No bets placed today yet, be the first to claim the top spot!',
   weekly: 'Season just started, be the first to claim the weekly crown!',
-  alltime: 'No predictors yet, jump in and make history!'
+  alltime: 'No predictors yet, jump in and make history!',
+  laps: 'No one has ascended yet. Be the first to reach 999 OVG.',
+  speedrun: 'No completed laps to rank yet.'
 }
+
+const isLapsTab = (t: Tab) => t === 'laps' || t === 'speedrun'
 
 function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
   if (!active) return <span className="text-gray-300 ml-1">↕</span>
@@ -61,7 +76,6 @@ function LeaderboardContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [myUserId, setMyUserId] = useState<string | null>(null)
 
-  // Defer localStorage read to avoid SSR mismatch
   useEffect(() => {
     setMyUserId(getUserId())
   }, [])
@@ -103,7 +117,6 @@ function LeaderboardContent() {
   }
 
   const handleSort = (col: SortKey) => {
-    // Clicking the active column flips direction; clicking a new column defaults to desc
     const newDir: SortDir = sort === col && dir === 'desc' ? 'asc' : 'desc'
     setSort(col)
     setDir(newDir)
@@ -140,7 +153,8 @@ function LeaderboardContent() {
       </div>
 
       <div className="sticky top-16 z-40 bg-gray-100 pb-4">
-        <div className="flex gap-2">
+        {/* Row 1: standard tabs */}
+        <div className="flex gap-2 mb-1">
           {(['daily', 'weekly', 'alltime'] as Tab[]).map((t) => (
             <button
               key={t}
@@ -148,6 +162,22 @@ function LeaderboardContent() {
               className={`px-3 py-1.5 rounded font-bold text-[10px] uppercase transition ${
                 tab === t
                   ? 'bg-purple-600 text-white'
+                  : 'bg-white border border-gray-200 text-gray-600'
+              }`}
+            >
+              {TAB_LABELS[t]}
+            </button>
+          ))}
+        </div>
+        {/* Row 2: laps tabs */}
+        <div className="flex gap-2">
+          {(['laps', 'speedrun'] as Tab[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => handleTab(t)}
+              className={`px-3 py-1.5 rounded font-bold text-[10px] uppercase transition ${
+                tab === t
+                  ? 'bg-indigo-600 text-white'
                   : 'bg-white border border-gray-200 text-gray-600'
               }`}
             >
@@ -171,48 +201,82 @@ function LeaderboardContent() {
                   <th className="text-left px-3 py-3 text-gray-400 font-bold text-xs uppercase">
                     Player
                   </th>
-                  {th(
-                    'W',
-                    'wins',
-                    'text-center',
-                    'hidden min-[600px]:table-cell'
-                  )}
-                  {th(
-                    'L',
-                    'losses',
-                    'text-center',
-                    'hidden min-[600px]:table-cell'
-                  )}
-                  {th(
-                    'Win%',
-                    'winrate',
-                    'text-center',
-                    'hidden min-[680px]:table-cell'
-                  )}
-                  {th(
-                    'Points',
-                    'points',
-                    'text-right',
-                    'hidden min-[600px]:table-cell'
-                  )}
-                  {th(
-                    'Gained',
-                    'gained',
-                    'text-right',
-                    'hidden min-[600px]:table-cell'
-                  )}
-                  {th(
-                    tab === 'daily'
-                      ? 'Daily Peak'
-                      : tab === 'weekly'
-                        ? 'Weekly Peak'
-                        : 'All Time Peak',
-                    'peak',
-                    'text-right',
-                    'hidden min-[600px]:table-cell'
+
+                  {isLapsTab(tab) ? (
+                    <>
+                      {th(
+                        'Laps',
+                        'laps',
+                        'text-center',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                      {tab === 'speedrun' &&
+                        th(
+                          'Fastest Lap',
+                          'fastest',
+                          'text-center',
+                          'hidden min-[600px]:table-cell'
+                        )}
+                      {th(
+                        'Points',
+                        'points',
+                        'text-right',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                      {th(
+                        'Peak',
+                        'peak',
+                        'text-right',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {th(
+                        'W',
+                        'wins',
+                        'text-center',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                      {th(
+                        'L',
+                        'losses',
+                        'text-center',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                      {th(
+                        'Win%',
+                        'winrate',
+                        'text-center',
+                        'hidden min-[680px]:table-cell'
+                      )}
+                      {th(
+                        'Points',
+                        'points',
+                        'text-right',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                      {th(
+                        'Gained',
+                        'gained',
+                        'text-right',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                      {th(
+                        tab === 'daily'
+                          ? 'Daily Peak'
+                          : tab === 'weekly'
+                            ? 'Weekly Peak'
+                            : 'All Time Peak',
+                        'peak',
+                        'text-right',
+                        'hidden min-[600px]:table-cell'
+                      )}
+                    </>
                   )}
                 </tr>
               </thead>
+
               <tbody>
                 {data.length === 0 ? (
                   <tr>
@@ -225,7 +289,7 @@ function LeaderboardContent() {
                 ) : (
                   data.map((entry, index) => {
                     const isMe = entry.userId === myUserId
-                    const gainedBI = BigInt(entry.gained)
+                    const gainedBI = BigInt(entry.gained ?? '0')
 
                     return (
                       <tr
@@ -262,124 +326,193 @@ function LeaderboardContent() {
                               />
                             </div>
 
-                            {/* Mobile stats grid - hidden at 600px+ where the table columns take over */}
+                            {/* Mobile stats */}
                             <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
-                              <div className="flex gap-2 text-gray-400 font-bold uppercase tracking-wider">
-                                <div className="w-6">W</div>
-                                <div className="w-6">L</div>
-                                <div className="w-14">Pts</div>
-                                <div className="w-14">Gain</div>
-                                <div className="w-14">Peak</div>
-                              </div>
-                              <div className="flex gap-2 font-medium items-center">
-                                <div className="w-6 text-green-600 font-bold">
-                                  {entry.wins}
-                                </div>
-                                <div className="w-6 text-red-500 font-bold">
-                                  {entry.losses}
-                                </div>
-                                <div className="w-14 font-bold flex items-center gap-0.5">
-                                  {(() => {
-                                    const { display, full, capped } =
-                                      formatPoints(entry.points)
-                                    return (
-                                      <div
-                                        className="w-14 font-bold flex items-center gap-0.5"
-                                        title={capped ? full : undefined}
-                                      >
-                                        <GemIcon
-                                          size={8}
-                                          className="shrink-0 text-gray-400"
-                                        />
-                                        <span
-                                          className={getDisplayTierClass(
-                                            entry.points,
-                                            entry.pointStylePreference
-                                          )}
-                                          style={{
-                                            position: 'relative',
-                                            display: 'inline-block'
-                                          }}
-                                        >
-                                          {display}
-                                        </span>
+                              {isLapsTab(tab) ? (
+                                <>
+                                  <div className="flex gap-2 text-gray-400 font-bold uppercase tracking-wider">
+                                    <div className="w-10">Laps</div>
+                                    {tab === 'speedrun' && (
+                                      <div className="w-16">Fastest</div>
+                                    )}
+                                    <div className="w-14">Pts</div>
+                                    <div className="w-14">Peak</div>
+                                  </div>
+                                  <div className="flex gap-2 font-medium items-center">
+                                    <div className="w-10 text-indigo-600 font-black">
+                                      {entry.laps ?? 0}
+                                    </div>
+                                    {tab === 'speedrun' && (
+                                      <div className="w-16 text-gray-600 font-bold">
+                                        {entry.fastestLapBets != null
+                                          ? `${entry.fastestLapBets}b`
+                                          : '—'}
                                       </div>
-                                    )
-                                  })()}
-                                </div>
-                                <div
-                                  className={`w-14 font-bold ${gainedBI >= 0n ? 'text-green-500' : 'text-red-500'}`}
-                                >
-                                  {gainedBI >= 0n ? '+' : ''}
-                                  {formatPoints(entry.gained).display}
-                                </div>
-                                <div
-                                  className={`w-14 font-bold ${getAmountColor(entry.peakPoints)}`}
-                                >
-                                  {formatPoints(entry.peakPoints).display}
-                                </div>
-                              </div>
+                                    )}
+                                    <div
+                                      className={`w-14 font-bold ${getAmountColor(entry.points)}`}
+                                    >
+                                      {formatPoints(entry.points).display}
+                                    </div>
+                                    <div
+                                      className={`w-14 font-bold ${getAmountColor(entry.peakPoints)}`}
+                                    >
+                                      {formatPoints(entry.peakPoints).display}
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="flex gap-2 text-gray-400 font-bold uppercase tracking-wider">
+                                    <div className="w-6">W</div>
+                                    <div className="w-6">L</div>
+                                    <div className="w-14">Pts</div>
+                                    <div className="w-14">Gain</div>
+                                    <div className="w-14">Peak</div>
+                                  </div>
+                                  <div className="flex gap-2 font-medium items-center">
+                                    <div className="w-6 text-green-600 font-bold">
+                                      {entry.wins}
+                                    </div>
+                                    <div className="w-6 text-red-500 font-bold">
+                                      {entry.losses}
+                                    </div>
+                                    <div className="w-14 font-bold flex items-center gap-0.5">
+                                      {(() => {
+                                        const { display, full, capped } =
+                                          formatPoints(entry.points)
+                                        return (
+                                          <div
+                                            className="w-14 font-bold flex items-center gap-0.5"
+                                            title={capped ? full : undefined}
+                                          >
+                                            <GemIcon
+                                              size={8}
+                                              className="shrink-0 text-gray-400"
+                                            />
+                                            <span
+                                              className={getDisplayTierClass(
+                                                entry.points,
+                                                entry.pointStylePreference
+                                              )}
+                                              style={{
+                                                position: 'relative',
+                                                display: 'inline-block'
+                                              }}
+                                            >
+                                              {display}
+                                            </span>
+                                          </div>
+                                        )
+                                      })()}
+                                    </div>
+                                    <div
+                                      className={`w-14 font-bold ${gainedBI >= 0n ? 'text-green-500' : 'text-red-500'}`}
+                                    >
+                                      {gainedBI >= 0n ? '+' : ''}
+                                      {
+                                        formatPoints(entry.gained ?? '0')
+                                          .display
+                                      }
+                                    </div>
+                                    <div
+                                      className={`w-14 font-bold ${getAmountColor(entry.peakPoints)}`}
+                                    >
+                                      {formatPoints(entry.peakPoints).display}
+                                    </div>
+                                  </div>
+                                </>
+                              )}
                             </div>
                           </div>
                         </td>
 
-                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-green-600 font-bold">
-                          {entry.wins}
-                        </td>
-                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-red-500">
-                          {entry.losses}
-                        </td>
-                        <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500 font-bold">
-                          {entry.winRate}%
-                        </td>
-
-                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                          {(() => {
-                            const { display, full, capped } = formatPoints(
-                              entry.points
-                            )
-                            return (
-                              <span
-                                className={getDisplayTierClass(
-                                  entry.points,
-                                  entry.pointStylePreference
-                                )}
-                                title={capped ? full : undefined}
-                                style={{ position: 'relative' }}
-                              >
-                                {display}
+                        {/* Desktop cells */}
+                        {isLapsTab(tab) ? (
+                          <>
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-center font-black text-indigo-600">
+                              {entry.laps ?? 0}
+                            </td>
+                            {tab === 'speedrun' && (
+                              <td className="hidden min-[600px]:table-cell px-3 py-3 text-center font-bold text-gray-600">
+                                {entry.fastestLapBets != null
+                                  ? `${entry.fastestLapBets} bets`
+                                  : '—'}
+                              </td>
+                            )}
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
+                              <span className={getAmountColor(entry.points)}>
+                                {formatPoints(entry.points).display}
                               </span>
-                            )
-                          })()}
-                        </td>
-
-                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                          <span
-                            className={
-                              gainedBI >= 0n ? 'text-green-600' : 'text-red-500'
-                            }
-                          >
-                            {gainedBI >= 0n ? '+' : ''}
-                            {formatPoints(entry.gained).display}
-                          </span>
-                        </td>
-
-                        <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                          {(() => {
-                            const { display, full, capped } = formatPoints(
-                              entry.peakPoints
-                            )
-                            return (
+                            </td>
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
                               <span
                                 className={getAmountColor(entry.peakPoints)}
-                                title={capped ? full : undefined}
-                                style={{ position: 'relative' }}
                               >
-                                {display}
+                                {formatPoints(entry.peakPoints).display}
                               </span>
-                            )
-                          })()}
-                        </td>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-green-600 font-bold">
+                              {entry.wins}
+                            </td>
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-red-500">
+                              {entry.losses}
+                            </td>
+                            <td className="hidden min-[680px]:table-cell px-3 py-3 text-center text-indigo-500 font-bold">
+                              {entry.winRate}%
+                            </td>
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
+                              {(() => {
+                                const { display, full, capped } = formatPoints(
+                                  entry.points
+                                )
+                                return (
+                                  <span
+                                    className={getDisplayTierClass(
+                                      entry.points,
+                                      entry.pointStylePreference
+                                    )}
+                                    title={capped ? full : undefined}
+                                    style={{ position: 'relative' }}
+                                  >
+                                    {display}
+                                  </span>
+                                )
+                              })()}
+                            </td>
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
+                              <span
+                                className={
+                                  gainedBI >= 0n
+                                    ? 'text-green-600'
+                                    : 'text-red-500'
+                                }
+                              >
+                                {gainedBI >= 0n ? '+' : ''}
+                                {formatPoints(entry.gained ?? '0').display}
+                              </span>
+                            </td>
+                            <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
+                              {(() => {
+                                const { display, full, capped } = formatPoints(
+                                  entry.peakPoints
+                                )
+                                return (
+                                  <span
+                                    className={getAmountColor(entry.peakPoints)}
+                                    title={capped ? full : undefined}
+                                    style={{ position: 'relative' }}
+                                  >
+                                    {display}
+                                  </span>
+                                )
+                              })()}
+                            </td>
+                          </>
+                        )}
                       </tr>
                     )
                   })

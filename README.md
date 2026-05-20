@@ -37,7 +37,8 @@ Screenshots, gameplay recordings, and feature showcases.
 - [⚡ Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
 - [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
 - [📋 Overview](#-overview)
-- [⚡ Flash Events](#-flash-events)
+- [🌠 Flash Events](#-flash-events)
+- [⚡ Ascension System](#-ascension-system)
 - [🌌 Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
 - [🔢 Global Number Formatting Engine](#-global-number-formatting-engine)
 - [📊 Competitive Analytics & Profiles](#-competitive-analytics--profiles)
@@ -121,6 +122,44 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Full test coverage across backend services and frontend components
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
 - Infinite Scaling: Engineered with native BigInt support to handle astronomical point values (Sextillions, Vigintillions, and beyond).
+
+---
+
+## ⚡ Ascension System
+
+Upon reaching **999 OVG (Octovigintillion)**, players unlock the Ascension system: a permanent progression layer built around prestige resets and long-term mastery.
+
+### 🏁 Chrono Laps
+
+Reset your current balance back to **200,000 points** to permanently increase your **Lap Count**.
+
+Each lap tracks:
+- total bets taken
+- lap completion speed
+
+Compete on dedicated:
+- Lap leaderboards
+- Speedrun leaderboards
+
+### ♾️ Infinite Path
+
+Players are never forced to prestige.
+
+Declining Ascension allows you to:
+- preserve your current balance
+- continue pushing toward extreme high-score tiers
+- compete for permanent wealth rankings
+
+Ascension can always be triggered later from the profile menu.
+
+### 🎨 Persistent Mastery
+
+Resets are visual-friendly. Any previously unlocked point-tier stylings (UVG, DVG, QIV, etc.) remain permanently available in your profile settings, allowing you to flex high-tier visuals even at the start of a fresh lap.
+
+<div>
+  <strong>Ascension System Demo</strong><br/>
+  <img src="./assets/ascension_demo.gif" width="220" />
+</div>
 
 ---
 

@@ -80,6 +80,8 @@ export interface UserPointsData {
   currentWinStreak: number
   allTimePeak: string
   pointStylePreference: string | null
+  laps: number
+  fastestLapBets: number
 }
 
 export interface LeaderboardEntry {
@@ -94,6 +96,8 @@ export interface LeaderboardEntry {
   winRate: number
   linkedinUrl: string | null
   pointStylePreference: string | null
+  laps?: number
+  fastestLapBets?: number | null
 }
 
 export interface ProfileData {
