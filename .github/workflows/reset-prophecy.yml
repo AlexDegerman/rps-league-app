@@ -1,0 +1,24 @@
+name: Reset Oracle Prophecy
+
+on:
+  schedule:
+    # Oracle reset - runs at 00:01 UTC every day (same time as daily peak)
+    - cron: "1 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  reset-oracle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reset daily oracle prophecy
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "x-reset-secret: ${{ secrets.RESET_SECRET }}" \
+            https://rps-league-g275.onrender.com/api/oracle/reset)
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Oracle reset failed with status $RESPONSE"
+            exit 1
+          fi
+          echo "Oracle prophecy reset successful"

@@ -11,6 +11,7 @@ interface PendingMatchCardProps {
   serverOffset: number
   winStreak?: number
   visualMode?: string | null
+  oracleSide?: 'left' | 'right' | null
 }
 
 export default function PendingMatchCard({
@@ -19,7 +20,8 @@ export default function PendingMatchCard({
   onPick,
   serverOffset,
   winStreak = 0,
-  visualMode = null
+  visualMode = null,
+  oracleSide
 }: PendingMatchCardProps) {
   const calculateTimeLeft = useCallback(() => {
     if (!pending.expiresAt) return 0
@@ -187,9 +189,9 @@ export default function PendingMatchCard({
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerA)}
-              className={betBtnClass}
+              className={`${betBtnClass} ${oracleSide === 'left' ? 'oracle-glow-btn' : ''}`}
             >
-              {cfg.label}
+              {oracleSide === 'left' ? '👁️ PICK' : cfg.label}
             </button>
           ) : (
             prediction?.pick === pending.playerA && (
@@ -231,9 +233,9 @@ export default function PendingMatchCard({
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerB)}
-              className={betBtnClass}
+              className={`${betBtnClass} ${oracleSide === 'right' ? 'oracle-glow-btn' : ''}`}
             >
-              {cfg.label}
+              {oracleSide === 'right' ? '👁️ PICK' : cfg.label}
             </button>
           ) : (
             prediction?.pick === pending.playerB && (

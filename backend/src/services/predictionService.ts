@@ -6,6 +6,7 @@ import {
   tryTriggerFlashEventForUser
 } from './flashEventService.js'
 import { logger } from '../utils/logger.js'
+import { consumeOracleForUser, getOracleState, hasUserUsedOracle } from './oracleService.js'
 
 const POINTS_FLOOR = 100000n
 
@@ -133,7 +134,7 @@ export const resolvePrediction = async (
 ): Promise<void> => {
   let predictions
   try {
-    // JOIN fetches balance and bet count in one query to avoid N+1 calls per bettor
+    // JOIN fetches balance, bet count, and match players in one query to avoid N+1 calls per bettor
     predictions = await pool.query(
       `SELECT
         p.*,
@@ -141,9 +142,12 @@ export const resolvePrediction = async (
         u.points AS current_points,
         u.bonus_pity_count,
         u.current_win_streak,
-        (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) AS total_bets
+        (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) AS total_bets,
+        m.player_a_name,
+        m.player_b_name
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
+        JOIN matches m ON p.game_id = m.game_id
         WHERE p.game_id = $1 AND p.result IS NULL`,
       [gameId]
     )
@@ -158,13 +162,25 @@ export const resolvePrediction = async (
     try {
       const flashEvent = getFlashEventForUser(row.user_id)
       const flashEventType = flashEvent?.type ?? null
-
       const flashActive = !!flashEvent
-      const result = flashActive
-        ? 'WIN'
-        : row.pick === winnerName
+
+      const oracleUsed = await hasUserUsedOracle(row.user_id)
+      let oracleRigged = false
+      if (!oracleUsed) {
+        const oracleState = getOracleState()
+        const oracleWinnerName =
+          oracleState.side === 'left' ? row.player_a_name : row.player_b_name
+        if (row.pick === oracleWinnerName) {
+          oracleRigged = true
+        }
+      }
+
+      const result =
+        flashActive || oracleRigged
           ? 'WIN'
-          : 'LOSE'
+          : row.pick === winnerName
+            ? 'WIN'
+            : 'LOSE'
       const isWin = result === 'WIN'
 
       const currentPoints = BigInt(row.current_points)
@@ -228,6 +244,11 @@ export const resolvePrediction = async (
         const effectiveFlashMult = BigInt(Math.floor(flashMult * 100))
         gainLoss = (gainLoss * effectiveFlashMult) / 100n
         consumeFlashBetForUser(row.user_id)
+      }
+
+      // Consume oracle after all payout math - one use per day
+      if (oracleRigged) {
+        await consumeOracleForUser(row.user_id)
       }
 
       await pool.query(
@@ -302,7 +323,8 @@ export const resolvePrediction = async (
           streakAfter,
           streakMult: Number(streakMult),
           flashEventType,
-          flashMult
+          flashMult,
+          oracleRigged
         })
       )
       tryTriggerFlashEventForUser(row.user_id, broadcast)

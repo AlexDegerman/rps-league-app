@@ -10,6 +10,18 @@ type Update = {
 
 const UPDATES: Update[] = [
   {
+    version: '1.8',
+    label: 'Daily Oracle & Point Style Customization',
+    notes: [
+      'Daily Oracle Prophecy: A server-side AI analyst now issues one guaranteed prediction per day. The Oracle picks a side before the match and rigs the outcome in your favor, follow it and win. The prophecy resets at midnight UTC.',
+      'Tamper-Proof Oracle: Oracle usage is tracked server-side in the database, not localStorage. Clearing browser data does not grant additional uses. One prophecy per player per day, enforced at the prediction layer.',
+      "Oracle Glow: The pending match card highlights the Oracle's predicted side with a distinctive purple pulse animation, making the recommended bet visually unmistakable.",
+      'Point Style Customization: Players can now pin a preferred visual style for their point display from their profile page. 32 tiers available from Million to Octovigintillion, unlocked by reaching the corresponding all-time peak threshold. Cosmetic only.',
+      'Auto-Style Mode: Enabled by default. Automatically advances your display to the highest tier you have reached. Can be overridden at any time by selecting a specific style manually.',
+      'All-Time Peak Tracking: Introduced a permanent all_time_peak column that is never reset by daily or weekly cycles, used as the authoritative source for style unlock eligibility.'
+    ]
+  },
+  {
     version: '1.7',
     label: 'Observability and Feedback Portal',
     notes: [

@@ -21,6 +21,8 @@ interface GameState {
   setPrediction: (gameId: string, record: PredictionRecord) => void
   updatePrediction: (gameId: string, update: Partial<PredictionRecord>) => void
   deletePrediction: (gameId: string) => void
+  oracleSide: 'left' | 'right' | null
+  setOracleSide: (side: 'left' | 'right' | null) => void
 
   // Event & Visual State
   activeFlashEvent: string | null
@@ -59,6 +61,7 @@ export const useGameStore = create<GameState>((set) => ({
   now: Date.now(),
   visualMode: null,
   liveTheme: null,
+  oracleSide: null,
 
   // Actions - Connection
   setBackendReady: (v) => set({ backendReady: v }),
@@ -103,6 +106,7 @@ export const useGameStore = create<GameState>((set) => ({
       next.delete(gameId)
       return { predictions: next }
     }),
+  setOracleSide: (side) => set({ oracleSide: side }),
 
   // Actions - Event & Visuals
   setActiveFlashEvent: (type) => set({ activeFlashEvent: type }),

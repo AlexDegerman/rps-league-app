@@ -41,8 +41,9 @@ import { useTabGuard } from '@/hooks/useTabGuard'
 import WelcomeModal from '@/components/WelcomeModal'
 import { logger } from '@/lib/logger'
 import UpdateModal from '@/components/UpdateModal'
+import { oracleTemplates } from '@/lib/oracleTemplates'
 
-const CURRENT_VERSION = '1.7'
+const CURRENT_VERSION = '1.8'
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
@@ -67,7 +68,9 @@ export default function HomePage() {
     now,
     tickNow,
     setVisualMode,
-    setLiveTheme
+    setLiveTheme,
+    oracleSide,
+    setOracleSide
   } = useGameStore()
 
   // - User store -
@@ -261,6 +264,18 @@ export default function HomePage() {
           error: String(err)
         })
       })
+
+      fetch(`${API_BASE}/api/oracle?userId=${user.userId}`)
+        .then((r) => r.json())
+        .then((data) => {
+          const alreadyWelcomed = !!localStorage.getItem('rps_welcomed')
+          if (!alreadyWelcomed) return
+          if (!data.used) {
+            setOracleSide(data.side)
+            setNotification('oracle')
+          }
+        })
+        .catch(() => {})
 
     fetchLatestMatches(1).then((data) => {
       if (data && data.matches.length > 0) markReady()
@@ -518,6 +533,12 @@ export default function HomePage() {
 
       if (ok && data?.success === true) {
         succeeded = true
+        if (
+          notification === 'oracle'
+        ) {
+          setNotification(null)
+          setOracleSide(null)
+        }
         updatePrediction(gameId, { confirmed: true })
       } else {
         triggerError(data?.error || 'MATCH ALREADY ENDED')
@@ -766,41 +787,89 @@ export default function HomePage() {
 
           {/* Notification banner */}
           {notification && isHydrated && (
-            <div
-              className={`mt-3 flex items-start justify-between gap-3 rounded-xl px-4 py-3 border animate-in fade-in slide-in-from-top-2 duration-400 ${notification === 'no_bigint' ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-200'}`}
-            >
-              <div className="flex items-start gap-3 min-w-0">
-                <span className="text-xl flex-none mt-0.5">
-                  {notification === 'no_bigint' ? '⚠️' : '🎉'}
-                </span>
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span
-                    className={`text-[11px] font-black uppercase tracking-widest leading-tight ${notification === 'no_bigint' ? 'text-red-700' : 'text-indigo-700'}`}
+            <div className="flex flex-col gap-2 mt-3">
+              {/* Welcome banner - new visitor or bigint error */}
+              {(notification === 'new_visitor' ||
+                notification === 'no_bigint') && (
+                <div
+                  className={`flex items-start justify-between gap-3 rounded-xl px-4 py-3 border animate-in fade-in slide-in-from-top-2 duration-400 ${
+                    notification === 'no_bigint'
+                      ? 'bg-red-50 border-red-200'
+                      : 'bg-indigo-50 border-indigo-200'
+                  }`}
+                >
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="text-xl flex-none mt-0.5">
+                      {notification === 'no_bigint' ? '⚠️' : '🎉'}
+                    </span>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span
+                        className={`text-[11px] font-black uppercase tracking-widest leading-tight ${
+                          notification === 'no_bigint'
+                            ? 'text-red-700'
+                            : 'text-indigo-700'
+                        }`}
+                      >
+                        {notification === 'no_bigint'
+                          ? 'Browser Not Supported'
+                          : "You've been granted 200,000 points!"}
+                      </span>
+                      <p
+                        className={`text-[10px] font-medium leading-snug ${
+                          notification === 'no_bigint'
+                            ? 'text-red-600'
+                            : 'text-indigo-500'
+                        }`}
+                      >
+                        {notification === 'no_bigint'
+                          ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
+                          : 'Start betting to rank up the leaderboard. No login needed, your progress is saved automatically.'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (notification === 'new_visitor')
+                        localStorage.setItem('rps_welcomed', '1')
+                      setNotification(null)
+                    }}
+                    className={`flex-none p-1.5 rounded-lg transition-colors shrink-0 ${
+                      notification === 'no_bigint'
+                        ? 'text-red-400 hover:text-red-700 hover:bg-red-100'
+                        : 'text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100'
+                    }`}
+                    aria-label="Close"
                   >
-                    {notification === 'no_bigint'
-                      ? 'Browser Not Supported'
-                      : "You've been granted 200,000 points!"}
-                  </span>
-                  <p
-                    className={`text-[10px] font-medium leading-snug ${notification === 'no_bigint' ? 'text-red-600' : 'text-indigo-500'}`}
-                  >
-                    {notification === 'no_bigint'
-                      ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
-                      : 'Start making predictions to climb the leaderboard.'}
-                  </p>
+                    <CloseIcon />
+                  </button>
                 </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (notification === 'new_visitor')
-                    localStorage.setItem('rps_welcomed', '1')
-                  setNotification(null)
-                }}
-                className={`flex-none p-1.5 rounded-lg transition-colors shrink-0 ${notification === 'no_bigint' ? 'text-red-400 hover:text-red-700 hover:bg-red-100' : 'text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100'}`}
-                aria-label="Close"
-              >
-                <CloseIcon />
-              </button>
+              )}
+
+              {/* Oracle prophecy banner */}
+              {notification === 'oracle' &&
+                oracleSide &&
+                (() => {
+                  const dayIndex =
+                    new Date().getUTCDate() % oracleTemplates.length
+                  const template = oracleTemplates[dayIndex](oracleSide)
+                  return (
+                    <div className="flex items-start gap-3 rounded-xl px-4 py-3 border border-purple-400 bg-purple-50 animate-in fade-in slide-in-from-top-2 duration-400">
+                      <span className="text-xl flex-none mt-0.5">👁️</span>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-purple-800">
+                          Daily Oracle Prophecy
+                        </span>
+                        <p className="text-[10px] font-medium leading-snug text-purple-700">
+                          {template.prefix}{' '}
+                          <span className="inline-block font-black text-white bg-purple-700 px-2 py-0.5 rounded-md shadow-[0_0_14px_rgba(168,85,247,0.9),0_0_28px_rgba(168,85,247,0.5)] uppercase tracking-wider text-[10px] mx-0.5">
+                            {oracleSide === 'left' ? 'LEFT' : 'RIGHT'}
+                          </span>{' '}
+                          {template.suffix}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
             </div>
           )}
         </div>
@@ -876,6 +945,7 @@ export default function HomePage() {
                   serverOffset={serverOffset}
                   winStreak={winStreak}
                   visualMode={visualMode}
+                  oracleSide={oracleSide}
                 />
               ))}
             <MatchList

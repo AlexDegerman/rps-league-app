@@ -24,6 +24,12 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 <p><em>Showcasing selected tier colors with live transitions.</em></p>
 <img src="./assets/rpscolor.gif" width="300" />
 
+## 📹 Media
+
+Screenshots, gameplay recordings, and feature showcases.
+
+📄 [View full media gallery →](./MEDIA.md)
+
 ---
 
 ## 📑 Table of Contents
@@ -160,6 +166,8 @@ These tiers extend the game’s visual language through themed gradients, glow b
 For example, Moon’s Blessing introduces lunar glow systems, while other events explore directions such as electric storm effects or holographic styling. Over time, these systems form a growing library of distinct visual identities across the progression scale.
 
 Progression is designed to feel increasingly unstable, excessive, and visually alive as players push deeper into astronomical point territory.
+
+Players can pin a preferred visual style from their profile page, selecting any tier they have unlocked based on all-time peak. Auto-style mode advances the display automatically as new thresholds are reached and can be overridden at any time.
 
 ---
 
@@ -304,6 +312,7 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 - **Intent Guardrailing**: Strict system instructions prevent hallucinations or off-topic queries. Refuses non-RPS topics, maintaining persona and reducing token costs.
 - **Performance Optimization**: In-memory TTL cache and IP-based rate limiting to prevent abuse and minimize latency.
 - **Strategic Analytical Presets**: Includes a curated set of “one-tap” queries designed to reveal hidden league patterns. These presets guide users in exploring underlying PostgreSQL telemetry, such as move frequency heatmaps and real-time house edge, transforming raw data into actionable betting insights.
+- **Daily Oracle Prophecy**: Once per day, the Oracle issues a guaranteed match prediction. It picks a side server-side and rigs the outcome in the player's favor if followed. Usage is tracked in the database per user, not localStorage, making it tamper-proof. Resets at midnight UTC.
 
 <p><em>Showcasing AI Analysis.</em></p>
 <img src="./assets/ai_analysis_showcase.gif" width="220" />
@@ -344,14 +353,17 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 The RPS League stack is fully automated via **GitHub Actions** to manage testing, deployment, and high-frequency maintenance.
 
 ### Pipeline Overview
+
 | Stage | Tool | Purpose |
 | :--- | :--- | :--- |
 | **Testing** | Vitest | ~28s suites for Betting Loops & API logic |
 | **Deployment** | Vercel / Render | Zero-touch CD after passing CI |
-| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets |
+| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets + Oracle prophecy reset |
 
 ### Key Workflows
+
 - **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
+- **Oracle Reset:** Automated `POST` to `/api/oracle/reset` at 00:01 UTC daily generates a fresh prophecy side and clears all per-user usage state. Reuses `RESET_SECRET` for authorization. Supports manual dispatch for testing.
 - **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
 - **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
 
