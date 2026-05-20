@@ -216,8 +216,11 @@ describe('HomePage', () => {
   it('displays formatted balance in bet input when AUTO is enabled', async () => {
     setupMocks({ autoAllIn: true, points: 500000n })
     render(<HomePage />)
+
     const input = screen.getByRole('textbox') as HTMLInputElement
-    await waitFor(() => expect(input.value).toBe('500.000'))
+
+    await waitFor(() => expect(input.placeholder).toBe('500.000'))
+    expect(input.value).toBe('')
   })
 
   it('toggles autoAllIn state on button click', async () => {
