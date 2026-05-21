@@ -48,7 +48,7 @@ describe('Prediction Service', () => {
       'abc123'
     )
     expect(result.success).toBe(false)
-    expect(result.error).toBe('Bet amount exceeds balance')
+    expect(result.error).toBe('Bet could not be processed')
   })
 
   it('applies a positive gain_loss to user points on a WIN', async () => {
