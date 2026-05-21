@@ -37,8 +37,8 @@ Screenshots, gameplay recordings, and feature showcases.
 - [⚡ Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
 - [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
 - [📋 Overview](#-overview)
-- [🌠 Flash Events](#-flash-events)
 - [⚡ Ascension System](#-ascension-system)
+- [🌠 Flash Events](#-flash-events)
 - [🌌 Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
 - [🔢 Global Number Formatting Engine](#-global-number-formatting-engine)
 - [📊 Competitive Analytics & Profiles](#-competitive-analytics--profiles)
@@ -441,6 +441,14 @@ npm run dev
 ```
 
 Open http://localhost:3000
+
+---
+
+## 📜 Changelog
+
+All notable updates, seasonal releases, and system changes are documented in the project changelog.
+
+👉 [View full changelog →](./CHANGELOG.md)
 
 ---
 

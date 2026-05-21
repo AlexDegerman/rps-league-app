@@ -21,9 +21,9 @@ export const savePrediction = async (
   const { points: balance } = await getOrCreateUser(userId, shortId)
 
   if (betAmount <= 0n)
-    return { success: false, error: 'Bet amount must be greater than 0' }
+    return { success: false, error: 'Invalid bet amount' }
   if (betAmount > balance)
-    return { success: false, error: 'Bet amount exceeds balance' }
+    return { success: false, error: 'Bet could not be processed' }
 
   try {
     const nameCheck = await pool.query(
@@ -32,7 +32,7 @@ export const savePrediction = async (
     )
 
     if (nameCheck.rows.length > 0) {
-      return { success: false, error: 'NICKNAME ALREADY TAKEN' }
+      return { success: false, error: 'Nickname unavailable' }
     }
 
     const matchRes = await pool.query(
@@ -40,9 +40,9 @@ export const savePrediction = async (
       [gameId]
     )
     if (matchRes.rows.length === 0)
-      return { success: false, error: 'MATCH NOT FOUND' }
+      return { success: false, error: 'Invalid match' }
     if (Date.now() > Number(matchRes.rows[0].expires_at))
-      return { success: false, error: 'BETTING WINDOW CLOSED' }
+      return { success: false, error: 'Selection window closed' }
 
     await pool.query(`UPDATE users SET nickname = $1 WHERE user_id = $2`, [
       nickname,

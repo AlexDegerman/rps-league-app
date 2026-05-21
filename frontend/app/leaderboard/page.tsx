@@ -350,7 +350,10 @@ function LeaderboardContent() {
                                       </div>
                                     )}
                                     <div
-                                      className={`w-14 font-bold ${getAmountColor(entry.points)}`}
+                                      className={`w-14 font-bold ${getDisplayTierClass(
+                                        entry.points,
+                                        entry.pointStylePreference
+                                      )}`}
                                     >
                                       {formatPoints(entry.points).display}
                                     </div>
@@ -441,7 +444,12 @@ function LeaderboardContent() {
                               </td>
                             )}
                             <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                              <span className={getAmountColor(entry.points)}>
+                              <span
+                                className={getDisplayTierClass(
+                                  entry.points,
+                                  entry.pointStylePreference
+                                )}
+                              >
                                 {formatPoints(entry.points).display}
                               </span>
                             </td>
