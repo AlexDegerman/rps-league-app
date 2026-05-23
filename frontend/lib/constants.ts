@@ -51,28 +51,28 @@ export const FLASH_EVENT_CARD: Record<
     label: "Moon's Blessing",
     emoji: '🌙',
     textClass: 'lunar-badge-text',
-    multLabel: 'x5'
+    multLabel: 'x3'
   },
   ELECTRIC: {
     cardClass: 'event-card-base event-card-electric',
     label: 'Electric Surge',
     emoji: '⚡',
     textClass: 'electric-badge-text',
-    multLabel: 'x5'
+    multLabel: 'x3'
   },
   CARDS: {
     cardClass: 'event-card-base event-card-cards',
     label: 'Luck in the Card',
     emoji: '🃏',
     textClass: 'cards-badge-text',
-    multLabel: 'LEG'
+    multLabel: 'x1.5 + LEG'
   },
   HELLFIRE: {
     cardClass: 'event-card-base event-card-hellfire',
     label: 'Hellfire Event',
     emoji: '🔥',
     textClass: 'streak-fire-text text-red-300',
-    multLabel: 'x5'
+    multLabel: 'x3'
   }
 }
 

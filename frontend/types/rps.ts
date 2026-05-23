@@ -40,7 +40,6 @@ export interface PredictionRecord {
   pick: string
   result?: 'WIN' | 'LOSE'
   confirmed: boolean
-  // Bet history fields (populated from DB, not from live SSE)
   id?: number
   betAmount?: string
   gainLoss?: string
@@ -49,6 +48,7 @@ export interface PredictionRecord {
   createdAt?: number
   flashEventType?: string | null
   flashMult?: number
+  streakMultiplier?: number
 }
 export interface UserStats {
   joinedDate: string
@@ -172,6 +172,7 @@ export interface BetHistoryEntry {
   playerBPlayed: 'ROCK' | 'PAPER' | 'SCISSORS'
   flashMult: number
   flashEventType: string | null
+  streakMult: number
 }
 
 export type BonusTier = 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON'

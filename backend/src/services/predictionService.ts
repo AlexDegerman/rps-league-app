@@ -79,7 +79,7 @@ const rollBonus = (
   flashType?: string | null
 ): { multiplier: number; tier: string } | null => {
   if (flashType === 'CARDS' && isWin) {
-    return { multiplier: 10.0, tier: 'LEGENDARY' }
+    return { multiplier: 5.0, tier: 'LEGENDARY' }
   }
 
   const forceBonus = pityCount >= 3
@@ -88,45 +88,40 @@ const rollBonus = (
 
   const roll = Math.random() * 100
 
-  // 0 - 59.5 (59.5% chance)
   if (roll < 59.5) {
-    // COMMON: Win 2.0–3.0× | Loss keep 60–80% (lose 20–40%)
+    // COMMON: Win 1.5–2.2x | Loss: Save 10–25% (User loses 75-90% of base loss)
     return {
-      multiplier: isWin ? 2.0 + Math.random() * 1.0 : 0.6 + Math.random() * 0.2,
+      multiplier: isWin
+        ? 1.5 + Math.random() * 0.7
+        : 0.1 + Math.random() * 0.15,
       tier: 'COMMON'
     }
   }
 
-  // 59.5 - 84.5 (25% chance)
   if (roll < 84.5) {
-    // RARE: Win 3.0–5.0× | Loss keep 30–59% (lose 41–70%)
+    // RARE: Win 2.2–3.2x | Loss: Save 25–50% (User loses 50-75% of base loss)
     return {
       multiplier: isWin
-        ? 3.0 + Math.random() * 2.0
-        : 0.3 + Math.random() * 0.29,
+        ? 2.2 + Math.random() * 1.0
+        : 0.25 + Math.random() * 0.25,
       tier: 'RARE'
     }
   }
 
-  // 84.5 - 97.5 (13% chance)
   if (roll < 97.5) {
-    // EPIC: Win 5.0–8.0× | Loss keep 1–29% (lose 71–99%)
+    // EPIC: Win 3.2–4.2x | Loss: Save 60–90% (User loses 10-40% of base loss)
     return {
-      multiplier: isWin
-        ? 5.0 + Math.random() * 3.0
-        : 0.01 + Math.random() * 0.28,
+      multiplier: isWin ? 3.2 + Math.random() * 1.0 : 0.6 + Math.random() * 0.3,
       tier: 'EPIC'
     }
   }
 
-  // 97.5 - 100 (2.5% chance)
-  // LEGENDARY: Win 10.0× | Loss full protection (keep 100%)
+  // LEGENDARY: Win 5.0x | Loss: Save 100% (User loses 0)
   return {
-    multiplier: isWin ? 10.0 : 1.0,
+    multiplier: isWin ? 5.0 : 1.0,
     tier: 'LEGENDARY'
   }
 }
-
 export const resolvePrediction = async (
   gameId: string,
   winnerName: string,
@@ -172,6 +167,7 @@ export const resolvePrediction = async (
         const oracleState = getOracleState()
         const oracleWinnerName =
           oracleState.side === 'left' ? row.player_a_name : row.player_b_name
+
         if (row.pick === oracleWinnerName) {
           oracleRigged = true
         } else {
@@ -205,101 +201,109 @@ export const resolvePrediction = async (
         flashEventType
       )
 
-      const effectiveMult = bonus
+      const streakAfter = isWin ? Number(row.current_win_streak) + 1 : 0
+
+      const streakMult =
+        streakAfter >= 5
+          ? 5n
+          : streakAfter >= 4
+            ? 3n
+            : streakAfter >= 3
+              ? 2n
+              : 1n
+
+      const bonusMult = bonus ? bonus.multiplier : 1
+      const streakNum = Number(streakMult)
+      const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
+
+      const bonusMultScale = bonus
         ? BigInt(Math.floor(bonus.multiplier * 100))
-        : 0n
+        : 100n
+      const flashMultScale =
+        isWin && flashEvent
+          ? BigInt(Math.floor(flashEvent.multiplier * 100))
+          : 100n
 
       const baseChange = isWin ? bet : bet / 2n
 
       let gainLoss: bigint
 
       if (isWin) {
-        gainLoss = bonus ? (baseChange * effectiveMult) / 100n : baseChange
+        const afterStreak = baseChange * streakMult
+        const afterFlash = (afterStreak * flashMultScale) / 100n
+        gainLoss = (afterFlash * bonusMultScale) / 100n
       } else {
-        const actualLoss = bonus
-          ? (baseChange * effectiveMult) / 100n
-          : baseChange
-        const provisionalPoints = currentPoints - actualLoss
-        gainLoss =
-          provisionalPoints < POINTS_FLOOR
-            ? POINTS_FLOOR - currentPoints
-            : -actualLoss
+        const savedAmount = bonus ? (baseChange * bonusMultScale) / 100n : 0n
+        gainLoss = -(baseChange - savedAmount)
       }
+
+      const provisionalPoints = currentPoints + gainLoss
+
+      if (provisionalPoints < POINTS_FLOOR) {
+        gainLoss = POINTS_FLOOR - currentPoints
+      }
+
+      const baseFinalPure = isWin
+        ? (baseChange * streakMult * flashMultScale) / 100n
+        : baseChange
 
       const bonusDisplayAmount = bonus
         ? isWin
-          ? gainLoss - baseChange
-          : baseChange - -gainLoss
+          ? gainLoss - baseFinalPure
+          : baseFinalPure + gainLoss
         : 0n
 
-      const streakAfter = isWin ? Number(row.current_win_streak) + 1 : 0
-      const streakMult =
-        streakAfter >= 5
-          ? 10n
-          : streakAfter >= 4
-            ? 6n
-            : streakAfter >= 3
-              ? 3n
-              : 1n
-
-      if (isWin && streakMult > 1n) {
-        gainLoss = gainLoss * streakMult
-      }
-
-      const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
-
       if (isWin && flashEvent) {
-        const effectiveFlashMult = BigInt(Math.floor(flashMult * 100))
-        gainLoss = (gainLoss * effectiveFlashMult) / 100n
         consumeFlashBetForUser(row.user_id)
       }
 
-      // Consume oracle after all payout math - one use per day
       if (oracleRigged || defiedOracle) {
         await consumeOracleForUser(row.user_id)
       }
 
       await pool.query(
         `UPDATE predictions 
-          SET result = $1, 
-            gain_loss = $2,
-            bonus_tier = $3,
-            bonus_multiplier = $4,
-            flash_event_type = $7,
-            flash_multiplier = $8
-          WHERE user_id = $5 AND game_id = $6`,
+            SET result = $1, 
+              gain_loss = $2,
+              bonus_tier = $3,
+              bonus_multiplier = $4,
+              flash_event_type = $7,
+              flash_multiplier = $8,
+              streak_multiplier = $9
+            WHERE user_id = $5 AND game_id = $6`,
         [
           result,
           gainLoss.toString(),
           bonus ? bonus.tier : null,
-          bonus ? Number(effectiveMult) : 0,
+          bonus ? Math.floor(bonus.multiplier * 100) : 100,
           row.user_id,
           row.game_id,
           flashEventType,
-          flashMult
+          flashMult,
+          streakNum
         ]
       )
 
       await pool.query(
         `UPDATE users
-        SET points               = points + $1,
-            peak_points          = GREATEST(peak_points, points + $1),
-            all_time_peak        = GREATEST(all_time_peak, points + $1),
-            daily_peak           = GREATEST(daily_peak,  points + $1),
-            weekly_peak          = GREATEST(weekly_peak, points + $1),
-            bonus_pity_count     = $3,
-            total_volume         = total_volume + $4,
-            biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
-            biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
-            current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
-            max_win_streak       = CASE 
+          SET points               = points + $1,
+              peak_points          = GREATEST(peak_points, points + $1),
+              all_time_peak        = GREATEST(all_time_peak, points + $1),
+              daily_peak           = GREATEST(daily_peak,  points + $1),
+              weekly_peak          = GREATEST(weekly_peak, points + $1),
+              bonus_pity_count     = $3,
+              total_volume         = total_volume + $4,
+              biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
+              biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
+              current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
+              max_win_streak       = CASE 
                                       WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
                                       THEN current_win_streak + 1 
                                       ELSE max_win_streak 
                                     END,
-            total_pities_earned  = total_pities_earned + $6,
-            total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
-        WHERE user_id = $2`,
+              total_pities_earned  = total_pities_earned + $6,
+              total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
+          WHERE user_id = $2`,
         [
           gainLoss.toString(),
           row.user_id,
@@ -324,12 +328,12 @@ export const resolvePrediction = async (
                 amount:
                   bonusDisplayAmount > 0n ? bonusDisplayAmount.toString() : '0',
                 tier: bonus.tier,
-                visualMultiplier: Number(effectiveMult)
+                visualMultiplier: Math.floor(bonus.multiplier * 100)
               }
             : null,
           wasAllIn: bet === currentPoints,
           streakAfter,
-          streakMult: Number(streakMult),
+          streakMult: streakNum,
           flashEventType,
           flashMult,
           oracleRigged
@@ -374,6 +378,7 @@ export const getPaginatedUserPredictions = async (
         p.bonus_multiplier AS "bonusMultiplier",
         p.flash_event_type AS "flashEventType",
         p.flash_multiplier AS "flashMult",
+        p.streak_multiplier AS "streakMultiplier",
         p.created_at       AS "createdAt",
         m.player_a_name,
         m.player_a_played,
@@ -473,6 +478,7 @@ export const getPaginatedUserPredictions = async (
     bonusMultiplier: Number(row.bonusMultiplier ?? 0),
     flashEventType: row.flashEventType ?? null,
     flashMult: Number(row.flashMult ?? 1),
+    streakMultiplier: Number(row.streakMultiplier ?? 1),
     createdAt: Number(row.createdAt)
   }))
 

@@ -14,10 +14,10 @@ const FLASH_TRIGGER_CHANCE = 0.05
 const FLASH_EVENT_CONFIG: Partial<
   Record<FlashEventType, { multiplier: number; weight: number }>
 > = {
-  LUNAR: { multiplier: 5, weight: 1.0 },
-  ELECTRIC: { multiplier: 5, weight: 1.0 },
+  LUNAR: { multiplier: 3, weight: 1.0 },
+  ELECTRIC: { multiplier: 3, weight: 1.0 },
   CARDS: { multiplier: 1.5, weight: 1.0 },
-  HELLFIRE: { multiplier: 5, weight: 1.5 }
+  HELLFIRE: { multiplier: 3, weight: 1.0 }
 }
 
 // Weighted random pick, avoids uniform distribution when weights differ

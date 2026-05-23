@@ -10,7 +10,7 @@ A high-intensity pressure state dominated by deep crimson and glowing orange gra
 
 **Effects**
 - Guaranteed wins during the event
-- x5 win multiplier
+- 3x win multiplier
 - UI transforms into a heat-drenched crimson and orange theme
 - Win effects replaced with layered hellfire: rising flame columns, flying embers, heat shimmer wisps, ash floaters, screen flash on ignition, and a persistent ground glow
 - Fire audio feedback reinforces high-pressure moments
@@ -61,7 +61,7 @@ A fast-paced, volatile energy theme infused with neon violet and electric purple
 
 **Effects**
 - Guaranteed wins during the event
-- x5 win multiplier
+- 3x win multiplier
 - UI shifts into neon electric storm visuals
 - Win effects replaced with sharp, fast-moving streams of electric static rain
 - Lightning audio feedback reinforces intensity
@@ -87,7 +87,7 @@ A calm lunar-inspired event wrapped in cool blue tones with serene visual and au
 
 **Effects**
 - Guaranteed wins during the event
-- x5 win multiplier
+- x3 win multiplier
 - UI shifts into a moonlit blue theme with lunar styling
 - Win effects replaced with drifting luminous particles resembling moonlight or snow
 - Soft ethereal audio with a moonshine shimmer

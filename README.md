@@ -91,9 +91,9 @@ This architecture eliminates the barrier to entry while preserving a robust laye
   - **LOSE:** -50% of your bet
   - **Floor:** points never drop below 100,000
   - **Bonus System**: 40% chance per match to trigger a Tiered Bonus multiplier.
-    - On Win: Multiply your payout by 2×–10× depending on tier.
-    - On Loss: Reduce your loss to 60%–0% of the base loss depending on tier.
-    - Tiers: Common (2–3×), Rare (3–5×), Epic (5–8×), Legendary (10×, guaranteed).
+    - On Win: Multiply your payout by 1.5×–5× depending on tier.
+    - On Loss: Reduce your loss to 75%–0% of base loss depending on tier (higher tiers retain more value, Legendary fully protects the loss).
+    - Tiers: Common (1.5–2.2×), Rare (2.2–3.2×), Epic (3.2–4.2×), Legendary (5×, guaranteed).
     - Guarantees a bonus at least every 4 bets if it doesn't occur naturally from the 40% base chance
 - Win streak system:
   - Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x3, x6, x10)

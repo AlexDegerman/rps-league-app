@@ -35,13 +35,13 @@ export default function BonusExplainerPopover() {
               <ul className="text-[9px] text-gray-600 space-y-1 list-disc pl-3">
                 <li>
                   <span className="text-green-600 font-bold">
-                    +100% to +1000%
+                    +50% to 500%
                   </span>{' '}
                   gain on Win
                 </li>
                 <li>
                   <span className="text-blue-600 font-bold">
-                    20% to 100% fewer
+                    10% to 100% fewer
                   </span>{' '}
                   points lost on Loss
                 </li>
@@ -56,7 +56,7 @@ export default function BonusExplainerPopover() {
               </span>
               <ul className="text-[9px] text-gray-600 space-y-1 list-disc pl-3">
                 <li>
-                  <span className="font-bold text-gray-800">3x / 6x / 10x</span>{' '}
+                  <span className="font-bold text-gray-800">2x / 3x / 5x</span>{' '}
                   multiplier
                 </li>
                 <li>
@@ -87,7 +87,7 @@ export default function BonusExplainerPopover() {
                     Moon
                   </span>
                   <span className="text-[8px] text-gray-400 font-medium">
-                    x5
+                    x3
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -96,7 +96,7 @@ export default function BonusExplainerPopover() {
                     Electric
                   </span>
                   <span className="text-[8px] text-gray-400 font-medium">
-                    x5
+                    x3
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -114,7 +114,7 @@ export default function BonusExplainerPopover() {
                     Hellfire
                   </span>
                   <span className="text-[8px] text-gray-400 font-medium">
-                    x5
+                    x3
                   </span>
                 </div>
               </div>

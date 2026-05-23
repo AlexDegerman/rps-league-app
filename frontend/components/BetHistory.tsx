@@ -1,11 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import {
-  formatDateTime,
-  formatPoints,
-  getDisplayTierClass
-} from '@/lib/format'
+import { formatDateTime, formatPoints, getDisplayTierClass } from '@/lib/format'
 import GemIcon from '@/components/icons/GemIcon'
 import MoveIcon from '@/components/icons/MoveIcon'
 import { fetchUserBetHistory } from '@/lib/api'
@@ -27,6 +23,40 @@ const TAB_LABELS: Record<Tab, string> = {
 }
 
 // --- SUB-COMPONENTS ---
+
+function StreakBadge({ streakMult }: { streakMult: number }) {
+  if (streakMult <= 1) return null
+
+  const isInferno = streakMult >= 5
+  const isFever = streakMult >= 2 && streakMult < 5
+
+  return (
+    <div className="flex items-center justify-center relative z-30">
+      <div
+        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md border font-black text-[8px] uppercase tracking-widest shadow-lg transition-all ${
+          isInferno
+            ? 'card-inferno bg-orange-950/90 border-orange-500'
+            : isFever
+              ? 'card-fever bg-green-950/90 border-green-500'
+              : 'bg-gray-950/90 border-gray-500'
+        }`}
+      >
+        <span
+          className={`flex items-center gap-1 ${
+            isInferno
+              ? 'inferno-shimmer-text streak-fire-text'
+              : 'streak-shimmer-text'
+          }`}
+        >
+          <span>{isInferno ? '🔥' : '⚡'}</span>
+          <span>
+            {streakMult}x {isInferno ? 'Inferno' : 'Fever'}
+          </span>
+        </span>
+      </div>
+    </div>
+  )
+}
 
 function FlashEventBadge({
   flashEventType,
@@ -57,16 +87,20 @@ function FlashEventBadge({
 function TotalMultiplierHeader({
   bonusMultiplier,
   flashMult,
+  streakMult,
   isWin
 }: {
   bonusMultiplier: number
   flashMult: number
+  streakMult: number
   isWin: boolean
 }) {
   if (!isWin) return null
-  const bonusMult = bonusMultiplier > 0 ? bonusMultiplier / 100 : 1
-  const effectiveFlash = flashMult > 1 ? flashMult : 1
-  const totalMult = bonusMult * effectiveFlash
+  const b = bonusMultiplier > 0 ? bonusMultiplier / 100 : 1
+  const f = flashMult > 1 ? flashMult : 1
+  const s = streakMult > 1 ? streakMult : 1
+
+  const totalMult = b * f * s
   if (totalMult < 1.01) return null
 
   return (
@@ -111,6 +145,9 @@ function BetRow({
   rank?: number
   stylePreference: string | null
 }) {
+  console.log(
+    `Game: ${entry.playerAName} vs ${entry.playerBName} | ID: ${entry.gameId}`
+  )
   const isWin = entry.result === 'WIN'
   const isLoss = entry.result === 'LOSE'
   const gainLossBig = BigInt(entry.gainLoss ?? '0')
@@ -165,10 +202,13 @@ function BetRow({
         <TotalMultiplierHeader
           bonusMultiplier={entry.bonusMultiplier}
           flashMult={entry.flashMult ?? 1}
+          streakMult={entry.streakMult ?? 1}
           isWin={isWin}
         />
 
-        <div className="flex gap-1 flex-wrap justify-center mt-1 relative z-30">
+        <div className="flex gap-2 flex-wrap justify-center mt-1.5 relative z-30">
+          <StreakBadge streakMult={entry.streakMult} />
+
           <BonusBadge
             tier={entry.bonusTier}
             multiplier={entry.bonusMultiplier}
@@ -266,9 +306,10 @@ function useTabFetchFn(userId: string | null, tab: Tab) {
           betAmount: pred?.betAmount ?? '0',
           gainLoss: pred?.gainLoss ?? '0',
           bonusTier: pred?.bonusTier ?? null,
-          bonusMultiplier: pred?.bonusMultiplier ?? 0,
+          bonusMultiplier: Number(pred?.bonusMultiplier ?? 0),
           flashEventType: pred?.flashEventType ?? null,
-          flashMult: pred?.flashMult ?? 1,
+          flashMult: Number(pred?.flashMult ?? 1),
+          streakMult: Number(pred?.streakMultiplier ?? 1),
           playerAName: m.playerA.name,
           playerBName: m.playerB.name,
           playerAPlayed: m.playerA.played,
