@@ -1,3 +1,5 @@
+import pool from "../utils/db.js"
+
 export type FlashEventType = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
 export interface FlashEventState {
   type: FlashEventType
@@ -50,13 +52,23 @@ export const consumeFlashBetForUser = (userId: string): boolean => {
 
 // Called after each individual user's bet resolves
 // Only triggers if user doesn't already have an active flash event
-export const tryTriggerFlashEventForUser = (
+export const tryTriggerFlashEventForUser = async (
   userId: string,
   broadcast: (event: string, data: string) => void
-): void => {
+): Promise<void> => {
   if (!FLASH_EVENTS_ENABLED) return
   if (_userFlashEvents.has(userId)) return // already has active event
-  if (Math.random() > FLASH_TRIGGER_CHANCE) return
+
+  // New players get 20% chance on their first ever flash event
+  const { rows } = await pool.query(
+    'SELECT first_flash_triggered FROM users WHERE user_id = $1',
+    [userId]
+  )
+  const isFirstFlash = !rows[0]?.first_flash_triggered
+  const chance = isFirstFlash ? 0.2 : FLASH_TRIGGER_CHANCE
+
+  if (Math.random() > chance) return
+
   const activeTypes = Object.keys(FLASH_EVENT_CONFIG) as FlashEventType[]
   if (activeTypes.length === 0) return
   const type = pickWeightedFlashEvent(activeTypes)
@@ -68,6 +80,15 @@ export const tryTriggerFlashEventForUser = (
     triggeredAt: Date.now()
   }
   _userFlashEvents.set(userId, event)
+
+  // Mark first flash as used so normal rate applies from here on
+  if (isFirstFlash) {
+    await pool.query(
+      'UPDATE users SET first_flash_triggered = true WHERE user_id = $1',
+      [userId]
+    )
+  }
+
   // Broadcast only to the specific user - the userId in the payload
   // means the frontend filters it client-side (only acts if data.userId === myId)
   broadcast(
