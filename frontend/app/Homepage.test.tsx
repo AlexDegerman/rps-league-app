@@ -21,24 +21,30 @@ interface StoreMock extends Mock {
   getState: Mock
 }
 
-const { mockUserStore, mockGameStore, mockUIStore } = vi.hoisted(() => {
-  const createMockStore = () => {
-    const mock = vi.fn() as unknown as StoreMock
-    mock.getState = vi.fn()
-    return mock
-  }
+const { mockUserStore, mockGameStore, mockUIStore, mockIdleStore } = vi.hoisted(
+  () => {
+    const createMockStore = () => {
+      const mock = vi.fn() as unknown as StoreMock
+      mock.getState = vi.fn()
+      return mock
+    }
 
-  return {
-    mockUserStore: createMockStore(),
-    mockGameStore: createMockStore(),
-    mockUIStore: createMockStore()
+    return {
+      mockUserStore: createMockStore(),
+      mockGameStore: createMockStore(),
+      mockUIStore: createMockStore(),
+      mockIdleStore: createMockStore()
+    }
   }
-})
+)
 
+// Mock Stores
 vi.mock('./stores/userStore', () => ({ useUserStore: mockUserStore }))
 vi.mock('./stores/gameStore', () => ({ useGameStore: mockGameStore }))
 vi.mock('./stores/uiStore', () => ({ useUIStore: mockUIStore }))
+vi.mock('./stores/idleStore', () => ({ useIdleStore: mockIdleStore }))
 
+// Mock Components
 vi.mock('@/components/MatchList', () => ({ default: () => null }))
 vi.mock('@/components/PendingMatchCard', () => ({ default: () => null }))
 vi.mock('@/components/LiveStatTicker', () => ({ default: () => null }))
@@ -57,8 +63,12 @@ vi.mock('@/components/overlays/ResultAnimOverlay', () => ({
 vi.mock('@/components/badges/FlashBadge', () => ({ default: () => null }))
 vi.mock('@/components/badges/StreakBadge', () => ({ default: () => null }))
 vi.mock('@/components/BonusExplainerPopover', () => ({ default: () => null }))
-vi.mock('@/components/WelcomeModal', () => ({ default: () => null }))
+vi.mock('@/components/modals/WelcomeModal', () => ({ default: () => null }))
+vi.mock('@/components/modals/UpdateModal', () => ({ default: () => null }))
+vi.mock('@/components/modals/AscensionModal', () => ({ default: () => null }))
+vi.mock('@/components/IdleBetControls', () => ({ default: () => null }))
 
+// Mock Hooks
 vi.mock('@/hooks/useSound', () => ({
   useSound: () => ({
     soundOn: true,
@@ -68,7 +78,8 @@ vi.mock('@/hooks/useSound', () => ({
     playCards: vi.fn(),
     playElectric: vi.fn(),
     playFire: vi.fn(),
-    playMoon: vi.fn()
+    playMoon: vi.fn(),
+    playFanfare: vi.fn()
   })
 }))
 vi.mock('@/hooks/useInfiniteScroll', () => ({
@@ -86,14 +97,20 @@ vi.mock('@/hooks/useAnimatedBigInt', () => ({
 vi.mock('@/hooks/useTabGuard', () => ({
   useTabGuard: () => false
 }))
+vi.mock('@/hooks/useIdleBet', () => ({
+  useIdleBet: vi.fn()
+}))
+
+// Mock Utils & API
 vi.mock('@/lib/user', () => ({
   getOrCreateUser: () => ({
-    userId: 'test',
-    shortId: 'abc',
+    userId: 'test-user-123',
+    shortId: 'abc-123',
     nickname: 'TestGuy'
   }),
   isUserValid: () => true
 }))
+
 vi.mock('@/lib/api', () => ({
   fetchLatestMatches: vi.fn(() => Promise.resolve({ matches: [], total: 0 })),
   fetchPendingMatches: vi.fn(() => Promise.resolve([])),
@@ -105,14 +122,22 @@ vi.mock('@/lib/api', () => ({
     })
   ),
   fetchUnifiedLeaderboard: vi.fn(() => Promise.resolve([])),
-  postPrediction: vi.fn()
+  postPrediction: vi.fn(),
+  fetchOracleState: vi.fn(() => Promise.resolve(null)),
+  fetchGlobalFlashState: vi.fn(() => Promise.resolve(null)),
+  fetchUserFlashState: vi.fn(() => Promise.resolve(null)),
+  fetchIdleEligibility: vi.fn(() => Promise.resolve(null)),
+  ascendUser: vi.fn(() =>
+    Promise.resolve({ success: true, laps: 1, fastestLapBets: 100 })
+  )
 }))
 
 describe('HomePage', () => {
   const setupMocks = (
     userOverrides = {},
     gameOverrides = {},
-    uiOverrides = {}
+    uiOverrides = {},
+    idleOverrides = {}
   ) => {
     const userState = {
       points: 500000n,
@@ -125,61 +150,75 @@ describe('HomePage', () => {
       streakMult: 1,
       displayNickname: 'TestGuy',
       dailyRank: null,
+      stylePreference: 'default',
+      laps: 0,
       setBetAmount: vi.fn(),
       setAutoAllIn: vi.fn(),
       setWinStreak: vi.fn(),
       setStreakMult: vi.fn(),
       setDailyRank: vi.fn(),
       applyPointsUpdate: vi.fn(),
+      setLaps: vi.fn(),
+      setFastestLapBets: vi.fn(),
       ...userOverrides
     }
     const gameState = {
       backendReady: true,
-      pendingMatches: [],
-      predictions: new Map(),
-      activeFlashEvent: null,
-      flashBuffRemaining: 0,
-      serverOffset: 0,
-      now: Date.now(),
-      tickNow: vi.fn(),
       markReady: vi.fn(),
+      pendingMatches: [],
       addPendingMatch: vi.fn(),
       removePendingMatch: vi.fn(),
+      predictions: new Map(),
       setPrediction: vi.fn(),
       updatePrediction: vi.fn(),
       deletePrediction: vi.fn(),
+      activeFlashEvent: null,
       setActiveFlashEvent: vi.fn(),
+      flashBuffRemaining: 0,
       setFlashBuffRemaining: vi.fn(),
       decrementFlashBuff: vi.fn(),
+      serverOffset: 0,
       setServerOffset: vi.fn(),
-      setMatches: vi.fn(),
+      now: Date.now(),
+      tickNow: vi.fn(),
       setVisualMode: vi.fn(),
       setLiveTheme: vi.fn(),
+      oracleSide: null,
+      setOracleSide: vi.fn(),
       ...gameOverrides
     }
     const uiState = {
       resultAnim: null,
-      notification: null,
-      errorMessage: null,
-      inputString: '500000',
-      showJumpButton: false,
-      showPointsInfo: false,
-      showPointsExplainer: false,
-      isFocused: false,
-      persistentError: null,
-      showWelcomeModal: false,
       setResultAnim: vi.fn(),
       clearResultAnim: vi.fn(),
+      notification: null,
       setNotification: vi.fn(),
+      errorMessage: null,
       triggerError: vi.fn(),
-      setShowJumpButton: vi.fn(),
-      setShowPointsInfo: vi.fn(),
-      setShowPointsExplainer: vi.fn(),
-      setIsFocused: vi.fn(),
+      inputString: '500000',
       setInputString: vi.fn(),
+      showJumpButton: false,
+      setShowJumpButton: vi.fn(),
+      showPointsInfo: false,
+      setShowPointsInfo: vi.fn(),
+      showPointsExplainer: false,
+      setShowPointsExplainer: vi.fn(),
+      isFocused: false,
+      setIsFocused: vi.fn(),
+      persistentError: null,
       setPersistentError: vi.fn(),
+      showWelcomeModal: false,
       setShowWelcomeModal: vi.fn(),
+      showUpdateModal: false,
+      setShowUpdateModal: vi.fn(),
+      showAscensionPrompt: false,
+      setShowAscensionPrompt: vi.fn(),
       ...uiOverrides
+    }
+    const idleState = {
+      setEligible: vi.fn(),
+      setHasInteractedWithIdle: vi.fn(),
+      ...idleOverrides
     }
 
     mockUserStore.mockReturnValue(userState)
@@ -188,6 +227,8 @@ describe('HomePage', () => {
     mockGameStore.getState.mockReturnValue(gameState)
     mockUIStore.mockReturnValue(uiState)
     mockUIStore.getState.mockReturnValue(uiState)
+    mockIdleStore.mockReturnValue(idleState)
+    mockIdleStore.getState.mockReturnValue(idleState)
   }
 
   beforeEach(() => {
@@ -214,7 +255,7 @@ describe('HomePage', () => {
   })
 
   it('displays formatted balance in bet input when AUTO is enabled', async () => {
-    setupMocks({ autoAllIn: true, points: 500000n })
+    setupMocks({ autoAllIn: true, points: 500000n, betAmount: 500000n })
     render(<HomePage />)
 
     const input = screen.getByRole('textbox') as HTMLInputElement
@@ -225,9 +266,11 @@ describe('HomePage', () => {
 
   it('toggles autoAllIn state on button click', async () => {
     const setAutoAllIn = vi.fn()
-    setupMocks({ setAutoAllIn })
+    setupMocks({ autoAllIn: true, setAutoAllIn })
     render(<HomePage />)
-    fireEvent.click(screen.getByText(/AUTO ON/i))
+
+    const btn = screen.getByText(/AUTO ON/i)
+    fireEvent.click(btn)
     expect(setAutoAllIn).toHaveBeenCalledWith(false)
   })
 
@@ -241,12 +284,14 @@ describe('HomePage', () => {
     const setBetAmount = vi.fn()
     setupMocks({ autoAllIn: false, points: 500000n, setBetAmount })
     render(<HomePage />)
+
     const input = screen.getByRole('textbox')
     await act(async () => {
       fireEvent.focus(input)
       fireEvent.change(input, { target: { value: '10' } })
       fireEvent.blur(input)
     })
+
     expect(setBetAmount).toHaveBeenCalledWith(100000n)
   })
 
@@ -254,6 +299,7 @@ describe('HomePage', () => {
     const setBetAmount = vi.fn()
     setupMocks({ autoAllIn: false, points: 500000n, setBetAmount })
     render(<HomePage />)
+
     fireEvent.click(screen.getByText(/ALL IN/i))
     expect(setBetAmount).toHaveBeenCalledWith(500000n)
   })
