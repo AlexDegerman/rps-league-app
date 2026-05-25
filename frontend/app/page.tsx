@@ -7,7 +7,11 @@ import {
   fetchUserPoints,
   postPrediction,
   fetchUnifiedLeaderboard,
-  ascendUser
+  ascendUser,
+  fetchOracleState,
+  fetchGlobalFlashState,
+  fetchIdleEligibility,
+  fetchUserFlashState
 } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
@@ -46,6 +50,9 @@ import { oracleTemplates } from '@/lib/oracleTemplates'
 import AscensionModal from '@/components/modals/AscensionModal'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import { CURRENT_VERSION } from '@/lib/updates'
+import { useIdleStore } from './stores/idleStore'
+import { useIdleBet } from '@/hooks/useIdleBet'
+import IdleBetControls from '@/components/IdleBetControls'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -128,6 +135,9 @@ export default function HomePage() {
     setShowAscensionPrompt
   } = useUIStore()
 
+  const { setEligible, setHasInteractedWithIdle } = useIdleStore()
+  useIdleBet()
+
   const {
     playWin,
     playLoss,
@@ -193,26 +203,26 @@ export default function HomePage() {
   }, [setShowJumpButton])
 
   // localStorage
-    useEffect(() => {
-      const welcomed = localStorage.getItem('rps_welcomed')
-      const lastSeenVersion = localStorage.getItem('rps_last_version')
+  useEffect(() => {
+    const welcomed = localStorage.getItem('rps_welcomed')
+    const lastSeenVersion = localStorage.getItem('rps_last_version')
 
-      if (!welcomed) {
-        setShowWelcomeModal(true)
-      } else if (lastSeenVersion !== CURRENT_VERSION) {
-        setShowUpdateModal(true)
-      }
+    if (!welcomed) {
+      setShowWelcomeModal(true)
+    } else if (lastSeenVersion !== CURRENT_VERSION) {
+      setShowUpdateModal(true)
+    }
 
-      if (typeof BigInt === 'undefined') {
-        setNotification('no_bigint')
-      }
+    if (typeof BigInt === 'undefined') {
+      setNotification('no_bigint')
+    }
 
-      const params = new URLSearchParams(window.location.search)
-      const utmSource = params.get('utm_source')
-      if (utmSource) {
-        sessionStorage.setItem('utm_source', utmSource)
-      }
-    }, [setNotification, setShowUpdateModal, setShowWelcomeModal])
+    const params = new URLSearchParams(window.location.search)
+    const utmSource = params.get('utm_source')
+    if (utmSource) {
+      sessionStorage.setItem('utm_source', utmSource)
+    }
+  }, [setNotification, setShowUpdateModal, setShowWelcomeModal])
 
   // auto all-in sync
   useEffect(() => {
@@ -246,8 +256,7 @@ export default function HomePage() {
     const user = getOrCreateUser()
     if (!isUserValid(user)) return
 
-    fetch(`${API_BASE}/api/live/flash-state?userId=${user.userId}`)
-      .then((r) => r.json())
+    fetchUserFlashState(user.userId)
       .then((data) => {
         if (data?.type) {
           setActiveFlashEvent(data.type)
@@ -262,8 +271,7 @@ export default function HomePage() {
         })
       })
 
-    fetch(`${API_BASE}/api/live/flash-state`)
-      .then((r) => r.json())
+    fetchGlobalFlashState()
       .then((data) => {
         if (data?.type) {
           setActiveFlashEvent(data.type)
@@ -276,17 +284,22 @@ export default function HomePage() {
         })
       })
 
-      fetch(`${API_BASE}/api/oracle?userId=${user.userId}`)
-        .then((r) => r.json())
-        .then((data) => {
-          const alreadyWelcomed = !!localStorage.getItem('rps_welcomed')
-          if (!alreadyWelcomed) return
-          if (!data.used) {
-            setOracleSide(data.side)
-            setNotification('oracle')
-          }
-        })
-        .catch(() => {})
+    fetchOracleState(user.userId)
+      .then((data) => {
+        const alreadyWelcomed = !!localStorage.getItem('rps_welcomed')
+        if (!alreadyWelcomed) return
+        if (data && !data.used) {
+          setOracleSide(data.side)
+          setNotification('oracle')
+        }
+      })
+      .catch(() => {})
+
+    fetchIdleEligibility(user.userId)
+      .then((data) => {
+        if (data?.eligible) setEligible(true)
+      })
+      .catch(() => {})
 
     fetchLatestMatches(1).then((data) => {
       if (data && data.matches.length > 0) markReady()
@@ -392,7 +405,7 @@ export default function HomePage() {
       if (data.userId !== userId) return
       const isWin = data.result === 'WIN'
       const { activeFlashEvent: currentFlash } = useGameStore.getState()
-      
+
       if (isWin) {
         const { points: currentPoints } = useUserStore.getState()
         const winAmt = BigInt(data.amount)
@@ -400,8 +413,7 @@ export default function HomePage() {
           currentPoints < ASCENSION_THRESHOLD &&
           currentPoints + winAmt >= ASCENSION_THRESHOLD
 
-        if (isAscendingWin)
-          playFanfare()
+        if (isAscendingWin) playFanfare()
         else if (currentFlash === 'LUNAR') playMoon()
         else if (currentFlash === 'CARDS') playCards()
         else if (currentFlash === 'ELECTRIC') playElectric()
@@ -562,9 +574,7 @@ export default function HomePage() {
 
       if (ok && data?.success === true) {
         succeeded = true
-        if (
-          notification === 'oracle'
-        ) {
+        if (notification === 'oracle') {
           setNotification(null)
           setOracleSide(null)
         }
@@ -589,17 +599,17 @@ export default function HomePage() {
     }
   }
 
-    const handleWelcomeContinue = () => {
-      localStorage.setItem('rps_welcomed', '1')
-      localStorage.setItem('rps_last_version', CURRENT_VERSION)
-      setShowWelcomeModal(false)
-      setNotification('new_visitor')
-    }
+  const handleWelcomeContinue = () => {
+    localStorage.setItem('rps_welcomed', '1')
+    localStorage.setItem('rps_last_version', CURRENT_VERSION)
+    setShowWelcomeModal(false)
+    setNotification('new_visitor')
+  }
 
-    const handleUpdateClose = () => {
-      localStorage.setItem('rps_last_version', CURRENT_VERSION)
-      setShowUpdateModal(false)
-    }
+  const handleUpdateClose = () => {
+    localStorage.setItem('rps_last_version', CURRENT_VERSION)
+    setShowUpdateModal(false)
+  }
 
   const numberName = pointsLoaded ? getFullNumberName(points) : ''
   const shouldShowTooltip =
@@ -628,10 +638,14 @@ export default function HomePage() {
                 setFastestLapBets(data.fastestLapBets)
                 applyPointsUpdate(200000n, useUserStore.getState().peakPoints)
                 setInputString('200000')
+                setEligible(true)
               }
               setShowAscensionPrompt(false)
             }}
             onDismiss={() => setShowAscensionPrompt(false)}
+            onComplete={() => {
+              setNotification('idle_unlock')
+            }}
           />
         )}
 
@@ -916,6 +930,33 @@ export default function HomePage() {
                     </div>
                   )
                 })()}
+              {/* Idle unlock banner */}
+              {notification === 'idle_unlock' && (
+                <div className="flex items-start justify-between gap-3 rounded-xl px-4 py-3 border border-indigo-300 bg-indigo-50 animate-in fade-in slide-in-from-top-2 duration-400">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="text-xl flex-none mt-0.5">⚡</span>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-indigo-700">
+                        Auto-Bet Unlocked
+                      </span>
+                      <p className="text-[10px] font-medium leading-snug text-indigo-500">
+                        Tick Auto-Bet Left or Right above any match to let the
+                        system bet for you automatically.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setHasInteractedWithIdle(true)
+                      setNotification(null)
+                    }}
+                    className="flex-none p-1.5 rounded-lg text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100 transition-colors shrink-0"
+                    aria-label="Close"
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -943,6 +984,9 @@ export default function HomePage() {
           <BonusExplainerPopover />
         </div>
       </div>
+
+      {/* ADD THIS HERE: Global Auto-Bet Tickers */}
+      <IdleBetControls />
 
       {/* Match feed */}
       <div className="min-h-[60vh]">

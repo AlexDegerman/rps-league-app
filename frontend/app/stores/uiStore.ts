@@ -17,8 +17,10 @@ interface UIState {
   clearResultAnim: () => void
 
   // Notifications & Errors
-  notification: 'new_visitor' | 'no_bigint' | 'oracle' | null
-  setNotification: (n: 'new_visitor' | 'no_bigint' | 'oracle' | null) => void
+  notification: 'new_visitor' | 'no_bigint' | 'oracle' | 'idle_unlock' | null
+  setNotification: (
+    n: 'new_visitor' | 'no_bigint' | 'oracle' | 'idle_unlock' | null
+  ) => void
   errorMessage: string | null
   triggerError: (msg: string) => void
   persistentError: string | null

@@ -6,26 +6,36 @@ interface Props {
   laps: number
   onAscend: () => Promise<void>
   onDismiss: () => void
+  onComplete?: () => void
 }
 
-export default function AscensionModal({ laps, onAscend, onDismiss }: Props) {
+export default function AscensionModal({
+  laps,
+  onAscend,
+  onDismiss,
+  onComplete
+}: Props) {
   const [loading, setLoading] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
 
-  const handleAscend = async () => {
-    if (!confirmed) {
-      setConfirmed(true)
-      return
+    const handleAscend = async () => {
+      if (!confirmed) {
+        setConfirmed(true)
+        return
+      }
+      setLoading(true)
+      await onAscend()
+      setLoading(false)
+      onComplete?.()
     }
-    setLoading(true)
-    await onAscend()
-    setLoading(false)
-  }
 
   return (
     <div
       className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 backdrop-blur-md px-4 py-4"
-      onClick={onDismiss}
+      onClick={() => {
+        onDismiss()
+        onComplete?.()
+      }}
     >
       <div
         className="relative rounded-[2.25rem] border-2 border-white/20 shadow-[0_0_80px_rgba(144,205,244,0.4)] max-w-77.5 w-full max-h-[95vh] overflow-y-auto overflow-x-hidden animate-in zoom-in-95 fade-in duration-500 custom-scrollbar"
@@ -63,7 +73,7 @@ export default function AscensionModal({ laps, onAscend, onDismiss }: Props) {
             </div>
           </div>
 
-          {/* Stats Glass Box */}
+          {/* Stats */}
           <div className="bg-white/5 backdrop-blur-xl rounded-[1.25rem] border border-white/10 p-4 px-5 flex flex-col gap-3 shadow-2xl">
             <div className="flex justify-between items-center h-4">
               <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-none">

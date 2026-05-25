@@ -6,6 +6,17 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '1.10',
+    label: 'The Idle Update',
+    notes: [
+      'Idle Auto-Bet: After reaching the Ascension threshold or starting Lap 1, two tick boxes unlock above every live match card. Ticking Auto-Bet Left or Right instructs the system to place your current stake automatically on every incoming match until manually toggled off or switched.',
+      'Server-Authoritative Eligibility: The idle unlock state is validated against the database on load, not localStorage. The controls cannot be enabled through browser tooling before the threshold is reached.',
+      'Race Condition Guard: A processing lock and 400ms execution buffer prevent duplicate submissions on the same match ID. Rapid SSE events cannot stack overlapping requests.',
+      'Page Visibility Lifecycle: Auto-betting halts immediately when the tab is backgrounded or hidden and resumes cleanly on return with no queued backlog.',
+      'Contextual Onboarding: The unlock notification surfaces automatically after the Ascension modal resolves and persists until the player either interacts with the tick boxes or manually dismisses it. Both tick boxes pulse with the Oracle glow effect during the active notification window.'
+    ]
+  },
+  {
     version: '1.9',
     label: 'The Ascension Update',
     notes: [

@@ -169,7 +169,7 @@ router.post('/ascend', async (req, res) => {
 
     const userRes = await pool.query(
       `SELECT points, laps, fastest_lap_bets, total_bets_at_last_ascension
-       FROM users WHERE user_id = $1`,
+        FROM users WHERE user_id = $1`,
       [userId]
     )
     if (userRes.rows.length === 0)
@@ -202,7 +202,7 @@ router.post('/ascend', async (req, res) => {
         fastest_lap_bets = $1,
         total_bets_at_last_ascension = $2,
         peak_points = GREATEST(peak_points, $3)
-       WHERE user_id = $4`,
+        WHERE user_id = $4`,
       [newFastest, totalBets, currentPoints.toString(), userId]
     )
 
@@ -389,6 +389,33 @@ router.get('/:userId/points', async (req, res) => {
       userId: req.params.userId
     })
     res.status(500).json({ error: 'Failed to fetch points' })
+  }
+})
+
+// GET /api/users/idle-eligible/:userId
+router.get('/idle-eligible/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params
+    if (!userId) return res.status(400).json({ error: 'Missing userId' })
+
+    const result = await pool.query(
+      `SELECT laps, points FROM users WHERE user_id = $1`,
+      [userId]
+    )
+    if (result.rows.length === 0)
+      return res.status(404).json({ error: 'User not found' })
+
+    const row = result.rows[0]
+    const ASCENSION_THRESHOLD = 999n * 10n ** 87n
+    const eligible =
+      Number(row.laps) >= 1 || BigInt(row.points) >= ASCENSION_THRESHOLD
+
+    res.json({ eligible })
+  } catch (err) {
+    logger.error('GET /users/idle-eligible/:userId failed', err, {
+      userId: req.params.userId
+    })
+    res.status(500).json({ error: 'Failed to check idle eligibility' })
   }
 })
 

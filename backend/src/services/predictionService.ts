@@ -122,6 +122,7 @@ const rollBonus = (
     tier: 'LEGENDARY'
   }
 }
+
 export const resolvePrediction = async (
   gameId: string,
   winnerName: string,

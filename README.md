@@ -85,29 +85,49 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 
 - Players bet virtual points on fast-paced Rock Paper Scissors matches
 - Matches appear every 5 seconds, with a 3-second betting window
-- No ties ever occur, every match always produces a clear winner to keep gameplay fast, decisive, and more exciting
-- Dynamic odds:
-  - **WIN:** +100% of your bet
-  - **LOSE:** -50% of your bet
-  - **Floor:** points never drop below 100,000
-  - **Bonus System**: 40% chance per match to trigger a Tiered Bonus multiplier.
-    - On Win: Multiply your payout by 1.5×–5× depending on tier.
-    - On Loss: Reduce your loss to 75%–0% of base loss depending on tier (higher tiers retain more value, Legendary fully protects the loss).
-    - Tiers: Common (1.5–2.2×), Rare (2.2–3.2×), Epic (3.2–4.2×), Legendary (5×, guaranteed).
-    - Guarantees a bonus at least every 4 bets if it doesn't occur naturally from the 40% base chance
-- Win streak system:
-  - Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x3, x6, x10)
-  - x10 multiplier persists until the streak is broken
-  - Longest win streak is permanently tracked in player profiles
-  - Momentum changes the UI color theme in real time as streak increases
-  - Streak badge evolves visually with each tier
-  - Core action buttons adapt to the active streak color state
-- Points contribute to:
-  - Current points
-  - Weekly gains
-  - All-time peak leaderboard
-- Live feed shows prioritized, high-frequency results from:
-  - Your own bets (instant feedback)
+- No ties ever occur, every match always produces a clear winner to keep gameplay fast and decisive
+
+### Dynamic odds
+- WIN: +100% of your bet
+- LOSE: -50% of your bet
+- Floor: points never drop below 100,000
+
+### Bonus system
+- 40% chance per match to trigger a Tiered Bonus multiplier
+- On win: multiplies payout by 1.5×–5× depending on tier
+- On loss: reduces loss to 75%–0% depending on tier (Legendary fully negates loss)
+- Tiers:
+  - Common: 1.5×–2.2×
+  - Rare: 2.2×–3.2×
+  - Epic: 3.2×–4.2×
+  - Legendary: 5× (guaranteed tier)
+- Guarantees at least one bonus every 4 matches if not triggered naturally
+
+### Win streak system
+- Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x3, x6, x10)
+- x10 multiplier persists until the streak is broken
+- Longest win streak is permanently tracked in player profiles
+- Momentum changes the UI color theme in real time as streak increases
+- Streak badge evolves visually with each tier
+- Core action buttons adapt to the active streak color state
+
+### Idle auto-bet mode
+- Unlocks after reaching Ascension (999 OVG) or starting Lap 1
+- Two tick boxes appear above each live match card: Auto-Bet Left and Auto-Bet Right
+- Automatically places your selected bet on your chosen side for every incoming match after unlock
+- Switching sides takes effect on the next match
+- Pauses automatically when the tab is hidden or browser is minimized
+
+### Progression & leaderboard
+- Weekly gains contribute to weekly leaderboard rankings
+- Peak point value determines all-time leaderboard position
+- Laps track long-term progression and Ascension cycles, and are ranked in dedicated lap leaderboards
+- Speedrun leaderboards track fastest Ascension cycles based on completion efficiency
+- Points are continuously updated through live matches and modified by events, streaks, bonuses, and other gameplay systems
+
+### Live feed
+- Displays high-frequency match results in real time:
+  - Your bets (instant feedback)
   - Other players
   - Demo traffic for continuous activity
 
@@ -327,6 +347,11 @@ JavaScript Number (IEEE 754) loses integer precision beyond approximately 9 quad
 The entire system was refactored to remove floating-point risk and enforce exact arithmetic. This included database migration of numeric fields to `NUMERIC` in PostgreSQL, backend transition to native BigInt operations in Node.js, and frontend updates to ensure safe rendering and formatting of large values.
 
 This guarantees accurate computation, storage, and display of point values at extreme scales, including vigintillion-range totals under sustained gameplay pressure.
+
+**Idle Auto-Betting State Handling & Visibility Control**
+Implemented a visibility-aware execution model for auto-betting to handle browser throttling and multi-monitor usage patterns. Using the Page Visibility API, execution pauses when the tab is backgrounded and resumes cleanly when the tab becomes visible again.
+
+A resynchronization layer ensures any missed match events are immediately processed on return, preventing state desync in high-frequency (100ms) event streams.
 
 ---
 

@@ -281,3 +281,23 @@ export async function updateStylePreference(
     body: JSON.stringify({ shortId, stylePreference })
   })
 }
+
+export async function fetchUserFlashState(userId: string) {
+  const r = await fetch(`${API_BASE}/api/live/flash-state?userId=${userId}`)
+  return r.ok ? r.json() : null
+}
+
+export async function fetchGlobalFlashState() {
+  const r = await fetch(`${API_BASE}/api/live/flash-state`)
+  return r.ok ? r.json() : null
+}
+
+export async function fetchOracleState(userId: string) {
+  const r = await fetch(`${API_BASE}/api/oracle?userId=${userId}`)
+  return r.ok ? r.json() : null
+}
+
+export async function fetchIdleEligibility(userId: string) {
+  const r = await fetch(`${API_BASE}/api/users/idle-eligible/${userId}`)
+  return r.ok ? r.json() : null
+}

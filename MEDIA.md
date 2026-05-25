@@ -39,3 +39,16 @@ Sentry integrated across the full stack for runtime and SSE monitoring. The in-a
     <td><img src="./assets/feedback3.png" /></td>
   </tr>
 </table>
+
+---
+
+## 🤖 Idle Auto-Bet Mode
+
+Idle auto-betting system that automatically places your selected bet on your chosen side for every incoming match after unlock.
+
+Unlocked after reaching Ascension (999 OVG) or starting Lap 1.
+
+<div>
+  <strong>Idle Auto-Bet Mode Showcase</strong><br/>
+  <img src="./assets/idle_bet_demo.gif" width="220" />
+</div>
