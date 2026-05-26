@@ -320,9 +320,16 @@ router.get('/:userId/points', async (req, res) => {
   try {
     const { userId } = req.params
     const { shortId, nickname } = req.query
+    const utmSource = (req.query.utm_source as string)?.toLowerCase().trim()
+
+    if (utmSource) {
+      pool
+        .query(`INSERT INTO utm_visits (utm_source) VALUES ($1)`, [utmSource])
+        .catch((err) => logger.warn('utm_visit insert failed', { err }))
+    }
 
     const result = await pool.query(
-      `SELECT nickname, points, peak_points, daily_peak, weekly_peak,
+      `SELECT utm_source, nickname, points, peak_points, daily_peak, weekly_peak,
               current_win_streak, all_time_peak, point_style_preference,
               laps, fastest_lap_bets
         FROM users WHERE user_id = $1`,
@@ -338,6 +345,15 @@ router.get('/:userId/points', async (req, res) => {
         nickname as string
       )
 
+      if (utmSource) {
+        await pool
+          .query(`UPDATE users SET utm_source = $1 WHERE user_id = $2`, [
+            utmSource,
+            userId
+          ])
+          .catch((err) => logger.warn('New user utm update failed', err))
+      }
+
       return res.json({
         nickname: user.nickname ?? (nickname as string) ?? 'New Player',
         points: user.points.toString(),
@@ -352,8 +368,9 @@ router.get('/:userId/points', async (req, res) => {
       })
     }
 
-    const utmSource = req.query.utm_source as string | undefined
-    if (utmSource && result.rows.length > 0 && !result.rows[0].utm_source) {
+    const row = result.rows[0]
+
+    if (utmSource && (!row.utm_source || row.utm_source === 'direct' || row.utm_source === '')) {
       await pool
         .query(`UPDATE users SET utm_source = $1 WHERE user_id = $2`, [
           utmSource,
@@ -363,13 +380,6 @@ router.get('/:userId/points', async (req, res) => {
           logger.warn('utm_source update failed', { userId, err })
         )
     }
-    if (utmSource) {
-      await pool
-        .query(`INSERT INTO utm_visits (utm_source) VALUES ($1)`, [utmSource])
-        .catch((err) => logger.warn('utm_visit insert failed', { err }))
-    }
-
-    const row = result.rows[0]
 
     res.json({
       nickname: row.nickname ?? (nickname as string) ?? 'Anonymous',

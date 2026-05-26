@@ -2,6 +2,15 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [1.10] - The Idle Update
+
+### Added
+- **Idle Auto-Bet system:** After reaching the Ascension threshold or starting Lap 1, two toggle checkboxes unlock above every live match card. Enabling Auto-Bet Left or Auto-Bet Right automatically places your current stake on every incoming match until manually disabled or switched.
+- **Server-authoritative unlock validation:** Auto-bet eligibility is validated from the database on session load, not from localStorage, preventing client-side spoofing or early unlocking.
+- **Race condition protection:** Added processing lock and 400ms execution buffer to prevent duplicate submissions and overlapping bets on identical match IDs during rapid SSE updates.
+- **Page visibility handling:** Auto-betting pauses instantly when the tab becomes hidden or backgrounded and resumes cleanly when the user returns, with no queued or duplicated actions.
+- **Contextual onboarding system:** Unlock notification appears automatically after Ascension modal completion and remains active until user interaction or dismissal. During this state, both auto-bet toggles pulse with Oracle glow highlighting.
+
 ## [1.9] - The Ascension Update
 ### Added
 - **Launched endgame progression logic:** Introduced "Ascension" milestones where users reaching 999 Octovigintillion choose between a **Chrono Lap** (system reset for prestige) or the **Infinite Path** (continued accumulation).

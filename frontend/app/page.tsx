@@ -218,7 +218,14 @@ export default function HomePage() {
     }
 
     const params = new URLSearchParams(window.location.search)
-    const utmSource = params.get('utm_source')
+    let utmSource = params.get('utm_source')
+
+    if (utmSource) {
+      localStorage.setItem('rps_utm_source', utmSource)
+    } else {
+      utmSource = localStorage.getItem('rps_utm_source')
+    }
+
     if (utmSource) {
       sessionStorage.setItem('utm_source', utmSource)
     }
