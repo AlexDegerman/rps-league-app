@@ -1,5 +1,7 @@
 import { Router } from 'express'
 import pool from '../utils/db.js'
+import { broadcast } from './live.js'
+import { triggerSurgeFestival } from '../services/festivalService.js'
 
 const router = Router()
 
@@ -58,6 +60,16 @@ router.post('/', async (req, res) => {
       `SELECT laps, fastest_lap_bets FROM users WHERE user_id = $1`,
       [userId]
     )
+
+    // Surge Festival: Chrono-Lap completion
+    const updatedRow = updated.rows[0]
+    // Fetch nickname for the broadcast message
+    const nicknameRes = await pool.query(
+      `SELECT nickname FROM users WHERE user_id = $1`,
+      [userId]
+    )
+    const nickname = nicknameRes.rows[0]?.nickname ?? 'Anonymous'
+    triggerSurgeFestival(nickname, broadcast)
 
     res.json({
       success: true,

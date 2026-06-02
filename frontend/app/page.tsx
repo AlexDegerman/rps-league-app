@@ -11,7 +11,8 @@ import {
   fetchOracleState,
   fetchGlobalFlashState,
   fetchIdleEligibility,
-  fetchUserFlashState
+  fetchUserFlashState,
+  fetchFestivalState
 } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
@@ -21,7 +22,7 @@ import CloseIcon from '@/components/icons/CloseIcon'
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import type { Match, PendingMatch, ResultAnim, EventTheme } from '@/types/rps'
+import type { Match, PendingMatch, ResultAnim, EventTheme, FestivalModeKey, VisualMode, FestivalSSEData } from '@/types/rps'
 import {
   formatPoints,
   getDisplayTierClass,
@@ -53,6 +54,8 @@ import { CURRENT_VERSION } from '@/lib/updates'
 import { useIdleStore } from './stores/idleStore'
 import { useIdleBet } from '@/hooks/useIdleBet'
 import IdleBetControls from '@/components/IdleBetControls'
+import FestivalTicker from '@/components/FestivalTicker'
+import GlobalTickerWrapper from '@/components/GlobalTickerWrapper'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -80,7 +83,9 @@ export default function HomePage() {
     setVisualMode,
     setLiveTheme,
     oracleSide,
-    setOracleSide
+    setOracleSide,
+    setActiveFestival,
+    festivalModeKey
   } = useGameStore()
 
   // - User store -
@@ -132,7 +137,8 @@ export default function HomePage() {
     showUpdateModal,
     setShowUpdateModal,
     showAscensionPrompt,
-    setShowAscensionPrompt
+    setShowAscensionPrompt,
+    setOracleTickerMessage
   } = useUIStore()
 
   const { setEligible, setHasInteractedWithIdle } = useIdleStore()
@@ -165,19 +171,29 @@ export default function HomePage() {
     !persistentError &&
     (isOffline || isStreamStale)
 
-  const getVisualMode = (flash: string | null, streak: number) => {
-    if (flash === 'LUNAR') return 'flash_lunar' as const
-    if (flash === 'ELECTRIC') return 'flash_electric' as const
-    if (flash === 'CARDS') return 'flash_cards' as const
-    if (flash === 'HELLFIRE') return 'flash_hellfire' as const
-    if (streak >= 5) return 'inferno' as const
-    if (streak >= 3) return 'fever' as const
+  const getVisualMode = (
+    flash: string | null,
+    festival: FestivalModeKey | null,
+    streak: number
+  ): VisualMode => {
+    if (flash === 'LUNAR') return 'flash_lunar'
+    if (flash === 'ELECTRIC') return 'flash_electric'
+    if (flash === 'CARDS') return 'flash_cards'
+    if (flash === 'HELLFIRE') return 'flash_hellfire'
+
+    if (festival) return festival
+
+    if (streak >= 5) return 'winstreak_inferno'
+    if (streak >= 3) return 'winstreak_fever'
+
     return null
   }
-  const visualMode = getVisualMode(activeFlashEvent, winStreak)
+
+  const visualMode = getVisualMode(activeFlashEvent, festivalModeKey, winStreak)
 
   useEffect(() => {
     setVisualMode(visualMode)
+
     const flashMap: Record<string, EventTheme> = {
       flash_lunar: 'LUNAR',
       flash_electric: 'ELECTRIC',
@@ -295,9 +311,32 @@ export default function HomePage() {
       .then((data) => {
         const alreadyWelcomed = !!localStorage.getItem('rps_welcomed')
         if (!alreadyWelcomed) return
+
         if (data && !data.used) {
           setOracleSide(data.side)
           setNotification('oracle')
+
+          // Oracle ticker - scrolls for 5s above points balance
+          const dayIndex = new Date().getUTCDate() % oracleTemplates.length
+          const template = oracleTemplates[dayIndex](data.side)
+
+          setOracleTickerMessage({
+            id: `oracle-${Date.now()}`,
+            content: (
+              <span>
+                {template.prefix}{' '}
+                <span
+                  className="font-black uppercase"
+                  style={{ color: '#a855f7' }}
+                >
+                  {data.side === 'left' ? 'LEFT' : 'RIGHT'}
+                </span>{' '}
+                {template.suffix}
+              </span>
+            ),
+            accentColor: '#a855f7',
+            durationMs: 10_000
+          })
         }
       })
       .catch(() => {})
@@ -338,6 +377,14 @@ export default function HomePage() {
         logger.error('Failed to fetch leaderboard rank', err)
       })
 
+    fetchFestivalState()
+      .then((data) => {
+        if (data?.festival) {
+          setActiveFestival(data.festival.type, data.festival.endsAt)
+        }
+      })
+      .catch(() => {})
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
 
@@ -367,8 +414,12 @@ export default function HomePage() {
     const { autoAllIn: aa, betAmount: ba } = useUserStore.getState()
     if (aa || ba > newPoints) setInputString(newPoints.toString())
 
-    // Trigger ascension prompt if user crosses threshold and it's not already showing
-    if (newPoints >= ASCENSION_THRESHOLD && !showAscensionPrompt) {
+    const { ascensionDeclinedThisSession } = useUIStore.getState()
+    if (
+      newPoints >= ASCENSION_THRESHOLD &&
+      !showAscensionPrompt &&
+      !ascensionDeclinedThisSession
+    ) {
       setShowAscensionPrompt(true)
     }
 
@@ -456,6 +507,9 @@ export default function HomePage() {
           confettiType: capturedConfettiType,
           flashMult: data.flashMult,
           flashEventType: data.flashEventType,
+          ghostEchoAmount: data.ghostEchoAmount
+            ? BigInt(data.ghostEchoAmount)
+            : null,
           confetti: Array.from({ length: 100 }).map(() => ({
             leftOffset: Math.random() * 100 - 50,
             vx: (Math.random() - 0.5) * 300,
@@ -521,6 +575,42 @@ export default function HomePage() {
       setActiveFlashEvent(data.type)
       setFlashBuffRemaining(data.betsRemaining)
       setLiveTheme(data.type as EventTheme)
+      useGameStore.getState().setFlashExpiresAt(null)
+    })
+
+    es.addEventListener('festival_event', (event: MessageEvent) => {
+      const data: FestivalSSEData = JSON.parse(event.data)
+      const { activeFlashEvent, setFlashExpiresAt } = useGameStore.getState()
+
+      const clientEndsAt = Date.now() + data.durationMs
+      setActiveFestival(data.type, clientEndsAt)
+
+      if (data.type === 'SPARK') {
+        const typeToSet =
+          (activeFlashEvent as string | null) || data.flashType || 'ELECTRIC'
+        setActiveFlashEvent(typeToSet)
+        setFlashBuffRemaining(3)
+        setLiveTheme(typeToSet as EventTheme)
+        setFlashExpiresAt(clientEndsAt)
+      }
+
+      const FESTIVAL_COLORS: Record<string, string> = {
+        SPARK: '#a855f7',
+        GHOST: '#4dd0c4',
+        SAFEGUARD: '#94a3b8',
+        RESONANCE: '#ecc94b',
+        SURGE: '#22d3ee',
+        VAULT: '#748ffc',
+        FEVER: '#f97316',
+        SANGUINE: '#991b1b'
+      }
+
+      setOracleTickerMessage({
+        id: `festival-${data.type}-${Date.now()}`,
+        content: data.message,
+        accentColor: FESTIVAL_COLORS[data.type] ?? '#a855f7',
+        durationMs: 5000
+      })
     })
 
     es.onerror = () => {
@@ -627,6 +717,8 @@ export default function HomePage() {
       {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}
       {showUpdateModal && <UpdateModal onClose={handleUpdateClose} />}
 
+      <GlobalTickerWrapper />
+
       <EdgeGlow visualMode={visualMode} />
 
       <div className="relative">
@@ -649,7 +741,10 @@ export default function HomePage() {
               }
               setShowAscensionPrompt(false)
             }}
-            onDismiss={() => setShowAscensionPrompt(false)}
+            onDismiss={() => {
+              useUIStore.getState().setAscensionDeclinedThisSession(true)
+              setShowAscensionPrompt(false)
+            }}
             onComplete={() => {
               setNotification('idle_unlock')
             }}
@@ -672,11 +767,27 @@ export default function HomePage() {
                   ? 'border-yellow-400 cards-ring'
                   : visualMode === 'flash_hellfire'
                     ? 'border-red-500 hellfire-ring'
-                    : visualMode === 'inferno'
+                    : visualMode === 'winstreak_inferno'
                       ? 'border-orange-400 inferno-ring'
-                      : visualMode === 'fever'
+                      : visualMode === 'winstreak_fever'
                         ? 'border-green-400 fever-ring'
-                        : 'border-gray-100'
+                        : visualMode === 'festival_ghost'
+                          ? 'border-teal-300 ghost-ring'
+                          : visualMode === 'festival_safeguard'
+                            ? 'border-slate-300 safeguard-ring'
+                            : visualMode === 'festival_resonance'
+                              ? 'border-yellow-300 resonance-ring'
+                              : visualMode === 'festival_surge'
+                                ? 'border-cyan-300 surge-ring'
+                                : visualMode === 'festival_vault'
+                                  ? 'border-indigo-300 vault-ring'
+                                  : visualMode === 'festival_spark'
+                                    ? 'border-purple-300 spark-neon-pulse'
+                                    : visualMode === 'festival_fever'
+                                      ? 'border-orange-400 fever-festival-ring'
+                                      : visualMode === 'festival_sanguine'
+                                        ? 'border-red-900 sanguine-ring'
+                                        : 'border-gray-100'
           }`}
         >
           {/* Top section */}
@@ -838,6 +949,7 @@ export default function HomePage() {
             <div className="flex items-center gap-1 shrink-0 h-full">
               <ModeButton
                 visualMode={visualMode}
+                festivalModeKey={festivalModeKey}
                 label="ALL IN"
                 onClick={() => {
                   setBetAmount(points)
@@ -846,6 +958,7 @@ export default function HomePage() {
               />
               <ModeButton
                 visualMode={visualMode}
+                festivalModeKey={festivalModeKey}
                 label={`AUTO\u00A0${autoAllIn ? 'ON' : 'OFF'}`}
                 onClick={() => setAutoAllIn(!autoAllIn)}
               />
@@ -970,6 +1083,7 @@ export default function HomePage() {
       </div>
 
       <LiveStatsTicker />
+      <FestivalTicker />
 
       {errorMessage && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-200">
@@ -992,7 +1106,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ADD THIS HERE: Global Auto-Bet Tickers */}
       <IdleBetControls />
 
       {/* Match feed */}
@@ -1042,6 +1155,7 @@ export default function HomePage() {
                   serverOffset={serverOffset}
                   winStreak={winStreak}
                   visualMode={visualMode}
+                  festivalModeKey={festivalModeKey}
                   oracleSide={oracleSide}
                 />
               ))}
@@ -1052,6 +1166,7 @@ export default function HomePage() {
               predictions={predictions}
               winStreak={winStreak}
               visualMode={visualMode}
+              festivalModeKey={festivalModeKey}
             />
           </>
         )}

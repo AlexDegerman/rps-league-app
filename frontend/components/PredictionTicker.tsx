@@ -52,8 +52,16 @@ export default function PredictionTicker() {
     new Set()
   )
   const liveTheme = useGameStore((s) => s.liveTheme)
-  const tcfg = liveTheme ? EVENT_TICKER_CONFIG[liveTheme] : null
-  const modeKey = liveTheme?.toLowerCase() ?? null
+  const festivalModeKey = useGameStore((s) => s.festivalModeKey)
+  const visualMode = useGameStore((s) => s.visualMode)
+  const rawKey = liveTheme ?? festivalModeKey ?? null
+
+  const tcfg =
+    rawKey && rawKey in EVENT_TICKER_CONFIG
+      ? EVENT_TICKER_CONFIG[rawKey as keyof typeof EVENT_TICKER_CONFIG]
+      : null
+
+  const modeKey = visualMode || festivalModeKey || null
 
   useEffect(() => {
     const es = new EventSource(`${API_BASE}/api/live`)

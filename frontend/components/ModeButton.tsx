@@ -1,56 +1,55 @@
-type VisualMode =
-  | 'flash_lunar'
-  | 'flash_electric'
-  | 'flash_cards'
-  | 'flash_hellfire'
-  | 'inferno'
-  | 'fever'
-  | null
+'use client'
+
+import type { VisualMode, FestivalModeKey } from '@/types/rps'
 
 interface ModeButtonProps {
   visualMode: VisualMode
-  /** The base label shown in default (no visual mode) state, e.g. "ALL IN" or "AUTO ON" */
+  festivalModeKey?: FestivalModeKey | null
   label: string
   onClick: () => void
   className?: string
 }
 
-const MODE_EMOJI: Record<NonNullable<VisualMode>, string> = {
-  flash_lunar: '🌙',
-  flash_electric: '⚡',
-  flash_cards: '🃏',
-  flash_hellfire: '🔥',
-  inferno: '🔥',
-  fever: '⚡'
-}
-
-const MODE_BTN_CLASS: Record<NonNullable<VisualMode>, string> = {
+const MODE_BTN_CLASS: Record<string, string> = {
   flash_lunar: 'lunar-btn',
   flash_electric: 'electric-btn',
   flash_cards: 'cards-btn',
   flash_hellfire: 'flash-hellfire-btn',
-  inferno: 'inferno-btn',
-  fever: 'fever-btn'
+  winstreak_inferno: 'inferno-btn',
+  winstreak_fever: 'fever-btn'
+}
+
+const FESTIVAL_BTN_CLASS: Record<string, string> = {
+  festival_ghost: 'bg-teal-500 hover:bg-teal-600 text-white',
+  festival_safeguard: 'bg-slate-500 hover:bg-slate-600 text-white',
+  festival_resonance: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+  festival_surge: 'bg-cyan-500 hover:bg-cyan-600 text-white',
+  festival_vault: 'bg-indigo-500 hover:bg-indigo-600 text-white',
+  festival_spark: 'electric-btn',
+  festival_sanguine: 'bg-red-800 hover:bg-red-900 text-white',
+  festival_fever: 'bg-orange-600 text-white'
 }
 
 export default function ModeButton({
   visualMode,
+  festivalModeKey = null,
   label,
   onClick,
   className = ''
 }: ModeButtonProps) {
-  const btnClass = visualMode
-    ? MODE_BTN_CLASS[visualMode]
-    : 'bg-purple-600 hover:bg-purple-700 text-white'
-
-  const displayLabel = visualMode ? `${MODE_EMOJI[visualMode]} ${label}` : label
+  const btnClass =
+    visualMode && visualMode in MODE_BTN_CLASS
+      ? MODE_BTN_CLASS[visualMode as string]
+      : festivalModeKey && festivalModeKey in FESTIVAL_BTN_CLASS
+        ? FESTIVAL_BTN_CLASS[festivalModeKey as string]
+        : 'bg-purple-600 hover:bg-purple-700 text-white'
 
   return (
     <button
       onClick={onClick}
-      className={`flex-1 sm:flex-none px-4 py-2 text-xs font-black rounded-lg active:scale-95 transition-all shadow-sm ${btnClass} ${className}`}
+      className={`flex-1 px-3 py-2 text-[10px] sm:text-xs font-black rounded-lg active:scale-95 transition-all shadow-sm whitespace-nowrap ${btnClass} ${className}`}
     >
-      {displayLabel}
+      {label}
     </button>
   )
 }

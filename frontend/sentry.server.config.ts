@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/nextjs'
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-
+  enabled: process.env.NODE_ENV === 'production',
   // Performance Monitoring: Set to 1% to stay within the 10k monthly limit.
   // Note: This does not affect Error Tracking, which remains at 100%.
   tracesSampleRate: 0.01,

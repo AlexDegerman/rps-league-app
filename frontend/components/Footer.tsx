@@ -6,12 +6,17 @@ import Link from 'next/link'
 
 const Footer = () => {
   const visualMode = useGameStore((s) => s.visualMode)
-  const modeKey = visualMode?.replace('flash_', '') ?? null
+  const festivalModeKey = useGameStore((s) => s.festivalModeKey)
+
+  const modeKey = visualMode || festivalModeKey || null
+
   const bgClass = modeKey ? `event-bg-${modeKey}` : 'bg-white'
   const sideClass = modeKey ? `event-side-${modeKey}` : ''
+
   const borderKey = modeKey?.toUpperCase() as
     | keyof typeof EVENT_FOOTER_CONFIG
     | undefined
+
   const cfg =
     borderKey && EVENT_FOOTER_CONFIG[borderKey]
       ? EVENT_FOOTER_CONFIG[borderKey]

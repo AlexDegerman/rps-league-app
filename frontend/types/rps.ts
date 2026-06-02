@@ -221,15 +221,49 @@ export interface ResultAnim {
   confettiType?: ConfettiType
   flashMult?: number
   flashEventType?: string | null
+  ghostEchoAmount?: bigint | null
 }
 
 export type EventTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE' | null
 
-export type VisualMode =
+export type FlashModeKey =
   | 'flash_lunar'
   | 'flash_electric'
   | 'flash_cards'
   | 'flash_hellfire'
-  | 'inferno'
-  | 'fever'
+
+export type FestivalType =
+  | 'SPARK'
+  | 'GHOST'
+  | 'SAFEGUARD'
+  | 'RESONANCE'
+  | 'SURGE'
+  | 'VAULT'
+  | 'FEVER'
+  | 'SANGUINE'
+
+export type FestivalModeKey =
+  | 'festival_spark'
+  | 'festival_ghost'
+  | 'festival_safeguard'
+  | 'festival_resonance'
+  | 'festival_surge'
+  | 'festival_vault'
+  | 'festival_fever'
+  | 'festival_sanguine'
+
+export type WinStreakModeKey = 'winstreak_inferno' | 'winstreak_fever'
+
+export type VisualMode =
+  | FlashModeKey
+  | FestivalModeKey
+  | WinStreakModeKey
   | null
+
+export interface FestivalSSEData {
+  type: string
+  endsAt: number | null
+  durationMs: number
+  message: string
+  flashType?: string
+}

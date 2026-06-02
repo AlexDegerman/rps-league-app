@@ -11,7 +11,7 @@ import {
   BonusTier,
   BetHistoryEntry
 } from '@/types/rps'
-import { BONUS_TIER_STYLES, FLASH_EVENT_CARD } from '@/lib/constants'
+import { BONUS_TIER_STYLES, EVENT_CARD } from '@/lib/constants'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 
 type Tab = 'recent' | 'wins' | 'multipliers'
@@ -66,7 +66,7 @@ function FlashEventBadge({
   flashMult: number
 }) {
   if (!flashEventType) return null
-  const cfg = FLASH_EVENT_CARD[flashEventType]
+  const cfg = EVENT_CARD[flashEventType]
   if (!cfg) return null
 
   return (
@@ -145,9 +145,6 @@ function BetRow({
   rank?: number
   stylePreference: string | null
 }) {
-  console.log(
-    `Game: ${entry.playerAName} vs ${entry.playerBName} | ID: ${entry.gameId}`
-  )
   const isWin = entry.result === 'WIN'
   const isLoss = entry.result === 'LOSE'
   const gainLossBig = BigInt(entry.gainLoss ?? '0')
@@ -161,9 +158,8 @@ function BetRow({
       : 'COMMON'
   ) as BonusTier
   const flashCfg = entry.flashEventType
-    ? FLASH_EVENT_CARD[entry.flashEventType]
+    ? EVENT_CARD[entry.flashEventType]
     : null
-
   const cardClass = isWin
     ? flashCfg
       ? flashCfg.cardClass

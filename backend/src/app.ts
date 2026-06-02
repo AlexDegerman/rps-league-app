@@ -2,6 +2,7 @@ import './utils/instrument.js'
 import 'dotenv/config'
 import express from 'express'
 import * as Sentry from '@sentry/node'
+import { initDb } from './utils/initDb.js'
 import matchesRouter from './routes/matches.js'
 import leaderboardRouter from './routes/leaderboard.js'
 import liveRouter from './routes/live.js'
@@ -11,7 +12,7 @@ import usersRouter from './routes/users.js'
 import feedbackRouter from './routes/feedback.js'
 import oracleRouter from './routes/oracle.js'
 import ascendRouter from './routes/ascend.js'
-import { initDb } from './utils/initDb.js'
+import festivalsRouter from './routes/festivals.js'
 
 const app = express()
 
@@ -45,6 +46,7 @@ app.use('/api/users', usersRouter)
 app.use('/api/users/ascend', ascendRouter)
 app.use('/api/feedback', feedbackRouter)
 app.use('/api/oracle', oracleRouter)
+app.use('/api/festivals', festivalsRouter)
 
 
 // Sentry Error Handler

@@ -1,11 +1,15 @@
 import { create } from 'zustand'
 import type { ResultAnim } from '@/types/rps'
+import { OracleTickerMessage } from '@/components/OracleMessageTicker'
 
 type BrandTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
 
 interface UIState {
   showAscensionPrompt: boolean
   setShowAscensionPrompt: (v: boolean) => void
+  oracleTickerMessage: OracleTickerMessage | null
+  setOracleTickerMessage: (msg: OracleTickerMessage | null) => void
+
   // Brand State
   brandTheme: BrandTheme
   setBrandTheme: (t: BrandTheme) => void
@@ -37,6 +41,8 @@ interface UIState {
   setShowPointsInfo: (v: boolean) => void
   showPointsExplainer: boolean
   setShowPointsExplainer: (v: boolean) => void
+  ascensionDeclinedThisSession: boolean
+  setAscensionDeclinedThisSession: (v: boolean) => void
 
   // Input State
   isFocused: boolean
@@ -60,8 +66,11 @@ export const useUIStore = create<UIState>((set) => ({
   showWelcomeModal: false,
   showUpdateModal: false,
   showAscensionPrompt: false,
+  oracleTickerMessage: null,
+  ascensionDeclinedThisSession: false,
 
   // Actions
+  setOracleTickerMessage: (msg) => set({ oracleTickerMessage: msg }),
   setBrandTheme: (t) => set({ brandTheme: t }),
   randomizeBrandTheme: () => {
     const themes: BrandTheme[] = ['LUNAR', 'ELECTRIC', 'CARDS', 'HELLFIRE']
@@ -85,6 +94,8 @@ export const useUIStore = create<UIState>((set) => ({
   setShowPointsInfo: (v) => set({ showPointsInfo: v }),
   setShowPointsExplainer: (v) => set({ showPointsExplainer: v }),
   setShowAscensionPrompt: (v) => set({ showAscensionPrompt: v }),
+  setAscensionDeclinedThisSession: (v) =>
+    set({ ascensionDeclinedThisSession: v }),
 
   setIsFocused: (v) => set({ isFocused: v }),
   setInputString: (s) => set({ inputString: s })

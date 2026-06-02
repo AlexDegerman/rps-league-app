@@ -4,7 +4,7 @@ import { nodeProfilingIntegration } from '@sentry/profiling-node'
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   integrations: [nodeProfilingIntegration()],
-
+  enabled: process.env.NODE_ENV === 'production',
   // Performance Monitoring: Set to 1% to match frontend and stay within limits.
   tracesSampleRate: 0.01,
 

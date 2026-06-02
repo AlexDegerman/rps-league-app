@@ -1,5 +1,12 @@
 import { create } from 'zustand'
-import type { PendingMatch, Match, PredictionRecord } from '@/types/rps'
+import type {
+  PendingMatch,
+  Match,
+  PredictionRecord,
+  FestivalModeKey,
+  VisualMode,
+  EventTheme
+} from '@/types/rps'
 
 interface GameState {
   // Connection State
@@ -24,29 +31,45 @@ interface GameState {
   oracleSide: 'left' | 'right' | null
   setOracleSide: (side: 'left' | 'right' | null) => void
 
+  // Festival State
+  activeFestival: boolean
+  festivalType: string | null
+  festivalEndsAt: number | null
+  festivalModeKey: FestivalModeKey | null
+  setActiveFestival: (type: string, endsAt: number | null) => void
+  clearFestival: () => void
+  syncFestivalModeKey: () => void
+
   // Event & Visual State
   activeFlashEvent: string | null
   setActiveFlashEvent: (type: string | null) => void
   flashBuffRemaining: number
   setFlashBuffRemaining: (n: number) => void
   decrementFlashBuff: () => void
-  visualMode:
-    | 'flash_lunar'
-    | 'flash_electric'
-    | 'flash_cards'
-    | 'flash_hellfire'
-    | 'inferno'
-    | 'fever'
-    | null
-  setVisualMode: (m: GameState['visualMode']) => void
-  liveTheme: 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE' | null
-  setLiveTheme: (t: GameState['liveTheme']) => void
+  visualMode: VisualMode
+  setVisualMode: (m: VisualMode) => void
+  liveTheme: EventTheme
+  setLiveTheme: (t: EventTheme) => void
+  flashExpiresAt: number | null
+  setFlashExpiresAt: (time: number | null) => void
 
   // Server Time State
   serverOffset: number
   setServerOffset: (offset: number) => void
   now: number
   tickNow: () => void
+}
+
+// Helper for consistent mapping
+const FESTIVAL_MAP: Record<string, FestivalModeKey> = {
+  SPARK: 'festival_spark',
+  GHOST: 'festival_ghost',
+  SAFEGUARD: 'festival_safeguard',
+  RESONANCE: 'festival_resonance',
+  SURGE: 'festival_surge',
+  VAULT: 'festival_vault',
+  FEVER: 'festival_fever',
+  SANGUINE: 'festival_sanguine'
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -62,6 +85,11 @@ export const useGameStore = create<GameState>((set) => ({
   visualMode: null,
   liveTheme: null,
   oracleSide: null,
+  activeFestival: false,
+  festivalType: null,
+  festivalEndsAt: null,
+  festivalModeKey: null,
+  flashExpiresAt: null,
 
   // Actions - Connection
   setBackendReady: (v) => set({ backendReady: v }),
@@ -109,20 +137,92 @@ export const useGameStore = create<GameState>((set) => ({
   setOracleSide: (side) => set({ oracleSide: side }),
 
   // Actions - Event & Visuals
-  setActiveFlashEvent: (type) => set({ activeFlashEvent: type }),
+  setActiveFlashEvent: (type) =>
+    set({ activeFlashEvent: type, festivalModeKey: null }),
   setFlashBuffRemaining: (n) => set({ flashBuffRemaining: n }),
   decrementFlashBuff: () =>
     set((s) => {
       const next = s.flashBuffRemaining - 1
+      const flashEnding = next <= 0
       return {
         flashBuffRemaining: next,
-        activeFlashEvent: next <= 0 ? null : s.activeFlashEvent
+        activeFlashEvent: flashEnding ? null : s.activeFlashEvent,
+        festivalModeKey:
+          flashEnding && s.festivalType
+            ? (FESTIVAL_MAP[s.festivalType] ?? null)
+            : null
       }
     }),
   setVisualMode: (m) => set({ visualMode: m }),
   setLiveTheme: (t) => set({ liveTheme: t }),
+  setFlashExpiresAt: (time) => set({ flashExpiresAt: time }),
+
+  // Actions - Festival
+  syncFestivalModeKey: () =>
+    set((s) => {
+      if (s.activeFlashEvent) return { festivalModeKey: null }
+      if (!s.festivalType) return { festivalModeKey: null }
+      return { festivalModeKey: FESTIVAL_MAP[s.festivalType] ?? null }
+    }),
+  setActiveFestival: (type, endsAt) => {
+    set({
+      activeFestival: true,
+      festivalType: type,
+      festivalEndsAt: endsAt
+    })
+
+    set((s) => {
+      if (s.activeFlashEvent) return { festivalModeKey: null }
+      return { festivalModeKey: FESTIVAL_MAP[type] ?? null }
+    })
+  },
+  clearFestival: () =>
+    set({
+      activeFestival: false,
+      festivalType: null,
+      festivalEndsAt: null,
+      festivalModeKey: null
+    }),
 
   // Actions - Server Time
   setServerOffset: (offset) => set({ serverOffset: offset }),
-  tickNow: () => set({ now: Date.now() })
+  tickNow: () =>
+    set((state) => {
+      const currentTime = Date.now()
+      const syncedNow = currentTime + state.serverOffset
+
+      const festivalExpired =
+        state.activeFestival &&
+        state.festivalEndsAt &&
+        syncedNow >= state.festivalEndsAt
+
+      const flashExpired =
+        state.activeFlashEvent &&
+        state.flashExpiresAt &&
+        syncedNow >= state.flashExpiresAt
+
+      if (festivalExpired || flashExpired) {
+        return {
+          now: currentTime,
+          ...(festivalExpired
+            ? {
+                activeFestival: false,
+                festivalType: null,
+                festivalEndsAt: null,
+                festivalModeKey: null
+              }
+            : {}),
+          ...(flashExpired
+            ? {
+                activeFlashEvent: null,
+                flashExpiresAt: null,
+                flashBuffRemaining: 0,
+                liveTheme: null
+              }
+            : {})
+        }
+      }
+
+      return { now: currentTime }
+    })
 }))

@@ -210,6 +210,23 @@ A calm lunar-inspired event wrapped in cool blue tones with serene visual and au
 
 ---
 
+## 👁️ Player Festivals
+
+Festivals are rare, globally-triggered gameplay events initiated by specific player actions. Unlike Flash Events, Festivals affect all active players simultaneously and are driven by emergent in-game milestones such as win streaks, loss streaks, high multipliers, and Chrono-Lap completions.
+
+Only one Festival can be active at a time. A 10-minute cooldown follows every Festival. The triggering player's name is broadcast to all active players via the Oracle ticker when a Festival activates.
+
+The Oracle system also runs autonomous weighted festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred recently.
+
+<div>
+  <strong>Ghost Festival in Action</strong><br/>
+  <img src="./assets/ghost_festival_demo.gif" width="220" />
+</div>
+
+> 📋 **[View all Festival showcases →](./FESTIVALS.md)**
+
+---
+
 ## 🌌 Infinite Number Scaling & Visual Tier System
 
 RPS League is engineered around native `BigInt` progression, allowing point values to scale far beyond traditional leaderboard systems without precision loss.

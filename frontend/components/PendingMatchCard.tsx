@@ -11,6 +11,7 @@ interface PendingMatchCardProps {
   serverOffset: number
   winStreak?: number
   visualMode?: string | null
+  festivalModeKey?: string | null
   oracleSide?: 'left' | 'right' | null
 }
 
@@ -21,6 +22,7 @@ export default function PendingMatchCard({
   serverOffset,
   winStreak = 0,
   visualMode = null,
+  festivalModeKey = null,
   oracleSide
 }: PendingMatchCardProps) {
   const calculateTimeLeft = useCallback(() => {
@@ -42,13 +44,11 @@ export default function PendingMatchCard({
 
   const canPick = timeLeft > 0 && !prediction
 
-  // Flash always beats streak visually
-  const isFlash = visualMode?.startsWith('flash_') ?? false
+  const isFlash = visualMode?.startsWith('flash_')
+
   const isInferno = !isFlash && winStreak >= 5
   const isFever = !isFlash && winStreak >= 3 && winStreak < 5
-  const isActive = isFlash || isInferno || isFever
 
-  // Mode config table - one place to update per flash event
   const modeConfig = {
     flash_lunar: {
       border: 'border-blue-300',
@@ -94,7 +94,7 @@ export default function PendingMatchCard({
       label: '🔥 PICK',
       confirmBg: 'bg-red-600'
     },
-    inferno: {
+    winstreak_inferno: {
       border: 'border-orange-400',
       card: 'bg-gradient-to-b from-white to-orange-50/40',
       glowColor: 'rgba(249,115,22,0.07)',
@@ -105,7 +105,7 @@ export default function PendingMatchCard({
       label: '🔥 PICK',
       confirmBg: 'bg-orange-500'
     },
-    fever: {
+    winstreak_fever: {
       border: 'border-green-400',
       card: 'bg-gradient-to-b from-white to-green-50/40',
       glowColor: 'rgba(34,197,94,0.07)',
@@ -115,6 +115,94 @@ export default function PendingMatchCard({
       btnClass: 'fever-btn',
       label: '⚡ PICK',
       confirmBg: 'bg-green-500'
+    },
+    festival_ghost: {
+      border: 'border-teal-300',
+      card: 'bg-gradient-to-b from-white to-teal-50/40',
+      glowColor: 'rgba(77,208,196,0.07)',
+      cardAnim: 'ghost-ring',
+      dateText: 'text-teal-400/70',
+      vsText: 'text-teal-200',
+      btnClass: 'bg-teal-500 hover:bg-teal-600 text-white',
+      label: '👻 PICK',
+      confirmBg: 'bg-teal-500'
+    },
+    festival_safeguard: {
+      border: 'border-slate-300',
+      card: 'bg-gradient-to-b from-white to-slate-50/40',
+      glowColor: 'rgba(100,116,139,0.07)',
+      cardAnim: 'safeguard-ring',
+      dateText: 'text-slate-400/70',
+      vsText: 'text-slate-300',
+      btnClass: 'bg-slate-500 hover:bg-slate-600 text-white',
+      label: '🛡️ PICK',
+      confirmBg: 'bg-slate-500'
+    },
+    festival_resonance: {
+      border: 'border-yellow-300',
+      card: 'bg-gradient-to-b from-white to-yellow-50/40',
+      glowColor: 'rgba(236,201,75,0.07)',
+      cardAnim: 'resonance-ring',
+      dateText: 'text-yellow-600/70',
+      vsText: 'text-yellow-300',
+      btnClass: 'bg-yellow-500 hover:bg-yellow-600 text-white',
+      label: '🔮 PICK',
+      confirmBg: 'bg-yellow-500'
+    },
+    festival_surge: {
+      border: 'border-cyan-300',
+      card: 'bg-gradient-to-b from-white to-cyan-50/40',
+      glowColor: 'rgba(34,211,238,0.07)',
+      cardAnim: 'surge-ring',
+      dateText: 'text-cyan-400/70',
+      vsText: 'text-cyan-200',
+      btnClass: 'bg-cyan-500 hover:bg-cyan-600 text-white',
+      label: '⚡ PICK',
+      confirmBg: 'bg-cyan-500'
+    },
+    festival_vault: {
+      border: 'border-indigo-300',
+      card: 'bg-gradient-to-b from-white to-indigo-50/40',
+      glowColor: 'rgba(59,91,219,0.07)',
+      cardAnim: 'vault-ring',
+      dateText: 'text-indigo-400/70',
+      vsText: 'text-indigo-200',
+      btnClass: 'bg-indigo-500 hover:bg-indigo-600 text-white',
+      label: '🏛️ PICK',
+      confirmBg: 'bg-indigo-500'
+    },
+    festival_spark: {
+      border: 'border-purple-300',
+      card: 'bg-gradient-to-b from-white to-purple-50/40',
+      glowColor: 'rgba(168,85,247,0.07)',
+      cardAnim: 'spark-ring',
+      dateText: 'text-purple-400/70',
+      vsText: 'text-purple-200',
+      btnClass: 'electric-btn',
+      label: '⚡ PICK',
+      confirmBg: 'bg-purple-500'
+    },
+    festival_sanguine: {
+      border: 'border-red-900',
+      card: 'bg-gradient-to-b from-white to-red-50/40',
+      glowColor: 'rgba(153,27,27,0.08)',
+      cardAnim: 'sanguine-ring',
+      dateText: 'text-red-800/70',
+      vsText: 'text-red-300',
+      btnClass: 'bg-red-800 hover:bg-red-900 text-white',
+      label: '🩸 PICK',
+      confirmBg: 'bg-red-800'
+    },
+    festival_fever: {
+      border: 'border-orange-500',
+      card: 'bg-gradient-to-b from-white to-orange-50/40',
+      glowColor: 'rgba(249,115,22,0.1)',
+      cardAnim: 'fever-festival-ring',
+      dateText: 'text-orange-400/60',
+      vsText: 'text-orange-300',
+      btnClass: 'bg-orange-600 text-white',
+      label: '🔥 PICK',
+      confirmBg: 'bg-orange-600'
     },
     default: {
       border: 'border-indigo-200',
@@ -130,16 +218,20 @@ export default function PendingMatchCard({
   } as const
 
   const activeKey = (
-    visualMode && visualMode in modeConfig
+    isFlash
       ? visualMode
-      : isInferno
-        ? 'inferno'
-        : isFever
-          ? 'fever'
-          : 'default'
+      : (festivalModeKey ??
+        (isInferno
+          ? 'winstreak_inferno'
+          : isFever
+            ? 'winstreak_fever'
+            : 'default'))
   ) as keyof typeof modeConfig
 
-  const cfg = modeConfig[activeKey]
+  const cfg = modeConfig[activeKey] ?? modeConfig.default
+
+  // Components are "active" if they aren't using the default theme
+  const isActive = activeKey !== 'default'
 
   const timerClass =
     timeLeft <= 0

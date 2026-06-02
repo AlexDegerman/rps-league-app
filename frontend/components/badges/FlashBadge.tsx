@@ -1,11 +1,4 @@
-type VisualMode =
-  | 'flash_lunar'
-  | 'flash_electric'
-  | 'flash_cards'
-  | 'flash_hellfire'
-  | 'inferno'
-  | 'fever'
-  | null
+import { VisualMode } from "@/types/rps"
 
 interface FlashBadgeProps {
   visualMode: VisualMode

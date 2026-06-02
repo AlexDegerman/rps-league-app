@@ -36,7 +36,7 @@ export const BONUS_TIER_STYLES: Record<BonusTier, BonusStyle> = {
   }
 }
 
-export const FLASH_EVENT_CARD: Record<
+export const EVENT_CARD: Record<
   string,
   {
     cardClass: string
@@ -46,6 +46,7 @@ export const FLASH_EVENT_CARD: Record<
     multLabel: string
   }
 > = {
+  // FLASH EVENTS
   LUNAR: {
     cardClass: 'event-card-base event-card-lunar',
     label: "Moon's Blessing",
@@ -73,10 +74,69 @@ export const FLASH_EVENT_CARD: Record<
     emoji: '🔥',
     textClass: 'streak-fire-text text-red-300',
     multLabel: 'x3'
+  },
+
+  // FESTIVALS
+  SPARK: {
+    cardClass: 'event-card-base event-card-spark',
+    label: 'Spark Festival',
+    emoji: '⚡',
+    textClass: 'text-purple-300',
+    multLabel: 'FLASH SYNC'
+  },
+  GHOST: {
+    cardClass: 'event-card-base event-card-ghost',
+    label: 'Ghost Festival',
+    emoji: '👻',
+    textClass: 'text-teal-200',
+    multLabel: '1.2x ECHO'
+  },
+  SAFEGUARD: {
+    cardClass: 'event-card-base event-card-safeguard',
+    label: 'Safeguard Festival',
+    emoji: '🛡️',
+    textClass: 'text-slate-300',
+    multLabel: '40% LOSS DEDUCTION'
+  },
+  RESONANCE: {
+    cardClass: 'event-card-base event-card-resonance',
+    label: 'Resonance Festival',
+    emoji: '🔮',
+    textClass: 'text-yellow-200',
+    multLabel: 'BNS FLOOR'
+  },
+  SURGE: {
+    cardClass: 'event-card-base event-card-surge',
+    label: 'Surge Festival',
+    emoji: '⚡',
+    textClass: 'text-cyan-200',
+    multLabel: '3x POWER'
+  },
+  VAULT: {
+    cardClass: 'event-card-base event-card-vault',
+    label: 'Vault Festival',
+    emoji: '🏛️',
+    textClass: 'text-indigo-200',
+    multLabel: '2x RELICS'
+  },
+  FEVER_FESTIVAL: {
+    cardClass: 'event-card-base event-card-fever-festival',
+    label: 'Fever Festival',
+    emoji: '🔥',
+    textClass: 'text-orange-300',
+    multLabel: 'STRK AEGIS'
+  },
+  SANGUINE: {
+    cardClass: 'event-card-base event-card-sanguine',
+    label: 'Sanguine Festival',
+    emoji: '🩸',
+    textClass: 'text-red-400',
+    multLabel: '100% WIN'
   }
 }
 
 export const MODE_CONFIG = {
+  // FLASH MODES
   flash_lunar: {
     border: 'border-blue-200',
     cardAnim: 'lunar-ring',
@@ -84,10 +144,9 @@ export const MODE_CONFIG = {
     glowColor: 'rgba(190,227,248,0.06)',
     dateText: 'text-blue-400/60',
     vsText: 'text-blue-200',
-    winnerBadge: 'bg-gradient-to-r from-blue-400 to-cyan-400',
-    winnerText:
-      'text-blue-600 font-black hover:text-blue-700 decoration-blue-300',
-    youWon: 'bg-gradient-to-r from-blue-400 to-cyan-400'
+    winnerBadge: 'bg-blue-400',
+    winnerText: 'text-blue-600 font-black',
+    youWon: 'bg-blue-400'
   },
   flash_electric: {
     border: 'border-purple-300',
@@ -96,10 +155,9 @@ export const MODE_CONFIG = {
     glowColor: 'rgba(159,122,234,0.06)',
     dateText: 'text-purple-400/60',
     vsText: 'text-purple-200',
-    winnerBadge: 'bg-gradient-to-r from-purple-500 to-violet-400',
-    winnerText:
-      'text-purple-600 font-black hover:text-purple-700 decoration-purple-300',
-    youWon: 'bg-gradient-to-r from-purple-500 to-violet-400'
+    winnerBadge: 'bg-purple-500',
+    winnerText: 'text-purple-600 font-black',
+    youWon: 'bg-purple-500'
   },
   flash_cards: {
     border: 'border-yellow-300',
@@ -108,10 +166,9 @@ export const MODE_CONFIG = {
     glowColor: 'rgba(236,201,75,0.06)',
     dateText: 'text-yellow-600/60',
     vsText: 'text-yellow-300',
-    winnerBadge: 'bg-gradient-to-r from-yellow-400 to-amber-400',
-    winnerText:
-      'text-yellow-600 font-black hover:text-yellow-700 decoration-yellow-300',
-    youWon: 'bg-gradient-to-r from-yellow-400 to-amber-400'
+    winnerBadge: 'bg-yellow-400',
+    winnerText: 'text-yellow-600 font-black',
+    youWon: 'bg-yellow-400'
   },
   flash_hellfire: {
     border: 'border-red-400',
@@ -120,34 +177,125 @@ export const MODE_CONFIG = {
     glowColor: 'rgba(197,48,48,0.06)',
     dateText: 'text-red-400/60',
     vsText: 'text-red-200',
-    winnerBadge: 'bg-gradient-to-r from-red-500 to-rose-500',
-    winnerText: 'text-red-600 font-black hover:text-red-700 decoration-red-300',
-    youWon: 'bg-gradient-to-r from-red-500 to-rose-500'
+    winnerBadge: 'bg-red-500',
+    winnerText: 'text-red-600 font-black',
+    youWon: 'bg-red-500'
   },
-  inferno: {
+
+  // FESTIVAL MODES
+  festival_spark: {
+    border: 'border-purple-500',
+    cardAnim: 'spark-ring',
+    bg: 'bg-white',
+    glowColor: 'rgba(168,85,247,0.12)',
+    dateText: 'text-purple-400',
+    vsText: 'text-purple-300',
+    winnerBadge: 'bg-purple-600',
+    winnerText: 'text-purple-700 font-black',
+    youWon: 'bg-purple-600'
+  },
+  festival_ghost: {
+    border: 'border-teal-200',
+    cardAnim: 'ghost-ring',
+    bg: 'bg-white',
+    glowColor: 'rgba(77,208,196,0.1)',
+    dateText: 'text-teal-400',
+    vsText: 'text-teal-200',
+    winnerBadge: 'bg-teal-400',
+    winnerText: 'text-teal-600 font-black',
+    youWon: 'bg-teal-400'
+  },
+  festival_safeguard: {
+    border: 'border-slate-400',
+    cardAnim: 'safeguard-ring',
+    bg: 'bg-slate-50',
+    glowColor: 'rgba(100,116,139,0.08)',
+    dateText: 'text-slate-500',
+    vsText: 'text-slate-300',
+    winnerBadge: 'bg-slate-600',
+    winnerText: 'text-slate-700 font-black',
+    youWon: 'bg-slate-600'
+  },
+  festival_resonance: {
+    border: 'border-yellow-400',
+    cardAnim: 'resonance-ring',
+    bg: 'bg-white',
+    glowColor: 'rgba(245,158,11,0.1)',
+    dateText: 'text-yellow-600',
+    vsText: 'text-yellow-300',
+    winnerBadge: 'bg-amber-500',
+    winnerText: 'text-amber-700 font-black',
+    youWon: 'bg-amber-500'
+  },
+  festival_surge: {
+    border: 'border-cyan-400',
+    cardAnim: 'surge-ring',
+    bg: 'bg-white',
+    glowColor: 'rgba(34,211,238,0.15)',
+    dateText: 'text-cyan-500',
+    vsText: 'text-cyan-300',
+    winnerBadge: 'bg-cyan-500',
+    winnerText: 'text-cyan-700 font-black',
+    youWon: 'bg-cyan-500'
+  },
+  festival_vault: {
+    border: 'border-indigo-600',
+    cardAnim: 'vault-ring',
+    bg: 'bg-indigo-50/30',
+    glowColor: 'rgba(59,91,219,0.1)',
+    dateText: 'text-indigo-600',
+    vsText: 'text-indigo-300',
+    winnerBadge: 'bg-indigo-700',
+    winnerText: 'text-indigo-800 font-black',
+    youWon: 'bg-indigo-700'
+  },
+  festival_fever: {
+    border: 'border-orange-500',
+    cardAnim: 'fever-festival-ring',
+    bg: 'bg-orange-50/20',
+    glowColor: 'rgba(249,115,22,0.15)',
+    dateText: 'text-orange-600',
+    vsText: 'text-orange-400',
+    winnerBadge: 'bg-orange-600',
+    winnerText: 'text-orange-700 font-black',
+    youWon: 'bg-orange-600'
+  },
+  festival_sanguine: {
+    border: 'border-red-900',
+    cardAnim: 'sanguine-ring',
+    bg: 'bg-red-950/5',
+    glowColor: 'rgba(153,27,27,0.2)',
+    dateText: 'text-red-800',
+    vsText: 'text-red-500',
+    winnerBadge: 'bg-red-900',
+    winnerText: 'text-red-900 font-black',
+    youWon: 'bg-red-900'
+  },
+
+  // WINSTREAK MODES
+  winstreak_inferno: {
     border: 'border-orange-300',
     cardAnim: 'card-inferno',
     bg: 'bg-gradient-to-br from-white via-white to-orange-50/30',
     glowColor: 'rgba(249,115,22,0.06)',
     dateText: 'text-orange-400/60',
     vsText: 'text-orange-200',
-    winnerBadge: 'bg-gradient-to-r from-orange-500 to-red-500',
-    winnerText:
-      'text-orange-600 font-black hover:text-orange-700 decoration-orange-300',
-    youWon: 'bg-gradient-to-r from-orange-500 to-red-500'
+    winnerBadge: 'bg-red-500',
+    winnerText: 'text-red-600 font-black',
+    youWon: 'bg-red-500'
   },
-  fever: {
+  winstreak_fever: {
     border: 'border-green-300',
     cardAnim: 'card-fever',
     bg: 'bg-gradient-to-br from-white via-white to-green-50/30',
     glowColor: 'rgba(34,197,94,0.06)',
     dateText: 'text-green-600/60',
     vsText: 'text-green-200',
-    winnerBadge: 'bg-gradient-to-r from-green-500 to-emerald-400',
-    winnerText:
-      'text-green-600 font-black hover:text-green-700 decoration-green-300',
-    youWon: 'bg-gradient-to-r from-green-500 to-emerald-400'
+    winnerBadge: 'bg-green-500',
+    winnerText: 'text-green-600 font-black',
+    youWon: 'bg-green-500'
   },
+
   default: {
     border: 'border-gray-100',
     cardAnim: '',
@@ -156,7 +304,7 @@ export const MODE_CONFIG = {
     dateText: 'text-gray-400',
     vsText: 'text-gray-300',
     winnerBadge: 'bg-green-500',
-    winnerText: 'text-green-600 font-bold hover:decoration-green-600',
+    winnerText: 'text-green-600 font-bold',
     youWon: 'bg-green-500'
   }
 }

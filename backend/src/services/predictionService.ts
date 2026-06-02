@@ -3,10 +3,21 @@ import { getOrCreateUser } from './userService.js'
 import {
   getFlashEventForUser,
   consumeFlashBetForUser,
-  tryTriggerFlashEventForUser
+  tryTriggerFlashEventForUser,
+  grantFlashEvent
 } from './flashEventService.js'
 import { logger } from '../utils/logger.js'
-import { consumeOracleForUser, getOracleState, hasUserUsedOracle } from './oracleService.js'
+import {
+  consumeOracleForUser,
+  getOracleState,
+  hasUserUsedOracle
+} from './oracleService.js'
+import {
+  checkAndTriggerFestival,
+  getGuaranteedBonusRemaining,
+  consumeGuaranteedBonus,
+  getActiveFestival
+} from './festivalService.js'
 
 const POINTS_FLOOR = 100000n
 
@@ -20,8 +31,7 @@ export const savePrediction = async (
 ): Promise<{ success: boolean; error?: string }> => {
   const { points: balance } = await getOrCreateUser(userId, shortId)
 
-  if (betAmount <= 0n)
-    return { success: false, error: 'Invalid bet amount' }
+  if (betAmount <= 0n) return { success: false, error: 'Invalid bet amount' }
   if (betAmount > balance)
     return { success: false, error: 'Bet could not be processed' }
 
@@ -71,20 +81,31 @@ export const savePrediction = async (
   }
 }
 
-// 40% chance of a bonus. Tier determines the multiplier range applied to the win amount.
+// ─── rollBonus ────────────────────────────────────────────────────────────────
+// 40% chance of a bonus (80% under 2M points). Tier determines multiplier range.
+// userId added for Spark guaranteed-bonus consumption.
+
 const rollBonus = (
   isWin: boolean,
   pityCount: number,
   currentPoints: bigint,
+  userId: string,
   flashType?: string | null
 ): { multiplier: number; tier: string } | null => {
+  // CARDS flash event: always legendary on wins
   if (flashType === 'CARDS' && isWin) {
     return { multiplier: 5.0, tier: 'LEGENDARY' }
   }
 
   const forceBonus = pityCount >= 3
+
+  // Spark Festival: guaranteed bonus on next 3 bets for streak-trigger initiator
+  const hasGuaranteedBonus = isWin && getGuaranteedBonusRemaining(userId) > 0
+  if (hasGuaranteedBonus) consumeGuaranteedBonus(userId)
+
   const bonusChance = currentPoints < 2000000n ? 0.8 : 0.4
-  if (!forceBonus && Math.random() > bonusChance) return null
+  if (!forceBonus && !hasGuaranteedBonus && Math.random() > bonusChance)
+    return null
 
   const roll = Math.random() * 100
 
@@ -122,6 +143,8 @@ const rollBonus = (
     tier: 'LEGENDARY'
   }
 }
+
+// ─── resolvePrediction ────────────────────────────────────────────────────────
 
 export const resolvePrediction = async (
   gameId: string,
@@ -176,16 +199,20 @@ export const resolvePrediction = async (
         }
       }
 
+      // Sanguine Festival: forced wins for all
+      const activeFestival = getActiveFestival()
+      const sanguineActive = activeFestival?.type === 'SANGUINE'
+      const feverActive = activeFestival?.type === 'FEVER'
+
       const result = oracleRigged
         ? 'WIN'
         : defiedOracle
           ? 'LOSE'
-          : flashActive
+          : sanguineActive || flashActive
             ? 'WIN'
             : row.pick === winnerName
               ? 'WIN'
               : 'LOSE'
-
       const isWin = result === 'WIN'
 
       const currentPoints = BigInt(row.current_points)
@@ -195,14 +222,36 @@ export const resolvePrediction = async (
 
       const isNaturalPityHit = currentPity >= 3
 
+      // Resonance Festival: guarantee common/rare bonus floor
+      const resonanceActive = activeFestival?.type === 'RESONANCE'
+
       const bonus = rollBonus(
         isWin,
-        totalBets <= 3 ? 3 : currentPity,
+        // Resonance forces a bonus by passing pityCount >= 3 equivalent
+        resonanceActive ? 3 : totalBets <= 3 ? 3 : currentPity,
         currentPoints,
+        row.user_id,
         flashEventType
       )
 
-      const streakAfter = isWin ? Number(row.current_win_streak) + 1 : 0
+      // Resonance cap: clamp bonus tier to RARE max (no EPIC/LEGENDARY from floor)
+      const effectiveBonus =
+        resonanceActive && bonus
+          ? bonus.tier === 'EPIC' || bonus.tier === 'LEGENDARY'
+            ? {
+                multiplier: isWin
+                  ? 2.2 + Math.random() * 1.0
+                  : 0.25 + Math.random() * 0.25,
+                tier: 'RARE'
+              }
+            : bonus
+          : bonus
+
+      const streakAfter = isWin
+        ? Number(row.current_win_streak) + 1
+        : feverActive
+          ? Number(row.current_win_streak)
+          : 0
 
       const streakMult =
         streakAfter >= 5
@@ -213,12 +262,11 @@ export const resolvePrediction = async (
               ? 2n
               : 1n
 
-      const bonusMult = bonus ? bonus.multiplier : 1
       const streakNum = Number(streakMult)
       const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
 
-      const bonusMultScale = bonus
-        ? BigInt(Math.floor(bonus.multiplier * 100))
+      const bonusMultScale = effectiveBonus
+        ? BigInt(Math.floor(effectiveBonus.multiplier * 100))
         : 100n
       const flashMultScale =
         isWin && flashEvent
@@ -234,33 +282,62 @@ export const resolvePrediction = async (
         const afterFlash = (afterStreak * flashMultScale) / 100n
         gainLoss = (afterFlash * bonusMultScale) / 100n
       } else {
-        const savedAmount = bonus ? (baseChange * bonusMultScale) / 100n : 0n
-        gainLoss = -(baseChange - savedAmount)
+        // Safeguard Festival: loss deduction reduced by 20% (40% of bet instead of 50%)
+        const safeguardActive = activeFestival?.type === 'SAFEGUARD'
+        const effectiveBase = safeguardActive ? (bet * 40n) / 100n : baseChange
+        const savedAmount = effectiveBonus
+          ? (effectiveBase * bonusMultScale) / 100n
+          : 0n
+        gainLoss = -(effectiveBase - savedAmount)
       }
 
       const provisionalPoints = currentPoints + gainLoss
-
       if (provisionalPoints < POINTS_FLOOR) {
         gainLoss = POINTS_FLOOR - currentPoints
+      }
+
+      // Ghost Festival: +20% win echo on final payout
+      let ghostEchoAmount = 0n
+      if (isWin && activeFestival?.type === 'GHOST') {
+        ghostEchoAmount = gainLoss / 5n
+        gainLoss = gainLoss + ghostEchoAmount
+        // Re-check floor after echo
+        const provisionalWithEcho = currentPoints + gainLoss
+        if (provisionalWithEcho < POINTS_FLOOR) {
+          gainLoss = POINTS_FLOOR - currentPoints
+          ghostEchoAmount = 0n
+        }
+      }
+
+      // Surge Festival: 3x global multiplier on wins
+      if (isWin && activeFestival?.type === 'SURGE') {
+        gainLoss = gainLoss * 3n
+        const provisionalWithSurge = currentPoints + gainLoss
+        if (provisionalWithSurge < POINTS_FLOOR) {
+          gainLoss = POINTS_FLOOR - currentPoints
+        }
       }
 
       const baseFinalPure = isWin
         ? (baseChange * streakMult * flashMultScale) / 100n
         : baseChange
 
-      const bonusDisplayAmount = bonus
+      const bonusDisplayAmount = effectiveBonus
         ? isWin
           ? gainLoss - baseFinalPure
           : baseFinalPure + gainLoss
         : 0n
 
+      let flashJustEndedFlag = false
       if (isWin && flashEvent) {
-        consumeFlashBetForUser(row.user_id)
+        flashJustEndedFlag = consumeFlashBetForUser(row.user_id)
       }
 
       if (oracleRigged || defiedOracle) {
         await consumeOracleForUser(row.user_id)
       }
+
+      const savedFlashType = flashJustEndedFlag ? null : flashEventType
 
       await pool.query(
         `UPDATE predictions 
@@ -275,13 +352,18 @@ export const resolvePrediction = async (
         [
           result,
           gainLoss.toString(),
-          bonus ? bonus.tier : null,
-          bonus ? Math.floor(bonus.multiplier * 100) : 100,
+          effectiveBonus ? effectiveBonus.tier : null,
+          effectiveBonus ? Math.floor(effectiveBonus.multiplier * 100) : 100,
           row.user_id,
           row.game_id,
-          flashEventType,
-          flashMult,
-          streakNum
+          savedFlashType ??
+            (activeFestival
+              ? activeFestival.type === 'FEVER'
+                ? 'FEVER_FESTIVAL'
+                : activeFestival.type
+              : null),
+          flashJustEndedFlag ? 1 : flashMult,
+          streakNum,
         ]
       )
 
@@ -296,7 +378,7 @@ export const resolvePrediction = async (
               total_volume         = total_volume + $4,
               biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
               biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
-              current_win_streak   = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 ELSE 0 END,
+              current_win_streak = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 WHEN $8 THEN current_win_streak ELSE 0 END,
               max_win_streak       = CASE 
                                       WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
                                       THEN current_win_streak + 1 
@@ -308,12 +390,19 @@ export const resolvePrediction = async (
         [
           gainLoss.toString(),
           row.user_id,
-          bonus ? 0 : currentPity + 1,
+          effectiveBonus ? 0 : currentPity + 1,
           bet.toString(),
           result,
           isNaturalPityHit ? 1 : 0,
-          flashEventType
+          savedFlashType,
+          feverActive
         ]
+      )
+
+      const totalMultiplier = Math.round(
+        streakNum *
+          (flashJustEndedFlag ? 1 : flashMult) *
+          (effectiveBonus ? effectiveBonus.multiplier : 1)
       )
 
       broadcast(
@@ -324,23 +413,42 @@ export const resolvePrediction = async (
           result,
           gameId,
           amount: gainLoss > 0n ? gainLoss.toString() : (-gainLoss).toString(),
-          bonus: bonus
+          bonus: effectiveBonus
             ? {
                 amount:
                   bonusDisplayAmount > 0n ? bonusDisplayAmount.toString() : '0',
-                tier: bonus.tier,
-                visualMultiplier: Math.floor(bonus.multiplier * 100)
+                tier: effectiveBonus.tier,
+                visualMultiplier: Math.floor(effectiveBonus.multiplier * 100)
               }
             : null,
           wasAllIn: bet === currentPoints,
           streakAfter,
           streakMult: streakNum,
-          flashEventType,
-          flashMult,
-          oracleRigged
+          flashEventType: savedFlashType,
+          flashMult: flashJustEndedFlag ? 1 : flashMult,
+          oracleRigged,
+          ghostEchoAmount:
+            ghostEchoAmount > 0n ? ghostEchoAmount.toString() : null
         })
       )
+
       tryTriggerFlashEventForUser(row.user_id, broadcast)
+
+      // Festival trigger check - runs after flash trigger to avoid double-lockout race
+      checkAndTriggerFestival(
+        row.user_id,
+        row.nickname ?? 'Anonymous',
+        {
+          isWin,
+          bonusTier: effectiveBonus?.tier ?? null,
+          bonusMult: effectiveBonus?.multiplier ?? 1,
+          flashActive,
+          flashJustEnded: flashJustEndedFlag,
+          winStreakAfter: streakAfter,
+          totalMultiplier
+        },
+        broadcast
+      )
     } catch (err) {
       logger.errorWithPoints('resolvePrediction: failed for user', err, {
         userId: row.user_id,

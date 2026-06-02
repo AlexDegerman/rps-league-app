@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
-import { getEventColor } from '@/lib/format'
 import { EVENT_HEADER_CONFIG } from '@/lib/eventConfig'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
@@ -16,7 +15,9 @@ const Header = () => {
   const pathname = usePathname()
   const { initUser, shortId } = useUserStore()
   const { brandTheme, randomizeBrandTheme } = useUIStore()
+
   const visualMode = useGameStore((s) => s.visualMode)
+  const festivalModeKey = useGameStore((s) => s.festivalModeKey)
 
   useEffect(() => {
     randomizeBrandTheme()
@@ -24,14 +25,12 @@ const Header = () => {
   }, [randomizeBrandTheme, initUser])
 
   const brandCfg = EVENT_HEADER_CONFIG[brandTheme]
-  const modeKey = visualMode?.replace('flash_', '') ?? null
+  const modeKey = visualMode || festivalModeKey || null
   const navGlow = modeKey ? `nav-glow-${modeKey}` : ''
   const profileHref = shortId ? `/profile/${shortId}` : '/profile'
 
   const borderCfg = modeKey
-    ? EVENT_HEADER_CONFIG[
-        modeKey.toUpperCase() as keyof typeof EVENT_HEADER_CONFIG
-      ]
+    ? (EVENT_HEADER_CONFIG[modeKey as keyof typeof EVENT_HEADER_CONFIG] ?? null)
     : null
 
   const navClass = (href: string) =>
@@ -50,13 +49,21 @@ const Header = () => {
 
   const burgerColorClass = modeKey
     ? `text-${
-        modeKey === 'hellfire'
+        modeKey.includes('hellfire') ||
+        modeKey.includes('sanguine') ||
+        modeKey.includes('inferno')
           ? 'red-600'
-          : modeKey === 'lunar'
+          : modeKey.includes('lunar') || modeKey.includes('ghost')
             ? 'blue-600'
-            : modeKey === 'electric'
+            : modeKey.includes('electric') ||
+                modeKey.includes('spark') ||
+                modeKey.includes('surge')
               ? 'purple-600'
-              : 'yellow-600'
+              : modeKey.includes('vault')
+                ? 'indigo-600'
+                : modeKey.includes('safeguard')
+                  ? 'slate-600'
+                  : 'yellow-600'
       }`
     : 'text-gray-600'
 
@@ -67,28 +74,16 @@ const Header = () => {
       <div className="absolute inset-0 bg-white -z-20" />
 
       {modeKey && (
-        <div
-          className={`absolute inset-0 -z-10 event-bg-${modeKey} event-side-${modeKey}`}
-        />
-      )}
-
-      {modeKey === 'hellfire' ? (
-        <div className="event-hellfire-ember" />
-      ) : (
-        modeKey && (
+        <>
           <div
-            className="event-particle event-particle-down-1 absolute top-1 left-[15%]"
-            style={{
-              background: getEventColor(modeKey, 0.8),
-              boxShadow: `0 0 6px ${getEventColor(modeKey, 0.6)}`
-            }}
+            className={`absolute inset-0 -z-10 event-bg-${modeKey} event-side-${modeKey}`}
           />
-        )
+          <div className={`event-dynamic-particles particles-${modeKey}`} />
+        </>
       )}
 
       <div className={`max-w-110 mx-auto px-4 py-3 relative z-10 ${navGlow}`}>
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* LOGO */}
           <Link href="/" className="shrink-0" onClick={() => setIsOpen(false)}>
             <Image
               src="/rpslogo.png"
@@ -101,18 +96,12 @@ const Header = () => {
             />
           </Link>
 
-          {/* BRANDING: Hidden <380, Wrapped 380-419, 1-Line 420+ */}
           <span
-            data-text="RPS League"
-            className={`hidden! min-[380px]:inline-block! relative text-sm font-black uppercase tracking-widest select-none leading-[1.1]
-              min-[380px]:w-17.5 min-[420px]:w-auto min-[420px]:whitespace-nowrap
-              ${brandCfg?.textClass ?? 'text-gray-300'}
-            `}
+            className={`hidden! min-[380px]:inline-block! relative text-sm font-black uppercase tracking-widest select-none leading-[1.1] min-[380px]:w-17.5 min-[420px]:w-auto min-[420px]:whitespace-nowrap ${brandCfg?.textClass ?? 'text-gray-300'}`}
           >
             RPS League
           </span>
 
-          {/* RIGHT SIDE ACTIONS */}
           <div className="flex items-center gap-1.5 flex-1 ml-auto justify-end">
             <Link href="/" className={navClass('/')}>
               Live
@@ -123,18 +112,9 @@ const Header = () => {
             <Link href={profileHref} className={navClass(profileHref)}>
               Profile
             </Link>
-
-            {/* Smart More Button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`flex items-center justify-center p-2 rounded-lg border transition-all shrink-0 ${
-                isOpen
-                  ? 'bg-gray-800 text-white border-gray-800 shadow-inner'
-                  : modeKey
-                    ? 'bg-white/50 border-current backdrop-blur-sm ' +
-                      burgerColorClass
-                    : 'bg-gray-50 border-gray-200 active:bg-gray-200'
-              } min-[480px]:px-3 min-[480px]:gap-2`}
+              className={`flex items-center justify-center p-2 rounded-lg border transition-all shrink-0 ${isOpen ? 'bg-gray-800 text-white border-gray-800 shadow-inner' : modeKey ? 'bg-white/50 border-current backdrop-blur-sm ' + burgerColorClass : 'bg-gray-50 border-gray-200 active:bg-gray-200'} min-[480px]:px-3 min-[480px]:gap-2`}
             >
               <span className="hidden min-[480px]:block text-[10px] font-black uppercase tracking-widest">
                 More
@@ -144,13 +124,11 @@ const Header = () => {
           </div>
         </div>
 
-        {/* DROPDOWN MENU */}
         {isOpen && (
           <nav
             className={`mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-center gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${modeKey ? `event-bg-${modeKey}` : ''}`}
           >
             <div className="absolute inset-0 bg-white -z-20" />
-
             <Link
               href="/analysis"
               onClick={() => setIsOpen(false)}
@@ -164,6 +142,13 @@ const Header = () => {
               className={menuRowItemClass('/showcase')}
             >
               Tiers
+            </Link>
+            <Link
+              href="/festivalshowcase"
+              onClick={() => setIsOpen(false)}
+              className={menuRowItemClass('/festivals')}
+            >
+              Festivals
             </Link>
             <Link
               href="/feedback"

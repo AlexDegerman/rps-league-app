@@ -135,7 +135,19 @@ export const useUserStore = create<UserState>((set, get) => ({
     Sentry.setUser({ id: user.userId, username: user.nickname })
     Sentry.setTag('shortId', user.shortId)
 
-    const utmSource = sessionStorage.getItem('utm_source') ?? undefined
+    const urlParams = new URLSearchParams(window.location.search)
+    let utmSource =
+      urlParams.get('utm_source')?.toLowerCase().trim() ?? undefined
+
+    if (utmSource) {
+      localStorage.setItem('rps_utm_source', utmSource)
+      sessionStorage.setItem('utm_source', utmSource)
+    } else {
+      utmSource =
+        sessionStorage.getItem('utm_source') ??
+        localStorage.getItem('rps_utm_source') ??
+        undefined
+    }
 
     const data = await fetchUserPoints(
       user.userId,

@@ -7,6 +7,11 @@ import { resolvePrediction } from '../services/predictionService.js'
 import type { Match } from '../types/rps.js'
 import { getFlashEventForUser } from '../services/flashEventService.js'
 import { logger } from '../utils/logger.js'
+import {
+  startDemoFestivalScheduler,
+  getActiveFestival,
+  getFestivalLockoutRemaining
+} from '../services/festivalService.js'
 
 const router = Router()
 
@@ -27,6 +32,22 @@ router.get('/flash-state', (req, res) => {
   )
 })
 
+router.get('/festival-state', (req, res) => {
+  const festival = getActiveFestival()
+  const lockoutRemaining = getFestivalLockoutRemaining()
+  res.json({
+    festival: festival
+      ? {
+          type: festival.type,
+          triggeredBy: festival.triggeredBy,
+          startedAt: festival.startedAt,
+          endsAt: festival.endsAt
+        }
+      : null,
+    lockoutRemaining
+  })
+})
+
 type SSEClient = (event: string, data: string) => void
 const clients = new Set<SSEClient>()
 
@@ -34,7 +55,7 @@ const clients = new Set<SSEClient>()
 // clients connect, since it drives real DB writes and SSE broadcasts.
 let generatorStarted = false
 
-const broadcast = (event: string, data: string) =>
+export const broadcast = (event: string, data: string) =>
   clients.forEach((client) => client(event, data))
 
 router.get('/', (req, res) => {
@@ -85,6 +106,7 @@ router.get('/', (req, res) => {
       },
       broadcast
     )
+    startDemoFestivalScheduler(broadcast)
   }
 
   req.on('close', () => {

@@ -5,17 +5,20 @@ type Extra = Record<string, unknown>
 
 export const logger = {
   error: (message: string, error?: unknown, extra?: Extra) => {
-    if (error instanceof Error) {
-      Sentry.captureException(error, {
-        ...(extra && { extra }),
-        tags: { message }
-      })
-    } else {
-      Sentry.captureMessage(message, {
-        ...(extra && { extra: { ...extra, rawError: error } }),
-        level: 'error'
-      })
+    if (isProd) {
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          ...(extra && { extra }),
+          tags: { message }
+        })
+      } else {
+        Sentry.captureMessage(message, {
+          ...(extra && { extra: { ...extra, rawError: error } }),
+          level: 'error'
+        })
+      }
     }
+
     if (!isProd) {
       console.error(
         `[ERROR] ${message}`,
@@ -26,26 +29,33 @@ export const logger = {
   },
 
   warn: (message: string, extra?: Extra) => {
-    Sentry.captureMessage(message, {
-      ...(extra && { extra }),
-      level: 'warning'
-    })
+    if (isProd) {
+      Sentry.captureMessage(message, {
+        ...(extra && { extra }),
+        level: 'warning'
+      })
+    }
+
     if (!isProd) {
       console.warn(`[WARN] ${message}`, ...(extra !== undefined ? [extra] : []))
     }
   },
 
   info: (message: string, extra?: Extra) => {
-    Sentry.addBreadcrumb({
-      message,
-      ...(extra && { data: extra }),
-      level: 'info'
-    })
+    if (isProd) {
+      Sentry.addBreadcrumb({
+        message,
+        ...(extra && { data: extra }),
+        level: 'info'
+      })
+    }
+
     if (!isProd) {
       console.log(`[INFO] ${message}`, ...(extra !== undefined ? [extra] : []))
     }
   },
 
+  // For BigInt-heavy contexts - stringify before sending
   errorWithPoints: (
     message: string,
     error?: unknown,
@@ -62,6 +72,7 @@ export const logger = {
           })
         }
       : undefined
+
     logger.error(message, error, safeExtra)
   }
 }

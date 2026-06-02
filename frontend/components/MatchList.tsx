@@ -21,8 +21,9 @@ const MatchRow = ({
   prediction,
   alwaysLeft,
   winStreak = 0,
-  visualMode = null
-}: MatchRowProps) => {
+  visualMode = null,
+  festivalModeKey = null
+}: MatchRowProps & { festivalModeKey?: string | null }) => {
   const isFlipped =
     alwaysLeft && highlightPlayer && match.playerB.name === highlightPlayer
   const left = isFlipped ? match.playerB : match.playerA
@@ -32,23 +33,23 @@ const MatchRow = ({
   // Only apply themed styling to rows where the user has a prediction
   const hasPrediction = !!prediction
   const isFlash = visualMode?.startsWith('flash_') ?? false
-  const isInferno = !isFlash && winStreak >= 5
-  const isFever = !isFlash && winStreak >= 3 && winStreak < 5
-  const isActive = hasPrediction && (isFlash || isInferno || isFever)
+  const isInferno = winStreak >= 5
+  const isFever = winStreak >= 3 && winStreak < 5
 
   const activeKey = (
-    isActive
-      ? visualMode && visualMode in MODE_CONFIG
-        ? visualMode
-        : isInferno
-          ? 'inferno'
+    isFlash
+      ? visualMode
+      : (festivalModeKey ??
+        (isInferno
+          ? 'winstreak_inferno'
           : isFever
-            ? 'fever'
-            : 'default'
-      : 'default'
+            ? 'winstreak_fever'
+            : 'default'))
   ) as keyof typeof MODE_CONFIG
 
-  const cfg = MODE_CONFIG[activeKey]
+  const cfg = MODE_CONFIG[activeKey] || MODE_CONFIG.default
+
+  const isActive = hasPrediction && activeKey !== 'default'
 
   return (
     <li
@@ -185,6 +186,7 @@ interface MatchListProps {
   alwaysLeft?: boolean
   winStreak?: number
   visualMode?: string | null
+  festivalModeKey?: string | null
 }
 
 const MatchList = ({
@@ -195,7 +197,8 @@ const MatchList = ({
   predictions,
   alwaysLeft,
   winStreak = 0,
-  visualMode = null
+  visualMode = null,
+  festivalModeKey = null
 }: MatchListProps) => {
   return (
     <>
@@ -209,6 +212,7 @@ const MatchList = ({
             alwaysLeft={alwaysLeft}
             winStreak={winStreak}
             visualMode={visualMode}
+            festivalModeKey={festivalModeKey}
           />
         ))}
       </ul>

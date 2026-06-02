@@ -252,6 +252,18 @@ export async function fetchDailyStats() {
   }>(fetch(`${API_BASE}/api/predictions/stats/daily`))
 }
 
+export async function fetchFestivalState() {
+  return handleResponse<{
+    festival: {
+      type: string
+      triggeredBy: string
+      startedAt: number
+      endsAt: number | null
+    } | null
+    lockoutRemaining: number
+  }>(fetch(`${API_BASE}/api/live/festival-state`))
+}
+
 export async function submitFeedback(
   formData: FormData
 ): Promise<
@@ -300,4 +312,12 @@ export async function fetchOracleState(userId: string) {
 export async function fetchIdleEligibility(userId: string) {
   const r = await fetch(`${API_BASE}/api/users/idle-eligible/${userId}`)
   return r.ok ? r.json() : null
+}
+
+export async function postFestivalParticipated(userId: string) {
+  return fetch(`${API_BASE}/api/festivals/participated`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId })
+  }).catch(() => null)
 }
