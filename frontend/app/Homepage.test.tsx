@@ -129,7 +129,8 @@ vi.mock('@/lib/api', () => ({
   fetchIdleEligibility: vi.fn(() => Promise.resolve(null)),
   ascendUser: vi.fn(() =>
     Promise.resolve({ success: true, laps: 1, fastestLapBets: 100 })
-  )
+  ),
+  fetchFestivalState: vi.fn(() => Promise.resolve(null))
 }))
 
 describe('HomePage', () => {
