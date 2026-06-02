@@ -3,7 +3,7 @@
 import { useGameStore } from '@/app/stores/gameStore'
 import { FESTIVAL_REGISTRY } from '@/lib/festivals'
 import { getFestivalEffectDescription } from '@/lib/oracleTemplates'
-import { FestivalModeKey } from '@/types/rps'
+import { FestivalModeKey, FestivalType } from '@/types/rps'
 
 const LOCAL_FESTIVAL_MAP: Record<string, FestivalModeKey> = {
   SPARK: 'festival_spark',
@@ -34,8 +34,9 @@ export default function FestivalEffectTicker() {
   const config = modeKey ? FESTIVAL_REGISTRY[modeKey] : null
 
   const effectText =
-    config?.effectText || getFestivalEffectDescription(festivalType)
-  const color = config?.color || '#eab308' 
+    config?.effectText ||
+    getFestivalEffectDescription(festivalType as FestivalType)
+  const color = config?.color || '#eab308'
 
   if (!effectText) return null
 
