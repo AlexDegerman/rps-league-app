@@ -82,6 +82,8 @@ export interface UserPointsData {
   pointStylePreference: string | null
   laps: number
   fastestLapBets: number
+  linkedinUrl: string | null
+  showLinkedinBadge: boolean 
 }
 
 export interface LeaderboardEntry {
@@ -98,6 +100,8 @@ export interface LeaderboardEntry {
   pointStylePreference: string | null
   laps?: number
   fastestLapBets?: number | null
+  achievementCount?: number
+  showLinkedinBadge: boolean
 }
 
 export interface ProfileData {
@@ -266,4 +270,50 @@ export interface FestivalSSEData {
   durationMs: number
   message: string
   flashType?: string
+}
+
+export interface AchievementNotif {
+  code: string
+  name: string
+  icon: string
+  rarity: AchievementRarity
+}
+
+export type AchievementRarity =
+  | 'COMMON'
+  | 'RARE'
+  | 'EPIC'
+  | 'LEGENDARY'
+  | 'MYTHICAL'
+  | 'RAINBOW'
+
+export interface BadgeData {
+  code: string
+  name: string
+  icon: string
+  rarity: AchievementRarity
+}
+
+export interface AchievementEntry extends BadgeData {
+  requirement: string
+  category: string
+  earned: boolean
+  earnedAt: number | null
+}
+
+export interface AchievementStats {
+  wins: number
+  maxWinStreak: number
+  laps: number
+  points: string
+  biggestMatchMult: number
+  totalPitiesEarned: number
+  lunarCaught: number
+  electricCaught: number
+  hellfireCaught: number
+  cardsCaught: number
+  betAgainstOracleCount: number
+  festivalsTriggered: number
+  festivalsParticipated: number
+  oracleMaxStreak: number
 }

@@ -18,6 +18,10 @@ import {
   consumeGuaranteedBonus,
   getActiveFestival
 } from './festivalService.js'
+import {
+  checkAchievements,
+  type AchievementStats
+} from './achievementChecker.js'
 
 const POINTS_FLOOR = 100000n
 
@@ -46,7 +50,7 @@ export const savePrediction = async (
     }
 
     const matchRes = await pool.query(
-      `SELECT expires_at FROM matches WHERE game_id = $1`,
+      `SELECT expires_at, player_a_name, player_b_name FROM matches WHERE game_id = $1`,
       [gameId]
     )
     if (matchRes.rows.length === 0)
@@ -54,16 +58,27 @@ export const savePrediction = async (
     if (Date.now() > Number(matchRes.rows[0].expires_at))
       return { success: false, error: 'Selection window closed' }
 
+    const oracleUsed = await hasUserUsedOracle(userId)
+    let betAgainstOracle = false
+    if (!oracleUsed) {
+      const oracleState = getOracleState()
+      const oracleWinnerName =
+        oracleState.side === 'left'
+          ? matchRes.rows[0].player_a_name
+          : matchRes.rows[0].player_b_name
+      betAgainstOracle = pick !== oracleWinnerName
+    }
+
     await pool.query(`UPDATE users SET nickname = $1 WHERE user_id = $2`, [
       nickname,
       userId
     ])
 
     const insertResult = await pool.query(
-      `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at)
-        VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO predictions (user_id, game_id, pick, bet_amount, created_at, bet_against_oracle)
+        VALUES ($1, $2, $3, $4, $5, $6)
         ON CONFLICT (user_id, game_id) DO NOTHING`,
-      [userId, gameId, pick, betAmount.toString(), Date.now()]
+      [userId, gameId, pick, betAmount.toString(), Date.now(), betAgainstOracle]
     )
 
     if (insertResult.rowCount === 0)
@@ -83,7 +98,6 @@ export const savePrediction = async (
 
 // ─── rollBonus ────────────────────────────────────────────────────────────────
 // 40% chance of a bonus (80% under 2M points). Tier determines multiplier range.
-// userId added for Spark guaranteed-bonus consumption.
 
 const rollBonus = (
   isWin: boolean,
@@ -98,7 +112,6 @@ const rollBonus = (
   }
 
   const forceBonus = pityCount >= 3
-
   // Spark Festival: guaranteed bonus on next 3 bets for streak-trigger initiator
   const hasGuaranteedBonus = isWin && getGuaranteedBonusRemaining(userId) > 0
   if (hasGuaranteedBonus) consumeGuaranteedBonus(userId)
@@ -118,7 +131,6 @@ const rollBonus = (
       tier: 'COMMON'
     }
   }
-
   if (roll < 84.5) {
     // RARE: Win 2.2–3.2x | Loss: Save 25–50% (User loses 50-75% of base loss)
     return {
@@ -128,15 +140,14 @@ const rollBonus = (
       tier: 'RARE'
     }
   }
-
   if (roll < 97.5) {
     // EPIC: Win 3.2–4.2x | Loss: Save 60–90% (User loses 10-40% of base loss)
+
     return {
       multiplier: isWin ? 3.2 + Math.random() * 1.0 : 0.6 + Math.random() * 0.3,
       tier: 'EPIC'
     }
   }
-
   // LEGENDARY: Win 5.0x | Loss: Save 100% (User loses 0)
   return {
     multiplier: isWin ? 5.0 : 1.0,
@@ -191,7 +202,6 @@ export const resolvePrediction = async (
         const oracleState = getOracleState()
         const oracleWinnerName =
           oracleState.side === 'left' ? row.player_a_name : row.player_b_name
-
         if (row.pick === oracleWinnerName) {
           oracleRigged = true
         } else {
@@ -199,7 +209,6 @@ export const resolvePrediction = async (
         }
       }
 
-      // Sanguine Festival: forced wins for all
       const activeFestival = getActiveFestival()
       const sanguineActive = activeFestival?.type === 'SANGUINE'
       const feverActive = activeFestival?.type === 'FEVER'
@@ -219,22 +228,21 @@ export const resolvePrediction = async (
       const bet = BigInt(row.bet_amount)
       const totalBets = Number(row.total_bets)
       const currentPity = Number(row.bonus_pity_count)
-
       const isNaturalPityHit = currentPity >= 3
 
-      // Resonance Festival: guarantee common/rare bonus floor
+      const betAgainstOracle = Boolean(row.bet_against_oracle)
+
       const resonanceActive = activeFestival?.type === 'RESONANCE'
 
       const bonus = rollBonus(
         isWin,
-        // Resonance forces a bonus by passing pityCount >= 3 equivalent
         resonanceActive ? 3 : totalBets <= 3 ? 3 : currentPity,
         currentPoints,
         row.user_id,
         flashEventType
       )
 
-      // Resonance cap: clamp bonus tier to RARE max (no EPIC/LEGENDARY from floor)
+      // Resonance cap: clamp to RARE max
       const effectiveBonus =
         resonanceActive && bonus
           ? bonus.tier === 'EPIC' || bonus.tier === 'LEGENDARY'
@@ -282,7 +290,6 @@ export const resolvePrediction = async (
         const afterFlash = (afterStreak * flashMultScale) / 100n
         gainLoss = (afterFlash * bonusMultScale) / 100n
       } else {
-        // Safeguard Festival: loss deduction reduced by 20% (40% of bet instead of 50%)
         const safeguardActive = activeFestival?.type === 'SAFEGUARD'
         const effectiveBase = safeguardActive ? (bet * 40n) / 100n : baseChange
         const savedAmount = effectiveBonus
@@ -296,12 +303,11 @@ export const resolvePrediction = async (
         gainLoss = POINTS_FLOOR - currentPoints
       }
 
-      // Ghost Festival: +20% win echo on final payout
+      // Ghost Festival: +20% win echo
       let ghostEchoAmount = 0n
       if (isWin && activeFestival?.type === 'GHOST') {
         ghostEchoAmount = gainLoss / 5n
         gainLoss = gainLoss + ghostEchoAmount
-        // Re-check floor after echo
         const provisionalWithEcho = currentPoints + gainLoss
         if (provisionalWithEcho < POINTS_FLOOR) {
           gainLoss = POINTS_FLOOR - currentPoints
@@ -339,9 +345,15 @@ export const resolvePrediction = async (
 
       const savedFlashType = flashJustEndedFlag ? null : flashEventType
 
+      const combinedMult = Math.round(
+        streakNum *
+          (flashJustEndedFlag ? 1 : flashMult) *
+          (effectiveBonus ? effectiveBonus.multiplier : 1)
+      )
+
       await pool.query(
-        `UPDATE predictions 
-            SET result = $1, 
+        `UPDATE predictions
+            SET result = $1,
               gain_loss = $2,
               bonus_tier = $3,
               bonus_multiplier = $4,
@@ -363,29 +375,37 @@ export const resolvePrediction = async (
                 : activeFestival.type
               : null),
           flashJustEndedFlag ? 1 : flashMult,
-          streakNum,
+          streakNum
         ]
       )
 
       await pool.query(
         `UPDATE users
-          SET points               = points + $1,
-              peak_points          = GREATEST(peak_points, points + $1),
-              all_time_peak        = GREATEST(all_time_peak, points + $1),
-              daily_peak           = GREATEST(daily_peak,  points + $1),
-              weekly_peak          = GREATEST(weekly_peak, points + $1),
-              bonus_pity_count     = $3,
-              total_volume         = total_volume + $4,
-              biggest_win          = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
-              biggest_single_win   = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
-              current_win_streak = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 WHEN $8 THEN current_win_streak ELSE 0 END,
-              max_win_streak       = CASE 
-                                      WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak 
-                                      THEN current_win_streak + 1 
-                                      ELSE max_win_streak 
-                                    END,
-              total_pities_earned  = total_pities_earned + $6,
-              total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END
+          SET points                    = points + $1,
+              peak_points               = GREATEST(peak_points, points + $1),
+              all_time_peak             = GREATEST(all_time_peak, points + $1),
+              daily_peak                = GREATEST(daily_peak,  points + $1),
+              weekly_peak               = GREATEST(weekly_peak, points + $1),
+              bonus_pity_count          = $3,
+              total_volume              = total_volume + $4,
+              biggest_win               = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
+              biggest_single_win        = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
+              current_win_streak        = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 WHEN $8 THEN current_win_streak ELSE 0 END,
+              max_win_streak            = CASE
+                                            WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak
+                                            THEN current_win_streak + 1
+                                            ELSE max_win_streak
+                                          END,
+              total_pities_earned       = total_pities_earned + $6,
+              total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END,
+              wins                      = CASE WHEN $5 = 'WIN' THEN wins + 1 ELSE wins END,
+              losses                    = CASE WHEN $5 = 'LOSE' THEN losses + 1 ELSE losses END,
+              lunar_events_caught       = CASE WHEN $7 = 'LUNAR'    AND $5 = 'WIN' THEN lunar_events_caught    + 1 ELSE lunar_events_caught    END,
+              electric_events_caught    = CASE WHEN $7 = 'ELECTRIC' AND $5 = 'WIN' THEN electric_events_caught + 1 ELSE electric_events_caught END,
+              hellfire_events_caught    = CASE WHEN $7 = 'HELLFIRE' AND $5 = 'WIN' THEN hellfire_events_caught + 1 ELSE hellfire_events_caught END,
+              cards_events_caught       = CASE WHEN $7 = 'CARDS'    AND $5 = 'WIN' THEN cards_events_caught    + 1 ELSE cards_events_caught    END,
+              biggest_match_mult        = GREATEST(biggest_match_mult, $9),
+              bet_against_oracle_count  = CASE WHEN $10 THEN bet_against_oracle_count + 1 ELSE bet_against_oracle_count END
           WHERE user_id = $2`,
         [
           gainLoss.toString(),
@@ -395,15 +415,103 @@ export const resolvePrediction = async (
           result,
           isNaturalPityHit ? 1 : 0,
           savedFlashType,
-          feverActive
+          feverActive,
+          combinedMult,
+          betAgainstOracle
         ]
       )
 
-      const totalMultiplier = Math.round(
-        streakNum *
-          (flashJustEndedFlag ? 1 : flashMult) *
-          (effectiveBonus ? effectiveBonus.multiplier : 1)
+      // ── Achievement check ─────────────────────────────────────────────────
+      const freshUser = await pool.query(
+        `SELECT wins, max_win_streak, laps, points,
+                biggest_match_mult, total_pities_earned,
+                lunar_events_caught, electric_events_caught,
+                hellfire_events_caught, cards_events_caught,
+                bet_against_oracle_count, oracle_max_streak,
+                festivals_triggered, festivals_participated
+          FROM users WHERE user_id = $1`,
+        [row.user_id]
       )
+      const u = freshUser.rows[0]
+
+      const earnedRes = await pool.query(
+        `SELECT achievement_code FROM user_achievements WHERE user_id = $1`,
+        [row.user_id]
+      )
+      const alreadyEarned = new Set<string>(
+        earnedRes.rows.map(
+          (r: { achievement_code: string }) => r.achievement_code
+        )
+      )
+
+      const stats: AchievementStats = {
+        wins: Number(u.wins),
+        maxWinStreak: Number(u.max_win_streak),
+        laps: Number(u.laps),
+        points: u.points.toString(),
+        biggestMatchMult: Number(u.biggest_match_mult),
+        totalPitiesEarned: Number(u.total_pities_earned),
+        lunarCaught: Number(u.lunar_events_caught),
+        electricCaught: Number(u.electric_events_caught),
+        hellfireCaught: Number(u.hellfire_events_caught),
+        cardsCaught: Number(u.cards_events_caught),
+        betAgainstOracleCount: Number(u.bet_against_oracle_count),
+        oracleMaxStreak: Number(u.oracle_max_streak),
+        festivalsTriggered: Number(u.festivals_triggered),
+        festivalsParticipated: Number(u.festivals_participated),
+        uniqueRelicsOwned: 0,
+        allRelicsOwned: false,
+        allCommonRareEpicRelics: false,
+        allMythicalRelics: false,
+        biggestMultiplierTier: null,
+        totalAchievementsEarned: alreadyEarned.size
+      }
+
+      const firstPass = checkAchievements(stats, alreadyEarned)
+      const projectedTotal = alreadyEarned.size + firstPass.length
+
+      const statsPass2 = {
+        ...stats,
+        totalAchievementsEarned: projectedTotal
+      }
+
+      const collectorPass = checkAchievements(
+        statsPass2,
+        new Set([...alreadyEarned, ...firstPass.map((a) => a.code)])
+      )
+      const newAchievements = [...firstPass, ...collectorPass]
+
+      if (newAchievements.length > 0) {
+        const placeholders = newAchievements
+          .map((_, i) => `($1, $${i + 2}, ${Date.now()})`)
+          .join(', ')
+
+        await pool.query(
+          `INSERT INTO user_achievements (user_id, achievement_code, earned_at)
+            VALUES ${placeholders}
+            ON CONFLICT DO NOTHING`,
+          [row.user_id, ...newAchievements.map((a) => a.code)]
+        )
+
+        await pool.query(
+          `UPDATE users SET total_achievements = total_achievements + $1 WHERE user_id = $2`,
+          [newAchievements.length, row.user_id]
+        )
+
+        for (const achievement of newAchievements) {
+          broadcast(
+            'achievement_unlocked',
+            JSON.stringify({
+              userId: row.user_id,
+              code: achievement.code,
+              name: achievement.name,
+              icon: achievement.icon,
+              rarity: achievement.rarity,
+              category: achievement.category
+            })
+          )
+        }
+      }
 
       broadcast(
         'prediction_result',
@@ -433,7 +541,6 @@ export const resolvePrediction = async (
       )
 
       tryTriggerFlashEventForUser(row.user_id, broadcast)
-
       // Festival trigger check - runs after flash trigger to avoid double-lockout race
       checkAndTriggerFestival(
         row.user_id,
@@ -445,7 +552,7 @@ export const resolvePrediction = async (
           flashActive,
           flashJustEnded: flashJustEndedFlag,
           winStreakAfter: streakAfter,
-          totalMultiplier
+          totalMultiplier: combinedMult
         },
         broadcast
       )
@@ -467,7 +574,6 @@ export const getPaginatedUserPredictions = async (
   sort: 'recent' | 'wins' | 'multipliers' = 'recent'
 ) => {
   const offset = (page - 1) * limit
-
   // Build separate queries per sort mode to avoid dynamic SQL injection issues
   let dataQuery: string
   let countQuery: string
@@ -476,7 +582,7 @@ export const getPaginatedUserPredictions = async (
 
   if (sort === 'wins') {
     dataQuery = `
-      SELECT 
+      SELECT
         p.id,
         p.game_id          AS "gameId",
         p.pick,
@@ -489,12 +595,7 @@ export const getPaginatedUserPredictions = async (
         p.flash_multiplier AS "flashMult",
         p.streak_multiplier AS "streakMultiplier",
         p.created_at       AS "createdAt",
-        m.player_a_name,
-        m.player_a_played,
-        m.player_b_name,
-        m.player_b_played,
-        m.time,
-        m.type
+        m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
       FROM predictions p
       LEFT JOIN matches m ON p.game_id = m.game_id
       WHERE p.user_id = $1 AND p.result = 'WIN'
@@ -503,7 +604,7 @@ export const getPaginatedUserPredictions = async (
     countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN'`
   } else if (sort === 'multipliers') {
     dataQuery = `
-      SELECT 
+      SELECT
         p.id,
         p.game_id          AS "gameId",
         p.pick,
@@ -515,12 +616,7 @@ export const getPaginatedUserPredictions = async (
         p.flash_event_type AS "flashEventType",
         p.flash_multiplier AS "flashMult",
         p.created_at       AS "createdAt",
-        m.player_a_name,
-        m.player_a_played,
-        m.player_b_name,
-        m.player_b_played,
-        m.time,
-        m.type
+        m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
       FROM predictions p
       LEFT JOIN matches m ON p.game_id = m.game_id
       WHERE p.user_id = $1 AND p.result = 'WIN' AND (p.bonus_multiplier > 0 OR p.flash_multiplier > 1)
@@ -529,7 +625,7 @@ export const getPaginatedUserPredictions = async (
     countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN' AND (bonus_multiplier > 0 OR flash_multiplier > 1)`
   } else {
     dataQuery = `
-      SELECT 
+      SELECT
         p.id,
         p.game_id          AS "gameId",
         p.pick,
@@ -541,12 +637,7 @@ export const getPaginatedUserPredictions = async (
         p.flash_event_type AS "flashEventType",
         p.flash_multiplier AS "flashMult",
         p.created_at       AS "createdAt",
-        m.player_a_name,
-        m.player_a_played,
-        m.player_b_name,
-        m.player_b_played,
-        m.time,
-        m.type
+        m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
       FROM predictions p
       LEFT JOIN matches m ON p.game_id = m.game_id
       WHERE p.user_id = $1 AND p.result IS NOT NULL
@@ -595,12 +686,10 @@ export const getPaginatedUserPredictions = async (
 }
 
 export const getUserStats = async (userId: string, shortId: string) => {
-  // Ensure the user exists and has their shortId synced before fetching stats
-  // This handles the "creation" side using the new 2-argument signature
   await getOrCreateUser(userId, shortId)
 
   const result = await pool.query(
-    `SELECT 
+    `SELECT
         u.points,
         u.peak_points,
         u.daily_peak,
@@ -610,20 +699,16 @@ export const getUserStats = async (userId: string, shortId: string) => {
         u.current_win_streak,
         u.max_win_streak,
         u.bonus_pity_count,
-        u.current_win_streak,
         u.total_pities_earned,
         u.joined_date,
-        COALESCE(p_stats.total, 0) as total,
-        COALESCE(p_stats.wins, 0) as wins,
-        COALESCE(p_stats.losses, 0) as losses,
+        u.wins,   -- Cached total wins from users table
+        u.losses, -- Cached total losses from users table
         COALESCE(p_stats.total_gain, 0) as total_gain
       FROM users u
       LEFT JOIN (
-        SELECT 
+        -- We only need the SUM from here now, making this much faster
+        SELECT
             user_id,
-            COUNT(*) AS total,
-            COUNT(*) FILTER (WHERE result = 'WIN') AS wins,
-            COUNT(*) FILTER (WHERE result = 'LOSE') AS losses,
             SUM(gain_loss) FILTER (WHERE gain_loss > 0) AS total_gain
         FROM predictions
         WHERE result IS NOT NULL
@@ -635,7 +720,6 @@ export const getUserStats = async (userId: string, shortId: string) => {
 
   const row = result.rows[0]
 
-  // Fallback if the query somehow fails after creation
   if (!row) {
     return {
       total: 0,
@@ -658,14 +742,17 @@ export const getUserStats = async (userId: string, shortId: string) => {
     }
   }
 
-  const total = Number(row.total)
-  const wins = Number(row.wins)
+  const wins = Number(row.wins || 0)
+  const losses = Number(row.losses || 0)
+
+  const total = wins + losses
+
   const totalGain = row.total_gain.toString()
 
   return {
     total,
     wins,
-    losses: Number(row.losses),
+    losses,
     winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
     totalGain: totalGain,
     points: row.points.toString(),
@@ -682,7 +769,6 @@ export const getUserStats = async (userId: string, shortId: string) => {
     avgReturn: total > 0 ? (BigInt(totalGain) / BigInt(total)).toString() : '0'
   }
 }
-
 export const getGlobalBettingStats = async () => {
   const result = await pool.query(
     `SELECT

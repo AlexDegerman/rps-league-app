@@ -2,7 +2,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest'
 import LeaderboardPage from '@/app/leaderboard/page'
 import * as api from '@/lib/api'
-import * as user from '@/lib/user'
 import { useSearchParams } from 'next/navigation'
 
 const mockReplace = vi.fn()
@@ -14,16 +13,22 @@ vi.mock('next/navigation', () => ({
 }))
 
 vi.mock('@/lib/api', () => ({
-  fetchUnifiedLeaderboard: vi.fn()
+  fetchUnifiedLeaderboard: vi.fn(),
+  fetchAchievementsBulkBadges: vi.fn()
 }))
 
-vi.mock('@/lib/user', () => ({
-  getUserId: vi.fn()
+vi.mock('../stores/userStore', () => ({
+  useUserStore: vi.fn(() => ({
+    shortId: 'my-short-id',
+    myBadges: [],
+    showLinkedinBadge: false
+  }))
 }))
 
 const mockPredictors = [
   {
     userId: 'user-1',
+    shortId: 'alice-short',
     nickname: 'Alice',
     points: 1000,
     peakPoints: 1100,
@@ -34,6 +39,7 @@ const mockPredictors = [
   },
   {
     userId: 'my-id',
+    shortId: 'my-short-id',
     nickname: 'Me',
     points: 500,
     peakPoints: 600,
@@ -47,8 +53,8 @@ const mockPredictors = [
 describe('LeaderboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    ;(user.getUserId as Mock).mockReturnValue('my-id')
     ;(api.fetchUnifiedLeaderboard as Mock).mockResolvedValue(mockPredictors)
+    ;(api.fetchAchievementsBulkBadges as Mock).mockResolvedValue({})
     ;(useSearchParams as Mock).mockReturnValue(new URLSearchParams())
   })
 

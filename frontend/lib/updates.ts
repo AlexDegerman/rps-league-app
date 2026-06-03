@@ -6,6 +6,19 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '1.12',
+    label: 'The Achievement Update',
+    notes: [
+      'Global Achievement Codex: Over 70 unique accomplishments across 12 categories, rewarding everything from massive win streaks to specialized Flash Event mastery.',
+      'Badge Showcase: Customize your public identity by choosing your Top 5 badges to display on your profile and the global leaderboard.',
+      'Goal Telemetry: Locked achievements now display high-contrast requirements and real-time progress bars showing exactly how close you are to the next unlock.',
+      'Tiered Upgrading: Higher rarity badges now automatically replace lower-tier versions in your collection to keep your showcase focused on your greatest hits.',
+      'Category Hub: Navigate the vast codex easily with a new horizontal category ribbon designed for fast swiping and filtered viewing on mobile devices.',
+      'Achievements Leaderboard: Compete for the title of "Grand Archivist" in a new leaderboard tab that ranks players by their total achievement collection.',
+      'Rarity Styling: Experience a completely overhauled visual system where every achievement rarity features unique colors, borders, and animated auras.'
+    ]
+  },
+  {
     version: '1.11',
     label: 'The Festival Update',
     notes: [

@@ -2,6 +2,18 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [1.12] - The Achievement Update
+
+### Added
+- **Global Achievement Codex:** A massive expansion featuring over 70 unique achievements categorized into 12 distinct tracks, including Combat, Momentum, Dimensional Scale, and dedicated tracks for every Flash Event theme.
+- **Dynamic Badge Progression:** Badges now feature a tiered hierarchy from Common to Mythical. Earning a higher-tier achievement automatically upgrades your previous badge, ensuring your profile always showcases your peak performance.
+- **Showcase Selection:** Users can now select up to 5 earned badges to display on their public identity. This selection is mirrored on the global leaderboard, allowing players to curate their most prestigious accomplishments.
+- **Live Progress Telemetry:** All unearned achievements now feature a "Goal Progress" tracker. Countable objectives (such as total wins or festival participation) display real-time numerical progress bars, while milestones provide clear binary requirements.
+- **Horizontal Category Navigation:** The achievement interface has been redesigned with a mobile-first horizontal scroll ribbon. This allows for rapid jumping between progression tracks like "Multiplier Madness" or "The Reliquary" without vertical fatigue.
+- **Achievements Leaderboard:** A new global ranking system that tracks the total collection size of every predictor. Collection counts are cached for instant standings updates, allowing you to see where you rank among the world's top collectors.
+- **Rarity Visual System:** Achievement cards and badges are now styled by rarity. Mythical achievements feature distinct red auras and animations, while the ultra-rare Rainbow rarity provides a unique "Oil Slick" visual effect reserved for seasonal peaks.
+- **Social Badge Integration:** The LinkedIn profile badge has been integrated into the identity system, allowing it to be toggled on as a dedicated social slot that counts toward your total badge display limit.
+
 ## [1.11] - The Festival Update
 
 ### Added

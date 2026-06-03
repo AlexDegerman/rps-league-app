@@ -16,6 +16,17 @@ vi.mock('./flashEventService.js', () => ({
   tryTriggerFlashEventForUser: vi.fn()
 }))
 
+vi.mock('./festivalService.js', () => ({
+  checkAndTriggerFestival: vi.fn(),
+  getGuaranteedBonusRemaining: vi.fn(() => 0),
+  consumeGuaranteedBonus: vi.fn(),
+  getActiveFestival: vi.fn(() => null)
+}))
+
+vi.mock('./achievementChecker.js', () => ({
+  checkAchievements: vi.fn(() => [])
+}))
+
 const mockQuery = vi.mocked(pool.query)
 
 const makeRow = (overrides = {}) => ({
@@ -28,8 +39,29 @@ const makeRow = (overrides = {}) => ({
   total_bets: '10',
   bonus_pity_count: '0',
   result: null,
+  current_win_streak: '0',
+  player_a_name: 'Winner',
+  player_b_name: 'Loser',
+  bet_against_oracle: false,
   ...overrides
 })
+
+const mockUserStatsRow = {
+  wins: '0',
+  max_win_streak: '0',
+  laps: '0',
+  points: '500000',
+  biggest_match_mult: '0',
+  total_pities_earned: '0',
+  lunar_events_caught: '0',
+  electric_events_caught: '0',
+  hellfire_events_caught: '0',
+  cards_events_caught: '0',
+  bet_against_oracle_count: '0',
+  oracle_max_streak: '0',
+  festivals_triggered: '0',
+  festivals_participated: '0'
+}
 
 describe('Prediction Service', () => {
   beforeEach(() => vi.clearAllMocks())
@@ -59,6 +91,10 @@ describe('Prediction Service', () => {
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
     // UPDATE users
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+    // SELECT users for achievements
+    mockQuery.mockResolvedValueOnce(mockDbResponse([mockUserStatsRow]))
+    // SELECT user_achievements
+    mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
     await predictionService.resolvePrediction('g1', 'Winner', broadcastMock)
 
@@ -80,6 +116,8 @@ describe('Prediction Service', () => {
       mockDbResponse([makeRow({ pick: 'Loser', current_points: '120000' })])
     )
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+    mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+    mockQuery.mockResolvedValueOnce(mockDbResponse([mockUserStatsRow]))
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
     await predictionService.resolvePrediction('g1', 'Winner', broadcastMock)

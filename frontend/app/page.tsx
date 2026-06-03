@@ -12,7 +12,8 @@ import {
   fetchGlobalFlashState,
   fetchIdleEligibility,
   fetchUserFlashState,
-  fetchFestivalState
+  fetchFestivalState,
+  postFestivalParticipated
 } from '@/lib/api'
 import MatchList from '@/components/MatchList'
 import PendingMatchCard from '@/components/PendingMatchCard'
@@ -56,6 +57,7 @@ import { useIdleBet } from '@/hooks/useIdleBet'
 import IdleBetControls from '@/components/IdleBetControls'
 import FestivalTicker from '@/components/FestivalTicker'
 import GlobalTickerWrapper from '@/components/GlobalTickerWrapper'
+import AchievementToast from '@/components/AchievementToast'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -580,6 +582,9 @@ export default function HomePage() {
 
     es.addEventListener('festival_event', (event: MessageEvent) => {
       const data: FestivalSSEData = JSON.parse(event.data)
+      const { userId } = getOrCreateUser()
+      // Track participation for achievement counting
+      postFestivalParticipated(userId).catch(() => {})
       const { activeFlashEvent, setFlashExpiresAt } = useGameStore.getState()
 
       const clientEndsAt = Date.now() + data.durationMs
@@ -611,6 +616,21 @@ export default function HomePage() {
         accentColor: FESTIVAL_COLORS[data.type] ?? '#a855f7',
         durationMs: 5000
       })
+    })
+
+    es.addEventListener('achievement_unlocked', (event) => {
+      const data = JSON.parse(event.data)
+      const { userId } = getOrCreateUser()
+      if (data.userId !== userId) return
+
+      useGameStore.getState().pushAchievement({
+        code: data.code,
+        name: data.name,
+        icon: data.icon,
+        rarity: data.rarity
+      })
+
+      useUserStore.getState().refreshBadges()
     })
 
     es.onerror = () => {
@@ -726,6 +746,7 @@ export default function HomePage() {
           confettiType={resultAnim?.confettiType ?? 'normal'}
           show={resultAnim?.win === true}
         />
+        <AchievementToast />
         {showAscensionPrompt && (
           <AscensionModal
             laps={laps}

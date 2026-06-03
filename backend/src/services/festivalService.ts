@@ -1,5 +1,10 @@
+import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
-import { clearAllFlashEvents, getRandomFlashType, refillAllFlashEvents } from './flashEventService.js'
+import {
+  clearAllFlashEvents,
+  getRandomFlashType,
+  refillAllFlashEvents
+} from './flashEventService.js'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,20 +31,20 @@ type Broadcast = (event: string, data: string) => void
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const FESTIVAL_DURATIONS_MS: Record<FestivalType, number | null> = {
-  SPARK: 45_000, // 45 sec
-  GHOST: 60_000, // 1 min
-  SAFEGUARD: 60_000, // 1 min
-  RESONANCE: 40_000, // 40 sec
-  SURGE: 60_000, // 1 min
-  VAULT: 120_000, // 2 min
-  FEVER: 30_000, // 30 sec
-  SANGUINE: 15_000 // 15 sec
+  SPARK: 45_000,
+  GHOST: 60_000,
+  SAFEGUARD: 60_000,
+  RESONANCE: 40_000,
+  SURGE: 60_000,
+  VAULT: 120_000,
+  FEVER: 30_000,
+  SANGUINE: 15_000
 }
 
-const LOCKOUT_MS = 5 * 60 * 1000 // 5 minutes post-festival
-const DEMO_FESTIVAL_MIN_MS = 18 * 60 * 1000 // 18 minutes
-const DEMO_FESTIVAL_MAX_MS = 24 * 60 * 1000 // 24 minutes
-const PLAYER_FESTIVAL_QUIET_MS = 10 * 60 * 1000 // 10 min quiet window after player festival
+const LOCKOUT_MS = 5 * 60 * 1000
+const DEMO_FESTIVAL_MIN_MS = 18 * 60 * 1000
+const DEMO_FESTIVAL_MAX_MS = 24 * 60 * 1000
+const PLAYER_FESTIVAL_QUIET_MS = 10 * 60 * 1000
 
 const PLAYER_TRIGGER_PREFIXES = [
   '{user} has initiated the',
@@ -69,7 +74,7 @@ const DEMO_FESTIVAL_WEIGHTS: { type: FestivalType; weight: number }[] = [
   { type: 'FEVER', weight: 18 },
   { type: 'GHOST', weight: 14 },
   { type: 'SAFEGUARD', weight: 8 },
-  //{ type: 'VAULT', weight: 5 }, relics unimplemented
+  // { type: 'VAULT', weight: 5 }, // relics unimplemented
   { type: 'SURGE', weight: 2 },
   { type: 'SANGUINE', weight: 1 }
 ]
@@ -84,7 +89,6 @@ const pickDemoFestival = (): FestivalType => {
   return DEMO_FESTIVAL_WEIGHTS[DEMO_FESTIVAL_WEIGHTS.length - 1]!.type
 }
 
-
 // ─── Module State ─────────────────────────────────────────────────────────────
 
 let _activeFestival: FestivalState | null = null
@@ -92,11 +96,10 @@ let _lockoutUntil: number = 0
 let _lastPlayerFestivalAt: number = 0
 let _demoFestivalTimer: ReturnType<typeof setTimeout> | null = null
 
-// Streak tracking
 const _userBonusStreak = new Map<string, number>()
 const _userFlashStreak = new Map<string, number>()
 const _userLossStreak = new Map<string, number>()
-const _userGuaranteedBonus = new Map<string, number>() // Used for Spark streak rewards
+const _userGuaranteedBonus = new Map<string, number>()
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -121,7 +124,6 @@ export const buildFestivalBroadcastMessage = (
 
 export const getActiveFestival = (): FestivalState | null => {
   if (!_activeFestival) return null
-
   if (Date.now() > _activeFestival.endsAt) {
     logger.info('Festival expired', { type: _activeFestival.type })
     _lockoutUntil = Date.now() + LOCKOUT_MS
@@ -135,49 +137,51 @@ export const getFestivalLockoutRemaining = (): number =>
   Math.max(0, _lockoutUntil - Date.now())
 
 export const isFestivalLocked = (): boolean => {
-  getActiveFestival() // Clears if expired
+  getActiveFestival()
   return _activeFestival !== null || Date.now() < _lockoutUntil
 }
 
 // ─── Festival Launch ──────────────────────────────────────────────────────────
 
+interface LaunchMeta {
+  isDemo?: boolean
+  streakTrigger?: boolean
+  triggerUserId?: string
+}
+
 const launchFestival = (
   type: FestivalType,
   triggeredBy: string,
   broadcast: Broadcast,
-  meta?: { streakTrigger?: boolean; triggerUserId?: string; isDemo?: boolean }
+  meta: LaunchMeta = {}
 ): boolean => {
   if (isFestivalLocked()) return false
 
-const isDemo = meta?.isDemo ?? false
-const now = Date.now()
-const durationMs = FESTIVAL_DURATIONS_MS[type] ?? 0
+  const isDemo = meta.isDemo ?? false
+  const now = Date.now()
+  const durationMs = FESTIVAL_DURATIONS_MS[type] ?? 0
 
-const newState: FestivalState = {
-  type,
-  startedAt: now,
-  endsAt: now + durationMs,
-  triggeredBy
-}
-
-if (type === 'SPARK') {
-  const randomFlash = getRandomFlashType()
-
-  refillAllFlashEvents(randomFlash.type)
-
-  newState.flashType = randomFlash.type
-
-  setTimeout(() => {
-    clearAllFlashEvents()
-  }, durationMs)
-
-  newState.flashType = randomFlash.type
-
-  if (meta?.streakTrigger && meta.triggerUserId) {
-    _userGuaranteedBonus.set(meta.triggerUserId, 3)
-    logger.info('Spark streak bonus granted', { userId: meta.triggerUserId })
+  const newState: FestivalState = {
+    type,
+    startedAt: now,
+    endsAt: now + durationMs,
+    triggeredBy
   }
-}
+
+  if (type === 'SPARK') {
+    const randomFlash = getRandomFlashType()
+    refillAllFlashEvents(randomFlash.type)
+    newState.flashType = randomFlash.type
+
+    setTimeout(() => {
+      clearAllFlashEvents()
+    }, durationMs)
+
+    if (meta.streakTrigger && meta.triggerUserId) {
+      _userGuaranteedBonus.set(meta.triggerUserId, 3)
+      logger.info('Spark streak bonus granted', { userId: meta.triggerUserId })
+    }
+  }
 
   _activeFestival = newState
 
@@ -205,6 +209,21 @@ if (type === 'SPARK') {
 
   if (type === 'SPARK') {
     _lockoutUntil = newState.endsAt + LOCKOUT_MS
+  }
+
+  // Increment festivals_triggered for real player-triggered festivals only
+  if (!isDemo && meta.triggerUserId) {
+    pool
+      .query(
+        `UPDATE users SET festivals_triggered = festivals_triggered + 1 WHERE user_id = $1`,
+        [meta.triggerUserId]
+      )
+      .catch((err) =>
+        logger.error('festivals_triggered increment failed', err, {
+          userId: meta.triggerUserId,
+          type
+        })
+      )
   }
 
   return true
@@ -299,25 +318,40 @@ export const checkAndTriggerFestival = (
     resetFlashStreakForUser(userId)
   }
 
-  // SANGUINE
+  // SANGUINE: 4-loss streak
   if (!isWin && getLossStreakForUser(userId) >= 4) {
     resetLossStreakForUser(userId)
-    if (launchFestival('SANGUINE', nickname, broadcast, { isDemo: false }))
+    if (
+      launchFestival('SANGUINE', nickname, broadcast, {
+        isDemo: false,
+        triggerUserId: userId
+      })
+    )
       return
   }
 
-  // FEVER
+  // FEVER: 5-win streak (20%) or 8-win streak (100%)
   if (isWin) {
     if (winStreakAfter >= 8) {
-      if (launchFestival('FEVER', nickname, broadcast, { isDemo: false }))
+      if (
+        launchFestival('FEVER', nickname, broadcast, {
+          isDemo: false,
+          triggerUserId: userId
+        })
+      )
         return
     } else if (winStreakAfter >= 5 && Math.random() < 0.2) {
-      if (launchFestival('FEVER', nickname, broadcast, { isDemo: false }))
+      if (
+        launchFestival('FEVER', nickname, broadcast, {
+          isDemo: false,
+          triggerUserId: userId
+        })
+      )
         return
     }
   }
 
-  // SPARK
+  // SPARK: 2 flash events in a row OR LEGENDARY/MYTHICAL during flash
   if (getFlashStreakForUser(userId) >= 2) {
     resetFlashStreakForUser(userId)
     if (
@@ -346,32 +380,64 @@ export const checkAndTriggerFestival = (
       return
   }
 
-  // GHOST
+  // GHOST: 30x+ (40%) or 60x+ (100%)
   if (isWin && totalMultiplier >= 60) {
-    if (launchFestival('GHOST', nickname, broadcast, { isDemo: false })) return
+    if (
+      launchFestival('GHOST', nickname, broadcast, {
+        isDemo: false,
+        triggerUserId: userId
+      })
+    )
+      return
   } else if (isWin && totalMultiplier >= 30 && Math.random() < 0.4) {
-    if (launchFestival('GHOST', nickname, broadcast, { isDemo: false })) return
+    if (
+      launchFestival('GHOST', nickname, broadcast, {
+        isDemo: false,
+        triggerUserId: userId
+      })
+    )
+      return
   }
-  // RESONANCE
+
+  // RESONANCE: 3 tiered bonuses in a row OR LEGENDARY (30%)
   const bonusStreak = getBonusStreakForUser(userId)
   if (bonusStreak >= 3) {
     resetBonusStreakForUser(userId)
-    if (launchFestival('RESONANCE', nickname, broadcast, { isDemo: false }))
+    if (
+      launchFestival('RESONANCE', nickname, broadcast, {
+        isDemo: false,
+        triggerUserId: userId
+      })
+    )
       return
   }
   if (bonusTier === 'LEGENDARY' && Math.random() < 0.3) {
     resetBonusStreakForUser(userId)
-    if (launchFestival('RESONANCE', nickname, broadcast, { isDemo: false }))
+    if (
+      launchFestival('RESONANCE', nickname, broadcast, {
+        isDemo: false,
+        triggerUserId: userId
+      })
+    )
       return
   }
 }
 
+/**
+ * Called from ascend route when a user completes a lap.
+ * triggerUserId credited for festivals_triggered achievement.
+ */
 export const triggerSurgeFestival = (
   nickname: string,
+  triggerUserId: string,
   broadcast: Broadcast
-): boolean => launchFestival('SURGE', nickname, broadcast, { isDemo: false })
+): boolean =>
+  launchFestival('SURGE', nickname, broadcast, {
+    isDemo: false,
+    triggerUserId
+  })
 
-// ─── Scheduler ────────────────────────────────────────────────────────────────
+// ─── Demo Scheduler ───────────────────────────────────────────────────────────
 
 const scheduleDemoFestival = (broadcast: Broadcast): void => {
   const delay =

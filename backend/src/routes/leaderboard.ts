@@ -110,6 +110,46 @@ router.get('/unified', async (req, res) => {
         }))
       )
     }
+    if (tab === 'achievements') {
+      const result = await pool.query(`
+        SELECT
+          u.user_id,
+          u.short_id,
+          u.nickname,
+          u.points,
+          u.peak_points,
+          u.laps,
+          u.linkedin_url,
+          u.show_linkedin_badge,
+          u.point_style_preference,
+          u.total_achievements  -- Use the new cached column
+        FROM users u
+        WHERE u.total_achievements > 0
+        ORDER BY u.total_achievements DESC, u.nickname ASC
+        LIMIT 100
+      `)
+
+      return res.json(
+        result.rows.map((row) => ({
+          userId: row.user_id,
+          shortId: row.short_id,
+          nickname: row.nickname,
+          points: row.points.toString(),
+          peakPoints: row.peak_points.toString(),
+          gained: '0',
+          wins: 0,
+          losses: 0,
+          winRate: 0,
+          laps: Number(row.laps),
+          fastestLapBets: null,
+          achievementCount: Number(row.total_achievements),
+          linkedinUrl: row.show_linkedin_badge
+            ? (row.linkedin_url ?? null)
+            : null,
+          pointStylePreference: row.point_style_preference ?? null
+        }))
+      )
+    }
 
     const peakColumn =
       tab === 'daily'

@@ -12,10 +12,12 @@ import {
   updateNickname,
   handleRecoverProfile,
   updateStylePreference,
-  ascendUser
+  ascendUser,
+  fetchAchievementsBulkBadges
 } from '@/lib/api'
 import { logger } from '@/lib/logger'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
+import { BadgeData } from '@/types/rps'
 
 interface UserState {
   // Identity
@@ -25,6 +27,13 @@ interface UserState {
   isHydrated: boolean
   setDisplayNickname: (name: string) => void
   setIsHydrated: (v: boolean) => void
+  linkedinUrl: string | null
+  setLinkedinUrl: (url: string | null) => void
+  showLinkedinBadge: boolean
+  setShowLinkedinBadge: (v: boolean) => void
+  myBadges: BadgeData[]
+  setMyBadges: (b: BadgeData[]) => void
+  refreshBadges: () => Promise<void>
 
   // Balance & Betting
   points: bigint
@@ -86,10 +95,16 @@ export const useUserStore = create<UserState>((set, get) => ({
   fastestLapBets: null,
   stylePreference: null,
   allTimePeak: 200000n,
+  linkedinUrl: null,
+  showLinkedinBadge: true,
+  myBadges: [],
 
   // Setters - Identity
   setDisplayNickname: (name) => set({ displayNickname: name }),
   setIsHydrated: (v) => set({ isHydrated: v }),
+  setLinkedinUrl: (url) => set({ linkedinUrl: url }),
+  setShowLinkedinBadge: (v) => set({ showLinkedinBadge: v }),
+  setMyBadges: (b) => set({ myBadges: b }),
 
   // Setters - Balance
   setPoints: (p) => set({ points: p }),
@@ -120,6 +135,22 @@ export const useUserStore = create<UserState>((set, get) => ({
       )
   },
 
+  refreshBadges: async () => {
+    const { shortId } = get()
+    if (!shortId) return
+    try {
+      const res = await fetchAchievementsBulkBadges([shortId])
+      if (res && res[shortId]) {
+        set({ myBadges: res[shortId] })
+      }
+    } catch (err) {
+      logger.error(
+        'Failed to refresh badges in store',
+        err instanceof Error ? err : undefined
+      )
+    }
+  },
+
   // Actions - Init
   initUser: async () => {
     const user = getOrCreateUser()
@@ -131,6 +162,8 @@ export const useUserStore = create<UserState>((set, get) => ({
       displayNickname: user.nickname,
       isHydrated: true
     })
+
+    await get().refreshBadges()
 
     Sentry.setUser({ id: user.userId, username: user.nickname })
     Sentry.setTag('shortId', user.shortId)
@@ -166,6 +199,11 @@ export const useUserStore = create<UserState>((set, get) => ({
     })
 
     if (!data) return
+
+    set({
+      linkedinUrl: data.linkedinUrl || null,
+      showLinkedinBadge: data.showLinkedinBadge ?? true
+    })
 
     const newPoints = BigInt(data.points)
     const newPeak = BigInt(data.peakPoints)

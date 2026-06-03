@@ -287,10 +287,20 @@ function useTabFetchFn(userId: string | null, tab: Tab) {
   return useCallback(
     async (page: number) => {
       if (!userId) return { matches: [], total: 0, hasMore: false }
+
       const data = await fetchUserBetHistory(userId, page, tab)
+
+      if (!data) {
+        return { matches: [], total: 0, hasMore: false }
+      }
+
       const predMap = new Map<string, PredictionRecord>(
-        data.predictions.map((p: PredictionRecord) => [p.gameId, p])
+        (data.predictions as unknown as PredictionRecord[]).map((p) => [
+          p.gameId,
+          p
+        ])
       )
+
       const entries: BetHistoryEntry[] = data.matches.map((m: Match) => {
         const pred = predMap.get(m.gameId)
         return {
@@ -312,6 +322,7 @@ function useTabFetchFn(userId: string | null, tab: Tab) {
           playerBPlayed: m.playerB.played
         }
       })
+
       return {
         matches: entries as unknown as Match[],
         total: data.total,

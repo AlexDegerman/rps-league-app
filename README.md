@@ -39,6 +39,8 @@ Screenshots, gameplay recordings, and feature showcases.
 - [📋 Overview](#-overview)
 - [⚡ Ascension System](#-ascension-system)
 - [🌠 Flash Events](#-flash-events)
+- [👁️ Player Festivals](#️-player-festivals)
+- [🏆 Predictor Achievements](#-predictor-achievements)
 - [🌌 Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
 - [🔢 Global Number Formatting Engine](#-global-number-formatting-engine)
 - [📊 Competitive Analytics & Profiles](#-competitive-analytics--profiles)
@@ -224,6 +226,21 @@ The Oracle system also runs autonomous weighted festivals during low-concurrency
 </div>
 
 > 📋 **[View all Festival showcases →](./FESTIVALS.md)**
+
+---
+
+## 🏆 Predictor Achievements
+
+The Achievement Codex is a multi-tier progression system that tracks over 70 unique simulation milestones. From raw win volume and dimensional wealth to specialized Flash Event tracks and global Festival triggers, every interaction contributes to your public identity.
+
+Badges feature dynamic upgrading: earning a higher-rarity achievement automatically replaces the previous tier in your collection to keep your inventory clean. Predictors can curate their Top 5 earned badges to showcase on their public profile and the global leaderboard.
+
+<div>
+  <strong>Achievements System in Action</strong><br/>
+  <img src="./assets/achievements_demo.gif" width="220" />
+</div>
+
+> 📖 **[View the full Achievement Codex →](./ACHIEVEMENTS.md)**
 
 ---
 

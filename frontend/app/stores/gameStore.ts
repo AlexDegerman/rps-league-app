@@ -5,7 +5,8 @@ import type {
   PredictionRecord,
   FestivalModeKey,
   VisualMode,
-  EventTheme
+  EventTheme,
+  AchievementNotif
 } from '@/types/rps'
 
 interface GameState {
@@ -58,6 +59,11 @@ interface GameState {
   setServerOffset: (offset: number) => void
   now: number
   tickNow: () => void
+
+  // Achievement Toast Queuea
+  achievementQueue: AchievementNotif[]
+  pushAchievement: (a: AchievementNotif) => void
+  shiftAchievement: () => void
 }
 
 // Helper for consistent mapping
@@ -90,6 +96,7 @@ export const useGameStore = create<GameState>((set) => ({
   festivalEndsAt: null,
   festivalModeKey: null,
   flashExpiresAt: null,
+  achievementQueue: [],
 
   // Actions - Connection
   setBackendReady: (v) => set({ backendReady: v }),
@@ -224,5 +231,11 @@ export const useGameStore = create<GameState>((set) => ({
       }
 
       return { now: currentTime }
-    })
+    }),
+  // Actions - Achievement Toast
+  pushAchievement: (a) =>
+    set((s) => ({ achievementQueue: [...s.achievementQueue, a] })),
+  shiftAchievement: () =>
+    set((s) => ({ achievementQueue: s.achievementQueue.slice(1) })),
+
 }))

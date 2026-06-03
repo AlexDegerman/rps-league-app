@@ -7,7 +7,12 @@ import type {
   UserPointsData,
   Match,
   SinglePlayerStats,
-  PendingMatch
+  PendingMatch,
+  AchievementEntry,
+  AchievementStats,
+  BetHistoryEntry,
+  PlayerStats,
+  BadgeData
 } from '@/types/rps'
 import { logger } from '@/lib/logger'
 
@@ -63,23 +68,30 @@ export async function updateNickname(
   newNickname: string,
   shortId: string
 ) {
-  return fetch(`${API_BASE}/api/users/update-nickname`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, nickname: newNickname, shortId })
-  })
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/users/update-nickname`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, nickname: newNickname, shortId })
+    })
+  )
 }
 
-export const fetchUserBetHistory = async (
+export async function fetchUserBetHistory(
   userId: string,
   page: number,
   sort: 'recent' | 'wins' | 'multipliers' = 'recent'
-) => {
-  const res = await fetch(
-    `${API_BASE}/api/predictions/user/${userId}/history?page=${page}&limit=20&sort=${sort}`
+) {
+  return handleResponse<{
+    matches: Match[]
+    predictions: BetHistoryEntry[]
+    total: number
+    hasMore: boolean
+  }>(
+    fetch(
+      `${API_BASE}/api/predictions/user/${userId}/history?page=${page}&limit=20&sort=${sort}`
+    )
   )
-  if (!res.ok) throw new Error('Failed to fetch bet history')
-  return res.json()
 }
 
 export async function updateLinkedin(
@@ -87,31 +99,35 @@ export async function updateLinkedin(
   linkedinUrl: string | null,
   showLinkedinBadge: boolean
 ) {
-  return fetch(`${API_BASE}/api/users/update-linkedin`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ shortId, linkedinUrl, showLinkedinBadge })
-  })
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/users/update-linkedin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shortId, linkedinUrl, showLinkedinBadge })
+    })
+  )
 }
 
-export const ascendUser = async (userId: string, shortId: string) => {
-  const res = await fetch(`${API_BASE}/api/users/ascend`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId, shortId })
-  })
-  if (!res.ok) return null
-  return res.json() as Promise<{
+export async function ascendUser(userId: string, shortId: string) {
+  return handleResponse<{
     success: boolean
     laps: number
     fastestLapBets: number
-  }>
+  }>(
+    fetch(`${API_BASE}/api/users/ascend`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, shortId })
+    })
+  )
 }
 
 /* --- AUTH & RECOVERY --- */
 
 export async function fetchRecoveryCode(userId: string) {
-  return fetch(`${API_BASE}/api/users/recovery/${userId}`)
+  return handleResponse<{ recoveryCode: string }>(
+    fetch(`${API_BASE}/api/users/recovery/${userId}`)
+  )
 }
 
 export async function handleRecoverProfile(recoveryCode: string) {
@@ -137,14 +153,18 @@ export async function postPrediction(
   },
   signal?: AbortSignal
 ): Promise<{ ok: boolean; data: PredictionResponse | null }> {
-  const res = await fetch(`${API_BASE}/api/predictions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
-    signal
-  })
-  const data = await res.json()
-  return { ok: res.ok, data: data as PredictionResponse }
+  try {
+    const res = await fetch(`${API_BASE}/api/predictions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+      signal
+    })
+    const data = await res.json()
+    return { ok: res.ok, data: data as PredictionResponse }
+  } catch {
+    return { ok: false, data: null }
+  }
 }
 
 export async function fetchPendingMatches() {
@@ -158,54 +178,46 @@ export async function fetchLatestMatches(page: number, limit = 20) {
     fetch(`${API_BASE}/api/matches?page=${page}&limit=${limit}`)
   )
 }
-export const fetchMatchesByDate = async (
+
+export async function fetchMatchesByDate(
   date: string,
   page: number,
   limit = 20
-) => {
-  const res = await fetch(
-    `${API_BASE}/api/matches/by-date?date=${date}&page=${page}&limit=${limit}`
+) {
+  return handleResponse<{ matches: Match[]; total: number }>(
+    fetch(
+      `${API_BASE}/api/matches/by-date?date=${date}&page=${page}&limit=${limit}`
+    )
   )
-  if (!res.ok) throw new Error('Failed to fetch matches by date')
-  return res.json()
 }
 
-export const fetchPlayerNames = async (): Promise<string[]> => {
-  const res = await fetch(`${API_BASE}/api/matches/players`)
-  if (!res.ok) throw new Error('Failed to fetch player names')
-  return res.json()
+export async function fetchPlayerNames() {
+  return handleResponse<string[]>(fetch(`${API_BASE}/api/matches/players`))
 }
 
-export const fetchMatchesByPlayer = async (
+export async function fetchMatchesByPlayer(
   name: string,
   page: number,
   limit = 20
-) => {
-  const res = await fetch(
-    `${API_BASE}/api/matches/by-player?name=${encodeURIComponent(name)}&page=${page}&limit=${limit}`
+) {
+  return handleResponse<{ matches: Match[]; total: number }>(
+    fetch(
+      `${API_BASE}/api/matches/by-player?name=${encodeURIComponent(name)}&page=${page}&limit=${limit}`
+    )
   )
-  if (!res.ok) throw new Error('Failed to fetch matches by player')
-  return res.json()
 }
 
 /* --- LEADERBOARDS & STATS --- */
 
-export const fetchHistoricalLeaderboard = async (
-  startDate?: string,
-  endDate?: string
-) => {
+export async function fetchHistoricalLeaderboard(startDate?: string, endDate?: string) {
   const params = new URLSearchParams()
   if (startDate) params.set('startDate', startDate)
   if (endDate) params.set('endDate', endDate)
-  const res = await fetch(`${API_BASE}/api/leaderboard/historical?${params}`)
-  if (!res.ok) throw new Error('Failed to fetch historical leaderboard')
-  return res.json()
+  return handleResponse<PlayerStats[]>(fetch(`${API_BASE}/api/leaderboard/historical?${params}`))
 }
 
-export const fetchTodayLeaderboard = async () => {
-  const res = await fetch(`${API_BASE}/api/leaderboard/today`)
-  if (!res.ok) throw new Error('Failed to fetch today leaderboard')
-  return res.json()
+export async function fetchTodayLeaderboard() {
+  return handleResponse<PlayerStats[]>(fetch(`${API_BASE}/api/leaderboard/today`))
 }
 
 export async function fetchUnifiedLeaderboard(
@@ -214,15 +226,10 @@ export async function fetchUnifiedLeaderboard(
   dir = 'desc'
 ): Promise<LeaderboardEntry[]> {
   const params = new URLSearchParams({ tab, sort, dir })
-
   const result = await handleResponse<LeaderboardEntry[]>(
     fetch(`${API_BASE}/api/leaderboard/unified?${params}`)
   )
-
-  if (!result) {
-    throw new Error('Could not fetch leaderboard data')
-  }
-
+  if (!result) throw new Error('Could not fetch leaderboard data')
   return result
 }
 
@@ -264,12 +271,7 @@ export async function fetchFestivalState() {
   }>(fetch(`${API_BASE}/api/live/festival-state`))
 }
 
-export async function submitFeedback(
-  formData: FormData
-): Promise<
-  | { ok: true }
-  | { error: 'BANNED' | 'RATE_LIMITED' | 'CONNECTION_FAILED' | string }
-> {
+export async function submitFeedback(formData: FormData) {
   try {
     const res = await fetch(`${API_BASE}/api/feedback`, {
       method: 'POST',
@@ -287,37 +289,72 @@ export async function updateStylePreference(
   shortId: string,
   stylePreference: string | null
 ) {
-  return fetch(`${API_BASE}/api/users/style-preference`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ shortId, stylePreference })
-  })
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/users/style-preference`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shortId, stylePreference })
+    })
+  )
 }
 
 export async function fetchUserFlashState(userId: string) {
-  const r = await fetch(`${API_BASE}/api/live/flash-state?userId=${userId}`)
-  return r.ok ? r.json() : null
+  return handleResponse<{ type: string; betsRemaining: number }>(
+    fetch(`${API_BASE}/api/live/flash-state?userId=${userId}`)
+  )
 }
 
 export async function fetchGlobalFlashState() {
-  const r = await fetch(`${API_BASE}/api/live/flash-state`)
-  return r.ok ? r.json() : null
+  return handleResponse<{ type: string; betsRemaining: number }>(
+    fetch(`${API_BASE}/api/live/flash-state`)
+  )
 }
 
 export async function fetchOracleState(userId: string) {
-  const r = await fetch(`${API_BASE}/api/oracle?userId=${userId}`)
-  return r.ok ? r.json() : null
+  return handleResponse<{ side: 'left' | 'right'; used: boolean }>(
+    fetch(`${API_BASE}/api/oracle?userId=${userId}`)
+  )
 }
 
 export async function fetchIdleEligibility(userId: string) {
-  const r = await fetch(`${API_BASE}/api/users/idle-eligible/${userId}`)
-  return r.ok ? r.json() : null
+  return handleResponse<{ eligible: boolean }>(
+    fetch(`${API_BASE}/api/users/idle-eligible/${userId}`)
+  )
 }
 
 export async function postFestivalParticipated(userId: string) {
-  return fetch(`${API_BASE}/api/festivals/participated`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId })
-  }).catch(() => null)
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/festivals/participated`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    })
+  )
+}
+
+export async function fetchAchievementsBulkBadges(shortIds: string[]) {
+  return handleResponse<Record<string, BadgeData[]>>(
+    fetch(`${API_BASE}/api/achievements/badges-for-leaderboard`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shortIds })
+    })
+  )
+}
+export async function fetchUserAchievements(shortId: string) {
+  return handleResponse<{
+    achievements: AchievementEntry[]
+    stats: AchievementStats
+    displayedBadges: string[]
+  }>(fetch(`${API_BASE}/api/achievements/${shortId}`))
+}
+
+export async function updateUserBadges(shortId: string, badges: string[]) {
+  return handleResponse<{ displayedBadges: string[] }>(
+    fetch(`${API_BASE}/api/achievements/${shortId}/badges`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ badges })
+    })
+  )
 }

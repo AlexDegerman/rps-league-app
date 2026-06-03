@@ -4,16 +4,16 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import { fetchUnifiedLeaderboard } from '@/lib/api'
+import { fetchAchievementsBulkBadges, fetchUnifiedLeaderboard } from '@/lib/api'
 import GemIcon from '@/components/icons/GemIcon'
-import { getUserId } from '@/lib/user'
 import { formatPoints, getAmountColor, getDisplayTierClass } from '@/lib/format'
 import Link from 'next/link'
-import { LeaderboardEntry } from '@/types/rps'
+import { BadgeData, LeaderboardEntry } from '@/types/rps'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
 import { logger } from '@/lib/logger'
+import { useUserStore } from '../stores/userStore'
 
-type Tab = 'daily' | 'weekly' | 'alltime' | 'laps' | 'speedrun'
+type Tab = 'daily' | 'weekly' | 'alltime' | 'laps' | 'speedrun' | 'achievements'
 type SortKey =
   | 'points'
   | 'gained'
@@ -23,6 +23,7 @@ type SortKey =
   | 'winrate'
   | 'laps'
   | 'fastest'
+  | 'achievements'
 type SortDir = 'asc' | 'desc'
 
 const DEFAULT_SORT: Record<Tab, SortKey> = {
@@ -30,15 +31,17 @@ const DEFAULT_SORT: Record<Tab, SortKey> = {
   weekly: 'gained',
   alltime: 'peak',
   laps: 'laps',
-  speedrun: 'fastest'
+  speedrun: 'fastest',
+  achievements: 'achievements'
 }
 
 const TAB_LABELS: Record<Tab, string> = {
   daily: 'Daily',
   weekly: 'Weekly',
   alltime: 'All Time',
-  laps: 'Total Laps',
-  speedrun: 'Speedrun'
+  laps: 'Total',
+  speedrun: 'Speedrun',
+  achievements: 'Achievements'
 }
 
 const EMPTY_MESSAGES: Record<Tab, string> = {
@@ -46,10 +49,12 @@ const EMPTY_MESSAGES: Record<Tab, string> = {
   weekly: 'Season just started, be the first to claim the weekly crown!',
   alltime: 'No predictors yet, jump in and make history!',
   laps: 'No one has ascended yet. Be the first to reach 999 OVG.',
-  speedrun: 'No completed laps to rank yet.'
+  speedrun: 'No completed laps to rank yet.',
+  achievements: 'No achievements earned yet. Be the first.'
 }
 
 const isLapsTab = (t: Tab) => t === 'laps' || t === 'speedrun'
+const isAchievementsTab = (t: Tab) => t === 'achievements'
 
 function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
   if (!active) return <span className="text-gray-300 ml-1">↕</span>
@@ -73,13 +78,13 @@ function LeaderboardContent() {
     (searchParams.get('dir') as SortDir) || 'desc'
   )
   const [data, setData] = useState<LeaderboardEntry[]>([])
+  const [badgeMap, setBadgeMap] = useState<Record<string, BadgeData[]>>({})
   const [isLoading, setIsLoading] = useState(false)
-  const [myUserId, setMyUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    setMyUserId(getUserId())
-  }, [])
-
+  const {
+    shortId: myShortId,
+    myBadges,
+    showLinkedinBadge: myStoreShowLinkedin
+  } = useUserStore()
   const updateUrl = useCallback(
     (params: Record<string, string>) => {
       const newParams = new URLSearchParams(searchParams.toString())
@@ -92,12 +97,16 @@ function LeaderboardContent() {
   const load = useCallback(async (t: Tab, s: SortKey, d: SortDir) => {
     setIsLoading(true)
     try {
-      setData(await fetchUnifiedLeaderboard(t, s, d))
+      const entries = await fetchUnifiedLeaderboard(t, s, d)
+      setData(entries)
+
+      const shortIds = entries.map((e) => e.shortId)
+      const badges = await fetchAchievementsBulkBadges(shortIds)
+      if (badges) setBadgeMap(badges)
     } catch (err) {
       logger.error(
         'Failed to load leaderboard',
-        err instanceof Error ? err : undefined,
-        { tab: t, sort: s, dir: d }
+        err instanceof Error ? err : undefined
       )
     } finally {
       setIsLoading(false)
@@ -138,53 +147,91 @@ function LeaderboardContent() {
     </th>
   )
 
+  const isPointsCategory = ['daily', 'weekly', 'alltime'].includes(tab)
+  const isLapsCategory = ['laps', 'speedrun'].includes(tab)
+
   return (
     <div className="max-w-4xl mx-auto px-4">
-      <div className="flex gap-2 mb-4">
-        <button className="px-6 py-2 rounded font-bold text-xs uppercase bg-yellow-400 text-gray-900 shadow-sm">
+      {/* Main Mode Toggle */}
+      <div className="flex bg-gray-200/50 p-1 rounded-lg gap-1 mb-4 w-fit">
+        <button className="px-6 py-2 rounded-md font-bold text-xs uppercase bg-yellow-400 text-gray-900 shadow-sm">
           Predictors
         </button>
         <Link
           href="/leaderboard/players"
-          className="px-6 py-2 rounded font-bold text-xs uppercase border border-indigo-200 text-indigo-600 bg-white hover:bg-indigo-50 transition"
+          className="px-6 py-2 rounded-md font-bold text-xs uppercase text-gray-500 hover:text-indigo-600 transition"
         >
           Players
         </Link>
       </div>
 
       <div className="sticky top-16 z-40 bg-gray-100 pb-4">
-        {/* Row 1: standard tabs */}
-        <div className="flex gap-2 mb-1">
-          {(['daily', 'weekly', 'alltime'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => handleTab(t)}
-              className={`px-3 py-1.5 rounded font-bold text-[10px] uppercase transition ${
-                tab === t
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-600'
-              }`}
-            >
-              {TAB_LABELS[t]}
-            </button>
-          ))}
+        {/* Level 1: Main Category Pillars */}
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          <button
+            onClick={() => handleTab('daily')}
+            className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase transition border ${
+              isPointsCategory
+                ? 'bg-purple-600 text-white border-transparent shadow-sm'
+                : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            Points
+          </button>
+          <button
+            onClick={() => handleTab('laps')}
+            className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase transition border ${
+              isLapsCategory
+                ? 'bg-indigo-600 text-white border-transparent shadow-sm'
+                : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            Laps
+          </button>
+          <button
+            onClick={() => handleTab('achievements')}
+            className={`px-4 py-1.5 rounded-full font-black text-[10px] uppercase transition border ${
+              tab === 'achievements'
+                ? 'bg-yellow-500 text-white border-transparent shadow-sm'
+                : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            Achievements
+          </button>
         </div>
-        {/* Row 2: laps tabs */}
-        <div className="flex gap-2">
-          {(['laps', 'speedrun'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => handleTab(t)}
-              className={`px-3 py-1.5 rounded font-bold text-[10px] uppercase transition ${
-                tab === t
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-600'
-              }`}
-            >
-              {TAB_LABELS[t]}
-            </button>
-          ))}
-        </div>
+
+        {/* Level 2: Conditional Sub-Tabs */}
+        {(isPointsCategory || isLapsCategory) && (
+          <div className="flex gap-1 p-1 bg-gray-200/50 rounded-lg w-fit animate-in fade-in slide-in-from-top-1 duration-200">
+            {isPointsCategory
+              ? (['daily', 'weekly', 'alltime'] as Tab[]).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => handleTab(t)}
+                    className={`px-3 py-1 rounded-md font-bold text-[10px] uppercase transition ${
+                      tab === t
+                        ? 'bg-white text-purple-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {TAB_LABELS[t]}
+                  </button>
+                ))
+              : (['laps', 'speedrun'] as Tab[]).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => handleTab(t)}
+                    className={`px-3 py-1 rounded-md font-bold text-[10px] uppercase transition ${
+                      tab === t
+                        ? 'bg-white text-indigo-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {TAB_LABELS[t]}
+                  </button>
+                ))}
+          </div>
+        )}
       </div>
 
       <div className="pt-2">
@@ -230,6 +277,10 @@ function LeaderboardContent() {
                         'hidden min-[600px]:table-cell'
                       )}
                     </>
+                  ) : isAchievementsTab(tab) ? (
+                    <th className="px-3 py-3 text-right text-gray-400 font-bold text-xs uppercase hidden min-[600px]:table-cell">
+                      Achievements
+                    </th>
                   ) : (
                     <>
                       {th(
@@ -288,7 +339,7 @@ function LeaderboardContent() {
                   </tr>
                 ) : (
                   data.map((entry, index) => {
-                    const isMe = entry.userId === myUserId
+                    const isMe = entry.shortId === myShortId
                     const gainedBI = BigInt(entry.gained ?? '0')
 
                     return (
@@ -302,32 +353,40 @@ function LeaderboardContent() {
 
                         <td className="px-1 min-[600px]:px-3 py-3">
                           <div className="flex flex-col">
-                            <div className="flex items-center gap-2 flex-wrap">
+                            {/* Row 1: Nickname + YOU label */}
+                            <div className="flex items-center gap-2">
                               <Link
                                 href={`/profile/${entry.shortId}`}
-                                className={`font-medium transition hover:underline decoration-purple-400 underline-offset-4 text-current! ${
-                                  isMe
-                                    ? 'text-purple-600! font-bold'
-                                    : 'text-indigo-600 hover:text-indigo-800'
+                                className={`font-black transition hover:underline decoration-purple-400 underline-offset-4 ${
+                                  isMe ? 'text-purple-600' : 'text-gray-900'
                                 }`}
                               >
                                 {entry.nickname ?? entry.userId.slice(0, 8)}
                               </Link>
                               {isMe && (
-                                <span className="text-[10px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase">
+                                <span className="text-[9px] bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full font-black uppercase">
                                   YOU
                                 </span>
                               )}
-                              <IdentityBadges
-                                targetShortId={entry.shortId}
-                                linkedinUrl={entry.linkedinUrl}
-                                size="sm"
-                                disabledLinkedin={true}
-                              />
                             </div>
 
-                            {/* Mobile stats */}
-                            <div className="flex flex-col min-[600px]:hidden mt-2 gap-0.5 text-[10px]">
+                            {/* Row 2: Badge Cluster (Handles Dev check automatically) */}
+                            <IdentityBadges
+                              linkedinUrl={entry.linkedinUrl}
+                              showLinkedinBadge={
+                                isMe
+                                  ? myStoreShowLinkedin
+                                  : entry.showLinkedinBadge
+                              }
+                              badges={
+                                isMe ? myBadges : badgeMap[entry.shortId] || []
+                              }
+                              size="sm"
+                              targetShortId={entry.shortId}
+                            />
+
+                            {/* Mobile stats row */}
+                            <div className="flex flex-col min-[600px]:hidden mt-3 gap-0.5 text-[10px]">
                               {isLapsTab(tab) ? (
                                 <>
                                   <div className="flex gap-2 text-gray-400 font-bold uppercase tracking-wider">
@@ -350,10 +409,7 @@ function LeaderboardContent() {
                                       </div>
                                     )}
                                     <div
-                                      className={`w-14 font-bold ${getDisplayTierClass(
-                                        entry.points,
-                                        entry.pointStylePreference
-                                      )}`}
+                                      className={`w-14 font-bold ${getDisplayTierClass(entry.points, entry.pointStylePreference)}`}
                                     >
                                       {formatPoints(entry.points).display}
                                     </div>
@@ -364,6 +420,15 @@ function LeaderboardContent() {
                                     </div>
                                   </div>
                                 </>
+                              ) : isAchievementsTab(tab) ? (
+                                <div className="flex gap-2 font-medium items-center mt-1 text-[10px]">
+                                  <span className="text-indigo-600 font-black">
+                                    {entry.achievementCount ?? 0}
+                                  </span>
+                                  <span className="text-gray-400 font-bold uppercase tracking-wider">
+                                    achievements
+                                  </span>
+                                </div>
                               ) : (
                                 <>
                                   <div className="flex gap-2 text-gray-400 font-bold uppercase tracking-wider">
@@ -381,33 +446,18 @@ function LeaderboardContent() {
                                       {entry.losses}
                                     </div>
                                     <div className="w-14 font-bold flex items-center gap-0.5">
-                                      {(() => {
-                                        const { display, full, capped } =
-                                          formatPoints(entry.points)
-                                        return (
-                                          <div
-                                            className="w-14 font-bold flex items-center gap-0.5"
-                                            title={capped ? full : undefined}
-                                          >
-                                            <GemIcon
-                                              size={8}
-                                              className="shrink-0 text-gray-400"
-                                            />
-                                            <span
-                                              className={getDisplayTierClass(
-                                                entry.points,
-                                                entry.pointStylePreference
-                                              )}
-                                              style={{
-                                                position: 'relative',
-                                                display: 'inline-block'
-                                              }}
-                                            >
-                                              {display}
-                                            </span>
-                                          </div>
-                                        )
-                                      })()}
+                                      <GemIcon
+                                        size={8}
+                                        className="shrink-0 text-gray-400"
+                                      />
+                                      <span
+                                        className={getDisplayTierClass(
+                                          entry.points,
+                                          entry.pointStylePreference
+                                        )}
+                                      >
+                                        {formatPoints(entry.points).display}
+                                      </span>
                                     </div>
                                     <div
                                       className={`w-14 font-bold ${gainedBI >= 0n ? 'text-green-500' : 'text-red-500'}`}
@@ -461,6 +511,10 @@ function LeaderboardContent() {
                               </span>
                             </td>
                           </>
+                        ) : isAchievementsTab(tab) ? (
+                          <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-black text-indigo-600">
+                            {entry.achievementCount ?? 0}
+                          </td>
                         ) : (
                           <>
                             <td className="hidden min-[600px]:table-cell px-3 py-3 text-center text-green-600 font-bold">
@@ -473,23 +527,14 @@ function LeaderboardContent() {
                               {entry.winRate}%
                             </td>
                             <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                              {(() => {
-                                const { display, full, capped } = formatPoints(
-                                  entry.points
-                                )
-                                return (
-                                  <span
-                                    className={getDisplayTierClass(
-                                      entry.points,
-                                      entry.pointStylePreference
-                                    )}
-                                    title={capped ? full : undefined}
-                                    style={{ position: 'relative' }}
-                                  >
-                                    {display}
-                                  </span>
-                                )
-                              })()}
+                              <span
+                                className={getDisplayTierClass(
+                                  entry.points,
+                                  entry.pointStylePreference
+                                )}
+                              >
+                                {formatPoints(entry.points).display}
+                              </span>
                             </td>
                             <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
                               <span
@@ -504,20 +549,11 @@ function LeaderboardContent() {
                               </span>
                             </td>
                             <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">
-                              {(() => {
-                                const { display, full, capped } = formatPoints(
-                                  entry.peakPoints
-                                )
-                                return (
-                                  <span
-                                    className={getAmountColor(entry.peakPoints)}
-                                    title={capped ? full : undefined}
-                                    style={{ position: 'relative' }}
-                                  >
-                                    {display}
-                                  </span>
-                                )
-                              })()}
+                              <span
+                                className={getAmountColor(entry.peakPoints)}
+                              >
+                                {formatPoints(entry.peakPoints).display}
+                              </span>
                             </td>
                           </>
                         )}

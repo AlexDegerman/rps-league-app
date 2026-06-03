@@ -32,25 +32,6 @@ function PlayerLeaderboardContent() {
     end: searchParams.get('end') || ''
   })
 
-  const loadData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const data =
-        playerSubTab === 'today'
-          ? await fetchTodayLeaderboard()
-          : await fetchHistoricalLeaderboard(
-              activeFilters.current.start || undefined,
-              activeFilters.current.end || undefined
-            )
-      setStats(data.slice(0, 200))
-    } catch (error) {
-      console.error('Failed to load leaderboard:', error)
-      setStats([])
-    } finally {
-      setIsLoading(false)
-    }
-  }, [playerSubTab])
-
   const updateUrl = useCallback(
     (params: Record<string, string | null>) => {
       const newParams = new URLSearchParams(searchParams.toString())
@@ -64,8 +45,36 @@ function PlayerLeaderboardContent() {
   )
 
   useEffect(() => {
+    let isMounted = true
+
+    async function loadData() {
+      setIsLoading(true)
+      try {
+        const data =
+          playerSubTab === 'today'
+            ? await fetchTodayLeaderboard()
+            : await fetchHistoricalLeaderboard(
+                activeFilters.current.start || undefined,
+                activeFilters.current.end || undefined
+              )
+
+        if (isMounted) {
+          setStats((data || []).slice(0, 200))
+        }
+      } catch (error) {
+        console.error('Failed to load leaderboard:', error)
+        if (isMounted) setStats([])
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+
     loadData()
-  }, [loadData])
+
+    return () => {
+      isMounted = false
+    }
+  }, [playerSubTab])
 
   const handleTabChange = (tab: PlayerSubTab) => {
     setPlayerSubTab(tab)
@@ -75,7 +84,7 @@ function PlayerLeaderboardContent() {
   const handleFilter = () => {
     activeFilters.current = { start: startDate, end: endDate }
     updateUrl({ start: startDate || null, end: endDate || null })
-    loadData()
+    setPlayerSubTab('alltime')
   }
 
   const handleClear = () => {
@@ -83,7 +92,7 @@ function PlayerLeaderboardContent() {
     setEndDate('')
     activeFilters.current = { start: '', end: '' }
     updateUrl({ start: null, end: null })
-    loadData()
+    setPlayerSubTab('alltime')
   }
 
   return (

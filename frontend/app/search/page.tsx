@@ -55,11 +55,21 @@ function SearchContent() {
   }
 
   useEffect(() => {
+    let isMounted = true
+
     fetchPlayerNames()
-      .then(setPlayerNames)
+      .then((names) => {
+        if (isMounted && names) {
+          setPlayerNames(names)
+        }
+      })
       .catch((err) =>
         logger.warn('Failed to load player names', { error: String(err) })
       )
+
+    return () => {
+      isMounted = false
+    }
   }, [])
 
   useEffect(() => {
@@ -127,7 +137,6 @@ function SearchContent() {
 
   return (
     <div className="max-w-2xl mx-auto px-4">
-
       <div className="sticky top-16 z-40 bg-gray-100 pb-4">
         <div className="flex gap-2 mb-4">
           <button

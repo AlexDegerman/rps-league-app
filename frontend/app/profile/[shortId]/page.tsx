@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { clearUserCache, getOrCreateUser, resetUser } from '@/lib/user'
+import { clearUserCache, getOrCreateUser} from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import type { UserStats } from '@/types/rps'
 import {
@@ -16,10 +16,9 @@ import {
   fetchUserStats,
   fetchRank,
   fetchRecoveryCode,
-  updateNickname,
   handleRecoverProfile,
   updateLinkedin,
-  ascendUser
+  ascendUser,
 } from '@/lib/api'
 import BetHistory from '@/components/BetHistory'
 import { LinkedInBadge } from '@/components/badges/LinkedInBadge'
@@ -30,6 +29,7 @@ import { logger } from '@/lib/logger'
 import { StyleSelect } from '@/components/StyleSelect'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import AscensionModal from '@/components/modals/AscensionModal'
+import AchievementMenu from '@/components/AchievementMenu'
 
 interface Ranks {
   daily: number | null
@@ -42,16 +42,21 @@ export default function ProfilePage() {
   const router = useRouter()
   const targetShortId = params.shortId as string
 
-  const {
-    rerollNickname,
-    setStylePreference: setStoreStylePreference,
-    laps,
-    setLaps,
-    fastestLapBets,
-    setFastestLapBets,
-    setPoints: setStorePoints
-  } = useUserStore()
-
+    const {
+      rerollNickname,
+      setStylePreference: setStoreStylePreference,
+      laps,
+      setLaps,
+      fastestLapBets,
+      setFastestLapBets,
+      setPoints: setStorePoints,
+      userId: myUserId,
+      shortId: myShortId,
+      myBadges,
+      showLinkedinBadge: storeLinkedinEnabled,
+      setShowLinkedinBadge: setStoreLinkedinEnabled,
+      refreshBadges
+    } = useUserStore()
   const { showAscensionPrompt, setShowAscensionPrompt } = useUIStore()
 
   const [isOwnProfile, setIsOwnProfile] = useState(false)
@@ -88,23 +93,31 @@ export default function ProfilePage() {
   >(null)
   const [allTimePeak, setAllTimePeak] = useState<bigint>(200000n)
   const [autoStyle, setAutoStyle] = useState(true)
+  const [activeTab, setActiveTab] = useState<'stats' | 'achievements'>('stats')
 
   const { display, full, capped } = formatPoints(points ?? '0')
 
   useEffect(() => {
     if (!targetShortId) return
-    const user = getOrCreateUser()
-    const own = user.shortId === targetShortId
+    const own = myShortId === targetShortId
     setIsOwnProfile(own)
     setMounted(true)
 
-    const checkWidth = () => setUseK(window.innerWidth <= 362)
+    let isMounted = true
+    let recoveryTimer: NodeJS.Timeout
+
+    const checkWidth = () => {
+      if (isMounted) setUseK(window.innerWidth <= 362)
+    }
     checkWidth()
     window.addEventListener('resize', checkWidth)
 
     const loadProfile = async () => {
       try {
         const profileData = await fetchUserProfile(targetShortId)
+
+        if (!isMounted) return
+
         if (profileData) {
           setNickname(profileData.nickname)
           setPoints(profileData.points)
@@ -120,9 +133,12 @@ export default function ProfilePage() {
             profileData.userId,
             targetShortId
           )
-          if (statsData) setStats(statsData)
+          if (isMounted && statsData) setStats(statsData)
+          if (own)
+            setStoreLinkedinEnabled(profileData.showLinkedinBadge ?? true)
         }
       } catch (err) {
+        if (!isMounted) return
         logger.error(
           'Failed to load profile',
           err instanceof Error ? err : undefined,
@@ -135,7 +151,7 @@ export default function ProfilePage() {
           setProfileUserId(local.userId)
         }
       } finally {
-        setStatsLoading(false)
+        if (isMounted) setStatsLoading(false)
       }
     }
 
@@ -145,31 +161,35 @@ export default function ProfilePage() {
       fetchRank('daily', targetShortId),
       fetchRank('weekly', targetShortId),
       fetchRank('alltime', targetShortId)
-    ]).then(([d, w, a]) => setRanks({ daily: d, weekly: w, allTime: a }))
+    ]).then(([d, w, a]) => {
+      if (isMounted) setRanks({ daily: d, weekly: w, allTime: a })
+    })
 
-    let recoveryTimer: NodeJS.Timeout
-    if (own) {
+    if (own && myUserId) {
       const getRecovery = async () => {
         try {
-          const res = await fetchRecoveryCode(user.userId)
-          if (res.ok) {
-            const data = await res.json()
+          const data = await fetchRecoveryCode(myUserId)
+          if (!isMounted) return
+          if (data) {
             setRecoveryCode(data.recoveryCode)
-          } else if (res.status === 404) {
-            recoveryTimer = setTimeout(getRecovery, 1500)
+          } else {
+            recoveryTimer = setTimeout(getRecovery, 2000)
           }
         } catch {
-          recoveryTimer = setTimeout(getRecovery, 3000)
+          if (isMounted) {
+            recoveryTimer = setTimeout(getRecovery, 3000)
+          }
         }
       }
-      recoveryTimer = setTimeout(getRecovery, 800)
+      getRecovery()
     }
 
     return () => {
+      isMounted = false
       if (recoveryTimer) clearTimeout(recoveryTimer)
       window.removeEventListener('resize', checkWidth)
     }
-  }, [targetShortId])
+  }, [targetShortId, myShortId, myUserId, setStoreLinkedinEnabled])
 
   const handleRegenerate = async () => {
     if (!isOwnProfile) return
@@ -225,17 +245,16 @@ export default function ProfilePage() {
     localStorage.setItem('rps_restart_timestamps', JSON.stringify(timestamps))
     try {
       setResetError('')
-      resetUser()
-      const newUser = getOrCreateUser()
-      try {
-        await updateNickname(newUser.userId, newUser.nickname, newUser.shortId)
-      } catch (err) {
-        logger.warn('Initial nickname sync failed after reset', {
-          error: String(err)
-        })
+
+      const { resetProfile } = useUserStore.getState()
+      const result = await resetProfile()
+
+      if (result.success) {
+        const newShortId = useUserStore.getState().shortId
+        window.location.href = `/profile/${newShortId}`
+      } else {
+        setResetError(result.error || 'Failed to reset profile')
       }
-      await useUserStore.getState().initUser()
-      window.location.href = `/profile/${newUser.shortId}`
     } catch (err) {
       logger.error(
         'Failed to reset profile',
@@ -295,10 +314,13 @@ export default function ProfilePage() {
               {nickname}
             </p>
             <IdentityBadges
-              targetShortId={targetShortId}
               linkedinUrl={linkedinUrl}
-              isOwnProfile={isOwnProfile}
-              showLinkedinBadge={showLinkedinBadge}
+              badges={isOwnProfile ? myBadges : []}
+              showLinkedinBadge={
+                isOwnProfile ? storeLinkedinEnabled : showLinkedinBadge
+              }
+              size="md"
+              targetShortId={targetShortId}
             />
           </div>
 
@@ -377,87 +399,117 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {statsLoading ? (
-          <div className="h-100 flex flex-col items-center justify-center bg-gray-50/30 rounded-3xl border border-dashed border-gray-100">
-            <div className="relative">
-              <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse" />
-              <div className="w-10 h-10 border-4 border-gray-100 border-t-indigo-600 rounded-full animate-spin relative z-10" />
-            </div>
-            <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600/50 animate-pulse">
-              Loading stats...
-            </p>
-          </div>
+        {/* Tab switcher */}
+        <div className="flex gap-2 mb-5">
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl transition-all ${
+              activeTab === 'stats'
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+            }`}
+          >
+            Stats
+          </button>
+          <button
+            onClick={() => setActiveTab('achievements')}
+            className={`text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-xl transition-all ${
+              activeTab === 'achievements'
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+            }`}
+          >
+            Achievements
+          </button>
+        </div>
+
+        {activeTab === 'stats' ? (
+          <>
+            {statsLoading ? (
+              <div className="h-100 flex flex-col items-center justify-center bg-gray-50/30 rounded-3xl border border-dashed border-gray-100">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse" />
+                  <div className="w-10 h-10 border-4 border-gray-100 border-t-indigo-600 rounded-full animate-spin relative z-10" />
+                </div>
+                <p className="mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600/50 animate-pulse">
+                  Loading stats...
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-5 sm:gap-8">
+                <StatSection label="Records">
+                  <StatBox
+                    label="Peak"
+                    value={stats ? stats.peakPoints : '0'}
+                    color="text-amber-500"
+                    useK={useK}
+                  />
+                  <StatBox
+                    label="Weekly"
+                    value={stats ? stats.weeklyPeak : '0'}
+                    color="text-indigo-600"
+                    useK={useK}
+                  />
+                  <StatBox
+                    label="Daily"
+                    value={stats ? stats.dailyPeak : '0'}
+                    color="text-indigo-400"
+                    useK={useK}
+                  />
+                </StatSection>
+                <StatSection label="Wealth">
+                  <StatBox
+                    label="Gained"
+                    value={stats ? stats.totalGain : '0'}
+                    color="text-emerald-600"
+                    useK={useK}
+                  />
+                  <StatBox
+                    label="Risked"
+                    value={stats ? stats.totalVolume : '0'}
+                    color="text-gray-600"
+                    useK={useK}
+                  />
+                  <StatBox
+                    label="Best Win"
+                    value={stats ? stats.biggestWin : '0'}
+                    color="text-emerald-500"
+                    useK={useK}
+                  />
+                </StatSection>
+                <StatSection label="Performance">
+                  <StatBox
+                    label="Max Streak"
+                    value={stats?.maxWinStreak || 0}
+                    color="text-orange-500"
+                  />
+                  <StatBox
+                    label="Win Rate"
+                    value={stats?.total ? `${stats.winRate}%` : '-'}
+                    color="text-indigo-600"
+                  />
+                  <StatBox
+                    label="Pities Hit"
+                    value={stats?.totalPitiesEarned || 0}
+                    color="text-red-400"
+                  />
+                  <StatBox label="Total Plays" value={stats?.total || 0} />
+                  <StatBox
+                    label="Wins"
+                    value={stats?.wins || 0}
+                    color="text-green-600"
+                  />
+                  <StatBox
+                    label="Losses"
+                    value={stats?.losses || 0}
+                    color="text-red-500"
+                  />
+                </StatSection>
+              </div>
+            )}
+          </>
         ) : (
-          <div className="flex flex-col gap-5 sm:gap-8">
-            <StatSection label="Records">
-              <StatBox
-                label="Peak"
-                value={stats ? stats.peakPoints : '0'}
-                color="text-amber-500"
-                useK={useK}
-              />
-              <StatBox
-                label="Weekly"
-                value={stats ? stats.weeklyPeak : '0'}
-                color="text-indigo-600"
-                useK={useK}
-              />
-              <StatBox
-                label="Daily"
-                value={stats ? stats.dailyPeak : '0'}
-                color="text-indigo-400"
-                useK={useK}
-              />
-            </StatSection>
-            <StatSection label="Wealth">
-              <StatBox
-                label="Gained"
-                value={stats ? stats.totalGain : '0'}
-                color="text-emerald-600"
-                useK={useK}
-              />
-              <StatBox
-                label="Risked"
-                value={stats ? stats.totalVolume : '0'}
-                color="text-gray-600"
-                useK={useK}
-              />
-              <StatBox
-                label="Best Win"
-                value={stats ? stats.biggestWin : '0'}
-                color="text-emerald-500"
-                useK={useK}
-              />
-            </StatSection>
-            <StatSection label="Performance">
-              <StatBox
-                label="Max Streak"
-                value={stats?.maxWinStreak || 0}
-                color="text-orange-500"
-              />
-              <StatBox
-                label="Win Rate"
-                value={stats?.total ? `${stats.winRate}%` : '-'}
-                color="text-indigo-600"
-              />
-              <StatBox
-                label="Pities Hit"
-                value={stats?.totalPitiesEarned || 0}
-                color="text-red-400"
-              />
-              <StatBox label="Total Plays" value={stats?.total || 0} />
-              <StatBox
-                label="Wins"
-                value={stats?.wins || 0}
-                color="text-green-600"
-              />
-              <StatBox
-                label="Losses"
-                value={stats?.losses || 0}
-                color="text-red-500"
-              />
-            </StatSection>
-          </div>
+          <AchievementMenu onBadgeUpdate={refreshBadges} />
         )}
 
         {/* Manual Ascension Button for qualifying users */}
@@ -494,7 +546,6 @@ export default function ProfilePage() {
                         const next = !autoStyle
                         setAutoStyle(next)
                         if (next) {
-                          setProfileStylePreference(null)
                           setStoreStylePreference(null)
                         }
                       }}
@@ -590,10 +641,19 @@ export default function ProfilePage() {
               )}
               <label className="flex items-center gap-3 ml-1 cursor-pointer select-none">
                 <div
-                  onClick={() => {
+                  onClick={async () => {
+                    if (!showLinkedinBadge && myBadges.length >= 5) {
+                      alert(
+                        'Badge slots full! Deselect an achievement to show LinkedIn.'
+                      )
+                      return
+                    }
                     const next = !showLinkedinBadge
                     setShowLinkedinBadge(next)
-                    updateLinkedin(
+                    if (isOwnProfile) {
+                      setStoreLinkedinEnabled(next)
+                    }
+                    await updateLinkedin(
                       targetShortId,
                       linkedinInput.trim() || null,
                       next
@@ -606,7 +666,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-black/40">
-                  Show LinkedIn badge publicly
+                  Show LinkedIn badge publicly (Takes 1 of 5 slots)
                 </span>
               </label>
               {linkedinUrl && showLinkedinBadge && (
@@ -615,7 +675,7 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-          ) : linkedinUrl ? (
+          ) : linkedinUrl && showLinkedinBadge ? (
             <div className="flex items-center gap-2 ml-1">
               <LinkedInBadge url={linkedinUrl} size="md" />
             </div>
