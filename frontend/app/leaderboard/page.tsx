@@ -242,7 +242,7 @@ function LeaderboardContent() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th className="text-left px-3 py-3 text-gray-400 font-bold text-xs uppercase w-10">
+                  <th className="text-left px-2 py-3 text-gray-400 font-bold text-xs uppercase w-12 whitespace-nowrap">
                     #
                   </th>
                   <th className="text-left px-3 py-3 text-gray-400 font-bold text-xs uppercase">
@@ -341,13 +341,33 @@ function LeaderboardContent() {
                   data.map((entry, index) => {
                     const isMe = entry.shortId === myShortId
                     const gainedBI = BigInt(entry.gained ?? '0')
+                    const entryBadges = isMe
+                      ? myBadges
+                      : badgeMap[entry.shortId] || []
+                    const hasRainbow = entryBadges.some(
+                      (b) => b.rarity === 'RAINBOW'
+                    )
+                    const hasMythical =
+                      !hasRainbow &&
+                      entryBadges.some((b) => b.rarity === 'MYTHICAL')
+                    const prestigeClass = hasRainbow
+                      ? 'row-prestige-rainbow'
+                      : hasMythical
+                        ? 'row-prestige-mythical'
+                        : ''
 
                     return (
                       <tr
                         key={entry.userId}
-                        className={`border-b border-gray-50 ${isMe ? 'bg-purple-50' : ''}`}
+                        className={`transition-all duration-700 relative ${
+                          prestigeClass
+                            ? prestigeClass
+                            : isMe
+                              ? 'bg-purple-50'
+                              : 'bg-white'
+                        }`}
                       >
-                        <td className="px-1 min-[600px]:px-3 py-3 align-top text-gray-400 font-bold text-xs">
+                        <td className="px-2 py-3 align-top text-gray-400 font-bold text-xs w-12 whitespace-nowrap bg-transparent">
                           {index === 0 ? '🏆' : index + 1}
                         </td>
 

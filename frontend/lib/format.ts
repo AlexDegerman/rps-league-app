@@ -259,6 +259,14 @@ export const getBonusStyles = (tier: string) => {
     'font-black uppercase tracking-[0.25em] transition-all duration-300 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-md border border-white/10'
 
   switch (tier) {
+    case 'MYTHICAL':
+      return {
+        label: 'MYTHICAL BONUS',
+        text: 'text-red-400',
+        containerClass: `${base} text-4xl shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-[pulsate_0.8s_ease-in-out_infinite]`,
+        scale: 'scale-[1.15]',
+        glow: 'drop-shadow-[0_0_35px_rgba(220,38,38,0.9)]'
+      }
     case 'LEGENDARY':
       return {
         label: 'LEGENDARY BONUS',

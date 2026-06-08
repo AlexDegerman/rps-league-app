@@ -278,7 +278,7 @@ function AchievementCard({
       ach.category === 'Dimensional' ||
       !isCountable ||
       target <= 1 ||
-      ['SLAY', 'REBL', 'AUTO', 'FND'].includes(ach.code)
+      ['SLAY', 'REBL', 'AUTO', 'FND', 'DREM', 'STRM', 'BOOM'].includes(ach.code)
     if (isMilestone) return { current: 0, target: 1, percent: 0 }
     let current = 0
     if (stats) {
@@ -291,6 +291,10 @@ function AchievementCard({
       if (ach.category === 'Hellfire') current = stats.hellfireCaught ?? 0
       if (ach.category === 'Cards') current = stats.cardsCaught ?? 0
       if (ach.code === 'PITY') current = stats.totalPitiesEarned ?? 0
+      if (ach.category === 'OracleProphecy')
+        current = stats.oracleMaxStreak ?? 0
+      if (ach.category === 'Reliquary') current = stats.uniqueRelicsOwned ?? 0
+      if (ach.code === 'DREM') current = stats.maxConsecutiveFlashEvents ?? 0
       if (ach.category === 'OracleProphecy')
         current = stats.oracleMaxStreak ?? 0
       if (ach.category === 'Festival')

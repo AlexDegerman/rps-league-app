@@ -22,6 +22,7 @@ export const initDb = async (): Promise<void> => {
         short_id TEXT NOT NULL UNIQUE,
         points NUMERIC NOT NULL DEFAULT 200000,
         peak_points NUMERIC NOT NULL DEFAULT 200000,
+        all_time_peak NUMERIC NOT NULL DEFAULT 200000,
         daily_peak NUMERIC DEFAULT 100000,
         weekly_peak NUMERIC DEFAULT 100000,
         nickname TEXT,
@@ -30,6 +31,8 @@ export const initDb = async (): Promise<void> => {
         biggest_win NUMERIC NOT NULL DEFAULT 0,
         current_win_streak INTEGER NOT NULL DEFAULT 0,
         max_win_streak INTEGER NOT NULL DEFAULT 0,
+        wins INTEGER NOT NULL DEFAULT 0,
+        losses INTEGER NOT NULL DEFAULT 0,
         bonus_pity_count INTEGER DEFAULT 0,
         total_pities_earned INTEGER DEFAULT 0,
         joined_date BIGINT NOT NULL DEFAULT (EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT,
@@ -38,7 +41,31 @@ export const initDb = async (): Promise<void> => {
         biggest_single_win NUMERIC NOT NULL DEFAULT 0,
         biggest_multiplier_win NUMERIC NOT NULL DEFAULT 0,
         biggest_multiplier_tier TEXT,
-        total_flash_events_caught INTEGER NOT NULL DEFAULT 0
+        biggest_match_mult NUMERIC NOT NULL DEFAULT 0,
+        total_flash_events_caught INTEGER NOT NULL DEFAULT 0,
+        lunar_events_caught INTEGER NOT NULL DEFAULT 0,
+        electric_events_caught INTEGER NOT NULL DEFAULT 0,
+        hellfire_events_caught INTEGER NOT NULL DEFAULT 0,
+        cards_events_caught INTEGER NOT NULL DEFAULT 0,
+        first_flash_triggered BOOLEAN NOT NULL DEFAULT false,
+        consecutive_flash_streak INTEGER NOT NULL DEFAULT 0,
+        consecutive_flash_peak INTEGER NOT NULL DEFAULT 0,
+        festivals_participated INTEGER NOT NULL DEFAULT 0,
+        festivals_triggered INTEGER NOT NULL DEFAULT 0,
+        laps INTEGER NOT NULL DEFAULT 0,
+        fastest_lap_bets INTEGER,
+        total_bets_at_last_ascension INTEGER NOT NULL DEFAULT 0,
+        equipped_relic TEXT,
+        relic_cycle_counter INTEGER DEFAULT 0,
+        oracle_used_date TEXT,
+        oracle_streak INTEGER NOT NULL DEFAULT 0,
+        oracle_max_streak INTEGER NOT NULL DEFAULT 0,
+        bet_against_oracle_count INTEGER NOT NULL DEFAULT 0,
+        point_style_preference TEXT,
+        displayed_badges TEXT[] NOT NULL DEFAULT '{}',
+        total_achievements INTEGER NOT NULL DEFAULT 0,
+        has_used_auto_bet BOOLEAN NOT NULL DEFAULT false,
+        utm_source TEXT
       )
     `)
 
@@ -56,7 +83,43 @@ export const initDb = async (): Promise<void> => {
         created_at BIGINT NOT NULL,
         flash_event_type TEXT,
         flash_multiplier NUMERIC DEFAULT 1,
+        streak_multiplier NUMERIC DEFAULT 1,
+        relic_multiplier INTEGER NOT NULL DEFAULT 1,
+        festival_multiplier NUMERIC DEFAULT 1,
+        festival_type TEXT,
+        total_multiplier NUMERIC DEFAULT 1,
+        bet_against_oracle BOOLEAN DEFAULT false,
         UNIQUE(user_id, game_id)
+      )
+    `)
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS relics (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        relic_key TEXT NOT NULL,
+        rarity TEXT NOT NULL,
+        found_at BIGINT NOT NULL,
+        counter INTEGER DEFAULT 0,
+        CONSTRAINT relics_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id)
+      )
+    `)
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_achievements (
+        user_id TEXT NOT NULL,
+        achievement_code TEXT NOT NULL,
+        earned_at BIGINT NOT NULL DEFAULT ((EXTRACT(EPOCH FROM NOW()) * 1000)::BIGINT),
+        PRIMARY KEY (user_id, achievement_code),
+        CONSTRAINT user_achievements_user_fkey FOREIGN KEY (user_id) REFERENCES users(user_id)
+      )
+    `)
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS utm_visits (
+        id SERIAL PRIMARY KEY,
+        utm_source TEXT NOT NULL,
+        visited_at TIMESTAMPTZ DEFAULT now()
       )
     `)
 
@@ -66,6 +129,63 @@ export const initDb = async (): Promise<void> => {
         banned_at TIMESTAMPTZ DEFAULT now(),
         CONSTRAINT feedback_bans_pkey PRIMARY KEY (user_id)
       )
+    `)
+
+    // Indexes
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_user_created
+        ON predictions(user_id, created_at DESC)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_created_at
+        ON predictions(created_at)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_points
+        ON users(points)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_peak_points
+        ON users(peak_points)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_matches_time
+        ON matches(time)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_matches_game_id
+        ON matches(game_id)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id
+        ON user_achievements(user_id)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_relics_user_id
+        ON relics(user_id)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_game_id
+        ON predictions(game_id)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_laps_points
+        ON users(laps, points DESC)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_all_time_peak
+        ON users(all_time_peak DESC)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_result_user
+        ON predictions(result, user_id)
+    `)
+
+    // Unique constraint on predictions - must be enforced at DB level
+    // (resolvePrediction relies on one bet per user per game)
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_predictions_user_game
+        ON predictions(user_id, game_id)
     `)
 
     logger.info('Database initialized')

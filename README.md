@@ -38,6 +38,7 @@ Screenshots, gameplay recordings, and feature showcases.
 - [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
 - [📋 Overview](#-overview)
 - [⚡ Ascension System](#-ascension-system)
+- [🧿 Relic System](#-relic-system)
 - [🌠 Flash Events](#-flash-events)
 - [👁️ Player Festivals](#️-player-festivals)
 - [🏆 Predictor Achievements](#-predictor-achievements)
@@ -102,12 +103,13 @@ This architecture eliminates the barrier to entry while preserving a robust laye
   - Common: 1.5×–2.2×
   - Rare: 2.2×–3.2×
   - Epic: 3.2×–4.2×
-  - Legendary: 5× (guaranteed tier)
+  - Legendary: 5×
+  - Mythical: 7x
 - Guarantees at least one bonus every 4 matches if not triggered naturally
 
 ### Win streak system
-- Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x3, x6, x10)
-- x10 multiplier persists until the streak is broken
+- Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x2, x3, x5)
+- x5 multiplier persists until the streak is broken
 - Longest win streak is permanently tracked in player profiles
 - Momentum changes the UI color theme in real time as streak increases
 - Streak badge evolves visually with each tier
@@ -182,6 +184,21 @@ Resets are visual-friendly. Any previously unlocked point-tier stylings (UVG, DV
   <strong>Ascension System Demo</strong><br/>
   <img src="./assets/ascension_demo.gif" width="220" />
 </div>
+
+---
+
+# 🧿 Relic System
+
+Relics are permanent collectible gameplay modifiers that introduce long-term progression and strategic specialization. Players discover relics through post-match drops across five rarity tiers (Common through Mythical) and can equip one active relic at a time.
+
+Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling, creating distinct build paths and playstyles. A permanent no-duplicate collection system turns acquisition into long-term progression rather than repetitive RNG farming.
+
+<div>
+  <strong>Relic Discovery & Equipment in Action</strong><br/>
+  <img src="./assets/relics_demo.gif" width="220" />
+</div>
+
+> 📋 **[View full Relic system breakdown →](./RELICS.md)**
 
 ---
 
@@ -346,6 +363,23 @@ Guarantees:
 | Testing | Vitest, React Testing Library |
 | Match system | Custom generator feeding SSE stream |
 | Analytics | UTM attribution tracking, aggregated live statistics, admin dashboards |
+
+### System Flow
+
+```mermaid
+graph LR
+    User([User Browser])
+    Next[Next.js Frontend]
+    API[Express Backend]
+    DB[(Supabase DB)]
+    AI[Gemini AI Oracle]
+
+    User <-->|UI / Zustand| Next
+    Next <-->|REST API| API
+    API <-->|SQL / BigInt| DB
+    API <-->|Data Context| AI
+    API -.->|SSE Live Stream| User
+```
 
 ---
 

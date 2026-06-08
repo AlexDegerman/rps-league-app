@@ -7,7 +7,10 @@ const SOUND_MAP = {
   electric: '/sounds/electric.wav',
   fire: '/sounds/fire.wav',
   moon: '/sounds/moon.wav',
-  fanfare: '/sounds/ascension-fanfare.mp3'
+  fanfare: '/sounds/ascension-fanfare.mp3',
+  slam: '/sounds/slam.mp3',
+  cascade: '/sounds/cascade.mp3',
+  shimmer: '/sounds/shimmer.mp3'
 } as const
 
 type SoundKey = keyof typeof SOUND_MAP
@@ -25,32 +28,55 @@ if (typeof window !== 'undefined') {
 }
 
 export const useSound = () => {
-  // Use lazy initializer to read from localStorage before the first render
-  const [soundOn, setOn] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('soundOn')
-      return saved !== null ? saved === 'true' : true
-    }
-    return true
-  })
+  const [soundOn, setOn] = useState<boolean>(true)
 
-  // Initialize Ref with the initial state value
+  useEffect(() => {
+    const saved = localStorage.getItem('soundOn')
+    if (saved === 'false') {
+      setTimeout(() => setOn(false), 0)
+    }
+  }, [])
+
   const soundOnRef = useRef(soundOn)
 
-  // Update localStorage and Ref whenever state changes
   useEffect(() => {
     soundOnRef.current = soundOn
     localStorage.setItem('soundOn', soundOn.toString())
   }, [soundOn])
 
-  const play = (key: SoundKey) => {
-    const instance = audioInstances[key]
-    if (!soundOnRef.current || !instance) return
+  const stopAll = () => {
+    ;(Object.keys(audioInstances) as SoundKey[]).forEach((key) => {
+      const instance = audioInstances[key]
+      if (instance) {
+        instance.pause()
+        instance.currentTime = 0
+        instance.onended = null
+      }
+    })
+  }
 
-    // Reset currentTime so rapid plays don't queue - always plays from start
+  const play = (key: SoundKey, onEnd?: () => void) => {
+    const instance = audioInstances[key]
+    if (!soundOnRef.current || !instance) {
+      if (onEnd) onEnd()
+      return
+    }
+
+    stopAll()
+
     instance.currentTime = 0
+
+    if (onEnd) {
+      instance.onended = () => {
+        instance.onended = null
+        onEnd()
+      }
+    } else {
+      instance.onended = null
+    }
+
     instance.play().catch(() => {
-      // Browsers block autoplay until the user has interacted with the page
+      if (onEnd) onEnd()
     })
   }
 
@@ -58,15 +84,30 @@ export const useSound = () => {
     setOn((prev) => !prev)
   }
 
+  const playJackpot = () => {
+    if (!soundOnRef.current) return
+
+    play('slam')
+
+    setTimeout(() => {
+      play('cascade', () => {
+        play('shimmer')
+      })
+    }, 500)
+  }
+
   return {
     soundOn,
     toggleSound,
+    stopAll,
     playWin: () => play('win'),
     playLoss: () => play('loss'),
     playCards: () => play('cards'),
     playElectric: () => play('electric'),
     playFire: () => play('fire'),
     playMoon: () => play('moon'),
-    playFanfare: () => play('fanfare')
+    playFanfare: () => play('fanfare'),
+    playJackpot,
+    getDuration: (key: SoundKey) => audioInstances[key]?.duration || 0
   }
 }

@@ -86,6 +86,41 @@
     SECTION 2: SHARED KEYFRAMES (used by multiple systems)
    ═══════════════════════════════════════════════════════════════════ */
 
+@keyframes discovery-halo-glow {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(1.02); }
+}
+
+.discovery-relic-halo {
+  position: absolute;
+  inset: -15px; /* Subtle spill outside border */
+  background: var(--halo-color);
+  border-radius: 50px;
+  z-index: -1;
+  filter: blur(35px); /* Soft, controlled bleed */
+  animation: discovery-halo-glow 6s ease-in-out infinite;
+}
+
+@keyframes light-shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(2px, -2px); }
+  50% { transform: translate(-2px, 2px); }
+  75% { transform: translate(1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-light-shake {
+  animation: light-shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.mythical-slam-glow {
+  text-shadow: 0 0 20px rgba(220, 38, 38, 0.8), 0 0 40px rgba(220, 38, 38, 0.4);
+}
+
+.legendary-slam-glow {
+  text-shadow: 0 0 15px rgba(250, 204, 21, 0.8), 0 0 30px rgba(250, 204, 21, 0.4);
+}
+
 @keyframes shimmer-slide {
   0% { background-position: 0% 50%; }
   100% { background-position: 200% 50%; }
@@ -514,12 +549,39 @@
   0%   { background-position: 0% 50%; }
   100% { background-position: 300% 50%; }
 }
+
 @keyframes supercell-pulse {
-  0%, 100% { filter: drop-shadow(0 0 5px #6633ff) drop-shadow(0 0 14px #0055ee); transform: scale(1); }
-  30%  { filter: drop-shadow(0 0 10px #aaddff) drop-shadow(0 0 24px #33aaff) drop-shadow(0 0 45px #0066ff); transform: scale(1.06); }
-  55%  { filter: drop-shadow(0 0 3px #6633ff) drop-shadow(0 0 8px #0044cc); transform: scale(0.98); }
-  65%  { filter: drop-shadow(0 0 14px #ffffff) drop-shadow(0 0 30px #88ccff) drop-shadow(0 0 55px #0088ff); transform: scale(1.08); }
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 2px #6633ff)
+      drop-shadow(0 0 4px #0055ee);
+    transform: scale(1);
+  }
+
+  30% {
+    filter:
+      drop-shadow(0 0 3px #aaddff)
+      drop-shadow(0 0 6px #33aaff)
+      drop-shadow(0 0 10px #0066ff);
+    transform: scale(1.02);
+  }
+
+  55% {
+    filter:
+      drop-shadow(0 0 1px #6633ff)
+      drop-shadow(0 0 3px #0044cc);
+    transform: scale(0.99);
+  }
+
+  65% {
+    filter:
+      drop-shadow(0 0 2px #ffffff)
+      drop-shadow(0 0 5px #88ccff)
+      drop-shadow(0 0 8px #0088ff);
+    transform: scale(1.03);
+  }
 }
+
 @keyframes fractal-lightning {
   0%, 20%, 40%, 60%, 80%, 100% { opacity: 0; transform: scale(1) rotate(0deg); }
   21% { opacity: 1; background-position: 10% 90%; transform: scale(1.1) rotate(5deg); }
@@ -529,16 +591,26 @@
   82% { opacity: 0.4; }
   83% { opacity: 1; background-position: 70% 70%; transform: scale(1.05); }
 }
-.g-qvg, .event-header-electric {
+.g-qvg,
+.event-header-electric {
   font-weight: 900;
   display: inline-block;
   position: relative;
-  background: linear-gradient(90deg, #6633ff, #00aaff, #aa33ff, #0066ff, #6633ff);
+  background: linear-gradient(
+    90deg,
+    #6633ff,
+    #00aaff,
+    #aa33ff,
+    #0066ff,
+    #6633ff
+  );
   background-size: 300% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: supercell-gradient 1.8s linear infinite, supercell-pulse 2.2s ease-in-out infinite;
+  animation:
+    supercell-gradient 1.8s linear infinite,
+    supercell-pulse 2.2s ease-in-out infinite;
   overflow: visible;
 }
 .g-qvg::after {
@@ -823,6 +895,17 @@
   animation: holy-fire-upward 3s ease-in-out infinite;
   filter: drop-shadow(0 -1px 10px rgba(245, 158, 11, 0.7));
 }
+.aura-mythical::before {
+  background: radial-gradient(
+    ellipse at bottom,
+    rgba(220, 38, 38, 0.95) 0%,
+    rgba(239, 68, 68, 0.6) 35%,
+    rgba(220, 38, 38, 0.2) 75%,
+    transparent 100%
+  );
+  animation: holy-fire-upward 2s ease-in-out infinite;
+  filter: drop-shadow(0 -2px 14px rgba(220, 38, 38, 0.85));
+}
 
 /* God King aura — rainbow oil-slick, stronger than mythical */
 .aura-godking {
@@ -1018,7 +1101,90 @@
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+/* ═══════════════════════════════════════════════════════════════════
+    SECTION 8: RELIC EFFECTS
+   ═══════════════════════════════════════════════════════════════════ */
 
+.mythical-slam-glow {
+  text-shadow: 
+    0 0 20px rgba(248, 113, 113, 0.8), 
+    0 0 40px rgba(220, 38, 38, 0.4);
+}
+
+.legendary-slam-glow {
+  text-shadow: 
+    0 0 20px rgba(251, 191, 36, 0.7), 
+    0 0 40px rgba(180, 83, 9, 0.3);
+}
+@keyframes slam-drop {
+  0% {
+    transform: translateY(-120px) scale(1.4);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(12px) scale(0.95);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-6px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.slam-drop-in {
+  animation: slam-drop 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+    SECTION 9: PRESTIGE LEADERBOARD ROWS
+   ═══════════════════════════════════════════════════════════════════ */
+
+.row-prestige-mythical td,
+.row-prestige-rainbow td {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.row-prestige-mythical {
+  background-color: rgba(220, 38, 38, 0.08); 
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(220, 38, 38, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(153, 27, 27, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(185, 28, 28, 0.1) 0%, transparent 60%);
+  background-size: 150% 150%, 150% 150%, 200% 200%;
+  animation: liquid-boil 12s linear infinite;
+  color: #7f1d1d; 
+}
+
+@keyframes liquid-boil {
+  0% { background-position: 0% 0%, 100% 100%, 50% 50%; }
+  33% { background-position: 50% 100%, 0% 50%, 100% 0%; }
+  66% { background-position: 100% 0%, 50% 0%, 0% 100%; }
+  100% { background-position: 0% 0%, 100% 100%, 50% 50%; }
+}
+
+.row-prestige-rainbow {
+  background-image:
+    linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.25) 45%, rgba(255, 255, 255, 0.60) 50%, rgba(255, 255, 255, 0.25) 55%, transparent 100%),
+    linear-gradient(110deg, rgba(255, 0, 128, 0.25), rgba(0, 204, 255, 0.25), rgba(255, 255, 255, 0.65), rgba(0, 255, 136, 0.25), rgba(255, 0, 128, 0.25));
+  background-size: 200% 100%, 100% 100%;
+  background-repeat: no-repeat, no-repeat;
+  animation: shimmer-bg 3.5s linear infinite;
+}
+
+@keyframes shimmer-bg {
+  0% {
+    background-position: 100% 0, 0 0; 
+  }
+  100% {
+    background-position: -100% 0, 0 0;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════════════
     MASTER EVENT SYSTEM

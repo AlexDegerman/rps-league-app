@@ -35,7 +35,7 @@ const FESTIVAL_DURATIONS_MS: Record<FestivalType, number | null> = {
   GHOST: 60_000,
   SAFEGUARD: 60_000,
   RESONANCE: 40_000,
-  SURGE: 60_000,
+  SURGE: 30_000,
   VAULT: 120_000,
   FEVER: 30_000,
   SANGUINE: 15_000
@@ -109,12 +109,18 @@ const randomItem = <T>(arr: T[]): T =>
 export const buildFestivalBroadcastMessage = (
   triggeredBy: string,
   festivalType: FestivalType,
-  isDemo: boolean
+  isDemo: boolean,
+  lapCount?: number
 ): string => {
   if (isDemo) {
     const prefix = randomItem(ORACLE_TRIGGER_PREFIXES)
     return `${prefix} ${festivalType} FESTIVAL`
   }
+  
+  if (festivalType === 'SURGE' && lapCount) {
+    return `${triggeredBy} has completed Chrono-Lap ${lapCount} and initiated the SURGE FESTIVAL`
+  }
+
   const template = randomItem(PLAYER_TRIGGER_PREFIXES)
   const prefix = template.replace('{user}', triggeredBy)
   return `${prefix} ${festivalType} FESTIVAL`

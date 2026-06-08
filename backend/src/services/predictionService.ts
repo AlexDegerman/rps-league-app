@@ -4,7 +4,8 @@ import {
   getFlashEventForUser,
   consumeFlashBetForUser,
   tryTriggerFlashEventForUser,
-  grantFlashEvent
+  recordSessionFlashType,
+  hasSeenAllFlashTypes,
 } from './flashEventService.js'
 import { logger } from '../utils/logger.js'
 import {
@@ -22,8 +23,18 @@ import {
   checkAchievements,
   type AchievementStats
 } from './achievementChecker.js'
+import { RELICS, rollRelicDrop } from './relicService.js'
 
 const POINTS_FLOOR = 100000n
+// Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
+const MYTHICAL_MULTIPLIER = 7.0
+      let recordIndex = 0
+const TIER_UPGRADE: Record<string, string> = {
+  COMMON: 'RARE',
+  RARE: 'EPIC',
+  EPIC: 'LEGENDARY',
+  LEGENDARY: 'MYTHICAL'
+}
 
 export const savePrediction = async (
   userId: string,
@@ -96,15 +107,14 @@ export const savePrediction = async (
   }
 }
 
-// ─── rollBonus ────────────────────────────────────────────────────────────────
 // 40% chance of a bonus (80% under 2M points). Tier determines multiplier range.
-
 const rollBonus = (
   isWin: boolean,
   pityCount: number,
   currentPoints: bigint,
   userId: string,
-  flashType?: string | null
+  flashType?: string | null,
+  equippedRelic?: string | null
 ): { multiplier: number; tier: string } | null => {
   // CARDS flash event: always legendary on wins
   if (flashType === 'CARDS' && isWin) {
@@ -116,13 +126,22 @@ const rollBonus = (
   const hasGuaranteedBonus = isWin && getGuaranteedBonusRemaining(userId) > 0
   if (hasGuaranteedBonus) consumeGuaranteedBonus(userId)
 
-  const bonusChance = currentPoints < 2000000n ? 0.8 : 0.4
-  if (!forceBonus && !hasGuaranteedBonus && Math.random() > bonusChance)
+  const baseChance = currentPoints < 2000000n ? 0.8 : 0.4
+  const extraChance = equippedRelic === 'precision_bearing' ? 0.1 : 0.0
+  const finalChance = baseChance + extraChance
+
+  if (!forceBonus && !hasGuaranteedBonus && Math.random() > finalChance)
     return null
 
   const roll = Math.random() * 100
 
-  if (roll < 59.5) {
+  const isBiased = equippedRelic === 'biased_oscillator'
+  const commonThreshold = isBiased ? 58.4 : 59.5
+  const rareThreshold = isBiased ? 83.0 : 84.5
+  const epicThreshold = isBiased ? 97.3 : 97.5
+  const legendaryThreshold = 99.5
+
+  if (roll < commonThreshold) {
     // COMMON: Win 1.5–2.2x | Loss: Save 10–25% (User loses 75-90% of base loss)
     return {
       multiplier: isWin
@@ -131,7 +150,7 @@ const rollBonus = (
       tier: 'COMMON'
     }
   }
-  if (roll < 84.5) {
+  if (roll < rareThreshold) {
     // RARE: Win 2.2–3.2x | Loss: Save 25–50% (User loses 50-75% of base loss)
     return {
       multiplier: isWin
@@ -140,22 +159,26 @@ const rollBonus = (
       tier: 'RARE'
     }
   }
-  if (roll < 97.5) {
+  if (roll < epicThreshold) {
     // EPIC: Win 3.2–4.2x | Loss: Save 60–90% (User loses 10-40% of base loss)
-
     return {
       multiplier: isWin ? 3.2 + Math.random() * 1.0 : 0.6 + Math.random() * 0.3,
       tier: 'EPIC'
     }
   }
-  // LEGENDARY: Win 5.0x | Loss: Save 100% (User loses 0)
+  if (roll < legendaryThreshold) {
+    // LEGENDARY: Win 5.0x | Loss: Save 100% (User loses 0)
+    return {
+      multiplier: isWin ? 5.0 : 1.0,
+      tier: 'LEGENDARY'
+    }
+  }
+  // MYTHICAL: Win 7x | Loss: Save 100%, primarily via Architect's Keystone
   return {
-    multiplier: isWin ? 5.0 : 1.0,
-    tier: 'LEGENDARY'
+    multiplier: isWin ? MYTHICAL_MULTIPLIER : 1.0,
+    tier: 'MYTHICAL'
   }
 }
-
-// ─── resolvePrediction ────────────────────────────────────────────────────────
 
 export const resolvePrediction = async (
   gameId: string,
@@ -164,7 +187,7 @@ export const resolvePrediction = async (
 ): Promise<void> => {
   let predictions
   try {
-    // JOIN fetches balance, bet count, and match players in one query to avoid N+1 calls per bettor
+    // JOIN fetches balance, bet count, relic state, and match players in one query to avoid N+1 calls per bettor
     predictions = await pool.query(
       `SELECT
         p.*,
@@ -172,12 +195,15 @@ export const resolvePrediction = async (
         u.points AS current_points,
         u.bonus_pity_count,
         u.current_win_streak,
+        u.equipped_relic,
+        r.counter AS relic_counter,
         (SELECT COUNT(*) FROM predictions WHERE user_id = p.user_id) AS total_bets,
         m.player_a_name,
         m.player_b_name
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
         JOIN matches m ON p.game_id = m.game_id
+        LEFT JOIN relics r ON (r.user_id = u.user_id AND r.relic_key = u.equipped_relic)
         WHERE p.game_id = $1 AND p.result IS NULL`,
       [gameId]
     )
@@ -193,6 +219,7 @@ export const resolvePrediction = async (
       const flashEvent = getFlashEventForUser(row.user_id)
       const flashEventType = flashEvent?.type ?? null
       const flashActive = !!flashEvent
+      const snapshotRelic = flashEvent?.snapshotRelic ?? null
 
       const oracleUsed = await hasUserUsedOracle(row.user_id)
       let oracleRigged = false
@@ -230,16 +257,21 @@ export const resolvePrediction = async (
       const currentPity = Number(row.bonus_pity_count)
       const isNaturalPityHit = currentPity >= 3
 
+      // Relic state
+      const equippedRelic = row.equipped_relic as string | null
+      let cycleCounter = Number(row.relic_counter ?? 0)
+
       const betAgainstOracle = Boolean(row.bet_against_oracle)
 
       const resonanceActive = activeFestival?.type === 'RESONANCE'
 
-      const bonus = rollBonus(
+      let bonus = rollBonus(
         isWin,
         resonanceActive ? 3 : totalBets <= 3 ? 3 : currentPity,
         currentPoints,
         row.user_id,
-        flashEventType
+        flashEventType,
+        equippedRelic
       )
 
       // Resonance cap: clamp to RARE max
@@ -255,9 +287,57 @@ export const resolvePrediction = async (
             : bonus
           : bonus
 
+      // LOGIC GATE: every 20 wins → guaranteed Legendary, wins counted while relic is equipped
+      let logicGateFired = false
+      if (equippedRelic === 'logic_gate' && isWin) {
+        cycleCounter++
+        if (cycleCounter % 20 === 0) {
+          bonus = { multiplier: 5.0, tier: 'LEGENDARY' }
+          logicGateFired = true
+        }
+        await pool.query(
+          'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
+          [cycleCounter, row.user_id, 'logic_gate']
+        )
+      }
+
+      // ARCHITECTS KEYSTONE: auto-upgrade bonus tier
+      if (equippedRelic === 'architects_keystone' && bonus) {
+        const upgraded = TIER_UPGRADE[bonus.tier]
+        if (upgraded) {
+          bonus = {
+            multiplier:
+              upgraded === 'MYTHICAL' ? MYTHICAL_MULTIPLIER : bonus.multiplier,
+            tier: upgraded
+          }
+        }
+      }
+
+      // KINETIC CAPACITOR: every 30 wins → +x2 after all other multipliers, wins counted while relic is equipped
+      let kineticFired = false
+      if (equippedRelic === 'kinetic_capacitor' && isWin && !logicGateFired) {
+        cycleCounter++
+        if (cycleCounter % 30 === 0) kineticFired = true
+        await pool.query(
+          'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
+          [cycleCounter, row.user_id, 'kinetic_capacitor']
+        )
+      }
+
+      // BUFFER MODULE: every 15 matches → streak shield on next loss, matches counted while relic is equipped
+      let streakShielded = false
+      if (equippedRelic === 'buffer_module') {
+        cycleCounter++
+        if (!isWin && cycleCounter % 15 === 0) streakShielded = true
+        await pool.query(
+          'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
+          [cycleCounter, row.user_id, 'buffer_module']
+        )
+      }
+
       const streakAfter = isWin
         ? Number(row.current_win_streak) + 1
-        : feverActive
+        : feverActive || streakShielded
           ? Number(row.current_win_streak)
           : 0
 
@@ -271,15 +351,33 @@ export const resolvePrediction = async (
               : 1n
 
       const streakNum = Number(streakMult)
-      const flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
+      let flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
+
+      if (isWin && flashEvent) {
+        if (snapshotRelic === 'lunar_siphon' && flashEventType === 'LUNAR')
+          flashMult += 0.5
+        if (
+          snapshotRelic === 'static_inductor' &&
+          flashEventType === 'ELECTRIC'
+        )
+          flashMult += 0.5
+        if (
+          snapshotRelic === 'volcanic_mantle' &&
+          flashEventType === 'HELLFIRE'
+        )
+          flashMult += 0.5
+        if (snapshotRelic === 'dealers_hand' && flashEventType === 'CARDS')
+          flashMult += 0.3
+
+        if (snapshotRelic === 'overdrive_relay') flashMult += 0.5
+      }
+
 
       const bonusMultScale = effectiveBonus
         ? BigInt(Math.floor(effectiveBonus.multiplier * 100))
         : 100n
       const flashMultScale =
-        isWin && flashEvent
-          ? BigInt(Math.floor(flashEvent.multiplier * 100))
-          : 100n
+        isWin && flashEvent ? BigInt(Math.floor(flashMult * 100)) : 100n
 
       const baseChange = isWin ? bet : bet / 2n
 
@@ -291,11 +389,16 @@ export const resolvePrediction = async (
         gainLoss = (afterFlash * bonusMultScale) / 100n
       } else {
         const safeguardActive = activeFestival?.type === 'SAFEGUARD'
+        // CONDUCTIVE FILAMENT: reduce loss by 5% on top of any other reduction
+        const conductiveReduction =
+          equippedRelic === 'conductive_filament' ? 95n : 100n
         const effectiveBase = safeguardActive ? (bet * 40n) / 100n : baseChange
+        const effectiveBaseWithRelic =
+          (effectiveBase * conductiveReduction) / 100n
         const savedAmount = effectiveBonus
-          ? (effectiveBase * bonusMultScale) / 100n
+          ? (effectiveBaseWithRelic * bonusMultScale) / 100n
           : 0n
-        gainLoss = -(effectiveBase - savedAmount)
+        gainLoss = -(effectiveBaseWithRelic - savedAmount)
       }
 
       const provisionalPoints = currentPoints + gainLoss
@@ -315,17 +418,65 @@ export const resolvePrediction = async (
         }
       }
 
-      // Surge Festival: 3x global multiplier on wins
+      // Surge Festival: 2x global multiplier on wins
       if (isWin && activeFestival?.type === 'SURGE') {
-        gainLoss = gainLoss * 3n
+        gainLoss = gainLoss * 2n
         const provisionalWithSurge = currentPoints + gainLoss
         if (provisionalWithSurge < POINTS_FLOOR) {
           gainLoss = POINTS_FLOOR - currentPoints
         }
       }
 
+      // PRISMATIC SHARD: +0.5x (of bet) only if NO flash event active
+      if (equippedRelic === 'prismatic_shard' && isWin && !flashActive) {
+        gainLoss = gainLoss + bet / 2n
+      }
+
+      // KINETIC CAPACITOR fire: applied after all other multipliers
+      const preKineticAmount = gainLoss
+      if (kineticFired) {
+        gainLoss = gainLoss * 2n
+      }
+
+      // SOUL OF THE MACHINE: 5% chance → 3x
+      let soulProc = false
+      const preSoulAmount = gainLoss
+      if (equippedRelic === 'soul_of_the_machine' && isWin) {
+        // REAL PRODUCTION VERSION
+        /*
+        if (Math.random() < 0.05) {
+          gainLoss = gainLoss * 3n
+          soulProc = true
+        }
+        */
+
+        // TEST VERSION (always triggers)
+        gainLoss = gainLoss * 3n
+        soulProc = true
+      }
+
+      let flashJustEndedFlag = false
+      if (isWin && flashEvent) {
+        flashJustEndedFlag = consumeFlashBetForUser(row.user_id)
+      }
+      if (oracleRigged || defiedOracle) {
+        await consumeOracleForUser(row.user_id)
+      }
+
+      let finalCombinedMult = Math.round(
+        streakNum * flashMult * (effectiveBonus ? effectiveBonus.multiplier : 1)
+      )
+      const festivalType = activeFestival?.type ?? null
+      const festivalMultValue = isWin && festivalType === 'SURGE' ? 3 : 1
+
+      if (isWin) {
+        if (activeFestival?.type === 'SURGE') finalCombinedMult *= 3
+        if (kineticFired) finalCombinedMult *= 2
+        if (soulProc) finalCombinedMult *= 3
+      }
+
       const baseFinalPure = isWin
-        ? (baseChange * streakMult * flashMultScale) / 100n
+        ? (baseChange * BigInt(streakNum) * flashMultScale) / 100n
         : baseChange
 
       const bonusDisplayAmount = effectiveBonus
@@ -334,23 +485,10 @@ export const resolvePrediction = async (
           : baseFinalPure + gainLoss
         : 0n
 
-      let flashJustEndedFlag = false
-      if (isWin && flashEvent) {
-        flashJustEndedFlag = consumeFlashBetForUser(row.user_id)
-      }
-
-      if (oracleRigged || defiedOracle) {
-        await consumeOracleForUser(row.user_id)
-      }
-
       const savedFlashType = flashJustEndedFlag ? null : flashEventType
-
-      const combinedMult = Math.round(
-        streakNum *
-          (flashJustEndedFlag ? 1 : flashMult) *
-          (effectiveBonus ? effectiveBonus.multiplier : 1)
-      )
-
+      if (savedFlashType) {
+        recordSessionFlashType(row.user_id, savedFlashType)
+      }
       await pool.query(
         `UPDATE predictions
             SET result = $1,
@@ -359,23 +497,26 @@ export const resolvePrediction = async (
               bonus_multiplier = $4,
               flash_event_type = $7,
               flash_multiplier = $8,
-              streak_multiplier = $9
+              streak_multiplier = $9,
+              relic_multiplier = $10,
+              total_multiplier = $11,
+              festival_multiplier = $12,
+              festival_type = $13
             WHERE user_id = $5 AND game_id = $6`,
         [
           result,
           gainLoss.toString(),
           effectiveBonus ? effectiveBonus.tier : null,
-          effectiveBonus ? Math.floor(effectiveBonus.multiplier * 100) : 100,
+          effectiveBonus ? effectiveBonus.multiplier : 1,
           row.user_id,
           row.game_id,
-          savedFlashType ??
-            (activeFestival
-              ? activeFestival.type === 'FEVER'
-                ? 'FEVER_FESTIVAL'
-                : activeFestival.type
-              : null),
+          savedFlashType,
           flashJustEndedFlag ? 1 : flashMult,
-          streakNum
+          Number(streakNum),
+          soulProc ? 3 : kineticFired ? 2 : 1,
+          finalCombinedMult,
+          festivalMultValue,
+          festivalType
         ]
       )
 
@@ -388,6 +529,7 @@ export const resolvePrediction = async (
               weekly_peak               = GREATEST(weekly_peak, points + $1),
               bonus_pity_count          = $3,
               total_volume              = total_volume + $4,
+              festivals_participated = festivals_participated + CASE WHEN $13 THEN 1 ELSE 0 END,
               biggest_win               = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
               biggest_single_win        = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
               current_win_streak        = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 WHEN $8 THEN current_win_streak ELSE 0 END,
@@ -396,6 +538,14 @@ export const resolvePrediction = async (
                                             THEN current_win_streak + 1
                                             ELSE max_win_streak
                                           END,
+              consecutive_flash_streak = CASE 
+                WHEN $14 THEN consecutive_flash_streak + 1 
+                ELSE 0 
+              END,
+              consecutive_flash_peak = CASE 
+                WHEN $14 THEN GREATEST(consecutive_flash_peak, consecutive_flash_streak + 1)
+                ELSE consecutive_flash_peak 
+              END,
               total_pities_earned       = total_pities_earned + $6,
               total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END,
               wins                      = CASE WHEN $5 = 'WIN' THEN wins + 1 ELSE wins END,
@@ -405,7 +555,9 @@ export const resolvePrediction = async (
               hellfire_events_caught    = CASE WHEN $7 = 'HELLFIRE' AND $5 = 'WIN' THEN hellfire_events_caught + 1 ELSE hellfire_events_caught END,
               cards_events_caught       = CASE WHEN $7 = 'CARDS'    AND $5 = 'WIN' THEN cards_events_caught    + 1 ELSE cards_events_caught    END,
               biggest_match_mult        = GREATEST(biggest_match_mult, $9),
-              bet_against_oracle_count  = CASE WHEN $10 THEN bet_against_oracle_count + 1 ELSE bet_against_oracle_count END
+              bet_against_oracle_count  = CASE WHEN $10 THEN bet_against_oracle_count + 1 ELSE bet_against_oracle_count END,
+              oracle_streak             = CASE WHEN $11 THEN oracle_streak + 1 WHEN $12 THEN 0 ELSE oracle_streak END,
+              oracle_max_streak         = CASE WHEN $11 THEN GREATEST(oracle_max_streak, oracle_streak + 1) ELSE oracle_max_streak END
           WHERE user_id = $2`,
         [
           gainLoss.toString(),
@@ -415,20 +567,24 @@ export const resolvePrediction = async (
           result,
           isNaturalPityHit ? 1 : 0,
           savedFlashType,
-          feverActive,
-          combinedMult,
-          betAgainstOracle
+          feverActive || streakShielded,
+          finalCombinedMult,
+          betAgainstOracle,
+          oracleRigged,
+          defiedOracle,
+          activeFestival !== null,
+          flashJustEndedFlag
         ]
       )
 
-      // ── Achievement check ─────────────────────────────────────────────────
+      // Achievement check
       const freshUser = await pool.query(
         `SELECT wins, max_win_streak, laps, points,
                 biggest_match_mult, total_pities_earned,
                 lunar_events_caught, electric_events_caught,
                 hellfire_events_caught, cards_events_caught,
                 bet_against_oracle_count, oracle_max_streak,
-                festivals_triggered, festivals_participated
+                festivals_triggered, festivals_participated, consecutive_flash_peak, has_used_auto_bet  
           FROM users WHERE user_id = $1`,
         [row.user_id]
       )
@@ -443,6 +599,19 @@ export const resolvePrediction = async (
           (r: { achievement_code: string }) => r.achievement_code
         )
       )
+
+      // Count relics for achievement check
+      const relicCountRes = await pool.query(
+        'SELECT relic_key, rarity FROM relics WHERE user_id = $1',
+        [row.user_id]
+      )
+      const userRelicKeys = new Set(relicCountRes.rows.map((r) => r.relic_key))
+      const mythCount = relicCountRes.rows.filter(
+        (r) => r.rarity === 'MYTHICAL'
+      ).length
+      const commonRareEpicCount = relicCountRes.rows.filter((r) =>
+        ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
+      ).length
 
       const stats: AchievementStats = {
         wins: Number(u.wins),
@@ -459,12 +628,16 @@ export const resolvePrediction = async (
         oracleMaxStreak: Number(u.oracle_max_streak),
         festivalsTriggered: Number(u.festivals_triggered),
         festivalsParticipated: Number(u.festivals_participated),
-        uniqueRelicsOwned: 0,
-        allRelicsOwned: false,
-        allCommonRareEpicRelics: false,
-        allMythicalRelics: false,
+        uniqueRelicsOwned: userRelicKeys.size,
+        allRelicsOwned: userRelicKeys.size >= RELICS.length,
+        allCommonRareEpicRelics: commonRareEpicCount >= 11,
+        allMythicalRelics: mythCount >= 3,
         biggestMultiplierTier: null,
-        totalAchievementsEarned: alreadyEarned.size
+        totalAchievementsEarned: alreadyEarned.size,
+        hadMythicRelicSlam: soulProc,
+        maxConsecutiveFlashEvents: Number(u.consecutive_flash_peak),
+        hasSeenAllFlashTypes: hasSeenAllFlashTypes(row.user_id),
+        hasUsedAutoBet: Boolean(u.has_used_auto_bet)
       }
 
       const firstPass = checkAchievements(stats, alreadyEarned)
@@ -513,6 +686,13 @@ export const resolvePrediction = async (
         }
       }
 
+      // Relic drop roll
+      const droppedRelic = await rollRelicDrop(
+        row.user_id,
+        equippedRelic,
+        Number(u.laps)
+      )
+
       broadcast(
         'prediction_result',
         JSON.stringify({
@@ -536,12 +716,21 @@ export const resolvePrediction = async (
           flashMult: flashJustEndedFlag ? 1 : flashMult,
           oracleRigged,
           ghostEchoAmount:
-            ghostEchoAmount > 0n ? ghostEchoAmount.toString() : null
+            ghostEchoAmount > 0n ? ghostEchoAmount.toString() : null,
+          relicCounter: cycleCounter,
+          relicDrop: droppedRelic ?? null,
+          soulProc,
+          kineticFired,
+          preSoulAmount: soulProc
+            ? preSoulAmount.toString()
+            : kineticFired
+              ? preKineticAmount.toString()
+              : null
         })
       )
 
       tryTriggerFlashEventForUser(row.user_id, broadcast)
-      // Festival trigger check - runs after flash trigger to avoid double-lockout race
+      // Festival trigger check, runs after flash trigger to avoid double-lockout race
       checkAndTriggerFestival(
         row.user_id,
         row.nickname ?? 'Anonymous',
@@ -552,7 +741,7 @@ export const resolvePrediction = async (
           flashActive,
           flashJustEnded: flashJustEndedFlag,
           winStreakAfter: streakAfter,
-          totalMultiplier: combinedMult
+          totalMultiplier: finalCombinedMult
         },
         broadcast
       )
@@ -580,22 +769,19 @@ export const getPaginatedUserPredictions = async (
   const baseParams = [userId, limit, offset]
   const countParams = [userId]
 
+  const pCols = `
+    p.id, p.game_id AS "gameId", p.pick, p.bet_amount AS "betAmount", 
+    p.gain_loss AS "gainLoss", p.result, p.bonus_tier AS "bonusTier", 
+    p.bonus_multiplier AS "bonusMultiplier", p.flash_event_type AS "flashEventType", 
+    p.flash_multiplier AS "flashMult", p.streak_multiplier AS "streakMultiplier", 
+    p.created_at AS "createdAt", p.relic_multiplier AS "relicMultiplier",
+    p.total_multiplier AS "totalMultiplier",
+    p.festival_multiplier AS "festivalMultiplier",
+    p.festival_type AS "festivalType"`
+
   if (sort === 'wins') {
     dataQuery = `
-      SELECT
-        p.id,
-        p.game_id          AS "gameId",
-        p.pick,
-        p.bet_amount       AS "betAmount",
-        p.gain_loss        AS "gainLoss",
-        p.result,
-        p.bonus_tier       AS "bonusTier",
-        p.bonus_multiplier AS "bonusMultiplier",
-        p.flash_event_type AS "flashEventType",
-        p.flash_multiplier AS "flashMult",
-        p.streak_multiplier AS "streakMultiplier",
-        p.created_at       AS "createdAt",
-        m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
+      SELECT ${pCols}, m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
       FROM predictions p
       LEFT JOIN matches m ON p.game_id = m.game_id
       WHERE p.user_id = $1 AND p.result = 'WIN'
@@ -604,40 +790,16 @@ export const getPaginatedUserPredictions = async (
     countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN'`
   } else if (sort === 'multipliers') {
     dataQuery = `
-      SELECT
-        p.id,
-        p.game_id          AS "gameId",
-        p.pick,
-        p.bet_amount       AS "betAmount",
-        p.gain_loss        AS "gainLoss",
-        p.result,
-        p.bonus_tier       AS "bonusTier",
-        p.bonus_multiplier AS "bonusMultiplier",
-        p.flash_event_type AS "flashEventType",
-        p.flash_multiplier AS "flashMult",
-        p.created_at       AS "createdAt",
-        m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
+      SELECT ${pCols}, m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
       FROM predictions p
       LEFT JOIN matches m ON p.game_id = m.game_id
-      WHERE p.user_id = $1 AND p.result = 'WIN' AND (p.bonus_multiplier > 0 OR p.flash_multiplier > 1)
-      ORDER BY (p.bonus_multiplier * GREATEST(p.flash_multiplier, 1)) DESC
+      WHERE p.user_id = $1 AND p.result = 'WIN' AND (p.bonus_multiplier > 0 OR p.flash_multiplier > 1 OR p.festival_multiplier > 1)
+      ORDER BY p.total_multiplier DESC
       LIMIT $2 OFFSET $3`
-    countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN' AND (bonus_multiplier > 0 OR flash_multiplier > 1)`
+    countQuery = `SELECT COUNT(*) FROM predictions WHERE user_id = $1 AND result = 'WIN' AND (bonus_multiplier > 0 OR flash_multiplier > 1 OR festival_multiplier > 1)`
   } else {
     dataQuery = `
-      SELECT
-        p.id,
-        p.game_id          AS "gameId",
-        p.pick,
-        p.bet_amount       AS "betAmount",
-        p.gain_loss        AS "gainLoss",
-        p.result,
-        p.bonus_tier       AS "bonusTier",
-        p.bonus_multiplier AS "bonusMultiplier",
-        p.flash_event_type AS "flashEventType",
-        p.flash_multiplier AS "flashMult",
-        p.created_at       AS "createdAt",
-        m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
+      SELECT ${pCols}, m.player_a_name, m.player_a_played, m.player_b_name, m.player_b_played, m.time, m.type
       FROM predictions p
       LEFT JOIN matches m ON p.game_id = m.game_id
       WHERE p.user_id = $1 AND p.result IS NOT NULL
@@ -679,7 +841,11 @@ export const getPaginatedUserPredictions = async (
     flashEventType: row.flashEventType ?? null,
     flashMult: Number(row.flashMult ?? 1),
     streakMultiplier: Number(row.streakMultiplier ?? 1),
-    createdAt: Number(row.createdAt)
+    createdAt: Number(row.createdAt),
+    relicMultiplier: Number(row.relicMultiplier ?? 1),
+    totalMultiplier: Number(row.totalMultiplier || row.total_multiplier || 1),
+    festivalMultiplier: Number(row.festivalMultiplier || 1),
+    festivalType: row.festivalType || null
   }))
 
   return { matches, predictions, total, hasMore: offset + limit < total }
@@ -701,12 +867,11 @@ export const getUserStats = async (userId: string, shortId: string) => {
         u.bonus_pity_count,
         u.total_pities_earned,
         u.joined_date,
-        u.wins,   -- Cached total wins from users table
-        u.losses, -- Cached total losses from users table
+        u.wins,
+        u.losses,
         COALESCE(p_stats.total_gain, 0) as total_gain
       FROM users u
       LEFT JOIN (
-        -- We only need the SUM from here now, making this much faster
         SELECT
             user_id,
             SUM(gain_loss) FILTER (WHERE gain_loss > 0) AS total_gain
@@ -744,9 +909,7 @@ export const getUserStats = async (userId: string, shortId: string) => {
 
   const wins = Number(row.wins || 0)
   const losses = Number(row.losses || 0)
-
   const total = wins + losses
-
   const totalGain = row.total_gain.toString()
 
   return {
@@ -754,7 +917,7 @@ export const getUserStats = async (userId: string, shortId: string) => {
     wins,
     losses,
     winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
-    totalGain: totalGain,
+    totalGain,
     points: row.points.toString(),
     peakPoints: row.peak_points.toString(),
     dailyPeak: row.daily_peak.toString(),
@@ -769,6 +932,7 @@ export const getUserStats = async (userId: string, shortId: string) => {
     avgReturn: total > 0 ? (BigInt(totalGain) / BigInt(total)).toString() : '0'
   }
 }
+
 export const getGlobalBettingStats = async () => {
   const result = await pool.query(
     `SELECT

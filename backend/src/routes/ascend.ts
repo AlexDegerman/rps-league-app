@@ -56,25 +56,21 @@ router.post('/', async (req, res) => {
       [newFastest, totalBets, currentPoints.toString(), userId]
     )
 
-    const updated = await pool.query(
-      `SELECT laps, fastest_lap_bets FROM users WHERE user_id = $1`,
+    const finalUserRes = await pool.query(
+      `SELECT nickname, laps, fastest_lap_bets FROM users WHERE user_id = $1`,
       [userId]
     )
 
-    // Surge Festival: Chrono-Lap completion
-    const updatedRow = updated.rows[0]
-    // Fetch nickname for the broadcast message
-    const nicknameRes = await pool.query(
-      `SELECT nickname FROM users WHERE user_id = $1`,
-      [userId]
-    )
-    const nickname = nicknameRes.rows[0]?.nickname ?? 'Anonymous'
-    triggerSurgeFestival(nickname, broadcast)
+    const userData = finalUserRes.rows[0]
+    const nickname = userData?.nickname ?? 'Anonymous'
+    const currentLap = userData?.laps ?? 0
+
+    triggerSurgeFestival(nickname, userId, broadcast)
 
     res.json({
       success: true,
-      laps: updated.rows[0].laps,
-      fastestLapBets: updated.rows[0].fastest_lap_bets
+      laps: currentLap,
+      fastestLapBets: userData?.fastest_lap_bets
     })
   } catch (err) {
     console.error('Ascend error:', err)

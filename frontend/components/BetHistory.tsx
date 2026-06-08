@@ -24,6 +24,25 @@ const TAB_LABELS: Record<Tab, string> = {
 
 // --- SUB-COMPONENTS ---
 
+function RelicMultBadge({ relicMultiplier }: { relicMultiplier: number }) {
+  if (relicMultiplier <= 1) return null
+  const isSoul = relicMultiplier === 3
+  return (
+    <div
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border font-black text-[8px] uppercase tracking-widest ${
+        isSoul
+          ? 'bg-red-950 border-red-500 text-red-200'
+          : 'bg-yellow-950 border-yellow-500 text-yellow-200'
+      }`}
+    >
+      <span>{isSoul ? '👁️' : '⚡'}</span>
+      <span>
+        {isSoul ? 'Soul' : 'Kinetic'} ×{relicMultiplier}
+      </span>
+    </div>
+  )
+}
+
 function StreakBadge({ streakMult }: { streakMult: number }) {
   if (streakMult <= 1) return null
 
@@ -85,28 +104,20 @@ function FlashEventBadge({
 }
 
 function TotalMultiplierHeader({
-  bonusMultiplier,
-  flashMult,
-  streakMult,
+  totalMultiplier,
   isWin
 }: {
-  bonusMultiplier: number
-  flashMult: number
-  streakMult: number
+  totalMultiplier?: number | string | null
   isWin: boolean
 }) {
-  if (!isWin) return null
-  const b = bonusMultiplier > 0 ? bonusMultiplier / 100 : 1
-  const f = flashMult > 1 ? flashMult : 1
-  const s = streakMult > 1 ? streakMult : 1
+  const val = Number(totalMultiplier || 0)
 
-  const totalMult = b * f * s
-  if (totalMult < 1.01) return null
+  if (!isWin || val <= 1.01) return null
 
   return (
     <div className="flex items-center justify-center relative z-30">
       <span className="text-[9px] px-2 py-0.5 font-black uppercase tracking-widest rounded border-2 border-purple-500 bg-white text-purple-600 shadow-md">
-        {totalMult.toFixed(1)}× TOTAL
+        {val.toFixed(1)}× TOTAL
       </span>
     </div>
   )
@@ -130,8 +141,31 @@ function BonusBadge({
         className={`text-[9px] px-2 py-0.5 font-black uppercase tracking-tight rounded border shadow-sm ${tier === 'LEGENDARY' ? 'text-yellow-600 border-yellow-400 bg-white' : 'bg-white border-black/10 text-gray-950'}`}
       >
         <span className={style.color}>{style.label}</span>{' '}
-        {(multiplier / 100).toFixed(1)}×
+        {multiplier.toFixed(1)}×
       </span>
+    </div>
+  )
+}
+
+function FestivalBadge({
+  type,
+  mult,
+  isWin
+}: {
+  type: string | null
+  mult: number
+  isWin: boolean
+}) {
+  if (!isWin || !type) return null
+
+  return (
+    <div className="flex items-center justify-center relative z-30">
+      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-cyan-400 bg-cyan-50 font-black text-[8px] uppercase tracking-widest shadow-sm text-cyan-700">
+        <span>⚡</span>
+        <span>
+          {type} {mult > 1 ? `x${mult.toFixed(0)}` : 'FESTIVAL'}
+        </span>
+      </div>
     </div>
   )
 }
@@ -170,7 +204,7 @@ function BetRow({
     <li
       className={`relative overflow-hidden w-full p-2.5 rounded-3xl border-2 transition-all ${cardClass}`}
     >
-      <div className="absolute top-2 right-2 z-40">
+      <div className="absolute bottom-2 right-2 z-40">
         <span className="text-[7px] font-black text-gray-400 uppercase tabular-nums bg-white/60 backdrop-blur-sm px-1.5 py-0.5 rounded border border-black/5">
           {formatDateTime(entry.createdAt)}
         </span>
@@ -196,13 +230,12 @@ function BetRow({
 
       <div className="flex flex-col items-center justify-center pt-1">
         <TotalMultiplierHeader
-          bonusMultiplier={entry.bonusMultiplier}
-          flashMult={entry.flashMult ?? 1}
-          streakMult={entry.streakMult ?? 1}
+          totalMultiplier={entry.totalMultiplier}
           isWin={isWin}
         />
 
         <div className="flex gap-2 flex-wrap justify-center mt-1.5 relative z-30">
+          <RelicMultBadge relicMultiplier={entry.relicMultiplier} />
           <StreakBadge streakMult={entry.streakMult} />
 
           <BonusBadge
@@ -215,6 +248,11 @@ function BetRow({
               flashMult={entry.flashMult ?? 1}
             />
           )}
+          <FestivalBadge
+            type={entry.festivalType}
+            mult={entry.festivalMultiplier}
+            isWin={isWin}
+          />
         </div>
 
         <div className="flex items-center justify-center relative py-2.5 pl-4">
@@ -283,11 +321,11 @@ function BetRow({
 
 // --- MAIN COMPONENT ---
 
-function useTabFetchFn(userId: string | null, tab: Tab) {
+function useTabFetchFn(userId: string | null, tab: Tab,) {
   return useCallback(
     async (page: number) => {
       if (!userId) return { matches: [], total: 0, hasMore: false }
-
+      
       const data = await fetchUserBetHistory(userId, page, tab)
 
       if (!data) {
@@ -319,7 +357,11 @@ function useTabFetchFn(userId: string | null, tab: Tab) {
           playerAName: m.playerA.name,
           playerBName: m.playerB.name,
           playerAPlayed: m.playerA.played,
-          playerBPlayed: m.playerB.played
+          playerBPlayed: m.playerB.played,
+          relicMultiplier: Number(pred?.relicMultiplier ?? 1),
+          totalMultiplier: Number(pred?.totalMultiplier ?? 1),
+          festivalMultiplier: Number(pred?.festivalMultiplier ?? 1),
+          festivalType: pred?.festivalType ?? null
         }
       })
 

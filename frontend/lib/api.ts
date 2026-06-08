@@ -209,15 +209,22 @@ export async function fetchMatchesByPlayer(
 
 /* --- LEADERBOARDS & STATS --- */
 
-export async function fetchHistoricalLeaderboard(startDate?: string, endDate?: string) {
+export async function fetchHistoricalLeaderboard(
+  startDate?: string,
+  endDate?: string
+) {
   const params = new URLSearchParams()
   if (startDate) params.set('startDate', startDate)
   if (endDate) params.set('endDate', endDate)
-  return handleResponse<PlayerStats[]>(fetch(`${API_BASE}/api/leaderboard/historical?${params}`))
+  return handleResponse<PlayerStats[]>(
+    fetch(`${API_BASE}/api/leaderboard/historical?${params}`)
+  )
 }
 
 export async function fetchTodayLeaderboard() {
-  return handleResponse<PlayerStats[]>(fetch(`${API_BASE}/api/leaderboard/today`))
+  return handleResponse<PlayerStats[]>(
+    fetch(`${API_BASE}/api/leaderboard/today`)
+  )
 }
 
 export async function fetchUnifiedLeaderboard(
@@ -356,5 +363,17 @@ export async function updateUserBadges(shortId: string, badges: string[]) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ badges })
     })
+  )
+}
+
+export async function fetchEquippedRelic(userId: string) {
+  return handleResponse<{ relic: import('@/lib/relics').RelicDef | null }>(
+    fetch(`${API_BASE}/api/relics/equipped?userId=${userId}`)
+  )
+}
+
+export async function fetchUserRelics(userId: string) {
+  return handleResponse<import('@/lib/relics').RelicDef[]>(
+    fetch(`${API_BASE}/api/relics?userId=${userId}`)
   )
 }

@@ -151,6 +151,13 @@ const Header = () => {
               Festivals
             </Link>
             <Link
+              href="/relicshowcase"
+              onClick={() => setIsOpen(false)}
+              className={menuRowItemClass('/relicshowcase')}
+            >
+              Relics
+            </Link>
+            <Link
               href="/feedback"
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/feedback')}

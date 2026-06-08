@@ -49,6 +49,10 @@ export interface PredictionRecord {
   flashEventType?: string | null
   flashMult?: number
   streakMultiplier?: number
+  relicMultiplier?: number
+  totalMultiplier: number
+  festivalMultiplier?: number
+  festivalType?: string | null
 }
 export interface UserStats {
   joinedDate: string
@@ -83,7 +87,7 @@ export interface UserPointsData {
   laps: number
   fastestLapBets: number
   linkedinUrl: string | null
-  showLinkedinBadge: boolean 
+  showLinkedinBadge: boolean
 }
 
 export interface LeaderboardEntry {
@@ -177,9 +181,13 @@ export interface BetHistoryEntry {
   flashMult: number
   flashEventType: string | null
   streakMult: number
+  relicMultiplier: number
+  totalMultiplier: number
+  festivalMultiplier: number
+  festivalType: string | null
 }
 
-export type BonusTier = 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON'
+export type BonusTier = 'MYTHICAL' | 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON'
 
 export interface MatchRowProps {
   match: Match
@@ -188,6 +196,9 @@ export interface MatchRowProps {
   alwaysLeft?: boolean
   winStreak?: number
   visualMode?: string | null
+  totalMultiplier: number
+  festivalMultiplier?: number
+  festivalType?: string | null
 }
 
 export type LeaderboardTab = 'daily' | 'weekly' | 'alltime'
@@ -226,6 +237,9 @@ export interface ResultAnim {
   flashMult?: number
   flashEventType?: string | null
   ghostEchoAmount?: bigint | null
+  soulProc?: boolean
+  kineticFired?: boolean
+  preSoulAmount?: bigint
 }
 
 export type EventTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE' | null
@@ -316,4 +330,14 @@ export interface AchievementStats {
   festivalsTriggered: number
   festivalsParticipated: number
   oracleMaxStreak: number
+  totalAchievementsEarned: number
+  hadMythicRelicSlam: boolean
+  uniqueRelicsOwned: number
+  allRelicsOwned: boolean
+  allCommonRareEpicRelics: boolean
+  allMythicalRelics: boolean
+  biggestMultiplierTier: string | null
+  maxConsecutiveFlashEvents: number
+  hasSeenAllFlashTypes: boolean
+  hasUsedAutoBet: boolean
 }

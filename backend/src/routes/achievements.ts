@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import pool from '../utils/db.js'
 import { ALL_ACHIEVEMENTS } from '../services/achievementChecker.js'
+import { RELICS } from '../services/relicService.js'
+import { hasSeenAllFlashTypes } from '../services/flashEventService.js'
 
 const router = Router()
 
@@ -9,23 +11,33 @@ router.get('/:shortId', async (req, res) => {
   const { shortId } = req.params
   try {
     const userRes = await pool.query(
-      `SELECT user_id, displayed_badges, wins, max_win_streak, laps, points, 
-              biggest_match_mult, total_pities_earned, lunar_events_caught, 
-              electric_events_caught, hellfire_events_caught, cards_events_caught,
-              bet_against_oracle_count, festivals_triggered, festivals_participated
-        FROM users WHERE short_id = $1`,
+      `SELECT * FROM users WHERE short_id = $1`,
       [shortId]
     )
-    if (userRes.rows.length === 0) return res.status(404).json({ error: 'User not found' })
-
+    if (userRes.rows.length === 0)
+      return res.status(404).json({ error: 'User not found' })
     const u = userRes.rows[0]
+
     const earnedRes = await pool.query(
       `SELECT achievement_code, earned_at FROM user_achievements WHERE user_id = $1`,
       [u.user_id]
     )
-    const earnedMap = new Map(earnedRes.rows.map(r => [r.achievement_code, Number(r.earned_at)]))
+    const earnedMap = new Map(
+      earnedRes.rows.map((r) => [r.achievement_code, Number(r.earned_at)])
+    )
 
-    // Mapping raw stats to achievements
+    const relicRes = await pool.query(
+      `SELECT relic_key, rarity FROM relics WHERE user_id = $1`,
+      [u.user_id]
+    )
+    const userRelics = relicRes.rows
+    const mythicRelicCount = userRelics.filter(
+      (r) => r.rarity === 'MYTHICAL'
+    ).length
+    const commonRareEpicCount = userRelics.filter((r) =>
+      ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
+    ).length
+
     const stats = {
       wins: Number(u.wins),
       maxWinStreak: Number(u.max_win_streak),
@@ -38,8 +50,23 @@ router.get('/:shortId', async (req, res) => {
       hellfireCaught: Number(u.hellfire_events_caught),
       cardsCaught: Number(u.cards_events_caught),
       betAgainstOracleCount: Number(u.bet_against_oracle_count),
+      oracleMaxStreak: Number(u.oracle_max_streak),
+      totalAchievementsEarned: earnedMap.size,
       festivalsTriggered: Number(u.festivals_triggered),
-      festivalsParticipated: Number(u.festivals_participated)
+      festivalsParticipated: Number(u.festivals_participated),
+
+      // Relic Stats
+      uniqueRelicsOwned: userRelics.length,
+      allRelicsOwned: userRelics.length >= RELICS.length,
+      allCommonRareEpicRelics: commonRareEpicCount >= 11, // Adjust when RELICS list changes
+      allMythicalRelics: mythicRelicCount >= 3,
+      hadMythicRelicSlam: !!u.had_mythic_relic_slam,
+
+      // Flash / Session Stats
+      maxConsecutiveFlashEvents: Number(u.consecutive_flash_peak),
+      hasSeenAllFlashTypes: hasSeenAllFlashTypes(u.user_id),
+      hasUsedAutoBet: !!u.has_used_auto_bet,
+      biggestMultiplierTier: null
     }
 
     const achievements = ALL_ACHIEVEMENTS.map((def) => ({
@@ -50,15 +77,19 @@ router.get('/:shortId', async (req, res) => {
       rarity: def.rarity,
       category: def.category,
       earned: earnedMap.has(def.code),
-      earnedAt: earnedMap.get(def.code) ?? null,
+      earnedAt: earnedMap.get(def.code) ?? null
     }))
 
-    res.json({ achievements, stats, displayedBadges: u.displayed_badges ?? [] })
+    res.json({
+      achievements,
+      stats,
+      displayedBadges: u.displayed_badges ?? []
+    })
   } catch (err) {
+    console.error('Achievements GET error:', err)
     res.status(500).json({ error: 'Internal server error' })
   }
 })
-
 // PATCH /api/achievements/:shortId/badges
 router.patch('/:shortId/badges', async (req, res) => {
   const { shortId } = req.params

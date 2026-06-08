@@ -2,6 +2,7 @@
 
 import { useIdleStore } from '@/app/stores/idleStore'
 import { useUIStore } from '@/app/stores/uiStore'
+import { getOrCreateUser } from '@/lib/user'
 
 export default function IdleBetControls() {
   const { isEligible, idleSide, setIdleSide, setHasInteractedWithIdle } =
@@ -10,11 +11,19 @@ export default function IdleBetControls() {
 
   const handleToggle = (side: 'left' | 'right') => {
     if (!isEligible) return
-
     setHasInteractedWithIdle(true)
     setNotification(null)
 
+    const turningOn = idleSide !== side
     setIdleSide(idleSide === side ? null : side)
+
+    if (turningOn) {
+      const user = getOrCreateUser()
+      fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.userId}/auto-bet-used`,
+        { method: 'POST' }
+      ).catch(() => {})
+    }
   }
 
   const baseBtn =

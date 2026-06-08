@@ -24,17 +24,19 @@ export interface AchievementStats {
   hellfireCaught: number
   cardsCaught: number
   betAgainstOracleCount: number
-  oracleMaxStreak: number // max consecutive days oracle was used
+  oracleMaxStreak: number
   totalAchievementsEarned: number
   festivalsTriggered: number
   festivalsParticipated: number
-
-  // Stubs - 0/false until those systems ship
+  hadMythicRelicSlam: boolean
   uniqueRelicsOwned: number
   allRelicsOwned: boolean
   allCommonRareEpicRelics: boolean
   allMythicalRelics: boolean
   biggestMultiplierTier: string | null
+  maxConsecutiveFlashEvents: number
+  hasSeenAllFlashTypes: boolean
+  hasUsedAutoBet: boolean
 }
 
 // ── Category 1: Combatants ────────────────────────────────────────────────────
@@ -56,8 +58,6 @@ const MOMENTUM: AchievementDef[] = [
 ]
 
 // ── Category 3: Prestige / Laps ───────────────────────────────────────────────
-// laps column is live in DB. To activate: replace (_s) => false with (s) => s.laps >= N
-// and uncomment 'Prestige' in CATEGORY_ORDER in lib/achievements.ts
 const PRESTIGE: AchievementDef[] = [
   {
     code: 'LAP1',
@@ -117,21 +117,100 @@ const DIMENSIONAL: AchievementDef[] = [
 
 // ── Category 5: Multiplier Madness ───────────────────────────────────────────
 const MULTIPLIER: AchievementDef[] = [
-  { code: '10X',  name: 'Amplified',  requirement: 'Reach x10 Match Multiplier',      icon: '⚡', rarity: 'COMMON',    category: 'Multiplier', check: (s) => s.biggestMatchMult >= 10 },
-  { code: '50X',  name: 'Surge',      requirement: 'Reach x30 Match Multiplier',      icon: '🌪️', rarity: 'RARE',      category: 'Multiplier', check: (s) => s.biggestMatchMult >= 30 },
-  { code: 'NUKE', name: 'Nuclear',    requirement: 'Reach x60 Match Multiplier',     icon: '☢️', rarity: 'EPIC',      category: 'Multiplier', check: (s) => s.biggestMatchMult >= 60 },
-  { code: 'NOVA', name: 'Supernova',  requirement: 'Reach x100 Match Multiplier',     icon: '🌟', rarity: 'LEGENDARY', category: 'Multiplier', check: (s) => s.biggestMatchMult >= 100 },
-  { code: 'BOOM', name: 'The Big One',requirement: 'Trigger a x3 Mythic Relic Slam', icon: '🧨', rarity: 'MYTHICAL',  category: 'Multiplier', check: (_s) => false }, // stub: relics not built
+  {
+    code: '10X',
+    name: 'Amplified',
+    requirement: 'Reach x10 Match Multiplier',
+    icon: '⚡',
+    rarity: 'COMMON',
+    category: 'Multiplier',
+    check: (s) => s.biggestMatchMult >= 10
+  },
+  {
+    code: '50X',
+    name: 'Surge',
+    requirement: 'Reach x30 Match Multiplier',
+    icon: '🌪️',
+    rarity: 'RARE',
+    category: 'Multiplier',
+    check: (s) => s.biggestMatchMult >= 30
+  },
+  {
+    code: 'NUKE',
+    name: 'Nuclear',
+    requirement: 'Reach x60 Match Multiplier',
+    icon: '☢️',
+    rarity: 'EPIC',
+    category: 'Multiplier',
+    check: (s) => s.biggestMatchMult >= 60
+  },
+  {
+    code: 'NOVA',
+    name: 'Supernova',
+    requirement: 'Reach x100 Match Multiplier',
+    icon: '🌟',
+    rarity: 'LEGENDARY',
+    category: 'Multiplier',
+    check: (s) => s.biggestMatchMult >= 100
+  },
+  {
+    code: 'BOOM',
+    name: 'The Big One',
+    requirement: 'Trigger a x3 Mythic Relic Slam',
+    icon: '🧨',
+    rarity: 'MYTHICAL',
+    category: 'Multiplier',
+    check: (s) => s.hadMythicRelicSlam
+  }
 ]
 
 // ── Category 6: Reliquary ─────────────────────────────────────────────────────
-// All stubs - checks return false until relic system ships
 const RELIQUARY: AchievementDef[] = [
-  { code: '5RL',  name: 'Scavenger',    requirement: 'Own 5 Unique Relics',                icon: '📁', rarity: 'COMMON',    category: 'Reliquary', check: (_s) => false },
-  { code: '10RL', name: 'Collector',    requirement: 'Own 10 Unique Relics',               icon: '🎒', rarity: 'RARE',      category: 'Reliquary', check: (_s) => false },
-  { code: 'MUSE', name: 'True Curator', requirement: 'Own all Common, Rare & Epic Relics', icon: '🏛️', rarity: 'EPIC',      category: 'Reliquary', check: (_s) => false },
-  { code: 'FULL', name: 'Full House',   requirement: 'Own all 17 Unique Relics',           icon: '🎰', rarity: 'LEGENDARY', category: 'Reliquary', check: (_s) => false },
-  { code: 'TRI',  name: 'Trinity',      requirement: 'Own all 3 Mythical Relics',          icon: '🔱', rarity: 'MYTHICAL',  category: 'Reliquary', check: (_s) => false },
+  {
+    code: '5RL',
+    name: 'Scavenger',
+    requirement: 'Own 5 Unique Relics',
+    icon: '📁',
+    rarity: 'COMMON',
+    category: 'Reliquary',
+    check: (s) => s.uniqueRelicsOwned >= 5
+  },
+  {
+    code: '10RL',
+    name: 'Collector',
+    requirement: 'Own 10 Unique Relics',
+    icon: '🎒',
+    rarity: 'RARE',
+    category: 'Reliquary',
+    check: (s) => s.uniqueRelicsOwned >= 10
+  },
+  {
+    code: 'MUSE',
+    name: 'True Curator',
+    requirement: 'Own all Common, Rare & Epic Relics',
+    icon: '🏛️',
+    rarity: 'EPIC',
+    category: 'Reliquary',
+    check: (s) => s.allCommonRareEpicRelics
+  },
+  {
+    code: 'FULL',
+    name: 'Full House',
+    requirement: 'Own all 17 Unique Relics',
+    icon: '🎰',
+    rarity: 'LEGENDARY',
+    category: 'Reliquary',
+    check: (s) => s.allRelicsOwned
+  },
+  {
+    code: 'TRI',
+    name: 'Trinity',
+    requirement: 'Own all 3 Mythical Relics',
+    icon: '🔱',
+    rarity: 'MYTHICAL',
+    category: 'Reliquary',
+    check: (s) => s.allMythicalRelics
+  }
 ]
 
 // ── Category 7–10: Flash Event Tracks ────────────────────────────────────────
@@ -206,7 +285,7 @@ const META: AchievementDef[] = [
     icon: '⚙️',
     rarity: 'RARE',
     category: 'Meta',
-    check: (_s) => false
+    check: (s) => s.hasUsedAutoBet
   },
   {
     code: 'SLAY',
@@ -224,7 +303,7 @@ const META: AchievementDef[] = [
     icon: '💤',
     rarity: 'MYTHICAL',
     category: 'Meta',
-    check: (_s) => false
+    check: (s) => s.maxConsecutiveFlashEvents >= 2
   },
   {
     code: 'STRM',
@@ -233,7 +312,7 @@ const META: AchievementDef[] = [
     icon: '🌪️',
     rarity: 'MYTHICAL',
     category: 'Meta',
-    check: (_s) => false
+    check: (s) => s.hasSeenAllFlashTypes
   }
 ]
 
@@ -242,9 +321,6 @@ const META: AchievementDef[] = [
 // Other users' hidden achievements are never revealed - even locked ones are invisible.
 const MISCELLANEOUS: AchievementDef[] = [
   {
-    // REBL: fires when user bets AGAINST the oracle's prediction.
-    // bet_against_oracle_count incremented in resolvePrediction when row.bet_against_oracle = true.
-    // The flag is set in savePrediction via the defiedOracle path - already live in your service.
     code: 'REBL',
     name: 'The Rebel',
     requirement: 'Bet against the Oracle',
@@ -358,7 +434,6 @@ const COLLECTOR: AchievementDef[] = [
 ]
 
 // ── Rainbow ───────────────────────────────────────────────────────────────────
-// Stub: requires relic system. Activates once allMythicalRelics is wired.
 const RAINBOW_CAT: AchievementDef[] = [
   {
     code: 'KING',
@@ -367,8 +442,8 @@ const RAINBOW_CAT: AchievementDef[] = [
     icon: '👑',
     rarity: 'RAINBOW',
     category: 'Rainbow',
-    check: (_s) => false,
-  },
+    check: (s) => s.wins >= 1000 && s.laps >= 50 && s.allMythicalRelics
+  }
 ]
 
 export const ALL_ACHIEVEMENTS: AchievementDef[] = [

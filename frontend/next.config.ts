@@ -2,7 +2,10 @@ import { withSentryConfig } from '@sentry/nextjs'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true
+  reactStrictMode: true,
+  experimental: {
+    optimizePackageImports: ['lucide-react']
+  }
 }
 
 export default withSentryConfig(nextConfig, {

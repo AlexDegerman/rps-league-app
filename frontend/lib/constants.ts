@@ -1,6 +1,15 @@
 import { BonusStyle, BonusTier } from '@/types/rps'
 
 export const BONUS_TIER_STYLES: Record<BonusTier, BonusStyle> = {
+  MYTHICAL: {
+    label: 'Mythical',
+    color: 'text-red-400',
+    bg: 'bg-red-50',
+    cardClass:
+      'border-red-300 shadow-[0_0_30px_rgba(220,38,38,0.5)] bg-gradient-to-br from-white via-red-50/30 to-white animate-[pulsate_0.8s_ease-in-out_infinite]',
+    auraClass: 'aura-mythical',
+    amountColor: 'text-green-400'
+  },
   LEGENDARY: {
     label: 'Legendary',
     color: 'text-amber-700',
@@ -110,7 +119,7 @@ export const EVENT_CARD: Record<
     label: 'Surge Festival',
     emoji: '⚡',
     textClass: 'text-cyan-200',
-    multLabel: '3x POWER'
+    multLabel: '2x WINS'
   },
   VAULT: {
     cardClass: 'event-card-base event-card-vault',

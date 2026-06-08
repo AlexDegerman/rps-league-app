@@ -60,7 +60,8 @@ export function useIdleBet() {
     setPrediction(target.gameId, {
       gameId: target.gameId,
       pick: playerName,
-      confirmed: false
+      confirmed: false,
+      totalMultiplier: 1
     })
 
     console.log(`[IdleBet] 🚀 Auto-betting ${idleSide} for RoyalSilverFalcon`)
@@ -78,7 +79,8 @@ export function useIdleBet() {
           setPrediction(target.gameId, {
             gameId: target.gameId,
             pick: playerName,
-            confirmed: true
+            confirmed: true,
+            totalMultiplier: 1
           })
         }
       })

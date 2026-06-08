@@ -215,11 +215,17 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 ---
 
 ## 🎲 Category 15: Miscellaneous
+
 *Hidden accomplishments revealed only upon acquisition.*
+
+<details>
+<summary>Reveal hidden achievements</summary>
 
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
 | 🔵 Rare | The Rebel | Bet against the Oracle | 🎭 | `REBL` |
+
+</details>
 
 ---
 

@@ -6,7 +6,7 @@ export const CATEGORY_ORDER = [
   'Prestige',
   'Dimensional',
   'Multiplier',
-  // 'Reliquary',     // uncomment when relic system ships
+  'Reliquary',
   'Lunar',
   'Electric',
   'Hellfire',
@@ -15,8 +15,8 @@ export const CATEGORY_ORDER = [
   'Festival',
   'Meta',
   'Collector',
-  'Miscellaneous'
-  // 'Rainbow',       // uncomment when relics + laps both ship
+  'Miscellaneous',
+  'Rainbow',
 ] as const
 
 export type CategoryKey = (typeof CATEGORY_ORDER)[number]
@@ -139,7 +139,7 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
   FIRE: { code: 'FIRE', name: 'Inferno', icon: '🌋', rarity: 'EPIC' },
   BST: { code: 'BST', name: 'Beast Mode', icon: '💠', rarity: 'LEGENDARY' },
   ZEN: { code: 'ZEN', name: 'Ascended', icon: '🧘', rarity: 'MYTHICAL' },
-  // Prestige (stubs — badges ready for when laps activate)
+  // Prestige
   LAP1: { code: 'LAP1', name: 'Rebirth', icon: '♻️', rarity: 'COMMON' },
   LAP5: { code: 'LAP5', name: 'Cycler', icon: '🌀', rarity: 'RARE' },
   '10LP': { code: '10LP', name: 'Lapse King', icon: '🔄', rarity: 'EPIC' },
@@ -172,7 +172,7 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
   NUKE: { code: 'NUKE', name: 'Nuclear', icon: '☢️', rarity: 'EPIC' },
   NOVA: { code: 'NOVA', name: 'Supernova', icon: '🌟', rarity: 'LEGENDARY' },
   BOOM: { code: 'BOOM', name: 'The Big One', icon: '🧨', rarity: 'MYTHICAL' },
-  // Reliquary (stubs)
+  // Reliquary
   '5RL': { code: '5RL', name: 'Scavenger', icon: '📁', rarity: 'COMMON' },
   '10RL': { code: '10RL', name: 'Collector', icon: '🎒', rarity: 'RARE' },
   MUSE: { code: 'MUSE', name: 'True Curator', icon: '🏛️', rarity: 'EPIC' },
@@ -217,14 +217,17 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
   PITY: { code: 'PITY', name: 'Pity King', icon: '🩹', rarity: 'COMMON' },
   FND: { code: 'FND', name: 'Founder', icon: '⭐', rarity: 'RARE' },
   SLAY: { code: 'SLAY', name: 'God-Killer', icon: '👺', rarity: 'MYTHICAL' },
+  AUTO: { code: 'AUTO', name: 'Autopilot', icon: '⚙️', rarity: 'RARE' },
+  DREM: { code: 'DREM', name: 'Fever Dream', icon: '💤', rarity: 'MYTHICAL' },
+  STRM: { code: 'STRM', name: 'Storm Chaser', icon: '🌪️', rarity: 'MYTHICAL' },
+  COLMAX: { code: 'COLMAX', name: 'Omnivore', icon: '🌟', rarity: 'MYTHICAL' },
   // Miscellaneous (hidden)
   REBL: { code: 'REBL', name: 'The Rebel', icon: '🎭', rarity: 'RARE' },
   // Total achievement collection
-  COL5: { code: 'COL5', name: 'Curious', icon: '📖', rarity: 'COMMON' },
-  COL15: { code: 'COL15', name: 'Dedicated', icon: '📚', rarity: 'RARE' },
-  COL30: { code: 'COL30', name: 'Completionist', icon: '🗂️', rarity: 'EPIC' },
-  COL45: { code: 'COL45', name: 'Archivist', icon: '🏛️', rarity: 'LEGENDARY' },
-  COLMAX: { code: 'COLMAX', name: 'Omnivore', icon: '🌟', rarity: 'MYTHICAL' },
+  COL10: { code: 'COL10', name: 'Curious', icon: '📖', rarity: 'COMMON' },
+  COL25: { code: 'COL25', name: 'Dedicated', icon: '📚', rarity: 'RARE' },
+  COL40: { code: 'COL40', name: 'Completionist', icon: '🗂️', rarity: 'EPIC' },
+  COL55: { code: 'COL55', name: 'Archivist', icon: '🏛️', rarity: 'LEGENDARY' },
   // Festival
   FES1: { code: 'FES1', name: 'Spark Initiator', icon: '🔋', rarity: 'COMMON' },
   FES2: { code: 'FES2', name: 'System Catalyst', icon: '🌀', rarity: 'RARE' },
@@ -269,16 +272,15 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
   Prestige: ['LAP1', 'LAP5', '10LP', '25LP', 'LORD'],
   Dimensional: ['1TRL', '1QAD', '1VIG', '1OVG', '999X'],
   Multiplier: ['10X', '50X', 'NUKE', 'NOVA', 'BOOM'],
-  // Reliquary:   ['5RL', '10RL', 'MUSE', 'FULL', 'TRI'],
+  Reliquary:   ['5RL', '10RL', 'MUSE', 'FULL', 'TRI'],
   Lunar: ['LUN1', 'LUN2', 'LUN3', 'LUN4', 'LUNA'],
   Electric: ['VOL1', 'VOL2', 'VOL3', 'VOL4', 'VOLT'],
   Hellfire: ['HEL1', 'HEL2', 'HEL3', 'HEL4', 'HELL'],
   Cards: ['CRD1', 'CRD2', 'CRD3', 'CRD4', 'CARD'],
   OracleProphecy: ['ORC3', 'ORC7', 'ORCL', 'CHRON', 'OMNI'],
-  // Standalone — all earned shown in selector
   Meta: ['PITY', 'FND', 'AUTO', 'SLAY', 'DREM', 'STRM'],
   Miscellaneous: ['REBL'],
-  Collector: ['COL5', 'COL15', 'COL30', 'COL45', 'COLMAX'],
+  Collector: ['COL10', 'COL25', 'COL40', 'COL55', 'COLMAX'],
   Festival: [
     'FES1',
     'FES2',
@@ -290,8 +292,8 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
     'NET3',
     'NET4',
     'MESH'
-  ]
-  // Rainbow:     ['KING'],
+  ],
+  Rainbow: ['KING'],
 }
 
 const STANDALONE_CATEGORIES = new Set(['Meta', 'Miscellaneous', 'Rainbow'])

@@ -13,7 +13,9 @@ vi.mock('./oracleService.js', () => ({
 vi.mock('./flashEventService.js', () => ({
   getFlashEventForUser: vi.fn(() => null),
   consumeFlashBetForUser: vi.fn(),
-  tryTriggerFlashEventForUser: vi.fn()
+  tryTriggerFlashEventForUser: vi.fn(),
+  recordSessionFlashType: vi.fn(),
+  hasSeenAllFlashTypes: vi.fn(() => false)
 }))
 
 vi.mock('./festivalService.js', () => ({
@@ -25,6 +27,12 @@ vi.mock('./festivalService.js', () => ({
 
 vi.mock('./achievementChecker.js', () => ({
   checkAchievements: vi.fn(() => [])
+}))
+
+vi.mock('./relicService.js', () => ({
+  RELICS: [],
+  rollRelicDrop: vi.fn(() => Promise.resolve(null)),
+  rollBonus: vi.fn(() => null)
 }))
 
 const mockQuery = vi.mocked(pool.query)
@@ -43,6 +51,8 @@ const makeRow = (overrides = {}) => ({
   player_a_name: 'Winner',
   player_b_name: 'Loser',
   bet_against_oracle: false,
+  equipped_relic: null,
+  relic_counter: '0',
   ...overrides
 })
 
@@ -60,14 +70,15 @@ const mockUserStatsRow = {
   bet_against_oracle_count: '0',
   oracle_max_streak: '0',
   festivals_triggered: '0',
-  festivals_participated: '0'
+  festivals_participated: '0',
+  consecutive_flash_peak: '0',
+  has_used_auto_bet: false
 }
 
 describe('Prediction Service', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('rejects bets that exceed user balance', async () => {
-    // getOrCreateUser: SELECT points, short_id
     mockQuery.mockResolvedValueOnce(
       mockDbResponse([{ points: '100000', short_id: 'abc123' }])
     )
@@ -85,15 +96,18 @@ describe('Prediction Service', () => {
 
   it('applies a positive gain_loss to user points on a WIN', async () => {
     const broadcastMock = vi.fn()
-    // resolvePrediction: JOIN fetch
+
+    // 1. JOIN fetch (predictions + users LEFT JOIN relics)
     mockQuery.mockResolvedValueOnce(mockDbResponse([makeRow()]))
-    // UPDATE predictions
+    // 2. UPDATE predictions
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
-    // UPDATE users
+    // 3. UPDATE users
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
-    // SELECT users for achievements
+    // 4. SELECT users for achievement stats
     mockQuery.mockResolvedValueOnce(mockDbResponse([mockUserStatsRow]))
-    // SELECT user_achievements
+    // 5. SELECT user_achievements
+    mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+    // 6. SELECT relics for relic count (uniqueRelicsOwned / mythCount checks)
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
     await predictionService.resolvePrediction('g1', 'Winner', broadcastMock)
@@ -112,12 +126,20 @@ describe('Prediction Service', () => {
 
   it('clamps loss so points never drop below POINTS_FLOOR (100k)', async () => {
     const broadcastMock = vi.fn()
+
+    // 1. JOIN fetch
     mockQuery.mockResolvedValueOnce(
       mockDbResponse([makeRow({ pick: 'Loser', current_points: '120000' })])
     )
+    // 2. UPDATE predictions
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+    // 3. UPDATE users
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+    // 4. SELECT users for achievement stats
     mockQuery.mockResolvedValueOnce(mockDbResponse([mockUserStatsRow]))
+    // 5. SELECT user_achievements
+    mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+    // 6. SELECT relics for relic count
     mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
     await predictionService.resolvePrediction('g1', 'Winner', broadcastMock)

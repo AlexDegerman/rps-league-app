@@ -59,9 +59,9 @@ The echo is visualised in the result animation: after the result number finishes
 
 ---
 
-## The Safeguard Festival(To be added)
+## The Safeguard Festival
 
-**Trigger:** Completion of a Mythical Achievement (100%, stub) OR Legendary Achievement (50%, stub)
+**Trigger:** Completion of a Mythical Achievement (100%) OR Legendary Achievement (50%)
 
 **Duration:** 1 minute, 12 matches
 
@@ -99,10 +99,10 @@ Every prediction is guaranteed to roll a Common or Rare Bonus. Epic and Legendar
 
 **Trigger:** Completion of a Chrono-Lap (Ascension), 100%
 
-**Duration:** 1 minute, 12 matches
+**Duration:** 30 seconds, 6 matches
 
 **Effect: Power Surge**
-A 3x global multiplier is applied to all win payouts for the duration of the Festival.
+A 2x global multiplier is applied to all win payouts for the duration of the Festival.
 
 **Theme:** High-Voltage Cyan and Frost White, clean UI brightness boost, horizontal scanlines
 
@@ -113,9 +113,9 @@ A 3x global multiplier is applied to all win payouts for the duration of the Fes
 
 ---
 
-## The Vault Festival (To be added)
+## The Vault Festival
 
-**Trigger:** Discovery of a Mythical Relic (100%, stub)
+**Trigger:** Discovery of a Mythical Relic (100%)
 
 **Duration:** 2 minutes, 24 matches
 

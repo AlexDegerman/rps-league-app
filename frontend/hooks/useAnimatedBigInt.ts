@@ -6,41 +6,37 @@ export function useAnimatedBigInt(
   shouldReset: boolean = false
 ) {
   const [displayValue, setDisplayValue] = useState(targetValue)
-  const startTimeRef = useRef<number | null>(null)
-  const startValueRef = useRef(targetValue)
+  const displayRef = useRef(targetValue)
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
-    // When shouldReset is true (e.g. win/loss result animation), always start from 0
-    // so the number counts up from zero rather than from the previous displayed value.
-    const baseValue = shouldReset ? 0n : startValueRef.current
-    startValueRef.current = baseValue
-    startTimeRef.current = null
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
 
-    let rafId: number
+    const baseValue = shouldReset ? 0n : displayRef.current
+    const startTime = { current: Date.now() }
 
-    const animate = (currentTime: number) => {
-      if (!startTimeRef.current) startTimeRef.current = currentTime
-
-      const elapsed = currentTime - startTimeRef.current
+    const animate = () => {
+      const elapsed = Date.now() - startTime.current
       const progress = Math.min(elapsed / duration, 1)
-      // Cubic ease-out so the animation decelerates as it approaches the target
-      const easedProgress = 1 - Math.pow(1 - progress, 3)
+      const eased = 1 - Math.pow(1 - progress, 3)
 
       if (progress < 1) {
         const diff = targetValue - baseValue
-        const nextValue =
-          baseValue + (diff * BigInt(Math.floor(easedProgress * 1000))) / 1000n
-        setDisplayValue(nextValue)
-        startValueRef.current = nextValue
-        rafId = requestAnimationFrame(animate)
+        const next =
+          baseValue + (diff * BigInt(Math.floor(eased * 1000))) / 1000n
+        displayRef.current = next
+        setDisplayValue(next)
+        rafRef.current = requestAnimationFrame(animate)
       } else {
+        displayRef.current = targetValue
         setDisplayValue(targetValue)
-        startValueRef.current = targetValue
       }
     }
 
-    rafId = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(rafId)
+    rafRef.current = requestAnimationFrame(animate)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
   }, [targetValue, duration, shouldReset])
 
   return displayValue

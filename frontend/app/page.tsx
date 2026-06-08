@@ -58,7 +58,11 @@ import IdleBetControls from '@/components/IdleBetControls'
 import FestivalTicker from '@/components/FestivalTicker'
 import GlobalTickerWrapper from '@/components/GlobalTickerWrapper'
 import AchievementToast from '@/components/AchievementToast'
-
+import RelicSlot from '@/components/RelicSlot'
+import RelicDrawer from '@/components/RelicDrawer'
+import RelicDropPopup from '@/components/RelicDropPopup'
+import { useRelicStore } from './stores/relicStore'
+import { slamState } from '@/lib/slamState'
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
@@ -155,10 +159,11 @@ export default function HomePage() {
     playMoon,
     playFanfare,
     soundOn,
-    toggleSound
+    toggleSound,
   } = useSound()
 
   const esRef = useRef<EventSource | null>(null)
+  const clearAnimTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const isDuplicate = useTabGuard(() => {
     esRef.current?.close()
@@ -295,6 +300,8 @@ export default function HomePage() {
           error: String(err)
         })
       })
+
+    useRelicStore.getState().initRelics()
 
     fetchGlobalFlashState()
       .then((data) => {
@@ -463,6 +470,7 @@ export default function HomePage() {
       const data = JSON.parse(event.data)
       const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
+
       const isWin = data.result === 'WIN'
       const { activeFlashEvent: currentFlash } = useGameStore.getState()
 
@@ -501,6 +509,9 @@ export default function HomePage() {
           : null
 
         fetchUpdatedPoints()
+        if (data.soulProc || data.kineticFired) {
+          slamState.active = true
+        }
         setResultAnim({
           win: true,
           amount: BigInt(data.amount),
@@ -512,6 +523,11 @@ export default function HomePage() {
           ghostEchoAmount: data.ghostEchoAmount
             ? BigInt(data.ghostEchoAmount)
             : null,
+          soulProc: data.soulProc ?? false,
+          kineticFired: data.kineticFired ?? false,
+          preSoulAmount: data.preSoulAmount
+            ? BigInt(data.preSoulAmount)
+            : BigInt(data.amount),
           confetti: Array.from({ length: 100 }).map(() => ({
             leftOffset: Math.random() * 100 - 50,
             vx: (Math.random() - 0.5) * 300,
@@ -540,6 +556,9 @@ export default function HomePage() {
       }
 
       setWinStreak(data.streakAfter ?? 0)
+      if (data.relicDrop) {
+        useRelicStore.getState().pushToDropQueue(data.relicDrop)
+      }
       setStreakMult(data.streakMult ?? 1)
 
       if (currentFlash) {
@@ -548,11 +567,18 @@ export default function HomePage() {
         if (remaining <= 0) setLiveTheme(null)
       }
 
-      setTimeout(
+      if (clearAnimTimerRef.current) clearTimeout(clearAnimTimerRef.current)
+      clearAnimTimerRef.current = setTimeout(
         () => clearResultAnim(),
-        data.bonus?.tier === 'LEGENDARY' ? 3000 : 2000
+        data.soulProc || data.kineticFired
+          ? 7000
+          : data.bonus?.tier === 'LEGENDARY' || data.bonus?.tier === 'MYTHICAL'
+            ? 3000
+            : 2000
       )
-
+      if (data.relicCounter !== undefined) {
+        useRelicStore.getState().updateRelicCounter(data.relicCounter)
+      }
       const { predictions: preds } = useGameStore.getState()
       const existing = preds.get(data.gameId)
       if (existing) {
@@ -668,7 +694,12 @@ export default function HomePage() {
       setNotification(null)
     }
 
-    setPrediction(gameId, { gameId, pick: playerName, confirmed: false })
+    setPrediction(gameId, {
+      gameId,
+      pick: playerName,
+      confirmed: false,
+      totalMultiplier: 1
+    })
 
     let succeeded = false
     try {
@@ -898,14 +929,17 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Mute */}
-              <button
-                onClick={toggleSound}
-                className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
-                title="Toggle sound effects"
-              >
-                <SoundIcon muted={!soundOn} />
-              </button>
+              {/* Mute + Relic */}
+              <div className="flex items-center gap-2 shrink-0">
+                <RelicSlot align="right" />
+                <button
+                  onClick={toggleSound}
+                  className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
+                  title="Toggle sound effects"
+                >
+                  <SoundIcon muted={!soundOn} />
+                </button>
+              </div>
             </div>
 
             {/* Badges */}
@@ -1192,6 +1226,9 @@ export default function HomePage() {
           </>
         )}
       </div>
+
+      <RelicDrawer />
+      <RelicDropPopup />
 
       {/* Scroll-to-top */}
       <button

@@ -429,4 +429,13 @@ router.get('/idle-eligible/:userId', async (req, res) => {
   }
 })
 
+router.post('/:userId/auto-bet-used', async (req, res) => {
+  const { userId } = req.params
+  await pool.query(
+    `UPDATE users SET has_used_auto_bet = true WHERE user_id = $1`,
+    [userId]
+  )
+  res.json({ ok: true })
+})
+
 export default router

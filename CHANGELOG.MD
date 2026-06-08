@@ -2,6 +2,18 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [1.13] - The Relic Protocol
+
+### Added
+- **The Reliquary System:** A permanent equipment layer for account-wide progression modifiers. Predictors collect and socket artifacts across Rare, Legendary, and Mythical tiers to fundamentally alter gameplay and event outcomes.
+- **Anti-Swap Architecture:** Integration of "Socket Commitment" logic to ensure strategic integrity. "Trigger Snapshots" lock event bonuses at the moment of activation, while "Socket-Locked Progress" ensures charge-based counters only advance while the specific Relic is active.
+- **Blueprint UI & Drawer:** A high-fidelity, slide-up panel for rapid Relic management. This interface utilizes a technical "schematic" design language, optimized for mobile-first navigation and seamless swapping between matches.
+- **"Multiplier Slam" VFX:** High-impact animations for specific Relic-influenced multiplier payouts. When an equipped item provides an additional multiplier, the result screen triggers a physics-based "Slam" effect with rarity-specific particle bursts.
+- **Socket Header Integration:** A persistent "Socket" display in the primary game header. This visual indicator features rarity-specific border glows and bloom effects, providing a global view of the active Relic and its current status.
+- **Chrono-Lap Drop Scaling:** A permanent synergy between Relic discovery and Ascension. Every completed **Chrono-Lap** provides a stacking increase to the base drop rates of all Relic Blueprints, rewarding long-term specialization.
+- **Live Progress Telemetry:** Real-time UI feedback for charge-based Relics. Items like the *Logic Gate* or *Kinetic Capacitor* display persistent progress bars directly on their icons to show exact proximity to the next trigger.
+- **Discovery Protocol:** A "Discovery equals Ownership" rule for all Relic drops. Once a Blueprint is found, it is added to a permanent account library with no expiration, allowing for the build-out of a complete strategic collection.
+
 ## [1.12] - The Achievement Update
 
 ### Added

@@ -9,7 +9,9 @@ import { BONUS_TIER_STYLES } from '@/lib/constants'
 import type { BonusTier, ConfettiType, ResultAnim } from '@/types/rps'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
+import { useSound } from '@/hooks/useSound'
+import { slamState } from '@/lib/slamState'
 
 interface ConfettiParticle {
   vx: number
@@ -53,7 +55,6 @@ const FESTIVAL_LOSS_BADGE = {
   FEVER: { name: 'FEVER', effect: 'streak loss protected', color: '#f97316' }
 }
 
-// Festival confetti color palettes - override streak/bonus colors when festival active
 const FESTIVAL_CONFETTI_COLORS: Record<string, string[]> = {
   GHOST: ['#4dd0c4', '#b2f5ea', '#ffffff', '#0d9488', '#99f6e4'],
   SAFEGUARD: ['#94a3b8', '#cbd5e1', '#ffffff', '#64748b', '#e2e8f0'],
@@ -70,13 +71,14 @@ function getConfettiColors(
   streak?: number,
   festivalType?: string | null
 ): string[] {
-  // Festival overrides everything including streak and bonus tier
   if (festivalType && FESTIVAL_CONFETTI_COLORS[festivalType]) {
     return FESTIVAL_CONFETTI_COLORS[festivalType]!
   }
   if (streak && streak >= 5) return ['#f97316', '#ef4444', '#fbbf24', '#fb923c']
   if (streak && streak >= 3) return ['#22c55e', '#4ade80', '#86efac', '#16a34a']
   switch (tier) {
+    case 'MYTHICAL':
+      return ['#dc2626', '#ef4444', '#b91c1c', '#f87171', '#7f1d1d', '#fca5a5']
     case 'LEGENDARY':
       return ['#FFD700', '#FCD34D', '#F59E0B', '#FBBF24']
     case 'EPIC':
@@ -104,9 +106,7 @@ function BottomConfetti({
   if (['hellfire', 'lunar', 'electric', 'cards'].includes(confettiType))
     return null
 
-  // Festival overrides fever/inferno/normal color palettes
   const colors = getConfettiColors(bonus?.tier, streakAfter, festivalType)
-
   const isLarge = confettiType === 'fever' || confettiType === 'inferno'
 
   return (
@@ -117,8 +117,8 @@ function BottomConfetti({
           className="absolute rounded-sm pointer-events-none"
           style={
             {
-              width: `${i % 3 === 0 ? (isLarge ? 9 : 8) : isLarge ? 6 : 6}px`,
-              height: `${i % 3 === 0 ? (isLarge ? 11 : 10) : isLarge ? 8 : 8}px`,
+              width: `${i % 3 === 0 ? (isLarge ? 9 : 8) : 6}px`,
+              height: `${i % 3 === 0 ? (isLarge ? 11 : 10) : 8}px`,
               left: `${c.leftOffset}px`,
               top: 0,
               backgroundColor: colors[i % colors.length],
@@ -140,7 +140,7 @@ function GhostEcho({ amount }: { amount: bigint }) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), 400) // was 1100
+    const t = setTimeout(() => setShow(true), 400)
     return () => clearTimeout(t)
   }, [amount])
 
@@ -155,6 +155,125 @@ function GhostEcho({ amount }: { amount: bigint }) {
   )
 }
 
+// ─── Relic Slam Overlay ───────────────────────────────────────────────────────
+function RelicSlamOverlay({
+  show,
+  multiplier,
+  preSoulAmount,
+  finalAmount
+}: {
+  show: boolean
+  multiplier: 2 | 3
+  preSoulAmount: bigint
+  finalAmount: bigint
+}) {
+  const [phase, setPhase] = useState<'slam' | 'tick'>('slam')
+  const [displayAmount, setDisplayAmount] = useState(preSoulAmount)
+  const rafRef = useRef<number | null>(null)
+
+  const tierKey = multiplier === 3 ? 'MYTHICAL' : 'LEGENDARY'
+  const style = BONUS_TIER_STYLES[tierKey]
+  const visual = getBonusStyles(tierKey)
+  const isMythical = multiplier === 3
+  const glowClass = isMythical ? 'mythical-slam-glow' : 'legendary-slam-glow'
+
+  useEffect(() => {
+    if (!show) return
+
+    let isMounted = true
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+
+    const base = preSoulAmount
+    const diff = finalAmount > base ? finalAmount - base : 0n
+    setDisplayAmount(base)
+
+    // Small delay so the slam visual lands before ticker starts
+    const t = setTimeout(() => {
+      if (!isMounted) return
+      setPhase('tick')
+      const start = Date.now()
+      const duration = 2500
+
+      const tick = () => {
+        if (!isMounted) return
+        const elapsed = Date.now() - start
+        const progress = Math.min(elapsed / duration, 1)
+        const eased = 1 - Math.pow(1 - progress, 4)
+        const easedScaled = BigInt(Math.floor(eased * 10000))
+        setDisplayAmount(base + (diff * easedScaled) / 10000n)
+        if (progress < 1) {
+          rafRef.current = requestAnimationFrame(tick)
+        } else {
+          setDisplayAmount(finalAmount)
+          slamState.active = false
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }, 500)
+
+    return () => {
+      isMounted = false
+      clearTimeout(t)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [show, finalAmount, preSoulAmount])
+
+  if (!show) return null
+
+  return (
+    <div
+      className={`fixed inset-x-0 top-[15%] flex flex-col items-center pointer-events-none z-999 gap-2 ${phase === 'slam' ? 'animate-light-shake' : ''}`}
+    >
+      {/* Multiplier badge */}
+      <div
+        className={`slam-drop-in font-black tabular-nums ${style.color} ${glowClass}`}
+        style={{
+          fontSize: isMythical ? '9rem' : '7rem',
+          lineHeight: 1,
+          textShadow: isMythical
+            ? '0 0 40px rgba(220,38,38,0.9), 0 0 80px rgba(220,38,38,0.5), 0 4px 20px rgba(0,0,0,0.8)'
+            : '0 0 40px rgba(234,179,8,0.9), 0 0 80px rgba(234,179,8,0.5), 0 4px 20px rgba(0,0,0,0.8)',
+          WebkitTextStroke: isMythical
+            ? '2px rgba(255,100,100,0.3)'
+            : '2px rgba(255,220,50,0.3)'
+        }}
+      >
+        ×{multiplier}
+      </div>
+
+      {/* Result card */}
+      <div
+        className={`transition-all duration-500 ${phase === 'tick' ? 'opacity-100 scale-100' : 'opacity-100 scale-95'}`}
+      >
+        <div
+          className={`relative overflow-hidden p-6 sm:p-8 rounded-4xl border-2 bg-white shadow-[0_30px_60px_-12px_rgba(0,0,0,0.6)] min-w-65 ${style.cardClass} ${visual.glow}`}
+        >
+          <div className="flex flex-col items-center px-4 text-center gap-3">
+            <div
+              className={`badge-aura-wrapper ${style.auraClass} inline-flex items-center`}
+            >
+              <span
+                className={`text-[10px] px-5 py-1.5 font-black uppercase tracking-[0.25em] rounded-full border relative z-10 bg-white ${style.color} border-black/5`}
+              >
+                {isMythical ? 'Machine Soul' : 'Kinetic Capacitor'}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 mt-1">
+              <span
+                className={`text-4xl sm:text-5xl font-black tabular-nums tracking-tighter ${getAmountColor(displayAmount)}`}
+              >
+                +{formatPoints(displayAmount).display}
+              </span>
+              <GemIcon size={36} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Export ──────────────────────────────────────────────────────────────
 export default function ResultAnimOverlay({
   resultAnim,
   streakMult,
@@ -164,6 +283,51 @@ export default function ResultAnimOverlay({
   const festivalType = useGameStore((s) => s.festivalType)
   const activeFestival = useGameStore((s) => s.activeFestival)
 
+  const [slamActive, setSlamActive] = useState(false)
+  const slamTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { playJackpot } = useSound()
+
+  const willSlam = !!(
+    resultAnim?.win &&
+    (resultAnim.soulProc || resultAnim.kineticFired)
+  )
+  const slamIdRef = useRef(0)
+  const lastSlamResultRef = useRef<ResultAnim | null>(null)
+
+  useEffect(() => {
+    if (slamTimerRef.current) clearTimeout(slamTimerRef.current)
+    setSlamActive(false)
+
+    if (!willSlam || resultAnim === lastSlamResultRef.current) return
+
+    lastSlamResultRef.current = resultAnim
+    const thisSlam = ++slamIdRef.current
+
+    slamTimerRef.current = setTimeout(() => {
+      if (slamIdRef.current !== thisSlam) return
+      setSlamActive(true)
+      slamState.active = true
+      playJackpot()
+    }, 2400)
+
+        return () => {
+          if (slamTimerRef.current) clearTimeout(slamTimerRef.current)
+        }
+  }, [willSlam, resultAnim]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const slamPropsRef = useRef({
+    multiplier: 2 as 2 | 3,
+    preSoulAmount: 0n,
+    finalAmount: 0n
+  })
+  if (resultAnim?.win && (resultAnim.soulProc || resultAnim.kineticFired)) {
+    slamPropsRef.current = {
+      multiplier: resultAnim.soulProc ? 3 : 2,
+      preSoulAmount: resultAnim.preSoulAmount ?? 0n,
+      finalAmount: resultAnim.amount
+    }
+  }
+
   if (!resultAnim) return null
 
   const bonusTierKey = (resultAnim.bonus?.tier ?? 'COMMON') as BonusTier
@@ -172,11 +336,8 @@ export default function ResultAnimOverlay({
   const confettiType = resultAnim.confettiType ?? 'normal'
   const flashMult = resultAnim.flashMult ?? 1
   const flashType = resultAnim.flashEventType ?? null
-
   const isWin = resultAnim.win
 
-  // Only apply festival context when no flash event is active
-  // Flash events own their own confetti and visual systems
   const activeFestivalType = activeFestival && !flashType ? festivalType : null
 
   const festivalBadge =
@@ -191,6 +352,18 @@ export default function ResultAnimOverlay({
       : null
 
   const isGhostActive = activeFestival && festivalType === 'GHOST' && isWin
+
+  const slamMultiplier = slamPropsRef.current.multiplier
+  const preSoulAmount = slamPropsRef.current.preSoulAmount
+
+  const adjustedScale =
+    bonusTierKey === 'MYTHICAL'
+      ? 'scale-[1.15]'
+      : bonusTierKey === 'LEGENDARY'
+        ? 'scale-[1.1]'
+        : bonusTierKey === 'EPIC'
+          ? 'scale-[1.05]'
+          : 'scale-100'
 
   return (
     <div className="absolute -bottom-35 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col-reverse items-center w-full max-w-sm px-4">
@@ -277,7 +450,24 @@ export default function ResultAnimOverlay({
           {isGhostActive && resultAnim.ghostEchoAmount && (
             <GhostEcho amount={resultAnim.ghostEchoAmount} />
           )}
-          <span className="flex items-center gap-1 text-5xl sm:text-6xl font-black animate-bounce leading-tight drop-shadow-lg">
+
+          {(willSlam || slamActive) && (
+            <RelicSlamOverlay
+              key={slamMultiplier}
+              show={slamActive}
+              multiplier={slamMultiplier}
+              preSoulAmount={preSoulAmount}
+              finalAmount={slamPropsRef.current.finalAmount}
+            />
+          )}
+
+          <span
+            className={`flex items-center gap-1 text-5xl sm:text-6xl font-black animate-bounce leading-tight drop-shadow-lg transition-all duration-500 ${
+              slamActive
+                ? 'opacity-0 scale-75 blur-sm'
+                : 'opacity-100 scale-100 blur-0'
+            }`}
+          >
             {isWin ? (
               <>
                 <span className="text-green-500">+</span>
@@ -288,7 +478,13 @@ export default function ResultAnimOverlay({
                       stylePreference
                     )}
                   >
-                    {formatPoints(animatedResult).display}
+                    {
+                      formatPoints(
+                        willSlam
+                          ? slamPropsRef.current.preSoulAmount
+                          : animatedResult
+                      ).display
+                    }
                   </span>
                 </span>
               </>
@@ -312,14 +508,9 @@ export default function ResultAnimOverlay({
       </div>
 
       {resultAnim.bonus &&
+        !slamActive &&
         (() => {
           const visual = getBonusStyles(bonusTierKey)
-          const adjustedScale =
-            bonusTierKey === 'LEGENDARY'
-              ? 'scale-[1.1]'
-              : bonusTierKey === 'EPIC'
-                ? 'scale-[1.05]'
-                : 'scale-100'
           const bonusMultDisplay = (
             (resultAnim.bonus.visualMultiplier ?? 0) / 100
           ).toFixed(1)
@@ -333,9 +524,11 @@ export default function ResultAnimOverlay({
                 >
                   <span
                     className={`text-[10px] px-2.5 py-0.5 font-black uppercase tracking-widest rounded-full border relative z-10 ${
-                      bonusTierKey === 'LEGENDARY'
-                        ? 'text-yellow-700 border-yellow-500 bg-yellow-50'
-                        : `${bonusTierStyle.color} ${bonusTierStyle.bg} border-black/5`
+                      bonusTierKey === 'MYTHICAL'
+                        ? 'text-red-300 border-red-600 bg-red-950'
+                        : bonusTierKey === 'LEGENDARY'
+                          ? 'text-yellow-700 border-yellow-500 bg-yellow-50'
+                          : `${bonusTierStyle.color} ${bonusTierStyle.bg} border-black/5`
                     }`}
                   >
                     {visual.label} {bonusMultDisplay}×

@@ -196,7 +196,7 @@ export default function Festivals() {
           <FestivalCard
             name="The Surge Festival"
             effect="Power Surge"
-            trigger="Completion of a Chrono-Lap (Ascension) — 100%"
+            trigger="Completion of a Chrono-Lap (Ascension) - 100%"
             duration="1 minute · 12 matches"
             description="A 3x global multiplier is applied to all win payouts for the duration of the Festival."
             theme="High-Voltage Cyan and Frost White, clean UI brightness boost, horizontal scanlines"
@@ -222,7 +222,7 @@ export default function Festivals() {
           <FestivalCard
             name="The Sanguine Festival"
             effect="Absolute Correction"
-            trigger="4-loss streak — 100%"
+            trigger="4-loss streak - 100%"
             duration="15 seconds · 3 matches"
             description="All predictions resolve as wins. Win streaks continue to increment normally."
             extra="Exception: players who defied the Daily Oracle Prophecy still lose. The Oracle overrides all correction protocols."
@@ -236,7 +236,7 @@ export default function Festivals() {
           <FestivalCard
             name="The Safeguard Festival"
             effect="Risk Shield"
-            trigger="Legendary Achievement (50%) OR Mythical Achievement (100%) — stub"
+            trigger="Legendary Achievement (50%) OR Mythical Achievement (100%)"
             duration="1 minute · 12 matches"
             description="Loss deductions are reduced by 20%. Losses only deduct 40% of the stake instead of the standard 50%."
             theme="Slate Blue and Shield Silver, metallic border-frame overrides, geometric shield-shimmer effects"
@@ -250,7 +250,7 @@ export default function Festivals() {
           <FestivalCard
             name="The Vault Festival"
             effect="Loot Echo"
-            trigger="Discovery of a Mythical Relic — 100% · stub"
+            trigger="Discovery of a Mythical Relic - 100%"
             duration="2 minutes · 24 matches"
             description="All Relic drop rates are doubled for the duration."
             theme="Deep Cobalt and Chrome Silver, liquid metallic sheen on UI containers"

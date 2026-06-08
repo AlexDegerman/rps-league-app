@@ -30,6 +30,12 @@ import { StyleSelect } from '@/components/StyleSelect'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import AscensionModal from '@/components/modals/AscensionModal'
 import AchievementMenu from '@/components/AchievementMenu'
+import RelicSlot from '@/components/RelicSlot'
+import RelicDrawer from '@/components/RelicDrawer'
+import { useRelicStore } from '@/app/stores/relicStore'
+import { fetchEquippedRelic } from '@/lib/api'
+import type { RelicDef } from '@/lib/relics'
+import { RARITY_STYLES } from '@/lib/relics'
 
 interface Ranks {
   daily: number | null
@@ -58,7 +64,7 @@ export default function ProfilePage() {
       refreshBadges
     } = useUserStore()
   const { showAscensionPrompt, setShowAscensionPrompt } = useUIStore()
-
+    const { equippedRelic } = useRelicStore()
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
@@ -87,7 +93,9 @@ export default function ProfilePage() {
   const [linkedinInput, setLinkedinInput] = useState('')
   const [linkedinSaved, setLinkedinSaved] = useState(false)
   const [linkedinError, setLinkedinError] = useState('')
-
+  const [profileRelic, setProfileRelic] = useState<RelicDef | null | undefined>(
+    undefined
+  )
   const [profileStylePreference, setProfileStylePreference] = useState<
     string | null
   >(null)
@@ -125,6 +133,12 @@ export default function ProfilePage() {
           setLinkedinUrl(profileData.linkedinUrl)
           setShowLinkedinBadge(profileData.showLinkedinBadge ?? true)
           setLinkedinInput(profileData.linkedinUrl ?? '')
+          try {
+            const data = await fetchEquippedRelic(profileData.userId)
+            setProfileRelic(data?.relic ?? null)
+          } catch {
+            setProfileRelic(null)
+          }
           setProfileStylePreference(profileData.pointStylePreference ?? null)
           setAutoStyle(profileData.pointStylePreference === null)
           setAllTimePeak(BigInt(profileData.allTimePeak ?? '200000'))
@@ -190,6 +204,10 @@ export default function ProfilePage() {
       window.removeEventListener('resize', checkWidth)
     }
   }, [targetShortId, myShortId, myUserId, setStoreLinkedinEnabled])
+
+  useEffect(() => {
+    if (isOwnProfile) setProfileRelic(equippedRelic)
+  }, [equippedRelic, isOwnProfile])
 
   const handleRegenerate = async () => {
     if (!isOwnProfile) return
@@ -313,6 +331,28 @@ export default function ProfilePage() {
             <p className="text-[1.4rem] min-[375px]:text-[1.5rem] sm:text-[clamp(1.5rem,6vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tighter">
               {nickname}
             </p>
+            {profileRelic !== undefined && (
+              <div className="flex items-center gap-2 mt-1.5">
+                <RelicSlot
+                  relic={profileRelic}
+                  readonly={!isOwnProfile}
+                  size="sm"
+                  align="left"
+                />
+                {profileRelic && (
+                  <span
+                    className={`text-[9px] font-black uppercase tracking-widest ${RARITY_STYLES[profileRelic.rarity].text}`}
+                  >
+                    {profileRelic.name}
+                  </span>
+                )}
+                {isOwnProfile && !profileRelic && (
+                  <span className="text-[9px] text-gray-400 font-medium">
+                    No relic equipped
+                  </span>
+                )}
+              </div>
+            )}
             <IdentityBadges
               linkedinUrl={linkedinUrl}
               badges={isOwnProfile ? myBadges : []}
@@ -813,6 +853,7 @@ export default function ProfilePage() {
           stylePreference={profileStylePreference}
         />
       </div>
+      {isOwnProfile && <RelicDrawer />}
     </div>
   )
 }

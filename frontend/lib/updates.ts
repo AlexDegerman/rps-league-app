@@ -6,6 +6,19 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '1.13',
+    label: 'The Relic Protocol',
+    notes: [
+      'The Reliquary: A permanent account-wide progression system featuring unique Relics across Common, Rare, Legendary, and Mythical tiers.',
+      'Anti-Swap Architecture: Implementation of "Socket Commitment" logic to ensure strategic choices are made before events trigger.',
+      'Snapshot Technology: Flash Event bonuses (Multipliers and Duration) lock at the moment of trigger to maintain competitive balance.',
+      'Socket-Locked Persistence: Charge-based Relics feature deep-state memory, saving progress across sessions and resuming only when re-equipped.',
+      'Blueprint Interface: A mobile-first slide-up drawer designed for seamless Relic swapping with a technical, schematic-inspired aesthetic.',
+      'Multiplier Slam VFX: Physics-based payout animations that trigger specifically when high-tier Relics like "Soul of the Machine" activate.',
+      'Ascension Drop Scaling: Permanent, stacking discovery rate bonuses for all Relic rarities tied to total Chrono-Laps completed.'
+    ]
+  },
+  {
     version: '1.12',
     label: 'The Achievement Update',
     notes: [
