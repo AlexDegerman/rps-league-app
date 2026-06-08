@@ -40,7 +40,6 @@ import ResultAnimOverlay from '@/components/overlays/ResultAnimOverlay'
 import FlashBadge from '@/components/badges/FlashBadge'
 import StreakBadge from '@/components/badges/StreakBadge'
 import ModeButton from '@/components/ModeButton'
-import BonusExplainerPopover from '@/components/BonusExplainerPopover'
 import { useGameStore } from './stores/gameStore'
 import { useUserStore } from './stores/userStore'
 import { useUIStore } from './stores/uiStore'
@@ -63,6 +62,9 @@ import RelicDrawer from '@/components/RelicDrawer'
 import RelicDropPopup from '@/components/RelicDropPopup'
 import { useRelicStore } from './stores/relicStore'
 import { slamState } from '@/lib/slamState'
+import BonusExplainerModal, {
+  BonusExplainerTrigger
+} from '@/components/modals/BonusExplainerModal'
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
@@ -144,7 +146,9 @@ export default function HomePage() {
     setShowUpdateModal,
     showAscensionPrompt,
     setShowAscensionPrompt,
-    setOracleTickerMessage
+    setOracleTickerMessage,
+    showBonusModal,
+    setShowBonusModal
   } = useUIStore()
 
   const { setEligible, setHasInteractedWithIdle } = useIdleStore()
@@ -767,6 +771,9 @@ export default function HomePage() {
     <div className="max-w-2xl mx-auto px-4 pb-24">
       {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}
       {showUpdateModal && <UpdateModal onClose={handleUpdateClose} />}
+      {showBonusModal && (
+        <BonusExplainerModal onClose={() => setShowBonusModal(false)} />
+      )}
 
       <GlobalTickerWrapper />
 
@@ -1157,7 +1164,7 @@ export default function HomePage() {
         </div>
         <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
           <span className="text-green-600">WIN: +100%</span>
-          <BonusExplainerPopover />
+          <BonusExplainerTrigger onClick={() => setShowBonusModal(true)} />
         </div>
       </div>
 

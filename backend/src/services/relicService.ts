@@ -115,7 +115,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'LEGENDARY',
     icon: 'Gem',
     effect: '+0.5x win multiplier while no Flash Event is active',
-    dropRate: 0.001
+    dropRate: 0.002
   },
   {
     key: 'kinetic_capacitor',
@@ -124,7 +124,7 @@ export const RELICS: RelicDef[] = [
     icon: 'BatteryCharging',
     effect:
       'Every 30 wins while equipped, your next win gains an extra x2 multiplier.',
-    dropRate: 0.001,
+    dropRate: 0.002,
     threshold: 30
   },
   {
@@ -134,7 +134,7 @@ export const RELICS: RelicDef[] = [
     icon: 'CircuitBoard',
     effect:
       'Every 20 wins while equipped, your next win guarantees a Legendary Bonus.',
-    dropRate: 0.001,
+    dropRate: 0.002,
     threshold: 20
   },
   {
@@ -143,7 +143,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'MYTHICAL',
     icon: 'Fingerprint',
     effect: '5% chance for wins to pay out 3x rewards',
-    dropRate: 0.0003
+    dropRate: 0.001
   },
   {
     key: 'temporal_anchor',
@@ -151,7 +151,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'MYTHICAL',
     icon: 'Anchor',
     effect: 'Flash Events triggered while equipped last 4 rounds instead of 3.',
-    dropRate: 0.0003
+    dropRate: 0.001
   },
   {
     key: 'architects_keystone',
@@ -159,7 +159,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'MYTHICAL',
     icon: 'Diamond',
     effect: 'Triggered bonus rarity auto-upgrades to next tier',
-    dropRate: 0.0003
+    dropRate: 0.001
   }
 ]
 
@@ -197,35 +197,32 @@ export async function rollRelicDrop(
   const lensMultiplier = equippedRelic === 'scavengers_lens' ? 1.2 : 1.0
 
   const eligible = RELICS.filter((r) => !ownedKeys.has(r.key))
+  if (eligible.length === 0) return null
 
-  const poolWeights = eligible.map((relic) => {
-    let weight = relic.dropRate
-    weight += getLapBonus(relic.rarity, userLaps)
+  // First relic ever: guaranteed common, pick randomly among commons
+  if (isFirstRelicEver) {
+    const commons = eligible.filter((r) => r.rarity === 'COMMON')
+    const picked = commons[Math.floor(Math.random() * commons.length)]
+    if (!picked) return null
+    await pool.query(
+      'INSERT INTO relics (user_id, relic_key, rarity, found_at) VALUES ($1, $2, $3, $4)',
+      [userId, picked.key, picked.rarity, Date.now()]
+    )
+    return picked
+  }
+  // Shuffle so there's no implicit ordering bias (rarest checked last etc.)
+  const shuffled = [...eligible].sort(() => Math.random() - 0.5)
 
-    if (isFirstRelicEver && relic.rarity === 'COMMON') {
-      weight = 0.2
-    }
+  for (const relic of shuffled) {
+    const effectiveRate =
+      (relic.dropRate + getLapBonus(relic.rarity, userLaps)) * lensMultiplier
 
-    return {
-      relic,
-      weight: weight * lensMultiplier
-    }
-  })
-
-  const totalWeight = poolWeights.reduce((sum, x) => sum + x.weight, 0)
-
-  if (totalWeight <= 0) return null
-
-  let roll = Math.random() * totalWeight
-
-  for (const item of poolWeights) {
-    roll -= item.weight
-    if (roll <= 0) {
+    if (Math.random() < effectiveRate) {
       await pool.query(
         'INSERT INTO relics (user_id, relic_key, rarity, found_at) VALUES ($1, $2, $3, $4)',
-        [userId, item.relic.key, item.relic.rarity, Date.now()]
+        [userId, relic.key, relic.rarity, Date.now()]
       )
-      return item.relic
+      return relic
     }
   }
 

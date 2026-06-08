@@ -97,8 +97,8 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 
 ### Bonus system
 - 40% chance per match to trigger a Tiered Bonus multiplier
-- On win: multiplies payout by 1.5×–5× depending on tier
-- On loss: reduces loss to 75%–0% depending on tier (Legendary fully negates loss)
+- On win: multiplies payout by 1.5×–7× depending on tier
+- On loss: reduces loss to 75%–0% depending on tier (Legendary+ fully negates loss)
 - Tiers:
   - Common: 1.5×–2.2×
   - Rare: 2.2×–3.2×

@@ -29,8 +29,8 @@ Once a relic is obtained, it is permanently added to the account and removed fro
 | 🟢 Common | 3% | +0.5% per lap (max +15%) |
 | 🔵 Rare | 1% | +0.2% per lap (max +5%) |
 | 🟣 Epic | 0.3% | +0.08% per lap (max +2%) |
-| 🟡 Legendary | 0.1% | +0.03% per lap (max +1%) |
-| 🔴 Mythical | 0.03% | +0.01% per lap (max +0.2%) |
+| 🟡 Legendary | 0.2% | +0.03% per lap (max +1%) |
+| 🔴 Mythical | 0.1% | +0.01% per lap (max +0.2%) |
 
 ### System Rules
 - Each match triggers exactly one relic roll (win or loss)
@@ -114,7 +114,7 @@ Players display equipped relic publicly, enabling build comparison across leader
 | Relic | Icon | Effect |
 |---|---|---|
 | Prismatic Shard | Gem | +0.5x multiplier when no Flash Event is active |
-| Kinetic Capacitor | BatteryCharging | Every 40 wins, next win gains x2 multiplier |
+| Kinetic Capacitor | BatteryCharging | Every 30 wins, next win gains x2 multiplier |
 | Logic Gate | CircuitBoard | Every 20 wins, next win guarantees Legendary bonus |
 
 ---

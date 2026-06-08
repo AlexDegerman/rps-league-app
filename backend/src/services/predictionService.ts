@@ -442,17 +442,10 @@ export const resolvePrediction = async (
       let soulProc = false
       const preSoulAmount = gainLoss
       if (equippedRelic === 'soul_of_the_machine' && isWin) {
-        // REAL PRODUCTION VERSION
-        /*
         if (Math.random() < 0.05) {
           gainLoss = gainLoss * 3n
           soulProc = true
         }
-        */
-
-        // TEST VERSION (always triggers)
-        gainLoss = gainLoss * 3n
-        soulProc = true
       }
 
       let flashJustEndedFlag = false

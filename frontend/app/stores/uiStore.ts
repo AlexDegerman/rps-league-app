@@ -43,6 +43,8 @@ interface UIState {
   setShowPointsExplainer: (v: boolean) => void
   ascensionDeclinedThisSession: boolean
   setAscensionDeclinedThisSession: (v: boolean) => void
+  showBonusModal: boolean
+  setShowBonusModal: (v: boolean) => void
 
   // Input State
   isFocused: boolean
@@ -65,6 +67,7 @@ export const useUIStore = create<UIState>((set) => ({
   inputString: '100000',
   showWelcomeModal: false,
   showUpdateModal: false,
+  showBonusModal: false,
   showAscensionPrompt: false,
   oracleTickerMessage: null,
   ascensionDeclinedThisSession: false,
@@ -90,6 +93,7 @@ export const useUIStore = create<UIState>((set) => ({
 
   setShowWelcomeModal: (v) => set({ showWelcomeModal: v }),
   setShowUpdateModal: (v) => set({ showUpdateModal: v }),
+  setShowBonusModal: (v) => set({ showBonusModal: v }),
   setShowJumpButton: (v) => set({ showJumpButton: v }),
   setShowPointsInfo: (v) => set({ showPointsInfo: v }),
   setShowPointsExplainer: (v) => set({ showPointsExplainer: v }),
