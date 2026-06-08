@@ -54,6 +54,7 @@ export interface PredictionRecord {
   festivalMultiplier?: number
   festivalType?: string | null
 }
+
 export interface UserStats {
   joinedDate: string
   total: number
@@ -196,7 +197,7 @@ export interface MatchRowProps {
   alwaysLeft?: boolean
   winStreak?: number
   visualMode?: string | null
-  totalMultiplier: number
+  totalMultiplier?: number
   festivalMultiplier?: number
   festivalType?: string | null
 }

@@ -58,7 +58,8 @@ describe('PendingMatchCard', () => {
     const prediction: PredictionRecord = {
       gameId: 'game-123',
       pick: 'Bob',
-      confirmed: true
+      confirmed: true,
+      totalMultiplier: 1
     }
 
     render(
