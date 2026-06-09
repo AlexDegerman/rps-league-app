@@ -6,6 +6,16 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '1.14',
+    label: 'The Onboarding Update',
+    notes: [
+      'Recovery Code Tutorial: First profile visit now surfaces a focused overlay that auto-scrolls to the recovery section, dims the page, and explains the importance of saving the recovery code before navigating away.',
+      'Server-Side Persistence: Tutorial completion is stored in the database and follows the player across devices. The tutorial never repeats regardless of browser or device.',
+      'Spotlight Architecture: The onboarding overlay uses live DOM measurement to position a cutout spotlight accurately over the recovery section, including re-measurement during the auto-scroll animation.',
+      'Scroll Restoration: The page scroll position is saved before the auto-scroll and restored after dismissal so the player returns to where they were.'
+    ]
+  },
+  {
     version: '1.13',
     label: 'The Relic Protocol',
     notes: [

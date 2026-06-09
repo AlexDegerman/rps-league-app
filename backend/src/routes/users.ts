@@ -9,6 +9,21 @@ const router = Router()
 // OVG = 10^87, so 999 OVG = 999 * 10^87.
 const ASCENSION_THRESHOLD = 999n * 10n ** 87n
 
+// POST /api/users/recovery-tutorial-complete
+router.post('/recovery-tutorial-complete', async (req, res) => {
+  const { userId } = req.body
+  if (!userId) return res.status(400).json({ error: 'Missing userId' })
+  try {
+    await pool.query(
+      'UPDATE users SET recovery_tutorial_completed = true WHERE user_id = $1',
+      [userId]
+    )
+    res.json({ success: true })
+  } catch {
+    res.status(500).json({ error: 'Failed' })
+  }
+})
+
 // GET /api/admin/utm-stats
 router.get('/admin/utm-stats', async (req, res) => {
   try {
@@ -436,6 +451,22 @@ router.post('/:userId/auto-bet-used', async (req, res) => {
     [userId]
   )
   res.json({ ok: true })
+})
+
+// GET /api/users/:userId/recovery-tutorial-status
+router.get('/:userId/recovery-tutorial-status', async (req, res) => {
+  const { userId } = req.params
+  try {
+    const result = await pool.query(
+      'SELECT recovery_tutorial_completed FROM users WHERE user_id = $1',
+      [userId]
+    )
+    res.json({
+      recoveryTutorialCompleted: result.rows[0]?.recovery_tutorial_completed ?? false
+    })
+  } catch {
+    res.status(500).json({ error: 'Failed' })
+  }
 })
 
 export default router

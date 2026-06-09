@@ -1045,6 +1045,22 @@
   0%, 100% { box-shadow: 0 0 10px rgba(139, 92, 246, 0.9), 0 0 22px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.3); }
   50%       { box-shadow: 0 0 18px rgba(168, 85, 247, 1), 0 0 36px rgba(168, 85, 247, 0.75), 0 0 60px rgba(168, 85, 247, 0.4); }
 }
+
+@keyframes oracle-pulse-amber {
+  0%, 100% {
+    box-shadow:
+      0 0 10px rgba(245, 158, 11, 0.7),
+      0 0 22px rgba(245, 158, 11, 0.4),
+      0 0 40px rgba(245, 158, 11, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(251, 191, 36, 0.9),
+      0 0 36px rgba(251, 191, 36, 0.55),
+      0 0 60px rgba(251, 191, 36, 0.25);
+  }
+}
+
 .oracle-glow-btn {
   background: linear-gradient(135deg, #7c3aed, #6d28d9);
   color: white;

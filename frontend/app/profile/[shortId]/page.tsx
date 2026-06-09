@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { clearUserCache, getOrCreateUser} from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
@@ -29,6 +29,7 @@ import { logger } from '@/lib/logger'
 import { StyleSelect } from '@/components/StyleSelect'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import AscensionModal from '@/components/modals/AscensionModal'
+import RecoveryTutorial from '@/components/RecoveryTutorial'
 import AchievementMenu from '@/components/AchievementMenu'
 import RelicSlot from '@/components/RelicSlot'
 import RelicDrawer from '@/components/RelicDrawer'
@@ -102,6 +103,7 @@ export default function ProfilePage() {
   const [allTimePeak, setAllTimePeak] = useState<bigint>(200000n)
   const [autoStyle, setAutoStyle] = useState(true)
   const [activeTab, setActiveTab] = useState<'stats' | 'achievements'>('stats')
+  const recoverySectionRef = useRef<HTMLDivElement>(null)
 
   const { display, full, capped } = formatPoints(points ?? '0')
 
@@ -728,7 +730,10 @@ export default function ProfilePage() {
 
         {/* Recovery section */}
         {isOwnProfile && (
-          <div className="border-t border-gray-50 mt-8 pt-6">
+          <div
+            ref={recoverySectionRef}
+            className="border-t border-gray-50 mt-8 pt-6"
+          >
             <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-2 ml-1">
               Recovery Access
             </p>
@@ -854,6 +859,11 @@ export default function ProfilePage() {
         />
       </div>
       {isOwnProfile && <RelicDrawer />}
+      <RecoveryTutorial
+        userId={profileUserId}
+        isOwnProfile={isOwnProfile}
+        recoverySectionRef={recoverySectionRef}
+      />
     </div>
   )
 }

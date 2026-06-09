@@ -377,3 +377,19 @@ export async function fetchUserRelics(userId: string) {
     fetch(`${API_BASE}/api/relics?userId=${userId}`)
   )
 }
+
+export async function fetchRecoveryTutorialStatus(userId: string) {
+  return handleResponse<{ recoveryTutorialCompleted: boolean }>(
+    fetch(`${API_BASE}/api/users/${userId}/recovery-tutorial-status`)
+  )
+}
+
+export async function completeRecoveryTutorial(userId: string) {
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/users/recovery-tutorial-complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    })
+  )
+}

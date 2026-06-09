@@ -2,6 +2,16 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [1.14] - Recovery Code Onboarding
+
+### Added
+
+* **Recovery Code Tutorial:** First-time visits to the Profile page now trigger a guided onboarding experience focused on account recovery. The tutorial automatically navigates players to the Recovery section, dims surrounding content, and explains the importance of securely saving recovery credentials before leaving the page.
+* **Cross-Device Tutorial Persistence:** Tutorial completion is now stored server-side and synchronized at the account level. Once completed, the onboarding flow will never reappear, regardless of browser, platform, or device.
+* **Dynamic Spotlight System:** Introduction of a precision spotlight architecture that performs live DOM measurements to accurately frame the Recovery section. Positioning is continuously recalculated during automated scrolling to maintain visual alignment throughout the tutorial sequence.
+* **Scroll State Restoration:** The onboarding system now preserves the player's original page position before navigation. Upon dismissal, the interface seamlessly returns to the exact location the player was viewing prior to the tutorial.
+
+
 ## [1.13] - The Relic Protocol
 
 ### Added
