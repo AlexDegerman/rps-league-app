@@ -53,6 +53,8 @@ interface GameState {
   setLiveTheme: (t: EventTheme) => void
   flashExpiresAt: number | null
   setFlashExpiresAt: (time: number | null) => void
+  flashEventJustTriggered: EventTheme
+  setFlashEventJustTriggered: (t: EventTheme) => void
 
   // Server Time State
   serverOffset: number
@@ -96,6 +98,7 @@ export const useGameStore = create<GameState>((set) => ({
   festivalEndsAt: null,
   festivalModeKey: null,
   flashExpiresAt: null,
+  flashEventJustTriggered: null,
   achievementQueue: [],
 
   // Actions - Connection
@@ -163,6 +166,7 @@ export const useGameStore = create<GameState>((set) => ({
   setVisualMode: (m) => set({ visualMode: m }),
   setLiveTheme: (t) => set({ liveTheme: t }),
   setFlashExpiresAt: (time) => set({ flashExpiresAt: time }),
+  setFlashEventJustTriggered: (t) => set({ flashEventJustTriggered: t }),
 
   // Actions - Festival
   syncFestivalModeKey: () =>
@@ -236,6 +240,5 @@ export const useGameStore = create<GameState>((set) => ({
   pushAchievement: (a) =>
     set((s) => ({ achievementQueue: [...s.achievementQueue, a] })),
   shiftAchievement: () =>
-    set((s) => ({ achievementQueue: s.achievementQueue.slice(1) })),
-
+    set((s) => ({ achievementQueue: s.achievementQueue.slice(1) }))
 }))

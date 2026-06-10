@@ -84,32 +84,62 @@ export default function AchievementMenu({
         if (ghost) list.push(ghost)
       }
     })
-    return list
+
+    const RARITY_WEIGHT: Record<string, number> = {
+      RAINBOW: 0,
+      MYTHICAL: 1,
+      LEGENDARY: 2,
+      EPIC: 3,
+      RARE: 4,
+      COMMON: 5
+    }
+
+    return list.sort((a, b) => {
+      const weightA = RARITY_WEIGHT[a.rarity as AchievementRarity] ?? 10
+      const weightB = RARITY_WEIGHT[b.rarity as AchievementRarity] ?? 10
+
+      if (weightA !== weightB) return weightA - weightB
+
+      return a.name.localeCompare(b.name)
+    })
   }, [earnedSet, displayedBadges])
 
   const toggleBadge = useCallback(
-    (code: string) => {
-      setDisplayedBadges((prev) => {
-        if (prev.includes(code)) return prev.filter((c) => c !== code)
-        if (prev.length >= maxSlots) return prev
-        return [...prev, code]
-      })
-    },
-    [maxSlots]
-  )
+    async (code: string) => {
+      const isCurrentlySelected = displayedBadges.includes(code)
+      let nextBadges: string[] = []
 
-  const handleSave = async () => {
-    setSaveStatus('saving')
-    const result = await updateUserBadges(targetShortId, displayedBadges)
-    if (result) {
-      setSaveStatus('saved')
-      if (isOwnProfile) await refreshBadges()
-      if (onBadgeUpdate) onBadgeUpdate()
-      setTimeout(() => setSaveStatus('idle'), 2000)
-    } else {
-      setSaveStatus('idle')
-    }
-  }
+      if (isCurrentlySelected) {
+        nextBadges = displayedBadges.filter((c) => c !== code)
+      } else {
+        if (displayedBadges.length >= maxSlots) return
+        nextBadges = [...displayedBadges, code]
+      }
+
+      setDisplayedBadges(nextBadges)
+      setSaveStatus('saving')
+
+      const result = await updateUserBadges(targetShortId, nextBadges)
+
+      if (result) {
+        setSaveStatus('saved')
+        if (isOwnProfile) await refreshBadges()
+        if (onBadgeUpdate) onBadgeUpdate()
+        setTimeout(() => setSaveStatus('idle'), 1500)
+      } else {
+        setDisplayedBadges(displayedBadges)
+        setSaveStatus('idle')
+      }
+    },
+    [
+      displayedBadges,
+      maxSlots,
+      targetShortId,
+      isOwnProfile,
+      refreshBadges,
+      onBadgeUpdate
+    ]
+  )
 
   const visibleAchievements = useMemo(
     () =>
@@ -148,32 +178,54 @@ export default function AchievementMenu({
               <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                 Badge Display
               </h4>
-              <p className="text-[11px] font-bold text-indigo-600 mt-1">
-                {displayedBadges.length} / {maxSlots} Achievement Slots
-              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[11px] font-bold text-indigo-600">
+                  {displayedBadges.length} / {maxSlots} Achievement Slots
+                </p>
+                <span
+                  className={`text-[9px] font-black uppercase transition-opacity duration-300 ${saveStatus !== 'idle' ? 'opacity-100' : 'opacity-0'}`}
+                >
+                  {saveStatus === 'saving' ? (
+                    <span className="text-amber-500 animate-pulse">
+                      ● Saving...
+                    </span>
+                  ) : (
+                    <span className="text-emerald-500">✓ Changes Saved</span>
+                  )}
+                </span>
+              </div>
             </div>
-            <button
-              onClick={handleSave}
-              disabled={saveStatus === 'saving'}
-              className="bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-indigo-700 transition disabled:opacity-50"
-            >
-              {saveStatus === 'saved'
-                ? '✓ Saved'
-                : saveStatus === 'saving'
-                  ? '...'
-                  : 'Save'}
-            </button>
           </div>
+
           <div className="flex flex-wrap gap-1.5">
-            {selectableBadges.map((badge) => (
-              <button
-                key={badge.code}
-                onClick={() => toggleBadge(badge.code)}
-                className={`px-2 py-1 rounded-md border text-[9px] font-black transition-all flex items-center gap-1 ${displayedBadges.includes(badge.code) ? 'bg-indigo-50 border-indigo-200 text-indigo-700 ring-1 ring-indigo-200 shadow-xs' : 'bg-gray-50 border-gray-100 text-gray-400 opacity-60'}`}
-              >
-                <span>{badge.icon}</span> {badge.code}
-              </button>
-            ))}
+            {selectableBadges.map((badge) => {
+              const isSelected = displayedBadges.includes(badge.code)
+              const isRainbow = badge.rarity === 'RAINBOW'
+              const rarityStyle = isRainbow
+                ? 'rainbow-badge-bg text-purple-900 border-purple-400'
+                : RARITY_BADGE_STYLE[badge.rarity as AchievementRarity]
+
+              return (
+                <button
+                  key={badge.code}
+                  disabled={saveStatus === 'saving' && !isSelected}
+                  onClick={() => toggleBadge(badge.code)}
+                  className={`
+              relative px-2 py-1 rounded-md border text-[9px] font-black transition-all 
+              flex items-center gap-1 active:scale-95
+              ${rarityStyle}
+              ${
+                isSelected
+                  ? 'ring-2 ring-indigo-500 ring-offset-2 z-10 opacity-100 shadow-sm'
+                  : 'opacity-85 border-dashed border-black/10'
+              }
+            `}
+                >
+                  <span>{badge.icon}</span>
+                  <span>{badge.code}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       )}

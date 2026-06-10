@@ -30,7 +30,7 @@ export default function BonusExplainerModal({
   onClose: () => void
 }) {
   const [expanded, setExpanded] = useState<ExpandedState>({
-    bonuses: true,
+    bonuses: false,
     streaks: false,
     flash: false,
     relics: false,
@@ -341,13 +341,13 @@ export default function BonusExplainerModal({
                         rarity: 'Legendary',
                         color: 'text-yellow-600',
                         bg: 'bg-yellow-50 border-yellow-200',
-                        base: '0.1%'
+                        base: '0.2%'
                       },
                       {
                         rarity: 'Mythical',
                         color: 'text-red-600',
                         bg: 'bg-red-50 border-red-200',
-                        base: '0.03%'
+                        base: '0.1%'
                       }
                     ].map((r) => (
                       <div

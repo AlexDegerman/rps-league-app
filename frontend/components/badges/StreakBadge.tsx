@@ -18,9 +18,6 @@ export default function StreakBadge({
           ? 'bg-linear-to-br from-orange-950 via-red-950 to-orange-950 border-orange-500'
           : 'bg-linear-to-br from-green-950 via-emerald-950 to-green-950 border-green-500'
       }`}
-      style={{
-        animation: 'fever-badge-in 0.4s cubic-bezier(.34,1.56,.64,1) both'
-      }}
     >
       {/* Shimmer sweep */}
       <div

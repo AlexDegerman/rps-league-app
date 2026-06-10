@@ -195,7 +195,6 @@ export async function rollRelicDrop(
   )
   const isFirstRelicEver = ownedKeys.size === 0
   const lensMultiplier = equippedRelic === 'scavengers_lens' ? 1.2 : 1.0
-
   const eligible = RELICS.filter((r) => !ownedKeys.has(r.key))
   if (eligible.length === 0) return null
 

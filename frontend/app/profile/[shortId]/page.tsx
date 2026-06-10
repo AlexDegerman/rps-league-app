@@ -708,7 +708,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-black/40">
-                  Show LinkedIn badge publicly (Takes 1 of 5 slots)
+                  Show LinkedIn badge publicly (Takes 1 of 5 badge slots)
                 </span>
               </label>
               {linkedinUrl && showLinkedinBadge && (

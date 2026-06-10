@@ -65,6 +65,8 @@ import { slamState } from '@/lib/slamState'
 import BonusExplainerModal, {
   BonusExplainerTrigger
 } from '@/components/modals/BonusExplainerModal'
+import FlashEventActivationOverlay from '@/components/overlays/FlashEventActivationOverlay'
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
@@ -93,7 +95,9 @@ export default function HomePage() {
     oracleSide,
     setOracleSide,
     setActiveFestival,
-    festivalModeKey
+    festivalModeKey,
+    flashEventJustTriggered,
+    setFlashEventJustTriggered
   } = useGameStore()
 
   // - User store -
@@ -604,11 +608,22 @@ export default function HomePage() {
       const data = JSON.parse(event.data)
       const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
-      setActiveFlashEvent(data.type)
       setFlashBuffRemaining(data.betsRemaining)
-      setLiveTheme(data.type as EventTheme)
       useGameStore.getState().setFlashExpiresAt(null)
+
+      const type = data.type as string
+    
+      setTimeout(() => {
+        setFlashEventJustTriggered(data.type as EventTheme)
+        setLiveTheme(data.type as EventTheme)
+        setActiveFlashEvent(data.type)
+        if (type === 'LUNAR') playMoon()
+        else if (type === 'CARDS') playCards()
+        else if (type === 'ELECTRIC') playElectric()
+        else if (type === 'HELLFIRE') playFire()
+      }, 1500)
     })
+
 
     es.addEventListener('festival_event', (event: MessageEvent) => {
       const data: FestivalSSEData = JSON.parse(event.data)
@@ -773,6 +788,13 @@ export default function HomePage() {
       {showUpdateModal && <UpdateModal onClose={handleUpdateClose} />}
       {showBonusModal && (
         <BonusExplainerModal onClose={() => setShowBonusModal(false)} />
+      )}
+
+      {flashEventJustTriggered && (
+        <FlashEventActivationOverlay
+          event={flashEventJustTriggered}
+          onDone={() => setFlashEventJustTriggered(null)}
+        />
       )}
 
       <GlobalTickerWrapper />
