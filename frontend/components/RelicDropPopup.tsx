@@ -24,6 +24,7 @@ import {
 import { RARITY_STYLES } from '@/lib/relics'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { slamState } from '@/lib/slamState'
+import { useSound } from '@/hooks/useSound'
 
 const ICON_MAP: Record<
   string,
@@ -52,7 +53,7 @@ export default function RelicDropPopup() {
   const { dropQueue, popDropQueue, equipRelic } = useRelicStore()
   const [visible, setVisible] = useState(false)
   const [equipping, setEquipping] = useState(false)
-
+  const { playRelicDrop } = useSound()
   const currentDrop = dropQueue[0] || null
 
   const dismiss = useCallback(() => {
@@ -76,7 +77,8 @@ export default function RelicDropPopup() {
       }
       timerId = setTimeout(() => {
         if (!cancelled) setVisible(true)
-      }, 600)
+        playRelicDrop(currentDrop.rarity)
+      }, 1500)
     }
 
     tryShow()
@@ -85,6 +87,7 @@ export default function RelicDropPopup() {
       cancelled = true
       clearTimeout(timerId)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDrop, visible])
 
   const handleEquip = async () => {

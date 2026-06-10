@@ -1,3 +1,4 @@
+import { RelicRarity } from '@/lib/relics'
 import { useRef, useState, useEffect } from 'react'
 
 const SOUND_MAP = {
@@ -10,7 +11,12 @@ const SOUND_MAP = {
   fanfare: '/sounds/ascension-fanfare.mp3',
   slam: '/sounds/slam.mp3',
   cascade: '/sounds/cascade.mp3',
-  shimmer: '/sounds/shimmer.mp3'
+  shimmer: '/sounds/shimmer.mp3',
+  relic_common: '/sounds/relic_common.mp3',
+  relic_rare: '/sounds/relic_rare.mp3',
+  relic_epic: '/sounds/relic_epic.mp3',
+  relic_legendary: '/sounds/relic_legendary.mp3',
+  relic_mythical: '/sounds/relic_mythical.mp3'
 } as const
 
 type SoundKey = keyof typeof SOUND_MAP
@@ -108,6 +114,10 @@ export const useSound = () => {
     playMoon: () => play('moon'),
     playFanfare: () => play('fanfare'),
     playJackpot,
-    getDuration: (key: SoundKey) => audioInstances[key]?.duration || 0
+    getDuration: (key: SoundKey) => audioInstances[key]?.duration || 0,
+    playRelicDrop: (rarity: RelicRarity) => {
+      const key = `relic_${rarity.toLowerCase()}` as SoundKey
+      play(key)
+    }
   }
 }

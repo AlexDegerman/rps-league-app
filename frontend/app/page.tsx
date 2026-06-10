@@ -437,7 +437,9 @@ export default function HomePage() {
       !showAscensionPrompt &&
       !ascensionDeclinedThisSession
     ) {
-      setShowAscensionPrompt(true)
+      setTimeout(() => {
+        setShowAscensionPrompt(true)
+      }, 1500)
     }
 
     return { newPoints, isNewPeak }
@@ -489,12 +491,15 @@ export default function HomePage() {
           currentPoints < ASCENSION_THRESHOLD &&
           currentPoints + winAmt >= ASCENSION_THRESHOLD
 
-        if (isAscendingWin) playFanfare()
-        else if (currentFlash === 'LUNAR') playMoon()
+        if (currentFlash === 'LUNAR') playMoon()
         else if (currentFlash === 'CARDS') playCards()
         else if (currentFlash === 'ELECTRIC') playElectric()
         else if (currentFlash === 'HELLFIRE') playFire()
         else playWin()
+
+        if (isAscendingWin) {
+          setTimeout(() => playFanfare(), 1500)
+        }
 
         const currentStreak = data.streakAfter ?? 0
         const capturedConfettiType =
@@ -668,14 +673,16 @@ export default function HomePage() {
       const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
 
-      useGameStore.getState().pushAchievement({
-        code: data.code,
-        name: data.name,
-        icon: data.icon,
-        rarity: data.rarity
-      })
+      setTimeout(() => {
+        useGameStore.getState().pushAchievement({
+          code: data.code,
+          name: data.name,
+          icon: data.icon,
+          rarity: data.rarity
+        })
 
-      useUserStore.getState().refreshBadges()
+        useUserStore.getState().refreshBadges()
+      }, 1500)
     })
 
     es.onerror = () => {
