@@ -673,7 +673,8 @@ export const resolvePrediction = async (
               name: achievement.name,
               icon: achievement.icon,
               rarity: achievement.rarity,
-              category: achievement.category
+              category: achievement.category,
+              requirement: achievement.requirement
             })
           )
         }

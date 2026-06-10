@@ -1,5 +1,5 @@
 import { RelicRarity } from '@/lib/relics'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 
 const SOUND_MAP = {
   win: '/sounds/win.wav',
@@ -115,9 +115,10 @@ export const useSound = () => {
     playFanfare: () => play('fanfare'),
     playJackpot,
     getDuration: (key: SoundKey) => audioInstances[key]?.duration || 0,
-    playRelicDrop: (rarity: RelicRarity) => {
+    playRelicDrop: useCallback((rarity: RelicRarity) => {
       const key = `relic_${rarity.toLowerCase()}` as SoundKey
       play(key)
-    }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
   }
 }

@@ -285,6 +285,8 @@ export interface FestivalSSEData {
   durationMs: number
   message: string
   flashType?: string
+  isDemo: boolean
+  triggerUserId?: string
 }
 
 export interface AchievementNotif {
@@ -292,6 +294,7 @@ export interface AchievementNotif {
   name: string
   icon: string
   rarity: AchievementRarity
+  requirement: string
 }
 
 export type AchievementRarity =

@@ -21,28 +21,34 @@ interface StoreMock extends Mock {
   getState: Mock
 }
 
-const { mockUserStore, mockGameStore, mockUIStore, mockIdleStore } = vi.hoisted(
-  () => {
-    const createMockStore = () => {
-      const mock = vi.fn() as unknown as StoreMock
-      mock.getState = vi.fn()
-      return mock
-    }
-
-    return {
-      mockUserStore: createMockStore(),
-      mockGameStore: createMockStore(),
-      mockUIStore: createMockStore(),
-      mockIdleStore: createMockStore()
-    }
+const {
+  mockUserStore,
+  mockGameStore,
+  mockUIStore,
+  mockIdleStore,
+  mockRelicStore
+} = vi.hoisted(() => {
+  const createMockStore = () => {
+    const mock = vi.fn() as unknown as StoreMock
+    mock.getState = vi.fn()
+    return mock
   }
-)
+
+  return {
+    mockUserStore: createMockStore(),
+    mockGameStore: createMockStore(),
+    mockUIStore: createMockStore(),
+    mockIdleStore: createMockStore(),
+    mockRelicStore: createMockStore()
+  }
+})
 
 // Mock Stores
 vi.mock('./stores/userStore', () => ({ useUserStore: mockUserStore }))
 vi.mock('./stores/gameStore', () => ({ useGameStore: mockGameStore }))
 vi.mock('./stores/uiStore', () => ({ useUIStore: mockUIStore }))
 vi.mock('./stores/idleStore', () => ({ useIdleStore: mockIdleStore }))
+vi.mock('./stores/relicStore', () => ({ useRelicStore: mockRelicStore }))
 
 // Mock Components
 vi.mock('@/components/MatchList', () => ({ default: () => null }))
@@ -60,13 +66,25 @@ vi.mock('@/components/overlays/ConfettiOverlay', () => ({
 vi.mock('@/components/overlays/ResultAnimOverlay', () => ({
   default: () => null
 }))
+vi.mock('@/components/overlays/FlashEventActivationOverlay', () => ({
+  default: () => null
+}))
 vi.mock('@/components/badges/FlashBadge', () => ({ default: () => null }))
 vi.mock('@/components/badges/StreakBadge', () => ({ default: () => null }))
-vi.mock('@/components/BonusExplainerPopover', () => ({ default: () => null }))
 vi.mock('@/components/modals/WelcomeModal', () => ({ default: () => null }))
 vi.mock('@/components/modals/UpdateModal', () => ({ default: () => null }))
 vi.mock('@/components/modals/AscensionModal', () => ({ default: () => null }))
+vi.mock('@/components/modals/BonusExplainerModal', () => ({
+  default: () => null,
+  BonusExplainerTrigger: () => null
+}))
 vi.mock('@/components/IdleBetControls', () => ({ default: () => null }))
+vi.mock('@/components/FestivalTicker', () => ({ default: () => null }))
+vi.mock('@/components/GlobalTickerWrapper', () => ({ default: () => null }))
+vi.mock('@/components/AchievementToast', () => ({ default: () => null }))
+vi.mock('@/components/RelicSlot', () => ({ default: () => null }))
+vi.mock('@/components/RelicDrawer', () => ({ default: () => null }))
+vi.mock('@/components/RelicDropPopup', () => ({ default: () => null }))
 
 // Mock Hooks
 vi.mock('@/hooks/useSound', () => ({
@@ -100,6 +118,14 @@ vi.mock('@/hooks/useTabGuard', () => ({
 vi.mock('@/hooks/useIdleBet', () => ({
   useIdleBet: vi.fn()
 }))
+vi.mock('@/hooks/usePopupQueue', () => ({
+  usePopupQueue: vi.fn()
+}))
+
+// Mock slamState
+vi.mock('@/lib/slamState', () => ({
+  slamState: { active: false }
+}))
 
 // Mock Utils & API
 vi.mock('@/lib/user', () => ({
@@ -130,7 +156,8 @@ vi.mock('@/lib/api', () => ({
   ascendUser: vi.fn(() =>
     Promise.resolve({ success: true, laps: 1, fastestLapBets: 100 })
   ),
-  fetchFestivalState: vi.fn(() => Promise.resolve(null))
+  fetchFestivalState: vi.fn(() => Promise.resolve(null)),
+  postFestivalParticipated: vi.fn(() => Promise.resolve(null))
 }))
 
 describe('HomePage', () => {
@@ -161,6 +188,7 @@ describe('HomePage', () => {
       applyPointsUpdate: vi.fn(),
       setLaps: vi.fn(),
       setFastestLapBets: vi.fn(),
+      refreshBadges: vi.fn(),
       ...userOverrides
     }
     const gameState = {
@@ -186,6 +214,11 @@ describe('HomePage', () => {
       setLiveTheme: vi.fn(),
       oracleSide: null,
       setOracleSide: vi.fn(),
+      setActiveFestival: vi.fn(),
+      festivalModeKey: null,
+      setFlashExpiresAt: vi.fn(),
+      achievementQueue: [],
+      shiftAchievement: vi.fn(),
       ...gameOverrides
     }
     const uiState = {
@@ -212,14 +245,28 @@ describe('HomePage', () => {
       setShowWelcomeModal: vi.fn(),
       showUpdateModal: false,
       setShowUpdateModal: vi.fn(),
-      showAscensionPrompt: false,
-      setShowAscensionPrompt: vi.fn(),
+      showBonusModal: false,
+      setShowBonusModal: vi.fn(),
+      activePopup: null,
+      dequeuePopup: vi.fn(),
+      readyToShow: false,
+      enqueuePopup: vi.fn(),
+      setOracleTickerMessage: vi.fn(),
+      ascensionDeclinedThisSession: false,
+      setAscensionDeclinedThisSession: vi.fn(),
       ...uiOverrides
     }
     const idleState = {
       setEligible: vi.fn(),
       setHasInteractedWithIdle: vi.fn(),
       ...idleOverrides
+    }
+    const relicState = {
+      initRelics: vi.fn(),
+      pushToDropQueue: vi.fn(),
+      updateRelicCounter: vi.fn(),
+      relicCounter: 0,
+      dropQueue: []
     }
 
     mockUserStore.mockReturnValue(userState)
@@ -230,6 +277,8 @@ describe('HomePage', () => {
     mockUIStore.getState.mockReturnValue(uiState)
     mockIdleStore.mockReturnValue(idleState)
     mockIdleStore.getState.mockReturnValue(idleState)
+    mockRelicStore.mockReturnValue(relicState)
+    mockRelicStore.getState.mockReturnValue(relicState)
   }
 
   beforeEach(() => {

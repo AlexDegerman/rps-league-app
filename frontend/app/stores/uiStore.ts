@@ -3,12 +3,39 @@ import type { ResultAnim } from '@/types/rps'
 import { OracleTickerMessage } from '@/components/OracleMessageTicker'
 
 type BrandTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
+export type PopupKind =
+  | 'flash_event'
+  | 'ascension'
+  | 'achievement'
+  | 'relic_drop'
+
+export interface PopupQueueItem {
+  id: string
+  kind: PopupKind
+  priority: number
+  payload?: unknown
+}
+
+const POPUP_PRIORITIES: Record<PopupKind, number> = {
+  flash_event: 0,
+  ascension: 1,
+  relic_drop: 2,
+  achievement: 3
+}
 
 interface UIState {
   showAscensionPrompt: boolean
   setShowAscensionPrompt: (v: boolean) => void
   oracleTickerMessage: OracleTickerMessage | null
   setOracleTickerMessage: (msg: OracleTickerMessage | null) => void
+
+  // Popup queue
+  popupQueue: PopupQueueItem[]
+  activePopup: PopupQueueItem | null
+  enqueuePopup: (item: Omit<PopupQueueItem, 'priority'>) => void
+  dequeuePopup: () => void
+  isTransitioning: boolean
+  readyToShow: boolean
 
   // Brand State
   brandTheme: BrandTheme
@@ -71,6 +98,10 @@ export const useUIStore = create<UIState>((set) => ({
   showAscensionPrompt: false,
   oracleTickerMessage: null,
   ascensionDeclinedThisSession: false,
+  popupQueue: [],
+  activePopup: null,
+  readyToShow: false,
+  isTransitioning: false,
 
   // Actions
   setOracleTickerMessage: (msg) => set({ oracleTickerMessage: msg }),
@@ -100,7 +131,32 @@ export const useUIStore = create<UIState>((set) => ({
   setShowAscensionPrompt: (v) => set({ showAscensionPrompt: v }),
   setAscensionDeclinedThisSession: (v) =>
     set({ ascensionDeclinedThisSession: v }),
+  enqueuePopup: (item) =>
+    set((s) => {
+      if (
+        s.popupQueue.some((p) => p.id === item.id) ||
+        s.activePopup?.id === item.id
+      )
+        return s
 
+      const full = { ...item, priority: POPUP_PRIORITIES[item.kind] }
+      const next = [...s.popupQueue, full].sort(
+        (a, b) => a.priority - b.priority
+      )
+
+      return {
+        activePopup: s.activePopup ?? next[0],
+        popupQueue: s.activePopup ? next : next.slice(1),
+        readyToShow: s.activePopup ? s.readyToShow : false
+      }
+    }),
+
+  dequeuePopup: () =>
+    set((s) => ({
+      activePopup: s.popupQueue[0] ?? null,
+      popupQueue: s.popupQueue.slice(1),
+      readyToShow: false
+    })),
   setIsFocused: (v) => set({ isFocused: v }),
   setInputString: (s) => set({ inputString: s })
 }))

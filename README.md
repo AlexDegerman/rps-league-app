@@ -147,6 +147,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Full test coverage across backend services and frontend components
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
 - Infinite Scaling: Engineered with native BigInt support to handle astronomical point values (Sextillions, Vigintillions, and beyond).
+- Cinematic Spectacle Orchestration: A priority-driven UI engine that sequences Flash Events, Ascensions, and Relics into a seamless flow, preventing interface exhaustion during high-frequency match cycles.
 
 ---
 
@@ -219,13 +220,13 @@ Event selection is weighted to support controlled rollout of new or seasonal eve
 
 > 📋 **[View all Flash Event showcases →](./EVENTS.md)**
 
-### Featured: Moon's Blessing
+### Flash Event Animations
 
-A calm lunar-inspired event wrapped in cool blue tones with serene visual and audio effects.
+A preview of the animations that play when flash events are triggered.
 
 <div>
-  <strong>Moon's Blessing Flash Event in Action</strong><br/>
-  <img src="./assets/moon_event_demo.gif" width="220" />
+  <strong>Flash Event Trigger Animations</strong><br/>
+  <img src="./assets/flasheventanimations.gif" width="220" />
 </div>
 
 ---
@@ -357,7 +358,7 @@ Guarantees:
 |-------|-------|
 | Database | Supabase PostgreSQL (Validated on 10k+ record datasets) |
 | Frontend | Next.js, React, TypeScript, Tailwind CSS |
-| State Management | Zustand (game, user, ui, stores)|
+| State Management | Zustand (game, user, ui, popup queue) |
 | Backend | Node.js, Express, TypeScript, Google Gemini API |
 | Real-time | Server-Sent Events via `/api/live` |
 | Database | Supabase PostgreSQL |
@@ -421,6 +422,11 @@ This guarantees accurate computation, storage, and display of point values at ex
 Implemented a visibility-aware execution model for auto-betting to handle browser throttling and multi-monitor usage patterns. Using the Page Visibility API, execution pauses when the tab is backgrounded and resumes cleanly when the tab becomes visible again.
 
 A resynchronization layer ensures any missed match events are immediately processed on return, preventing state desync in high-frequency (100ms) event streams.
+
+**Race Conditions in Spectacle Logic (The "UI Exhaustion" Problem)**
+In a live-service environment where matches resolve every 5 seconds, a single win can simultaneously trigger a Flash Event, an Achievement, a Relic Drop, and an Ascension prompt. Initially, these would overlap, creating "UI clutter" and blocking match results.
+
+I engineered a Sequential Spectacle Queue using a Zustand-based state machine. The system enforces a "Starting Gate" (1500ms delay for match results to breathe) followed by a priority-sorted execution path. It distinguishes between Obstructive stages (Modals that wait for user action) and Non-Obstructive stages (Achievements), which utilize a "Queue Flush" logic to dump notifications into a vertical stack simultaneously, ensuring the main betting loop is never interrupted for more than 3 seconds.
 
 ---
 

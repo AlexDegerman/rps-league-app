@@ -1,4 +1,4 @@
-import { AchievementRarity, BadgeData } from "@/types/rps"
+import { AchievementRarity, BadgeData } from '@/types/rps'
 
 export const CATEGORY_ORDER = [
   'Combatants',
@@ -16,7 +16,7 @@ export const CATEGORY_ORDER = [
   'Meta',
   'Collector',
   'Miscellaneous',
-  'Rainbow',
+  'Rainbow'
 ] as const
 
 export type CategoryKey = (typeof CATEGORY_ORDER)[number]
@@ -272,7 +272,7 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
   Prestige: ['LAP1', 'LAP5', '10LP', '25LP', 'LORD'],
   Dimensional: ['1TRL', '1QAD', '1VIG', '1OVG', '999X'],
   Multiplier: ['10X', '50X', 'NUKE', 'NOVA', 'BOOM'],
-  Reliquary:   ['5RL', '10RL', 'MUSE', 'FULL', 'TRI'],
+  Reliquary: ['5RL', '10RL', 'MUSE', 'FULL', 'TRI'],
   Lunar: ['LUN1', 'LUN2', 'LUN3', 'LUN4', 'LUNA'],
   Electric: ['VOL1', 'VOL2', 'VOL3', 'VOL4', 'VOLT'],
   Hellfire: ['HEL1', 'HEL2', 'HEL3', 'HEL4', 'HELL'],
@@ -293,7 +293,7 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
     'NET4',
     'MESH'
   ],
-  Rainbow: ['KING'],
+  Rainbow: ['KING']
 }
 
 const STANDALONE_CATEGORIES = new Set(['Meta', 'Miscellaneous', 'Rainbow'])
@@ -327,4 +327,85 @@ export function getHighestEarnedPerCategory(earned: Set<string>): BadgeData[] {
   }
 
   return result
+}
+
+export const BADGE_REQUIREMENT: Record<string, string> = {
+  '50W': '50 Total Wins',
+  '100W': '100 Total Wins',
+  '250W': '250 Total Wins',
+  '500W': '500 Total Wins',
+  GLAD: '1,000 Total Wins',
+  STK3: '3-Win Streak',
+  HOT: '5-Win Streak',
+  FIRE: '10-Win Streak',
+  BST: '15-Win Streak',
+  ZEN: '20-Win Streak',
+  LAP1: '1 Full Lap',
+  LAP5: '5 Full Laps',
+  '10LP': '10 Full Laps',
+  '25LP': '25 Full Laps',
+  LORD: '50 Full Laps',
+  '1TRL': 'Reach 1 Trillion',
+  '1QAD': 'Reach 1 Quadrillion',
+  '1VIG': 'Reach 1 Vigintillion',
+  '1OVG': 'Reach 1 Octovigintillion',
+  '999X': 'Reach 999 Octovigintillion',
+  '10X': 'Reach x10 Multiplier',
+  '50X': 'Reach x30 Multiplier',
+  NUKE: 'Reach x60 Multiplier',
+  NOVA: 'Reach x100 Multiplier',
+  BOOM: 'Trigger a x3 Mythic Relic Slam',
+  '5RL': 'Own 5 Unique Relics',
+  '10RL': 'Own 10 Unique Relics',
+  MUSE: 'Own all Common, Rare & Epic Relics',
+  FULL: 'Own all 17 Unique Relics',
+  TRI: 'Own all 3 Mythical Relics',
+  LUN1: '5 Moon Activations',
+  LUN2: '10 Moon Activations',
+  LUN3: '25 Moon Activations',
+  LUN4: '50 Moon Activations',
+  LUNA: '100 Moon Activations',
+  VOL1: '5 Electric Activations',
+  VOL2: '10 Electric Activations',
+  VOL3: '25 Electric Activations',
+  VOL4: '50 Electric Activations',
+  VOLT: '100 Electric Activations',
+  HEL1: '5 Hellfire Activations',
+  HEL2: '10 Hellfire Activations',
+  HEL3: '25 Hellfire Activations',
+  HEL4: '50 Hellfire Activations',
+  HELL: '100 Hellfire Activations',
+  CRD1: '5 Cards Activations',
+  CRD2: '10 Cards Activations',
+  CRD3: '25 Cards Activations',
+  CRD4: '50 Cards Activations',
+  CARD: '100 Cards Activations',
+  ORC3: 'Use Oracle 3 Days in a Row',
+  ORC7: 'Use Oracle 7 Days in a Row',
+  ORCL: 'Use Oracle 14 Days in a Row',
+  CHRON: 'Use Oracle 30 Days in a Row',
+  OMNI: 'Use Oracle 60 Days in a Row',
+  PITY: 'Trigger Bonus Pity 100 times',
+  FND: 'Play during launch month',
+  AUTO: 'Toggle on Auto-Bet for the first time',
+  SLAY: 'Win with x100+ multiplier',
+  DREM: 'Trigger back-to-back Flash Events on consecutive matches',
+  STRM: 'Experience all 4 Flash Event themes in one session',
+  REBL: 'Bet against the Oracle',
+  COL10: 'Earn 10 Achievements',
+  COL25: 'Earn 25 Achievements',
+  COL40: 'Earn 40 Achievements',
+  COL55: 'Earn 55 Achievements',
+  COLMAX: 'Earn 68 Achievements',
+  FES1: 'Trigger 1 Festival',
+  FES2: 'Trigger 5 Festivals',
+  FES3: 'Trigger 15 Festivals',
+  FES4: 'Trigger 30 Festivals',
+  FEST: 'Trigger 50 Festivals',
+  NET1: 'Participate in 5 Festivals',
+  NET2: 'Participate in 15 Festivals',
+  NET3: 'Participate in 30 Festivals',
+  NET4: 'Participate in 60 Festivals',
+  MESH: 'Participate in 100 Festivals',
+  KING: '1000 Wins + 50 Laps + 3 Mythical Relics'
 }

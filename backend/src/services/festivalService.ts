@@ -204,6 +204,7 @@ const launchFestival = (
     JSON.stringify({
       type,
       triggeredBy,
+      triggerUserId: meta.triggerUserId ?? null,
       message,
       isDemo,
       startedAt: newState.startedAt,

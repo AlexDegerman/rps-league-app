@@ -390,7 +390,7 @@ function LeaderboardContent() {
                               )}
                             </div>
 
-                            {/* Row 2: Badge Cluster (Handles Dev check automatically) */}
+                            {/* Row 2: Badge Cluster */}
                             <IdentityBadges
                               linkedinUrl={entry.linkedinUrl}
                               showLinkedinBadge={
