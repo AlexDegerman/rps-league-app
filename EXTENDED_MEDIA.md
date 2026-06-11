@@ -1,13 +1,17 @@
 # 📹 Media Gallery
 
-Full visual showcase of RPS League features, UI systems, and gameplay recordings.
+A complete visual archive of the RPS League ecosystem.
 
-> 📋 [View Flash Event showcase →](./EVENTS.md)
+### 🚩 Primary Feature Showcases
+Detailed gameplay and cinematic recordings for core systems:
+> 🕹️ [**Flash Event Deep-Dive** →](./EVENTS.md)
 
-> 📋 [View Festival showcase →](./FESTIVALS.md)
+> 🎭 [**Player Festival Deep-Dive** →](./FESTIVALS.md)
 
 ---
 
+### 🔍 Extended Feature Showcases
+Visual breakdowns of UI systems, automation, and reliability tools:
 ## 🏆 Achievement Badges Leaderboard Styling (Mythical & Rainbow)
 
 Achievement badges are earned through player milestones and progression. When equipped, they visually transform leaderboard rows to reflect achievement rarity and status. Mythical achievement badges create a deep red reactive energy field that gives the row a volatile, high-intensity presence, while Rainbow achievement badges represent the highest achievement tier and fully override all visuals with a shifting multicolor shimmer that continuously flows across the row.

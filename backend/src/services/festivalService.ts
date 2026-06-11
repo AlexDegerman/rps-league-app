@@ -74,7 +74,7 @@ const DEMO_FESTIVAL_WEIGHTS: { type: FestivalType; weight: number }[] = [
   { type: 'FEVER', weight: 18 },
   { type: 'GHOST', weight: 14 },
   { type: 'SAFEGUARD', weight: 8 },
-  // { type: 'VAULT', weight: 5 }, // relics unimplemented
+  { type: 'VAULT', weight: 5 },
   { type: 'SURGE', weight: 2 },
   { type: 'SANGUINE', weight: 1 }
 ]

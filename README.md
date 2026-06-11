@@ -8,27 +8,11 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 ## 🎮 Preview
 
-<table>
-  <tr>
-    <td valign="top">
-      <strong>Desktop Gameplay</strong><br />
-      <img src="./assets/rps.gif" width="450" />
-    </td>
-    <td valign="top">
-      <strong>Mobile (320px)</strong><br />
-      <img src="./assets/mobile_fevertime_demo.gif" width="220" />
-    </td>
-  </tr>
-</table>
-
-<p><em>Showcasing selected tier colors with live transitions.</em></p>
-<img src="./assets/rpscolor.gif" width="300" />
-
-## 📹 Media
-
-Screenshots, gameplay recordings, and feature showcases.
-
-📄 [View full media gallery →](./MEDIA.md)
+<p>
+  <em><strong>Flash Event Activations</strong>: Visual animations triggered when a Flash Event starts.</em>
+  <br />
+  <img src="./assets/flasheventanimations.gif" width="280" />
+</p>
 
 ---
 
@@ -53,12 +37,12 @@ Screenshots, gameplay recordings, and feature showcases.
 - [🛠️ Technical Challenges & Solutions](#️-technical-challenges--solutions)
 - [🔮 Reliability & Feedback](#-reliability--feedback)
 - [🤖 AI Oracle & Analytics](#-ai-oracle--analytics)
+- [📺 Extended Media Showcases](#-extended-media-showcases)
 - [📱 Mobile & PWA Experience](#-mobile--pwa-experience)
 
 - [🧪 Tests](#-tests)
 - [🚀 CI/CD & Automation](#-cicd--automation)
 - [🚀 Future Improvements](#-future-improvements)
-
 - [📦 How to Run](#-how-to-run)
 - [🔌 API Reference](#-api-reference)
 - [📱 Device Compatibility](#-device-compatibility)
@@ -281,6 +265,9 @@ Progression is designed to feel increasingly unstable, excessive, and visually a
 
 Players can pin a preferred visual style from their profile page, selecting any tier they have unlocked based on all-time peak. Auto-style mode advances the display automatically as new thresholds are reached and can be overridden at any time.
 
+<p><em>Showcasing selected tier colors with live transitions.</em></p>
+<img src="./assets/rpscolor.gif" width="300" />
+
 ---
 
 ## 🔢 Global Number Formatting Engine
@@ -456,6 +443,20 @@ The platform features "The Oracle", a custom-tuned AI analyst powered by Google 
 
 <p><em>Showcasing AI Analysis.</em></p>
 <img src="./assets/ai_analysis_showcase.gif" width="220" />
+
+---
+
+## 📺 Extended Media Showcases
+
+Extended visual breakdowns and gameplay recordings for the following systems:
+
+- **🏆 Achievement Styling**: Mythical & Rainbow leaderboard row overrides.
+- **🎁 Mechanic Reference**: Interactive guide for Bonuses, Streaks, Events, and Relics.
+- **🤖 Automation & Prophecy**: Idle Auto-Betting and the Daily Oracle system.
+- **🌌 Tier Customization**: Point-styling selection for unlocked milestones.
+- **🔮 Service Reliability**: Sentry-integrated Feedback Portal and Update Logs.
+
+📄 [View Extended Media Gallery →](./EXTENDED_MEDIA.md)
 
 ---
 
