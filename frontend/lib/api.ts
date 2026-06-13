@@ -81,11 +81,14 @@ export async function fetchUserBetHistory(
   userId: string,
   page: number,
   sort: 'recent' | 'wins' | 'multipliers' = 'recent'
-) {
+): Promise<{
+  matches: Match[]
+  predictions: BetHistoryEntry[]
+  hasMore: boolean
+} | null> {
   return handleResponse<{
     matches: Match[]
     predictions: BetHistoryEntry[]
-    total: number
     hasMore: boolean
   }>(
     fetch(
@@ -173,8 +176,11 @@ export async function fetchPendingMatches() {
   )
 }
 
-export async function fetchLatestMatches(page: number, limit = 20) {
-  return handleResponse<{ matches: Match[]; total: number }>(
+export async function fetchLatestMatches(
+  page: number,
+  limit = 20
+): Promise<{ matches: Match[]; hasMore: boolean } | null> {
+  return handleResponse<{ matches: Match[]; hasMore: boolean }>(
     fetch(`${API_BASE}/api/matches?page=${page}&limit=${limit}`)
   )
 }
@@ -183,8 +189,8 @@ export async function fetchMatchesByDate(
   date: string,
   page: number,
   limit = 20
-) {
-  return handleResponse<{ matches: Match[]; total: number }>(
+): Promise<{ matches: Match[]; hasMore: boolean } | null> {
+  return handleResponse<{ matches: Match[]; hasMore: boolean }>(
     fetch(
       `${API_BASE}/api/matches/by-date?date=${date}&page=${page}&limit=${limit}`
     )
@@ -199,8 +205,8 @@ export async function fetchMatchesByPlayer(
   name: string,
   page: number,
   limit = 20
-) {
-  return handleResponse<{ matches: Match[]; total: number }>(
+): Promise<{ matches: Match[]; hasMore: boolean } | null> {
+  return handleResponse<{ matches: Match[]; hasMore: boolean }>(
     fetch(
       `${API_BASE}/api/matches/by-player?name=${encodeURIComponent(name)}&page=${page}&limit=${limit}`
     )

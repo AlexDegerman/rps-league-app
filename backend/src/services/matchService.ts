@@ -52,7 +52,7 @@ export const getMatchesByDate = async (
   date: string,
   page: number,
   limit: number
-): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
+): Promise<{ matches: Match[]; hasMore: boolean }> => {
   try {
     const offset = (page - 1) * limit
     const start = new Date(date).getTime()
@@ -70,7 +70,6 @@ export const getMatchesByDate = async (
     const total = Number(count.rows[0].count)
     return {
       matches: data.rows.map(rowToMatch),
-      total,
       hasMore: offset + limit < total
     }
   } catch (err) {
@@ -83,7 +82,7 @@ export const getMatchesByPlayer = async (
   name: string,
   page: number,
   limit: number
-): Promise<{ matches: Match[]; total: number; hasMore: boolean }> => {
+): Promise<{ matches: Match[]; hasMore: boolean }> => {
   try {
     const offset = (page - 1) * limit
     const [data, count] = await Promise.all([
@@ -99,7 +98,6 @@ export const getMatchesByPlayer = async (
     const total = Number(count.rows[0].count)
     return {
       matches: data.rows.map(rowToMatch),
-      total,
       hasMore: offset + limit < total
     }
   } catch (err) {

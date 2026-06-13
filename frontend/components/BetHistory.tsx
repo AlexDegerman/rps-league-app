@@ -367,7 +367,6 @@ function useTabFetchFn(userId: string | null, tab: Tab,) {
 
       return {
         matches: entries as unknown as Match[],
-        total: data.total,
         hasMore: data.hasMore
       }
     },
