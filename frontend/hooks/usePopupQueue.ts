@@ -8,7 +8,7 @@ interface PopupQueueSounds {
   playCards: () => void
   playElectric: () => void
   playFire: () => void
-  playFanfare: () => void
+  playFanfare: (vol?: number) => void
 }
 
 export function usePopupQueue(sounds: PopupQueueSounds) {
@@ -53,7 +53,7 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
         activePopup.kind === 'ascension' ||
         activePopup.kind === 'relic_drop'
       ) {
-        if (activePopup.kind === 'ascension') sounds.playFanfare()
+        if (activePopup.kind === 'ascension') sounds.playFanfare(0.5)
         useUIStore.setState({ readyToShow: true })
       }
 

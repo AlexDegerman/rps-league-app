@@ -2,6 +2,7 @@ import { Router } from 'express'
 import pool from '../utils/db.js'
 import { broadcast } from './live.js'
 import { triggerSurgeFestival } from '../services/festivalService.js'
+import { logger } from '../utils/logger.js'
 
 const router = Router()
 
@@ -65,7 +66,8 @@ router.post('/', async (req, res) => {
     const nickname = userData?.nickname ?? 'Anonymous'
     const currentLap = userData?.laps ?? 0
 
-    triggerSurgeFestival(nickname, userId, broadcast)
+    triggerSurgeFestival(nickname, userId, currentLap, broadcast)
+    logger.info('User ascended', { userId, laps: currentLap })
 
     res.json({
       success: true,

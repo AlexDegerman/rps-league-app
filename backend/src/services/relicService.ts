@@ -1,4 +1,5 @@
 import pool from '../utils/db.js'
+import { getActiveFestival } from './festivalService.js'
 
 export type RelicRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHICAL'
 
@@ -194,6 +195,7 @@ export async function rollRelicDrop(
     owned.rows.map((r: { relic_key: string }) => r.relic_key)
   )
   const isFirstRelicEver = ownedKeys.size === 0
+  const vaultMultiplier = getActiveFestival()?.type === 'VAULT' ? 2.0 : 1.0
   const lensMultiplier = equippedRelic === 'scavengers_lens' ? 1.2 : 1.0
   const eligible = RELICS.filter((r) => !ownedKeys.has(r.key))
   if (eligible.length === 0) return null
@@ -214,7 +216,9 @@ export async function rollRelicDrop(
 
   for (const relic of shuffled) {
     const effectiveRate =
-      (relic.dropRate + getLapBonus(relic.rarity, userLaps)) * lensMultiplier
+      (relic.dropRate + getLapBonus(relic.rarity, userLaps)) *
+      lensMultiplier *
+      vaultMultiplier
 
     if (Math.random() < effectiveRate) {
       await pool.query(

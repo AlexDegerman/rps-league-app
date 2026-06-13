@@ -34,18 +34,13 @@ export const getWinner = (match: Match): 'A' | 'B' => {
 export const getLatestMatches = async (page: number, limit: number) => {
   try {
     const offset = (page - 1) * limit
-    const [data, count] = await Promise.all([
-      pool.query(
-        `SELECT * FROM matches ORDER BY time DESC LIMIT $1 OFFSET $2`,
-        [limit, offset]
-      ),
-      pool.query(`SELECT COUNT(*) FROM matches`)
-    ])
-    const total = Number(count.rows[0].count)
+    const data = await pool.query(
+      `SELECT * FROM matches ORDER BY time DESC LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    )
     return {
       matches: data.rows.map(rowToMatch),
-      total,
-      hasMore: offset + limit < total
+      hasMore: data.rows.length === limit
     }
   } catch (err) {
     logger.error('getLatestMatches failed', err, { page, limit })
@@ -131,26 +126,25 @@ export const getAllPlayerNames = async (): Promise<string[]> => {
 export const getPlayerStats = async (name: string) => {
   try {
     const result = await pool.query(
-      `SELECT * FROM matches WHERE player_a_name = $1 OR player_b_name = $1`,
+      `SELECT
+        COUNT(*) FILTER (WHERE
+          (player_a_name = $1 AND ((player_a_played='ROCK' AND player_b_played='SCISSORS') OR (player_a_played='SCISSORS' AND player_b_played='PAPER') OR (player_a_played='PAPER' AND player_b_played='ROCK')))
+          OR
+          (player_b_name = $1 AND NOT ((player_a_played='ROCK' AND player_b_played='SCISSORS') OR (player_a_played='SCISSORS' AND player_b_played='PAPER') OR (player_a_played='PAPER' AND player_b_played='ROCK')))
+        )::int AS wins,
+        COUNT(*) FILTER (WHERE player_a_name = $1 OR player_b_name = $1)::int AS total
+      FROM matches`,
       [name]
     )
-    const matches = result.rows.map(rowToMatch)
-    let wins = 0,
-      losses = 0
-    for (const m of matches) {
-      const winner = getWinner(m)
-      const playerWon =
-        (winner === 'A' && m.playerA.name === name) ||
-        (winner === 'B' && m.playerB.name === name)
-      if (playerWon) wins++
-      else losses++
-    }
+
+    const { wins, total } = result.rows[0]
+    const losses = total - wins
+
     return {
-      total: matches.length,
+      total,
       wins,
       losses,
-      winRate:
-        matches.length > 0 ? Math.round((wins / matches.length) * 100) : 0
+      winRate: total > 0 ? Math.round((wins / total) * 100) : 0
     }
   } catch (err) {
     logger.error('getPlayerStats failed', err, { name })

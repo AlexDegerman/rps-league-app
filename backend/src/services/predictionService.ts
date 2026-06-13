@@ -17,7 +17,9 @@ import {
   checkAndTriggerFestival,
   getGuaranteedBonusRemaining,
   consumeGuaranteedBonus,
-  getActiveFestival
+  getActiveFestival,
+  triggerVaultFestival,
+  triggerSafeguardFestival
 } from './festivalService.js'
 import {
   checkAchievements,
@@ -372,7 +374,6 @@ export const resolvePrediction = async (
         if (snapshotRelic === 'overdrive_relay') flashMult += 0.5
       }
 
-
       const bonusMultScale = effectiveBonus
         ? BigInt(Math.floor(effectiveBonus.multiplier * 100))
         : 100n
@@ -677,6 +678,23 @@ export const resolvePrediction = async (
               requirement: achievement.requirement
             })
           )
+          // Safeguard Festival: Mythical achievement (100%) or Legendary (50%)
+          if (achievement.rarity === 'MYTHICAL') {
+            triggerSafeguardFestival(
+              row.nickname ?? 'Anonymous',
+              row.user_id,
+              broadcast
+            )
+          } else if (
+            achievement.rarity === 'LEGENDARY' &&
+            Math.random() < 0.5
+          ) {
+            triggerSafeguardFestival(
+              row.nickname ?? 'Anonymous',
+              row.user_id,
+              broadcast
+            )
+          }
         }
       }
 
@@ -686,7 +704,14 @@ export const resolvePrediction = async (
         equippedRelic,
         Number(u.laps)
       )
-
+      // Vault Festival: Mythical relic drop triggers globally
+      if (droppedRelic?.rarity === 'MYTHICAL') {
+        triggerVaultFestival(
+          row.nickname ?? 'Anonymous',
+          row.user_id,
+          broadcast
+        )
+      }
       broadcast(
         'prediction_result',
         JSON.stringify({
@@ -735,7 +760,8 @@ export const resolvePrediction = async (
           flashActive,
           flashJustEnded: flashJustEndedFlag,
           winStreakAfter: streakAfter,
-          totalMultiplier: finalCombinedMult
+          totalMultiplier: finalCombinedMult,
+          flashType: flashEventType
         },
         broadcast
       )

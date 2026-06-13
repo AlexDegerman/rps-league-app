@@ -9,6 +9,7 @@ import { EVENT_HEADER_CONFIG } from '@/lib/eventConfig'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUIStore } from '@/app/stores/uiStore'
+import { primeOracleVoices } from '@/lib/oracleTTS'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
@@ -22,6 +23,7 @@ const Header = () => {
   useEffect(() => {
     randomizeBrandTheme()
     initUser()
+    primeOracleVoices()
   }, [randomizeBrandTheme, initUser])
 
   const brandCfg = EVENT_HEADER_CONFIG[brandTheme]

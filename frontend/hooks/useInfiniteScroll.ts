@@ -3,7 +3,9 @@ import type { Match } from '@/types/rps'
 import { logger } from '@/lib/logger';
 
 interface UseInfiniteScrollProps {
-  fetchFn: (page: number) => Promise<{ matches: Match[]; total: number } | null>
+  fetchFn: (
+    page: number
+  ) => Promise<{ matches: Match[]; hasMore: boolean } | null>
   enabled?: boolean
 }
 
@@ -39,8 +41,7 @@ export const useInfiniteScroll = ({
           return [...prev, ...unique]
         })
 
-        const loadedCount = targetPage * 20
-        setHasMore(loadedCount < data.total)
+        setHasMore(data.hasMore ?? false)
       } catch (err) {
         logger.warn('Failed to load matches', { error: String(err) })
       } finally {

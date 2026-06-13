@@ -114,7 +114,7 @@ export async function ascendUser(userId: string, shortId: string) {
     laps: number
     fastestLapBets: number
   }>(
-    fetch(`${API_BASE}/api/users/ascend`, {
+    fetch(`${API_BASE}/api/ascend`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, shortId })

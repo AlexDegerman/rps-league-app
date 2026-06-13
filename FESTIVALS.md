@@ -32,10 +32,10 @@ All active players instantly enter a Flash Event with 3 Flash Bets. Players alre
 
 **Theme:** Neon Violet and Electric Purple, vivid border glows and high-frequency light pulses
 
-<div>
+<p align="center">
   <strong>Spark Festival in Action</strong><br/>
   <img src="./assets/spark_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -52,10 +52,10 @@ The echo is visualised in the result animation: after the result number finishes
 
 **Theme:** Ethereal Teal and Ghost White, transparent floating particles, drifting echo silhouettes
 
-<div>
+<p align="center">
   <strong>Ghost Festival in Action</strong><br/>
   <img src="./assets/ghost_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -70,10 +70,10 @@ Loss deductions are reduced by 20%. Losses only deduct 40% of the stake instead 
 
 **Theme:** Slate Blue and Shield Silver, metallic border-frame overrides, geometric shield-shimmer effects
 
-<div>
+<p align="center">
   <strong>Safeguard Festival in Action</strong><br/>
   <img src="./assets/safeguard_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -88,10 +88,10 @@ Every prediction is guaranteed to roll a Common or Rare Bonus. Epic and Legendar
 
 **Theme:** Lustrous Amber and Solar Gold, radiant golden aura expanding from the resolution area
 
-<div>
+<p align="center">
   <strong>Resonance Festival in Action</strong><br/>
   <img src="./assets/resonance_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -106,10 +106,10 @@ A 2x global multiplier is applied to all win payouts for the duration of the Fes
 
 **Theme:** High-Voltage Cyan and Frost White, clean UI brightness boost, horizontal scanlines
 
-<div>
+<p align="center">
   <strong>Surge Festival in Action</strong><br/>
   <img src="./assets/surge_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -124,10 +124,10 @@ All Relic drop rates are doubled (2x) for the duration.
 
 **Theme:** Deep Cobalt and Chrome Silver, liquid metallic sheen on UI containers
 
-<div>
+<p align="center">
   <strong>Vault Festival in Action</strong><br/>
   <img src="./assets/vault_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -142,10 +142,10 @@ Losses do not reset win streaks for the duration. Streak multipliers are frozen 
 
 **Theme:** Crimson Red and Burning Orange, pulsing heat-haze distortion
 
-<div>
+<p align="center">
   <strong>Fever Festival in Action</strong><br/>
   <img src="./assets/fever_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -162,10 +162,10 @@ All predictions resolve as wins. Win streaks continue to increment normally.
 
 **Theme:** Blood Red and Deep Charcoal, pulsing crimson saturation, viscous liquid gradients
 
-<div>
+<p align="center">
   <strong>Sanguine Festival in Action</strong><br/>
   <img src="./assets/sanguine_festival_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 

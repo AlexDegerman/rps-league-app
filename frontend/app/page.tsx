@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import {
   fetchLatestMatches,
   fetchPendingMatches,
@@ -67,6 +67,8 @@ import BonusExplainerModal, {
 } from '@/components/modals/BonusExplainerModal'
 import FlashEventActivationOverlay from '@/components/overlays/FlashEventActivationOverlay'
 import { usePopupQueue } from '@/hooks/usePopupQueue'
+import SoundControlPopover from '@/components/SoundControlPopover'
+import { unlockOracle } from '@/lib/oracleTTS'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -152,7 +154,9 @@ export default function HomePage() {
     setShowBonusModal,
     activePopup,
     dequeuePopup,
-    readyToShow
+    readyToShow,
+    oracleVolume,
+    setOracleVolume
   } = useUIStore()
 
   const { setEligible, setHasInteractedWithIdle } = useIdleStore()
@@ -168,7 +172,11 @@ export default function HomePage() {
     playFanfare,
     soundOn,
     toggleSound,
+    volume,
+    setVolume
   } = useSound()
+  const [showSoundPopover, setShowSoundPopover] = useState(false)
+  const soundBtnRef = useRef<HTMLButtonElement>(null)
 
   usePopupQueue({ playMoon, playCards, playElectric, playFire, playFanfare })
   const esRef = useRef<EventSource | null>(null)
@@ -352,6 +360,7 @@ export default function HomePage() {
                 {template.suffix}
               </span>
             ),
+            speech: template.speech,
             accentColor: '#a855f7',
             durationMs: 10_000
           })
@@ -646,6 +655,7 @@ export default function HomePage() {
       setOracleTickerMessage({
         id: `festival-${data.type}-${Date.now()}`,
         content: data.message,
+        speech: data.speech,
         accentColor: FESTIVAL_COLORS[data.type] ?? '#a855f7',
         durationMs: 5000
       })
@@ -696,6 +706,7 @@ export default function HomePage() {
   }, [isDuplicate])
 
   const handlePick = async (gameId: string, playerName: string) => {
+    unlockOracle()
     const user = getOrCreateUser()
     const { betAmount: currentBet } = useUserStore.getState()
     if (!isUserValid(user) || !user.nickname || currentBet <= 0n) return
@@ -960,15 +971,27 @@ export default function HomePage() {
                 </div>
 
                 {/* Mute + Relic */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="relative flex items-center gap-2 shrink-0">
                   <RelicSlot align="right" />
                   <button
-                    onClick={toggleSound}
+                    ref={soundBtnRef}
+                    onClick={() => setShowSoundPopover((p) => !p)}
                     className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
-                    title="Toggle sound effects"
                   >
-                    <SoundIcon muted={!soundOn} />
+                    <SoundIcon muted={false} />
                   </button>
+                  {showSoundPopover && (
+                    <SoundControlPopover
+                      soundOn={soundOn}
+                      volume={volume}
+                      oracleVolume={oracleVolume}
+                      onVolumeChange={setVolume}
+                      onOracleVolumeChange={setOracleVolume}
+                      onToggleSound={toggleSound}
+                      anchorRef={soundBtnRef}
+                      onClose={() => setShowSoundPopover(false)}
+                    />
+                  )}
                 </div>
               </div>
 

@@ -22,7 +22,7 @@ export const FESTIVAL_REGISTRY: Record<
   },
   festival_surge: {
     color: '#22d3ee',
-    effectText: 'POWER SURGE ACTIVE - GLOBAL 3X WIN MULTIPLIER'
+    effectText: 'POWER SURGE ACTIVE - GLOBAL 2X WIN MULTIPLIER'
   },
   festival_vault: {
     color: '#748ffc',

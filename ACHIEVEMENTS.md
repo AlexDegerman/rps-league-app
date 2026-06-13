@@ -19,10 +19,10 @@ The Codex uses a "Highest Earned" logic for chained achievements. For example, w
 ### 3. Identity Showcase
 Users are provided with **5 dedicated badge slots** on their public identity. These slots can be filled with any earned achievement or the opt-in LinkedIn social badge. This selection is mirrored globally on the Leaderboard.
 
-<div>
+<p align="center">
   <strong>Achievement System in Action</strong><br/>
   <img src="./assets/achievements_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 

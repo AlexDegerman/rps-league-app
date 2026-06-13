@@ -117,7 +117,7 @@ export const buildFestivalBroadcastMessage = (
     return `${prefix} ${festivalType} FESTIVAL`
   }
   
-  if (festivalType === 'SURGE' && lapCount) {
+  if (festivalType === 'SURGE' && lapCount !== undefined) {
     return `${triggeredBy} has completed Chrono-Lap ${lapCount} and initiated the SURGE FESTIVAL`
   }
 
@@ -126,13 +126,29 @@ export const buildFestivalBroadcastMessage = (
   return `${prefix} ${festivalType} FESTIVAL`
 }
 
+export const buildFestivalSpeech = (
+  triggeredBy: string,
+  festivalType: FestivalType,
+  isDemo: boolean,
+  lapCount?: number
+): string => {
+  if (festivalType === 'SURGE' && lapCount !== undefined) {
+    return `${triggeredBy}... ascends... lap... ${lapCount}... Surge... Festival... unleashed.`
+  }
+
+  if (isDemo) {
+    return `The Oracle System... manifests... ${festivalType}... Festival.`
+  }
+
+  return `The catalyst... ${triggeredBy}... invokes... ${festivalType}... Festival.`
+}
 // ─── Getters ──────────────────────────────────────────────────────────────────
 
 export const getActiveFestival = (): FestivalState | null => {
   if (!_activeFestival) return null
   if (Date.now() > _activeFestival.endsAt) {
     logger.info('Festival expired', { type: _activeFestival.type })
-    _lockoutUntil = Date.now() + LOCKOUT_MS
+    _lockoutUntil = _activeFestival.endsAt + LOCKOUT_MS
     _activeFestival = null
     return null
   }
@@ -153,6 +169,7 @@ interface LaunchMeta {
   isDemo?: boolean
   streakTrigger?: boolean
   triggerUserId?: string
+  lapCount?: number
 }
 
 const launchFestival = (
@@ -197,7 +214,12 @@ const launchFestival = (
 
   logger.info('Festival launched', { type, triggeredBy, isDemo })
 
-  const message = buildFestivalBroadcastMessage(triggeredBy, type, isDemo)
+  const message = buildFestivalBroadcastMessage(
+    triggeredBy,
+    type,
+    isDemo,
+    meta.lapCount
+  )
 
   broadcast(
     'festival_event',
@@ -206,6 +228,7 @@ const launchFestival = (
       triggeredBy,
       triggerUserId: meta.triggerUserId ?? null,
       message,
+      speech: buildFestivalSpeech(triggeredBy, type, isDemo, meta.lapCount),
       isDemo,
       startedAt: newState.startedAt,
       endsAt: newState.endsAt,
@@ -297,6 +320,7 @@ export const checkAndTriggerFestival = (
     flashJustEnded: boolean
     winStreakAfter: number
     totalMultiplier: number
+    flashType: string | null
   },
   broadcast: Broadcast
 ): void => {
@@ -308,54 +332,26 @@ export const checkAndTriggerFestival = (
     flashActive,
     flashJustEnded,
     winStreakAfter,
-    totalMultiplier
+    totalMultiplier,
+    flashType
   } = params
 
   if (isWin) {
     resetLossStreakForUser(userId)
-    recordBonusForUser(userId, bonusTier)
+    if (flashType !== 'CARDS') {
+      recordBonusForUser(userId, bonusTier)
+    }
   } else {
     resetBonusStreakForUser(userId)
     recordLossForUser(userId)
   }
 
   if (flashJustEnded) {
-    recordFlashEventForUser(userId)
+    if (flashType !== 'CARDS') {
+      recordFlashEventForUser(userId)
+    }
   } else if (!flashActive && !flashJustEnded) {
     resetFlashStreakForUser(userId)
-  }
-
-  // SANGUINE: 4-loss streak
-  if (!isWin && getLossStreakForUser(userId) >= 4) {
-    resetLossStreakForUser(userId)
-    if (
-      launchFestival('SANGUINE', nickname, broadcast, {
-        isDemo: false,
-        triggerUserId: userId
-      })
-    )
-      return
-  }
-
-  // FEVER: 5-win streak (20%) or 8-win streak (100%)
-  if (isWin) {
-    if (winStreakAfter >= 8) {
-      if (
-        launchFestival('FEVER', nickname, broadcast, {
-          isDemo: false,
-          triggerUserId: userId
-        })
-      )
-        return
-    } else if (winStreakAfter >= 5 && Math.random() < 0.2) {
-      if (
-        launchFestival('FEVER', nickname, broadcast, {
-          isDemo: false,
-          triggerUserId: userId
-        })
-      )
-        return
-    }
   }
 
   // SPARK: 2 flash events in a row OR LEGENDARY/MYTHICAL during flash
@@ -370,10 +366,10 @@ export const checkAndTriggerFestival = (
     )
       return
   }
-
   if (
     flashActive &&
     isWin &&
+    flashType !== 'CARDS' &&
     (bonusTier === 'LEGENDARY' || bonusTier === 'MYTHICAL')
   ) {
     resetFlashStreakForUser(userId)
@@ -406,9 +402,42 @@ export const checkAndTriggerFestival = (
       return
   }
 
+  // FEVER: 5-win streak (20%) or 8-win streak (100%)
+  if (isWin) {
+    if (winStreakAfter >= 8) {
+      if (
+        launchFestival('FEVER', nickname, broadcast, {
+          isDemo: false,
+          triggerUserId: userId
+        })
+      )
+        return
+    } else if (winStreakAfter >= 5 && Math.random() < 0.2) {
+      if (
+        launchFestival('FEVER', nickname, broadcast, {
+          isDemo: false,
+          triggerUserId: userId
+        })
+      )
+        return
+    }
+  }
+
+  // SANGUINE: 4-loss streak
+  if (!isWin && getLossStreakForUser(userId) >= 4) {
+    resetLossStreakForUser(userId)
+    if (
+      launchFestival('SANGUINE', nickname, broadcast, {
+        isDemo: false,
+        triggerUserId: userId
+      })
+    )
+      return
+  }
+
   // RESONANCE: 3 tiered bonuses in a row OR LEGENDARY (30%)
   const bonusStreak = getBonusStreakForUser(userId)
-  if (bonusStreak >= 3) {
+  if (flashType !== 'CARDS' && bonusStreak >= 3) {
     resetBonusStreakForUser(userId)
     if (
       launchFestival('RESONANCE', nickname, broadcast, {
@@ -418,7 +447,11 @@ export const checkAndTriggerFestival = (
     )
       return
   }
-  if (bonusTier === 'LEGENDARY' && Math.random() < 0.3) {
+  if (
+    flashType !== 'CARDS' &&
+    bonusTier === 'LEGENDARY' &&
+    Math.random() < 0.3
+  ) {
     resetBonusStreakForUser(userId)
     if (
       launchFestival('RESONANCE', nickname, broadcast, {
@@ -437,9 +470,35 @@ export const checkAndTriggerFestival = (
 export const triggerSurgeFestival = (
   nickname: string,
   triggerUserId: string,
+  lapCount: number,
   broadcast: Broadcast
 ): boolean =>
   launchFestival('SURGE', nickname, broadcast, {
+    isDemo: false,
+    triggerUserId,
+    lapCount
+  })
+
+
+// Called from resolvePrediction when a Mythical relic drops.
+export const triggerVaultFestival = (
+  nickname: string,
+  triggerUserId: string,
+  broadcast: Broadcast
+): boolean =>
+  launchFestival('VAULT', nickname, broadcast, {
+    isDemo: false,
+    triggerUserId
+  })
+
+
+// Called from resolvePrediction when a Mythical or Legendary achievement unlocks.
+export const triggerSafeguardFestival = (
+  nickname: string,
+  triggerUserId: string,
+  broadcast: Broadcast
+): boolean =>
+  launchFestival('SAFEGUARD', nickname, broadcast, {
     isDemo: false,
     triggerUserId
   })

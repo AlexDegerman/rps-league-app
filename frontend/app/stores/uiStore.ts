@@ -29,6 +29,12 @@ interface UIState {
   oracleTickerMessage: OracleTickerMessage | null
   setOracleTickerMessage: (msg: OracleTickerMessage | null) => void
 
+  // Oracle TTS
+  oracleTTSEnabled: boolean
+  toggleOracleTTS: () => void
+  oracleVolume: number
+  setOracleVolume: (v: number) => void
+
   // Popup queue
   popupQueue: PopupQueueItem[]
   activePopup: PopupQueueItem | null
@@ -103,6 +109,30 @@ export const useUIStore = create<UIState>((set) => ({
   readyToShow: false,
   isTransitioning: false,
 
+  oracleTTSEnabled:
+    typeof window !== 'undefined'
+      ? localStorage.getItem('oracleTTSEnabled') !== 'false'
+      : true,
+
+  toggleOracleTTS: () =>
+    set((s) => {
+      const next = !s.oracleTTSEnabled
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('oracleTTSEnabled', String(next))
+      }
+      return { oracleTTSEnabled: next }
+    }),
+  oracleVolume:
+    typeof window !== 'undefined'
+      ? parseFloat(localStorage.getItem('oracleVolume') ?? '0.88')
+      : 0.88,
+  setOracleVolume: (v) =>
+    set(() => {
+      const clamped = Math.max(0, Math.min(1, v))
+      if (typeof window !== 'undefined')
+        localStorage.setItem('oracleVolume', String(clamped))
+      return { oracleVolume: clamped }
+    }),
   // Actions
   setOracleTickerMessage: (msg) => set({ oracleTickerMessage: msg }),
   setBrandTheme: (t) => set({ brandTheme: t }),

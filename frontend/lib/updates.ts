@@ -6,6 +6,19 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '1.15',
+    label: 'The Oracle Voice Update',
+    notes: [
+      'Oracle TTS: The Daily Oracle Prophecy now speaks aloud when it appears. Implemented via browser-native Web Speech API with no external dependencies or server cost.',
+      'Mythical Cadence Engine: Speech text is transformed before delivery, adding rhythmic micro-pauses between words and at punctuation boundaries for a deliberate, weighted delivery at pitch 0.25.',
+      'Festival Voice: All eight festival types now include a dedicated spoken line broadcast in the same SSE payload as the display message. Each line is short-form and optimized for low-pitch TTS delivery.',
+      'Audio Controls Popover: The mute button has been replaced by an audio controls interface with independent toggles and volume sliders for Sound FX and Oracle Voice. Both settings persist to localStorage.',
+      'Voice Priming: Oracle voices are loaded at app mount and re-fetched at speak time to prevent Chrome async loading from causing silence on first trigger.',
+      'Oracle Voice on by default: New and returning users have Oracle Voice enabled automatically. It can be toggled off from the audio controls popover at any time.'
+    ]
+  },
+
+  {
     version: '1.14',
     label: 'The Onboarding Update',
     notes: [

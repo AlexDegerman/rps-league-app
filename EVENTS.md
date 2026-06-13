@@ -15,10 +15,10 @@ A high-intensity pressure state dominated by deep crimson and glowing orange gra
 - Win effects replaced with layered hellfire: rising flame columns, flying embers, heat shimmer wisps, ash floaters, screen flash on ignition, and a persistent ground glow
 - Fire audio feedback reinforces high-pressure moments
 
-<div>
+<p align="center">
   <strong>Hellfire in Action</strong><br/>
   <img src="./assets/hellfire_event_demo.gif" width="220" />
-</div>
+</p>
 
 **Introduced Tiers**
 
@@ -41,10 +41,10 @@ A premium high-roller casino event styled in rich gold and amber tones. On win m
 - Win effects replaced with cascading suit symbols, mini card rectangles, gold/silver particle bursts, and shimmer trails
 - Card shuffle audio reinforces jackpot moments
 
-<div>
+<p align="center">
   <strong>Luck in the Card in Action</strong><br/>
   <img src="./assets/cards_event_demo.gif" width="220" />
-</div>
+</p>
 
 **Introduced Tiers**
 
@@ -67,10 +67,10 @@ A fast-paced, volatile energy theme infused with neon violet and electric purple
 - Lightning audio feedback reinforces intensity
 - Full interface transforms into a digital storm state
 
-<div>
+<p align="center">
   <strong>Electric Surge in Action</strong><br/>
   <img src="./assets/electric_event_demo.gif" width="220" />
-</div>
+</p>
 
 **Introduced Tiers**
 
@@ -93,10 +93,10 @@ A calm lunar-inspired event wrapped in cool blue tones with serene visual and au
 - Soft ethereal audio with a moonshine shimmer
 - Interface elements adapt into crescent-inspired motifs
 
-<div>
+<p align="center">
   <strong>Moon's Blessing Flash Event in Action</strong><br/>
   <img src="./assets/moon_event_demo.gif" width="220" />
-</div>
+</p>
 
 **Introduced Tiers**
 

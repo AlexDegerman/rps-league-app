@@ -2,6 +2,18 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [1.15] - Oracle Voice System
+ 
+### Added
+ 
+* **Oracle TTS:** The Daily Oracle Prophecy and all Festival activations now speak aloud using the browser-native Web Speech API. No external API, no audio files, zero server cost.
+* **Mythical Cadence Engine:** Speech is transformed before delivery. Short messages receive a pause after every word. Longer prophecies pause at punctuation boundaries. Combined with pitch 0.25 and rate 0.75, the voice presents as a system entity rather than a human assistant.
+* **Voice Priming:** Voice loading is handled at app mount via Header initialization and re-fetched at speak time to prevent Chrome's async voice load from producing silence on first trigger.
+* **Independent Volume Controls:** Oracle Voice has its own volume slider in the audio controls popover, fully separate from sound effects volume. Both settings persist across sessions via localStorage.
+* **Audio Controls Popover:** The mute button is replaced by an audio controls button that opens a popover with Sound FX toggle and volume slider on top, Oracle Voice toggle and volume slider below. All four controls are independent.
+* **Festival Speech Payload:** Backend festival broadcasts now include a dedicated speech field built by `buildFestivalSpeech()` alongside the existing display message. Festival type, trigger context, and lap count each produce a distinct short-form line optimized for low-pitch delivery.
+* **Oracle Voice on by default:** New users arrive with Oracle Voice enabled. The setting can be disabled at any time from the audio controls popover.
+
 ## [1.14] - Recovery Code Onboarding
 
 ### Added

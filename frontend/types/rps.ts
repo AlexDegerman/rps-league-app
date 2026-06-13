@@ -287,6 +287,7 @@ export interface FestivalSSEData {
   flashType?: string
   isDemo: boolean
   triggerUserId?: string
+  speech?: string
 }
 
 export interface AchievementNotif {

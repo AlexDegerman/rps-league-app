@@ -87,7 +87,7 @@ export default function LiveStatsTicker() {
               Vol
             </span>
             <span
-              className={`text-[9px] font-black whitespace-nowrap tracking-tighter w-fit ${getAmountColor(stats.totalVolume)}`}
+              className={`no-pseudo text-[9px] font-black whitespace-nowrap tracking-tighter w-fit ${getAmountColor(stats.totalVolume)}`}
             >
               {formatPoints(stats.totalVolume).display}
             </span>
@@ -98,7 +98,7 @@ export default function LiveStatsTicker() {
               Pay
             </span>
             <span
-              className={`text-[9px] font-black whitespace-nowrap tracking-tighter truncate ${stats.dailyPayout >= 0n ? 'text-green-600' : 'text-red-500'}`}
+              className={`no-pseudo text-[9px] font-black whitespace-nowrap tracking-tighter truncate ${stats.dailyPayout >= 0n ? 'text-green-600' : 'text-red-500'}`}
             >
               {stats.dailyPayout >= 0n ? '+' : ''}
               {formatPoints(stats.dailyPayout).display}
@@ -115,7 +115,7 @@ export default function LiveStatsTicker() {
               </span>
               {stats.mvp && (
                 <span
-                  className={`text-[8px] font-bold whitespace-nowrap tracking-tighter shrink-0 ${getAmountColor(stats.mvp.gain)}`}
+                  className={`no-pseudo text-[8px] font-bold whitespace-nowrap tracking-tighter shrink-0 ${getAmountColor(stats.mvp.gain)}`}
                 >
                   +{formatPoints(stats.mvp.gain).display}
                 </span>

@@ -964,6 +964,12 @@
   display: none !important;
 }
 
+.no-pseudo::before,
+.no-pseudo::after {
+  content: none !important;
+  display: none !important;
+}
+
 .result-number-wrap .g-ovg::before,
 .result-number-wrap .g-ovg::after,
 .result-number-wrap .g-svg::before,

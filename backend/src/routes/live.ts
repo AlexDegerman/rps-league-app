@@ -55,8 +55,9 @@ const clients = new Set<SSEClient>()
 // clients connect, since it drives real DB writes and SSE broadcasts.
 let generatorStarted = false
 
-export const broadcast = (event: string, data: string) =>
+export const broadcast = (event: string, data: string) => 
   clients.forEach((client) => client(event, data))
+
 
 router.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream')

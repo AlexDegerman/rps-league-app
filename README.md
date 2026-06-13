@@ -8,7 +8,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 ## 🎮 Preview
 
-<p>
+<p align="center">
   <em><strong>Flash Event Activations</strong>: Visual animations triggered when a Flash Event starts.</em>
   <br />
   <img src="./assets/flasheventanimations.gif" width="280" />
@@ -37,6 +37,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - [🛠️ Technical Challenges & Solutions](#️-technical-challenges--solutions)
 - [🔮 Reliability & Feedback](#-reliability--feedback)
 - [🤖 AI Oracle & Analytics](#-ai-oracle--analytics)
+- [🔊 Oracle Voice](#-oracle-voice)
 - [📺 Extended Media Showcases](#-extended-media-showcases)
 - [📱 Mobile & PWA Experience](#-mobile--pwa-experience)
 
@@ -166,10 +167,10 @@ Ascension can always be triggered later from the profile menu.
 
 Resets are visual-friendly. Any previously unlocked point-tier stylings (UVG, DVG, QIV, etc.) remain permanently available in your profile settings, allowing you to flex high-tier visuals even at the start of a fresh lap.
 
-<div>
+<p align="center">
   <strong>Ascension System Demo</strong><br/>
   <img src="./assets/ascension_demo.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -179,10 +180,10 @@ Relics are permanent collectible gameplay modifiers that introduce long-term pro
 
 Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling, creating distinct build paths and playstyles. A permanent no-duplicate collection system turns acquisition into long-term progression rather than repetitive RNG farming.
 
-<div>
+<p align="center">
   <strong>Relic Discovery & Equipment in Action</strong><br/>
   <img src="./assets/relics_demo.gif" width="220" />
-</div>
+</p>
 
 > 📋 **[View full Relic system breakdown →](./RELICS.md)**
 
@@ -208,10 +209,10 @@ Event selection is weighted to support controlled rollout of new or seasonal eve
 
 A preview of the animations that play when flash events are triggered.
 
-<div>
+<p align="center">
   <strong>Flash Event Trigger Animations</strong><br/>
   <img src="./assets/flasheventanimations.gif" width="220" />
-</div>
+</p>
 
 ---
 
@@ -223,10 +224,10 @@ Only one Festival can be active at a time. A 10-minute cooldown follows every Fe
 
 The Oracle system also runs autonomous weighted festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred recently.
 
-<div>
+<p align="center">
   <strong>Ghost Festival in Action</strong><br/>
   <img src="./assets/ghost_festival_demo.gif" width="220" />
-</div>
+</p>
 
 > 📋 **[View all Festival showcases →](./FESTIVALS.md)**
 
@@ -238,10 +239,10 @@ The Achievement Codex is a multi-tier progression system that tracks over 70 uni
 
 Badges feature dynamic upgrading: earning a higher-rarity achievement automatically replaces the previous tier in your collection to keep your inventory clean. Predictors can curate their Top 5 earned badges to showcase on their public profile and the global leaderboard.
 
-<div>
+<p align="center">
   <strong>Achievements System in Action</strong><br/>
   <img src="./assets/achievements_demo.gif" width="220" />
-</div>
+</p>
 
 > 📖 **[View the full Achievement Codex →](./ACHIEVEMENTS.md)**
 
@@ -265,8 +266,10 @@ Progression is designed to feel increasingly unstable, excessive, and visually a
 
 Players can pin a preferred visual style from their profile page, selecting any tier they have unlocked based on all-time peak. Auto-style mode advances the display automatically as new thresholds are reached and can be overridden at any time.
 
-<p><em>Showcasing selected tier colors with live transitions.</em></p>
-<img src="./assets/rpscolor.gif" width="300" />
+<p align="center">
+  <em>Showcasing selected tier colors with live transitions.</em><br/>
+  <img src="./assets/rpscolor.gif" width="300" />
+</p>
 
 ---
 
@@ -431,18 +434,57 @@ To maintain a professional live-service standard and close the loop between user
 ---
 
 ## 🤖 AI Oracle & Analytics
-The platform features "The Oracle", a custom-tuned AI analyst powered by Google Gemini. Unlike standard chatbots, The Oracle is a domain-specific agent designed to provide snarky, data-driven insights into the RPS league.
 
-**Key AI Features:**
-- **Context-Aware Grounding**: Injects real-time league telemetry and historical data from a 10,000+ match dataset into the model context via XML-tagged data structures.
-- **Resilient Model Fallback**: Rotates across gemini-2.0-flash, gemini-flash-lite, and gemini-pro to maintain uptime during 503/429 errors.
-- **Intent Guardrailing**: Strict system instructions prevent hallucinations or off-topic queries. Refuses non-RPS topics, maintaining persona and reducing token costs.
-- **Performance Optimization**: In-memory TTL cache and IP-based rate limiting to prevent abuse and minimize latency.
-- **Strategic Analytical Presets**: Includes a curated set of “one-tap” queries designed to reveal hidden league patterns. These presets guide users in exploring underlying PostgreSQL telemetry, such as move frequency heatmaps and real-time house edge, transforming raw data into actionable betting insights.
-- **Daily Oracle Prophecy**: Once per day, the Oracle issues a guaranteed match prediction. It picks a side server-side and rigs the outcome in the player's favor if followed. Usage is tracked in the database per user, not localStorage, making it tamper-proof. Resets at midnight UTC.
+The platform features **The Oracle**, a custom-tuned AI analyst powered by Google Gemini. Unlike standard chatbots, The Oracle is a domain-specific agent designed to provide snarky, data-driven insights into the RPS League.
 
-<p><em>Showcasing AI Analysis.</em></p>
-<img src="./assets/ai_analysis_showcase.gif" width="220" />
+### Core Features
+
+- Context-aware grounding via XML-tagged league telemetry and historical statistics from a 10,000+ match dataset.
+- Resilient multi-model fallback across Gemini variants to maintain uptime during temporary service failures and rate limits.
+- Strict intent guardrailing that rejects off-topic queries while maintaining the Oracle persona and minimizing hallucinations.
+- In-memory TTL caching and IP-based rate limiting to reduce latency and prevent abuse.
+- Curated analytical presets exposing hidden PostgreSQL telemetry such as move frequency distributions, real-time house edge, and league trends.
+- Daily Oracle Prophecy backed by server-side state and database tracking rather than local storage.
+
+<p align="center">
+  <em>Showcasing AI Analysis.</em><br>
+  <img src="./assets/ai_analysis_showcase.gif" width="220" />
+</p>
+
+---
+
+## 🔊 Oracle Voice
+
+The Oracle generates spoken output through the browser using the Web Speech API.
+
+When a Festival awakens or the Daily Prophecy is issued, the browser delivers a spoken proclamation using the native Web Speech API with no external services, audio files, or API keys.
+
+Festival announcements support three distinct activation paths:
+
+- Chrono-Lap completion, announcing the player's ascension, lap number, and awakened Festival.
+- Standard player-triggered Festival activations, proclaiming the catalyst by name.
+- Oracle-triggered activations, where the Oracle announces its own intervention.
+
+Every speech line is intentionally authored for low-pitch synthesis with carefully controlled cadence and forced pauses, producing the impression of an ancient system completing a ritual rather than a conventional voice assistant reading text.
+
+The Daily Oracle Prophecy follows the same pipeline with 30 unique spoken templates, each delivered with deliberate pacing to sound less like a notification and more like a forgotten machine issuing decrees.
+
+Implementation highlights:
+
+- Browser-native Web Speech API with zero external dependencies.
+- Cadence engine inserting micro-pauses between words and punctuation boundaries.
+- Tuned speech synthesis using low pitch and reduced speaking rate.
+- Voice priming on application mount with refresh-on-speak logic to accommodate asynchronous browser voice loading.
+- Cooldowns preventing collisions with simultaneous sound effects.
+- Independent Oracle Voice volume control in the audio controls popover.
+- Enabled by default.
+
+<p align="center">
+  <em>Oracle Voice Showcase</em><br>
+  <a href="https://www.youtube.com/watch?v=u2_66KIsnoo">
+    <img src="./assets/oracle_voice_thumbnail.png" width="220" />
+  </a>
+</p>
 
 ---
 

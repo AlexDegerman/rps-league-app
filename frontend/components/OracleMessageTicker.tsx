@@ -1,10 +1,13 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { speakOracle } from '@/lib/oracleTTS'
+import { useUIStore } from '@/app/stores/uiStore'
 
 export interface OracleTickerMessage {
   id: string
   content: React.ReactNode
+  speech?: string
   accentColor?: string
   durationMs?: number
 }
@@ -65,6 +68,9 @@ export default function OracleMessageTicker({
   const [animOut, setAnimOut] = useState(false)
   const [showExplosion, setShowExplosion] = useState(true)
 
+  const oracleTTSEnabled = useUIStore((s) => s.oracleTTSEnabled)
+  const oracleVolume = useUIStore((s) => s.oracleVolume)
+
   const dismissRef = useRef(onDismiss)
   const messageRef = useRef(message)
 
@@ -79,6 +85,12 @@ export default function OracleMessageTicker({
 
     const explosionTimer = setTimeout(() => setShowExplosion(false), 800)
 
+    let ttsTimer: ReturnType<typeof setTimeout> | null = null
+    if (oracleTTSEnabled && currentMessage.speech) {
+      const text = currentMessage.speech
+      ttsTimer = setTimeout(() => speakOracle(text, oracleVolume), 300)
+    }
+
     const duration = currentMessage.durationMs ?? 5000
 
     const exitAnimTimer = setTimeout(() => {
@@ -91,9 +103,11 @@ export default function OracleMessageTicker({
 
     return () => {
       clearTimeout(explosionTimer)
+      if (ttsTimer) clearTimeout(ttsTimer)
       clearTimeout(exitAnimTimer)
       clearTimeout(unmountTimer)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message?.id])
 
   if (!message) return null
