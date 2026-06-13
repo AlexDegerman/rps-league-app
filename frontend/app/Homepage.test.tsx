@@ -51,10 +51,10 @@ vi.mock('./stores/idleStore', () => ({ useIdleStore: mockIdleStore }))
 vi.mock('./stores/relicStore', () => ({ useRelicStore: mockRelicStore }))
 
 // Mock Components
-vi.mock('@/components/MatchList', () => ({ default: () => null }))
-vi.mock('@/components/PendingMatchCard', () => ({ default: () => null }))
-vi.mock('@/components/LiveStatTicker', () => ({ default: () => null }))
-vi.mock('@/components/ModeButton', () => ({
+vi.mock('@/components/game/MatchList', () => ({ default: () => null }))
+vi.mock('@/components/game/PendingMatchCard', () => ({ default: () => null }))
+vi.mock('@/components/tickers/LiveStatTicker', () => ({ default: () => null }))
+vi.mock('@/components/ui/ModeButton', () => ({
   default: ({ label, onClick }: { label: string; onClick: () => void }) => (
     <button onClick={onClick}>{label}</button>
   )
@@ -78,13 +78,16 @@ vi.mock('@/components/modals/BonusExplainerModal', () => ({
   default: () => null,
   BonusExplainerTrigger: () => null
 }))
-vi.mock('@/components/IdleBetControls', () => ({ default: () => null }))
-vi.mock('@/components/FestivalTicker', () => ({ default: () => null }))
-vi.mock('@/components/GlobalTickerWrapper', () => ({ default: () => null }))
-vi.mock('@/components/AchievementToast', () => ({ default: () => null }))
-vi.mock('@/components/RelicSlot', () => ({ default: () => null }))
-vi.mock('@/components/RelicDrawer', () => ({ default: () => null }))
-vi.mock('@/components/RelicDropPopup', () => ({ default: () => null }))
+vi.mock('@/components/ui/IdleBetControls', () => ({ default: () => null }))
+vi.mock('@/components/tickers/FestivalTicker', () => ({ default: () => null }))
+vi.mock('@/components/layout/GlobalTickerWrapper', () => ({
+  default: () => null
+}))
+vi.mock('@/components/game/AchievementToast', () => ({ default: () => null }))
+vi.mock('@/components/relics/RelicSlot', () => ({ default: () => null }))
+vi.mock('@/components/relics/RelicDrawer', () => ({ default: () => null }))
+vi.mock('@/components/relics/RelicDropPopup', () => ({ default: () => null }))
+vi.mock('@/components/ui/SoundControlPopover', () => ({ default: () => null }))
 
 // Mock Hooks
 vi.mock('@/hooks/useSound', () => ({
@@ -97,7 +100,9 @@ vi.mock('@/hooks/useSound', () => ({
     playElectric: vi.fn(),
     playFire: vi.fn(),
     playMoon: vi.fn(),
-    playFanfare: vi.fn()
+    playFanfare: vi.fn(),
+    volume: 1,
+    setVolume: vi.fn()
   })
 }))
 vi.mock('@/hooks/useInfiniteScroll', () => ({
@@ -157,7 +162,8 @@ vi.mock('@/lib/api', () => ({
     Promise.resolve({ success: true, laps: 1, fastestLapBets: 100 })
   ),
   fetchFestivalState: vi.fn(() => Promise.resolve(null)),
-  postFestivalParticipated: vi.fn(() => Promise.resolve(null))
+  postFestivalParticipated: vi.fn(() => Promise.resolve(null)),
+  fetchDailyStats: vi.fn(() => Promise.resolve(null))
 }))
 
 describe('HomePage', () => {
@@ -254,6 +260,8 @@ describe('HomePage', () => {
       setOracleTickerMessage: vi.fn(),
       ascensionDeclinedThisSession: false,
       setAscensionDeclinedThisSession: vi.fn(),
+      oracleVolume: 1,
+      setOracleVolume: vi.fn(),
       ...uiOverrides
     }
     const idleState = {
@@ -266,7 +274,8 @@ describe('HomePage', () => {
       pushToDropQueue: vi.fn(),
       updateRelicCounter: vi.fn(),
       relicCounter: 0,
-      dropQueue: []
+      dropQueue: [],
+      equippedRelic: null
     }
 
     mockUserStore.mockReturnValue(userState)
