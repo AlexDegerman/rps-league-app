@@ -15,15 +15,23 @@ import {
   fetchFestivalState,
   postFestivalParticipated
 } from '@/lib/api'
-import MatchList from '@/components/MatchList'
-import PendingMatchCard from '@/components/PendingMatchCard'
+import MatchList from '@/components/game/MatchList'
+import PendingMatchCard from '@/components/game/PendingMatchCard'
 import GemIcon from '@/components/icons/GemIcon'
 import InfoIcon from '@/components/icons/InfoIcon'
 import CloseIcon from '@/components/icons/CloseIcon'
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import type { Match, PendingMatch, ResultAnim, EventTheme, FestivalModeKey, VisualMode, FestivalSSEData } from '@/types/rps'
+import type {
+  Match,
+  PendingMatch,
+  ResultAnim,
+  EventTheme,
+  FestivalModeKey,
+  VisualMode,
+  FestivalSSEData
+} from '@/types/rps'
 import {
   formatPoints,
   getDisplayTierClass,
@@ -32,14 +40,14 @@ import {
 } from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
 import SoundIcon from '@/components/icons/SoundIcon'
-import LiveStatsTicker from '@/components/LiveStatTicker'
+import LiveStatsTicker from '@/components/tickers/LiveStatTicker'
 import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
 import EdgeGlow from '@/components/overlays/EdgeGlow'
 import ConfettiOverlay from '@/components/overlays/ConfettiOverlay'
 import ResultAnimOverlay from '@/components/overlays/ResultAnimOverlay'
 import FlashBadge from '@/components/badges/FlashBadge'
 import StreakBadge from '@/components/badges/StreakBadge'
-import ModeButton from '@/components/ModeButton'
+import ModeButton from '@/components/ui/ModeButton'
 import { useGameStore } from './stores/gameStore'
 import { useUserStore } from './stores/userStore'
 import { useUIStore } from './stores/uiStore'
@@ -53,13 +61,12 @@ import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import { CURRENT_VERSION } from '@/lib/updates'
 import { useIdleStore } from './stores/idleStore'
 import { useIdleBet } from '@/hooks/useIdleBet'
-import IdleBetControls from '@/components/IdleBetControls'
-import FestivalTicker from '@/components/FestivalTicker'
-import GlobalTickerWrapper from '@/components/GlobalTickerWrapper'
-import AchievementToast from '@/components/AchievementToast'
-import RelicSlot from '@/components/RelicSlot'
-import RelicDrawer from '@/components/RelicDrawer'
-import RelicDropPopup from '@/components/RelicDropPopup'
+import IdleBetControls from '@/components/ui/IdleBetControls'
+import FestivalTicker from '@/components/tickers/FestivalTicker'
+import AchievementToast from '@/components/game/AchievementToast'
+import RelicSlot from '@/components/relics/RelicSlot'
+import RelicDrawer from '@/components/relics/RelicDrawer'
+import RelicDropPopup from '@/components/relics/RelicDropPopup'
 import { useRelicStore } from './stores/relicStore'
 import { slamState } from '@/lib/slamState'
 import BonusExplainerModal, {
@@ -67,8 +74,9 @@ import BonusExplainerModal, {
 } from '@/components/modals/BonusExplainerModal'
 import FlashEventActivationOverlay from '@/components/overlays/FlashEventActivationOverlay'
 import { usePopupQueue } from '@/hooks/usePopupQueue'
-import SoundControlPopover from '@/components/SoundControlPopover'
 import { unlockOracle } from '@/lib/oracleTTS'
+import GlobalTickerWrapper from '@/components/layout/GlobalTickerWrapper'
+import SoundControlPopover from '@/components/ui/SoundControlPopover'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -98,7 +106,7 @@ export default function HomePage() {
     oracleSide,
     setOracleSide,
     setActiveFestival,
-    festivalModeKey,
+    festivalModeKey
   } = useGameStore()
 
   // - User store -
@@ -450,10 +458,7 @@ export default function HomePage() {
     }
 
     return { newPoints, isNewPeak }
-  }, [
-    applyPointsUpdate,
-    setInputString,
-  ])
+  }, [applyPointsUpdate, setInputString])
 
   // SSE live stream
   useEffect(() => {
@@ -785,511 +790,505 @@ export default function HomePage() {
   const shouldShowTooltip =
     showPointsExplainer && numberName && numberName !== 'Points'
 
-    return (
-      <div className="max-w-2xl mx-auto px-4 pb-24">
-        {showWelcomeModal && (
-          <WelcomeModal onContinue={handleWelcomeContinue} />
-        )}
-        {showUpdateModal && <UpdateModal onClose={handleUpdateClose} />}
-        {showBonusModal && (
-          <BonusExplainerModal onClose={() => setShowBonusModal(false)} />
-        )}
+  return (
+    <div className="max-w-2xl mx-auto px-4 pb-24">
+      {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}
+      {showUpdateModal && <UpdateModal onClose={handleUpdateClose} />}
+      {showBonusModal && (
+        <BonusExplainerModal onClose={() => setShowBonusModal(false)} />
+      )}
 
-        {/* POPUP QUEUE RENDERING */}
-        {activePopup && readyToShow && (
-          <>
-            {activePopup.kind === 'flash_event' && (
-              <FlashEventActivationOverlay
-                event={activePopup.payload as EventTheme}
-                onDone={() => dequeuePopup()}
-              />
-            )}
+      {/* POPUP QUEUE RENDERING */}
+      {activePopup && readyToShow && (
+        <>
+          {activePopup.kind === 'flash_event' && (
+            <FlashEventActivationOverlay
+              event={activePopup.payload as EventTheme}
+              onDone={() => dequeuePopup()}
+            />
+          )}
 
-            {activePopup.kind === 'ascension' && (
-              <AscensionModal
-                laps={laps}
-                onAscend={async () => {
-                  const user = getOrCreateUser()
-                  const data = await ascendUser(user.userId, user.shortId)
-                  if (data?.success) {
-                    setLaps(data.laps)
-                    setFastestLapBets(data.fastestLapBets)
-                    applyPointsUpdate(
-                      200000n,
-                      useUserStore.getState().peakPoints
-                    )
-                    setInputString('200000')
-                    setEligible(true)
-                  }
-                  dequeuePopup()
-                }}
-                onDismiss={() => {
-                  useUIStore.getState().setAscensionDeclinedThisSession(true)
-                  dequeuePopup()
-                }}
-              />
-            )}
+          {activePopup.kind === 'ascension' && (
+            <AscensionModal
+              laps={laps}
+              onAscend={async () => {
+                const user = getOrCreateUser()
+                const data = await ascendUser(user.userId, user.shortId)
+                if (data?.success) {
+                  setLaps(data.laps)
+                  setFastestLapBets(data.fastestLapBets)
+                  applyPointsUpdate(200000n, useUserStore.getState().peakPoints)
+                  setInputString('200000')
+                  setEligible(true)
+                }
+                dequeuePopup()
+              }}
+              onDismiss={() => {
+                useUIStore.getState().setAscensionDeclinedThisSession(true)
+                dequeuePopup()
+              }}
+            />
+          )}
 
-            {activePopup.kind === 'relic_drop' && <RelicDropPopup />}
-          </>
-        )}
+          {activePopup.kind === 'relic_drop' && <RelicDropPopup />}
+        </>
+      )}
 
-        <GlobalTickerWrapper />
-        <EdgeGlow visualMode={visualMode} />
+      <GlobalTickerWrapper />
+      <EdgeGlow visualMode={visualMode} />
 
-        <div className="relative">
-          <ConfettiOverlay
-            confettiType={resultAnim?.confettiType ?? 'normal'}
-            show={resultAnim?.win === true}
-          />
-          <AchievementToast />
+      <div className="relative">
+        <ConfettiOverlay
+          confettiType={resultAnim?.confettiType ?? 'normal'}
+          show={resultAnim?.win === true}
+        />
+        <AchievementToast />
 
-          <ResultAnimOverlay
-            resultAnim={resultAnim}
-            streakMult={streakMult}
-            animatedResult={animatedResult}
-          />
+        <ResultAnimOverlay
+          resultAnim={resultAnim}
+          streakMult={streakMult}
+          animatedResult={animatedResult}
+        />
 
-          <div
-            className={`bg-white rounded-xl border shadow-sm p-2 transition-all duration-500 ${
-              visualMode === 'flash_lunar'
-                ? 'border-blue-200 lunar-ring'
-                : visualMode === 'flash_electric'
-                  ? 'border-purple-400 electric-ring'
-                  : visualMode === 'flash_cards'
-                    ? 'border-yellow-400 cards-ring'
-                    : visualMode === 'flash_hellfire'
-                      ? 'border-red-500 hellfire-ring'
-                      : visualMode === 'winstreak_inferno'
-                        ? 'border-orange-400 inferno-ring'
-                        : visualMode === 'winstreak_fever'
-                          ? 'border-green-400 fever-ring'
-                          : visualMode === 'festival_ghost'
-                            ? 'border-teal-300 ghost-ring'
-                            : visualMode === 'festival_safeguard'
-                              ? 'border-slate-300 safeguard-ring'
-                              : visualMode === 'festival_resonance'
-                                ? 'border-yellow-300 resonance-ring'
-                                : visualMode === 'festival_surge'
-                                  ? 'border-cyan-300 surge-ring'
-                                  : visualMode === 'festival_vault'
-                                    ? 'border-indigo-300 vault-ring'
-                                    : visualMode === 'festival_spark'
-                                      ? 'border-purple-300 spark-neon-pulse'
-                                      : visualMode === 'festival_fever'
-                                        ? 'border-orange-400 fever-festival-ring'
-                                        : visualMode === 'festival_sanguine'
-                                          ? 'border-red-900 sanguine-ring'
-                                          : 'border-gray-100'
-            }`}
-          >
-            {/* Top section */}
-            <div className="mb-1">
-              {/* Points + Mute */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex flex-col gap-1 min-w-0 flex-1">
-                  {/* Points display */}
-                  <div className="flex items-center gap-2">
-                    <div className="relative group flex items-center">
-                      <div
-                        className="flex items-center gap-2 cursor-pointer select-none"
-                        title={capped ? full : undefined}
-                        onMouseEnter={() => {
-                          if (!capped) setShowPointsExplainer(true)
-                        }}
-                        onMouseLeave={() => setShowPointsExplainer(false)}
-                        onClick={() => {
-                          if (!capped)
-                            setShowPointsExplainer(!showPointsExplainer)
-                        }}
-                      >
-                        <GemIcon size={24} className="shrink-0" />
-                        <span className="text-xl font-bold tabular-nums">
-                          <span
-                            className={getDisplayTierClass(
-                              points,
-                              stylePreference
-                            )}
-                            style={{ position: 'relative' }}
-                          >
-                            {pointsLoaded ? animatedDisplay : '...'}
-                          </span>
-                        </span>
-                      </div>
-                      {shouldShowTooltip && (
-                        <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-                            <span
-                              className={`${getDisplayTierClass(points, stylePreference)} tier-clean-text`}
-                            >
-                              {numberName}
-                            </span>
-                          </span>
-                          <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="relative group flex items-center ml-1">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setShowPointsInfo(!showPointsInfo)
-                        }}
-                        onBlur={() => setShowPointsInfo(false)}
-                        className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
-                      >
-                        <InfoIcon />
-                      </button>
-                      <div
-                        className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
-                      >
-                        Virtual simulation points. No real-world currency or
-                        value.
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Nickname + rank */}
-                  {displayNickname && (
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span
-                        className="text-[10px] font-black text-gray-500 tracking-wider overflow-hidden whitespace-nowrap block min-w-0"
-                        title={displayNickname}
-                      >
-                        {displayNickname}
-                      </span>
-                      {dailyRank && (
-                        <span className="shrink-0 text-[9px] font-black px-1.5 py-0.5 bg-purple-100 text-purple-600 rounded-full uppercase tracking-wide whitespace-nowrap">
-                          #{dailyRank} today
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Mute + Relic */}
-                <div className="relative flex items-center gap-2 shrink-0">
-                  <RelicSlot align="right" />
-                  <button
-                    ref={soundBtnRef}
-                    onClick={() => setShowSoundPopover((p) => !p)}
-                    className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
-                  >
-                    <SoundIcon muted={false} />
-                  </button>
-                  {showSoundPopover && (
-                    <SoundControlPopover
-                      soundOn={soundOn}
-                      volume={volume}
-                      oracleVolume={oracleVolume}
-                      onVolumeChange={setVolume}
-                      onOracleVolumeChange={setOracleVolume}
-                      onToggleSound={toggleSound}
-                      anchorRef={soundBtnRef}
-                      onClose={() => setShowSoundPopover(false)}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Badges */}
-              {displayNickname && (
-                <div className="flex gap-1 mt-1 max-w-sm">
-                  <FlashBadge
-                    visualMode={visualMode}
-                    flashBuffRemaining={flashBuffRemaining}
-                  />
-                  <StreakBadge winStreak={winStreak} streakMult={streakMult} />
-                </div>
-              )}
-            </div>
-
-            {/* Bet input row */}
-            <div className="flex flex-row items-center gap-1 sm:gap-2 h-10">
-              <div className="flex items-center gap-2 flex-1 min-w-0 h-full">
-                <label className="hidden min-[370px]:block text-xs font-bold text-gray-400 uppercase shrink-0">
-                  Amount
-                </label>
-                <div className="relative flex-1 min-w-0 h-full">
-                  <input
-                    type="text"
-                    value={isFocused ? inputString : ''}
-                    onFocus={() => {
-                      setIsFocused(true)
-                      setInputString('')
-                    }}
-                    placeholder={
-                      !isFocused
-                        ? formatPoints(betAmount).display
-                        : !autoAllIn
-                          ? '100k → 100.000'
-                          : ''
-                    }
-                    onChange={(e) => {
-                      const val = e.target.value
-                      setInputString(val)
-                      const parsed = parseShorthand(val)
-                      if (parsed > 0n) {
-                        setBetAmount(parsed > points ? points : parsed)
-                      }
-                    }}
-                    onBlur={() => {
-                      setIsFocused(false)
-                      let final = parseShorthand(inputString)
-                      if (final > points) final = points
-                      const floor = 100000n
-                      if (final < floor) final = points < floor ? points : floor
-                      setBetAmount(final)
-                      setInputString(final.toString())
-                    }}
-                    className={`block w-full h-full border border-gray-200 rounded-lg pl-3 pr-2 py-0 font-bold focus:ring-2 focus:ring-purple-300 transition-all bg-white ${
-                      !isFocused
-                        ? 'placeholder:text-gray-800'
-                        : 'placeholder:text-gray-400'
-                    } ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0 h-full">
-                <ModeButton
-                  visualMode={visualMode}
-                  festivalModeKey={festivalModeKey}
-                  label="ALL IN"
-                  onClick={() => {
-                    setBetAmount(points)
-                    setInputString(points.toString())
-                  }}
-                />
-                <ModeButton
-                  visualMode={visualMode}
-                  festivalModeKey={festivalModeKey}
-                  label={`AUTO\u00A0${autoAllIn ? 'ON' : 'OFF'}`}
-                  onClick={() => setAutoAllIn(!autoAllIn)}
-                />
-              </div>
-            </div>
-
-            {/* Notification banner */}
-            {notification && isHydrated && (
-              <div className="flex flex-col gap-2 mt-3">
-                {/* Welcome banner - new visitor or bigint error */}
-                {(notification === 'new_visitor' ||
-                  notification === 'no_bigint') && (
-                  <div
-                    className={`flex items-start justify-between gap-3 rounded-xl px-4 py-3 border animate-in fade-in slide-in-from-top-2 duration-400 ${
-                      notification === 'no_bigint'
-                        ? 'bg-red-50 border-red-200'
-                        : 'bg-indigo-50 border-indigo-200'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3 min-w-0">
-                      <span className="text-xl flex-none mt-0.5">
-                        {notification === 'no_bigint' ? '⚠️' : '🎉'}
-                      </span>
-                      <div className="flex flex-col gap-0.5 min-w-0">
+        <div
+          className={`bg-white rounded-xl border shadow-sm p-2 transition-all duration-500 ${
+            visualMode === 'flash_lunar'
+              ? 'border-blue-200 lunar-ring'
+              : visualMode === 'flash_electric'
+                ? 'border-purple-400 electric-ring'
+                : visualMode === 'flash_cards'
+                  ? 'border-yellow-400 cards-ring'
+                  : visualMode === 'flash_hellfire'
+                    ? 'border-red-500 hellfire-ring'
+                    : visualMode === 'winstreak_inferno'
+                      ? 'border-orange-400 inferno-ring'
+                      : visualMode === 'winstreak_fever'
+                        ? 'border-green-400 fever-ring'
+                        : visualMode === 'festival_ghost'
+                          ? 'border-teal-300 ghost-ring'
+                          : visualMode === 'festival_safeguard'
+                            ? 'border-slate-300 safeguard-ring'
+                            : visualMode === 'festival_resonance'
+                              ? 'border-yellow-300 resonance-ring'
+                              : visualMode === 'festival_surge'
+                                ? 'border-cyan-300 surge-ring'
+                                : visualMode === 'festival_vault'
+                                  ? 'border-indigo-300 vault-ring'
+                                  : visualMode === 'festival_spark'
+                                    ? 'border-purple-300 spark-neon-pulse'
+                                    : visualMode === 'festival_fever'
+                                      ? 'border-orange-400 fever-festival-ring'
+                                      : visualMode === 'festival_sanguine'
+                                        ? 'border-red-900 sanguine-ring'
+                                        : 'border-gray-100'
+          }`}
+        >
+          {/* Top section */}
+          <div className="mb-1">
+            {/* Points + Mute */}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                {/* Points display */}
+                <div className="flex items-center gap-2">
+                  <div className="relative group flex items-center">
+                    <div
+                      className="flex items-center gap-2 cursor-pointer select-none"
+                      title={capped ? full : undefined}
+                      onMouseEnter={() => {
+                        if (!capped) setShowPointsExplainer(true)
+                      }}
+                      onMouseLeave={() => setShowPointsExplainer(false)}
+                      onClick={() => {
+                        if (!capped)
+                          setShowPointsExplainer(!showPointsExplainer)
+                      }}
+                    >
+                      <GemIcon size={24} className="shrink-0" />
+                      <span className="text-xl font-bold tabular-nums">
                         <span
-                          className={`text-[11px] font-black uppercase tracking-widest leading-tight ${
-                            notification === 'no_bigint'
-                              ? 'text-red-700'
-                              : 'text-indigo-700'
-                          }`}
+                          className={getDisplayTierClass(
+                            points,
+                            stylePreference
+                          )}
+                          style={{ position: 'relative' }}
                         >
-                          {notification === 'no_bigint'
-                            ? 'Browser Not Supported'
-                            : "You've been granted 200,000 points!"}
+                          {pointsLoaded ? animatedDisplay : '...'}
                         </span>
-                        <p
-                          className={`text-[10px] font-medium leading-snug ${
-                            notification === 'no_bigint'
-                              ? 'text-red-600'
-                              : 'text-indigo-500'
-                          }`}
-                        >
-                          {notification === 'no_bigint'
-                            ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
-                            : 'Start betting to rank up the leaderboard. No login needed, your progress is saved automatically.'}
-                        </p>
-                      </div>
+                      </span>
                     </div>
-                    <button
-                      onClick={() => {
-                        if (notification === 'new_visitor')
-                          localStorage.setItem('rps_welcomed', '1')
-                        setNotification(null)
-                      }}
-                      className={`flex-none p-1.5 rounded-lg transition-colors shrink-0 ${
-                        notification === 'no_bigint'
-                          ? 'text-red-400 hover:text-red-700 hover:bg-red-100'
-                          : 'text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100'
-                      }`}
-                      aria-label="Close"
-                    >
-                      <CloseIcon />
-                    </button>
-                  </div>
-                )}
-
-                {/* Oracle prophecy banner */}
-                {notification === 'oracle' &&
-                  oracleSide &&
-                  (() => {
-                    const dayIndex =
-                      new Date().getUTCDate() % oracleTemplates.length
-                    const template = oracleTemplates[dayIndex](oracleSide)
-                    return (
-                      <div className="flex items-start gap-3 rounded-xl px-4 py-3 border border-purple-400 bg-purple-50 animate-in fade-in slide-in-from-top-2 duration-400">
-                        <span className="text-xl flex-none mt-0.5">👁️</span>
-                        <div className="flex flex-col gap-0.5 min-w-0">
-                          <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-purple-800">
-                            Daily Oracle Prophecy
+                    {shouldShowTooltip && (
+                      <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                          <span
+                            className={`${getDisplayTierClass(points, stylePreference)} tier-clean-text`}
+                          >
+                            {numberName}
                           </span>
-                          <p className="text-[10px] font-medium leading-snug text-purple-700">
-                            {template.prefix}{' '}
-                            <span className="inline-block font-black text-white bg-purple-700 px-2 py-0.5 rounded-md shadow-[0_0_14px_rgba(168,85,247,0.9),0_0_28px_rgba(168,85,247,0.5)] uppercase tracking-wider text-[10px] mx-0.5">
-                              {oracleSide === 'left' ? 'LEFT' : 'RIGHT'}
-                            </span>{' '}
-                            {template.suffix}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })()}
-                {/* Idle unlock banner */}
-                {notification === 'idle_unlock' && (
-                  <div className="flex items-start justify-between gap-3 rounded-xl px-4 py-3 border border-indigo-300 bg-indigo-50 animate-in fade-in slide-in-from-top-2 duration-400">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <span className="text-xl flex-none mt-0.5">⚡</span>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-indigo-700">
-                          Auto-Bet Unlocked
                         </span>
-                        <p className="text-[10px] font-medium leading-snug text-indigo-500">
-                          Tick Auto-Bet Left or Right above any match to let the
-                          system bet for you automatically.
-                        </p>
+                        <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
                       </div>
-                    </div>
+                    )}
+                  </div>
+
+                  <div className="relative group flex items-center ml-1">
                     <button
-                      onClick={() => {
-                        setHasInteractedWithIdle(true)
-                        setNotification(null)
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowPointsInfo(!showPointsInfo)
                       }}
-                      className="flex-none p-1.5 rounded-lg text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100 transition-colors shrink-0"
-                      aria-label="Close"
+                      onBlur={() => setShowPointsInfo(false)}
+                      className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
                     >
-                      <CloseIcon />
+                      <InfoIcon />
                     </button>
+                    <div
+                      className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
+                    >
+                      Virtual simulation points. No real-world currency or
+                      value.
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nickname + rank */}
+                {displayNickname && (
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span
+                      className="text-[10px] font-black text-gray-500 tracking-wider overflow-hidden whitespace-nowrap block min-w-0"
+                      title={displayNickname}
+                    >
+                      {displayNickname}
+                    </span>
+                    {dailyRank && (
+                      <span className="shrink-0 text-[9px] font-black px-1.5 py-0.5 bg-purple-100 text-purple-600 rounded-full uppercase tracking-wide whitespace-nowrap">
+                        #{dailyRank} today
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
+
+              {/* Mute + Relic */}
+              <div className="relative flex items-center gap-2 shrink-0">
+                <RelicSlot align="right" />
+                <button
+                  ref={soundBtnRef}
+                  onClick={() => setShowSoundPopover((p) => !p)}
+                  className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
+                >
+                  <SoundIcon muted={false} />
+                </button>
+                {showSoundPopover && (
+                  <SoundControlPopover
+                    soundOn={soundOn}
+                    volume={volume}
+                    oracleVolume={oracleVolume}
+                    onVolumeChange={setVolume}
+                    onOracleVolumeChange={setOracleVolume}
+                    onToggleSound={toggleSound}
+                    anchorRef={soundBtnRef}
+                    onClose={() => setShowSoundPopover(false)}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Badges */}
+            {displayNickname && (
+              <div className="flex gap-1 mt-1 max-w-sm">
+                <FlashBadge
+                  visualMode={visualMode}
+                  flashBuffRemaining={flashBuffRemaining}
+                />
+                <StreakBadge winStreak={winStreak} streakMult={streakMult} />
+              </div>
             )}
           </div>
-        </div>
 
-        <LiveStatsTicker />
-        <FestivalTicker />
-
-        {errorMessage && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-200">
-            <div className="w-2 h-2 bg-red-500 rounded-full" />
-            <p className="text-xs font-bold text-red-900 uppercase">
-              {errorMessage}
-            </p>
-          </div>
-        )}
-
-        {/* Rules bar */}
-        <div className="flex flex-row items-center justify-between mb-1 gap-1 px-1">
-          <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-cyan-600 font-bold uppercase tracking-tight whitespace-nowrap">
-            <p>PTS FLOOR: 100K</p>
-            <p className="text-indigo-400/90">No Ties</p>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
-            <span className="text-green-600">WIN: +100%</span>
-            <BonusExplainerTrigger onClick={() => setShowBonusModal(true)} />
-          </div>
-        </div>
-
-        <IdleBetControls />
-
-        {/* Match feed */}
-        <div className="min-h-[60vh]">
-          {!backendReady ? (
-            <div className="text-center py-20 animate-pulse text-gray-400 text-sm">
-              Connecting to live stream…
+          {/* Bet input row */}
+          <div className="flex flex-row items-center gap-1 sm:gap-2 h-10">
+            <div className="flex items-center gap-2 flex-1 min-w-0 h-full">
+              <label className="hidden min-[370px]:block text-xs font-bold text-gray-400 uppercase shrink-0">
+                Amount
+              </label>
+              <div className="relative flex-1 min-w-0 h-full">
+                <input
+                  type="text"
+                  value={isFocused ? inputString : ''}
+                  onFocus={() => {
+                    setIsFocused(true)
+                    setInputString('')
+                  }}
+                  placeholder={
+                    !isFocused
+                      ? formatPoints(betAmount).display
+                      : !autoAllIn
+                        ? '100k → 100.000'
+                        : ''
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setInputString(val)
+                    const parsed = parseShorthand(val)
+                    if (parsed > 0n) {
+                      setBetAmount(parsed > points ? points : parsed)
+                    }
+                  }}
+                  onBlur={() => {
+                    setIsFocused(false)
+                    let final = parseShorthand(inputString)
+                    if (final > points) final = points
+                    const floor = 100000n
+                    if (final < floor) final = points < floor ? points : floor
+                    setBetAmount(final)
+                    setInputString(final.toString())
+                  }}
+                  className={`block w-full h-full border border-gray-200 rounded-lg pl-3 pr-2 py-0 font-bold focus:ring-2 focus:ring-purple-300 transition-all bg-white ${
+                    !isFocused
+                      ? 'placeholder:text-gray-800'
+                      : 'placeholder:text-gray-400'
+                  } ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
+                />
+              </div>
             </div>
-          ) : (
-            <>
-              {persistentError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full" />
-                  <p className="text-xs font-bold text-red-900 uppercase">
-                    {persistentError}
-                  </p>
-                </div>
-              )}
 
-              {isDuplicate && (
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
-                  <div className="w-2 h-2 bg-amber-500 rounded-full" />
-                  <p className="text-xs font-bold text-amber-900 uppercase">
-                    RPS League is open in another tab. Close this tab to
-                    continue.
-                  </p>
-                </div>
-              )}
-
-              {showConnectionWarning && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
-                  <div className="w-2 h-2 bg-red-500 rounded-full" />
-                  <p className="text-xs font-bold text-red-900 uppercase">
-                    {isOffline
-                      ? 'No Internet Connection.'
-                      : 'Server having issues.'}
-                  </p>
-                </div>
-              )}
-              {pendingMatches
-                .filter((pm) => pm.expiresAt - (now + serverOffset) > -5000)
-                .map((pending) => (
-                  <PendingMatchCard
-                    key={pending.gameId}
-                    pending={pending}
-                    prediction={predictions.get(pending.gameId) ?? null}
-                    onPick={handlePick}
-                    serverOffset={serverOffset}
-                    winStreak={winStreak}
-                    visualMode={visualMode}
-                    festivalModeKey={festivalModeKey}
-                    oracleSide={oracleSide}
-                  />
-                ))}
-              <MatchList
-                matches={matches}
-                isLoadingMore={isLoadingMore}
-                hasMore={hasMore}
-                predictions={predictions}
-                winStreak={winStreak}
+            <div className="flex items-center gap-1 shrink-0 h-full">
+              <ModeButton
                 visualMode={visualMode}
                 festivalModeKey={festivalModeKey}
+                label="ALL IN"
+                onClick={() => {
+                  setBetAmount(points)
+                  setInputString(points.toString())
+                }}
               />
-            </>
+              <ModeButton
+                visualMode={visualMode}
+                festivalModeKey={festivalModeKey}
+                label={`AUTO\u00A0${autoAllIn ? 'ON' : 'OFF'}`}
+                onClick={() => setAutoAllIn(!autoAllIn)}
+              />
+            </div>
+          </div>
+
+          {/* Notification banner */}
+          {notification && isHydrated && (
+            <div className="flex flex-col gap-2 mt-3">
+              {/* Welcome banner - new visitor or bigint error */}
+              {(notification === 'new_visitor' ||
+                notification === 'no_bigint') && (
+                <div
+                  className={`flex items-start justify-between gap-3 rounded-xl px-4 py-3 border animate-in fade-in slide-in-from-top-2 duration-400 ${
+                    notification === 'no_bigint'
+                      ? 'bg-red-50 border-red-200'
+                      : 'bg-indigo-50 border-indigo-200'
+                  }`}
+                >
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="text-xl flex-none mt-0.5">
+                      {notification === 'no_bigint' ? '⚠️' : '🎉'}
+                    </span>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span
+                        className={`text-[11px] font-black uppercase tracking-widest leading-tight ${
+                          notification === 'no_bigint'
+                            ? 'text-red-700'
+                            : 'text-indigo-700'
+                        }`}
+                      >
+                        {notification === 'no_bigint'
+                          ? 'Browser Not Supported'
+                          : "You've been granted 200,000 points!"}
+                      </span>
+                      <p
+                        className={`text-[10px] font-medium leading-snug ${
+                          notification === 'no_bigint'
+                            ? 'text-red-600'
+                            : 'text-indigo-500'
+                        }`}
+                      >
+                        {notification === 'no_bigint'
+                          ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
+                          : 'Start betting to rank up the leaderboard. No login needed, your progress is saved automatically.'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (notification === 'new_visitor')
+                        localStorage.setItem('rps_welcomed', '1')
+                      setNotification(null)
+                    }}
+                    className={`flex-none p-1.5 rounded-lg transition-colors shrink-0 ${
+                      notification === 'no_bigint'
+                        ? 'text-red-400 hover:text-red-700 hover:bg-red-100'
+                        : 'text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100'
+                    }`}
+                    aria-label="Close"
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+              )}
+
+              {/* Oracle prophecy banner */}
+              {notification === 'oracle' &&
+                oracleSide &&
+                (() => {
+                  const dayIndex =
+                    new Date().getUTCDate() % oracleTemplates.length
+                  const template = oracleTemplates[dayIndex](oracleSide)
+                  return (
+                    <div className="flex items-start gap-3 rounded-xl px-4 py-3 border border-purple-400 bg-purple-50 animate-in fade-in slide-in-from-top-2 duration-400">
+                      <span className="text-xl flex-none mt-0.5">👁️</span>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-purple-800">
+                          Daily Oracle Prophecy
+                        </span>
+                        <p className="text-[10px] font-medium leading-snug text-purple-700">
+                          {template.prefix}{' '}
+                          <span className="inline-block font-black text-white bg-purple-700 px-2 py-0.5 rounded-md shadow-[0_0_14px_rgba(168,85,247,0.9),0_0_28px_rgba(168,85,247,0.5)] uppercase tracking-wider text-[10px] mx-0.5">
+                            {oracleSide === 'left' ? 'LEFT' : 'RIGHT'}
+                          </span>{' '}
+                          {template.suffix}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
+              {/* Idle unlock banner */}
+              {notification === 'idle_unlock' && (
+                <div className="flex items-start justify-between gap-3 rounded-xl px-4 py-3 border border-indigo-300 bg-indigo-50 animate-in fade-in slide-in-from-top-2 duration-400">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="text-xl flex-none mt-0.5">⚡</span>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-indigo-700">
+                        Auto-Bet Unlocked
+                      </span>
+                      <p className="text-[10px] font-medium leading-snug text-indigo-500">
+                        Tick Auto-Bet Left or Right above any match to let the
+                        system bet for you automatically.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setHasInteractedWithIdle(true)
+                      setNotification(null)
+                    }}
+                    className="flex-none p-1.5 rounded-lg text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100 transition-colors shrink-0"
+                    aria-label="Close"
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
-
-        <RelicDrawer />
-
-        {/* Scroll-to-top */}
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className={`fixed bottom-25 right-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
-        >
-          <ChevronUpIcon />
-        </button>
       </div>
-    )
+
+      <LiveStatsTicker />
+      <FestivalTicker />
+
+      {errorMessage && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-200">
+          <div className="w-2 h-2 bg-red-500 rounded-full" />
+          <p className="text-xs font-bold text-red-900 uppercase">
+            {errorMessage}
+          </p>
+        </div>
+      )}
+
+      {/* Rules bar */}
+      <div className="flex flex-row items-center justify-between mb-1 gap-1 px-1">
+        <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-cyan-600 font-bold uppercase tracking-tight whitespace-nowrap">
+          <p>PTS FLOOR: 100K</p>
+          <p className="text-indigo-400/90">No Ties</p>
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
+          <span className="text-green-600">WIN: +100%</span>
+          <BonusExplainerTrigger onClick={() => setShowBonusModal(true)} />
+        </div>
+      </div>
+
+      <IdleBetControls />
+
+      {/* Match feed */}
+      <div className="min-h-[60vh]">
+        {!backendReady ? (
+          <div className="text-center py-20 animate-pulse text-gray-400 text-sm">
+            Connecting to live stream…
+          </div>
+        ) : (
+          <>
+            {persistentError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3">
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                <p className="text-xs font-bold text-red-900 uppercase">
+                  {persistentError}
+                </p>
+              </div>
+            )}
+
+            {isDuplicate && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-3">
+                <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                <p className="text-xs font-bold text-amber-900 uppercase">
+                  RPS League is open in another tab. Close this tab to continue.
+                </p>
+              </div>
+            )}
+
+            {showConnectionWarning && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                <p className="text-xs font-bold text-red-900 uppercase">
+                  {isOffline
+                    ? 'No Internet Connection.'
+                    : 'Server having issues.'}
+                </p>
+              </div>
+            )}
+            {pendingMatches
+              .filter((pm) => pm.expiresAt - (now + serverOffset) > -5000)
+              .map((pending) => (
+                <PendingMatchCard
+                  key={pending.gameId}
+                  pending={pending}
+                  prediction={predictions.get(pending.gameId) ?? null}
+                  onPick={handlePick}
+                  serverOffset={serverOffset}
+                  winStreak={winStreak}
+                  visualMode={visualMode}
+                  festivalModeKey={festivalModeKey}
+                  oracleSide={oracleSide}
+                />
+              ))}
+            <MatchList
+              matches={matches}
+              isLoadingMore={isLoadingMore}
+              hasMore={hasMore}
+              predictions={predictions}
+              winStreak={winStreak}
+              visualMode={visualMode}
+              festivalModeKey={festivalModeKey}
+            />
+          </>
+        )}
+      </div>
+
+      <RelicDrawer />
+
+      {/* Scroll-to-top */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className={`fixed bottom-25 right-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+      >
+        <ChevronUpIcon />
+      </button>
+    </div>
+  )
 }

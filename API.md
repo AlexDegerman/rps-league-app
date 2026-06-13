@@ -106,6 +106,7 @@ Real players (predictors) with persistent accounts and progression.
 | `show_linkedin_badge` | BOOLEAN | Controls LinkedIn badge visibility |
 | `joined_date` | INT8 | Account creation timestamp (ms) |
 | `recovery_code` | TEXT (UQ) | Account recovery token |
+| `recovery_tutorial_completed` | BOOLEAN | Whether user has completed the recovery code tutorial |
 
 ---
 
@@ -220,13 +221,16 @@ Operational control for feedback system abuse prevention.
 | `predictions` | `created_at` | Time-windowed leaderboard aggregation |
 | `predictions` | `game_id` | Fast resolution lookup — `resolvePrediction` fetches all bets per game on every match result |
 | `predictions` | `result, user_id` | Achievement checker win/loss sweep queries |
-| `predictions` | `user_id, game_id` (UNIQUE) | Enforces one bet per user per game; relied on by `resolvePrediction` — **missing from live DB, must be added** |
+| `predictions` | `user_id, game_id` (UNIQUE) | Enforces one bet per user per game; relied on by `resolvePrediction` |
 | `users` | `points` | Global leaderboard sorting |
 | `users` | `peak_points` | Session peak leaderboard sorting |
 | `users` | `all_time_peak DESC` | All-time leaderboard tab sorting |
 | `users` | `laps, points DESC` | Speedrun/ascension leaderboard filtering and ordering |
-| `matches` | `time` | Fast retrieval of recent matches |
+| `matches` | `time` | Fast retrieval of recent matches (ASC) |
+| `matches` | `time DESC` | Fast retrieval of recent matches (DESC) — used by match history queries |
 | `matches` | `game_id` | Fast lookup for match resolution and joins |
+| `matches` | `player_a_name` | Bot stats and by-player filtering |
+| `matches` | `player_b_name` | Bot stats and by-player filtering |
 | `relics` | `user_id` | FK not auto-indexed by Postgres — all relic lookups are `WHERE user_id = $1` |
 | `user_achievements` | `user_id` | Fast achievement lookup per user |
 
@@ -274,10 +278,12 @@ Operational control for feedback system abuse prevention.
 | POST | `/api/users/update-linkedin` | Set or clear LinkedIn URL and badge visibility |
 | PATCH | `/api/users/style-preference` | Update point display style preference |
 | POST | `/api/users/ascend` | Prestige reset — resets points to 200k, increments `laps`, updates speedrun record, triggers SURGE festival |
+| POST | `/api/users/recovery-tutorial-complete` | Mark recovery tutorial as completed for a user (`{ userId }`) |
 | GET | `/api/users/profile/:shortId` | Public profile data (points, streak, laps, all-time peak, LinkedIn) |
 | GET | `/api/users/recovery/:userId` | Fetch recovery code for the authenticated user |
 | GET | `/api/users/check-name/:nickname` | Check nickname availability |
 | GET | `/api/users/:userId/points` | Real-time balance, streak, and peak sync; also handles UTM attribution on first visit |
+| GET | `/api/users/:userId/recovery-tutorial-status` | Check whether user has completed the recovery tutorial |
 | GET | `/api/users/idle-eligible/:userId` | Check if user qualifies for idle auto-bet (laps ≥ 1 or points ≥ ascension threshold) |
 | POST | `/api/users/:userId/auto-bet-used` | Mark that user has activated idle auto-bet |
 

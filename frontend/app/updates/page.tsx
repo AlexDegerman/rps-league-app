@@ -9,10 +9,8 @@ export default function UpdatesPage() {
   const [openVersion, setOpenVersion] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest')
 
-  // 2. REFINE THE REF TYPE (Added a check for null later)
   const containerRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
-  // 3. EXPLICITLY TYPE THE SORTED ARRAY
   const sorted: Update[] =
     sortOrder === 'newest' ? UPDATES : [...UPDATES].reverse()
 

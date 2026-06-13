@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import Header from '../components/Header'
-import Footer from '@/components/Footer'
-import PredictionTicker from '@/components/PredictionTicker'
+import Header from '../components/ui/Header'
+import Footer from '@/components/ui/Footer'
+import PredictionTicker from '@/components/tickers/PredictionTicker'
 
 export const viewport: Viewport = {
   themeColor: '#f3f4f6',

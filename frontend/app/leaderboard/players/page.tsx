@@ -7,7 +7,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { fetchHistoricalLeaderboard, fetchTodayLeaderboard } from '@/lib/api'
 import type { PlayerStats } from '@/types/rps'
 import Link from 'next/link'
-import LeaderboardTable from '@/components/LeaderboardTable'
+import LeaderboardTable from '@/components/leaderboard/PlayerLeaderboardTable'
 
 const TODAY = new Date().toISOString().split('T')[0]
 const FIRST_MATCH_DATE = '2026-02-16'

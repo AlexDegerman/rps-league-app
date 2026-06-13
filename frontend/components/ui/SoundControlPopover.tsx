@@ -1,7 +1,7 @@
 'use client'
 
+import { useUIStore } from '@/app/stores/uiStore'
 import { useEffect, useRef } from 'react'
-import { useUIStore } from '../app/stores/uiStore'
 
 const SpeakerOn = () => (
   <svg width="14" height="14" viewBox="0 0 20 20" fill="none">

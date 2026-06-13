@@ -9,7 +9,7 @@ import {
   fetchMatchesByPlayer,
   fetchPlayerNames
 } from '@/lib/api'
-import MatchList from '@/components/MatchList'
+import MatchList from '@/components/game/MatchList'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { logger } from '@/lib/logger'
 

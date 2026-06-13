@@ -4,9 +4,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import { generateNickname } from '@/lib/nicknames'
 import { formatTickerPoints, getAmountColor } from '@/lib/format'
 import { getUserId } from '@/lib/user'
-import GemIcon from './icons/GemIcon'
 import { useGameStore } from '@/app/stores/gameStore'
 import { EVENT_TICKER_CONFIG } from '@/lib/eventConfig'
+import GemIcon from '../icons/GemIcon'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 

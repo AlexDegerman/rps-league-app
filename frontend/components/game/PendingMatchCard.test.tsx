@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
-import PendingMatchCard from '@/components/PendingMatchCard'
+import PendingMatchCard from '@/components/game/PendingMatchCard'
 import type { PendingMatch, PredictionRecord } from '@/types/rps'
 
 describe('PendingMatchCard', () => {

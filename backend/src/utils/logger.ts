@@ -5,6 +5,12 @@ type Extra = Record<string, unknown>
 
 export const logger = {
   error: (message: string, error?: unknown, extra?: Extra) => {
+    console.error(
+      `[ERROR] ${message}`,
+      ...(error !== undefined ? [error] : []),
+      ...(extra !== undefined ? [extra] : [])
+    )
+
     if (isProd) {
       if (error instanceof Error) {
         Sentry.captureException(error, {
@@ -18,40 +24,28 @@ export const logger = {
         })
       }
     }
-
-    if (!isProd) {
-      console.error(
-        `[ERROR] ${message}`,
-        ...(error !== undefined ? [error] : []),
-        ...(extra !== undefined ? [extra] : [])
-      )
-    }
   },
 
   warn: (message: string, extra?: Extra) => {
+    console.warn(`[WARN] ${message}`, ...(extra !== undefined ? [extra] : []))
+
     if (isProd) {
       Sentry.captureMessage(message, {
         ...(extra && { extra }),
         level: 'warning'
       })
     }
-
-    if (!isProd) {
-      console.warn(`[WARN] ${message}`, ...(extra !== undefined ? [extra] : []))
-    }
   },
 
   info: (message: string, extra?: Extra) => {
+    console.log(`[INFO] ${message}`, ...(extra !== undefined ? [extra] : []))
+    
     if (isProd) {
       Sentry.addBreadcrumb({
         message,
         ...(extra && { data: extra }),
         level: 'info'
       })
-    }
-
-    if (!isProd) {
-      console.log(`[INFO] ${message}`, ...(extra !== undefined ? [extra] : []))
     }
   },
 

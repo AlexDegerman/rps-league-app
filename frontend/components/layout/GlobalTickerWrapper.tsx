@@ -1,8 +1,8 @@
 'use client'
 
-import OracleMessageTicker from '@/components/OracleMessageTicker'
+import OracleMessageTicker from '@/components/tickers/OracleMessageTicker'
 import { useUIStore } from '@/app/stores/uiStore'
-import FestivalEffectTicker from './FestivalEventTicker'
+import FestivalEffectTicker from '../tickers/FestivalEventTicker'
 
 export default function GlobalTickerWrapper() {
   const { oracleTickerMessage, setOracleTickerMessage } = useUIStore()

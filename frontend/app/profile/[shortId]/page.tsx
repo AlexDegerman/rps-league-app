@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { clearUserCache, getOrCreateUser} from '@/lib/user'
+import { clearUserCache, getOrCreateUser } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
 import type { UserStats } from '@/types/rps'
 import {
@@ -18,25 +18,27 @@ import {
   fetchRecoveryCode,
   handleRecoverProfile,
   updateLinkedin,
-  ascendUser,
+  ascendUser
 } from '@/lib/api'
-import BetHistory from '@/components/BetHistory'
+import BetHistory from '@/components/game/BetHistory'
 import { LinkedInBadge } from '@/components/badges/LinkedInBadge'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
 import { useUserStore } from '@/app/stores/userStore'
 import { useUIStore } from '@/app/stores/uiStore'
 import { logger } from '@/lib/logger'
-import { StyleSelect } from '@/components/StyleSelect'
+import { StyleSelect } from '@/components/ui/StyleSelect'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import AscensionModal from '@/components/modals/AscensionModal'
-import RecoveryTutorial from '@/components/RecoveryTutorial'
-import AchievementMenu from '@/components/AchievementMenu'
-import RelicSlot from '@/components/RelicSlot'
-import RelicDrawer from '@/components/RelicDrawer'
+import RecoveryTutorial from '@/components/layout/RecoveryTutorial'
+import AchievementMenu from '@/components/game/AchievementMenu'
+import RelicSlot from '@/components/relics/RelicSlot'
+import RelicDrawer from '@/components/relics/RelicDrawer'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { fetchEquippedRelic } from '@/lib/api'
 import type { RelicDef } from '@/lib/relics'
 import { RARITY_STYLES } from '@/lib/relics'
+import { StatSection } from '@/components/game/StatSection'
+import { StatBox } from '@/components/game/StatBox'
 
 interface Ranks {
   daily: number | null
@@ -49,23 +51,23 @@ export default function ProfilePage() {
   const router = useRouter()
   const targetShortId = params.shortId as string
 
-    const {
-      rerollNickname,
-      setStylePreference: setStoreStylePreference,
-      laps,
-      setLaps,
-      fastestLapBets,
-      setFastestLapBets,
-      setPoints: setStorePoints,
-      userId: myUserId,
-      shortId: myShortId,
-      myBadges,
-      showLinkedinBadge: storeLinkedinEnabled,
-      setShowLinkedinBadge: setStoreLinkedinEnabled,
-      refreshBadges
-    } = useUserStore()
+  const {
+    rerollNickname,
+    setStylePreference: setStoreStylePreference,
+    laps,
+    setLaps,
+    fastestLapBets,
+    setFastestLapBets,
+    setPoints: setStorePoints,
+    userId: myUserId,
+    shortId: myShortId,
+    myBadges,
+    showLinkedinBadge: storeLinkedinEnabled,
+    setShowLinkedinBadge: setStoreLinkedinEnabled,
+    refreshBadges
+  } = useUserStore()
   const { showAscensionPrompt, setShowAscensionPrompt } = useUIStore()
-    const { equippedRelic } = useRelicStore()
+  const { equippedRelic } = useRelicStore()
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
@@ -864,56 +866,6 @@ export default function ProfilePage() {
         isOwnProfile={isOwnProfile}
         recoverySectionRef={recoverySectionRef}
       />
-    </div>
-  )
-}
-
-function StatSection({
-  label,
-  children
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div>
-      <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-black/30 mb-3 ml-1">
-        {label}
-      </h3>
-      <div className="grid grid-cols-3 gap-2">{children}</div>
-    </div>
-  )
-}
-
-function StatBox({
-  label,
-  value,
-  color = 'text-gray-900',
-  useK = false
-}: {
-  label: string
-  value: string | number
-  color?: string
-  useK?: boolean
-}) {
-  const isPointValue =
-    typeof value === 'string' && /^\d/.test(value) && !value.includes('%')
-  const { display, full, capped } = isPointValue
-    ? formatPoints(value, useK)
-    : { display: String(value), full: String(value), capped: false }
-
-  return (
-    <div className="bg-gray-50/50 rounded-2xl border border-gray-100 p-1 sm:p-2 py-2 sm:py-6 flex flex-col items-center justify-center text-center transition-all overflow-visible relative">
-      <p
-        title={capped ? full : undefined}
-        style={{ position: 'relative' }}
-        className={`${display.toString().length >= 8 ? 'text-[13px] tracking-tighter [@media(min-width:375px)]:text-lg [@media(min-width:375px)]:tracking-tight' : 'text-[15px] tracking-tight [@media(min-width:375px)]:text-lg'} font-black ${color} leading-tight whitespace-nowrap w-full px-0.5`}
-      >
-        {display}
-      </p>
-      <p className="text-[8px] sm:text-[10px] text-black/40 mt-0.5 sm:mt-2 uppercase font-black tracking-widest">
-        {label}
-      </p>
     </div>
   )
 }

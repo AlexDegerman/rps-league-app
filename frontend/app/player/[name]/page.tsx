@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { fetchPlayerStats, fetchMatchesByPlayer } from '@/lib/api'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import MatchList from '@/components/MatchList'
+import MatchList from '@/components/game/MatchList'
 import type { SinglePlayerStats } from '@/types/rps'
+import { StatCard } from '@/components/game/StatCard'
 
 export default function PlayerPage() {
   const params = useParams()
@@ -75,21 +76,6 @@ export default function PlayerPage() {
           alwaysLeft
         />
       )}
-    </div>
-  )
-}
-
-interface StatCardProps {
-  label: string
-  value: number
-  color?: string
-}
-
-function StatCard({ label, value, color = 'text-gray-900' }: StatCardProps) {
-  return (
-    <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 text-center">
-      <p className={`text-2xl font-bold ${color}`}>{value}</p>
-      <p className="text-xs text-gray-500 mt-1">{label}</p>
     </div>
   )
 }

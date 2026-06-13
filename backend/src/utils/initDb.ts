@@ -65,7 +65,8 @@ export const initDb = async (): Promise<void> => {
         displayed_badges TEXT[] NOT NULL DEFAULT '{}',
         total_achievements INTEGER NOT NULL DEFAULT 0,
         has_used_auto_bet BOOLEAN NOT NULL DEFAULT false,
-        utm_source TEXT
+        utm_source TEXT,
+        recovery_tutorial_completed BOOLEAN DEFAULT false
       )
     `)
 
@@ -131,7 +132,7 @@ export const initDb = async (): Promise<void> => {
       )
     `)
 
-    // Indexes
+    // Indexes - predictions
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_predictions_user_created
         ON predictions(user_id, created_at DESC)
@@ -141,32 +142,26 @@ export const initDb = async (): Promise<void> => {
         ON predictions(created_at)
     `)
     await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_game_id
+        ON predictions(game_id)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_result_user
+        ON predictions(result, user_id)
+    `)
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_predictions_user_game
+        ON predictions(user_id, game_id)
+    `)
+
+    // Indexes - users
+    await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_users_points
         ON users(points)
     `)
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_users_peak_points
         ON users(peak_points)
-    `)
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_matches_time
-        ON matches(time)
-    `)
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_matches_game_id
-        ON matches(game_id)
-    `)
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id
-        ON user_achievements(user_id)
-    `)
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_relics_user_id
-        ON relics(user_id)
-    `)
-    await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_predictions_game_id
-        ON predictions(game_id)
     `)
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_users_laps_points
@@ -176,16 +171,37 @@ export const initDb = async (): Promise<void> => {
       CREATE INDEX IF NOT EXISTS idx_users_all_time_peak
         ON users(all_time_peak DESC)
     `)
+
+    // Indexes - matches
     await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_predictions_result_user
-        ON predictions(result, user_id)
+      CREATE INDEX IF NOT EXISTS idx_matches_time
+        ON matches(time)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_matches_time_desc
+        ON matches(time DESC)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_matches_game_id
+        ON matches(game_id)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_matches_player_a
+        ON matches(player_a_name)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_matches_player_b
+        ON matches(player_b_name)
     `)
 
-    // Unique constraint on predictions - must be enforced at DB level
-    // (resolvePrediction relies on one bet per user per game)
+    // Indexes - relics / achievements
     await pool.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS uq_predictions_user_game
-        ON predictions(user_id, game_id)
+      CREATE INDEX IF NOT EXISTS idx_relics_user_id
+        ON relics(user_id)
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id
+        ON user_achievements(user_id)
     `)
 
     logger.info('Database initialized')
