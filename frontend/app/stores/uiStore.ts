@@ -8,6 +8,7 @@ export type PopupKind =
   | 'ascension'
   | 'achievement'
   | 'relic_drop'
+  | 'global_event'
 
 export interface PopupQueueItem {
   id: string
@@ -18,10 +19,12 @@ export interface PopupQueueItem {
 
 const POPUP_PRIORITIES: Record<PopupKind, number> = {
   flash_event: 0,
+  global_event: 0,
   ascension: 1,
   relic_drop: 2,
   achievement: 3
 }
+
 
 interface UIState {
   showAscensionPrompt: boolean
@@ -78,6 +81,8 @@ interface UIState {
   setAscensionDeclinedThisSession: (v: boolean) => void
   showBonusModal: boolean
   setShowBonusModal: (v: boolean) => void
+  showGlobalActivationOverlay: boolean
+  setShowGlobalActivationOverlay: (v: boolean) => void
 
   // Input State
   isFocused: boolean
@@ -101,6 +106,7 @@ export const useUIStore = create<UIState>((set) => ({
   showWelcomeModal: false,
   showUpdateModal: false,
   showBonusModal: false,
+  showGlobalActivationOverlay: false,
   showAscensionPrompt: false,
   oracleTickerMessage: null,
   ascensionDeclinedThisSession: false,
@@ -155,6 +161,8 @@ export const useUIStore = create<UIState>((set) => ({
   setShowWelcomeModal: (v) => set({ showWelcomeModal: v }),
   setShowUpdateModal: (v) => set({ showUpdateModal: v }),
   setShowBonusModal: (v) => set({ showBonusModal: v }),
+  setShowGlobalActivationOverlay: (v) =>
+    set({ showGlobalActivationOverlay: v }),
   setShowJumpButton: (v) => set({ showJumpButton: v }),
   setShowPointsInfo: (v) => set({ showPointsInfo: v }),
   setShowPointsExplainer: (v) => set({ showPointsExplainer: v }),

@@ -39,7 +39,7 @@ export const EMPTY_MESSAGES: Record<Tab, string> = {
   daily: 'No bets placed today yet, be the first to claim the top spot!',
   weekly: 'Season just started, be the first to claim the weekly crown!',
   alltime: 'No predictors yet, jump in and make history!',
-  laps: 'No one has ascended yet. Be the first to reach 999 OVG.',
+  laps: 'No one has ascended yet. Be the first to reach 999 STR.',
   speedrun: 'No completed laps to rank yet.',
   achievements: 'No achievements earned yet. Be the first.'
 }

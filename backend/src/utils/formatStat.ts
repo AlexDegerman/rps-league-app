@@ -5,6 +5,14 @@ export const formatStat = (val: string | number | null | undefined) => {
   const b = BigInt(val.toString())
 
   const tiers = [
+    { n: 10n ** 111n, s: 'Str', name: 'Sextrigintillion' },
+    { n: 10n ** 108n, s: 'Qntr', name: 'Quintrigintillion' },
+    { n: 10n ** 105n, s: 'Qtr', name: 'Quattuortrigintillion' },
+    { n: 10n ** 102n, s: 'Ttr', name: 'Trestrigintillion' },
+    { n: 10n ** 99n, s: 'Dtr', name: 'Duotrigintillion' },
+    { n: 10n ** 96n, s: 'Utr', name: 'Untrigintillion' },
+    { n: 10n ** 93n, s: 'Trg', name: 'Trigintillion' },
+    { n: 10n ** 90n, s: 'Nvg', name: 'Novemvigintillion' },
     { n: 10n ** 87n, s: 'Ovg', name: 'Octovigintillion' },
     { n: 10n ** 84n, s: 'Nvg', name: 'Septenvigintillion' },
     { n: 10n ** 81n, s: 'Sxg', name: 'Sexvigintillion' },

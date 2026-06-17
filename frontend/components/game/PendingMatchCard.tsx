@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import type { PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatDateTime } from '@/lib/format'
+import { useGameStore } from '@/app/stores/gameStore'
 
 interface PendingMatchCardProps {
   pending: PendingMatch
@@ -44,10 +45,16 @@ export default function PendingMatchCard({
 
   const canPick = timeLeft > 0 && !prediction
 
-  const isFlash = visualMode?.startsWith('flash_')
+  const storeVisualMode = useGameStore((s) => s.visualMode)
+  const storeFestivalModeKey = useGameStore((s) => s.festivalModeKey)
 
-  const isInferno = !isFlash && winStreak >= 5
-  const isFever = !isFlash && winStreak >= 3 && winStreak < 5
+  const activeVisualMode = visualMode || storeVisualMode
+  const activeFestivalKey = festivalModeKey || storeFestivalModeKey
+
+  const modeKey = activeVisualMode || activeFestivalKey || null
+
+  const isInferno = winStreak >= 5
+  const isFever = winStreak >= 3 && winStreak < 5
 
   const modeConfig = {
     flash_lunar: {
@@ -204,6 +211,51 @@ export default function PendingMatchCard({
       label: '🔥 PICK',
       confirmBg: 'bg-orange-600'
     },
+    // Global Events
+    global_tidal_surge: {
+      border: 'border-cyan-300',
+      card: 'bg-gradient-to-b from-white to-cyan-50/40',
+      glowColor: 'rgba(34,211,238,0.07)',
+      cardAnim: 'tidal-ring',
+      dateText: 'text-cyan-600/70',
+      vsText: 'text-cyan-300',
+      btnClass: 'bg-cyan-500 hover:bg-cyan-600 text-white',
+      label: '🌊 PICK',
+      confirmBg: 'bg-cyan-500'
+    },
+    global_solar_flare: {
+      border: 'border-amber-400',
+      card: 'bg-gradient-to-b from-white to-amber-50/40',
+      glowColor: 'rgba(245,158,11,0.07)',
+      cardAnim: 'solar-ring',
+      dateText: 'text-amber-600/70',
+      vsText: 'text-amber-300',
+      btnClass: 'bg-amber-500 hover:bg-amber-600 text-white',
+      label: '☀️ PICK',
+      confirmBg: 'bg-amber-500'
+    },
+    global_cyclone_blitz: {
+      border: 'border-slate-300',
+      card: 'bg-gradient-to-b from-white to-slate-50/40',
+      glowColor: 'rgba(148,163,184,0.07)',
+      cardAnim: 'cyclone-ring',
+      dateText: 'text-slate-500/70',
+      vsText: 'text-slate-300',
+      btnClass: 'bg-slate-500 hover:bg-slate-600 text-white',
+      label: '🌀 PICK',
+      confirmBg: 'bg-slate-500'
+    },
+    global_mirage_cataclysm: {
+      border: 'border-purple-300',
+      card: 'bg-gradient-to-b from-white to-purple-50/40',
+      glowColor: 'rgba(168,85,247,0.07)',
+      cardAnim: 'mirage-ring',
+      dateText: 'text-purple-600/70',
+      vsText: 'text-amber-300',
+      btnClass: 'bg-gradient-to-r from-purple-500 to-amber-500 text-white',
+      label: '🏜️ PICK',
+      confirmBg: 'bg-amber-500'
+    },
     default: {
       border: 'border-indigo-200',
       card: 'bg-white',
@@ -218,19 +270,16 @@ export default function PendingMatchCard({
   } as const
 
   const activeKey = (
-    isFlash
-      ? visualMode
-      : (festivalModeKey ??
-        (isInferno
-          ? 'winstreak_inferno'
-          : isFever
-            ? 'winstreak_fever'
-            : 'default'))
+    modeKey
+      ? modeKey
+      : isInferno
+        ? 'winstreak_inferno'
+        : isFever
+          ? 'winstreak_fever'
+          : 'default'
   ) as keyof typeof modeConfig
 
   const cfg = modeConfig[activeKey] ?? modeConfig.default
-
-  // Components are "active" if they aren't using the default theme
   const isActive = activeKey !== 'default'
 
   const timerClass =

@@ -15,6 +15,7 @@ import ascendRouter from './routes/ascend.js'
 import festivalsRouter from './routes/festivals.js'
 import achievementsRouter from './routes/achievements.js'
 import relicRouter from './routes/relics.js'
+import globaleventsRouter from './routes/globalevents.js'
 
 const app = express()
 
@@ -51,6 +52,7 @@ app.use('/api/oracle', oracleRouter)
 app.use('/api/festivals', festivalsRouter)
 app.use('/api/achievements', achievementsRouter)
 app.use('/api/relics', relicRouter)
+app.use('/api/globalevents', globaleventsRouter)
 
 
 // Sentry Error Handler

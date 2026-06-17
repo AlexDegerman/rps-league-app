@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { formatDateTime, formatPoints, getDisplayTierClass } from '@/lib/format'
 import GemIcon from '@/components/icons/GemIcon'
 import MoveIcon from '@/components/icons/MoveIcon'
@@ -22,7 +22,168 @@ const TAB_LABELS: Record<Tab, string> = {
   multipliers: 'Best Multipliers'
 }
 
+// --- GLOBAL EVENT CONFIG (inline, mirrors what lives in lib/globalEvents) ---
+
+const GLOBAL_EVENT_CARD: Record<
+  string,
+  {
+    cardClass: string
+    label: string
+    emoji: string
+    textClass: string
+    color: string
+    echoLabel: string
+  }
+> = {
+  TIDAL_SURGE: {
+    cardClass: 'event-card-base event-card-tidal-surge',
+    label: 'Tidal Surge',
+    emoji: '🌊',
+    textClass: 'text-cyan-400',
+    color: '#22d3ee',
+    echoLabel: '+20% Echo'
+  },
+  SOLAR_FLARE: {
+    cardClass: 'event-card-base event-card-solar-flare',
+    label: 'Solar Flare',
+    emoji: '☀️',
+    textClass: 'text-amber-400',
+    color: '#f59e0b',
+    echoLabel: '2x Win'
+  },
+  CYCLONE_BLITZ: {
+    cardClass: 'event-card-base event-card-cyclone-blitz',
+    label: 'Cyclone Blitz',
+    emoji: '🌪️',
+    textClass: 'text-slate-300',
+    color: '#94a3b8',
+    echoLabel: '+1 Streak'
+  },
+  MIRAGE_CATACLYSM: {
+    cardClass: 'event-card-base event-card-mirage-cataclysm',
+    label: 'Mirage Cataclysm',
+    emoji: '🏜️',
+    textClass: 'text-purple-400',
+    color: '#a855f7',
+    echoLabel: 'Variable Echo'
+  }
+}
+
+// Card class priority: flash > global event > festival > streak > bonus tier > default
+function resolveCardClass(entry: BetHistoryEntry): string {
+  if (entry.result !== 'WIN') {
+    // Loss cards: still show global event styling if applicable
+    if (entry.globalEventType && GLOBAL_EVENT_CARD[entry.globalEventType]) {
+      return GLOBAL_EVENT_CARD[entry.globalEventType].cardClass
+    }
+    return 'bg-white border-gray-100 shadow-sm'
+  }
+
+  // Win path — priority hierarchy
+  // 1. Flash event — light theme
+  if (entry.flashEventType) {
+    const FLASH_CARD_CLASSES: Record<string, string> = {
+      LUNAR:
+        'bg-gradient-to-br from-white via-white to-blue-50/30 border-blue-300',
+      ELECTRIC:
+        'bg-gradient-to-br from-white via-white to-purple-50/30 border-purple-300',
+      CARDS:
+        'bg-gradient-to-br from-white via-white to-yellow-50/30 border-yellow-300',
+      HELLFIRE:
+        'bg-gradient-to-br from-white via-white to-red-50/30 border-red-400'
+    }
+    const cls = FLASH_CARD_CLASSES[entry.flashEventType]
+    if (cls) return cls
+  }
+
+  // 2. Global event
+  if (entry.globalEventType && GLOBAL_EVENT_CARD[entry.globalEventType]) {
+    return GLOBAL_EVENT_CARD[entry.globalEventType].cardClass
+  }
+
+  // 3. Festival — light theme matching global event style
+  if (entry.festivalType) {
+    const FESTIVAL_CARD_CLASSES: Record<string, string> = {
+      SPARK:
+        'bg-gradient-to-br from-white via-white to-purple-50/30 border-purple-400',
+      GHOST:
+        'bg-gradient-to-br from-white via-white to-teal-50/30 border-teal-400',
+      SAFEGUARD:
+        'bg-gradient-to-br from-white via-white to-slate-50/30 border-slate-400',
+      RESONANCE:
+        'bg-gradient-to-br from-white via-white to-yellow-50/30 border-yellow-400',
+      SURGE:
+        'bg-gradient-to-br from-white via-white to-cyan-50/30 border-cyan-400',
+      VAULT:
+        'bg-gradient-to-br from-white via-white to-indigo-50/30 border-indigo-500',
+      FEVER:
+        'bg-gradient-to-br from-white via-white to-orange-50/30 border-orange-400',
+      SANGUINE:
+        'bg-gradient-to-br from-white via-white to-red-50/30 border-red-700'
+    }
+    const cls = FESTIVAL_CARD_CLASSES[entry.festivalType]
+    if (cls) return cls
+  }
+
+  // 4. Win streak
+  if (entry.streakMult >= 5)
+    return 'card-inferno bg-gradient-to-br from-white via-white to-orange-50/30 border-orange-400'
+  if (entry.streakMult >= 2)
+    return 'card-fever bg-gradient-to-br from-white via-white to-green-50/30 border-green-400'
+
+  // 5. Bonus tier
+  if (entry.bonusTier && entry.bonusMultiplier > 0) {
+    const tierKey = (
+      entry.bonusTier in BONUS_TIER_STYLES ? entry.bonusTier : 'COMMON'
+    ) as BonusTier
+    return BONUS_TIER_STYLES[tierKey].cardClass
+  }
+
+  return 'bg-white border-gray-100 shadow-sm'
+}
+
 // --- SUB-COMPONENTS ---
+
+const GLOBAL_EVENT_SHIMMER: Record<string, string> = {
+  TIDAL_SURGE: 'global-shimmer-tidal',
+  SOLAR_FLARE: 'global-shimmer-solar',
+  CYCLONE_BLITZ: 'global-shimmer-cyclone',
+  MIRAGE_CATACLYSM: 'global-shimmer-mirage'
+}
+
+function GlobalEventBadge({
+  globalEventType,
+  globalEchoAmount,
+  isWin
+}: {
+  globalEventType: string | null
+  globalEchoAmount: string | null
+  isWin: boolean
+}) {
+  if (!globalEventType || !isWin) return null
+  const cfg = GLOBAL_EVENT_CARD[globalEventType]
+  if (!cfg) return null
+
+  const hasEcho = globalEchoAmount && BigInt(globalEchoAmount) > 0n
+  const shimmerClass = GLOBAL_EVENT_SHIMMER[globalEventType] ?? ''
+
+  return (
+    <div className="flex items-center justify-center relative z-30">
+      <div
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded border font-black text-[8px] uppercase tracking-widest shadow-sm"
+        style={{ borderColor: cfg.color, backgroundColor: `${cfg.color}18` }}
+      >
+        <span className="text-[10px] leading-none">{cfg.emoji}</span>
+        <span className={shimmerClass}>{cfg.label}</span>
+        {hasEcho && (
+          <span className="opacity-70 ml-0.5" style={{ color: cfg.color }}>
+            +{formatPoints(globalEchoAmount!).display}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
 
 function RelicMultBadge({ relicMultiplier }: { relicMultiplier: number }) {
   if (relicMultiplier <= 1) return null
@@ -37,7 +198,7 @@ function RelicMultBadge({ relicMultiplier }: { relicMultiplier: number }) {
     >
       <span>{isSoul ? '👁️' : '⚡'}</span>
       <span>
-        {isSoul ? 'Soul' : 'Kinetic'} ×{relicMultiplier}
+        {isSoul ? 'Soul' : 'Kinetic'} x{relicMultiplier}
       </span>
     </div>
   )
@@ -45,19 +206,17 @@ function RelicMultBadge({ relicMultiplier }: { relicMultiplier: number }) {
 
 function StreakBadge({ streakMult }: { streakMult: number }) {
   if (streakMult <= 1) return null
-
   const isInferno = streakMult >= 5
   const isFever = streakMult >= 2 && streakMult < 5
-
   return (
     <div className="flex items-center justify-center relative z-30">
       <div
         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md border font-black text-[8px] uppercase tracking-widest shadow-lg transition-all ${
           isInferno
-            ? 'card-inferno bg-orange-950/90 border-orange-500'
+            ? 'bg-orange-950/80 border-orange-400'
             : isFever
-              ? 'card-fever bg-green-950/90 border-green-500'
-              : 'bg-gray-950/90 border-gray-500'
+              ? 'bg-green-950/80 border-green-400'
+              : 'bg-gray-950/80 border-gray-500'
         }`}
       >
         <span
@@ -87,11 +246,15 @@ function FlashEventBadge({
   if (!flashEventType) return null
   const cfg = EVENT_CARD[flashEventType]
   if (!cfg) return null
-
   return (
     <div className="flex items-center justify-center relative z-30">
       <div
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border font-black text-[8px] uppercase tracking-widest shadow-sm ${flashEventType === 'LUNAR' ? 'bg-slate-900 border-blue-400 text-blue-100' : ''} ${flashEventType === 'ELECTRIC' ? 'bg-purple-950 border-purple-400 text-purple-100' : ''} ${flashEventType === 'CARDS' ? 'bg-yellow-900 border-yellow-400 text-yellow-100' : ''} ${flashEventType === 'HELLFIRE' ? 'bg-red-950 border-red-500 text-red-100' : ''}`}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border font-black text-[8px] uppercase tracking-widest shadow-sm
+          ${flashEventType === 'LUNAR' ? 'bg-slate-900 border-blue-400 text-blue-100' : ''}
+          ${flashEventType === 'ELECTRIC' ? 'bg-purple-950 border-purple-400 text-purple-100' : ''}
+          ${flashEventType === 'CARDS' ? 'bg-yellow-900 border-yellow-400 text-yellow-100' : ''}
+          ${flashEventType === 'HELLFIRE' ? 'bg-red-950 border-red-500 text-red-100' : ''}
+        `}
       >
         <span className="text-[10px] leading-none">{cfg.emoji}</span>
         <span>{cfg.label}</span>
@@ -111,13 +274,11 @@ function TotalMultiplierHeader({
   isWin: boolean
 }) {
   const val = Number(totalMultiplier || 0)
-
   if (!isWin || val <= 1.01) return null
-
   return (
     <div className="flex items-center justify-center relative z-30">
       <span className="text-[9px] px-2 py-0.5 font-black uppercase tracking-widest rounded border-2 border-purple-500 bg-white text-purple-600 shadow-md">
-        {val.toFixed(1)}× TOTAL
+        {val.toFixed(1)}x TOTAL
       </span>
     </div>
   )
@@ -138,10 +299,14 @@ function BonusBadge({
       className={`badge-aura-wrapper ${auraClass} inline-flex items-center relative z-30`}
     >
       <span
-        className={`text-[9px] px-2 py-0.5 font-black uppercase tracking-tight rounded border shadow-sm ${tier === 'LEGENDARY' ? 'text-yellow-600 border-yellow-400 bg-white' : 'bg-white border-black/10 text-gray-950'}`}
+        className={`text-[9px] px-2 py-0.5 font-black uppercase tracking-tight rounded border shadow-sm ${
+          tier === 'LEGENDARY'
+            ? 'text-yellow-600 border-yellow-400 bg-white'
+            : 'bg-white border-black/10 text-gray-950'
+        }`}
       >
         <span className={style.color}>{style.label}</span>{' '}
-        {multiplier.toFixed(1)}×
+        {multiplier.toFixed(1)}x
       </span>
     </div>
   )
@@ -157,15 +322,83 @@ function FestivalBadge({
   isWin: boolean
 }) {
   if (!isWin || !type) return null
-
+  const festKey = type === 'FEVER' ? 'FEVER_FESTIVAL' : type
+  const cfg = EVENT_CARD[festKey]
+  if (!cfg) return null
   return (
     <div className="flex items-center justify-center relative z-30">
       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-cyan-400 bg-cyan-50 font-black text-[8px] uppercase tracking-widest shadow-sm text-cyan-700">
-        <span>⚡</span>
+        <span>{cfg.emoji}</span>
         <span>
           {type} {mult > 1 ? `x${mult.toFixed(0)}` : 'FESTIVAL'}
         </span>
       </div>
+    </div>
+  )
+}
+
+function BadgeRow({ entry }: { entry: BetHistoryEntry }) {
+  const isWin = entry.result === 'WIN'
+
+  const badges: React.ReactNode[] = []
+
+  if (isWin && entry.flashEventType) {
+    badges.push(
+      <FlashEventBadge
+        key="flash"
+        flashEventType={entry.flashEventType}
+        flashMult={entry.flashMult ?? 1}
+      />
+    )
+  }
+
+  if (isWin && !entry.flashEventType && entry.globalEventType) {
+    badges.push(
+      <GlobalEventBadge
+        key="global"
+        globalEventType={entry.globalEventType}
+        globalEchoAmount={entry.globalEchoAmount ?? null}
+        isWin={isWin}
+      />
+    )
+  }
+
+  if (isWin && !entry.flashEventType && entry.festivalType) {
+    badges.push(
+      <FestivalBadge
+        key="festival"
+        type={entry.festivalType}
+        mult={entry.festivalMultiplier}
+        isWin={isWin}
+      />
+    )
+  }
+
+  if (entry.streakMult > 1) {
+    badges.push(<StreakBadge key="streak" streakMult={entry.streakMult} />)
+  }
+
+  if (entry.bonusTier && entry.bonusMultiplier > 0) {
+    badges.push(
+      <BonusBadge
+        key="bonus"
+        tier={entry.bonusTier}
+        multiplier={entry.bonusMultiplier}
+      />
+    )
+  }
+
+  if (entry.relicMultiplier > 1) {
+    badges.push(
+      <RelicMultBadge key="relic" relicMultiplier={entry.relicMultiplier} />
+    )
+  }
+
+  if (badges.length === 0) return null
+
+  return (
+    <div className="flex flex-col items-center gap-1 mt-1.5 relative z-30">
+      {badges}
     </div>
   )
 }
@@ -186,19 +419,7 @@ function BetRow({
   const pickedA = entry.pick === entry.playerAName
 
   const amountAnimationClass = getDisplayTierClass(absGainLoss, stylePreference)
-  const tierKey = (
-    entry.bonusTier && entry.bonusTier in BONUS_TIER_STYLES
-      ? entry.bonusTier
-      : 'COMMON'
-  ) as BonusTier
-  const flashCfg = entry.flashEventType
-    ? EVENT_CARD[entry.flashEventType]
-    : null
-  const cardClass = isWin
-    ? flashCfg
-      ? flashCfg.cardClass
-      : (BONUS_TIER_STYLES[tierKey]?.cardClass ?? '')
-    : 'bg-white border-gray-100 shadow-sm'
+  const cardClass = resolveCardClass(entry)
 
   return (
     <li
@@ -234,32 +455,12 @@ function BetRow({
           isWin={isWin}
         />
 
-        <div className="flex gap-2 flex-wrap justify-center mt-1.5 relative z-30">
-          <RelicMultBadge relicMultiplier={entry.relicMultiplier} />
-          <StreakBadge streakMult={entry.streakMult} />
-
-          <BonusBadge
-            tier={entry.bonusTier}
-            multiplier={entry.bonusMultiplier}
-          />
-          {isWin && entry.flashEventType && (
-            <FlashEventBadge
-              flashEventType={entry.flashEventType}
-              flashMult={entry.flashMult ?? 1}
-            />
-          )}
-          <FestivalBadge
-            type={entry.festivalType}
-            mult={entry.festivalMultiplier}
-            isWin={isWin}
-          />
-        </div>
+        <BadgeRow entry={entry} />
 
         <div className="flex items-center justify-center relative py-2.5 pl-4">
           <span className="absolute left-0 text-xl font-black text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)] z-30 select-none">
             {isWin ? '+' : isLoss ? '-' : ''}
           </span>
-
           <div className="flex items-center gap-1.5 relative">
             {(() => {
               const { display, full, capped } = formatPoints(absGainLoss)
@@ -286,7 +487,7 @@ function BetRow({
         </div>
       </div>
 
-      <div className="mt-2.5 flex items-center justify-center gap-3 py-1.5 border-t border-gray-100/40 relative z-20">
+      <div className="mt-2.5 flex items-center justify-center gap-3 py-1.5 pb-4 border-t border-gray-100/40 relative z-20">
         <div className="flex items-center gap-1.5 min-w-0">
           <MoveIcon
             move={entry.playerAPlayed}
@@ -319,18 +520,15 @@ function BetRow({
   )
 }
 
-// --- MAIN COMPONENT ---
+// --- FETCH HOOK ---
 
-function useTabFetchFn(userId: string | null, tab: Tab,) {
+function useTabFetchFn(userId: string | null, tab: Tab) {
   return useCallback(
     async (page: number) => {
       if (!userId) return { matches: [], total: 0, hasMore: false }
-      
-      const data = await fetchUserBetHistory(userId, page, tab)
 
-      if (!data) {
-        return { matches: [], total: 0, hasMore: false }
-      }
+      const data = await fetchUserBetHistory(userId, page, tab)
+      if (!data) return { matches: [], total: 0, hasMore: false }
 
       const predMap = new Map<string, PredictionRecord>(
         (data.predictions as unknown as PredictionRecord[]).map((p) => [
@@ -361,18 +559,20 @@ function useTabFetchFn(userId: string | null, tab: Tab,) {
           relicMultiplier: Number(pred?.relicMultiplier ?? 1),
           totalMultiplier: Number(pred?.totalMultiplier ?? 1),
           festivalMultiplier: Number(pred?.festivalMultiplier ?? 1),
-          festivalType: pred?.festivalType ?? null
+          festivalType: pred?.festivalType ?? null,
+          // Global event fields
+          globalEventType: pred?.globalEventType ?? null,
+          globalEchoAmount: pred?.globalEchoAmount ?? null
         }
       })
 
-      return {
-        matches: entries as unknown as Match[],
-        hasMore: data.hasMore
-      }
+      return { matches: entries as unknown as Match[], hasMore: data.hasMore }
     },
     [userId, tab]
   )
 }
+
+// --- MAIN COMPONENT ---
 
 export default function BetHistory({
   userId,

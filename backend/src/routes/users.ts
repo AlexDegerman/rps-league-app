@@ -5,9 +5,8 @@ import { logger } from '../utils/logger.js'
 
 const router = Router()
 
-// 999 OVG. To raise cap: update exponent to match new max tier.
-// OVG = 10^87, so 999 OVG = 999 * 10^87.
-const ASCENSION_THRESHOLD = 999n * 10n ** 87n
+// 999 STR. To raise cap: update exponent to match new max tier.
+export const ASCENSION_THRESHOLD = 999n * 10n ** 111n
 
 // POST /api/users/recovery-tutorial-complete
 router.post('/recovery-tutorial-complete', async (req, res) => {

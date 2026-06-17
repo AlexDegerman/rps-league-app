@@ -54,7 +54,7 @@ export default function LiveStatsTicker() {
 
     return (
       <div
-        className={`rounded-b-xl py-1.5 px-3 flex items-center gap-2 shadow-sm relative overflow-hidden
+        className={`rounded-b-xl py-1.5 px-3 flex items-center gap-2 shadow-sm relative z-10 overflow-hidden
       bg-gray-50/80 border-x border-b border-gray-100
       ${modeKey ? `event-bg-${modeKey} event-side-${modeKey}` : ''} 
     `}

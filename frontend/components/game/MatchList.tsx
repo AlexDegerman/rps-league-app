@@ -4,7 +4,57 @@ import Link from 'next/link'
 import { formatDateTime, getPlayerResult, resultColor } from '@/lib/format'
 import type { Match, MatchRowProps, PredictionRecord } from '@/types/rps'
 import MoveIcon from '@/components/icons/MoveIcon'
-import { MODE_CONFIG } from '@/lib/constants'
+import { useGameStore } from '@/app/stores/gameStore'
+import { MODE_CONFIG as BASE_MODE_CONFIG } from '@/lib/constants'
+
+// Integrated configuration keys for global event compatibility
+const MODE_CONFIG = {
+  ...BASE_MODE_CONFIG,
+  global_tidal_surge: {
+    border: 'border-cyan-300',
+    cardAnim: 'tidal-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-cyan-50/20',
+    glowColor: 'rgba(34,211,238,0.08)',
+    dateText: 'text-cyan-500/60',
+    vsText: 'text-cyan-200',
+    winnerBadge: 'bg-cyan-500',
+    winnerText: 'text-cyan-700 font-black',
+    youWon: 'bg-cyan-500'
+  },
+  global_solar_flare: {
+    border: 'border-amber-300',
+    cardAnim: 'solar-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-amber-50/20',
+    glowColor: 'rgba(245,158,11,0.08)',
+    dateText: 'text-amber-500/60',
+    vsText: 'text-amber-200',
+    winnerBadge: 'bg-amber-500',
+    winnerText: 'text-amber-700 font-black',
+    youWon: 'bg-amber-500'
+  },
+  global_cyclone_blitz: {
+    border: 'border-slate-300',
+    cardAnim: 'cyclone-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-slate-50/20',
+    glowColor: 'rgba(148,163,184,0.08)',
+    dateText: 'text-slate-500/60',
+    vsText: 'text-slate-300',
+    winnerBadge: 'bg-slate-500',
+    winnerText: 'text-slate-700 font-black',
+    youWon: 'bg-slate-500'
+  },
+  global_mirage_cataclysm: {
+    border: 'border-purple-300',
+    cardAnim: 'mirage-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-purple-50/20',
+    glowColor: 'rgba(168,85,247,0.06)',
+    dateText: 'text-purple-400/60',
+    vsText: 'text-amber-200',
+    winnerBadge: 'bg-amber-500',
+    winnerText: 'text-amber-700 font-black',
+    youWon: 'bg-amber-500'
+  }
+}
 
 const getMatchWinner = (match: Match): string => {
   const { playerA, playerB } = match
@@ -30,25 +80,29 @@ const MatchRow = ({
   const right = isFlipped ? match.playerA : match.playerB
   const winner = getMatchWinner(match)
 
-  // Only apply themed styling to rows where the user has a prediction
+  const storeVisualMode = useGameStore((s) => s.visualMode)
+  const storeFestivalModeKey = useGameStore((s) => s.festivalModeKey)
+
+  const activeVisualMode = visualMode || storeVisualMode
+  const activeFestivalKey = festivalModeKey || storeFestivalModeKey
+
+  const modeKey = activeVisualMode || activeFestivalKey || null
+
   const hasPrediction = !!prediction
-  const isFlash = visualMode?.startsWith('flash_') ?? false
   const isInferno = winStreak >= 5
   const isFever = winStreak >= 3 && winStreak < 5
 
   const activeKey = (
-    isFlash
-      ? visualMode
-      : (festivalModeKey ??
-        (isInferno
-          ? 'winstreak_inferno'
-          : isFever
-            ? 'winstreak_fever'
-            : 'default'))
+    modeKey
+      ? modeKey
+      : isInferno
+        ? 'winstreak_inferno'
+        : isFever
+          ? 'winstreak_fever'
+          : 'default'
   ) as keyof typeof MODE_CONFIG
 
   const cfg = MODE_CONFIG[activeKey] || MODE_CONFIG.default
-
   const isActive = hasPrediction && activeKey !== 'default'
 
   return (
@@ -157,7 +211,6 @@ const MatchRow = ({
         </div>
       </div>
 
-      {/* Prediction result badge - own row, aligned to whichever side the pick was */}
       {prediction?.result && (
         <div
           className={`flex mt-1 relative z-10 ${

@@ -148,7 +148,7 @@ A post-result escalation layer that triggers only on high-tier relic procs. It i
 ---
 
 ### x2 Slam
-- Large orange “×2” drops in with a weighted fall animation
+- Large orange “x2” drops in with a weighted fall animation
 - Brief impact freeze frame locks the result state
 - Subtle screen shake on landing to emphasize force
 - Multiplier stays visible throughout the payout climb

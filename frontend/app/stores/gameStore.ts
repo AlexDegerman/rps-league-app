@@ -6,7 +6,9 @@ import type {
   FestivalModeKey,
   VisualMode,
   EventTheme,
-  AchievementNotif
+  AchievementNotif,
+  GlobalEventType,
+  GlobalEventPhase
 } from '@/types/rps'
 
 interface GameState {
@@ -41,6 +43,19 @@ interface GameState {
   clearFestival: () => void
   syncFestivalModeKey: () => void
 
+  // Global Event State
+  activeGlobalEvent: GlobalEventType | null
+  globalEventPhase: GlobalEventPhase | null
+  globalEventActiveAt: number | null // warning → active transition timestamp
+  globalEventEndsAt: number | null
+  setGlobalEventWarning: (
+    type: GlobalEventType,
+    activeAt: number,
+    endsAt: number
+  ) => void
+  setGlobalEventActive: (type: GlobalEventType, endsAt: number) => void
+  clearGlobalEvent: () => void
+
   // Event & Visual State
   activeFlashEvent: string | null
   setActiveFlashEvent: (type: string | null) => void
@@ -62,10 +77,11 @@ interface GameState {
   now: number
   tickNow: () => void
 
-  // Achievement Toast Queuea
+  // Achievement Toast Queue
   achievementQueue: AchievementNotif[]
   pushAchievement: (a: AchievementNotif) => void
   shiftAchievement: () => void
+  clearAllAchievements: () => void
 }
 
 // Helper for consistent mapping
@@ -100,6 +116,10 @@ export const useGameStore = create<GameState>((set) => ({
   flashExpiresAt: null,
   flashEventJustTriggered: null,
   achievementQueue: [],
+  activeGlobalEvent: null,
+  globalEventPhase: null,
+  globalEventActiveAt: null,
+  globalEventEndsAt: null,
 
   // Actions - Connection
   setBackendReady: (v) => set({ backendReady: v }),
@@ -195,6 +215,31 @@ export const useGameStore = create<GameState>((set) => ({
       festivalModeKey: null
     }),
 
+  // Actions - Global Event
+  setGlobalEventWarning: (type, activeAt, endsAt) =>
+    set({
+      activeGlobalEvent: type,
+      globalEventPhase: 'warning',
+      globalEventActiveAt: activeAt,
+      globalEventEndsAt: endsAt
+    }),
+
+  setGlobalEventActive: (type, endsAt) =>
+    set({
+      activeGlobalEvent: type,
+      globalEventPhase: 'active',
+      globalEventActiveAt: null,
+      globalEventEndsAt: endsAt
+    }),
+
+  clearGlobalEvent: () =>
+    set({
+      activeGlobalEvent: null,
+      globalEventPhase: null,
+      globalEventActiveAt: null,
+      globalEventEndsAt: null
+    }),
+
   // Actions - Server Time
   setServerOffset: (offset) => set({ serverOffset: offset }),
   tickNow: () =>
@@ -212,7 +257,12 @@ export const useGameStore = create<GameState>((set) => ({
         state.flashExpiresAt &&
         syncedNow >= state.flashExpiresAt
 
-      if (festivalExpired || flashExpired) {
+      const globalExpired =
+        state.activeGlobalEvent &&
+        state.globalEventEndsAt &&
+        syncedNow >= state.globalEventEndsAt
+
+      if (festivalExpired || flashExpired || globalExpired) {
         return {
           now: currentTime,
           ...(festivalExpired
@@ -230,6 +280,14 @@ export const useGameStore = create<GameState>((set) => ({
                 flashBuffRemaining: 0,
                 liveTheme: null
               }
+            : {}),
+          ...(globalExpired
+            ? {
+                activeGlobalEvent: null,
+                globalEventPhase: null,
+                globalEventActiveAt: null,
+                globalEventEndsAt: null
+              }
             : {})
         }
       }
@@ -240,5 +298,6 @@ export const useGameStore = create<GameState>((set) => ({
   pushAchievement: (a) =>
     set((s) => ({ achievementQueue: [...s.achievementQueue, a] })),
   shiftAchievement: () =>
-    set((s) => ({ achievementQueue: s.achievementQueue.slice(1) }))
+    set((s) => ({ achievementQueue: s.achievementQueue.slice(1) })),
+  clearAllAchievements: () => set({ achievementQueue: [] })
 }))

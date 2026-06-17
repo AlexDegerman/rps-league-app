@@ -46,7 +46,7 @@ export const parseShorthand = (val: string): bigint => {
   if (!clean) return 0n
 
   const match = clean.match(
-    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg|uvg|dvg|tvg|qvg|qiv|svg|spv|ovg)?$/
+    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg|uvg|dvg|tvg|qvg|qiv|svg|spv|ovg|nvg|trg|utr|dtr|ttr|qtr|qntr|str)?$/
   )
   if (!match) return 0n
 
@@ -81,7 +81,15 @@ export const parseShorthand = (val: string): bigint => {
     qiv: 10n ** 78n,
     svg: 10n ** 81n,
     spv: 10n ** 84n,
-    ovg: 10n ** 87n
+    ovg: 10n ** 87n,
+    nvg: 10n ** 90n,
+    trg: 10n ** 93n,
+    utr: 10n ** 96n,
+    dtr: 10n ** 99n,
+    ttr: 10n ** 102n,
+    qtr: 10n ** 105n,
+    qntr: 10n ** 108n,
+    str: 10n ** 111n
   }
 
   if (suffix && multipliers[suffix]) {
@@ -127,6 +135,14 @@ export const formatPoints = (
   const sign = bigN < 0n ? '-' : ''
 
   const tiers = [
+    { threshold: 10n ** 111n, symbol: 'Str' },
+    { threshold: 10n ** 108n, symbol: 'Qntr' },
+    { threshold: 10n ** 105n, symbol: 'Qtr' },
+    { threshold: 10n ** 102n, symbol: 'Ttr' },
+    { threshold: 10n ** 99n, symbol: 'Dtr' },
+    { threshold: 10n ** 96n, symbol: 'Utr' },
+    { threshold: 10n ** 93n, symbol: 'Trg' },
+    { threshold: 10n ** 90n, symbol: 'Nvg' },
     { threshold: 10n ** 87n, symbol: 'Ovg' },
     { threshold: 10n ** 84n, symbol: 'Spv' },
     { threshold: 10n ** 81n, symbol: 'Svg' },
@@ -196,6 +212,14 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   const absN = bigN < 0n ? -bigN : bigN
 
   const names = [
+    { t: 111, n: 'Sextrigintillion' },
+    { t: 108, n: 'Quintrigintillion' },
+    { t: 105, n: 'Quattuortrigintillion' },
+    { t: 102, n: 'Trestrigintillion' },
+    { t: 99, n: 'Duotrigintillion' },
+    { t: 96, n: 'Untrigintillion' },
+    { t: 93, n: 'Trigintillion' },
+    { t: 90, n: 'Novemvigintillion' },
     { t: 87, n: 'Octovigintillion' },
     { t: 84, n: 'Septenvigintillion' },
     { t: 81, n: 'Sexvigintillion' },
@@ -317,7 +341,11 @@ export const getEventColor = (key: string, alpha: number) => {
     cards: `rgba(236,201,75,${alpha})`,
     hellfire: `rgba(220,38,38,${alpha})`,
     fever: `rgba(34,197,94,${alpha})`,
-    inferno: `rgba(249,115,22,${alpha})`
+    inferno: `rgba(249,115,22,${alpha})`,
+    tidal_surge:      `rgba(34,211,238,${alpha})`,
+    solar_flare:      `rgba(245,158,11,${alpha})`,
+    cyclone_blitz:    `rgba(148,163,184,${alpha})`,
+    mirage_cataclysm: `rgba(168,85,247,${alpha})`,
   }
   return colors[key] ?? `rgba(150,150,150,${alpha})`
 }

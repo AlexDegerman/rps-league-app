@@ -1,3 +1,5 @@
+'use client'
+
 import GemIcon from '@/components/icons/GemIcon'
 import {
   formatPoints,
@@ -30,14 +32,14 @@ const FESTIVAL_WIN_BADGE: Record<
   string,
   { name: string; effect: string; color: string }
 > = {
-  SURGE: { name: 'SURGE', effect: '3× all wins', color: '#22d3ee' },
+  SURGE: { name: 'SURGE', effect: '2x all wins', color: '#22d3ee' },
   RESONANCE: {
     name: 'RESONANCE',
     effect: 'bonus guaranteed',
     color: '#ecc94b'
   },
   SPARK: { name: 'SPARK', effect: 'flash event active', color: '#a855f7' },
-  VAULT: { name: 'VAULT', effect: 'relic rate ×2', color: '#748ffc' },
+  VAULT: { name: 'VAULT', effect: 'relic rate x2', color: '#748ffc' },
   GHOST: { name: 'GHOST', effect: 'win echo +20%', color: '#4dd0c4' },
   SANGUINE: {
     name: 'SANGUINE',
@@ -55,6 +57,35 @@ const FESTIVAL_LOSS_BADGE = {
   FEVER: { name: 'FEVER', effect: 'streak loss protected', color: '#f97316' }
 }
 
+const GLOBAL_EVENT_WIN_BADGE: Record<
+  string,
+  { name: string; effect: string; color: string; textClass: string }
+> = {
+  TIDAL_SURGE: {
+    name: 'TIDAL SURGE',
+    effect: '+20% echo',
+    color: '#22d3ee',
+    textClass: 'text-cyan-300'
+  },
+  SOLAR_FLARE: {
+    name: 'SOLAR FLARE',
+    effect: '2x win',
+    color: '#fb923c',
+    textClass: 'text-orange-300'
+  },
+  CYCLONE_BLITZ: {
+    name: 'CYCLONE BLITZ',
+    effect: '+1 streak',
+    color: '#a3e635',
+    textClass: 'text-lime-300'
+  },
+  MIRAGE_CATACLYSM: {
+    name: 'MIRAGE CATACLYSM',
+    effect: '',
+    color: '#c084fc',
+    textClass: 'text-purple-300'
+  }
+}
 const FESTIVAL_CONFETTI_COLORS: Record<string, string[]> = {
   GHOST: ['#4dd0c4', '#b2f5ea', '#ffffff', '#0d9488', '#99f6e4'],
   SAFEGUARD: ['#94a3b8', '#cbd5e1', '#ffffff', '#64748b', '#e2e8f0'],
@@ -136,7 +167,17 @@ function BottomConfetti({
   )
 }
 
-function GhostEcho({ amount }: { amount: bigint }) {
+function EchoBubble({
+  amount,
+  side,
+  colorClass,
+  label
+}: {
+  amount: bigint
+  side: 'left' | 'right'
+  colorClass: string
+  label: string
+}) {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
@@ -146,16 +187,30 @@ function GhostEcho({ amount }: { amount: bigint }) {
 
   if (!show || amount === 0n) return null
 
+  const sideStyle =
+    side === 'left'
+      ? 'left-[-45%] sm:left-[-55%] -rotate-12'
+      : 'right-[-45%] sm:right-[-55%] rotate-12'
+
   return (
-    <div className="absolute pointer-events-none ghost-echo-wrap">
-      <span className="ghost-echo text-3xl sm:text-4xl font-black tabular-nums tracking-tighter text-teal-300">
+    <div
+      className={`absolute pointer-events-none ghost-echo-wrap flex flex-col items-center select-none ${sideStyle}`}
+    >
+      <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 mb-1">
+        {label}
+      </span>
+      <span
+        className={`ghost-echo text-2xl sm:text-3xl font-black tabular-nums tracking-tighter ${colorClass}`}
+        style={{
+          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))'
+        }}
+      >
         +{formatPoints(amount).display}
       </span>
     </div>
   )
 }
 
-// ─── Relic Slam Overlay ───────────────────────────────────────────────────────
 function RelicSlamOverlay({
   show,
   multiplier,
@@ -187,7 +242,6 @@ function RelicSlamOverlay({
     const diff = finalAmount > base ? finalAmount - base : 0n
     setDisplayAmount(base)
 
-    // Small delay so the slam visual lands before ticker starts
     const t = setTimeout(() => {
       if (!isMounted) return
       setPhase('tick')
@@ -224,7 +278,6 @@ function RelicSlamOverlay({
     <div
       className={`fixed inset-x-0 top-[15%] flex flex-col items-center pointer-events-none z-999 gap-2 ${phase === 'slam' ? 'animate-light-shake' : ''}`}
     >
-      {/* Multiplier badge */}
       <div
         className={`slam-drop-in font-black tabular-nums ${style.color} ${glowClass}`}
         style={{
@@ -238,10 +291,9 @@ function RelicSlamOverlay({
             : '2px rgba(255,220,50,0.3)'
         }}
       >
-        ×{multiplier}
+        x{multiplier}
       </div>
 
-      {/* Result card */}
       <div
         className={`transition-all duration-500 ${phase === 'tick' ? 'opacity-100 scale-100' : 'opacity-100 scale-95'}`}
       >
@@ -273,7 +325,6 @@ function RelicSlamOverlay({
   )
 }
 
-// ─── Main Export ──────────────────────────────────────────────────────────────
 export default function ResultAnimOverlay({
   resultAnim,
   streakMult,
@@ -310,10 +361,11 @@ export default function ResultAnimOverlay({
       playJackpot()
     }, 2400)
 
-        return () => {
-          if (slamTimerRef.current) clearTimeout(slamTimerRef.current)
-        }
-  }, [willSlam, resultAnim]) // eslint-disable-line react-hooks/exhaustive-deps
+    return () => {
+      if (slamTimerRef.current) clearTimeout(slamTimerRef.current)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [willSlam, resultAnim])
 
   const slamPropsRef = useRef({
     multiplier: 2 as 2 | 3,
@@ -349,6 +401,30 @@ export default function ResultAnimOverlay({
               festivalType as keyof typeof FESTIVAL_LOSS_BADGE
             ]
           : null
+      : null
+
+  const globalEventBadge =
+    isWin && resultAnim.globalEventType
+      ? (() => {
+          const entry = GLOBAL_EVENT_WIN_BADGE[resultAnim.globalEventType]
+          if (!entry) return null
+          let effect = entry.effect
+          if (
+            resultAnim.globalEventType === 'MIRAGE_CATACLYSM' &&
+            resultAnim.globalEchoAmount != null &&
+            resultAnim.globalEchoAmount > 0n
+          ) {
+            const base = resultAnim.amount - resultAnim.globalEchoAmount
+            const pct =
+              base > 0n
+                ? Math.round(
+                    Number((resultAnim.globalEchoAmount * 100n) / base)
+                  )
+                : 0
+            effect = `+${pct}% echo`
+          }
+          return { ...entry, effect }
+        })()
       : null
 
   const isGhostActive = activeFestival && festivalType === 'GHOST' && isWin
@@ -446,9 +522,52 @@ export default function ResultAnimOverlay({
           </div>
         )}
 
+        {globalEventBadge && (
+          <div
+            className="mb-2 px-3 py-1 rounded-lg border-2 font-black text-[10px] uppercase tracking-widest text-center animate-in zoom-in duration-200"
+            style={{
+              background: `color-mix(in srgb, ${globalEventBadge.color} 20%, #000000 80%)`,
+              borderColor: globalEventBadge.color,
+              boxShadow: `0 0 12px ${globalEventBadge.color}60`
+            }}
+          >
+            <span style={{ color: globalEventBadge.color }}>
+              {globalEventBadge.name}
+            </span>
+            <span className="text-white/40 mx-1.5">·</span>
+            <span style={{ color: `${globalEventBadge.color}dd` }}>
+              {globalEventBadge.effect}
+            </span>
+          </div>
+        )}
+
         <div className="relative result-number-wrap">
+          {/* Ghost Festival Echo */}
           {isGhostActive && resultAnim.ghostEchoAmount && (
-            <GhostEcho amount={resultAnim.ghostEchoAmount} />
+            <EchoBubble
+              amount={resultAnim.ghostEchoAmount}
+              side="left"
+              colorClass="text-teal-600"
+              label="Ghost Echo"
+            />
+          )}
+
+          {/* Global Event Echoes */}
+          {resultAnim.globalEchoAmount && resultAnim.globalEventType && (
+            <EchoBubble
+              amount={resultAnim.globalEchoAmount}
+              side="right"
+              colorClass={
+                resultAnim.globalEventType === 'TIDAL_SURGE'
+                  ? 'text-sky-600'
+                  : 'text-amber-600'
+              }
+              label={
+                resultAnim.globalEventType === 'TIDAL_SURGE'
+                  ? 'Tidal Echo'
+                  : 'Mirage Echo'
+              }
+            />
           )}
 
           {(willSlam || slamActive) && (
@@ -531,7 +650,7 @@ export default function ResultAnimOverlay({
                           : `${bonusTierStyle.color} ${bonusTierStyle.bg} border-black/5`
                     }`}
                   >
-                    {visual.label} {bonusMultDisplay}×
+                    {visual.label} {bonusMultDisplay}x
                   </span>
                 </div>
                 {!isWin && (

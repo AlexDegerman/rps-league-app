@@ -36,7 +36,7 @@ describe('Analysis Route', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockMatches.mockResolvedValue({ matches: [], total: 0, hasMore: false })
+    mockMatches.mockResolvedValue({ matches: [], hasMore: false })
     mockDb.mockResolvedValue(
       mockDbResponse([
         { total_volume: '1000', win_count: '5', total_count: '10' }

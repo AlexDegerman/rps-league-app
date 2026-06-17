@@ -203,6 +203,53 @@ export const initDb = async (): Promise<void> => {
       CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id
         ON user_achievements(user_id)
     `)
+    // Participation counters (incremented via POST /api/global-events/participated)
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS global_event_participations   INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS tidal_surge_participations    INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS solar_flare_participations    INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS cyclone_blitz_participations  INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS mirage_cataclysm_participations INTEGER NOT NULL DEFAULT 0`
+    )
+
+    // Streak-during-event peaks (TIDE: 3-consec in Tidal, CYCL: 10-streak in Cyclone)
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS max_streak_during_tidal_surge   INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS max_streak_during_cyclone_blitz INTEGER NOT NULL DEFAULT 0`
+    )
+
+    // One-way latch booleans for standalone Meta + hidden Misc achievements
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_flare_inferno_combo   BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_mirage_high_echo      BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_flash_plus_global_win BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_dry_mirage            BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_eye_of_storm          BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_prismatic_wave        BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_thermal_fusion        BOOLEAN NOT NULL DEFAULT false`
+    )
 
     logger.info('Database initialized')
   } catch (err) {

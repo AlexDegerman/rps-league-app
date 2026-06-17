@@ -12,6 +12,7 @@ import {
   getActiveFestival,
   getFestivalLockoutRemaining
 } from '../services/festivalService.js'
+import { getGlobalEventState, startGlobalEventScheduler } from '../services/globalEventService.js'
 
 const router = Router()
 
@@ -47,6 +48,11 @@ router.get('/festival-state', (req, res) => {
     lockoutRemaining
   })
 })
+
+router.get('/global-event-state', (_req, res) => {
+  res.json(getGlobalEventState())
+})
+
 
 type SSEClient = (event: string, data: string) => void
 const clients = new Set<SSEClient>()
@@ -108,6 +114,7 @@ router.get('/', (req, res) => {
       broadcast
     )
     startDemoFestivalScheduler(broadcast)
+    startGlobalEventScheduler(broadcast)
   }
 
   req.on('close', () => {

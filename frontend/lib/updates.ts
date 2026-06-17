@@ -6,6 +6,18 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '2.0',
+    label: 'The Global Events Update',
+    notes: [
+      'Global Event Orchestrator: Introduces server-wide synchronized events managed by the backend via SSE, following a structured Cooldown, Warning, and Active phase lifecycle.',
+      'Oracle Countdown & Warning System: Triggers telemetry warning broadcasts with custom interface timers and spoken counts at 60 and 30 seconds remaining.',
+      'Elemental Modifiers: Adds four events: Tidal Surge (+20% payout), Cyclone Blitz (+1 win streak speed), Solar Flare (2x win multiplier), and Mirage Cataclysm (15-50% random phantom payouts).',
+      'Eight Animated Number Tiers: Integrates themed tiers spanning Trigintillion to Sextrigintillion, featuring dynamic canvas effects, particle systems, and CSS-driven atmospheric animations.',
+      'Thirty-Six New Achievements: Expands long-term progression goals, player statistics tracking, and new badge collections across all element archetypes.',
+      'Dynamic UI Transformation: Applies real-time CSS shaders, ticker displays, and card transformations to synchronize the visual identity with the active event element.'
+    ]
+  },
+  {
     version: '1.15',
     label: 'The Oracle Voice Update',
     notes: [
@@ -17,7 +29,6 @@ export const UPDATES: Update[] = [
       'Oracle Voice on by default: New and returning users have Oracle Voice enabled automatically. It can be toggled off from the audio controls popover at any time.'
     ]
   },
-
   {
     version: '1.14',
     label: 'The Onboarding Update',

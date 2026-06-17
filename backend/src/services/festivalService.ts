@@ -6,8 +6,6 @@ import {
   refillAllFlashEvents
 } from './flashEventService.js'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type FestivalType =
   | 'SPARK'
   | 'GHOST'
@@ -27,8 +25,6 @@ export interface FestivalState {
 }
 
 type Broadcast = (event: string, data: string) => void
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const FESTIVAL_DURATIONS_MS: Record<FestivalType, number | null> = {
   SPARK: 45_000,
@@ -89,19 +85,17 @@ const pickDemoFestival = (): FestivalType => {
   return DEMO_FESTIVAL_WEIGHTS[DEMO_FESTIVAL_WEIGHTS.length - 1]!.type
 }
 
-// ─── Module State ─────────────────────────────────────────────────────────────
 
 let _activeFestival: FestivalState | null = null
 let _lockoutUntil: number = 0
 let _lastPlayerFestivalAt: number = 0
 let _demoFestivalTimer: ReturnType<typeof setTimeout> | null = null
+let _festivalsEnabled = true
 
 const _userBonusStreak = new Map<string, number>()
 const _userFlashStreak = new Map<string, number>()
 const _userLossStreak = new Map<string, number>()
 const _userGuaranteedBonus = new Map<string, number>()
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const randomItem = <T>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)]!
@@ -142,7 +136,6 @@ export const buildFestivalSpeech = (
 
   return `The catalyst... ${triggeredBy}... invokes... ${festivalType}... Festival.`
 }
-// ─── Getters ──────────────────────────────────────────────────────────────────
 
 export const getActiveFestival = (): FestivalState | null => {
   if (!_activeFestival) return null
@@ -163,7 +156,11 @@ export const isFestivalLocked = (): boolean => {
   return _activeFestival !== null || Date.now() < _lockoutUntil
 }
 
-// ─── Festival Launch ──────────────────────────────────────────────────────────
+export const areFestivalsEnabled = (): boolean => _festivalsEnabled
+
+export const setFestivalsEnabled = (enabled: boolean): void => {
+  _festivalsEnabled = enabled
+}
 
 interface LaunchMeta {
   isDemo?: boolean
@@ -178,6 +175,7 @@ const launchFestival = (
   broadcast: Broadcast,
   meta: LaunchMeta = {}
 ): boolean => {
+  if (!_festivalsEnabled) return false 
   if (isFestivalLocked()) return false
 
   const isDemo = meta.isDemo ?? false
@@ -259,7 +257,6 @@ const launchFestival = (
   return true
 }
 
-// ─── Per-user Tracking ────────────────────────────────────────────────────────
 
 export const recordBonusForUser = (
   userId: string,
@@ -307,7 +304,6 @@ export const getLossStreakForUser = (userId: string): number =>
 export const resetLossStreakForUser = (userId: string): void =>
   void _userLossStreak.set(userId, 0)
 
-// ─── Trigger Checks ───────────────────────────────────────────────────────────
 
 export const checkAndTriggerFestival = (
   userId: string,
@@ -324,6 +320,7 @@ export const checkAndTriggerFestival = (
   },
   broadcast: Broadcast
 ): void => {
+  if (!_festivalsEnabled) return
   if (isFestivalLocked()) return
 
   const {
@@ -503,7 +500,6 @@ export const triggerSafeguardFestival = (
     triggerUserId
   })
 
-// ─── Demo Scheduler ───────────────────────────────────────────────────────────
 
 const scheduleDemoFestival = (broadcast: Broadcast): void => {
   const delay =
@@ -516,7 +512,7 @@ const scheduleDemoFestival = (broadcast: Broadcast): void => {
       _lastPlayerFestivalAt > 0 &&
       now - _lastPlayerFestivalAt < PLAYER_FESTIVAL_QUIET_MS
 
-    if (!isFestivalLocked() && !playerFestivalRecent) {
+    if (_festivalsEnabled && !isFestivalLocked() && !playerFestivalRecent) {
       const type = pickDemoFestival()
       launchFestival(type, 'Oracle', broadcast, { isDemo: true })
     }

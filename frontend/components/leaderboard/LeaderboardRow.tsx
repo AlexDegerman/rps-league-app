@@ -92,7 +92,7 @@ export function LeaderboardRow({
                     <div className="w-16 text-gray-600 font-bold">
                       {entry.fastestLapBets != null
                         ? `${entry.fastestLapBets}b`
-                        : '—'}
+                        : '-'}
                     </div>
                   )}
                   <div
@@ -171,7 +171,7 @@ export function LeaderboardRow({
             <td className="hidden min-[600px]:table-cell px-3 py-3 text-center font-bold text-gray-600">
               {entry.fastestLapBets != null
                 ? `${entry.fastestLapBets} bets`
-                : '—'}
+                : '-'}
             </td>
           )}
           <td className="hidden min-[600px]:table-cell px-3 py-3 text-right font-bold">

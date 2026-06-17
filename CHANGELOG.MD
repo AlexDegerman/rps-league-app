@@ -2,6 +2,31 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [2.0] - Global Events & Elemental Tiers
+
+### Added
+
+* **Global Event Orchestrator:** Implemented a backend-driven event system synchronized across all connected players via Server-Sent Events (SSE). Events transition through a three-phase lifecycle:
+  * **Event Cooldown:** A 10 to 30-minute randomized interval between active events.
+  * **Warning Phase:** A 1.5 to 3-minute period featuring server-wide telemetry warning broadcasts, interface countdown timers, custom Oracle warning vocalizations, and spoken alerts at 60 and 30 seconds.
+  * **Active Phase:** A 1 to 3-minute blitz window applying real-time gameplay modifiers, card visual transformations, dynamic CSS interface shaders, and live marquee telemetry.
+* **Elemental Gameplay Modifiers:** Added four unique global event states with weighted selection distribution:
+  * **Tidal Surge (30% weight):** Activates the *Win Echo Protocol*, awarding an additional +20% signal payout echo to successful predictions.
+  * **Cyclone Blitz (25% weight):** Activates the *Streak Turbocurrent*, incrementing win streaks by +2 instead of +1 on successful predictions.
+  * **Solar Flare (20% weight):** All wins gain a 2.0x payout multiplier while active.
+  * **Mirage Cataclysm (20% weight):** Activates the *Variable Echo Field*, granting winning predictions a randomized phantom payout between 15% and 50%.
+* **Themed Animated Number Tiers:** Integrated eight high-end animated number styles aligned with the global event themes, arranged here in descending order from highest threshold:
+  * **Phantasm Core (Sextrigintillion - Str - 10^111):** Smoked amethyst typography under a royal crown with gold-purple shimmers and concentric shockwaves.
+  * **Dune Illusion (Quintrigintillion - Qntr - 10^108):** Neon-gold typography with diagonal wind ripples, unstable mirage shadows, and sandstorm blasts.
+  * **Zenith Supernova (Quattuortrigintillion - Qtr - 10^105):** Star-white and lavender gradients pulsing beneath rotating lens flares and glowing plasma sparks.
+  * **Solar Prominence (Trestrigintillion - Ttr - 10^102):** Golden plasma typography under a descending volumetric light cone feeding a five-peak animated solar crown.
+  * **Razor Tempest (Duotrigintillion - Dtr - 10^99):** Slate-and-emerald chrome typography with a static 3D shadow, serrated green mechanical tracks, needle-thin vertical sparks, and slowly bobbing spiky icons.
+  * **Gale-Force Aero (Untrigintillion - Utr - 10^96):** Liquid platinum-silver text with trailing smoked-slate wind plumes, a seamless horizontal parallax stream of wind threads, and tiny silver condensation droplets.
+  * **Leviathan Maelstrom (Trigintillion - Trg - 10^93):** Teal and emerald flowing gradients beneath animated cyan currents, featuring a water vortex and wave motion with white foam.
+  * **Abyssal Trench (Novemvigintillion - Nvg - 10^90):** Deep midnight-blue typography with neon cyan outlines, sapphire glow effects, a pulsing aura, and falling sapphire spores.
+* **Expanded Progression:** Added 36 new achievements dedicated to long-term progression, statistics tracking, and element-specific badge collections.
+* **Dynamic CSS Shaders:** Themed tickers, visual card overrides, and full-viewport CSS visual modifications adapt instantly to reflect the active event.
+
 ## [1.15] - Oracle Voice System
  
 ### Added

@@ -60,22 +60,42 @@ const EDGE_CONFIG: Record<string, { radial: string; shadow: string }> = {
   winstreak_fever: {
     radial: 'rgba(34,197,94,0.15)',
     shadow: 'rgba(34,197,94,0.2)'
+  },
+
+  // Global Events
+  global_tidal_surge: {
+    radial: 'rgba(34,211,238,0.2)',
+    shadow: 'rgba(34,211,238,0.35)'
+  },
+  global_solar_flare: {
+    radial: 'rgba(245,158,11,0.22)',
+    shadow: 'rgba(245,158,11,0.35)'
+  },
+  global_cyclone_blitz: {
+    radial: 'rgba(148,163,184,0.2)',
+    shadow: 'rgba(148,163,184,0.35)'
+  },
+  global_mirage_cataclysm: {
+    radial: 'rgba(168,85,247,0.18)',
+    shadow: 'rgba(217,119,6,0.3)'
   }
 }
-
 
 interface EdgeGlowProps {
   visualMode: string | null
 }
 
 export default function EdgeGlow({ visualMode }: EdgeGlowProps) {
-  const festivalModeKey = useGameStore((s) => s.festivalModeKey)
+  const storeVisualMode = useGameStore((s) => s.visualMode)
+  const storeFestivalModeKey = useGameStore((s) => s.festivalModeKey)
 
-  const isFlash = visualMode?.startsWith('flash_')
-  const key = isFlash ? visualMode : (festivalModeKey ?? visualMode)
+  const activeVisualMode = visualMode || storeVisualMode
+  const activeFestivalKey = storeFestivalModeKey
 
-  if (!key) return null
-  const e = EDGE_CONFIG[key]
+  const modeKey = activeVisualMode || activeFestivalKey || null
+
+  if (!modeKey) return null
+  const e = EDGE_CONFIG[modeKey]
 
   if (!e) return null
 

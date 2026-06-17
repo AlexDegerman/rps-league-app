@@ -13,6 +13,7 @@ export const CATEGORY_ORDER = [
   'Cards',
   'OracleProphecy',
   'Festival',
+  'Cosmic',
   'Meta',
   'Collector',
   'Miscellaneous',
@@ -22,7 +23,6 @@ export const CATEGORY_ORDER = [
 export type CategoryKey = (typeof CATEGORY_ORDER)[number]
 
 // Categories hidden from all users until they personally earn one.
-// Users cannot see OTHER hidden achievements they haven't earned yet.
 export const CATEGORY_HIDDEN = new Set(['Miscellaneous'])
 
 export const CATEGORY_ICONS: Record<string, string> = {
@@ -40,6 +40,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
   Meta: '🎯',
   Miscellaneous: '🎲',
   Festival: '🎪',
+  Cosmic: '🪐',
   Collector: '📖',
   Rainbow: '🌈'
 }
@@ -59,6 +60,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   Meta: 'Meta & Special',
   Miscellaneous: 'Miscellaneous',
   Festival: 'Festival Catalyst',
+  Cosmic: 'Cosmic Events',
   Collector: 'The Grand Archive',
   Rainbow: 'God King'
 }
@@ -160,6 +162,24 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     icon: '♾️',
     rarity: 'LEGENDARY'
   },
+  '1TRG': {
+    code: '1TRG',
+    name: 'Trigintillion Sovereign',
+    icon: '🌀',
+    rarity: 'LEGENDARY'
+  },
+  '1TTR': {
+    code: '1TTR',
+    name: 'Cosmic Transcendence',
+    icon: '☄️',
+    rarity: 'MYTHICAL'
+  },
+  '1STR': {
+    code: '1STR',
+    name: 'Absolute Zenith',
+    icon: '🌟',
+    rarity: 'MYTHICAL'
+  },
   '999X': {
     code: '999X',
     name: 'The Singularity',
@@ -213,21 +233,6 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     rarity: 'LEGENDARY'
   },
   OMNI: { code: 'OMNI', name: 'Omniscient', icon: '🌌', rarity: 'MYTHICAL' },
-  // Meta
-  PITY: { code: 'PITY', name: 'Pity King', icon: '🩹', rarity: 'COMMON' },
-  FND: { code: 'FND', name: 'Founder', icon: '⭐', rarity: 'RARE' },
-  SLAY: { code: 'SLAY', name: 'God-Killer', icon: '👺', rarity: 'MYTHICAL' },
-  AUTO: { code: 'AUTO', name: 'Autopilot', icon: '⚙️', rarity: 'RARE' },
-  DREM: { code: 'DREM', name: 'Fever Dream', icon: '💤', rarity: 'MYTHICAL' },
-  STRM: { code: 'STRM', name: 'Storm Chaser', icon: '🌪️', rarity: 'MYTHICAL' },
-  COLMAX: { code: 'COLMAX', name: 'Omnivore', icon: '🌟', rarity: 'MYTHICAL' },
-  // Miscellaneous (hidden)
-  REBL: { code: 'REBL', name: 'The Rebel', icon: '🎭', rarity: 'RARE' },
-  // Total achievement collection
-  COL10: { code: 'COL10', name: 'Curious', icon: '📖', rarity: 'COMMON' },
-  COL25: { code: 'COL25', name: 'Dedicated', icon: '📚', rarity: 'RARE' },
-  COL40: { code: 'COL40', name: 'Completionist', icon: '🗂️', rarity: 'EPIC' },
-  COL55: { code: 'COL55', name: 'Archivist', icon: '🏛️', rarity: 'LEGENDARY' },
   // Festival
   FES1: { code: 'FES1', name: 'Spark Initiator', icon: '🔋', rarity: 'COMMON' },
   FES2: { code: 'FES2', name: 'System Catalyst', icon: '🌀', rarity: 'RARE' },
@@ -259,18 +264,123 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
   },
   NET4: { code: 'NET4', name: 'Matrix Core', icon: '🕸️', rarity: 'LEGENDARY' },
   MESH: { code: 'MESH', name: 'Overmesh', icon: '🌐', rarity: 'MYTHICAL' },
+  // Cosmic - Global Events Track
+  GLO1: { code: 'GLO1', name: 'Event Horizon', icon: '🌌', rarity: 'COMMON' },
+  GLO2: { code: 'GLO2', name: 'Phenomenon', icon: '🌍', rarity: 'RARE' },
+  GLO3: { code: 'GLO3', name: 'Aether Drifter', icon: '🌠', rarity: 'EPIC' },
+  GLO4: { code: 'GLO4', name: 'Nexus Walker', icon: '🌀', rarity: 'LEGENDARY' },
+  GLOB: {
+    code: 'GLOB',
+    name: 'Force of Nature',
+    icon: '💫',
+    rarity: 'MYTHICAL'
+  },
+  // Cosmic - Tidal Surge Track
+  TSU1: { code: 'TSU1', name: 'Neap Tide', icon: '🌊', rarity: 'COMMON' },
+  TSU2: { code: 'TSU2', name: 'Spring Tide', icon: '💧', rarity: 'RARE' },
+  TSU3: { code: 'TSU3', name: 'Abyssal Drift', icon: '🐳', rarity: 'EPIC' },
+  TSU4: { code: 'TSU4', name: 'Maelstrom', icon: '🌀', rarity: 'LEGENDARY' },
+  TSU5: {
+    code: 'TSU5',
+    name: 'Tsunami Sovereign',
+    icon: '👑',
+    rarity: 'MYTHICAL'
+  },
+  // Cosmic - Solar Flare Track
+  SFL1: { code: 'SFL1', name: 'Corona', icon: '🔅', rarity: 'COMMON' },
+  SFL2: { code: 'SFL2', name: 'Solar Wind', icon: '💨', rarity: 'RARE' },
+  SFL3: { code: 'SFL3', name: 'Prominence', icon: '🔥', rarity: 'EPIC' },
+  SFL4: {
+    code: 'SFL4',
+    name: 'Coronal Ejection',
+    icon: '☄️',
+    rarity: 'LEGENDARY'
+  },
+  SFL5: { code: 'SFL5', name: 'Heliosphere', icon: '☀️', rarity: 'MYTHICAL' },
+  // Cosmic - Cyclone Blitz Track
+  CBL1: { code: 'CBL1', name: 'Gale', icon: '🍃', rarity: 'COMMON' },
+  CBL2: { code: 'CBL2', name: 'Squall', icon: '🌬️', rarity: 'RARE' },
+  CBL3: { code: 'CBL3', name: 'Tempest', icon: '🌩️', rarity: 'EPIC' },
+  CBL4: {
+    code: 'CBL4',
+    name: 'Eye of the Storm',
+    icon: '👁',
+    rarity: 'LEGENDARY'
+  },
+  CBL5: { code: 'CBL5', name: 'Zephyr King', icon: '👑', rarity: 'MYTHICAL' },
+  // Cosmic - Mirage Cataclysm Track
+  MCA1: { code: 'MCA1', name: 'Haze', icon: '🌫️', rarity: 'COMMON' },
+  MCA2: { code: 'MCA2', name: 'Shimmer', icon: '✨', rarity: 'RARE' },
+  MCA3: { code: 'MCA3', name: 'Sandstorm', icon: '🏜️', rarity: 'EPIC' },
+  MCA4: {
+    code: 'MCA4',
+    name: 'Oasis Phantom',
+    icon: '🌴',
+    rarity: 'LEGENDARY'
+  },
+  MCA5: {
+    code: 'MCA5',
+    name: 'Master of Illusion',
+    icon: '🔮',
+    rarity: 'MYTHICAL'
+  },
+  // Meta
+  PITY: { code: 'PITY', name: 'Pity King', icon: '🩹', rarity: 'COMMON' },
+  FND: { code: 'FND', name: 'Founder', icon: '⭐', rarity: 'RARE' },
+  AUTO: { code: 'AUTO', name: 'Autopilot', icon: '⚙️', rarity: 'RARE' },
+  SLAY: { code: 'SLAY', name: 'God-Killer', icon: '👺', rarity: 'MYTHICAL' },
+  DREM: { code: 'DREM', name: 'Fever Dream', icon: '💤', rarity: 'MYTHICAL' },
+  STRM: { code: 'STRM', name: 'Storm Chaser', icon: '🌪️', rarity: 'MYTHICAL' },
+  TIDE: { code: 'TIDE', name: 'Riding the Wave', icon: '🌊', rarity: 'EPIC' },
+  SOL: { code: 'SOL', name: 'Solar Maximum', icon: '☀️', rarity: 'EPIC' },
+  CYCL: { code: 'CYCL', name: 'Vortex Velocity', icon: '🌪️', rarity: 'EPIC' },
+  MIR: { code: 'MIR', name: 'Fata Morgana', icon: '🏜️', rarity: 'LEGENDARY' },
+  SYZY: {
+    code: 'SYZY',
+    name: 'Cosmic Alignment',
+    icon: '🪐',
+    rarity: 'MYTHICAL'
+  },
+  CATA: {
+    code: 'CATA',
+    name: 'Cataclysm Surveyor',
+    icon: '🔱',
+    rarity: 'MYTHICAL'
+  },
+  // Collector
+  COL10: { code: 'COL10', name: 'Curious', icon: '📖', rarity: 'COMMON' },
+  COL25: { code: 'COL25', name: 'Dedicated', icon: '📚', rarity: 'RARE' },
+  COL45: { code: 'COL45', name: 'Completionist', icon: '🗂️', rarity: 'EPIC' },
+  COL70: { code: 'COL70', name: 'Archivist', icon: '🏛️', rarity: 'LEGENDARY' },
+  COLMAX: { code: 'COLMAX', name: 'Omnivore', icon: '🌟', rarity: 'MYTHICAL' },
+  // Miscellaneous (hidden)
+  REBL: { code: 'REBL', name: 'The Rebel', icon: '🎭', rarity: 'RARE' },
+  DRYM: { code: 'DRYM', name: 'Dry Mirage', icon: '🏜️', rarity: 'RARE' },
+  EYEC: { code: 'EYEC', name: 'Eye of the Storm', icon: '🛡️', rarity: 'RARE' },
+  PRIS: { code: 'PRIS', name: 'Prismatic Wave', icon: '💎', rarity: 'EPIC' },
+  FUSN: {
+    code: 'FUSN',
+    name: 'Thermal Fusion',
+    icon: '☀️',
+    rarity: 'MYTHICAL'
+  },
   // Rainbow
-  KING: { code: 'KING', name: 'God King', icon: '👑', rarity: 'RAINBOW' }
+  KING: { code: 'KING', name: 'God King', icon: '👑', rarity: 'RAINBOW' },
+  COSM: {
+    code: 'COSM',
+    name: 'Cosmic Sovereign',
+    icon: '🪐',
+    rarity: 'RAINBOW'
+  }
 }
 
-// Chain order per category (low → high tier).
-// Chained categories: badge selector shows only the highest earned.
-// Standalone categories (Meta, Misc, Rainbow): all earned shown individually.
+// Chained tracks: only show the highest tier earned.
+// Standalone tracks (Meta, Misc, Rainbow): show all earned badges.
 export const CATEGORY_CHAINS: Record<string, string[]> = {
   Combatants: ['50W', '100W', '250W', '500W', 'GLAD'],
   Momentum: ['STK3', 'HOT', 'FIRE', 'BST', 'ZEN'],
   Prestige: ['LAP1', 'LAP5', '10LP', '25LP', 'LORD'],
-  Dimensional: ['1TRL', '1QAD', '1VIG', '1OVG', '999X'],
+  Dimensional: ['1TRL', '1QAD', '1VIG', '1OVG', '1TRG', '1TTR', '1STR', '999X'],
   Multiplier: ['10X', '50X', 'NUKE', 'NOVA', 'BOOM'],
   Reliquary: ['5RL', '10RL', 'MUSE', 'FULL', 'TRI'],
   Lunar: ['LUN1', 'LUN2', 'LUN3', 'LUN4', 'LUNA'],
@@ -278,9 +388,6 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
   Hellfire: ['HEL1', 'HEL2', 'HEL3', 'HEL4', 'HELL'],
   Cards: ['CRD1', 'CRD2', 'CRD3', 'CRD4', 'CARD'],
   OracleProphecy: ['ORC3', 'ORC7', 'ORCL', 'CHRON', 'OMNI'],
-  Meta: ['PITY', 'FND', 'AUTO', 'SLAY', 'DREM', 'STRM'],
-  Miscellaneous: ['REBL'],
-  Collector: ['COL10', 'COL25', 'COL40', 'COL55', 'COLMAX'],
   Festival: [
     'FES1',
     'FES2',
@@ -293,15 +400,34 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
     'NET4',
     'MESH'
   ],
-  Rainbow: ['KING']
+  CosmicGlobal: ['GLO1', 'GLO2', 'GLO3', 'GLO4', 'GLOB'],
+  CosmicTidal: ['TSU1', 'TSU2', 'TSU3', 'TSU4', 'TSU5'],
+  CosmicSolar: ['SFL1', 'SFL2', 'SFL3', 'SFL4', 'SFL5'],
+  CosmicCyclone: ['CBL1', 'CBL2', 'CBL3', 'CBL4', 'CBL5'],
+  CosmicMirage: ['MCA1', 'MCA2', 'MCA3', 'MCA4', 'MCA5'],
+  Collector: ['COL10', 'COL25', 'COL45', 'COL70', 'COLMAX'],
+  Meta: [
+    'PITY',
+    'FND',
+    'AUTO',
+    'SLAY',
+    'DREM',
+    'STRM',
+    'TIDE',
+    'SOL',
+    'CYCL',
+    'MIR',
+    'SYZY',
+    'CATA'
+  ],
+  Miscellaneous: ['REBL', 'DRYM', 'EYEC', 'PRIS', 'FUSN'],
+  Rainbow: ['KING', 'COSM']
 }
 
 const STANDALONE_CATEGORIES = new Set(['Meta', 'Miscellaneous', 'Rainbow'])
 
 /**
- * For chained categories: returns only the highest-tier earned badge.
- * For standalone categories: returns all earned badges individually.
- * Used to populate the badge selector in the profile achievement menu.
+ * Resolves visible selections for the user badge showcases.
  */
 export function getHighestEarnedPerCategory(earned: Set<string>): BadgeData[] {
   const result: BadgeData[] = []
@@ -349,7 +475,10 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   '1QAD': 'Reach 1 Quadrillion',
   '1VIG': 'Reach 1 Vigintillion',
   '1OVG': 'Reach 1 Octovigintillion',
-  '999X': 'Reach 999 Octovigintillion',
+  '1TRG': 'Reach 1 Trigintillion',
+  '1TTR': 'Reach 1 Trestrigintillion',
+  '1STR': 'Reach 1 Sextrigintillion',
+  '999X': 'Reach 999 Sextrigintillion',
   '10X': 'Reach x10 Multiplier',
   '50X': 'Reach x30 Multiplier',
   NUKE: 'Reach x60 Multiplier',
@@ -391,12 +520,22 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   SLAY: 'Win with x100+ multiplier',
   DREM: 'Trigger back-to-back Flash Events on consecutive matches',
   STRM: 'Experience all 4 Flash Event themes in one session',
-  REBL: 'Bet against the Oracle',
+  TIDE: 'Win 3 consecutive predictions during a single active Tidal Surge window',
+  SOL: 'Win a match during a Solar Flare while on an Inferno Win Streak (5+ wins)',
+  CYCL: 'Reach a 10-win streak during a Cyclone Blitz',
+  MIR: 'Roll a 45%+ Echo Bonus on a win during a Mirage Cataclysm',
+  SYZY: 'Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously',
+  CATA: 'Participate 15 times in each of the four separate Global Events',
   COL10: 'Earn 10 Achievements',
   COL25: 'Earn 25 Achievements',
-  COL40: 'Earn 40 Achievements',
-  COL55: 'Earn 55 Achievements',
-  COLMAX: 'Earn 68 Achievements',
+  COL45: 'Earn 45 Achievements',
+  COL70: 'Earn 70 Achievements',
+  COLMAX: 'Earn 105 Achievements',
+  REBL: 'Bet against the Oracle',
+  DRYM: 'Roll the minimum Echo Bonus (15%) on a win during Mirage Cataclysm',
+  EYEC: 'Have your win streak shielded by the Buffer Module during Cyclone Blitz',
+  PRIS: 'Win a match during Tidal Surge with the Prismatic Shard equipped',
+  FUSN: 'Trigger a Soul of the Machine Mythic Slam on a win during a Solar Flare',
   FES1: 'Trigger 1 Festival',
   FES2: 'Trigger 5 Festivals',
   FES3: 'Trigger 15 Festivals',
@@ -407,5 +546,31 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   NET3: 'Participate in 30 Festivals',
   NET4: 'Participate in 60 Festivals',
   MESH: 'Participate in 100 Festivals',
-  KING: '1000 Wins + 50 Laps + 3 Mythical Relics'
+  GLO1: 'Participate in 1 Global Event',
+  GLO2: 'Participate in 10 Global Events',
+  GLO3: 'Participate in 25 Global Events',
+  GLO4: 'Participate in 50 Global Events',
+  GLOB: 'Participate in 100 Global Events',
+  TSU1: 'Participate in 3 Tidal Surges',
+  TSU2: 'Participate in 7 Tidal Surges',
+  TSU3: 'Participate in 15 Tidal Surges',
+  TSU4: 'Participate in 25 Tidal Surges',
+  TSU5: 'Participate in 50 Tidal Surges',
+  SFL1: 'Participate in 3 Solar Flares',
+  SFL2: 'Participate in 7 Solar Flares',
+  SFL3: 'Participate in 15 Solar Flares',
+  SFL4: 'Participate in 25 Solar Flares',
+  SFL5: 'Participate in 50 Solar Flares',
+  CBL1: 'Participate in 3 Cyclone Blitzes',
+  CBL2: 'Participate in 7 Cyclone Blitzes',
+  CBL3: 'Participate in 15 Cyclone Blitzes',
+  CBL4: 'Participate in 25 Cyclone Blitzes',
+  CBL5: 'Participate in 50 Cyclone Blitzes',
+  MCA1: 'Participate in 3 Mirage Cataclysms',
+  MCA2: 'Participate in 7 Mirage Cataclysms',
+  MCA3: 'Participate in 15 Mirage Cataclysms',
+  MCA4: 'Participate in 25 Mirage Cataclysms',
+  MCA5: 'Participate in 50 Mirage Cataclysms',
+  KING: '1000 Wins + 50 Laps + 3 Mythical Relics',
+  COSM: 'Participate 50 times in each of the 4 Global Events'
 }

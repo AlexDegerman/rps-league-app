@@ -107,6 +107,20 @@ Real players (predictors) with persistent accounts and progression.
 | `joined_date` | INT8 | Account creation timestamp (ms) |
 | `recovery_code` | TEXT (UQ) | Account recovery token |
 | `recovery_tutorial_completed` | BOOLEAN | Whether user has completed the recovery code tutorial |
+| `global_event_participations` | INT4 | Total global events participated in (incremented client-side via POST `/api/global-events/participated`) |
+| `tidal_surge_participations` | INT4 | Total Tidal Surge events participated in |
+| `solar_flare_participations` | INT4 | Total Solar Flare events participated in |
+| `cyclone_blitz_participations` | INT4 | Total Cyclone Blitz events participated in |
+| `mirage_cataclysm_participations` | INT4 | Total Mirage Cataclysm events participated in |
+| `max_streak_during_tidal_surge` | INT4 | Peak consecutive win streak achieved during a Tidal Surge event |
+| `max_streak_during_cyclone_blitz` | INT4 | Peak consecutive win streak achieved during a Cyclone Blitz event |
+| `had_flare_inferno_combo` | BOOLEAN | Standalone Meta achievement: Unlocked Flare Inferno combo |
+| `had_mirage_high_echo` | BOOLEAN | Standalone Meta achievement: Unlocked Mirage High Echo |
+| `had_flash_plus_global_win` | BOOLEAN | Standalone Meta achievement: Unlocked Flash + Global win combo |
+| `had_dry_mirage` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Dry Mirage |
+| `had_eye_of_storm` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Eye of the Storm |
+| `had_prismatic_wave` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Prismatic Wave |
+| `had_thermal_fusion` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Thermal Fusion |
 
 ---
 
@@ -199,7 +213,7 @@ Operational control for feedback system abuse prevention.
 ---
 
 ### Notes
-- `short_id` is a unique public identifier (`nanoid(10)`), but not used as a foreign key — all internal relationships rely on `user_id`
+- `short_id` is a unique public identifier (`nanoid(10)`), but not used as a foreign key, all internal relationships rely on `user_id`
 - `points` enforces a 100,000 floor at the application layer
 - BigInt values are stringified at the API boundary and parsed back on the frontend
 
@@ -219,7 +233,7 @@ Operational control for feedback system abuse prevention.
 | :--- | :--- | :--- |
 | `predictions` | `user_id, created_at DESC` | Composite index for fast user history + activity feeds |
 | `predictions` | `created_at` | Time-windowed leaderboard aggregation |
-| `predictions` | `game_id` | Fast resolution lookup — `resolvePrediction` fetches all bets per game on every match result |
+| `predictions` | `game_id` | Fast resolution lookup, `resolvePrediction` fetches all bets per game on every match result |
 | `predictions` | `result, user_id` | Achievement checker win/loss sweep queries |
 | `predictions` | `user_id, game_id` (UNIQUE) | Enforces one bet per user per game; relied on by `resolvePrediction` |
 | `users` | `points` | Global leaderboard sorting |
@@ -227,11 +241,11 @@ Operational control for feedback system abuse prevention.
 | `users` | `all_time_peak DESC` | All-time leaderboard tab sorting |
 | `users` | `laps, points DESC` | Speedrun/ascension leaderboard filtering and ordering |
 | `matches` | `time` | Fast retrieval of recent matches (ASC) |
-| `matches` | `time DESC` | Fast retrieval of recent matches (DESC) — used by match history queries |
+| `matches` | `time DESC` | Fast retrieval of recent matches (DESC) used by match history queries |
 | `matches` | `game_id` | Fast lookup for match resolution and joins |
 | `matches` | `player_a_name` | Bot stats and by-player filtering |
 | `matches` | `player_b_name` | Bot stats and by-player filtering |
-| `relics` | `user_id` | FK not auto-indexed by Postgres — all relic lookups are `WHERE user_id = $1` |
+| `relics` | `user_id` | FK not auto-indexed by Postgres, all relic lookups are `WHERE user_id = $1` |
 | `user_achievements` | `user_id` | Fast achievement lookup per user |
 
 ---
@@ -264,7 +278,7 @@ Operational control for feedback system abuse prevention.
 ## 📊 Leaderboards
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| GET | `/api/leaderboard/unified` | Unified leaderboard — supports `?tab=daily\|weekly\|alltime\|laps\|speedrun\|achievements` with `sort=` and `dir=` params |
+| GET | `/api/leaderboard/unified` | Unified leaderboard, supports `?tab=daily\|weekly\|alltime\|laps\|speedrun\|achievements` with `sort=` and `dir=` params |
 | GET | `/api/leaderboard/historical` | Historical leaderboard (`?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD`) |
 | GET | `/api/leaderboard/today` | Today's leaderboard snapshot |
 
@@ -277,7 +291,7 @@ Operational control for feedback system abuse prevention.
 | POST | `/api/users/update-nickname` | Upsert user with new nickname (creates row if missing) |
 | POST | `/api/users/update-linkedin` | Set or clear LinkedIn URL and badge visibility |
 | PATCH | `/api/users/style-preference` | Update point display style preference |
-| POST | `/api/users/ascend` | Prestige reset — resets points to 200k, increments `laps`, updates speedrun record, triggers SURGE festival |
+| POST | `/api/users/ascend` | Prestige reset, resets points to 200k, increments `laps`, updates speedrun record, triggers SURGE festival |
 | POST | `/api/users/recovery-tutorial-complete` | Mark recovery tutorial as completed for a user (`{ userId }`) |
 | GET | `/api/users/profile/:shortId` | Public profile data (points, streak, laps, all-time peak, LinkedIn) |
 | GET | `/api/users/recovery/:userId` | Fetch recovery code for the authenticated user |
@@ -335,11 +349,11 @@ Operational control for feedback system abuse prevention.
 ## 🤖 Analytics & Stats
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| POST | `/api/analysis` | AI Oracle query — Gemini-powered RAG with league telemetry context; 5 req/min rate limit, 5-min cache |
+| POST | `/api/analysis` | AI Oracle query, Gemini-powered RAG with league telemetry context; 5 req/min rate limit, 5-min cache |
 | GET | `/api/predictions/stats` | Global summary stats (user count, prediction count, match count, richest player, top streak) |
 | GET | `/api/predictions/stats/daily` | Real-time daily ticker (volume, payout, win rate, MVP) |
-| GET | `/api/predictions/stats/monthly` | Monthly stats report (`?year=&month=`) — new users, volume, biggest win, top streak, most active, high roller, top win rate |
-| GET | `/api/admin/utm-stats` | UTM attribution breakdown — signups and visits per source |
+| GET | `/api/predictions/stats/monthly` | Monthly stats report (`?year=&month=`) new users, volume, biggest win, top streak, most active, high roller, top win rate |
+| GET | `/api/admin/utm-stats` | UTM attribution breakdown, signups and visits per source |
 
 ---
 

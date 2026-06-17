@@ -3,16 +3,37 @@
 import { useGameStore } from '@/app/stores/gameStore'
 import { RARITY_AURA, RARITY_TEXT, RARITY_TOAST_BG } from '@/lib/achievements'
 import { AchievementRarity } from '@/types/rps'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function AchievementToast() {
-  const { achievementQueue, shiftAchievement } = useGameStore()
+  const { achievementQueue, clearAllAchievements } = useGameStore()
+
+  const disappearanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  )
 
   useEffect(() => {
-    if (achievementQueue.length === 0) return
-    const timer = setTimeout(() => shiftAchievement(), 2000)
-    return () => clearTimeout(timer)
-  }, [achievementQueue.length, shiftAchievement])
+    if (achievementQueue.length > 0) {
+      if (disappearanceTimerRef.current) {
+        clearTimeout(disappearanceTimerRef.current)
+      }
+
+      disappearanceTimerRef.current = setTimeout(() => {
+        clearAllAchievements()
+      }, 2000)
+    } else {
+      if (disappearanceTimerRef.current) {
+        clearTimeout(disappearanceTimerRef.current)
+        disappearanceTimerRef.current = null
+      }
+    }
+
+    return () => {
+      if (disappearanceTimerRef.current) {
+        clearTimeout(disappearanceTimerRef.current)
+      }
+    }
+  }, [achievementQueue.length, clearAllAchievements])
 
   if (achievementQueue.length === 0) return null
 

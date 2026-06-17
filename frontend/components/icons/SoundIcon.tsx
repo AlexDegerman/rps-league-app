@@ -47,6 +47,7 @@ const SoundOffIcon = () => (
 
 const SoundIcon = ({ muted, size = 20 }: SoundIconProps) => (
   <span
+    suppressHydrationWarning
     style={{ width: size, height: size }}
     className="inline-flex items-center justify-center"
   >

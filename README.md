@@ -9,9 +9,27 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 ## 🎮 Preview
 
 <p align="center">
-  <em><strong>Flash Event Activations</strong>: Visual animations triggered when a Flash Event starts.</em>
+  <em><strong>Global Events Showcase</strong>: Server-wide real-time events that transform gameplay and visuals.</em>
   <br />
-  <img src="./assets/flasheventanimations.gif" width="280" />
+  <video width="280" autoplay muted loop playsinline>
+    <source src="https://github.com/AlexDegerman/rps-league-app/raw/main/assets/globalevents_showcase.mp4" type="video/mp4">
+  </video>
+</p>
+
+<p align="center">
+  <em><strong>Flash Event Activations</strong>: Personal dynamic events that temporarily override UI, audio, and outcomes.</em>
+  <br />
+  <video width="280" autoplay muted loop playsinline>
+    <source src="https://github.com/AlexDegerman/rps-league-app/raw/main/assets/flasheventanimations.mp4" type="video/mp4">
+  </video>
+</p>
+
+<p align="center">
+  <em><strong>Season 2 Tier Progression</strong>: Visual scaling system where score styling evolves across extreme number tiers.</em>
+  <br />
+  <video width="280" autoplay muted loop playsinline>
+    <source src="https://github.com/AlexDegerman/rps-league-app/raw/main/assets/season2_tiers_showcase.mp4" type="video/mp4">
+  </video>
 </p>
 
 ---
@@ -23,6 +41,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - [📋 Overview](#-overview)
 - [⚡ Ascension System](#-ascension-system)
 - [🧿 Relic System](#-relic-system)
+- [🪐 Global Events](#-global-events)
 - [🌠 Flash Events](#-flash-events)
 - [👁️ Player Festivals](#️-player-festivals)
 - [🏆 Predictor Achievements](#-predictor-achievements)
@@ -83,13 +102,13 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 
 ### Bonus system
 - 40% chance per match to trigger a Tiered Bonus multiplier
-- On win: multiplies payout by 1.5×–7× depending on tier
-- On loss: reduces loss to 75%–0% depending on tier (Legendary+ fully negates loss)
+- On win: multiplies payout by 1.5x-7x depending on tier
+- On loss: reduces loss to 75%-0% depending on tier (Legendary+ fully negates loss)
 - Tiers:
-  - Common: 1.5×–2.2×
-  - Rare: 2.2×–3.2×
-  - Epic: 3.2×–4.2×
-  - Legendary: 5×
+  - Common: 1.5x-2.2x
+  - Rare: 2.2x-3.2x
+  - Epic: 3.2x-4.2x
+  - Legendary: 5x
   - Mythical: 7x
 - Guarantees at least one bonus every 4 matches if not triggered naturally
 
@@ -102,7 +121,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Core action buttons adapt to the active streak color state
 
 ### Idle auto-bet mode
-- Unlocks after reaching Ascension (999 OVG) or starting Lap 1
+- Unlocks after reaching Ascension (999 STR) or starting Lap 1
 - Two tick boxes appear above each live match card: Auto-Bet Left and Auto-Bet Right
 - Automatically places your selected bet on your chosen side for every incoming match after unlock
 - Switching sides takes effect on the next match
@@ -138,7 +157,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 
 ## ⚡ Ascension System
 
-Upon reaching **999 OVG (Octovigintillion)**, players unlock the Ascension system: a permanent progression layer built around prestige resets and long-term mastery.
+Upon reaching **999 STR (Sextrigintillion)**, players unlock the Ascension system: a permanent progression layer built around prestige resets and long-term mastery.
 
 ### 🏁 Chrono Laps
 
@@ -189,6 +208,31 @@ Each relic meaningfully alters prediction strategy, event behavior, or multiplie
 
 ---
 
+## 🪐 Global Events
+
+Global Events introduce a server-wide synchronized event loop to RPS League. Scheduled entirely on the backend and broadcast in real-time via Server-Sent Events (SSE), these events temporarily warp gameplay modifiers, transform UI card structures, and trigger dynamic CSS canvas shaders for every active player session simultaneously.
+
+Each event includes:
+- Server-wide real-time SSE synchronization 
+- Structured three-phase lifecycle progression (Cooldown, Warning, and Active)
+- Custom Oracle telemetry warnings and synthesized spoken countdown alerts
+- Specialized visual transformations and animated number-tier scaling
+
+Selectable events are weighted randomly, featuring **Tidal Surge** (incorporating the +20% Win Echo Protocol), **Cyclone Blitz**, **Solar Flare**, and **Mirage Cataclysm**.
+
+> 📋 **[View all Global Event showcases →](./GLOBALEVENTS.md)**
+
+### Featured Showcase: Tidal Surge
+
+An oceanic-themed event built around crashing waves, deep currents, and hydro-telemetry effects that activates the Win Echo Protocol, applying a +20% signal echo to all successful predictions.
+
+<p align="center">
+  <strong>GLobal Event Trigger Animations</strong><br/>
+  <img src="./assets/globaleventanimations.gif" width="220" />
+</p>
+
+---
+
 ## ⚡ Flash Events
 
 Flash Events are live gameplay modifiers that can trigger during matches with a 5% chance per bet. When activated, a random event temporarily transforms the application for the next 3 predictions through:
@@ -203,7 +247,7 @@ Flash Events are live gameplay modifiers that can trigger during matches with a 
 Events are designed as evolving seasonal content and continuously expand over time.
 Event selection is weighted to support controlled rollout of new or seasonal events, allowing certain events to appear more frequently without changing the global trigger rate.
 
-> 📋 **[View all Flash Event showcases →](./EVENTS.md)**
+> 📋 **[View all Flash Event showcases →](./FLASHEVENTS.md)**
 
 ### Flash Event Animations
 
@@ -526,7 +570,7 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 
 **Frontend (Vitest + React Testing Library)**
 - **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
-- **HomePage**: Tests core betting loop ("ALL IN", floor clamping, AUTO toggle), user store integration (nickname display, bet amount sync), and live connection state rendering.
+- **DashboardCard**: Tests core betting loop ("ALL IN", floor clamping, AUTO toggle), user store integration (nickname display, bet amount sync).
 - **Leaderboard Page**: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
 
 ---

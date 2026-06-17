@@ -200,7 +200,7 @@ export default function PredictionTicker() {
     return (
       <button
         onClick={() => setVisible(true)}
-        className="fixed bottom-10 right-3 text-[10px] font-bold px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-lg text-gray-400 hover:text-gray-600 z-50 uppercase"
+        className="fixed bottom-2 right-3 text-[10px] font-bold px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-lg text-gray-400 hover:text-gray-600 z-50 uppercase"
       >
         Show Feed
       </button>
@@ -208,7 +208,7 @@ export default function PredictionTicker() {
 
   return (
     <div
-      className={`fixed bottom-8 left-0 right-0 z-50 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-8 overflow-hidden 
+      className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-sm shadow-[0_-4px_12px_rgba(0,0,0,0.05)] px-4 flex items-center h-8 overflow-hidden 
       ${tcfg?.borderClass ?? 'border-t border-gray-100'} 
       ${modeKey ? `event-side-${modeKey}` : ''}`}
     >

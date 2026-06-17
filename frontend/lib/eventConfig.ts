@@ -13,6 +13,10 @@ export type EventThemeKey =
   | 'festival_vault'
   | 'festival_fever'
   | 'festival_sanguine'
+  | 'global_tidal_surge'
+  | 'global_solar_flare'
+  | 'global_cyclone_blitz'
+  | 'global_mirage_cataclysm'
 
 export const FESTIVAL_THEME_CONFIG = {
   SPARK: { key: 'festival_spark', color: '#a855f7', dotClass: 'bg-purple-400' },
@@ -90,6 +94,23 @@ export const EVENT_HEADER_CONFIG = {
   winstreak_inferno: {
     textClass: 'text-orange-500',
     borderClass: 'border-orange-400'
+  },
+  // Global Events
+  global_tidal_surge: {
+    textClass: 'text-cyan-500',
+    borderClass: 'border-cyan-400'
+  },
+  global_solar_flare: {
+    textClass: 'text-amber-500',
+    borderClass: 'border-amber-400'
+  },
+  global_cyclone_blitz: {
+    textClass: 'text-slate-400',
+    borderClass: 'border-slate-400'
+  },
+  global_mirage_cataclysm: {
+    textClass: 'text-amber-600',
+    borderClass: 'border-purple-400'
   }
 } as const
 
@@ -194,55 +215,235 @@ export const EVENT_TICKER_CONFIG = {
     bgClass: 'bg-orange-50/10',
     dotClass: 'bg-orange-500',
     particleClass: ''
+  },
+  // Global Events
+  global_tidal_surge: {
+    borderClass: 'border-cyan-400',
+    topGlowClass: 'ticker-glow-tidal',
+    bgClass: 'event-bg-global_tidal_surge',
+    dotClass: 'bg-cyan-400',
+    particleClass: ''
+  },
+  global_solar_flare: {
+    borderClass: 'border-amber-400',
+    topGlowClass: 'ticker-glow-solar',
+    bgClass: 'event-bg-global_solar_flare',
+    dotClass: 'bg-amber-400',
+    particleClass: ''
+  },
+  global_cyclone_blitz: {
+    borderClass: 'border-slate-400',
+    topGlowClass: 'ticker-glow-cyclone',
+    bgClass: 'event-bg-global_cyclone_blitz',
+    dotClass: 'bg-slate-400',
+    particleClass: ''
+  },
+  global_mirage_cataclysm: {
+    borderClass: 'border-purple-400',
+    topGlowClass: 'ticker-glow-mirage',
+    bgClass: 'event-bg-global_mirage_cataclysm',
+    dotClass: 'bg-amber-500',
+    particleClass: ''
   }
 } as const
 
-export const EVENT_FOOTER_CONFIG = {
-  // Flash
-  LUNAR: { borderClass: 'event-border-lunar', dotClass: 'bg-blue-300' },
-  ELECTRIC: { borderClass: 'event-border-electric', dotClass: 'bg-purple-400' },
-  CARDS: { borderClass: 'event-border-cards', dotClass: 'bg-yellow-400' },
-  HELLFIRE: { borderClass: 'event-border-hellfire', dotClass: 'bg-red-500' },
-  // Festivals
+export const MODE_CONFIG = {
+  flash_lunar: {
+    border: 'border-blue-300',
+    cardAnim: 'flash-lunar-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-blue-50/20',
+    glowColor: 'rgba(147,197,253,0.08)',
+    dateText: 'text-blue-500/60',
+    vsText: 'text-blue-200',
+    winnerBadge: 'bg-blue-500',
+    winnerText: 'text-blue-700 font-black',
+    youWon: 'bg-blue-500'
+  },
+  flash_electric: {
+    border: 'border-purple-300',
+    cardAnim: 'flash-electric-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-purple-50/20',
+    glowColor: 'rgba(192,132,252,0.08)',
+    dateText: 'text-purple-500/60',
+    vsText: 'text-purple-200',
+    winnerBadge: 'bg-purple-500',
+    winnerText: 'text-purple-700 font-black',
+    youWon: 'bg-purple-500'
+  },
+  flash_cards: {
+    border: 'border-yellow-300',
+    cardAnim: 'flash-cards-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-yellow-50/20',
+    glowColor: 'rgba(252,211,77,0.08)',
+    dateText: 'text-yellow-500/60',
+    vsText: 'text-yellow-200',
+    winnerBadge: 'bg-yellow-500',
+    winnerText: 'text-yellow-700 font-black',
+    youWon: 'bg-yellow-500'
+  },
+  flash_hellfire: {
+    border: 'border-red-400',
+    cardAnim: 'flash-hellfire-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-red-100/20',
+    glowColor: 'rgba(239,68,68,0.08)',
+    dateText: 'text-red-500/60',
+    vsText: 'text-red-200',
+    winnerBadge: 'bg-red-600',
+    winnerText: 'text-red-800 font-black',
+    youWon: 'bg-red-600'
+  },
   festival_spark: {
-    borderClass: 'border-purple-500',
-    dotClass: 'bg-purple-400'
+    border: 'border-purple-300',
+    cardAnim: 'spark-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-purple-50/20',
+    glowColor: 'rgba(192,132,252,0.08)',
+    dateText: 'text-purple-500/60',
+    vsText: 'text-purple-200',
+    winnerBadge: 'bg-purple-500',
+    winnerText: 'text-purple-700 font-black',
+    youWon: 'bg-purple-500'
   },
   festival_ghost: {
-    borderClass: 'event-border-ghost',
-    dotClass: 'bg-teal-400'
+    border: 'border-teal-300',
+    cardAnim: 'ghost-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-teal-50/20',
+    glowColor: 'rgba(77,208,196,0.08)',
+    dateText: 'text-teal-500/60',
+    vsText: 'text-teal-200',
+    winnerBadge: 'bg-teal-500',
+    winnerText: 'text-teal-700 font-black',
+    youWon: 'bg-teal-500'
   },
   festival_safeguard: {
-    borderClass: 'event-border-safeguard',
-    dotClass: 'bg-slate-400'
+    border: 'border-slate-300',
+    cardAnim: 'safeguard-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-slate-50/20',
+    glowColor: 'rgba(148,163,184,0.08)',
+    dateText: 'text-slate-500/60',
+    vsText: 'text-slate-200',
+    winnerBadge: 'bg-slate-500',
+    winnerText: 'text-slate-700 font-black',
+    youWon: 'bg-slate-500'
   },
   festival_resonance: {
-    borderClass: 'border-yellow-400',
-    dotClass: 'bg-yellow-400'
+    border: 'border-yellow-300',
+    cardAnim: 'resonance-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-yellow-50/20',
+    glowColor: 'rgba(252,211,77,0.08)',
+    dateText: 'text-yellow-500/60',
+    vsText: 'text-yellow-200',
+    winnerBadge: 'bg-yellow-500',
+    winnerText: 'text-yellow-700 font-black',
+    youWon: 'bg-yellow-500'
   },
   festival_surge: {
-    borderClass: 'event-border-surge',
-    dotClass: 'bg-cyan-400'
+    border: 'border-cyan-300',
+    cardAnim: 'surge-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-cyan-50/20',
+    glowColor: 'rgba(34,211,238,0.08)',
+    dateText: 'text-cyan-500/60',
+    vsText: 'text-cyan-200',
+    winnerBadge: 'bg-cyan-500',
+    winnerText: 'text-cyan-700 font-black',
+    youWon: 'bg-cyan-500'
   },
   festival_vault: {
-    borderClass: 'event-border-vault',
-    dotClass: 'bg-indigo-400'
+    border: 'border-indigo-300',
+    cardAnim: 'vault-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-indigo-50/20',
+    glowColor: 'rgba(129,140,248,0.08)',
+    dateText: 'text-indigo-500/60',
+    vsText: 'text-indigo-200',
+    winnerBadge: 'bg-indigo-500',
+    winnerText: 'text-indigo-700 font-black',
+    youWon: 'bg-indigo-500'
   },
   festival_fever: {
-    borderClass: 'border-orange-500',
-    dotClass: 'bg-orange-500'
+    border: 'border-orange-300',
+    cardAnim: 'fever-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-orange-50/20',
+    glowColor: 'rgba(251,146,60,0.08)',
+    dateText: 'text-orange-500/60',
+    vsText: 'text-orange-200',
+    winnerBadge: 'bg-orange-500',
+    winnerText: 'text-orange-700 font-black',
+    youWon: 'bg-orange-500'
   },
   festival_sanguine: {
-    borderClass: 'event-border-sanguine',
-    dotClass: 'bg-red-800'
+    border: 'border-red-600',
+    cardAnim: 'sanguine-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-red-100/20',
+    glowColor: 'rgba(153,27,27,0.08)',
+    dateText: 'text-red-600/60',
+    vsText: 'text-red-300',
+    winnerBadge: 'bg-red-700',
+    winnerText: 'text-red-900 font-black',
+    youWon: 'bg-red-700'
   },
-  // WinStreaks
   winstreak_fever: {
-    borderClass: 'border-green-400',
-    dotClass: 'bg-green-500'
+    border: 'border-green-300',
+    cardAnim: 'fever-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-green-50/20',
+    glowColor: 'rgba(74,222,128,0.08)',
+    dateText: 'text-green-500/60',
+    vsText: 'text-green-200',
+    winnerBadge: 'bg-green-500',
+    winnerText: 'text-green-700 font-black',
+    youWon: 'bg-green-500'
   },
   winstreak_inferno: {
-    borderClass: 'border-orange-400',
-    dotClass: 'bg-orange-500'
+    border: 'border-orange-300',
+    cardAnim: 'inferno-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-orange-50/20',
+    glowColor: 'rgba(251,146,60,0.08)',
+    dateText: 'text-orange-500/60',
+    vsText: 'text-orange-200',
+    winnerBadge: 'bg-orange-500',
+    winnerText: 'text-orange-700 font-black',
+    youWon: 'bg-orange-500'
+  },
+  global_tidal_surge: {
+    border: 'border-cyan-300',
+    cardAnim: 'tidal-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-cyan-50/20',
+    glowColor: 'rgba(34,211,238,0.08)',
+    dateText: 'text-cyan-500/60',
+    vsText: 'text-cyan-200',
+    winnerBadge: 'bg-cyan-500',
+    winnerText: 'text-cyan-700 font-black',
+    youWon: 'bg-cyan-500'
+  },
+  global_solar_flare: {
+    border: 'border-amber-300',
+    cardAnim: 'solar-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-amber-50/20',
+    glowColor: 'rgba(245,158,11,0.08)',
+    dateText: 'text-amber-500/60',
+    vsText: 'text-amber-200',
+    winnerBadge: 'bg-amber-500',
+    winnerText: 'text-amber-700 font-black',
+    youWon: 'bg-amber-500'
+  },
+  global_cyclone_blitz: {
+    border: 'border-slate-300',
+    cardAnim: 'cyclone-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-slate-50/20',
+    glowColor: 'rgba(148,163,184,0.08)',
+    dateText: 'text-slate-500/60',
+    vsText: 'text-slate-300',
+    winnerBadge: 'bg-slate-500',
+    winnerText: 'text-slate-700 font-black',
+    youWon: 'bg-slate-500'
+  },
+  global_mirage_cataclysm: {
+    border: 'border-purple-300',
+    cardAnim: 'mirage-ring',
+    bg: 'bg-gradient-to-br from-white via-white to-purple-50/20',
+    glowColor: 'rgba(168,85,247,0.06)',
+    dateText: 'text-purple-400/60',
+    vsText: 'text-amber-200',
+    winnerBadge: 'bg-amber-500',
+    winnerText: 'text-amber-700 font-black',
+    youWon: 'bg-amber-500'
   }
 } as const

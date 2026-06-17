@@ -471,6 +471,1013 @@
   --glow-color-lower: rgba(8, 145, 178, 0.4);
 }
 
+/* --- SEASON 2 ANIMATED TIERS --- */
+
+/* TIER 1: ABYSSAL TRENCH  10^90  Novemvigintillion */
+@keyframes abyssal-text-flow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes abyssal-biolum-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 0.85;
+  }
+}
+@keyframes abyssal-bubbles-sink {
+  0% {
+    transform: translateY(-8px) translateX(-2px) scale(0.65);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  80% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(22px) translateX(4px) scale(1.2);
+    opacity: 0;
+  }
+}
+.g-nvg {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  background: linear-gradient(270deg, #0b132b 0%, #1c2541 35%, #5bc0be 50%, #1c2541 65%, #0b132b 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.4px rgba(34, 211, 238, 0.95);
+  filter: drop-shadow(0 0 5px rgba(34, 211, 238, 0.75)) drop-shadow(0 2px 4px rgba(11, 19, 43, 0.9));
+  will-change: background-position;
+  animation: abyssal-text-flow 6s linear infinite;
+}
+.g-nvg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 130%;
+  height: 130%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at center, rgba(37, 99, 235, 0.45) 0%, rgba(30, 58, 138, 0.15) 55%, transparent 75%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -2;
+  will-change: transform, opacity;
+  animation: abyssal-biolum-pulse 4.5s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+.g-nvg::after {
+  content: '⚬  ✦  ⬫  °  ⌬  ·  ✧  ⬪  ⚬  ✦  °  ⬫  ·  ✧';
+  position: absolute;
+  top: 35%;
+  bottom: -40%;
+  left: -5%;
+  right: -5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: bold;
+  letter-spacing: 0.25em;
+  pointer-events: none;
+  z-index: -1;
+  color: rgba(59, 130, 246, 0.9);
+  text-shadow: 0 0 5px rgba(37, 99, 235, 0.95), -15px 6px 3px rgba(29, 78, 216, 0.6), 15px -6px 3px rgba(29, 78, 216, 0.6);
+  will-change: transform, opacity;
+  animation: abyssal-bubbles-sink 3.5s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+/* TIER 2: LEVIATHAN MAELSTROM  10^93  Trigintillion */
+@keyframes maelstrom-text-flow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes maelstrom-twister-sway {
+  0%, 100% {
+    transform: translateX(-50%) skewX(-8deg) scaleX(0.95);
+    filter: blur(2px) drop-shadow(0 0 6px rgba(6, 182, 212, 0.7));
+  }
+  50% {
+    transform: translateX(-50%) skewX(8deg) scaleX(1.1);
+    filter: blur(2.5px) drop-shadow(0 0 12px rgba(16, 185, 129, 0.9));
+  }
+}
+@keyframes maelstrom-twister-spin {
+  0%   { background-position-x: 0px; }
+  100% { background-position-x: -300px; }
+}
+@keyframes rocky-wave-crash {
+  0%, 100% {
+    transform: scaleY(0.85) translateY(6px) skewX(-4deg);
+  }
+  50% {
+    transform: scaleY(1.25) translateY(-6px) skewX(6deg);
+  }
+}
+@keyframes wave-cascade-slide {
+  from { background-position-x: 0px; }
+  to   { background-position-x: -280px; }
+}
+.g-trg {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  background: linear-gradient(270deg, #022c22 0%, #0d9488 25%, #22d3ee 50%, #0d9488 75%, #022c22 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 5px rgba(6, 182, 212, 0.75)) drop-shadow(0 2px 4px rgba(5, 46, 22, 0.6));
+  will-change: background-position;
+  animation: maelstrom-text-flow 4s linear infinite;
+}
+.g-trg::before {
+  content: '';
+  position: absolute;
+  bottom: 90%;
+  left: 50%;
+  width: 1.8em;
+  height: 1.4em;
+  transform: translateX(-50%);
+  clip-path: polygon(0% 0%, 100% 0%, 65% 100%, 35% 100%);
+  background: repeating-linear-gradient(115deg, rgba(6, 182, 212, 0) 0px, rgba(6, 182, 212, 0) 15px, rgba(6, 182, 212, 0.7) 20px, #ffffff 25px, rgba(16, 185, 129, 0.7) 30px, rgba(6, 182, 212, 0) 45px);
+  background-size: 300px 100%;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, filter, background-position;
+  animation: maelstrom-twister-sway 2.4s ease-in-out infinite, maelstrom-twister-spin 3.5s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+.g-trg::after {
+  content: '';
+  position: absolute;
+  inset: -14px -16px;
+  clip-path: polygon(0% 100%, 0% 80%, 8% 45%, 15% 75%, 22% 35%, 30% 70%, 38% 30%, 45% 75%, 52% 40%, 60% 70%, 68% 35%, 75% 75%, 82% 45%, 90% 70%, 95% 30%, 100% 40%, 100% 100%);
+  background: linear-gradient(90deg, rgba(13, 148, 136, 0.3) 0%, rgba(6, 182, 212, 0.45) 30%, rgba(16, 185, 129, 0.5) 60%, #ffffff 85%, rgba(6, 182, 212, 0.4) 100%);
+  background-size: 200% 100%;
+  pointer-events: none;
+  z-index: 5;
+  will-change: transform, background-position;
+  animation: rocky-wave-crash 2s ease-in-out infinite, wave-cascade-slide 1.8s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+/* TIER 3: GALE-FORCE AERO  10^96  Untrigintillion */
+
+@keyframes gale-chrome-flow {
+  0%   { background-position-x: 0%; }
+  100% { background-position-x: 200%; }
+}
+
+@keyframes gale-flutter {
+  0%, 100% {
+    transform: scale3d(1, 1, 1) skewX(-11deg);
+  }
+  50% {
+    transform: scale3d(1.04, 1, 1) skewX(-13deg);
+  }
+}
+
+@keyframes gale-jetstream-flow {
+  0% {
+    background-position: 
+      0px 0px,
+      0px 0px,
+      0px 0px,
+      0px 0px,
+      0px top,
+      0px bottom;
+    transform: scaleY(0.95) skewX(-11deg);
+    opacity: 0.65;
+  }
+  50% {
+    background-position: 
+      -60px 0px,
+      -67.5px 0px,
+      -70px 0px,
+      -50% 0px,
+      0px top, 
+      0px bottom;
+    transform: scaleY(1.05) skewX(-13deg);
+    opacity: 0.95;
+  }
+  100% {
+    background-position: 
+      -120px 0px,
+      -135px 0px,
+      -140px 0px,
+      -100% 0px,
+      0px top, 
+      0px bottom;
+    transform: scaleY(0.95) skewX(-11deg);
+    opacity: 0.65;
+  }
+}
+
+.g-utr::after {
+  content: '';
+  position: absolute;
+  inset: -6px -24px;
+  pointer-events: none;
+  z-index: 10;
+  border-radius: 6px;
+  background-image: 
+    radial-gradient(circle at 15% 45%, #ffffff 1.2px, transparent 1.8px),
+    radial-gradient(circle at 65% 55%, rgba(148, 163, 184, 0.8) 1px, transparent 1.5px),
+    radial-gradient(circle at 40% 35%, rgba(165, 243, 252, 0.95) 1.2px, transparent 1.8px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0px, rgba(255, 255, 255, 0.1) 2px, transparent 3px, transparent 12px),
+    linear-gradient(to right, transparent, rgba(255, 255, 255, 0.95) 20%, #ffffff 50%, rgba(255, 255, 255, 0.95) 80%, transparent),
+    linear-gradient(to right, transparent, rgba(148, 163, 184, 0.85) 15%, #cbd5e1 50%, rgba(148, 163, 184, 0.85) 85%, transparent);
+
+  background-size: 
+    40px 20px,
+    45px 15px,
+    35px 25px,
+    200% 100%,
+    100% 2px, 
+    100% 2px;
+  background-repeat: 
+    repeat, 
+    repeat, 
+    repeat, 
+    repeat-x,
+    no-repeat,
+    no-repeat;
+  will-change: transform, opacity, background-position;
+  animation: gale-jetstream-flow 1.5s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+.g-utr {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(
+    90deg, 
+    #0f172a 0%, 
+    #334155 15%, 
+    #cbd5e1 30%, 
+    #ffffff 42%, 
+    #e2e8f0 48%, 
+    #475569 60%, 
+    #f1f5f9 72%, 
+    #64748b 85%, 
+    #0f172a 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.4)) drop-shadow(0 0 6px rgba(148, 163, 184, 0.45));
+  will-change: transform, background-position;
+  animation: 
+    gale-chrome-flow 3.5s linear infinite, 
+    gale-flutter 2s ease-in-out infinite;
+}
+
+@keyframes gale-smoke-drift {
+  0%, 100% {
+    transform: translate3d(-5px, 0, 0) skewX(8deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(-15px, 0, 0) skewX(13deg);
+    opacity: 0.65;
+  }
+}
+.g-utr::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 
+    -4px 1px 3px rgba(30, 41, 59, 0.75), 
+    -12px 3px 8px rgba(71, 85, 105, 0.45), 
+    -24px 6px 16px rgba(148, 163, 184, 0.3), 
+    -40px 10px 32px rgba(203, 213, 225, 0.12);
+  filter: blur(1.2px); 
+  will-change: transform, opacity;
+  animation: gale-smoke-drift 2s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+}
+
+/* TIER 4: RAZOR TEMPEST  10^99  Duotrigintillion */
+
+/* TIER 4: RAZOR TEMPEST  10^99  Duotrigintillion */
+@keyframes tempest-wind-sweep {
+  0%   { background-position-x: 0%; }
+  100% { background-position-x: 200%; }
+}
+@keyframes tempest-jetstream-flow {
+  0% {
+    background-position: 
+      0px 0px,
+      0px 0px,
+      0px 0px,
+      0px 0px,
+      0px top, 
+      0px bottom,
+      0px bottom;
+  }
+  100% {
+    background-position: 
+      -240px 0px,
+      -270px 0px,
+      -280px 0px,
+      -200% 0px,
+      0px top, 
+      0px bottom,
+      0px bottom;
+  }
+}
+@keyframes tempest-icon-drift {
+  0%, 100% {
+    transform: translate3d(0, -2.5px, 0) skewX(-11deg);
+    color: rgba(240, 253, 244, 0.7);
+    text-shadow: 
+      0 0 4px #10b981, 
+      0 0 10px #ffffff, 
+      0 0 18px #047857;
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate3d(0, 2.5px, 0) skewX(-11deg);
+    color: #ffffff;
+    text-shadow: 
+      0 0 8px #34d399, 
+      0 0 18px #ffffff, 
+      0 0 30px #10b981,
+      0 0 45px #047857;
+    opacity: 0.95;
+  }
+}
+.g-dtr {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(
+    90deg, 
+    #022c22 0%, 
+    #047857 20%, 
+    #34d399 40%, 
+    #a7f3d0 50%, 
+    #059669 65%, 
+    #064e3b 85%, 
+    #022c22 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.5px rgba(167, 243, 208, 0.8);
+  filter: drop-shadow(0 1px 2px rgba(4, 120, 87, 0.4)) drop-shadow(0 0 4px rgba(167, 243, 208, 0.45)) drop-shadow(-6px 2px 4px rgba(4, 120, 87, 0.35)) drop-shadow(-18px 4px 10px rgba(6, 95, 70, 0.22));
+  will-change: background-position;
+  animation: tempest-wind-sweep 3.5s linear infinite;
+}
+.g-dtr::before {
+  content: '';
+  position: absolute;
+  inset: -6px -24px;
+  pointer-events: none;
+  z-index: -1;
+  border-radius: 6px;
+  background-image: 
+    radial-gradient(circle at 15% 45%, #ffffff 1.2px, transparent 1.8px),
+    radial-gradient(circle at 65% 55%, rgba(16, 185, 129, 0.8) 1px, transparent 1.5px),
+    radial-gradient(circle at 40% 35%, rgba(167, 243, 208, 0.95) 1.2px, transparent 1.8px),
+    repeating-linear-gradient(90deg, rgba(4, 120, 87, 0.15) 0px, rgba(167, 243, 208, 0.12) 20px, rgba(4, 120, 87, 0.15) 40px),
+    linear-gradient(to right, transparent, rgba(255, 255, 255, 0.95) 20%, #ffffff 50%, rgba(255, 255, 255, 0.95) 80%, transparent),
+    linear-gradient(135deg, #10b981 25%, transparent 25%),
+    linear-gradient(225deg, #10b981 25%, transparent 25%);
+  background-size: 
+    40px 20px, 
+    45px 15px, 
+    35px 25px, 
+    200% 100%, 
+    100% 2px, 
+    8px 6px,
+    8px 6px;
+  background-repeat: 
+    repeat, 
+    repeat, 
+    repeat, 
+    repeat-x,
+    no-repeat,
+    repeat-x,
+    repeat-x;
+  transform: skewX(-11deg);
+  will-change: background-position;
+  animation: tempest-jetstream-flow 1.5s linear infinite;
+}
+.g-dtr::after {
+  /* \FE0E is the Variation Selector-15 that forces text rendering instead of graphical emoji */
+  content: '\1F5F2\FE0E  .  \2694\FE0E  .  \2726\FE0E  .  \2694\FE0E  .  \1F5F2\FE0E';
+  font-variant-emoji: text; /* Modern browser support fallback */
+  position: absolute;
+  inset: -6px -24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  letter-spacing: 0.35em;
+  pointer-events: none;
+  z-index: 10;
+  color: #f0fdf4;
+  text-shadow: 
+    0 0 5px #10b981, 
+    0 0 12px #ffffff, 
+    0 0 20px #047857;
+  will-change: transform, opacity;
+  animation: tempest-icon-drift 3s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+/* TIER 5: SOLAR PROMINENCE  10^102  Trestrigintillion */
+@keyframes solar-text-active-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: drop-shadow(0 2px 4px rgba(120, 53, 4, 0.95)) drop-shadow(0 0 10px rgba(245, 158, 11, 0.75));
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: drop-shadow(0 2px 4px rgba(120, 53, 4, 1)) drop-shadow(0 0 18px rgba(251, 191, 36, 0.95));
+  }
+}
+@keyframes solar-beam-stream {
+  0%, 100% {
+    opacity: 0.35;
+    transform: translateX(-50%) scaleX(0.9);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateX(-50%) scaleX(1.12);
+  }
+}
+@keyframes solar-crown-flare {
+  0%, 100% {
+    transform: translateX(-50%) scale(1.0);
+    background-position: 0% 50%;
+    filter: drop-shadow(0 0 5px #ffffff) drop-shadow(0 0 14px #fbbf24) drop-shadow(0 0 25px #d97706) brightness(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.06);
+    background-position: 100% 50%;
+    filter: drop-shadow(0 0 9px #ffffff) drop-shadow(0 0 22px #fbbf24) drop-shadow(0 0 40px #f59e0b) brightness(1.55) contrast(1.25);
+  }
+}
+.g-ttr {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  background: linear-gradient(135deg, #78350f 0%, #f59e0b 25%, #fef08a 50%, #f59e0b 75%, #78350f 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  will-change: background-position, filter;
+  animation: solar-text-active-shimmer 3s ease-in-out infinite;
+}
+.g-ttr::before {
+  content: '';
+  position: absolute;
+  bottom: 90%;
+  left: 50%;
+  width: 1.6em;
+  height: 1.4em;
+  transform: translateX(-50%);
+  background:
+    conic-gradient(from 165deg at 50% 0%, transparent 0deg, rgba(251, 191, 36, 0.4) 5deg, rgba(255, 255, 255, 0.95) 15deg, rgba(251, 191, 36, 0.4) 25deg, transparent 30deg) no-repeat center top,
+    conic-gradient(from 270deg at 50% 100%, transparent 0deg, transparent 35deg, rgba(255, 215, 0, 0.8) 45deg, transparent 55deg, transparent 80deg, rgba(255, 255, 255, 0.95) 90deg, transparent 100deg, transparent 125deg, rgba(255, 215, 0, 0.8) 135deg, transparent 145deg, transparent 180deg) no-repeat center bottom;
+  background-size: 100% 100%, 100% 100%;
+  filter: blur(2px) drop-shadow(0 -8px 12px rgba(251, 191, 36, 0.75)) drop-shadow(0 -18px 25px rgba(245, 158, 11, 0.45));
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+  animation: solar-beam-stream 4s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+.g-ttr::after {
+  content: '';
+  position: absolute;
+  bottom: 86%;
+  left: 50%;
+  width: 60%;
+  height: 0.55em;
+  transform: translateX(-50%);
+  clip-path: polygon(0% 100%, 10% 40%, 25% 75%, 38% 20%, 50% 70%, 62% 20%, 75% 75%, 90% 40%, 100% 100%);
+  background: linear-gradient(90deg, #d97706 0%, #fbbf24 25%, #ffffff 50%, #fbbf24 75%, #d97706 100%);
+  background-size: 200% 100%;
+  pointer-events: none;
+  z-index: 5;
+  will-change: transform, filter, background-position;
+  animation: solar-crown-flare 3.2s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+/* TIER 6: ZENITH SUPERNOVA  10^105  Quattuortrigintillion */
+@keyframes supernova-text-flow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes supernova-text-flicker {
+  0%, 100% {
+    filter: 
+      drop-shadow(0 0 3px rgba(255, 255, 255, 0.9))
+      drop-shadow(0 0 10px rgba(168, 85, 247, 0.6))
+      drop-shadow(0 0 18px rgba(107, 33, 168, 0.35));
+    transform: scale(1);
+  }
+  15% {
+    filter: 
+      drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.7))
+      drop-shadow(0 0 6px rgba(168, 85, 247, 0.45));
+    transform: scale(0.98);
+  }
+  18% {
+    filter: 
+      drop-shadow(0 0 7px rgba(255, 255, 255, 1))
+      drop-shadow(0 0 22px rgba(168, 85, 247, 1))
+      drop-shadow(0 0 42px rgba(107, 33, 168, 0.85));
+    transform: scale(1.03);
+  }
+  45% {
+    filter: 
+      drop-shadow(0 0 4px rgba(255, 255, 255, 0.85))
+      drop-shadow(0 0 12px rgba(168, 85, 247, 0.75))
+      drop-shadow(0 0 22px rgba(107, 33, 168, 0.45));
+    transform: scale(1.005);
+  }
+}
+
+@keyframes supernova-shockwave-sparks {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+  }
+  18% {
+    transform: translate(-50%, -50%) scale(0.55);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes supernova-star-detonation {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, -50%) scale(0.02) rotate(30deg);
+    opacity: 0.15;
+  }
+  18% {
+    transform: translate(-50%, -50%) scale(1.05) rotate(45deg);
+    opacity: 1;
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.15) rotate(90deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.25) rotate(220deg);
+    opacity: 0;
+  }
+}
+
+.g-qtr {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  background: linear-gradient(135deg, 
+    #ffffff 0%, 
+    #faf5ff 25%, 
+    #d8b4fe 45%, 
+    #ffffff 55%, 
+    #c084fc 70%, 
+    #ffffff 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.35px rgba(255, 255, 255, 0.95);
+
+  will-change: filter, transform, background-position;
+  animation: 
+    supernova-text-flicker 2.4s ease-in-out infinite,
+    supernova-text-flow 4s linear infinite;
+}
+
+.g-qtr::before {
+  content: 'a';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.8em;
+  height: 1.8em;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+
+  background: radial-gradient(circle at center, 
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(168, 85, 247, 0.15) 35%,
+    transparent 65%
+  );
+  box-shadow:
+    -5px -8px 1px 0.5px #ffffff,
+    8px -4px 1.5px 0.3px #a855f7,
+    -3px 10px 1px 0.5px #c084fc,
+    10px 6px 1px 0px #ffffff,
+    -8px -3px 1.2px 0.2px #e9d5ff,
+    4px 9px 1px 0.4px #ffd700,
+    -20px -15px 1.5px 0.8px #ffffff,
+    22px -10px 2px 0.5px #a855f7,
+    -10px 20px 1.5px 0.8px #c084fc,
+    25px 12px 1.2px 0px #ffffff,
+    -24px 3px 2px 0.5px #e9d5ff,
+    12px -20px 2px 0.8px #ffd700,
+    -6px -25px 1.5px 0.5px #a855f7,
+    20px 22px 2px 0.8px #ffffff,
+    -35px -28px 2px 1px #ffffff,
+    32px -18px 2px 0.6px #a855f7,
+    -18px 32px 2px 0.8px #c084fc,
+    35px 22px 2px 0.8px #ffffff,
+    -32px 10px 2px 0.5px #e9d5ff,
+    18px -32px 1.5px 0.6px #ffd700,
+    -10px -35px 2px 0.8px #a855f7,
+    28px 28px 2px 1px #ffffff,
+    -36px -10px 1.5px 0.5px #c084fc,
+    30px -30px 2px 0.8px #ffffff,
+    -10px -36px 2px 0.5px #e9d5ff,
+    36px 12px 1.5px 0.5px #a855f7,
+    -25px -25px 1.2px 0.4px #ffffff,
+    26px -26px 1.5px 0.8px #a855f7,
+    -26px 26px 1.5px 0.6px #c084fc,
+    25px 25px 1.2px 0.4px #ffffff,
+    -30px -15px 1.5px 0.6px #e9d5ff,
+    15px 32px 1.5px 0.6px #ffd700;
+  backdrop-filter: brightness(1.8) contrast(1.4) blur(1px);
+  z-index: -1;
+
+  will-change: transform, opacity;
+  animation: supernova-shockwave-sparks 2.4s cubic-bezier(0.15, 1, 0.2, 1) infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+.g-qtr::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.8em;
+  height: 1.8em;
+  transform: translate(-50%, -50%);
+  clip-path: polygon(
+    50% 0%, 
+    62% 38%, 
+    100% 50%, 
+    62% 62%, 
+    50% 100%, 
+    38% 62%, 
+    0% 50%, 
+    38% 38%
+  );
+  background: radial-gradient(circle at center, 
+    #ffffff 0%, 
+    rgba(168, 85, 247, 0.95) 30%, 
+    rgba(76, 29, 149, 0.85) 60%, 
+    transparent 80%
+  );
+  pointer-events: none;
+  z-index: 5;
+  will-change: transform, opacity;
+  animation: supernova-star-detonation 2.4s cubic-bezier(0.15, 1, 0.2, 1) infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+/* TIER 7: DUNE ILLUSION  10^108  Quintrigintillion */
+@keyframes dune-sand-sweep-rtl {
+  0%   { background-position-x: 0%; }
+  100% { background-position-x: 200%; }
+}
+
+@keyframes dune-mirage-distortion {
+  0%, 100% {
+    transform: scale3d(1, 1, 1) skewX(-11deg);
+  }
+  50% {
+    transform: scale3d(1.04, 1, 1) skewX(-13deg);
+  }
+}
+
+@keyframes dune-mirage-drift {
+  0%, 100% {
+    transform: translate3d(-5px, 0, 0) skewX(8deg);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(-15px, 0, 0) skewX(13deg);
+    opacity: 0.65;
+  }
+}
+
+@keyframes dune-jetstream-flow {
+  0% {
+    background-position: 
+      0px 0px,
+      0px 0px,
+      0px 0px,
+      0px bottom,
+      0px bottom,
+      0px top, 
+      0px bottom;
+    transform: scaleY(0.95) skewX(-11deg);
+    opacity: 0.65;
+  }
+  50% {
+    background-position: 
+      -75px -75px,
+      -100px -100px,
+      -90px -90px,
+      -60px bottom,
+      -80px bottom,
+      0px top, 
+      0px bottom;
+    transform: scaleY(1.05) skewX(-13deg);
+    opacity: 0.95;
+  }
+  100% {
+    background-position: 
+      -150px -150px,
+      -200px -200px,
+      -180px -180px,
+      -120px bottom,
+      -160px bottom,
+      0px top, 
+      0px bottom;
+    transform: scaleY(0.95) skewX(-11deg);
+    opacity: 0.65;
+  }
+}
+
+.g-qntr {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(
+    90deg, 
+    #78350f 0%, 
+    #b45309 15%, 
+    #f59e0b 30%, 
+    #fef3c7 45%, 
+    #fbbf24 55%, 
+    #d97706 70%, 
+    #92400e 85%, 
+    #78350f 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.5px rgba(254, 243, 199, 0.8);
+  filter: drop-shadow(0 1px 2px rgba(180, 83, 9, 0.4)) drop-shadow(0 0 4px rgba(251, 191, 36, 0.45)) drop-shadow(-6px 2px 4px rgba(180, 83, 9, 0.35)) drop-shadow(-18px 4px 10px rgba(146, 64, 14, 0.22));
+  will-change: background-position;
+  animation: 
+    dune-sand-sweep-rtl 3.5s linear infinite,
+    dune-mirage-distortion 2s ease-in-out infinite;
+}
+
+.g-qntr::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 
+    -2px 2px 0px #b45309,
+    -4px 4px 0px #78350f,
+    -6px 6px 1px rgba(245, 158, 11, 0.3);
+  filter: blur(1.2px); 
+  will-change: transform, opacity;
+  animation: dune-mirage-drift 2s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+}
+
+.g-qntr::after {
+  content: '';
+  position: absolute;
+  inset: -6px -24px;
+  pointer-events: none;
+  z-index: 10;
+  border-radius: 6px;
+  background-image: 
+    radial-gradient(circle at 20% 70%, rgba(251, 191, 36, 0.3) 0%, transparent 60%),
+    radial-gradient(circle at 50% 30%, rgba(245, 158, 11, 0.25) 0%, transparent 60%),
+    radial-gradient(circle at 80% 60%, rgba(253, 230, 138, 0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 60px 22px at 50% 100%, rgba(180, 83, 9, 0.3) 0%, transparent 80%),
+    radial-gradient(ellipse 80px 28px at 50% 100%, rgba(217, 119, 6, 0.25) 0%, transparent 80%),
+    linear-gradient(to right, transparent, rgba(251, 191, 36, 0.7) 20%, #fffbeb 50%, rgba(251, 191, 36, 0.7) 80%, transparent),
+    linear-gradient(to right, transparent, rgba(180, 83, 9, 0.65) 15%, #b45309 50%, rgba(180, 83, 9, 0.65) 85%, transparent);
+  background-size: 
+    150px 150px, 
+    200px 200px, 
+    180px 180px, 
+    120px 45px, 
+    160px 55px, 
+    100% 2px, 
+    100% 2px;
+  background-repeat: 
+    repeat, 
+    repeat, 
+    repeat, 
+    repeat-x,
+    repeat-x,
+    no-repeat,
+    no-repeat;
+  will-change: transform, opacity, background-position;
+  animation: dune-jetstream-flow 1.5s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* TIER 8: PHANTASM CORE  10^111  Sextrigintillion */
+
+@keyframes phantasm-flow-active {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+@keyframes phantasm-shockwave-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(0.35) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4) rotate(120deg);
+    opacity: 0;
+  }
+}
+
+.g-str {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  padding: 0.15em 0.25em;
+  line-height: 1;
+  background: linear-gradient(135deg, 
+    #4c1d95 0%, 
+    #ffd700 15%, 
+    #8b5cf6 30%, 
+    #c084fc 45%, 
+    #ffd700 60%, 
+    #3b0764 75%, 
+    #ffd700 90%, 
+    #4c1d95 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.35px rgba(255, 215, 0, 0.9);
+  filter: 
+    drop-shadow(0 0 5px rgba(255, 215, 0, 0.95)) 
+    drop-shadow(0 0 15px rgba(124, 58, 237, 0.7));
+
+  will-change: background-position;
+  animation: phantasm-flow-active 8s linear infinite;
+}
+
+.g-str::before {
+  content: '';
+  position: absolute;
+  bottom: 88%;
+  left: 50%;
+  width: 65%;
+  height: 0.55em;
+  transform: translateX(-50%);
+  clip-path: polygon(
+    0% 100%, 
+    15% 45%, 
+    30% 75%, 
+    50% 10%, 
+    70% 75%, 
+    85% 45%, 
+    100% 100%
+  );
+  background: linear-gradient(135deg, 
+    rgba(124, 58, 237, 0) 0%, 
+    rgba(168, 85, 247, 0.95) 20%, 
+    #ffd700 40%, 
+    rgba(124, 58, 237, 0.95) 60%, 
+    #ffd700 80%,
+    rgba(124, 58, 237, 0) 100%
+  );
+  background-size: 300% 100%;
+  pointer-events: none;
+  z-index: 5;
+  will-change: background-position;
+  animation: phantasm-flow-active 8s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+.g-str::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  background: radial-gradient(circle at center, 
+    transparent 28%, 
+    rgba(168, 85, 247, 0.9) 33%,
+    rgba(168, 85, 247, 0.9) 37%,
+    transparent 42%, 
+    transparent 48%, 
+    rgba(255, 215, 0, 0.95) 53%,
+    rgba(255, 215, 0, 0.95) 57%,
+    transparent 63%,
+    transparent 66%,
+    rgba(245, 158, 11, 0.95) 71%,
+    rgba(245, 158, 11, 0.95) 77%,
+    transparent 82%
+  );
+  box-shadow: 
+    0 0 12px rgba(168, 85, 247, 0.35),
+    inset 0 0 12px rgba(255, 215, 0, 0.15);
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+  animation: phantasm-shockwave-expand 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
 /* --- SEASON 1 NUMBER TIERS --- */
 
 @keyframes moon-shine {
@@ -906,7 +1913,7 @@
   filter: drop-shadow(0 -2px 14px rgba(220, 38, 38, 0.85));
 }
 
-/* God King aura — rainbow oil-slick, stronger than mythical */
+/* God King aura: rainbow oil-slick, stronger than mythical */
 .aura-godking {
   position: relative;
 }
@@ -1365,7 +2372,7 @@
 }
 .sanguine-ring { border-color: #7f1d1d !important; animation: sanguine-flow 2s ease-in-out infinite alternate; }
 
-/* --- SECTION F: AMBIENT ENGINE (Header / Footer / Ticker) --- */
+/* --- SECTION F: AMBIENT ENGINE (Header / Ticker) --- */
 
 .event-dynamic-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 1; }
 .event-dynamic-particles::before,
@@ -1477,6 +2484,121 @@
 .event-card-fever-festival { --event-color: #dc2626; background: linear-gradient(to bottom, #450a0a, #dc2626) !important; }
 .event-card-sanguine       { --event-color: #7f1d1d; background: #2a0505 !important; }
 
+.event-card-tidal-surge {
+  --event-color: #22d3ee;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 211, 238, 0.07) 0%,
+    rgba(207, 250, 254, 0.18) 50%,
+    rgba(34, 211, 238, 0.07) 100%
+  ) !important;
+  border-color: rgba(34, 211, 238, 0.75) !important;
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.12), inset 0 0 6px rgba(34, 211, 238, 0.05) !important;
+}
+
+.event-card-solar-flare {
+  --event-color: #f59e0b;
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.07) 0%,
+    rgba(254, 243, 199, 0.2) 50%,
+    rgba(245, 158, 11, 0.07) 100%
+  ) !important;
+  border-color: rgba(245, 158, 11, 0.75) !important;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15), inset 0 0 8px rgba(251, 191, 36, 0.05) !important;
+}
+
+.event-card-cyclone-blitz {
+  --event-color: #94a3b8;
+  background: linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.07) 0%,
+    rgba(226, 232, 240, 0.18) 50%,
+    rgba(148, 163, 184, 0.07) 100%
+  ) !important;
+  border-color: rgba(148, 163, 184, 0.75) !important;
+  box-shadow: 0 0 14px rgba(148, 163, 184, 0.1) !important;
+}
+
+.event-card-mirage-cataclysm {
+  --event-color: #a855f7;
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.06) 0%,
+    rgba(253, 230, 138, 0.14) 50%,
+    rgba(168, 85, 247, 0.06) 100%
+  ) !important;
+  border-color: rgba(168, 85, 247, 0.65) !important;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.1), inset 0 0 4px rgba(217, 119, 6, 0.05) !important;
+}
+
+/* Shimmer animation for all event-card-base entries */
+@keyframes event-card-bg-shimmer {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.event-card-base {
+  background-size: 200% 200% !important;
+  animation: event-card-bg-shimmer 3s linear infinite;
+}
+/* ─── Global event badge shimmer text animations ─── */
+
+@keyframes global-shimmer-tidal {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.global-shimmer-tidal {
+  background: linear-gradient(90deg, #06b6d4 0%, #a5f3fc 30%, #ffffff 50%, #a5f3fc 70%, #06b6d4 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: global-shimmer-tidal 2.5s linear infinite;
+  display: inline-block;
+}
+
+@keyframes global-shimmer-solar {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.global-shimmer-solar {
+  background: linear-gradient(90deg, #d97706 0%, #fde68a 30%, #ffffff 50%, #fde68a 70%, #d97706 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: global-shimmer-solar 2s linear infinite;
+  display: inline-block;
+}
+
+@keyframes global-shimmer-cyclone {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.global-shimmer-cyclone {
+  background: linear-gradient(90deg, #64748b 0%, #e2e8f0 30%, #ffffff 50%, #e2e8f0 70%, #64748b 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: global-shimmer-cyclone 3s linear infinite;
+  display: inline-block;
+}
+
+@keyframes global-shimmer-mirage {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.global-shimmer-mirage {
+  background: linear-gradient(90deg, #a855f7 0%, #fde68a 30%, #ffffff 50%, #d97706 70%, #a855f7 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: global-shimmer-mirage 2.8s linear infinite;
+  display: inline-block;
+}
+
 /* --- SECTION I: FLASH EVENT CONFETTI / PARTICLE-BURST KEYFRAMES --- */
 /* Flash events only - festivals and win streaks use their own JS renderers */
 
@@ -1552,4 +2674,352 @@
     transform: translate(-50%, -50%) translate(var(--vx), var(--vy)) scale(0);
     opacity: 0;
   }
+}
+/* ═══════════════════════════════════════════════════════════════════
+    GLOBAL EVENTS SYSTEM
+    Tidal Surge · Solar Flare · Cyclone Blitz · Mirage Cataclysm
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* --- SECTION K: GLOBAL EVENT CARD RINGS --- */
+
+@keyframes tidal-wave-border {
+  0%, 100% { border-color: rgba(34, 211, 238, 0.5); box-shadow: 0 0 10px rgba(34,211,238,0.2); }
+  50%       { border-color: rgba(34, 211, 238, 1);   box-shadow: 0 0 24px rgba(34,211,238,0.5), inset 0 0 8px rgba(34,211,238,0.1); }
+}
+.tidal-ring { animation: tidal-wave-border 2s ease-in-out infinite; }
+
+@keyframes solar-flare-border {
+  0%, 100% { border-color: rgba(245, 158, 11, 0.6); box-shadow: 0 0 12px rgba(245,158,11,0.25); }
+  50%       { border-color: rgba(253, 230, 138, 1);  box-shadow: 0 0 30px rgba(245,158,11,0.6), 0 0 60px rgba(251,191,36,0.2); filter: brightness(1.05); }
+}
+.solar-ring { animation: solar-flare-border 1.8s ease-in-out infinite; }
+
+@keyframes cyclone-spin-border {
+  0%   { border-color: rgba(148,163,184,0.5); box-shadow: 0 0 8px rgba(148,163,184,0.15); }
+  33%  { border-color: rgba(16,185,129,0.8);  box-shadow: 0 0 16px rgba(16,185,129,0.3); }
+  66%  { border-color: rgba(148,163,184,0.8); box-shadow: 0 0 20px rgba(148,163,184,0.4); }
+  100% { border-color: rgba(148,163,184,0.5); box-shadow: 0 0 8px rgba(148,163,184,0.15); }
+}
+.cyclone-ring { animation: cyclone-spin-border 2.4s linear infinite; }
+
+@keyframes mirage-shimmer-border {
+  0%   { border-color: rgba(168,85,247,0.4); box-shadow: 0 0 8px rgba(168,85,247,0.1); }
+  30%  { border-color: rgba(217,119,6,0.8);  box-shadow: 0 0 20px rgba(217,119,6,0.3); }
+  60%  { border-color: rgba(168,85,247,0.8); box-shadow: 0 0 24px rgba(168,85,247,0.4); }
+  100% { border-color: rgba(168,85,247,0.4); box-shadow: 0 0 8px rgba(168,85,247,0.1); }
+}
+.mirage-ring { animation: mirage-shimmer-border 3s ease-in-out infinite; }
+
+/* --- GLOBAL EVENT BACKGROUND SILK --- */
+
+.event-bg-global_tidal_surge     { background: linear-gradient(to bottom, rgba(34,211,238,0.05), rgba(34,211,238,0.18)) !important; }
+.event-bg-global_solar_flare     { background: linear-gradient(to bottom, rgba(245,158,11,0.05), rgba(251,191,36,0.2)) !important; }
+.event-bg-global_cyclone_blitz   { background: linear-gradient(to bottom, rgba(148,163,184,0.04), rgba(148,163,184,0.16)) !important; }
+.event-bg-global_mirage_cataclysm { background: linear-gradient(to bottom, rgba(168,85,247,0.04), rgba(217,119,6,0.14)) !important; }
+
+/* --- GLOBAL EVENT SIDE SHADOWS (ticker/header) --- */
+
+.event-side-global_tidal_surge     { box-shadow: inset 50px 0 80px -50px rgba(34,211,238,0.3),  inset -50px 0 80px -50px rgba(34,211,238,0.3); }
+.event-side-global_solar_flare     { box-shadow: inset 50px 0 80px -50px rgba(245,158,11,0.3),  inset -50px 0 80px -50px rgba(245,158,11,0.3); }
+.event-side-global_cyclone_blitz   { box-shadow: inset 50px 0 80px -50px rgba(148,163,184,0.3), inset -50px 0 80px -50px rgba(148,163,184,0.3); }
+.event-side-global_mirage_cataclysm { box-shadow: inset 50px 0 80px -50px rgba(168,85,247,0.25), inset -50px 0 80px -50px rgba(217,119,6,0.25); }
+
+/* --- GLOBAL EVENT NAV GLOW --- */
+
+.nav-glow-global_tidal_surge     { box-shadow: 0 10px 30px -10px rgba(34,211,238,0.35); }
+.nav-glow-global_solar_flare     { box-shadow: 0 10px 30px -10px rgba(245,158,11,0.35); }
+.nav-glow-global_cyclone_blitz   { box-shadow: 0 10px 30px -10px rgba(148,163,184,0.3); }
+.nav-glow-global_mirage_cataclysm { box-shadow: 0 10px 30px -10px rgba(168,85,247,0.3); }
+
+/* --- GLOBAL EVENT TICKER TOP GLOW --- */
+
+.ticker-glow-tidal   { background: linear-gradient(90deg, transparent, #22d3ee, transparent); }
+.ticker-glow-solar   { background: linear-gradient(90deg, transparent, #f59e0b, transparent); }
+.ticker-glow-cyclone { background: linear-gradient(90deg, transparent, #94a3b8, transparent); }
+.ticker-glow-mirage  { background: linear-gradient(90deg, transparent, #a855f7, transparent); }
+
+/* --- GLOBAL EVENT BORDER (header border-image) --- */
+
+.event-border-global_tidal_surge     { border-image: linear-gradient(to right, transparent, #22d3ee, #a5f3fc, #22d3ee, transparent) 1; }
+.event-border-global_solar_flare     { border-image: linear-gradient(to right, transparent, #f59e0b, #fde68a, #f59e0b, transparent) 1; }
+.event-border-global_cyclone_blitz   { border-image: linear-gradient(to right, transparent, #94a3b8, #e2e8f0, #94a3b8, transparent) 1; }
+.event-border-global_mirage_cataclysm { border-image: linear-gradient(to right, transparent, #a855f7, #d97706, #a855f7, transparent) 1; }
+
+/* --- GLOBAL EVENT PARTICLE MAPS --- */
+
+.particles-global_tidal_surge::before,
+.particles-global_tidal_surge::after {
+  background-image:
+    radial-gradient(ellipse 2px 4px at 20% 80%, #a5f3fc 0%, transparent 70%),
+    radial-gradient(ellipse 1.5px 3.5px at 50% 40%, #22d3ee 0%, transparent 70%),
+    radial-gradient(ellipse 2px 3px at 80% 20%, #cffafe 0%, transparent 70%);
+}
+
+.particles-global_solar_flare::before,
+.particles-global_solar_flare::after {
+  background-image:
+    radial-gradient(ellipse 2px 4px at 15% 90%, #fef3c7 0%, transparent 70%),
+    radial-gradient(ellipse 1.5px 3.5px at 55% 50%, #f59e0b 0%, transparent 70%),
+    radial-gradient(ellipse 2px 3px at 85% 15%, #fbbf24 0%, transparent 70%);
+}
+
+.particles-global_cyclone_blitz::before,
+.particles-global_cyclone_blitz::after {
+  background-image:
+    radial-gradient(ellipse 2px 4px at 25% 75%, #e2e8f0 0%, transparent 70%),
+    radial-gradient(ellipse 1.5px 3.5px at 60% 35%, #94a3b8 0%, transparent 70%),
+    radial-gradient(ellipse 2px 3px at 80% 65%, #6ee7b7 0%, transparent 70%);
+}
+
+.particles-global_mirage_cataclysm::before,
+.particles-global_mirage_cataclysm::after {
+  background-image:
+    radial-gradient(ellipse 2px 4px at 20% 80%, #fde68a 0%, transparent 70%),
+    radial-gradient(ellipse 1.5px 3.5px at 55% 45%, #a855f7 0%, transparent 70%),
+    radial-gradient(ellipse 2px 3px at 85% 20%, #d97706 0%, transparent 70%);
+}
+
+/* --- GLOBAL EVENT HISTORY CARDS (profile/analysis pages) --- */
+
+.event-card-tidal-surge {
+  --event-color: #22d3ee;
+  background: linear-gradient(135deg, rgba(34,211,238,0.07) 0%, rgba(207,250,254,0.15) 50%, rgba(34,211,238,0.07) 100%) !important;
+  border-color: rgba(34,211,238,0.7) !important;
+}
+.event-card-solar-flare {
+  --event-color: #f59e0b;
+  background: linear-gradient(135deg, rgba(245,158,11,0.07) 0%, rgba(254,243,199,0.18) 50%, rgba(245,158,11,0.07) 100%) !important;
+  border-color: rgba(245,158,11,0.7) !important;
+}
+.event-card-cyclone-blitz {
+  --event-color: #94a3b8;
+  background: linear-gradient(135deg, rgba(148,163,184,0.07) 0%, rgba(226,232,240,0.15) 50%, rgba(148,163,184,0.07) 100%) !important;
+  border-color: rgba(148,163,184,0.7) !important;
+}
+.event-card-mirage-cataclysm {
+  --event-color: #a855f7;
+  background: linear-gradient(135deg, rgba(168,85,247,0.06) 0%, rgba(253,230,138,0.12) 50%, rgba(168,85,247,0.06) 100%) !important;
+  border-color: rgba(168,85,247,0.6) !important;
+}
+/* --- SECTION K: GLOBAL EVENT CONFETTI / PARTICLE-BURST KEYFRAMES --- */
+
+/*  TIDAL SURGE (Hydro-Torrent Wave) */
+
+@keyframes tidal-wave-slam {
+  0%   { transform: translateX(-110%) scaleY(1);   opacity: 0.9; }
+  15%  { opacity: 1; }
+  65%  { transform: translateX(15%)   scaleY(1.08); opacity: 0.85; }
+  100% { transform: translateX(115%)  scaleY(0.7);  opacity: 0; }
+}
+
+@keyframes tidal-foam-slam {
+  0%   { transform: translateX(-115%); opacity: 0.85; }
+  100% { transform: translateX(120%);  opacity: 0; }
+}
+
+@keyframes tidal-droplet-gravity {
+  0%   { transform: translate(0, 0)                   scale(1);   opacity: 1;   }
+  60%  { transform: translate(var(--vx), var(--vy))    scale(0.9); opacity: 0.8; }
+  100% { transform: translate(var(--vx), calc(var(--vy) + 90px)) scale(0.3); opacity: 0; }
+}
+
+@keyframes tidal-mist-fade {
+  0%   { transform: translateY(0)    scale(1);   opacity: 0.55; }
+  100% { transform: translateY(-28px) scale(1.5); opacity: 0;    }
+}
+
+@keyframes tidal-submersion {
+  0%   { opacity: 0;    }
+  20%  { opacity: 0.12; }
+  70%  { opacity: 0.08; }
+  100% { opacity: 0;    }
+}
+
+/* SOLAR FLARE (Solar Blast Impact) */
+
+@keyframes solar-supernova-flash {
+  0%   { transform: translate(-50%, -50%) scale(0.05); opacity: 0; }
+  5%   { transform: translate(-50%, -50%) scale(1.8); opacity: 1; filter: blur(3px); }
+  20%  { transform: translate(-50%, -50%) scale(3.8); opacity: 0.95; filter: blur(10px); }
+  100% { transform: translate(-50%, -50%) scale(6.5); opacity: 0; filter: blur(30px); }
+}
+
+@keyframes solar-corona-ring {
+  0%   { transform: translate(-50%, -50%) scale(0.05); opacity: 0; }
+  8%   { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(4.8); opacity: 0; }
+}
+
+@keyframes solar-beam-down {
+  0%   { height: 0;     opacity: 1;   }
+  45%  { opacity: 1;    }
+  100% { height: 680px; opacity: 0;   }
+}
+
+@keyframes solar-beam-down-fs {
+  0%   { height: 0vh;   opacity: 1;  }
+  45%  { opacity: 1;    }
+  100% { height: 110vh; opacity: 0;  }
+}
+
+@keyframes solar-thermal-flicker {
+  0%   { opacity: 0; }
+  2%   { opacity: 0.95; background: rgba(255,255,255,1); }
+  10%  { opacity: 0.65; background: rgba(255,235,160,0.85); }
+  18%  { opacity: 0.85; background: rgba(255,220,130,0.7); }
+  35%  { opacity: 0.25; }
+  60%  { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+
+/* CYCLONE BLITZ (Vortex Funnel Outbreak) */
+
+@keyframes cyclone-vortex-swirl {
+  0%   { transform: rotate(0deg) scale(0.65); }
+  15%  { transform: rotate(120deg) scale(1.2); }
+  100% { transform: rotate(720deg) scale(1.45); }
+}
+
+@keyframes cyclone-spawn-compress {
+  0%   { transform: rotate(var(--angle)) translateX(var(--r-start, 10px)) scale(0); opacity: 0; }
+  25%  { transform: rotate(var(--angle)) translateX(var(--r-start, 10px)) scale(1); opacity: 1; }
+  75%  { transform: rotate(var(--angle)) translateX(var(--r-start, 10px)) scale(1.15); opacity: 1; }
+  100% { transform: rotate(var(--angle)) translateX(var(--r-start, 10px)) scale(0); opacity: 0; }
+}
+
+@keyframes cyclone-expand-orbit {
+  0%   { transform: rotate(var(--angle)) translateX(var(--r-start, 12px)) scale(0); opacity: 0; }
+  12%  { transform: rotate(var(--angle)) translateX(var(--r-start, 12px)) scale(1.25); opacity: 1; }
+  100% { transform: rotate(calc(var(--angle) + var(--spin))) translateX(var(--r-end)) scale(0); opacity: 0; }
+}
+
+@keyframes cyclone-disperse {
+  0%   { transform: rotate(var(--angle)) translateX(var(--r-end)) scale(0); opacity: 0; }
+  15%  { transform: rotate(var(--angle)) translateX(var(--r-end)) scale(1); opacity: 1; }
+  100% { transform: rotate(calc(var(--angle) + 180deg)) translateX(calc(var(--r-end) * 2.5)) scale(0); opacity: 0; }
+}
+
+@keyframes cyclone-wind-ltr {
+  0%   { transform: translateX(-120%) skewX(-28deg); opacity: 0; }
+  15%  { opacity: 0.95; }
+  85%  { opacity: 0.95; }
+  100% { transform: translateX(120%) skewX(-28deg); opacity: 0; }
+}
+
+@keyframes cyclone-wind-rtl {
+  0%   { transform: translateX(120%) skewX(28deg); opacity: 0; }
+  15%  { opacity: 0.95; }
+  85%  { opacity: 0.95; }
+  100% { transform: translateX(-120%) skewX(28deg); opacity: 0; }
+}
+
+@keyframes cyclone-wind-ltr-fs {
+  0%   { transform: translateX(-120%) skewX(-32deg); opacity: 0; }
+  12%  { opacity: 0.95; }
+  88%  { opacity: 0.95; }
+  100% { transform: translateX(120%) skewX(-32deg); opacity: 0; }
+}
+
+@keyframes cyclone-wind-rtl-fs {
+  0%   { transform: translateX(120%) skewX(32deg); opacity: 0; }
+  12%  { opacity: 0.95; }
+  88%  { opacity: 0.95; }
+  100% { transform: translateX(-120%) skewX(32deg); opacity: 0; }
+}
+
+/* MIRAGE CATACLYSM (Sandstorm Surge) */
+
+@keyframes mirage-radial-burst {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg);                            opacity: 1;   }
+  100% { transform: translate(var(--vx), var(--vy)) scale(0.4) rotate(var(--spin));   opacity: 0;   }
+}
+
+@keyframes mirage-dust-wall {
+  0%   { transform: translateX(110%);  opacity: 0.9; }
+  20%  { opacity: 0.8; }
+  100% { transform: translateX(-115%); opacity: 0;   }
+}
+
+@keyframes mirage-sine-sweep {
+  0%   { transform: translateX(var(--start-x)) translateY(0px);                    opacity: 0.8; }
+  25%  { transform: translateX(calc(var(--start-x) * 0.5)) translateY(var(--amp)); }
+  50%  { transform: translateX(0px) translateY(calc(var(--amp) * -1));             }
+  75%  { transform: translateX(calc(var(--start-x) * -0.5)) translateY(var(--amp));}
+  100% { transform: translateX(calc(var(--start-x) * -1.2)) translateY(0px);       opacity: 0;   }
+}
+
+@keyframes mirage-alpha-decay {
+  0%   { opacity: var(--start-opacity, 0.7); }
+  100% { opacity: 0; }
+}
+
+@keyframes mirage-apex-bloom {
+  0%   { transform: translateX(-50%) scale(0.3); opacity: 0.9; }
+  40%  { opacity: 0.7; }
+  100% { transform: translateX(-50%) scale(2.0); opacity: 0;   }
+}
+
+/* --- SECTION K: GLOBAL EVENT ACTIVATION OVERLAY KEYFRAMES --- */
+/* Full-viewport variants - used only by GlobalEventActivationOverlay  */
+
+/* TIDAL SURGE activation */
+
+/* Wave sweeps full viewport width */
+@keyframes tidal-wave-slam-fs {
+  0%   { transform: translateX(-110%) scaleY(1);    opacity: 0.92; }
+  12%  { opacity: 1; }
+  60%  { transform: translateX(10%)   scaleY(1.1);  opacity: 0.88; }
+  100% { transform: translateX(115%)  scaleY(0.75); opacity: 0;    }
+}
+@keyframes tidal-foam-slam-fs {
+  0%   { transform: translateX(-115%); opacity: 0.88; }
+  100% { transform: translateX(122%);  opacity: 0;    }
+}
+
+/* Submersion overlay opacity */
+@keyframes tidal-submersion-fs {
+  0%   { opacity: 0;    }
+  18%  { opacity: 0.14; }
+  65%  { opacity: 0.09; }
+  100% { opacity: 0;    }
+}
+
+/* SOLAR FLARE activation */
+
+/* Beam strikes full viewport height */
+@keyframes solar-beam-down-fs {
+  0%   { height: 0vh;   opacity: 1;  }
+  50%  { opacity: 1;    }
+  100% { height: 110vh; opacity: 0;  }
+}
+
+/* CYCLONE BLITZ activation */
+
+/* Wind streaks full viewport */
+@keyframes cyclone-wind-ltr-fs {
+  0%   { transform: translateX(-110%) skewX(-12deg); opacity: 0;    }
+  12%  { opacity: 0.6; }
+  88%  { opacity: 0.5; }
+  100% { transform: translateX(115%)  skewX(-12deg); opacity: 0;    }
+}
+/* Funnel expansion */
+@keyframes cyclone-funnel-expand-fs {
+  0%   { transform: translate(-50%, -50%) scale(0.08) rotate(0deg);   opacity: 0.85; }
+  45%  { opacity: 0.65; }
+  100% { transform: translate(-50%, -50%) scale(4.5)  rotate(540deg); opacity: 0;    }
+}
+
+/* MIRAGE CATACLYSM activation */
+
+/* Dust wall full viewport */
+@keyframes mirage-dust-wall-fs {
+  0%   { transform: translateX(112%);  opacity: 0.92; }
+  18%  { opacity: 0.82; }
+  100% { transform: translateX(-118%); opacity: 0;    }
+}
+/* Apex bloom full viewport */
+@keyframes mirage-apex-bloom-fs {
+  0%   { transform: translateX(-50%) scale(0.2); opacity: 0.95; }
+  40%  { opacity: 0.75; }
+  100% { transform: translateX(-50%) scale(3.5); opacity: 0;    }
 }

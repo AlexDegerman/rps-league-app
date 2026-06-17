@@ -1,5 +1,4 @@
 'use client'
-
 import type { VisualMode, FestivalModeKey } from '@/types/rps'
 
 interface ModeButtonProps {
@@ -16,7 +15,12 @@ const MODE_BTN_CLASS: Record<string, string> = {
   flash_cards: 'cards-btn',
   flash_hellfire: 'flash-hellfire-btn',
   winstreak_inferno: 'inferno-btn',
-  winstreak_fever: 'fever-btn'
+  winstreak_fever: 'fever-btn',
+  global_tidal_surge: 'bg-cyan-500 hover:bg-cyan-600 text-white',
+  global_solar_flare: 'bg-amber-500 hover:bg-amber-600 text-white',
+  global_cyclone_blitz: 'bg-slate-500 hover:bg-slate-600 text-white',
+  global_mirage_cataclysm:
+    'bg-gradient-to-r from-purple-500 to-amber-500 text-white'
 }
 
 const FESTIVAL_BTN_CLASS: Record<string, string> = {
@@ -27,7 +31,7 @@ const FESTIVAL_BTN_CLASS: Record<string, string> = {
   festival_vault: 'bg-indigo-500 hover:bg-indigo-600 text-white',
   festival_spark: 'electric-btn',
   festival_sanguine: 'bg-red-800 hover:bg-red-900 text-white',
-  festival_fever: 'bg-orange-600 text-white'
+  festival_fever: 'bg-orange-600 hover:bg-orange-700 text-white'
 }
 
 export default function ModeButton({

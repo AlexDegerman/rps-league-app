@@ -37,7 +37,7 @@ export function StyleSelect({
         <span
           className={`relative z-10 ${selected ? selected.cls : 'text-gray-400'}`}
         >
-          {selected ? selected.label : '— Select a style —'}
+          {selected ? selected.label : '- Select a style -'}
         </span>
         <span className="relative z-10 text-gray-400 text-[10px]">
           {open ? '▲' : '▼'}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback, useRef, useState } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import {
   fetchLatestMatches,
   fetchPendingMatches,
@@ -13,13 +13,11 @@ import {
   fetchIdleEligibility,
   fetchUserFlashState,
   fetchFestivalState,
-  postFestivalParticipated
+  postFestivalParticipated,
+  fetchGlobalEventState
 } from '@/lib/api'
 import MatchList from '@/components/game/MatchList'
 import PendingMatchCard from '@/components/game/PendingMatchCard'
-import GemIcon from '@/components/icons/GemIcon'
-import InfoIcon from '@/components/icons/InfoIcon'
-import CloseIcon from '@/components/icons/CloseIcon'
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
@@ -30,24 +28,18 @@ import type {
   EventTheme,
   FestivalModeKey,
   VisualMode,
-  FestivalSSEData
+  FestivalSSEData,
+  GlobalEventStartSSEData,
+  GlobalEventWarningSSEData,
+  GlobalEventType,
+  GlobalEventPhase
 } from '@/types/rps'
-import {
-  formatPoints,
-  getDisplayTierClass,
-  getFullNumberName,
-  parseShorthand
-} from '@/lib/format'
 import { useSound } from '@/hooks/useSound'
-import SoundIcon from '@/components/icons/SoundIcon'
 import LiveStatsTicker from '@/components/tickers/LiveStatTicker'
 import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
 import EdgeGlow from '@/components/overlays/EdgeGlow'
 import ConfettiOverlay from '@/components/overlays/ConfettiOverlay'
 import ResultAnimOverlay from '@/components/overlays/ResultAnimOverlay'
-import FlashBadge from '@/components/badges/FlashBadge'
-import StreakBadge from '@/components/badges/StreakBadge'
-import ModeButton from '@/components/ui/ModeButton'
 import { useGameStore } from './stores/gameStore'
 import { useUserStore } from './stores/userStore'
 import { useUIStore } from './stores/uiStore'
@@ -62,9 +54,7 @@ import { CURRENT_VERSION } from '@/lib/updates'
 import { useIdleStore } from './stores/idleStore'
 import { useIdleBet } from '@/hooks/useIdleBet'
 import IdleBetControls from '@/components/ui/IdleBetControls'
-import FestivalTicker from '@/components/tickers/FestivalTicker'
 import AchievementToast from '@/components/game/AchievementToast'
-import RelicSlot from '@/components/relics/RelicSlot'
 import RelicDrawer from '@/components/relics/RelicDrawer'
 import RelicDropPopup from '@/components/relics/RelicDropPopup'
 import { useRelicStore } from './stores/relicStore'
@@ -74,9 +64,12 @@ import BonusExplainerModal, {
 } from '@/components/modals/BonusExplainerModal'
 import FlashEventActivationOverlay from '@/components/overlays/FlashEventActivationOverlay'
 import { usePopupQueue } from '@/hooks/usePopupQueue'
-import { unlockOracle } from '@/lib/oracleTTS'
+import { speakOracle, unlockOracle } from '@/lib/oracleTTS'
 import GlobalTickerWrapper from '@/components/layout/GlobalTickerWrapper'
-import SoundControlPopover from '@/components/ui/SoundControlPopover'
+import { buildGlobalEventCountdownSpeech, GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/lib/globalEvents'
+import GlobalEventActivationOverlay from '@/components/overlays/GlobalEventActivationOverlay'
+import EventTimerTicker from '@/components/tickers/EventTimerTicker'
+import DashboardCard from '@/components/game/DashboardCard'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -94,7 +87,6 @@ export default function HomePage() {
     deletePrediction,
     activeFlashEvent,
     setActiveFlashEvent,
-    flashBuffRemaining,
     setFlashBuffRemaining,
     decrementFlashBuff,
     serverOffset,
@@ -106,27 +98,26 @@ export default function HomePage() {
     oracleSide,
     setOracleSide,
     setActiveFestival,
-    festivalModeKey
+    festivalModeKey,
+    activeGlobalEvent,
+    globalEventPhase,
+    setGlobalEventWarning,
+    setGlobalEventActive,
+    globalEventActiveAt
   } = useGameStore()
 
   // - User store -
   const {
     points,
-    pointsLoaded,
-    betAmount,
     setBetAmount,
     autoAllIn,
-    setAutoAllIn,
     isHydrated,
     winStreak,
     setWinStreak,
     streakMult,
     setStreakMult,
-    displayNickname,
-    dailyRank,
     setDailyRank,
     applyPointsUpdate,
-    stylePreference,
     laps,
     setLaps,
     setFastestLapBets
@@ -143,13 +134,7 @@ export default function HomePage() {
     triggerError,
     showJumpButton,
     setShowJumpButton,
-    showPointsInfo,
-    setShowPointsInfo,
-    showPointsExplainer,
-    setShowPointsExplainer,
     isFocused,
-    setIsFocused,
-    inputString,
     setInputString,
     persistentError,
     setPersistentError,
@@ -164,10 +149,11 @@ export default function HomePage() {
     dequeuePopup,
     readyToShow,
     oracleVolume,
-    setOracleVolume
+    showGlobalActivationOverlay,
+    setShowGlobalActivationOverlay
   } = useUIStore()
 
-  const { setEligible, setHasInteractedWithIdle } = useIdleStore()
+  const { setEligible } = useIdleStore()
   useIdleBet()
 
   const {
@@ -178,15 +164,24 @@ export default function HomePage() {
     playFire,
     playMoon,
     playFanfare,
-    soundOn,
-    toggleSound,
-    volume,
-    setVolume
+    playTidalSurge,
+    playSolarFlare,
+    playCycloneBlitz,
+    playMirageCataclysm
   } = useSound()
-  const [showSoundPopover, setShowSoundPopover] = useState(false)
-  const soundBtnRef = useRef<HTMLButtonElement>(null)
 
-  usePopupQueue({ playMoon, playCards, playElectric, playFire, playFanfare })
+  usePopupQueue({
+    playMoon,
+    playCards,
+    playElectric,
+    playFire,
+    playFanfare,
+    playTidalSurge,
+    playSolarFlare,
+    playCycloneBlitz,
+    playMirageCataclysm
+  })
+
   const esRef = useRef<EventSource | null>(null)
   const clearAnimTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -205,6 +200,8 @@ export default function HomePage() {
 
   const getVisualMode = (
     flash: string | null,
+    globalEvent: GlobalEventType | null,
+    globalPhase: GlobalEventPhase | null,
     festival: FestivalModeKey | null,
     streak: number
   ): VisualMode => {
@@ -212,6 +209,12 @@ export default function HomePage() {
     if (flash === 'ELECTRIC') return 'flash_electric'
     if (flash === 'CARDS') return 'flash_cards'
     if (flash === 'HELLFIRE') return 'flash_hellfire'
+    if (globalEvent && globalPhase === 'active') {
+      if (globalEvent === 'TIDAL_SURGE') return 'global_tidal_surge'
+      if (globalEvent === 'SOLAR_FLARE') return 'global_solar_flare'
+      if (globalEvent === 'CYCLONE_BLITZ') return 'global_cyclone_blitz'
+      if (globalEvent === 'MIRAGE_CATACLYSM') return 'global_mirage_cataclysm'
+    }
 
     if (festival) return festival
 
@@ -221,7 +224,13 @@ export default function HomePage() {
     return null
   }
 
-  const visualMode = getVisualMode(activeFlashEvent, festivalModeKey, winStreak)
+  const visualMode = getVisualMode(
+    activeFlashEvent,
+    activeGlobalEvent,
+    globalEventPhase,
+    festivalModeKey,
+    winStreak
+  )
 
   useEffect(() => {
     setVisualMode(visualMode)
@@ -242,6 +251,107 @@ export default function HomePage() {
     const timer = setInterval(tickNow, 100)
     return () => clearInterval(timer)
   }, [tickNow])
+
+  // Global event warning countdown TTS, fires at 60s and 30s before active
+  const countdownAnnouncedRef = useRef<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (
+      !activeGlobalEvent ||
+      globalEventPhase !== 'warning' ||
+      !globalEventActiveAt
+    ) {
+      countdownAnnouncedRef.current.clear()
+      return
+    }
+
+    const interval = setInterval(() => {
+      const msLeft = globalEventActiveAt - (Date.now() + serverOffset)
+      if (msLeft <= 0) return
+
+      // Announce at ~60s and ~30s remaining (500ms tolerance window)
+      const shouldAnnounce60 = msLeft <= 62000 && msLeft >= 58000
+      const shouldAnnounce30 = msLeft <= 32000 && msLeft >= 28000
+
+      const key60 = `${activeGlobalEvent}-60`
+      const key30 = `${activeGlobalEvent}-30`
+
+      if (shouldAnnounce60 && !countdownAnnouncedRef.current.has(key60)) {
+        countdownAnnouncedRef.current.add(key60)
+        const speech = buildGlobalEventCountdownSpeech(
+          activeGlobalEvent,
+          msLeft
+        )
+        speakOracle(speech, oracleVolume)
+        setOracleTickerMessage({
+          id: `global-countdown-60-${Date.now()}`,
+          content: (
+            <span>
+              <span
+                className="font-black uppercase"
+                style={{
+                  color:
+                    GLOBAL_EVENT_REGISTRY[
+                      GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]
+                    ]?.color ?? '#94a3b8'
+                }}
+              >
+                {GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
+                  ?.label ?? activeGlobalEvent}
+              </span>{' '}
+              activates in approximately 1 minute.
+            </span>
+          ),
+          accentColor:
+            GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
+              ?.color ?? '#94a3b8',
+          durationMs: 6000
+        })
+      }
+
+      if (shouldAnnounce30 && !countdownAnnouncedRef.current.has(key30)) {
+        countdownAnnouncedRef.current.add(key30)
+        const speech = buildGlobalEventCountdownSpeech(
+          activeGlobalEvent,
+          msLeft
+        )
+        speakOracle(speech, oracleVolume)
+        setOracleTickerMessage({
+          id: `global-countdown-30-${Date.now()}`,
+          content: (
+            <span>
+              <span
+                className="font-black uppercase"
+                style={{
+                  color:
+                    GLOBAL_EVENT_REGISTRY[
+                      GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]
+                    ]?.color ?? '#94a3b8'
+                }}
+              >
+                {GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
+                  ?.label ?? activeGlobalEvent}
+              </span>{' '}
+              imminent. 30 seconds.
+            </span>
+          ),
+          accentColor:
+            GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
+              ?.color ?? '#94a3b8',
+          durationMs: 5000
+        })
+      }
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [
+    activeGlobalEvent,
+    globalEventPhase,
+    globalEventActiveAt,
+    serverOffset,
+    oracleVolume,
+    setOracleTickerMessage
+  ])
 
   // scroll-to-top button
   useEffect(() => {
@@ -300,10 +410,6 @@ export default function HomePage() {
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
   const { matches, setMatches, hasMore, isLoadingMore, loadMatches } =
     useInfiniteScroll({ fetchFn })
-
-  const animatedPoints = useAnimatedBigInt(points, 1000)
-  const { full, capped } = formatPoints(points)
-  const { display: animatedDisplay } = formatPoints(animatedPoints)
   const animatedResult = useAnimatedBigInt(resultAnim?.amount ?? 0n, 600, true)
 
   // initial data fetch
@@ -420,6 +526,19 @@ export default function HomePage() {
       })
       .catch(() => {})
 
+    fetchGlobalEventState()
+      .then((data) => {
+        if (data?.event) {
+          const { type, phase, activeAt, endsAt } = data.event
+          if (phase === 'warning') {
+            setGlobalEventWarning(type, activeAt, endsAt)
+          } else if (phase === 'active') {
+            setGlobalEventActive(type, endsAt)
+          }
+        }
+      })
+      .catch(() => {})
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
 
@@ -499,9 +618,31 @@ export default function HomePage() {
         else if (currentFlash === 'CARDS') playCards()
         else if (currentFlash === 'ELECTRIC') playElectric()
         else if (currentFlash === 'HELLFIRE') playFire()
-        else playWin()
+        else {
+          const {
+            activeGlobalEvent: winGlobal,
+            globalEventPhase: winGlobalPhase
+          } = useGameStore.getState()
+          if (winGlobal && winGlobalPhase === 'active') {
+            if (winGlobal === 'TIDAL_SURGE') playTidalSurge()
+            else if (winGlobal === 'SOLAR_FLARE') playSolarFlare()
+            else if (winGlobal === 'CYCLONE_BLITZ') playCycloneBlitz()
+            else if (winGlobal === 'MIRAGE_CATACLYSM')
+              playMirageCataclysm()
+            else playWin()
+          } else {
+            playWin()
+          }
+        }
 
         const currentStreak = data.streakAfter ?? 0
+        const {
+          activeGlobalEvent: currentGlobal,
+          globalEventPhase: currentGlobalPhase
+        } = useGameStore.getState()
+        const globalIsActive =
+          currentGlobal && currentGlobalPhase === 'active'
+
         const capturedConfettiType =
           currentFlash === 'HELLFIRE'
             ? 'hellfire'
@@ -511,11 +652,20 @@ export default function HomePage() {
                 ? 'electric'
                 : currentFlash === 'CARDS'
                   ? 'cards'
-                  : currentStreak >= 5
-                    ? 'inferno'
-                    : currentStreak >= 3
-                      ? 'fever'
-                      : 'normal'
+                  : globalIsActive && currentGlobal === 'TIDAL_SURGE'
+                    ? 'tidal_surge'
+                    : globalIsActive && currentGlobal === 'SOLAR_FLARE'
+                      ? 'solar_flare'
+                      : globalIsActive && currentGlobal === 'CYCLONE_BLITZ'
+                        ? 'cyclone_blitz'
+                        : globalIsActive &&
+                            currentGlobal === 'MIRAGE_CATACLYSM'
+                          ? 'mirage_cataclysm'
+                          : currentStreak >= 5
+                            ? 'inferno'
+                            : currentStreak >= 3
+                              ? 'fever'
+                              : 'normal'
 
         const bonus = data.bonus
           ? { ...data.bonus, amount: BigInt(data.bonus.amount) }
@@ -541,6 +691,10 @@ export default function HomePage() {
           preSoulAmount: data.preSoulAmount
             ? BigInt(data.preSoulAmount)
             : BigInt(data.amount),
+          globalEventType: data.globalEventType ?? null,
+          globalEchoAmount: data.globalEchoAmount
+            ? BigInt(data.globalEchoAmount)
+            : null,
           confetti: Array.from({ length: 100 }).map(() => ({
             leftOffset: Math.random() * 100 - 50,
             vx: (Math.random() - 0.5) * 300,
@@ -554,9 +708,11 @@ export default function HomePage() {
           ? { ...data.bonus, amount: BigInt(data.bonus.amount) }
           : null
         const { points: pointsBefore } = useUserStore.getState()
-        new Promise<{ newPoints: bigint; isNewPeak: boolean }>((resolve) => {
-          setTimeout(() => resolve(fetchUpdatedPoints()), 100)
-        }).then(({ newPoints }) => {
+        new Promise<{ newPoints: bigint; isNewPeak: boolean }>(
+          (resolve) => {
+            setTimeout(() => resolve(fetchUpdatedPoints()), 100)
+          }
+        ).then(({ newPoints }) => {
           const actualLoss =
             pointsBefore > newPoints ? pointsBefore - newPoints : 0n
           setResultAnim({
@@ -628,6 +784,8 @@ export default function HomePage() {
 
     es.addEventListener('festival_event', (event: MessageEvent) => {
       const data: FestivalSSEData = JSON.parse(event.data)
+      if (data.endsAt !== null && Date.now() > data.endsAt) return
+      const isStale = Date.now() - data.startedAt > 3000
       const { userId } = getOrCreateUser()
       if (data.triggerUserId !== userId) {
         postFestivalParticipated(userId).catch(() => {})
@@ -656,13 +814,79 @@ export default function HomePage() {
         FEVER: '#f97316',
         SANGUINE: '#991b1b'
       }
+      if (!isStale) {
+        setOracleTickerMessage({
+          id: `festival-${data.type}-${Date.now()}`,
+          content: data.message,
+          speech: data.speech,
+          accentColor: FESTIVAL_COLORS[data.type] ?? '#a855f7',
+          durationMs: 5000
+        })
+      }
+    })
+
+    es.addEventListener('global_event_warning', (event) => {
+      const data: GlobalEventWarningSSEData = JSON.parse(event.data)
+      if (Date.now() + serverOffset > data.endsAt) return
+
+      setGlobalEventWarning(data.type, data.activeAt, data.endsAt)
+
+      // Oracle-style warning announcement
+      const modeKey = GLOBAL_EVENT_MODE_MAP[data.type as GlobalEventType]
+      const config = modeKey ? GLOBAL_EVENT_REGISTRY[modeKey] : null
 
       setOracleTickerMessage({
-        id: `festival-${data.type}-${Date.now()}`,
-        content: data.message,
+        id: `global-warning-${data.type}-${Date.now()}`,
+        content: (
+          <span>
+            {data.message}{' '}
+            <span
+              className="font-black uppercase"
+              style={{ color: config?.color ?? '#94a3b8' }}
+            >
+              {config?.label ?? data.type}
+            </span>{' '}
+            activates soon.
+          </span>
+        ),
         speech: data.speech,
-        accentColor: FESTIVAL_COLORS[data.type] ?? '#a855f7',
-        durationMs: 5000
+        accentColor: config?.color ?? '#94a3b8',
+        durationMs: 12_000
+      })
+    })
+
+    es.addEventListener('global_event_start', (event) => {
+      const data: GlobalEventStartSSEData = JSON.parse(event.data)
+      if (Date.now() + serverOffset > data.endsAt) return
+      setGlobalEventActive(data.type, data.endsAt)
+
+      // Queue activation overlay through popup system (respects 1500ms delay,
+      // won't interrupt a flash overlay that might be showing)
+      useUIStore.getState().enqueuePopup({
+        id: `global-start-${data.type}-${Date.now()}`,
+        kind: 'global_event',
+        payload: { type: data.type, endsAt: data.endsAt }
+      })
+
+      const modeKey = GLOBAL_EVENT_MODE_MAP[data.type as GlobalEventType]
+      const config = modeKey ? GLOBAL_EVENT_REGISTRY[modeKey] : null
+
+      setOracleTickerMessage({
+        id: `global-active-${data.type}-${Date.now()}`,
+        content: (
+          <span>
+            <span
+              className="font-black uppercase"
+              style={{ color: config?.color ?? '#94a3b8' }}
+            >
+              {config?.label ?? data.type}
+            </span>{' '}
+            NOW ACTIVE -{' '}
+            {config?.effectText?.split(' - ')[1] ?? 'Global buff online.'}
+          </span>
+        ),
+        accentColor: config?.color ?? '#94a3b8',
+        durationMs: 8_000
       })
     })
 
@@ -786,10 +1010,6 @@ export default function HomePage() {
     setShowUpdateModal(false)
   }
 
-  const numberName = pointsLoaded ? getFullNumberName(points) : ''
-  const shouldShowTooltip =
-    showPointsExplainer && numberName && numberName !== 'Points'
-
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
       {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}
@@ -831,6 +1051,20 @@ export default function HomePage() {
           )}
 
           {activePopup.kind === 'relic_drop' && <RelicDropPopup />}
+
+          {activePopup.kind === 'global_event' &&
+            showGlobalActivationOverlay && (
+              <GlobalEventActivationOverlay
+                event={
+                  (activePopup.payload as { type: GlobalEventType })?.type ??
+                  null
+                }
+                onDone={() => {
+                  setShowGlobalActivationOverlay(false)
+                  dequeuePopup()
+                }}
+              />
+            )}
         </>
       )}
 
@@ -850,348 +1084,10 @@ export default function HomePage() {
           animatedResult={animatedResult}
         />
 
-        <div
-          className={`bg-white rounded-xl border shadow-sm p-2 transition-all duration-500 ${
-            visualMode === 'flash_lunar'
-              ? 'border-blue-200 lunar-ring'
-              : visualMode === 'flash_electric'
-                ? 'border-purple-400 electric-ring'
-                : visualMode === 'flash_cards'
-                  ? 'border-yellow-400 cards-ring'
-                  : visualMode === 'flash_hellfire'
-                    ? 'border-red-500 hellfire-ring'
-                    : visualMode === 'winstreak_inferno'
-                      ? 'border-orange-400 inferno-ring'
-                      : visualMode === 'winstreak_fever'
-                        ? 'border-green-400 fever-ring'
-                        : visualMode === 'festival_ghost'
-                          ? 'border-teal-300 ghost-ring'
-                          : visualMode === 'festival_safeguard'
-                            ? 'border-slate-300 safeguard-ring'
-                            : visualMode === 'festival_resonance'
-                              ? 'border-yellow-300 resonance-ring'
-                              : visualMode === 'festival_surge'
-                                ? 'border-cyan-300 surge-ring'
-                                : visualMode === 'festival_vault'
-                                  ? 'border-indigo-300 vault-ring'
-                                  : visualMode === 'festival_spark'
-                                    ? 'border-purple-300 spark-neon-pulse'
-                                    : visualMode === 'festival_fever'
-                                      ? 'border-orange-400 fever-festival-ring'
-                                      : visualMode === 'festival_sanguine'
-                                        ? 'border-red-900 sanguine-ring'
-                                        : 'border-gray-100'
-          }`}
-        >
-          {/* Top section */}
-          <div className="mb-1">
-            {/* Points + Mute */}
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex flex-col gap-1 min-w-0 flex-1">
-                {/* Points display */}
-                <div className="flex items-center gap-2">
-                  <div className="relative group flex items-center">
-                    <div
-                      className="flex items-center gap-2 cursor-pointer select-none"
-                      title={capped ? full : undefined}
-                      onMouseEnter={() => {
-                        if (!capped) setShowPointsExplainer(true)
-                      }}
-                      onMouseLeave={() => setShowPointsExplainer(false)}
-                      onClick={() => {
-                        if (!capped)
-                          setShowPointsExplainer(!showPointsExplainer)
-                      }}
-                    >
-                      <GemIcon size={24} className="shrink-0" />
-                      <span className="text-xl font-bold tabular-nums">
-                        <span
-                          className={getDisplayTierClass(
-                            points,
-                            stylePreference
-                          )}
-                          style={{ position: 'relative' }}
-                        >
-                          {pointsLoaded ? animatedDisplay : '...'}
-                        </span>
-                      </span>
-                    </div>
-                    {shouldShowTooltip && (
-                      <div className="absolute top-full mt-2 left-0 z-50 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-xl animate-in fade-in zoom-in-95 duration-200 whitespace-nowrap">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
-                          <span
-                            className={`${getDisplayTierClass(points, stylePreference)} tier-clean-text`}
-                          >
-                            {numberName}
-                          </span>
-                        </span>
-                        <div className="absolute -top-1 left-10 w-2 h-2 bg-white border-t border-l border-gray-100 rotate-45" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="relative group flex items-center ml-1">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setShowPointsInfo(!showPointsInfo)
-                      }}
-                      onBlur={() => setShowPointsInfo(false)}
-                      className="text-gray-300 hover:text-purple-500 transition-colors p-1 outline-none sm:pointer-events-none"
-                    >
-                      <InfoIcon />
-                    </button>
-                    <div
-                      className={`absolute left-1/2 -translate-x-1/2 top-full mt-2 w-70 sm:w-56 p-3 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showPointsInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
-                    >
-                      Virtual simulation points. No real-world currency or
-                      value.
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full w-0 h-0 border-x-4 border-x-transparent border-b-4 border-b-gray-900" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Nickname + rank */}
-                {displayNickname && (
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span
-                      className="text-[10px] font-black text-gray-500 tracking-wider overflow-hidden whitespace-nowrap block min-w-0"
-                      title={displayNickname}
-                    >
-                      {displayNickname}
-                    </span>
-                    {dailyRank && (
-                      <span className="shrink-0 text-[9px] font-black px-1.5 py-0.5 bg-purple-100 text-purple-600 rounded-full uppercase tracking-wide whitespace-nowrap">
-                        #{dailyRank} today
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Mute + Relic */}
-              <div className="relative flex items-center gap-2 shrink-0">
-                <RelicSlot align="right" />
-                <button
-                  ref={soundBtnRef}
-                  onClick={() => setShowSoundPopover((p) => !p)}
-                  className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm"
-                >
-                  <SoundIcon muted={false} />
-                </button>
-                {showSoundPopover && (
-                  <SoundControlPopover
-                    soundOn={soundOn}
-                    volume={volume}
-                    oracleVolume={oracleVolume}
-                    onVolumeChange={setVolume}
-                    onOracleVolumeChange={setOracleVolume}
-                    onToggleSound={toggleSound}
-                    anchorRef={soundBtnRef}
-                    onClose={() => setShowSoundPopover(false)}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Badges */}
-            {displayNickname && (
-              <div className="flex gap-1 mt-1 max-w-sm">
-                <FlashBadge
-                  visualMode={visualMode}
-                  flashBuffRemaining={flashBuffRemaining}
-                />
-                <StreakBadge winStreak={winStreak} streakMult={streakMult} />
-              </div>
-            )}
-          </div>
-
-          {/* Bet input row */}
-          <div className="flex flex-row items-center gap-1 sm:gap-2 h-10">
-            <div className="flex items-center gap-2 flex-1 min-w-0 h-full">
-              <label className="hidden min-[370px]:block text-xs font-bold text-gray-400 uppercase shrink-0">
-                Amount
-              </label>
-              <div className="relative flex-1 min-w-0 h-full">
-                <input
-                  type="text"
-                  value={isFocused ? inputString : ''}
-                  onFocus={() => {
-                    setIsFocused(true)
-                    setInputString('')
-                  }}
-                  placeholder={
-                    !isFocused
-                      ? formatPoints(betAmount).display
-                      : !autoAllIn
-                        ? '100k → 100.000'
-                        : ''
-                  }
-                  onChange={(e) => {
-                    const val = e.target.value
-                    setInputString(val)
-                    const parsed = parseShorthand(val)
-                    if (parsed > 0n) {
-                      setBetAmount(parsed > points ? points : parsed)
-                    }
-                  }}
-                  onBlur={() => {
-                    setIsFocused(false)
-                    let final = parseShorthand(inputString)
-                    if (final > points) final = points
-                    const floor = 100000n
-                    if (final < floor) final = points < floor ? points : floor
-                    setBetAmount(final)
-                    setInputString(final.toString())
-                  }}
-                  className={`block w-full h-full border border-gray-200 rounded-lg pl-3 pr-2 py-0 font-bold focus:ring-2 focus:ring-purple-300 transition-all bg-white ${
-                    !isFocused
-                      ? 'placeholder:text-gray-800'
-                      : 'placeholder:text-gray-400'
-                  } ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 shrink-0 h-full">
-              <ModeButton
-                visualMode={visualMode}
-                festivalModeKey={festivalModeKey}
-                label="ALL IN"
-                onClick={() => {
-                  setBetAmount(points)
-                  setInputString(points.toString())
-                }}
-              />
-              <ModeButton
-                visualMode={visualMode}
-                festivalModeKey={festivalModeKey}
-                label={`AUTO\u00A0${autoAllIn ? 'ON' : 'OFF'}`}
-                onClick={() => setAutoAllIn(!autoAllIn)}
-              />
-            </div>
-          </div>
-
-          {/* Notification banner */}
-          {notification && isHydrated && (
-            <div className="flex flex-col gap-2 mt-3">
-              {/* Welcome banner - new visitor or bigint error */}
-              {(notification === 'new_visitor' ||
-                notification === 'no_bigint') && (
-                <div
-                  className={`flex items-start justify-between gap-3 rounded-xl px-4 py-3 border animate-in fade-in slide-in-from-top-2 duration-400 ${
-                    notification === 'no_bigint'
-                      ? 'bg-red-50 border-red-200'
-                      : 'bg-indigo-50 border-indigo-200'
-                  }`}
-                >
-                  <div className="flex items-start gap-3 min-w-0">
-                    <span className="text-xl flex-none mt-0.5">
-                      {notification === 'no_bigint' ? '⚠️' : '🎉'}
-                    </span>
-                    <div className="flex flex-col gap-0.5 min-w-0">
-                      <span
-                        className={`text-[11px] font-black uppercase tracking-widest leading-tight ${
-                          notification === 'no_bigint'
-                            ? 'text-red-700'
-                            : 'text-indigo-700'
-                        }`}
-                      >
-                        {notification === 'no_bigint'
-                          ? 'Browser Not Supported'
-                          : "You've been granted 200,000 points!"}
-                      </span>
-                      <p
-                        className={`text-[10px] font-medium leading-snug ${
-                          notification === 'no_bigint'
-                            ? 'text-red-600'
-                            : 'text-indigo-500'
-                        }`}
-                      >
-                        {notification === 'no_bigint'
-                          ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
-                          : 'Start betting to rank up the leaderboard. No login needed, your progress is saved automatically.'}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (notification === 'new_visitor')
-                        localStorage.setItem('rps_welcomed', '1')
-                      setNotification(null)
-                    }}
-                    className={`flex-none p-1.5 rounded-lg transition-colors shrink-0 ${
-                      notification === 'no_bigint'
-                        ? 'text-red-400 hover:text-red-700 hover:bg-red-100'
-                        : 'text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100'
-                    }`}
-                    aria-label="Close"
-                  >
-                    <CloseIcon />
-                  </button>
-                </div>
-              )}
-
-              {/* Oracle prophecy banner */}
-              {notification === 'oracle' &&
-                oracleSide &&
-                (() => {
-                  const dayIndex =
-                    new Date().getUTCDate() % oracleTemplates.length
-                  const template = oracleTemplates[dayIndex](oracleSide)
-                  return (
-                    <div className="flex items-start gap-3 rounded-xl px-4 py-3 border border-purple-400 bg-purple-50 animate-in fade-in slide-in-from-top-2 duration-400">
-                      <span className="text-xl flex-none mt-0.5">👁️</span>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-purple-800">
-                          Daily Oracle Prophecy
-                        </span>
-                        <p className="text-[10px] font-medium leading-snug text-purple-700">
-                          {template.prefix}{' '}
-                          <span className="inline-block font-black text-white bg-purple-700 px-2 py-0.5 rounded-md shadow-[0_0_14px_rgba(168,85,247,0.9),0_0_28px_rgba(168,85,247,0.5)] uppercase tracking-wider text-[10px] mx-0.5">
-                            {oracleSide === 'left' ? 'LEFT' : 'RIGHT'}
-                          </span>{' '}
-                          {template.suffix}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })()}
-              {/* Idle unlock banner */}
-              {notification === 'idle_unlock' && (
-                <div className="flex items-start justify-between gap-3 rounded-xl px-4 py-3 border border-indigo-300 bg-indigo-50 animate-in fade-in slide-in-from-top-2 duration-400">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <span className="text-xl flex-none mt-0.5">⚡</span>
-                    <div className="flex flex-col gap-0.5 min-w-0">
-                      <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-indigo-700">
-                        Auto-Bet Unlocked
-                      </span>
-                      <p className="text-[10px] font-medium leading-snug text-indigo-500">
-                        Tick Auto-Bet Left or Right above any match to let the
-                        system bet for you automatically.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setHasInteractedWithIdle(true)
-                      setNotification(null)
-                    }}
-                    className="flex-none p-1.5 rounded-lg text-indigo-400 hover:text-indigo-700 hover:bg-indigo-100 transition-colors shrink-0"
-                    aria-label="Close"
-                  >
-                    <CloseIcon />
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        <DashboardCard />
       </div>
-
       <LiveStatsTicker />
-      <FestivalTicker />
+      <EventTimerTicker />
 
       {errorMessage && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-200">

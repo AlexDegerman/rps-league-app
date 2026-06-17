@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import type { EventTheme } from '@/types/rps'
 
-// ─── Electric full-screen ──────────────────────────────────────────────────
+// Electric full-screen
 function ElectricActivationConfetti() {
   return (
     <div className="fixed inset-0 pointer-events-none z-200 overflow-hidden">
@@ -73,7 +73,7 @@ function ElectricActivationConfetti() {
   )
 }
 
-// ─── Cards full-screen ─────────────────────────────────────────────────────
+// Cards full-screen
 const SUITS = ['♠', '♥', '♣', '♦']
 const SUIT_COLORS = ['#1a202c', '#c53030', '#1a202c', '#c53030']
 const RANKS = ['A', 'K', 'Q', 'J', '10']
@@ -172,7 +172,7 @@ function CardsActivationConfetti() {
   )
 }
 
-// ─── Lunar full-screen ─────────────────────────────────────────────────────
+// Lunar full-screen
 const LUNAR_FS_SHAFTS = [
   { left: '10%', w: 18, blur: 5, aC: 0.55, aG: 0.25, delay: 0.1, dur: 1.3 },
   { left: '18%', w: 40, blur: 12, aC: 0.6, aG: 0.3, delay: 0.05, dur: 1.4 },
@@ -302,7 +302,7 @@ function LunarActivationConfetti() {
   )
 }
 
-// ─── Hellfire full-screen ──────────────────────────────────────────────────
+// Hellfire full-screen
 function HellfireActivationConfetti() {
   return (
     <div className="fixed inset-0 pointer-events-none z-200 overflow-hidden">
@@ -394,7 +394,6 @@ function HellfireActivationConfetti() {
   )
 }
 
-// ─── Event config ──────────────────────────────────────────────────────────
 const EVENT_CONFIG: Record<
   string,
   {
@@ -440,7 +439,7 @@ const EVENT_CONFIG: Record<
   }
 }
 
-// ─── Main overlay ──────────────────────────────────────────────────────────
+// Main overlay 
 interface FlashEventActivationOverlayProps {
   event: EventTheme
   onDone: () => void

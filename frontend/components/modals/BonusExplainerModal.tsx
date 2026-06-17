@@ -9,6 +9,7 @@ interface ExpandedState {
   flash: boolean
   relics: boolean
   festivals: boolean
+  globalevents: boolean
 }
 
 interface AccordionSectionProps {
@@ -34,7 +35,8 @@ export default function BonusExplainerModal({
     streaks: false,
     flash: false,
     relics: false,
-    festivals: false
+    festivals: false,
+    globalevents: false
   })
 
   const toggleSection = (section: keyof ExpandedState) => {
@@ -290,6 +292,20 @@ export default function BonusExplainerModal({
                     />
                   </div>
 
+                  <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-lg space-y-1.5">
+                    <p className="text-[10px] text-blue-800 leading-relaxed">
+                      Flash events execute purely client-side. Trigger them by
+                      making predictions on active matches.
+                    </p>
+                    <Link
+                      href="/showcases/flashevents"
+                      onClick={onClose}
+                      className="inline-flex items-center gap-1 text-[10px] text-blue-600 font-black uppercase tracking-tight hover:underline"
+                    >
+                      View all Flash Events <ExternalLinkIcon />
+                    </Link>
+                  </div>
+
                   <p className="text-[9px] text-gray-400 italic border-t border-gray-100 pt-2">
                     Cobalt Core relic boosts Flash Event chance by +25%.
                     Temporal Anchor relic extends duration by +1 round. Spark
@@ -313,7 +329,7 @@ export default function BonusExplainerModal({
                   <p className="text-[10px] text-gray-500 leading-relaxed">
                     Permanent collectible modifiers that drop after any
                     completed prediction. One active relic at a time. No
-                    duplicates ever — each relic is a one-time acquisition that
+                    duplicates ever, each relic is a one-time acquisition that
                     permanently joins your collection.
                   </p>
 
@@ -374,7 +390,7 @@ export default function BonusExplainerModal({
                       prevents mid-event relic swapping to maintain balance.
                     </p>
                     <Link
-                      href="/relicshowcase"
+                      href="/showcases/relics"
                       onClick={onClose}
                       className="inline-flex items-center gap-1 text-[10px] text-indigo-600 font-black uppercase tracking-tight hover:underline"
                     >
@@ -398,7 +414,7 @@ export default function BonusExplainerModal({
                     <span className="font-bold text-gray-800">
                       every active player simultaneously
                     </span>
-                    . Triggered by specific player milestones — streaks,
+                    . Triggered by specific player milestones, streaks,
                     multipliers, relic discoveries, and Ascension completions.
                     Only one can be active at a time; a 5-minute cooldown
                     follows each.
@@ -507,11 +523,114 @@ export default function BonusExplainerModal({
                       periods.
                     </p>
                     <Link
-                      href="/festivalshowcase"
+                      href="/showcases/festivals"
                       onClick={onClose}
                       className="inline-flex items-center gap-1 text-[10px] text-cyan-700 font-black uppercase tracking-tight hover:underline"
                     >
                       View All Festival Details <ExternalLinkIcon />
+                    </Link>
+                  </div>
+                </div>
+              </AccordionSection>
+
+              {/* 6. GLOBAL EVENTS */}
+              <AccordionSection
+                title="Global Events"
+                color="text-emerald-600"
+                dotColor="bg-emerald-400"
+                isOpen={expanded.globalevents}
+                onClick={() => toggleSection('globalevents')}
+              >
+                <div className="space-y-3">
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    Cyclic, server-wide environmental anomalies synchronized
+                    across{' '}
+                    <span className="font-bold text-gray-800">
+                      every online player
+                    </span>{' '}
+                    simultaneously. Unlike player-triggered Festivals, Global
+                    Events are automated cosmic cycles that alter core gameplay
+                    rules for their duration.
+                  </p>
+
+                  <div className="space-y-1.5">
+                    {[
+                      {
+                        name: 'Tidal Surge',
+                        emoji: '🌊',
+                        trigger: '30% weight',
+                        effect:
+                          'Win Echo Protocol: Successful predictions gain a +20% signal payout echo.',
+                        color: 'text-teal-600',
+                        bg: 'bg-teal-50 border-teal-100'
+                      },
+                      {
+                        name: 'Cyclone Blitz',
+                        emoji: '🌀',
+                        trigger: '25% weight',
+                        effect:
+                          'Streak Turbocurrent: Successful predictions increase win streaks by +2 instead of +1.',
+                        color: 'text-slate-600',
+                        bg: 'bg-slate-50 border-slate-200'
+                      },
+                      {
+                        name: 'Solar Flare',
+                        emoji: '☀️',
+                        trigger: '20% weight',
+                        effect:
+                          'Solar Radiation: Successful predictions gain an active 2.0x payout multiplier.',
+                        color: 'text-amber-600',
+                        bg: 'bg-amber-50 border-amber-200'
+                      },
+                      {
+                        name: 'Mirage Cataclysm',
+                        emoji: '🏜️',
+                        trigger: '20% weight',
+                        effect:
+                          'Variable Echo Field: Winners receive an additional randomized phantom payout of 15% to 50%.',
+                        color: 'text-yellow-700',
+                        bg: 'bg-yellow-50 border-yellow-200'
+                      }
+                    ].map((g) => (
+                      <div
+                        key={g.name}
+                        className={`p-2 rounded-lg border ${g.bg} flex items-start gap-2`}
+                      >
+                        <span className="text-[13px] mt-0.5 shrink-0">
+                          {g.emoji}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-baseline gap-1.5 flex-wrap">
+                            <span
+                              className={`text-[10px] font-black ${g.color}`}
+                            >
+                              {g.name}
+                            </span>
+                            <span className="text-[8px] text-gray-400 font-medium">
+                              → {g.trigger}
+                            </span>
+                          </div>
+                          <p className="text-[9px] text-gray-600 mt-0.5 font-medium">
+                            {g.effect}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg space-y-1.5">
+                    <p className="text-[9px] text-emerald-700 leading-relaxed">
+                      Global cycles progress through automated Cooldown,
+                      Warning, and Active phases with synchronized audio
+                      notifications, real-time marquee telemetry, and visual
+                      shaders.
+                    </p>
+                    <Link
+                      href="/showcases/globalevents"
+                      onClick={onClose}
+                      className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-black uppercase tracking-tight hover:underline"
+                    >
+                      View All Global Events <ExternalLinkIcon />
                     </Link>
                   </div>
                 </div>
@@ -708,6 +827,7 @@ function CloseIcon() {
     </svg>
   )
 }
+
 export function BonusExplainerTrigger({ onClick }: { onClick: () => void }) {
   return (
     <div

@@ -27,7 +27,7 @@ export function AchievementBadge({ badge, size = 'sm' }: AchievementBadgeProps) 
           : RARITY_BADGE_STYLE[badge.rarity as AchievementRarity]
         }
       `}
-      title={`${badge.name} — ${badge.code}`}
+      title={`${badge.name} - ${badge.code}`}
     >
       <span>{badge.icon}</span>
       <span>{badge.code}</span>

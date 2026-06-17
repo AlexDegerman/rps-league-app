@@ -12,7 +12,8 @@ import type {
   AchievementStats,
   BetHistoryEntry,
   PlayerStats,
-  BadgeData
+  BadgeData,
+  GlobalEventStateResponse
 } from '@/types/rps'
 import { logger } from '@/lib/logger'
 
@@ -399,3 +400,14 @@ export async function completeRecoveryTutorial(userId: string) {
     })
   )
 }
+
+export const fetchGlobalEventState =
+  async (): Promise<GlobalEventStateResponse | null> => {
+    try {
+      const res = await fetch(`${API_BASE}/api/live/global-event-state`)
+      if (!res.ok) return null
+      return res.json() as Promise<GlobalEventStateResponse>
+    } catch {
+      return null
+    }
+  }

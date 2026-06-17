@@ -139,25 +139,11 @@ const Header = () => {
               Analysis
             </Link>
             <Link
-              href="/showcase"
+              href="/tiers"
               onClick={() => setIsOpen(false)}
-              className={menuRowItemClass('/showcase')}
+              className={menuRowItemClass('/tiers')}
             >
               Tiers
-            </Link>
-            <Link
-              href="/festivalshowcase"
-              onClick={() => setIsOpen(false)}
-              className={menuRowItemClass('/festivals')}
-            >
-              Festivals
-            </Link>
-            <Link
-              href="/relicshowcase"
-              onClick={() => setIsOpen(false)}
-              className={menuRowItemClass('/relicshowcase')}
-            >
-              Relics
             </Link>
             <Link
               href="/feedback"
@@ -165,6 +151,13 @@ const Header = () => {
               className={menuRowItemClass('/feedback')}
             >
               Feedback
+            </Link>
+            <Link
+              href="/showcases"
+              onClick={() => setIsOpen(false)}
+              className={menuRowItemClass('/showcases')}
+            >
+              Showcases
             </Link>
             <Link
               href="/updates"

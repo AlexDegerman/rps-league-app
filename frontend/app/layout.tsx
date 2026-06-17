@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import Header from '../components/ui/Header'
-import Footer from '@/components/ui/Footer'
 import PredictionTicker from '@/components/tickers/PredictionTicker'
 
 export const viewport: Viewport = {
@@ -62,9 +61,7 @@ export default function RootLayout({
       <body className="bg-gray-100 min-h-screen">
           <Header />
           <main className="w-full pb-24 pt-2">{children}</main>
-          {/* Ticker sits above Footer (z-50) and below Header (z-50 sticky) */}
           <PredictionTicker />
-          <Footer />
       </body>
     </html>
   )

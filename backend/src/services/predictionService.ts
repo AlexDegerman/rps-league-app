@@ -26,6 +26,11 @@ import {
   type AchievementStats
 } from './achievementChecker.js'
 import { RELICS, rollRelicDrop } from './relicService.js'
+import {
+  applyGlobalEventBuff,
+  getActiveGlobalEvent,
+  type GlobalEventBuffResult
+} from './globalEventService.js'
 
 const POINTS_FLOOR = 100000n
 // Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
@@ -144,7 +149,7 @@ const rollBonus = (
   const legendaryThreshold = 99.5
 
   if (roll < commonThreshold) {
-    // COMMON: Win 1.5–2.2x | Loss: Save 10–25% (User loses 75-90% of base loss)
+    // COMMON: Win 1.5-2.2x | Loss: Save 10-25% (User loses 75-90% of base loss)
     return {
       multiplier: isWin
         ? 1.5 + Math.random() * 0.7
@@ -153,7 +158,7 @@ const rollBonus = (
     }
   }
   if (roll < rareThreshold) {
-    // RARE: Win 2.2–3.2x | Loss: Save 25–50% (User loses 50-75% of base loss)
+    // RARE: Win 2.2-3.2x | Loss: Save 25-50% (User loses 50-75% of base loss)
     return {
       multiplier: isWin
         ? 2.2 + Math.random() * 1.0
@@ -162,7 +167,7 @@ const rollBonus = (
     }
   }
   if (roll < epicThreshold) {
-    // EPIC: Win 3.2–4.2x | Loss: Save 60–90% (User loses 10-40% of base loss)
+    // EPIC: Win 3.2-4.2x | Loss: Save 60-90% (User loses 10-40% of base loss)
     return {
       multiplier: isWin ? 3.2 + Math.random() * 1.0 : 0.6 + Math.random() * 0.3,
       tier: 'EPIC'
@@ -241,6 +246,11 @@ export const resolvePrediction = async (
       const activeFestival = getActiveFestival()
       const sanguineActive = activeFestival?.type === 'SANGUINE'
       const feverActive = activeFestival?.type === 'FEVER'
+
+      const activeGlobalEvent = getActiveGlobalEvent()
+      const isSolarFlareActive =
+        activeGlobalEvent?.type === 'SOLAR_FLARE' &&
+        activeGlobalEvent.phase === 'active'
 
       const result = oracleRigged
         ? 'WIN'
@@ -337,8 +347,10 @@ export const resolvePrediction = async (
         )
       }
 
-      const streakAfter = isWin
-        ? Number(row.current_win_streak) + 1
+      let cycloneStreakBonus = 0
+
+      let streakAfter = isWin
+        ? Number(row.current_win_streak) + 1 + cycloneStreakBonus
         : feverActive || streakShielded
           ? Number(row.current_win_streak)
           : 0
@@ -383,14 +395,139 @@ export const resolvePrediction = async (
       const baseChange = isWin ? bet : bet / 2n
 
       let gainLoss: bigint
+      let bonusDisplayAmount = 0n
+      let ghostEchoAmount = 0n
+      let preKineticAmount = 0n
+      let preSoulAmount = 0n
+      let soulProc = false
+      let globalBuff: GlobalEventBuffResult | null = null
+      let globalEchoAmount = 0n
+      let activeGlobalEventType: string | null = null
 
       if (isWin) {
         const afterStreak = baseChange * streakMult
         const afterFlash = (afterStreak * flashMultScale) / 100n
-        gainLoss = (afterFlash * bonusMultScale) / 100n
+        const afterBonus = (afterFlash * bonusMultScale) / 100n
+
+        // Core Win Path (With Roll Bonus)
+        gainLoss = isSolarFlareActive ? afterBonus * 2n : afterBonus
+
+        // Core Win Path (Without Roll Bonus)
+        let gainLossWithoutBonus = isSolarFlareActive
+          ? afterFlash * 2n
+          : afterFlash
+
+        // Step-by-step points floor check
+        const provisionalPoints = currentPoints + gainLoss
+        if (provisionalPoints < POINTS_FLOOR) {
+          gainLoss = POINTS_FLOOR - currentPoints
+        }
+        const provisionalPointsWithout = currentPoints + gainLossWithoutBonus
+        if (provisionalPointsWithout < POINTS_FLOOR) {
+          gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+        }
+
+        // Ghost Festival (+20%)
+        if (activeFestival?.type === 'GHOST') {
+          ghostEchoAmount = gainLoss / 5n
+          gainLoss = gainLoss + ghostEchoAmount
+          const provisionalWithEcho = currentPoints + gainLoss
+          if (provisionalWithEcho < POINTS_FLOOR) {
+            gainLoss = POINTS_FLOOR - currentPoints
+            ghostEchoAmount = 0n
+          }
+
+          const ghostEchoWithout = gainLossWithoutBonus / 5n
+          gainLossWithoutBonus = gainLossWithoutBonus + ghostEchoWithout
+          const provisionalWithEchoWithout =
+            currentPoints + gainLossWithoutBonus
+          if (provisionalWithEchoWithout < POINTS_FLOOR) {
+            gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+          }
+        }
+
+        // Surge Festival (2x)
+        if (activeFestival?.type === 'SURGE') {
+          gainLoss = gainLoss * 2n
+          const provisionalWithSurge = currentPoints + gainLoss
+          if (provisionalWithSurge < POINTS_FLOOR) {
+            gainLoss = POINTS_FLOOR - currentPoints
+          }
+
+          gainLossWithoutBonus = gainLossWithoutBonus * 2n
+          const provisionalWithSurgeWithout =
+            currentPoints + gainLossWithoutBonus
+          if (provisionalWithSurgeWithout < POINTS_FLOOR) {
+            gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+          }
+        }
+
+        // Prismatic Shard (+0.5x bet)
+        if (equippedRelic === 'prismatic_shard' && !flashActive) {
+          gainLoss = gainLoss + bet / 2n
+          gainLossWithoutBonus = gainLossWithoutBonus + bet / 2n
+        }
+
+        // Kinetic Capacitor (2x)
+        preKineticAmount = gainLoss
+        if (kineticFired) {
+          gainLoss = gainLoss * 2n
+          gainLossWithoutBonus = gainLossWithoutBonus * 2n
+        }
+
+        // Soul of the Machine (3x)
+        preSoulAmount = gainLoss
+        if (equippedRelic === 'soul_of_the_machine') {
+          if (Math.random() < 0.05) {
+            gainLoss = gainLoss * 3n
+            soulProc = true
+            gainLossWithoutBonus = gainLossWithoutBonus * 3n
+          }
+        }
+
+        // Global Event Buffs
+        globalBuff = applyGlobalEventBuff(isWin, gainLoss, bet)
+        gainLoss = globalBuff.gainLossMultiplied
+        globalEchoAmount = globalBuff.echoAmount
+        activeGlobalEventType = globalBuff.buffType
+
+        // Mirror event scaling dynamically on the un-bonused track
+        if (activeGlobalEventType === 'TIDAL_SURGE') {
+          gainLossWithoutBonus =
+            gainLossWithoutBonus + gainLossWithoutBonus / 5n
+        } else if (activeGlobalEventType === 'MIRAGE_CATACLYSM') {
+          const finalGainRatio =
+            Number(gainLoss) /
+            Number(globalBuff.gainLossMultiplied - globalEchoAmount || 1n)
+          gainLossWithoutBonus =
+            (gainLossWithoutBonus * BigInt(Math.round(finalGainRatio * 100))) /
+            100n
+        }
+
+        // Cyclone Blitz streak increment
+        if (activeGlobalEventType === 'CYCLONE_BLITZ') {
+          cycloneStreakBonus = 1
+          streakAfter += cycloneStreakBonus
+        }
+
+        // Final points floor fallback
+        const provisionalWithGlobal = currentPoints + gainLoss
+        if (provisionalWithGlobal < POINTS_FLOOR) {
+          gainLoss = POINTS_FLOOR - currentPoints
+        }
+        const provisionalWithGlobalWithout =
+          currentPoints + gainLossWithoutBonus
+        if (provisionalWithGlobalWithout < POINTS_FLOOR) {
+          gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+        }
+
+        // Compounded visual bonus display amount (Realized Delta)
+        if (effectiveBonus) {
+          bonusDisplayAmount = gainLoss - gainLossWithoutBonus
+        }
       } else {
+        // Loss flow (unaffected by win multipliers)
         const safeguardActive = activeFestival?.type === 'SAFEGUARD'
-        // CONDUCTIVE FILAMENT: reduce loss by 5% on top of any other reduction
         const conductiveReduction =
           equippedRelic === 'conductive_filament' ? 95n : 100n
         const effectiveBase = safeguardActive ? (bet * 40n) / 100n : baseChange
@@ -400,55 +537,47 @@ export const resolvePrediction = async (
           ? (effectiveBaseWithRelic * bonusMultScale) / 100n
           : 0n
         gainLoss = -(effectiveBaseWithRelic - savedAmount)
-      }
 
-      const provisionalPoints = currentPoints + gainLoss
-      if (provisionalPoints < POINTS_FLOOR) {
-        gainLoss = POINTS_FLOOR - currentPoints
-      }
-
-      // Ghost Festival: +20% win echo
-      let ghostEchoAmount = 0n
-      if (isWin && activeFestival?.type === 'GHOST') {
-        ghostEchoAmount = gainLoss / 5n
-        gainLoss = gainLoss + ghostEchoAmount
-        const provisionalWithEcho = currentPoints + gainLoss
-        if (provisionalWithEcho < POINTS_FLOOR) {
-          gainLoss = POINTS_FLOOR - currentPoints
-          ghostEchoAmount = 0n
+        if (effectiveBonus) {
+          bonusDisplayAmount = savedAmount
         }
-      }
 
-      // Surge Festival: 2x global multiplier on wins
-      if (isWin && activeFestival?.type === 'SURGE') {
-        gainLoss = gainLoss * 2n
-        const provisionalWithSurge = currentPoints + gainLoss
-        if (provisionalWithSurge < POINTS_FLOOR) {
+        // Fallback points floor check for losses
+        const provisionalWithGlobal = currentPoints + gainLoss
+        if (provisionalWithGlobal < POINTS_FLOOR) {
           gainLoss = POINTS_FLOOR - currentPoints
         }
       }
-
-      // PRISMATIC SHARD: +0.5x (of bet) only if NO flash event active
-      if (equippedRelic === 'prismatic_shard' && isWin && !flashActive) {
-        gainLoss = gainLoss + bet / 2n
-      }
-
-      // KINETIC CAPACITOR fire: applied after all other multipliers
-      const preKineticAmount = gainLoss
-      if (kineticFired) {
-        gainLoss = gainLoss * 2n
-      }
-
-      // SOUL OF THE MACHINE: 5% chance → 3x
-      let soulProc = false
-      const preSoulAmount = gainLoss
-      if (equippedRelic === 'soul_of_the_machine' && isWin) {
-        if (Math.random() < 0.05) {
-          gainLoss = gainLoss * 3n
-          soulProc = true
-        }
-      }
-
+            const triggerFlareInfernoCombo =
+        isWin &&
+        activeGlobalEventType === 'SOLAR_FLARE' &&
+        streakAfter >= 5
+      const triggerMirageHighEcho =
+        isWin &&
+        activeGlobalEventType === 'MIRAGE_CATACLYSM' &&
+        (globalBuff?.echoFactor ?? 0) >= 45
+      const triggerFlashPlusGlobalWin =
+        isWin && flashActive && !!activeGlobalEventType
+      const triggerDryMirage =
+        isWin &&
+        activeGlobalEventType === 'MIRAGE_CATACLYSM' &&
+        (globalBuff?.echoFactor ?? 0) === 15
+      const triggerEyeOfStorm =
+        !isWin &&
+        activeGlobalEventType === 'CYCLONE_BLITZ' &&
+        streakShielded
+      const triggerPrismaticWave =
+        isWin &&
+        activeGlobalEventType === 'TIDAL_SURGE' &&
+        equippedRelic === 'prismatic_shard'
+      const triggerThermalFusion =
+        isWin &&
+        activeGlobalEventType === 'SOLAR_FLARE' &&
+        soulProc
+      const streakDuringTidal =
+        isWin && activeGlobalEventType === 'TIDAL_SURGE' ? streakAfter : 0
+      const streakDuringCyclone =
+        isWin && activeGlobalEventType === 'CYCLONE_BLITZ' ? streakAfter : 0
       let flashJustEndedFlag = false
       if (isWin && flashEvent) {
         flashJustEndedFlag = consumeFlashBetForUser(row.user_id)
@@ -467,52 +596,48 @@ export const resolvePrediction = async (
         if (activeFestival?.type === 'SURGE') finalCombinedMult *= 3
         if (kineticFired) finalCombinedMult *= 2
         if (soulProc) finalCombinedMult *= 3
+        if (isSolarFlareActive) finalCombinedMult *= 2
       }
-
-      const baseFinalPure = isWin
-        ? (baseChange * BigInt(streakNum) * flashMultScale) / 100n
-        : baseChange
-
-      const bonusDisplayAmount = effectiveBonus
-        ? isWin
-          ? gainLoss - baseFinalPure
-          : baseFinalPure + gainLoss
-        : 0n
 
       const savedFlashType = flashJustEndedFlag ? null : flashEventType
       if (savedFlashType) {
         recordSessionFlashType(row.user_id, savedFlashType)
       }
-      await pool.query(
-        `UPDATE predictions
-            SET result = $1,
-              gain_loss = $2,
-              bonus_tier = $3,
-              bonus_multiplier = $4,
-              flash_event_type = $7,
-              flash_multiplier = $8,
-              streak_multiplier = $9,
-              relic_multiplier = $10,
-              total_multiplier = $11,
-              festival_multiplier = $12,
-              festival_type = $13
-            WHERE user_id = $5 AND game_id = $6`,
-        [
-          result,
-          gainLoss.toString(),
-          effectiveBonus ? effectiveBonus.tier : null,
-          effectiveBonus ? effectiveBonus.multiplier : 1,
-          row.user_id,
-          row.game_id,
-          savedFlashType,
-          flashJustEndedFlag ? 1 : flashMult,
-          Number(streakNum),
-          soulProc ? 3 : kineticFired ? 2 : 1,
-          finalCombinedMult,
-          festivalMultValue,
-          festivalType
-        ]
-      )
+        await pool.query(
+          `UPDATE predictions
+        SET result = $1,
+          gain_loss = $2,
+          bonus_tier = $3,
+          bonus_multiplier = $4,
+          flash_event_type = $7,
+          flash_multiplier = $8,
+          streak_multiplier = $9,
+          relic_multiplier = $10,
+          total_multiplier = $11,
+          festival_multiplier = $12,
+          festival_type = $13,
+          global_event_type = $14,
+          global_echo_amount = $15
+        WHERE user_id = $5 AND game_id = $6`,
+          [
+            result,
+            gainLoss.toString(),
+            effectiveBonus ? effectiveBonus.tier : null,
+            effectiveBonus ? effectiveBonus.multiplier : 1,
+            row.user_id,
+            row.game_id,
+            savedFlashType,
+            flashJustEndedFlag ? 1 : flashMult,
+            Number(streakNum),
+            soulProc ? 3 : kineticFired ? 2 : 1,
+            finalCombinedMult,
+            festivalMultValue,
+            festivalType,
+            activeGlobalEventType,
+            globalEchoAmount > 0n ? globalEchoAmount.toString() : null
+          ]
+        )
+
 
       await pool.query(
         `UPDATE users
@@ -523,21 +648,17 @@ export const resolvePrediction = async (
               weekly_peak               = GREATEST(weekly_peak, points + $1),
               bonus_pity_count          = $3,
               total_volume              = total_volume + $4,
-              festivals_participated = festivals_participated + CASE WHEN $13 THEN 1 ELSE 0 END,
+              festivals_participated = festivals_participated + CASE WHEN $12 THEN 1 ELSE 0 END,
               biggest_win               = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_win, $1) ELSE biggest_win END,
               biggest_single_win        = CASE WHEN $5 = 'WIN' THEN GREATEST(biggest_single_win, $1) ELSE biggest_single_win END,
-              current_win_streak        = CASE WHEN $5 = 'WIN' THEN current_win_streak + 1 WHEN $8 THEN current_win_streak ELSE 0 END,
-              max_win_streak            = CASE
-                                            WHEN $5 = 'WIN' AND (current_win_streak + 1) > max_win_streak
-                                            THEN current_win_streak + 1
-                                            ELSE max_win_streak
-                                          END,
+              current_win_streak        = $14,
+              max_win_streak            = CASE WHEN $5 = 'WIN' THEN GREATEST(max_win_streak, $14) ELSE max_win_streak END,
               consecutive_flash_streak = CASE 
-                WHEN $14 THEN consecutive_flash_streak + 1 
+                WHEN $13 THEN consecutive_flash_streak + 1 
                 ELSE 0 
               END,
               consecutive_flash_peak = CASE 
-                WHEN $14 THEN GREATEST(consecutive_flash_peak, consecutive_flash_streak + 1)
+                WHEN $13 THEN GREATEST(consecutive_flash_peak, consecutive_flash_streak + 1)
                 ELSE consecutive_flash_peak 
               END,
               total_pities_earned       = total_pities_earned + $6,
@@ -548,10 +669,19 @@ export const resolvePrediction = async (
               electric_events_caught    = CASE WHEN $7 = 'ELECTRIC' AND $5 = 'WIN' THEN electric_events_caught + 1 ELSE electric_events_caught END,
               hellfire_events_caught    = CASE WHEN $7 = 'HELLFIRE' AND $5 = 'WIN' THEN hellfire_events_caught + 1 ELSE hellfire_events_caught END,
               cards_events_caught       = CASE WHEN $7 = 'CARDS'    AND $5 = 'WIN' THEN cards_events_caught    + 1 ELSE cards_events_caught    END,
-              biggest_match_mult        = GREATEST(biggest_match_mult, $9),
-              bet_against_oracle_count  = CASE WHEN $10 THEN bet_against_oracle_count + 1 ELSE bet_against_oracle_count END,
-              oracle_streak             = CASE WHEN $11 THEN oracle_streak + 1 WHEN $12 THEN 0 ELSE oracle_streak END,
-              oracle_max_streak         = CASE WHEN $11 THEN GREATEST(oracle_max_streak, oracle_streak + 1) ELSE oracle_max_streak END
+              biggest_match_mult        = GREATEST(biggest_match_mult, $8),
+              bet_against_oracle_count  = CASE WHEN $9 THEN bet_against_oracle_count + 1 ELSE bet_against_oracle_count END,
+              oracle_streak             = CASE WHEN $10 THEN oracle_streak + 1 WHEN $11 THEN 0 ELSE oracle_streak END,
+              oracle_max_streak         = CASE WHEN $10 THEN GREATEST(oracle_max_streak, oracle_streak + 1) ELSE oracle_max_streak END,
+              had_flare_inferno_combo   = had_flare_inferno_combo   OR $15,
+              had_mirage_high_echo      = had_mirage_high_echo      OR $16,
+              had_flash_plus_global_win = had_flash_plus_global_win OR $17,
+              had_dry_mirage            = had_dry_mirage            OR $18,
+              had_eye_of_storm          = had_eye_of_storm          OR $19,
+              had_prismatic_wave        = had_prismatic_wave        OR $20,
+              had_thermal_fusion        = had_thermal_fusion        OR $21,
+              max_streak_during_tidal_surge   = GREATEST(max_streak_during_tidal_surge,   $22),
+              max_streak_during_cyclone_blitz = GREATEST(max_streak_during_cyclone_blitz, $23)
           WHERE user_id = $2`,
         [
           gainLoss.toString(),
@@ -561,13 +691,22 @@ export const resolvePrediction = async (
           result,
           isNaturalPityHit ? 1 : 0,
           savedFlashType,
-          feverActive || streakShielded,
           finalCombinedMult,
           betAgainstOracle,
           oracleRigged,
           defiedOracle,
           activeFestival !== null,
-          flashJustEndedFlag
+          flashJustEndedFlag,
+          streakAfter,
+          triggerFlareInfernoCombo,
+          triggerMirageHighEcho,
+          triggerFlashPlusGlobalWin,
+          triggerDryMirage,
+          triggerEyeOfStorm,
+          triggerPrismaticWave,
+          triggerThermalFusion,
+          streakDuringTidal,
+          streakDuringCyclone
         ]
       )
 
@@ -578,8 +717,14 @@ export const resolvePrediction = async (
                 lunar_events_caught, electric_events_caught,
                 hellfire_events_caught, cards_events_caught,
                 bet_against_oracle_count, oracle_max_streak,
-                festivals_triggered, festivals_participated, consecutive_flash_peak, has_used_auto_bet  
-          FROM users WHERE user_id = $1`,
+                festivals_triggered, festivals_participated, consecutive_flash_peak, has_used_auto_bet,
+                max_streak_during_tidal_surge, max_streak_during_cyclone_blitz,
+                had_flare_inferno_combo, had_mirage_high_echo, had_flash_plus_global_win,
+                had_dry_mirage, had_eye_of_storm, had_prismatic_wave, had_thermal_fusion,
+                tidal_surge_participations, solar_flare_participations,
+                cyclone_blitz_participations, mirage_cataclysm_participations,
+                global_event_participations
+                  FROM users WHERE user_id = $1`,
         [row.user_id]
       )
       const u = freshUser.rows[0]
@@ -631,7 +776,25 @@ export const resolvePrediction = async (
         hadMythicRelicSlam: soulProc,
         maxConsecutiveFlashEvents: Number(u.consecutive_flash_peak),
         hasSeenAllFlashTypes: hasSeenAllFlashTypes(row.user_id),
-        hasUsedAutoBet: Boolean(u.has_used_auto_bet)
+        hasUsedAutoBet: Boolean(u.has_used_auto_bet),
+        globalEventParticipations: Number(u.global_event_participations ?? 0),
+        tidalSurgeParticipations: Number(u.tidal_surge_participations ?? 0),
+        solarFlareParticipations: Number(u.solar_flare_participations ?? 0),
+        cycloneBlitzParticipations: Number(u.cyclone_blitz_participations ?? 0),
+        mirageCataclysmParticipations: Number(
+          u.mirage_cataclysm_participations ?? 0
+        ),
+        maxStreakDuringTidalSurge: Number(u.max_streak_during_tidal_surge ?? 0),
+        maxStreakDuringCycloneBlitz: Number(
+          u.max_streak_during_cyclone_blitz ?? 0
+        ),
+        hadFlareInfernoCombo: Boolean(u.had_flare_inferno_combo),
+        hadMirageHighEcho: Boolean(u.had_mirage_high_echo),
+        hadFlashPlusGlobalWin: Boolean(u.had_flash_plus_global_win),
+        hadDryMirage: Boolean(u.had_dry_mirage),
+        hadEyeOfStorm: Boolean(u.had_eye_of_storm),
+        hadPrismaticWave: Boolean(u.had_prismatic_wave),
+        hadThermalFusion: Boolean(u.had_thermal_fusion)
       }
 
       const firstPass = checkAchievements(stats, alreadyEarned)
@@ -734,6 +897,9 @@ export const resolvePrediction = async (
           flashEventType: savedFlashType,
           flashMult: flashJustEndedFlag ? 1 : flashMult,
           oracleRigged,
+          globalEventType: activeGlobalEventType,
+          globalEchoAmount:
+            globalEchoAmount > 0n ? globalEchoAmount.toString() : null,
           ghostEchoAmount:
             ghostEchoAmount > 0n ? ghostEchoAmount.toString() : null,
           relicCounter: cycleCounter,
@@ -790,14 +956,16 @@ export const getPaginatedUserPredictions = async (
   const countParams = [userId]
 
   const pCols = `
-    p.id, p.game_id AS "gameId", p.pick, p.bet_amount AS "betAmount", 
-    p.gain_loss AS "gainLoss", p.result, p.bonus_tier AS "bonusTier", 
-    p.bonus_multiplier AS "bonusMultiplier", p.flash_event_type AS "flashEventType", 
-    p.flash_multiplier AS "flashMult", p.streak_multiplier AS "streakMultiplier", 
+    p.id, p.game_id AS "gameId", p.pick, p.bet_amount AS "betAmount",
+    p.gain_loss AS "gainLoss", p.result, p.bonus_tier AS "bonusTier",
+    p.bonus_multiplier AS "bonusMultiplier", p.flash_event_type AS "flashEventType",
+    p.flash_multiplier AS "flashMult", p.streak_multiplier AS "streakMultiplier",
     p.created_at AS "createdAt", p.relic_multiplier AS "relicMultiplier",
     p.total_multiplier AS "totalMultiplier",
     p.festival_multiplier AS "festivalMultiplier",
-    p.festival_type AS "festivalType"`
+    p.festival_type AS "festivalType",
+    p.global_event_type AS "globalEventType",
+    p.global_echo_amount AS "globalEchoAmount"`
 
   if (sort === 'wins') {
     dataQuery = `
@@ -849,24 +1017,29 @@ export const getPaginatedUserPredictions = async (
     }
   }))
 
-  const predictions = data.rows.map((row) => ({
-    id: row.id,
-    gameId: row.gameId,
-    pick: row.pick,
-    betAmount: row.betAmount?.toString() ?? '0',
-    gainLoss: row.gainLoss?.toString() ?? '0',
-    result: row.result,
-    bonusTier: row.bonusTier ?? null,
-    bonusMultiplier: Number(row.bonusMultiplier ?? 0),
-    flashEventType: row.flashEventType ?? null,
-    flashMult: Number(row.flashMult ?? 1),
-    streakMultiplier: Number(row.streakMultiplier ?? 1),
-    createdAt: Number(row.createdAt),
-    relicMultiplier: Number(row.relicMultiplier ?? 1),
-    totalMultiplier: Number(row.totalMultiplier || row.total_multiplier || 1),
-    festivalMultiplier: Number(row.festivalMultiplier || 1),
-    festivalType: row.festivalType || null
-  }))
+    const predictions = data.rows.map((row) => ({
+      id: row.id,
+      gameId: row.gameId,
+      pick: row.pick,
+      betAmount: row.betAmount?.toString() ?? '0',
+      gainLoss: row.gainLoss?.toString() ?? '0',
+      result: row.result,
+      bonusTier: row.bonusTier ?? null,
+      bonusMultiplier: Number(row.bonusMultiplier ?? 0),
+      flashEventType: row.flashEventType ?? null,
+      flashMult: Number(row.flashMult ?? 1),
+      streakMultiplier: Number(row.streakMultiplier ?? 1),
+      createdAt: Number(row.createdAt),
+      relicMultiplier: Number(row.relicMultiplier ?? 1),
+      totalMultiplier: Number(row.totalMultiplier || row.total_multiplier || 1),
+      festivalMultiplier: Number(row.festivalMultiplier || 1),
+      festivalType: row.festivalType || null,
+      globalEventType: row.globalEventType ?? null,
+      globalEchoAmount: row.globalEchoAmount
+        ? row.globalEchoAmount.toString()
+        : null
+    }))
+
 
   return { matches, predictions, total, hasMore: offset + limit < total }
 }

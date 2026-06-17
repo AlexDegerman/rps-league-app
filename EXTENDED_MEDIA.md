@@ -4,9 +4,11 @@ A complete visual archive of the RPS League ecosystem.
 
 ### 🚩 Primary Feature Showcases
 Detailed gameplay and cinematic recordings for core systems:
-> 🕹️ [**Flash Event Deep-Dive** →](./EVENTS.md)
+> 🕹️ [**Flash Event Deep-Dive** →](./FLASHEVENTS.md)
 
 > 🎭 [**Player Festival Deep-Dive** →](./FESTIVALS.md)
+
+> 🪐 [**Global Event Deep-Dive** →](./GLOBALEVENTS.md)
 
 ---
 
@@ -38,7 +40,7 @@ The Bonus Explainer Modal is an in-game achievement reference system that explai
 
 Idle auto-betting system that automatically places your selected bet on your chosen side for every incoming match after unlock.
 
-Unlocked after reaching Ascension (999 OVG) or starting Lap 1.
+Unlocked after reaching Ascension (999 STR) or starting Lap 1.
 
 <p align="center">
   <strong>Idle Auto-Bet Mode Showcase</strong><br/>

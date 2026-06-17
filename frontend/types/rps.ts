@@ -53,6 +53,8 @@ export interface PredictionRecord {
   totalMultiplier: number
   festivalMultiplier?: number
   festivalType?: string | null
+  globalEventType?: string | null
+  globalEchoAmount?: string | null
 }
 
 export interface UserStats {
@@ -186,6 +188,8 @@ export interface BetHistoryEntry {
   totalMultiplier: number
   festivalMultiplier: number
   festivalType: string | null
+  globalEventType: string | null
+  globalEchoAmount: string | null
 }
 
 export type BonusTier = 'MYTHICAL' | 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON'
@@ -220,6 +224,11 @@ export type ConfettiType =
   | 'cards'
   | 'fever'
   | 'inferno'
+  | 'tidal_surge'
+  | 'solar_flare'
+  | 'cyclone_blitz'
+  | 'mirage_cataclysm'
+
 
 export interface BonusData {
   tier: BonusTier
@@ -241,6 +250,8 @@ export interface ResultAnim {
   soulProc?: boolean
   kineticFired?: boolean
   preSoulAmount?: bigint
+  globalEventType?: GlobalEventType | null
+  globalEchoAmount?: bigint | null
 }
 
 export type EventTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE' | null
@@ -275,12 +286,14 @@ export type WinStreakModeKey = 'winstreak_inferno' | 'winstreak_fever'
 
 export type VisualMode =
   | FlashModeKey
+  | GlobalEventModeKey
   | FestivalModeKey
   | WinStreakModeKey
   | null
 
 export interface FestivalSSEData {
   type: string
+  startedAt: number
   endsAt: number | null
   durationMs: number
   message: string
@@ -345,4 +358,46 @@ export interface AchievementStats {
   maxConsecutiveFlashEvents: number
   hasSeenAllFlashTypes: boolean
   hasUsedAutoBet: boolean
+}
+
+export type GlobalEventType =
+  | 'TIDAL_SURGE'
+  | 'SOLAR_FLARE'
+  | 'CYCLONE_BLITZ'
+  | 'MIRAGE_CATACLYSM'
+
+export type GlobalEventPhase = 'warning' | 'active'
+
+export type GlobalEventModeKey =
+  | 'global_tidal_surge'
+  | 'global_solar_flare'
+  | 'global_cyclone_blitz'
+  | 'global_mirage_cataclysm'
+
+export interface GlobalEventWarningSSEData {
+  type: GlobalEventType
+  phase: 'warning'
+  startedAt: number
+  activeAt: number
+  endsAt: number
+  message: string
+  speech?: string
+}
+
+export interface GlobalEventStartSSEData {
+  type: GlobalEventType
+  phase: 'active'
+  startedAt: number
+  activeAt: number
+  endsAt: number
+}
+
+export interface GlobalEventStateResponse {
+  event: {
+    type: GlobalEventType
+    phase: GlobalEventPhase
+    activeAt: number
+    endsAt: number
+    startedAt: number
+  } | null
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useUIStore } from '@/app/stores/uiStore'
 import { useGameStore } from '@/app/stores/gameStore'
-import { EventTheme, AchievementNotif } from '@/types/rps'
+import type { EventTheme, AchievementNotif, GlobalEventType } from '@/types/rps'
 
 interface PopupQueueSounds {
   playMoon: () => void
@@ -9,6 +9,10 @@ interface PopupQueueSounds {
   playElectric: () => void
   playFire: () => void
   playFanfare: (vol?: number) => void
+  playTidalSurge: () => void
+  playSolarFlare: () => void
+  playCycloneBlitz: () => void
+  playMirageCataclysm: () => void
 }
 
 export function usePopupQueue(sounds: PopupQueueSounds) {
@@ -28,13 +32,13 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
       lastProcessedId.current = null
       return
     }
-
     if (activePopup.id === lastProcessedId.current) return
     lastProcessedId.current = activePopup.id
 
     if (timerRef.current) clearTimeout(timerRef.current)
 
     timerRef.current = setTimeout(() => {
+      // Flash event
       if (activePopup.kind === 'flash_event') {
         const type = activePopup.payload as EventTheme
         if (type) {
@@ -49,6 +53,28 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
         useUIStore.setState({ readyToShow: true })
       }
 
+      // Global event activation
+      if (activePopup.kind === 'global_event') {
+        const { type, endsAt } = activePopup.payload as {
+          type: GlobalEventType
+          endsAt: number
+        }
+        if (Date.now() > endsAt) {
+          useUIStore.getState().dequeuePopup()
+          return
+        }
+        useGameStore.getState().setGlobalEventActive(type, endsAt)
+        useUIStore.getState().setShowGlobalActivationOverlay(true)
+
+        if (type === 'TIDAL_SURGE') sounds.playTidalSurge()
+        else if (type === 'SOLAR_FLARE') sounds.playSolarFlare()
+        else if (type === 'CYCLONE_BLITZ') sounds.playCycloneBlitz()
+        else if (type === 'MIRAGE_CATACLYSM') sounds.playMirageCataclysm()
+
+        useUIStore.setState({ readyToShow: true })
+      }
+
+      // Ascension / relic drop 
       if (
         activePopup.kind === 'ascension' ||
         activePopup.kind === 'relic_drop'
@@ -57,28 +83,26 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
         useUIStore.setState({ readyToShow: true })
       }
 
+      // Achievement - batch all queued achievements at once
       if (activePopup.kind === 'achievement') {
         const freshQueue = useUIStore.getState().popupQueue
         const allAch = [
           activePopup,
           ...freshQueue.filter((p) => p.kind === 'achievement')
         ]
-
         allAch.forEach((item) =>
           pushAchievement(item.payload as AchievementNotif)
         )
-
         const nonAchievements = freshQueue.filter(
           (p) => p.kind !== 'achievement'
         )
-
         useUIStore.setState({
           activePopup: nonAchievements[0] ?? null,
           popupQueue: nonAchievements.slice(1),
           readyToShow: false
         })
       }
-    }, 1500)
+    }, 2000)
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)

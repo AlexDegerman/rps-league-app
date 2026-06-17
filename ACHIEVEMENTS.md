@@ -74,7 +74,10 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🔵 Rare | Quadrillionaire | Reach 1 Quadrillion | 💎 | `1QAD` |
 | 🟣 Epic | Vigintillionaire | Reach 1 Vigintillion | 🌌 | `1VIG` |
 | 🟡 Legendary | Infinity Bound | Reach 1 Octovigintillion | ♾️ | `1OVG` |
-| 🔴 Mythical | The Singularity | Reach 999 Octovigintillion | 🧿 | `999X` |
+| 🟡 Legendary | Trigintillion Sovereign | Reach 1 Trigintillion | 🌀 | `1TRG` |
+| 🔴 Mythical | Cosmic Transcendence | Reach 1 Trestrigintillion | ☄️ | `1TTR` |
+| 🔴 Mythical | Absolute Zenith | Reach 1 Sextrigintillion | 🌟 | `1STR` |
+| 🔴 Mythical | The Singularity | Reach 999 Sextrigintillion | 🧿 | `999X` |
 
 ---
 
@@ -163,7 +166,7 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | :--- | :--- | :--- | :--- | :--- |
 | 🟢 Common | Seer Apprentice | Use Oracle 3 Days in a Row | 🔮 | `ORC3` |
 | 🔵 Rare | Clairvoyant | Use Oracle 7 Days in a Row | 🌠 | `ORC7` |
-| 🟣 Epic | Prophet | Use Oracle 14 Days in a Row | 👁️ | `ORCL` |
+| 🟣 Epic | Prophet | Use Oracle 14 Days in a Row | 👁 | `ORCL` |
 | 🟡 Legendary | Chrono Scholar | Use Oracle 30 Days in a Row | 📅 | `CHRON` |
 | 🔴 Mythical | Omniscient | Use Oracle 60 Days in a Row | 🌌 | `OMNI` |
 
@@ -177,9 +180,15 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🟢 Common | Pity King | Trigger Bonus Pity 100 times | 🩹 | `PITY` |
 | 🔵 Rare | Founder | Play during launch month | ⭐ | `FND` |
 | 🔵 Rare | Autopilot | Toggle on Auto-Bet for the first time | ⚙️ | `AUTO` |
+| 🟣 Epic | Riding the Wave | Win 3 consecutive predictions during a single active Tidal Surge window | 🌊 | `TIDE` |
+| 🟣 Epic | Solar Maximum | Win a match during a Solar Flare while on an Inferno Win Streak (5+ wins) | ☀️ | `SOL` |
+| 🟣 Epic | Vortex Velocity | Reach a 10-win streak during a Cyclone Blitz | 🌪️ | `CYCL` |
+| 🟡 Legendary | Fata Morgana | Roll a 45%+ Echo Bonus on a win during a Mirage Cataclysm | 🏜️ | `MIR` |
 | 🔴 Mythical | God-Killer | Win with x100+ multiplier | 👺 | `SLAY` |
 | 🔴 Mythical | Fever Dream | Back-to-back Flash Events on consecutive matches | 💤 | `DREM` |
 | 🔴 Mythical | Storm Chaser | Experience all 4 Flash Event themes in one session | 🌪️ | `STRM` |
+| 🔴 Mythical | Cosmic Alignment | Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously | 🪐 | `SYZY` |
+| 🔴 Mythical | Cataclysm Surveyor | Participate 15 times in each of the four separate Global Events | 🔱 | `CATA` |
 
 ---
 
@@ -201,6 +210,56 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 
 ---
 
+## 🪐 Category 15: Cosmic (Global Events)
+*Ecosystem tracking across all Unified Server Events.*
+
+### Global Unified Track
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Event Horizon | Participate in 1 Global Event | 🌌 | `GLO1` |
+| 🔵 Rare | Phenomenon | Participate in 10 Global Events | 🌍 | `GLO2` |
+| 🟣 Epic | Aether Drifter | Participate in 25 Global Events | 🌠 | `GLO3` |
+| 🟡 Legendary | Nexus Walker | Participate in 50 Global Events | 🌀 | `GLO4` |
+| 🔴 Mythical | Force of Nature | Participate in 100 Global Events | 💫 | `GLOB` |
+
+### Tidal Surge Track
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Neap Tide | Participate in 3 Tidal Surges | 🌊 | `TSU1` |
+| 🔵 Rare | Spring Tide | Participate in 7 Tidal Surges | 💧 | `TSU2` |
+| 🟣 Epic | Abyssal Drift | Participate in 15 Tidal Surges | 🐳 | `TSU3` |
+| 🟡 Legendary | Maelstrom | Participate in 25 Tidal Surges | 🌀 | `TSU4` |
+| 🔴 Mythical | Tsunami Sovereign | Participate in 50 Tidal Surges | 👑 | `TSU5` |
+
+### Solar Flare Track
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Corona | Participate in 3 Solar Flares | 🔅 | `SFL1` |
+| 🔵 Rare | Solar Wind | Participate in 7 Solar Flares | 💨 | `SFL2` |
+| 🟣 Epic | Prominence | Participate in 15 Solar Flares | 🔥 | `SFL3` |
+| 🟡 Legendary | Coronal Ejection | Participate in 25 Solar Flares | ☄️ | `SFL4` |
+| 🔴 Mythical | Heliosphere | Participate in 50 Solar Flares | ☀️ | `SFL5` |
+
+### Cyclone Blitz Track
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Gale | Participate in 3 Cyclone Blitzes | 🍃 | `CBL1` |
+| 🔵 Rare | Squall | Participate in 7 Cyclone Blitzes | 🌬️ | `CBL2` |
+| 🟣 Epic | Tempest | Participate in 15 Cyclone Blitzes | 🌩️ | `CBL3` |
+| 🟡 Legendary | Eye of the Storm | Participate in 25 Cyclone Blitzes | 👁 | `CBL4` |
+| 🔴 Mythical | Zephyr King | Participate in 50 Cyclone Blitzes | 👑 | `CBL5` |
+
+### Mirage Cataclysm Track
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Haze | Participate in 3 Mirage Cataclysms | 🌫️ | `MCA1` |
+| 🔵 Rare | Shimmer | Participate in 7 Mirage Cataclysms | ✨ | `MCA2` |
+| 🟣 Epic | Sandstorm | Participate in 15 Mirage Cataclysms | 🏜️ | `MCA3` |
+| 🟡 Legendary | Oasis Phantom | Participate in 25 Mirage Cataclysms | 🌴 | `MCA4` |
+| 🔴 Mythical | Master of Illusion | Participate in 50 Mirage Cataclysms | 🔮 | `MCA5` |
+
+---
+
 ## 📖 Category 14: The Grand Archive (Collector)
 *Rewarding the completion of the achievement codex itself.*
 
@@ -208,9 +267,9 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | :--- | :--- | :--- | :--- | :--- |
 | 🟢 Common | Curious | Earn 10 Achievements | 📖 | `COL10` |
 | 🔵 Rare | Dedicated | Earn 25 Achievements | 📚 | `COL25` |
-| 🟣 Epic | Completionist | Earn 40 Achievements | 🗂️ | `COL40` |
-| 🟡 Legendary | Archivist | Earn 55 Achievements | 🏛️ | `COL55` |
-| 🔴 Mythical | Omnivore | Earn 68 Achievements | 🌟 | `COLMAX` |
+| 🟣 Epic | Completionist | Earn 45 Achievements | 🗂️ | `COL45` |
+| 🟡 Legendary | Archivist | Earn 70 Achievements | 🏛️ | `COL55` |
+| 🔴 Mythical | Omnivore | Earn 105 Achievements | 🌟 | `COLMAX` |
 
 ---
 
@@ -224,6 +283,10 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
 | 🔵 Rare | The Rebel | Bet against the Oracle | 🎭 | `REBL` |
+| 🔵 Rare | Dry Mirage | Roll the minimum Echo Bonus (15%) on a win during Mirage Cataclysm | 🏜️ | `DRYM` |
+| 🔵 Rare | Eye of the Storm | Have your win streak shielded by the Buffer Module during Cyclone Blitz | 🛡️ | `EYEC` |
+| 🟣 Epic | Prismatic Wave | Win a match during Tidal Surge with the Prismatic Shard equipped | 💎 | `PRIS` |
+| 🔴 Mythical | Thermal Fusion | Trigger a Soul of the Machine Mythic Slam on a win during a Solar Flare | ☀️ | `FUSN` |
 
 </details>
 
@@ -235,3 +298,4 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
 | 🌈 Rainbow | God King | 1000 Wins + 50 Laps + Trinity of Relics | 👑 | `KING` |
+| 🌈 Rainbow | Cosmic Sovereign | Participate 50 times in each of the 4 Global Events | 🪐 | `COSM` |
