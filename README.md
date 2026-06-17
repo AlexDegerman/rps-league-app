@@ -11,25 +11,25 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 <p align="center">
   <em><strong>Global Events Showcase</strong>: Server-wide real-time events that transform gameplay and visuals.</em>
   <br />
-  <video width="280" autoplay muted loop playsinline>
-    <source src="https://github.com/AlexDegerman/rps-league-app/raw/main/assets/globalevents_showcase.mp4" type="video/mp4">
-  </video>
+  <img src="./assets/globalevents_showcase.gif" width="280" />
+  <br />
+  <a href="https://www.youtube.com/shorts/nARfsfyWoDc">Watch full quality video</a>
 </p>
 
 <p align="center">
   <em><strong>Flash Event Activations</strong>: Personal dynamic events that temporarily override UI, audio, and outcomes.</em>
   <br />
-  <video width="280" autoplay muted loop playsinline>
-    <source src="https://github.com/AlexDegerman/rps-league-app/raw/main/assets/flasheventanimations.mp4" type="video/mp4">
-  </video>
+  <img src="./assets/flasheventanimations.gif" width="280" />
+  <br />
+  <a href="https://www.youtube.com/shorts/cM0UDeg6uz0">Watch full quality video</a>
 </p>
 
 <p align="center">
   <em><strong>Season 2 Tier Progression</strong>: Visual scaling system where score styling evolves across extreme number tiers.</em>
   <br />
-  <video width="280" autoplay muted loop playsinline>
-    <source src="https://github.com/AlexDegerman/rps-league-app/raw/main/assets/season2_tiers_showcase.mp4" type="video/mp4">
-  </video>
+  <img src="./assets/season2_tiers_showcase.gif" width="280" />
+  <br />
+  <a href="https://www.youtube.com/watch?v=4dwtzrzaOAA">Watch full quality video</a>
 </p>
 
 ---
@@ -279,7 +279,7 @@ The Oracle system also runs autonomous weighted festivals during low-concurrency
 
 ## 🏆 Predictor Achievements
 
-The Achievement Codex is a multi-tier progression system that tracks over 70 unique simulation milestones. From raw win volume and dimensional wealth to specialized Flash Event tracks and global Festival triggers, every interaction contributes to your public identity.
+The Achievement Codex is a multi-tier progression system that tracks over 100 unique simulation milestones. From raw win volume and dimensional wealth to specialized Flash Event tracks and global Festival triggers, every interaction contributes to your public identity.
 
 Badges feature dynamic upgrading: earning a higher-rarity achievement automatically replaces the previous tier in your collection to keep your inventory clean. Predictors can curate their Top 5 earned badges to showcase on their public profile and the global leaderboard.
 
