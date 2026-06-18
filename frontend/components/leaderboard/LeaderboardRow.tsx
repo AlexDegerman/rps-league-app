@@ -96,7 +96,8 @@ export function LeaderboardRow({
                     </div>
                   )}
                   <div
-                    className={`w-14 font-bold ${getDisplayTierClass(entry.points, entry.pointStylePreference)}`}
+                    className={`w-14 font-bold ${getDisplayTierClass(entry.points, entry.pointStylePreference)} `}
+                    data-text={formatPoints(entry.points).display}
                   >
                     {formatPoints(entry.points).display}
                   </div>
@@ -139,6 +140,7 @@ export function LeaderboardRow({
                         entry.points,
                         entry.pointStylePreference
                       )}
+                      data-text={formatPoints(entry.points).display}
                     >
                       {formatPoints(entry.points).display}
                     </span>
@@ -180,6 +182,7 @@ export function LeaderboardRow({
                 entry.points,
                 entry.pointStylePreference
               )}
+              data-text={formatPoints(entry.points).display}
             >
               {formatPoints(entry.points).display}
             </span>
@@ -211,6 +214,7 @@ export function LeaderboardRow({
                 entry.points,
                 entry.pointStylePreference
               )}
+              data-text={formatPoints(entry.points).display}
             >
               {formatPoints(entry.points).display}
             </span>

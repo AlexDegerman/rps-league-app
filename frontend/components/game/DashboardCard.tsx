@@ -236,7 +236,7 @@ export default function DashboardCard() {
 
   const pointsRef = useRef<HTMLSpanElement>(null)
   useAnimatedBigInt(pointsRef, points, stylePreference, 1000)
-  const { full, capped } = formatPoints(points)
+  const { full, capped, display } = formatPoints(points)
 
   const numberName = pointsLoaded ? getFullNumberName(points) : ''
   const shouldShowTooltip =
@@ -286,7 +286,11 @@ export default function DashboardCard() {
                   <GemIcon size={24} className="shrink-0" />
                   <span className="text-xl font-bold tabular-nums">
                     <span className="text-xl font-bold tabular-nums">
-                      <span ref={pointsRef} style={{ position: 'relative' }}>
+                      <span
+                        ref={pointsRef}
+                        style={{ position: 'relative' }}
+                        data-text={pointsLoaded ? display : '...'}
+                      >
                         {pointsLoaded ? '' : '...'}
                       </span>
                     </span>

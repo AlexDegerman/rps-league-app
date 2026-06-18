@@ -397,6 +397,7 @@ export default function ProfilePage() {
               <span
                 className={`text-3xl sm:text-4xl font-black leading-none tracking-tighter ${points !== null ? pointsColorClass : 'text-purple-600'}`}
                 style={{ position: 'relative' }}
+                data-text={points !== null ? display : '...'}
               >
                 {points !== null ? display : '...'}
               </span>

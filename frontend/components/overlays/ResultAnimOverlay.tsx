@@ -121,6 +121,7 @@ function getConfettiColors(
   }
 }
 
+
 function BottomConfetti({
   confettiType,
   confetti,
@@ -223,7 +224,7 @@ function RelicSlamOverlay({
   finalAmount: bigint
 }) {
   const [phase, setPhase] = useState<'slam' | 'tick'>('slam')
-  const [displayAmount, setDisplayAmount] = useState(preSoulAmount)
+  const displayRef = useRef<HTMLSpanElement>(null)
   const rafRef = useRef<number | null>(null)
 
   const tierKey = multiplier === 3 ? 'MYTHICAL' : 'LEGENDARY'
@@ -240,7 +241,10 @@ function RelicSlamOverlay({
 
     const base = preSoulAmount
     const diff = finalAmount > base ? finalAmount - base : 0n
-    setDisplayAmount(base)
+
+    if (displayRef.current) {
+      displayRef.current.textContent = `+${formatPoints(base).display}`
+    }
 
     const t = setTimeout(() => {
       if (!isMounted) return
@@ -254,11 +258,19 @@ function RelicSlamOverlay({
         const progress = Math.min(elapsed / duration, 1)
         const eased = 1 - Math.pow(1 - progress, 4)
         const easedScaled = BigInt(Math.floor(eased * 10000))
-        setDisplayAmount(base + (diff * easedScaled) / 10000n)
+
+        const currentAmount = base + (diff * easedScaled) / 10000n
+
+        if (displayRef.current) {
+          displayRef.current.textContent = `+${formatPoints(currentAmount).display}`
+        }
+
         if (progress < 1) {
           rafRef.current = requestAnimationFrame(tick)
         } else {
-          setDisplayAmount(finalAmount)
+          if (displayRef.current) {
+            displayRef.current.textContent = `+${formatPoints(finalAmount).display}`
+          }
           slamState.active = false
         }
       }
@@ -312,9 +324,10 @@ function RelicSlamOverlay({
             </div>
             <div className="flex items-center gap-4 mt-1">
               <span
-                className={`text-4xl sm:text-5xl font-black tabular-nums tracking-tighter ${getAmountColor(displayAmount)}`}
+                ref={displayRef}
+                className={`text-4xl sm:text-5xl font-black tabular-nums tracking-tighter ${getAmountColor(finalAmount)}`}
               >
-                +{formatPoints(displayAmount).display}
+                +{formatPoints(preSoulAmount).display}
               </span>
               <GemIcon size={36} />
             </div>

@@ -96,14 +96,14 @@ export default function LunarConfetti() {
         // Halo
         <div
           key={`h${i}`}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               top: '-5%',
               left: d.left,
               width: `${d.w * 2.5}px`,
-              height: '0px',
-              transform: 'translateX(-50%)',
+              height: '100%',
+              transform: 'translateX(-50%) scaleY(0)',
               background: `linear-gradient(to bottom, rgba(180,220,255,${d.aG * 0.5}), rgba(144,205,244,${d.aG}), rgba(144,205,244,${d.aG * 0.5}), transparent)`,
               filter: isMobile ? undefined : `blur(${d.blur * 1.8}px)`,
               animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s both`
@@ -113,14 +113,14 @@ export default function LunarConfetti() {
         // Core
         <div
           key={`c${i}`}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               top: '-5%',
               left: d.left,
               width: `${d.w}px`,
-              height: '0px',
-              transform: 'translateX(-50%)',
+              height: '100%',
+              transform: 'translateX(-50%) scaleY(0)',
               background: `linear-gradient(to bottom, rgba(255,255,255,${d.aC}), rgba(210,235,255,${d.aC * 0.9}), rgba(180,220,255,${d.aC * 0.7}), rgba(144,205,244,${d.aC * 0.4}), transparent)`,
               filter: isMobile ? undefined : `blur(${d.blur}px)`,
               animation: `lunar-shaft-fall ${d.dur}s ease-out ${d.delay}s both`
@@ -132,14 +132,14 @@ export default function LunarConfetti() {
           ? [
               <div
                 key={`s${i}`}
-                className="absolute"
+                className="absolute origin-top"
                 style={
                   {
                     top: '-5%',
                     left: d.left,
                     width: `${Math.max(2, Math.round(d.w * 0.08))}px`,
-                    height: '0px',
-                    transform: 'translateX(-50%)',
+                    height: '100%',
+                    transform: 'translateX(-50%) scaleY(0)',
                     background:
                       'linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.7), rgba(220,240,255,0.3), transparent)',
                     filter: 'blur(1px)',

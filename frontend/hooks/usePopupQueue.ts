@@ -26,6 +26,17 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastProcessedId = useRef<string | null>(null)
+  const isMountedRef = useRef(true)
+
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!activePopup) {
@@ -38,6 +49,8 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
     if (timerRef.current) clearTimeout(timerRef.current)
 
     timerRef.current = setTimeout(() => {
+      if (!isMountedRef.current) return
+
       // Flash event
       if (activePopup.kind === 'flash_event') {
         const type = activePopup.payload as EventTheme
@@ -74,7 +87,7 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
         useUIStore.setState({ readyToShow: true })
       }
 
-      // Ascension / relic drop 
+      // Ascension / relic drop
       if (
         activePopup.kind === 'ascension' ||
         activePopup.kind === 'relic_drop'

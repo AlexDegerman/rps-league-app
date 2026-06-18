@@ -33,13 +33,14 @@ export default function ElectricConfetti() {
       {Array.from({ length: boltCount }).map((_, i) => (
         <div
           key={i}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               left: `${(i / (boltCount - 1)) * 98 + 1}%`,
               top: '-5%',
               width: `${2 + (i % 3)}px`,
-              height: '0',
+              height: '100%',
+              transform: 'scaleY(0)',
               background: `linear-gradient(to bottom, rgba(255,255,255,1), #e9d5ff, #b794f4, #9f7aea, rgba(127,156,245,0.3), transparent)`,
               boxShadow: isMobile
                 ? undefined
@@ -54,13 +55,14 @@ export default function ElectricConfetti() {
       {Array.from({ length: haloCount }).map((_, i) => (
         <div
           key={`h${i}`}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               left: `${(i / (haloCount - 1)) * 90 + 5}%`,
               top: '-5%',
               width: `${20 + (i % 3) * 10}px`,
-              height: '0',
+              height: '100%',
+              transform: 'scaleY(0)',
               background: `linear-gradient(to bottom, rgba(183,148,244,0.2), rgba(159,122,234,0.3), transparent)`,
               filter: isMobile ? undefined : 'blur(6px)',
               animation: `electric-bolt-fall 0.75s ease-in 0s forwards`

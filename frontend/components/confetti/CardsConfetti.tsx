@@ -135,7 +135,7 @@ export default function CardsConfetti() {
       {Array.from({ length: trailCount }).map((_, i) => (
         <div
           key={`t${i}`}
-          className="absolute pointer-events-none"
+          className="absolute pointer-events-none origin-top"
           style={
             {
               width: '1px',

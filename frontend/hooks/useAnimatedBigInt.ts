@@ -38,6 +38,7 @@ export function useAnimatedBigInt(
       if (ref.current) {
         const { display } = formatPoints(currentVal)
         ref.current.textContent = display
+        ref.current.setAttribute('data-text', display)
 
         const newClass = getDisplayTierClass(currentVal, stylePreference)
         ref.current.className = newClass

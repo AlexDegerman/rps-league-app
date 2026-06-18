@@ -99,14 +99,14 @@ export default function SolarFlareConfetti() {
         {BEAMS.map((b, i) => (
           <React.Fragment key={i}>
             <div
-              className="absolute"
+              className="absolute origin-top"
               style={
                 {
                   top: 0,
                   left: b.left,
                   width: `${b.w * 2.2}px`,
-                  height: '0',
-                  transform: 'translateX(-50%)',
+                  height: '100%',
+                  transform: 'translateX(-50%) scaleY(0)',
                   background:
                     'linear-gradient(to bottom, rgba(253,230,138,0.45), rgba(245,158,11,0.6), rgba(245,158,11,0.35), transparent)',
                   filter: isMobile ? undefined : `blur(${b.blur * 1.5}px)`,
@@ -116,14 +116,14 @@ export default function SolarFlareConfetti() {
               }
             />
             <div
-              className="absolute"
+              className="absolute origin-top"
               style={
                 {
                   top: 0,
                   left: b.left,
                   width: `${b.w}px`,
-                  height: '0',
-                  transform: 'translateX(-50%)',
+                  height: '100%',
+                  transform: 'translateX(-50%) scaleY(0)',
                   background:
                     'linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(253,230,138,0.9), rgba(245,158,11,0.7), rgba(239,68,68,0.3), transparent)',
                   filter: isMobile ? undefined : `blur(${b.blur}px)`,
@@ -133,14 +133,14 @@ export default function SolarFlareConfetti() {
               }
             />
             <div
-              className="absolute"
+              className="absolute origin-top"
               style={
                 {
                   top: 0,
                   left: b.left,
                   width: '2px',
-                  height: '0',
-                  transform: 'translateX(-50%)',
+                  height: '100%',
+                  transform: 'translateX(-50%) scaleY(0)',
                   background:
                     'linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0.6), transparent)',
                   filter: isMobile ? undefined : 'blur(0.5px)',
@@ -167,7 +167,7 @@ export default function SolarFlareConfetti() {
             width: '180px',
             height: '180px',
             left: '50%',
-            top: '80%',
+            top: '100%',
             transform: 'translate(-50%, -50%)',
             background:
               'radial-gradient(circle, #ffffff 0%, #fbbf24 35%, #f97316 70%, transparent 100%)',

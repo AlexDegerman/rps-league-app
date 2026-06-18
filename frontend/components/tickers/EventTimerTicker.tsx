@@ -64,6 +64,7 @@ export default function EventTimerTicker() {
 
   const [entries, setEntries] = useState<TimerEntry[]>([])
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const prevTimeRef = useRef<string | null>(null)
 
   useEffect(() => {
     const tick = () => {
@@ -114,7 +115,14 @@ export default function EventTimerTicker() {
         }
       }
 
-      setEntries(next)
+      const newTimeKey = next
+        .map((e) => `${e.label}-${Math.ceil(e.timeLeft / 1000)}`)
+        .join('|')
+
+      if (newTimeKey !== prevTimeRef.current) {
+        prevTimeRef.current = newTimeKey
+        setEntries(next)
+      }
     }
 
     tick()

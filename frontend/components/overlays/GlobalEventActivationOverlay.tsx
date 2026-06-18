@@ -214,11 +214,7 @@ function TidalActivationConfetti({ isMobile }: { isMobile: boolean }) {
 }
 
 // SOLAR FLARE full-screen
-const SF_BEAMS = [
-  { left: '35%', w: 40, blur: 10, delay: 0.0, dur: 1.0 },
-  { left: '50%', w: 65, blur: 15, delay: 0.0, dur: 1.0 },
-  { left: '65%', w: 35, blur: 9, delay: 0.03, dur: 1.0 }
-]
+const SF_BEAMS = [{ left: '50%', w: 100, blur: 22, delay: 0.0, dur: 1.0 }]
 const SF_SPARKS = Array.from({ length: 420 }, (_, i) => {
   const angle = (i / 420) * Math.PI * 2
   const speed = 650 + (i % 9) * 110
@@ -276,50 +272,50 @@ function SolarActivationConfetti({ isMobile }: { isMobile: boolean }) {
       {SF_BEAMS.map((b, i) => (
         <React.Fragment key={i}>
           <div
-            className="absolute"
+            className="absolute origin-top"
             style={
               {
                 top: 0,
                 left: b.left,
                 width: `${b.w * 2.2}px`,
-                height: '0',
-                transform: 'translateX(-50%)',
+                height: '110vh',
+                transform: 'translateX(-50%) scaleY(0)',
                 background:
                   'linear-gradient(to bottom, rgba(253,230,138,0.48), rgba(245,158,11,0.64), rgba(245,158,11,0.4), transparent)',
                 filter: isMobile ? undefined : `blur(${b.blur * 1.5}px)`,
-                animation: `solar-beam-down-fs ${b.dur}s ease-in ${b.delay}s both`
+                animation: `solar-beam-down ${b.dur}s ease-in ${b.delay}s both`
               } as React.CSSProperties
             }
           />
           <div
-            className="absolute"
+            className="absolute origin-top"
             style={
               {
                 top: 0,
                 left: b.left,
                 width: `${b.w}px`,
-                height: '0',
-                transform: 'translateX(-50%)',
+                height: '110vh',
+                transform: 'translateX(-50%) scaleY(0)',
                 background:
                   'linear-gradient(to bottom, rgba(255,255,255,0.97), rgba(253,230,138,0.91), rgba(245,158,11,0.74), rgba(239,68,68,0.34), transparent)',
                 filter: isMobile ? undefined : `blur(${b.blur}px)`,
-                animation: `solar-beam-down-fs ${b.dur}s ease-in ${b.delay}s both`
+                animation: `solar-beam-down ${b.dur}s ease-in ${b.delay}s both`
               } as React.CSSProperties
             }
           />
           <div
-            className="absolute"
+            className="absolute origin-top"
             style={
               {
                 top: 0,
                 left: b.left,
                 width: '2px',
-                height: '0',
-                transform: 'translateX(-50%)',
+                height: '110vh',
+                transform: 'translateX(-50%) scaleY(0)',
                 background:
                   'linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0.6), transparent)',
                 filter: isMobile ? undefined : 'blur(0.5px)',
-                animation: `solar-beam-down-fs ${b.dur * 0.95}s ease-in ${b.delay}s both`
+                animation: `solar-beam-down ${b.dur * 0.95}s ease-in ${b.delay}s both`
               } as React.CSSProperties
             }
           />

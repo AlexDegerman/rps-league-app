@@ -703,7 +703,7 @@ export default function HomePage() {
           globalEchoAmount: data.globalEchoAmount
             ? BigInt(data.globalEchoAmount)
             : null,
-          confetti: Array.from({ length: 100 }).map(() => ({
+          confetti: Array.from({ length: 50 }).map(() => ({
             leftOffset: Math.random() * 100 - 50,
             vx: (Math.random() - 0.5) * 300,
             vy: -(Math.random() * 200 + 100),

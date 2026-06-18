@@ -16,13 +16,14 @@ function ElectricActivationConfetti({ isMobile }: { isMobile: boolean }) {
       {Array.from({ length: boltCount }).map((_, i) => (
         <div
           key={i}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               left: `${(i / (boltCount - 1)) * 98 + 1}%`,
               top: '-5%',
               width: `${2 + (i % 3)}px`,
-              height: '0vh',
+              height: '110vh',
+              transform: 'scaleY(0)',
               background: `linear-gradient(to bottom, rgba(255,255,255,1), #e9d5ff, #b794f4, #9f7aea, rgba(127,156,245,0.3), transparent)`,
               boxShadow: isMobile
                 ? undefined
@@ -36,13 +37,14 @@ function ElectricActivationConfetti({ isMobile }: { isMobile: boolean }) {
       {Array.from({ length: haloCount }).map((_, i) => (
         <div
           key={`h${i}`}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               left: `${(i / (haloCount - 1)) * 90 + 5}%`,
               top: '-5%',
               width: `${20 + (i % 3) * 10}px`,
-              height: '0',
+              height: '110vh',
+              transform: 'scaleY(0)',
               background: `linear-gradient(to bottom, rgba(183,148,244,0.2), rgba(159,122,234,0.3), transparent)`,
               filter: isMobile ? undefined : 'blur(6px)',
               animation: `electric-bolt-fall-fs 0.75s ease-in 0s forwards`
@@ -247,14 +249,14 @@ function LunarActivationConfetti({ isMobile }: { isMobile: boolean }) {
       {activeShafts.flatMap((d, i) => [
         <div
           key={`h${i}`}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               top: '-5%',
               left: d.left,
               width: `${d.w * 2.5}px`,
-              height: '0px',
-              transform: 'translateX(-50%)',
+              height: '110vh',
+              transform: 'translateX(-50%) scaleY(0)',
               background: `linear-gradient(to bottom, rgba(180,220,255,${d.aG * 0.5}), rgba(144,205,244,${d.aG}), rgba(144,205,244,${d.aG * 0.5}), transparent)`,
               filter: isMobile ? undefined : `blur(${d.blur * 1.8}px)`,
               animation: `lunar-shaft-fall-fs ${d.dur}s ease-out ${d.delay}s both`
@@ -263,14 +265,14 @@ function LunarActivationConfetti({ isMobile }: { isMobile: boolean }) {
         />,
         <div
           key={`c${i}`}
-          className="absolute"
+          className="absolute origin-top"
           style={
             {
               top: '-5%',
               left: d.left,
               width: `${d.w}px`,
-              height: '0px',
-              transform: 'translateX(-50%)',
+              height: '110vh',
+              transform: 'translateX(-50%) scaleY(0)',
               background: `linear-gradient(to bottom, rgba(255,255,255,${d.aC}), rgba(210,235,255,${d.aC * 0.9}), rgba(180,220,255,${d.aC * 0.7}), rgba(144,205,244,${d.aC * 0.4}), transparent)`,
               filter: isMobile ? undefined : `blur(${d.blur}px)`,
               animation: `lunar-shaft-fall-fs ${d.dur}s ease-out ${d.delay}s both`
@@ -281,14 +283,14 @@ function LunarActivationConfetti({ isMobile }: { isMobile: boolean }) {
           ? [
               <div
                 key={`s${i}`}
-                className="absolute"
+                className="absolute origin-top"
                 style={
                   {
                     top: '-5%',
                     left: d.left,
                     width: `${Math.max(2, Math.round(d.w * 0.08))}px`,
-                    height: '0px',
-                    transform: 'translateX(-50%)',
+                    height: '110vh',
+                    transform: 'translateX(-50%) scaleY(0)',
                     background:
                       'linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.7), rgba(220,240,255,0.3), transparent)',
                     filter: 'blur(1px)',

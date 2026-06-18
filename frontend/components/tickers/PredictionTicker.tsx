@@ -110,11 +110,11 @@ export default function PredictionTicker() {
     const scheduleDemoEvent = () => {
       const isMobile = window.innerWidth < 768
       const delay = isMobile
-        ? 1500 + Math.random() * 2500
-        : 400 + Math.random() * 1200
+        ? 2000 + Math.random() * 1000
+        : 1000 + Math.random() * 1000 
 
       demoTimer = setTimeout(() => {
-        if (visible && !document.hidden && pendingRef.current.length < 40) {
+        if (visible && !document.hidden && pendingRef.current.length < 10) {
           const name = generateNickname()
           const tierRoll = Math.random() * 100
           let amount = 0n
@@ -169,14 +169,14 @@ export default function PredictionTicker() {
       if (lastEvent) {
         minDelay =
           ((lastEvent.message.length * 8 + 60) / velocity) * 1000 +
-          (isMobile ? 600 : 200)
+          (isMobile ? 1600 : 1000)
       }
 
       const hasRealEvent = pendingRef.current.some((e) => e.isReal)
       const finalDelay = hasRealEvent ? Math.max(300, minDelay * 0.7) : minDelay
 
       if (now - lastStartTimeRef.current < finalDelay) {
-        activeTimer = setTimeout(tick, isMobile ? 100 : 50)
+        activeTimer = setTimeout(tick, 300)
         return
       }
 
@@ -193,7 +193,10 @@ export default function PredictionTicker() {
       const eventDuration = (totalDistance / velocity) * 1000
 
       lastStartTimeRef.current = now
-      setActive((prev) => [...prev, { ...next, duration: eventDuration }])
+      setActive((prev) => {
+        const nextActive = [...prev, { ...next, duration: eventDuration }]
+        return nextActive.slice(-5)
+      })
 
       const removalId = setTimeout(() => {
         setActive((prev) => prev.filter((e) => e.id !== next.id))
@@ -201,7 +204,7 @@ export default function PredictionTicker() {
       }, eventDuration + 500)
       currentTimeouts.add(removalId)
 
-      activeTimer = setTimeout(tick, isMobile ? 100 : 50)
+      activeTimer = setTimeout(tick, 300)
     }
 
     tick()
