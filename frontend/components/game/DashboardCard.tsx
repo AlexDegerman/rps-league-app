@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import GemIcon from '@/components/icons/GemIcon'
 import InfoIcon from '@/components/icons/InfoIcon'
 import CloseIcon from '@/components/icons/CloseIcon'
@@ -18,10 +18,10 @@ import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
 import {
   formatPoints,
   getDisplayTierClass,
-  getFullNumberName,
-  parseShorthand
+  getFullNumberName
 } from '@/lib/format'
 import { oracleTemplates } from '@/lib/oracleTemplates'
+import BetAmountInput from '@/components/ui/BetAmountInput'
 
 const DASHBOARD_BORDER_CLASSES: Record<string, string> = {
   flash_lunar: 'border-blue-200 lunar-ring',
@@ -209,61 +209,34 @@ export default function DashboardCard() {
   const oracleSide = useGameStore((s) => s.oracleSide)
   const festivalModeKey = useGameStore((s) => s.festivalModeKey)
   const flashBuffRemaining = useGameStore((s) => s.flashBuffRemaining)
+  const points = useUserStore((s) => s.points)
+  const pointsLoaded = useUserStore((s) => s.pointsLoaded)
+  const setBetAmount = useUserStore((s) => s.setBetAmount)
+  const autoAllIn = useUserStore((s) => s.autoAllIn)
+  const setAutoAllIn = useUserStore((s) => s.setAutoAllIn)
+  const isHydrated = useUserStore((s) => s.isHydrated)
+  const winStreak = useUserStore((s) => s.winStreak)
+  const streakMult = useUserStore((s) => s.streakMult)
+  const displayNickname = useUserStore((s) => s.displayNickname)
+  const dailyRank = useUserStore((s) => s.dailyRank)
+  const stylePreference = useUserStore((s) => s.stylePreference)
 
-  const {
-    points,
-    pointsLoaded,
-    betAmount,
-    setBetAmount,
-    autoAllIn,
-    setAutoAllIn,
-    isHydrated,
-    winStreak,
-    streakMult,
-    displayNickname,
-    dailyRank,
-    stylePreference
-  } = useUserStore()
-
-  const {
-    showPointsInfo,
-    setShowPointsInfo,
-    showPointsExplainer,
-    setShowPointsExplainer,
-    isFocused,
-    setIsFocused,
-    inputString,
-    setInputString,
-    notification,
-    setNotification,
-    oracleVolume,
-    setOracleVolume
-  } = useUIStore()
+  const showPointsInfo = useUIStore((s) => s.showPointsInfo)
+  const setShowPointsInfo = useUIStore((s) => s.setShowPointsInfo)
+  const showPointsExplainer = useUIStore((s) => s.showPointsExplainer)
+  const setShowPointsExplainer = useUIStore((s) => s.setShowPointsExplainer)
+  const notification = useUIStore((s) => s.notification)
+  const setNotification = useUIStore((s) => s.setNotification)
+  const oracleVolume = useUIStore((s) => s.oracleVolume)
+  const setOracleVolume = useUIStore((s) => s.setOracleVolume)
 
   const { soundOn, toggleSound, volume, setVolume } = useSound()
   const [showSoundPopover, setShowSoundPopover] = useState(false)
   const soundBtnRef = useRef<HTMLButtonElement>(null)
 
-  const animatedPoints = useAnimatedBigInt(points, 1000)
+  const pointsRef = useRef<HTMLSpanElement>(null)
+  useAnimatedBigInt(pointsRef, points, stylePreference, 1000)
   const { full, capped } = formatPoints(points)
-  const { display: animatedDisplay } = formatPoints(animatedPoints)
-
-  useEffect(() => {
-    if (isHydrated && autoAllIn) {
-      setBetAmount(points)
-      if (!isFocused) setInputString(points.toString())
-    }
-  }, [autoAllIn, points, isHydrated, isFocused, setBetAmount, setInputString])
-
-  useEffect(() => {
-    if (isHydrated && !autoAllIn) {
-      const floor = 100000n
-      const resetTo = points < floor ? points : floor
-      setBetAmount(resetTo)
-      if (!isFocused) setInputString(resetTo.toString())
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoAllIn, isHydrated])
 
   const numberName = pointsLoaded ? getFullNumberName(points) : ''
   const shouldShowTooltip =
@@ -312,11 +285,10 @@ export default function DashboardCard() {
                 >
                   <GemIcon size={24} className="shrink-0" />
                   <span className="text-xl font-bold tabular-nums">
-                    <span
-                      className={getDisplayTierClass(points, stylePreference)}
-                      style={{ position: 'relative'}}
-                    >
-                      {pointsLoaded ? animatedDisplay : '...'}
+                    <span className="text-xl font-bold tabular-nums">
+                      <span ref={pointsRef} style={{ position: 'relative' }}>
+                        {pointsLoaded ? '' : '...'}
+                      </span>
                     </span>
                   </span>
                 </div>
@@ -421,42 +393,9 @@ export default function DashboardCard() {
             Amount
           </label>
           <div className="relative flex-1 min-w-0 h-full">
-            <input
-              type="text"
-              value={isFocused ? inputString : ''}
-              onFocus={() => {
-                setIsFocused(true)
-                setInputString('')
-              }}
-              placeholder={
-                !isFocused
-                  ? formatPoints(betAmount).display
-                  : !autoAllIn
-                    ? '100k → 100.000'
-                    : ''
-              }
-              onChange={(e) => {
-                const val = e.target.value
-                setInputString(val)
-                const parsed = parseShorthand(val)
-                if (parsed > 0n) {
-                  setBetAmount(parsed > points ? points : parsed)
-                }
-              }}
-              onBlur={() => {
-                setIsFocused(false)
-                let final = parseShorthand(inputString)
-                if (final > points) final = points
-                const floor = 100000n
-                if (final < floor) final = points < floor ? points : floor
-                setBetAmount(final)
-                setInputString(final.toString())
-              }}
-              className={`block w-full h-full border-2 rounded-lg pl-3 pr-2 py-0 font-bold focus:ring-2 transition-all bg-white/70 ${inner.inputBorder} ${inner.inputRing} ${
-                !isFocused
-                  ? 'placeholder:text-gray-800'
-                  : 'placeholder:text-gray-400'
-              } ${isFocused && inputString.length > 20 ? 'text-[10px] font-mono' : 'text-sm'}`}
+            <BetAmountInput
+              innerBorder={inner.inputBorder}
+              innerRing={inner.inputRing}
             />
           </div>
         </div>
@@ -468,7 +407,7 @@ export default function DashboardCard() {
             label="ALL IN"
             onClick={() => {
               setBetAmount(points)
-              setInputString(points.toString())
+              useUIStore.getState().setInputString(points.toString())
             }}
           />
           <ModeButton

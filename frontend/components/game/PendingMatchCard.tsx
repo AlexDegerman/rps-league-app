@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import type { PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatDateTime } from '@/lib/format'
 import { useGameStore } from '@/app/stores/gameStore'
@@ -16,7 +16,7 @@ interface PendingMatchCardProps {
   oracleSide?: 'left' | 'right' | null
 }
 
-export default function PendingMatchCard({
+function PendingMatchCardComponent({
   pending,
   prediction,
   onPick,
@@ -392,3 +392,24 @@ export default function PendingMatchCard({
     </div>
   )
 }
+
+const PendingMatchCard = React.memo(
+  PendingMatchCardComponent,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.pending.gameId === nextProps.pending.gameId &&
+      prevProps.pending.expiresAt === nextProps.pending.expiresAt &&
+      prevProps.prediction?.confirmed === nextProps.prediction?.confirmed &&
+      prevProps.prediction?.pick === nextProps.prediction?.pick &&
+      prevProps.serverOffset === nextProps.serverOffset &&
+      prevProps.winStreak === nextProps.winStreak &&
+      prevProps.visualMode === nextProps.visualMode &&
+      prevProps.festivalModeKey === nextProps.festivalModeKey &&
+      prevProps.oracleSide === nextProps.oracleSide &&
+      prevProps.onPick === nextProps.onPick
+    )
+  }
+)
+
+PendingMatchCard.displayName = 'PendingMatchCard'
+export default PendingMatchCard

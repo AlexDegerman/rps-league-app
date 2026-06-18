@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import {
   fetchLatestMatches,
   fetchPendingMatches,
@@ -36,7 +36,7 @@ import type {
 } from '@/types/rps'
 import { useSound } from '@/hooks/useSound'
 import LiveStatsTicker from '@/components/tickers/LiveStatTicker'
-import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
+import { useAnimatedBigIntVal } from '@/hooks/useAnimatedBigInt'
 import EdgeGlow from '@/components/overlays/EdgeGlow'
 import ConfettiOverlay from '@/components/overlays/ConfettiOverlay'
 import ResultAnimOverlay from '@/components/overlays/ResultAnimOverlay'
@@ -74,86 +74,83 @@ import DashboardCard from '@/components/game/DashboardCard'
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 export default function HomePage() {
-  // - Game store -
-  const {
-    backendReady,
-    markReady,
-    pendingMatches,
-    addPendingMatch,
-    removePendingMatch,
-    predictions,
-    setPrediction,
-    updatePrediction,
-    deletePrediction,
-    activeFlashEvent,
-    setActiveFlashEvent,
-    setFlashBuffRemaining,
-    decrementFlashBuff,
-    serverOffset,
-    setServerOffset,
-    now,
-    tickNow,
-    setVisualMode,
-    setLiveTheme,
-    oracleSide,
-    setOracleSide,
-    setActiveFestival,
-    festivalModeKey,
-    activeGlobalEvent,
-    globalEventPhase,
-    setGlobalEventWarning,
-    setGlobalEventActive,
-    globalEventActiveAt
-  } = useGameStore()
+  // --- Game Store Selectors ---
+  const backendReady = useGameStore((s) => s.backendReady)
+  const markReady = useGameStore((s) => s.markReady)
+  const pendingMatches = useGameStore((s) => s.pendingMatches)
+  const addPendingMatch = useGameStore((s) => s.addPendingMatch)
+  const removePendingMatch = useGameStore((s) => s.removePendingMatch)
+  const predictions = useGameStore((s) => s.predictions)
+  const setPrediction = useGameStore((s) => s.setPrediction)
+  const updatePrediction = useGameStore((s) => s.updatePrediction)
+  const deletePrediction = useGameStore((s) => s.deletePrediction)
+  const activeFlashEvent = useGameStore((s) => s.activeFlashEvent)
+  const setActiveFlashEvent = useGameStore((s) => s.setActiveFlashEvent)
+  const setFlashBuffRemaining = useGameStore((s) => s.setFlashBuffRemaining)
+  const decrementFlashBuff = useGameStore((s) => s.decrementFlashBuff)
+  const serverOffset = useGameStore((s) => s.serverOffset)
+  const setServerOffset = useGameStore((s) => s.setServerOffset)
+  const setVisualMode = useGameStore((s) => s.setVisualMode)
+  const setLiveTheme = useGameStore((s) => s.setLiveTheme)
+  const oracleSide = useGameStore((s) => s.oracleSide)
+  const setOracleSide = useGameStore((s) => s.setOracleSide)
+  const setActiveFestival = useGameStore((s) => s.setActiveFestival)
+  const festivalModeKey = useGameStore((s) => s.festivalModeKey)
+  const activeGlobalEvent = useGameStore((s) => s.activeGlobalEvent)
+  const globalEventPhase = useGameStore((s) => s.globalEventPhase)
+  const setGlobalEventWarning = useGameStore((s) => s.setGlobalEventWarning)
+  const setGlobalEventActive = useGameStore((s) => s.setGlobalEventActive)
+  const globalEventActiveAt = useGameStore((s) => s.globalEventActiveAt)
 
-  // - User store -
-  const {
-    points,
-    setBetAmount,
-    autoAllIn,
-    isHydrated,
-    winStreak,
-    setWinStreak,
-    streakMult,
-    setStreakMult,
-    setDailyRank,
-    applyPointsUpdate,
-    laps,
-    setLaps,
-    setFastestLapBets
-  } = useUserStore()
+  // --- User Store Selectors ---
+  const points = useUserStore((s) => s.points)
+  const setBetAmount = useUserStore((s) => s.setBetAmount)
+  const autoAllIn = useUserStore((s) => s.autoAllIn)
+  const isHydrated = useUserStore((s) => s.isHydrated)
+  const winStreak = useUserStore((s) => s.winStreak)
+  const setWinStreak = useUserStore((s) => s.setWinStreak)
+  const streakMult = useUserStore((s) => s.streakMult)
+  const setStreakMult = useUserStore((s) => s.setStreakMult)
+  const setDailyRank = useUserStore((s) => s.setDailyRank)
+  const applyPointsUpdate = useUserStore((s) => s.applyPointsUpdate)
+  const laps = useUserStore((s) => s.laps)
+  const setLaps = useUserStore((s) => s.setLaps)
+  const setFastestLapBets = useUserStore((s) => s.setFastestLapBets)
 
-  // - UI store -
-  const {
-    resultAnim,
-    setResultAnim,
-    clearResultAnim,
-    notification,
-    setNotification,
-    errorMessage,
-    triggerError,
-    showJumpButton,
-    setShowJumpButton,
-    isFocused,
-    setInputString,
-    persistentError,
-    setPersistentError,
-    showWelcomeModal,
-    setShowWelcomeModal,
-    showUpdateModal,
-    setShowUpdateModal,
-    setOracleTickerMessage,
-    showBonusModal,
-    setShowBonusModal,
-    activePopup,
-    dequeuePopup,
-    readyToShow,
-    oracleVolume,
-    showGlobalActivationOverlay,
-    setShowGlobalActivationOverlay
-  } = useUIStore()
+  // --- UI Store Selectors ---
+  const resultAnim = useUIStore((s) => s.resultAnim)
+  const setResultAnim = useUIStore((s) => s.setResultAnim)
+  const clearResultAnim = useUIStore((s) => s.clearResultAnim)
+  const setNotification = useUIStore((s) => s.setNotification)
+  const errorMessage = useUIStore((s) => s.errorMessage)
+  const triggerError = useUIStore((s) => s.triggerError)
+  const showJumpButton = useUIStore((s) => s.showJumpButton)
+  const setShowJumpButton = useUIStore((s) => s.setShowJumpButton)
+  const isFocused = useUIStore((s) => s.isFocused)
+  const setInputString = useUIStore((s) => s.setInputString)
+  const persistentError = useUIStore((s) => s.persistentError)
+  const setPersistentError = useUIStore((s) => s.setPersistentError)
+  const showWelcomeModal = useUIStore((s) => s.showWelcomeModal)
+  const setShowWelcomeModal = useUIStore((s) => s.setShowWelcomeModal)
+  const showUpdateModal = useUIStore((s) => s.showUpdateModal)
+  const setShowUpdateModal = useUIStore((s) => s.setShowUpdateModal)
+  const setOracleTickerMessage = useUIStore((s) => s.setOracleTickerMessage)
+  const showBonusModal = useUIStore((s) => s.showBonusModal)
+  const setShowBonusModal = useUIStore((s) => s.setShowBonusModal)
+  const activePopup = useUIStore((s) => s.activePopup)
+  const dequeuePopup = useUIStore((s) => s.dequeuePopup)
+  const readyToShow = useUIStore((s) => s.readyToShow)
+  const oracleVolume = useUIStore((s) => s.oracleVolume)
+  const showGlobalActivationOverlay = useUIStore(
+    (s) => s.showGlobalActivationOverlay
+  )
+  const setShowGlobalActivationOverlay = useUIStore(
+    (s) => s.setShowGlobalActivationOverlay
+  )
 
-  const { setEligible } = useIdleStore()
+  // --- Idle Store Selector ---
+  const setEligible = useIdleStore((s) => s.setEligible)
+
   useIdleBet()
 
   const {
@@ -181,7 +178,6 @@ export default function HomePage() {
     playCycloneBlitz,
     playMirageCataclysm
   })
-
   const esRef = useRef<EventSource | null>(null)
   const clearAnimTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -189,14 +185,27 @@ export default function HomePage() {
     esRef.current?.close()
   })
 
+  const [isStreamStale, setIsStreamStale] = useState(false)
   const lastPacketRef = useRef(Date.now())
   const isOffline = typeof window !== 'undefined' && !navigator.onLine
-  const isStreamStale = now - lastPacketRef.current > 10000
+
   const showConnectionWarning =
     backendReady &&
     !isDuplicate &&
     !persistentError &&
     (isOffline || isStreamStale)
+
+  useEffect(() => {
+    const checkStaleness = () => {
+      const isStale = Date.now() - lastPacketRef.current > 10000
+      setIsStreamStale(isStale)
+    }
+
+    checkStaleness()
+
+    const timer = setInterval(checkStaleness, 5000)
+    return () => clearInterval(timer)
+  }, [])
 
   const getVisualMode = (
     flash: string | null,
@@ -245,12 +254,6 @@ export default function HomePage() {
       visualMode && flashMap[visualMode] ? flashMap[visualMode]! : null
     )
   }, [visualMode, setVisualMode, setLiveTheme])
-
-  // now ticker
-  useEffect(() => {
-    const timer = setInterval(tickNow, 100)
-    return () => clearInterval(timer)
-  }, [tickNow])
 
   // Global event warning countdown TTS, fires at 60s and 30s before active
   const countdownAnnouncedRef = useRef<Set<string>>(new Set())
@@ -410,7 +413,11 @@ export default function HomePage() {
   const fetchFn = useCallback((page: number) => fetchLatestMatches(page), [])
   const { matches, setMatches, hasMore, isLoadingMore, loadMatches } =
     useInfiniteScroll({ fetchFn })
-  const animatedResult = useAnimatedBigInt(resultAnim?.amount ?? 0n, 600, true)
+  const animatedResult = useAnimatedBigIntVal(
+    resultAnim?.amount ?? 0n,
+    600,
+    true
+  )
 
   // initial data fetch
   useEffect(() => {
@@ -584,7 +591,10 @@ export default function HomePage() {
     if (isDuplicate) return
     const es = new EventSource(`${API_BASE}/api/live`)
     esRef.current = es
-
+    const updatePacketTimestamp = () => {
+      lastPacketRef.current = Date.now()
+      setIsStreamStale(false)
+    }
     es.addEventListener('sync', (event) => {
       const { serverTime } = JSON.parse(event.data)
       setServerOffset(serverTime - Date.now())
@@ -593,7 +603,7 @@ export default function HomePage() {
 
     es.addEventListener('pending', (event) => {
       const pending: PendingMatch = JSON.parse(event.data)
-      lastPacketRef.current = Date.now()
+      updatePacketTimestamp()
       addPendingMatch(pending)
 
       const { serverOffset: offset } = useGameStore.getState()
@@ -609,6 +619,7 @@ export default function HomePage() {
       const data = JSON.parse(event.data)
       const { userId } = getOrCreateUser()
       if (data.userId !== userId) return
+      updatePacketTimestamp()
 
       const isWin = data.result === 'WIN'
       const { activeFlashEvent: currentFlash } = useGameStore.getState()
@@ -627,8 +638,7 @@ export default function HomePage() {
             if (winGlobal === 'TIDAL_SURGE') playTidalSurge()
             else if (winGlobal === 'SOLAR_FLARE') playSolarFlare()
             else if (winGlobal === 'CYCLONE_BLITZ') playCycloneBlitz()
-            else if (winGlobal === 'MIRAGE_CATACLYSM')
-              playMirageCataclysm()
+            else if (winGlobal === 'MIRAGE_CATACLYSM') playMirageCataclysm()
             else playWin()
           } else {
             playWin()
@@ -640,8 +650,7 @@ export default function HomePage() {
           activeGlobalEvent: currentGlobal,
           globalEventPhase: currentGlobalPhase
         } = useGameStore.getState()
-        const globalIsActive =
-          currentGlobal && currentGlobalPhase === 'active'
+        const globalIsActive = currentGlobal && currentGlobalPhase === 'active'
 
         const capturedConfettiType =
           currentFlash === 'HELLFIRE'
@@ -658,8 +667,7 @@ export default function HomePage() {
                       ? 'solar_flare'
                       : globalIsActive && currentGlobal === 'CYCLONE_BLITZ'
                         ? 'cyclone_blitz'
-                        : globalIsActive &&
-                            currentGlobal === 'MIRAGE_CATACLYSM'
+                        : globalIsActive && currentGlobal === 'MIRAGE_CATACLYSM'
                           ? 'mirage_cataclysm'
                           : currentStreak >= 5
                             ? 'inferno'
@@ -708,11 +716,9 @@ export default function HomePage() {
           ? { ...data.bonus, amount: BigInt(data.bonus.amount) }
           : null
         const { points: pointsBefore } = useUserStore.getState()
-        new Promise<{ newPoints: bigint; isNewPeak: boolean }>(
-          (resolve) => {
-            setTimeout(() => resolve(fetchUpdatedPoints()), 100)
-          }
-        ).then(({ newPoints }) => {
+        new Promise<{ newPoints: bigint; isNewPeak: boolean }>((resolve) => {
+          setTimeout(() => resolve(fetchUpdatedPoints()), 100)
+        }).then(({ newPoints }) => {
           const actualLoss =
             pointsBefore > newPoints ? pointsBefore - newPoints : 0n
           setResultAnim({
@@ -761,7 +767,7 @@ export default function HomePage() {
 
     es.addEventListener('result', (event) => {
       const match: Match = JSON.parse(event.data)
-      lastPacketRef.current = Date.now()
+      updatePacketTimestamp()
       removePendingMatch(match.gameId)
       setMatches((prev) => {
         if (prev.some((m) => m.gameId === match.gameId)) return prev
@@ -934,69 +940,83 @@ export default function HomePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDuplicate])
 
-  const handlePick = async (gameId: string, playerName: string) => {
-    unlockOracle()
-    const user = getOrCreateUser()
-    const { betAmount: currentBet } = useUserStore.getState()
-    if (!isUserValid(user) || !user.nickname || currentBet <= 0n) return
+  const handlePick = useCallback(
+    async (gameId: string, playerName: string) => {
+      unlockOracle()
+      const user = getOrCreateUser()
 
-    if (notification === 'new_visitor') {
-      localStorage.setItem('rps_welcomed', '1')
-      setNotification(null)
-    }
+      const { betAmount: currentBet } = useUserStore.getState()
+      if (!isUserValid(user) || !user.nickname || currentBet <= 0n) return
 
-    setPrediction(gameId, {
-      gameId,
-      pick: playerName,
-      confirmed: false,
-      totalMultiplier: 1
-    })
-
-    let succeeded = false
-    try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 5000)
-
-      const { ok, data } = await postPrediction(
-        {
-          userId: user.userId,
-          gameId,
-          pick: playerName,
-          betAmount: currentBet.toString(),
-          nickname: user.nickname,
-          shortId: user.shortId
-        },
-        controller.signal
-      )
-
-      clearTimeout(timeout)
-
-      if (ok && data?.success === true) {
-        succeeded = true
-        if (notification === 'oracle') {
-          setNotification(null)
-          setOracleSide(null)
-        }
-        updatePrediction(gameId, { confirmed: true })
-      } else {
-        triggerError(data?.error || 'MATCH ALREADY ENDED')
+      const currentNotification = useUIStore.getState().notification
+      if (currentNotification === 'new_visitor') {
+        localStorage.setItem('rps_welcomed', '1')
+        useUIStore.setState({ notification: null })
       }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        logger.warn('Prediction POST aborted (timeout)', { gameId, playerName })
-        triggerError('CONNECTION TOO SLOW')
-      } else {
-        logger.error(
-          'Prediction POST failed',
-          err instanceof Error ? err : undefined,
-          { gameId, playerName }
+
+      setPrediction(gameId, {
+        gameId,
+        pick: playerName,
+        confirmed: false,
+        totalMultiplier: 1
+      })
+
+      let succeeded = false
+      try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 5000)
+
+        const { ok, data } = await postPrediction(
+          {
+            userId: user.userId,
+            gameId,
+            pick: playerName,
+            betAmount: currentBet.toString(),
+            nickname: user.nickname,
+            shortId: user.shortId
+          },
+          controller.signal
         )
-        triggerError('CONNECTION FAILED')
+
+        clearTimeout(timeout)
+
+        if (ok && data?.success === true) {
+          succeeded = true
+          if (currentNotification === 'oracle') {
+            useUIStore.setState({ notification: null })
+            setOracleSide(null)
+          }
+          updatePrediction(gameId, { confirmed: true })
+        } else {
+          triggerError(data?.error || 'MATCH ALREADY ENDED')
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          logger.warn('Prediction POST aborted (timeout)', {
+            gameId,
+            playerName
+          })
+          triggerError('CONNECTION TOO SLOW')
+        } else {
+          logger.error(
+            'Prediction POST failed',
+            err instanceof Error ? err : undefined,
+            { gameId, playerName }
+          )
+          triggerError('CONNECTION FAILED')
+        }
+      } finally {
+        if (!succeeded) deletePrediction(gameId)
       }
-    } finally {
-      if (!succeeded) deletePrediction(gameId)
-    }
-  }
+    },
+    [
+      setPrediction,
+      updatePrediction,
+      deletePrediction,
+      setOracleSide,
+      triggerError
+    ]
+  )
 
   const handleWelcomeContinue = () => {
     localStorage.setItem('rps_welcomed', '1')
@@ -1149,7 +1169,9 @@ export default function HomePage() {
               </div>
             )}
             {pendingMatches
-              .filter((pm) => pm.expiresAt - (now + serverOffset) > -5000)
+              .filter(
+                (pm) => pm.expiresAt - (Date.now() + serverOffset) > -5000
+              )
               .map((pending) => (
                 <PendingMatchCard
                   key={pending.gameId}

@@ -40,7 +40,11 @@ const TS_MISTS = Array.from({ length: 55 }, (_, i) => ({
   delay: 0.85 + (i % 11) * 0.035
 }))
 
-function TidalActivationConfetti() {
+function TidalActivationConfetti({ isMobile }: { isMobile: boolean }) {
+  const activeDroplets = isMobile ? TS_DROPLETS.slice(0, 50) : TS_DROPLETS
+  const activeFoam = isMobile ? TS_FOAM_CHUNKS.slice(0, 20) : TS_FOAM_CHUNKS
+  const activeMists = isMobile ? TS_MISTS.slice(0, 25) : TS_MISTS
+
   return (
     <div className="fixed inset-0 pointer-events-none z-200 overflow-hidden">
       <div
@@ -52,7 +56,7 @@ function TidalActivationConfetti() {
           height: '100%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(34,211,238,0.0) 5%, rgba(34,211,238,0.55) 27%, rgba(8,145,178,0.78) 50%, rgba(34,211,238,0.62) 70%, rgba(103,232,249,0.34) 87%, transparent 100%)',
-          filter: 'blur(10px)',
+          filter: isMobile ? undefined : 'blur(10px)',
           animation:
             'tidal-wave-slam-fs 1.1s cubic-bezier(0.18,0.65,0.38,1) 0.0s both'
         }}
@@ -66,7 +70,7 @@ function TidalActivationConfetti() {
           height: '88%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(8,145,178,0.0) 8%, rgba(8,145,178,0.65) 33%, rgba(6,120,150,0.82) 54%, rgba(8,145,178,0.58) 72%, transparent 100%)',
-          filter: 'blur(14px)',
+          filter: isMobile ? undefined : 'blur(14px)',
           animation:
             'tidal-wave-slam-fs 1.12s cubic-bezier(0.18,0.65,0.38,1) 0.025s both'
         }}
@@ -80,7 +84,7 @@ function TidalActivationConfetti() {
           height: '78%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(103,232,249,0.0) 10%, rgba(103,232,249,0.45) 36%, rgba(34,211,238,0.6) 55%, rgba(103,232,249,0.37) 73%, transparent 100%)',
-          filter: 'blur(6px)',
+          filter: isMobile ? undefined : 'blur(6px)',
           animation:
             'tidal-wave-slam-fs 1.08s cubic-bezier(0.2,0.62,0.36,1) 0.01s both'
         }}
@@ -94,7 +98,7 @@ function TidalActivationConfetti() {
           height: '100%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.0) 11%, rgba(255,255,255,0.92) 36%, rgba(207,250,254,0.97) 43%, rgba(255,255,255,0.84) 49%, transparent 57%)',
-          filter: 'blur(2px)',
+          filter: isMobile ? undefined : 'blur(2px)',
           animation:
             'tidal-foam-slam-fs 0.9s cubic-bezier(0.15,0.58,0.32,1) 0.0s both'
         }}
@@ -108,7 +112,7 @@ function TidalActivationConfetti() {
           height: '20%',
           background:
             'linear-gradient(to right, transparent 5%, rgba(207,250,254,0.0) 14%, rgba(255,255,255,0.88) 39%, rgba(207,250,254,0.94) 47%, transparent 59%)',
-          filter: 'blur(1.5px)',
+          filter: isMobile ? undefined : 'blur(1.5px)',
           animation:
             'tidal-foam-slam-fs 0.87s cubic-bezier(0.15,0.55,0.35,1) 0.0s both'
         }}
@@ -122,7 +126,7 @@ function TidalActivationConfetti() {
           height: '16%',
           background:
             'linear-gradient(to right, transparent 5%, rgba(207,250,254,0.0) 17%, rgba(207,250,254,0.74) 41%, rgba(255,255,255,0.7) 49%, transparent 61%)',
-          filter: 'blur(2px)',
+          filter: isMobile ? undefined : 'blur(2px)',
           animation:
             'tidal-foam-slam-fs 0.92s cubic-bezier(0.15,0.55,0.35,1) 0.03s both'
         }}
@@ -136,12 +140,12 @@ function TidalActivationConfetti() {
           height: '100%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(207,250,254,0.0) 18%, rgba(207,250,254,0.22) 44%, rgba(207,250,254,0.17) 61%, transparent 100%)',
-          filter: 'blur(20px)',
+          filter: isMobile ? undefined : 'blur(20px)',
           animation:
             'tidal-wave-slam-fs 1.2s cubic-bezier(0.18,0.65,0.38,1) 0.04s both'
         }}
       />
-      {TS_FOAM_CHUNKS.map((c) => (
+      {activeFoam.map((c) => (
         <div
           key={c.id}
           className="absolute rounded-full"
@@ -153,7 +157,7 @@ function TidalActivationConfetti() {
               top: `${8 + (c.id % 10) * 9}%`,
               background:
                 'radial-gradient(ellipse, rgba(255,255,255,0.95) 0%, rgba(207,250,254,0.8) 60%, transparent 100%)',
-              filter: 'blur(1px)',
+              filter: isMobile ? undefined : 'blur(1px)',
               animation: `tidal-droplet-gravity 1.3s ease-out ${c.delay}s both`,
               ['--vx' as string]: `${c.vx}px`,
               ['--vy' as string]: `${c.vy}px`
@@ -161,7 +165,7 @@ function TidalActivationConfetti() {
           }
         />
       ))}
-      {TS_DROPLETS.map((d) => (
+      {activeDroplets.map((d) => (
         <div
           key={d.id}
           className="absolute rounded-full"
@@ -172,7 +176,9 @@ function TidalActivationConfetti() {
               left: d.startLeft,
               top: `${4 + (d.id % 10) * 9}%`,
               background: d.color,
-              boxShadow: `0 0 ${d.size * 3}px rgba(34,211,238,0.75)`,
+              boxShadow: isMobile
+                ? undefined
+                : `0 0 ${d.size * 3}px rgba(34,211,238,0.75)`,
               animation: `tidal-droplet-gravity 1.6s ease-in ${d.delay}s both`,
               ['--vx' as string]: `${d.vx}px`,
               ['--vy' as string]: `${d.vy}px`
@@ -188,7 +194,7 @@ function TidalActivationConfetti() {
           animation: 'tidal-submersion-fs 2.0s ease-out 0.0s both'
         }}
       />
-      {TS_MISTS.map((m) => (
+      {activeMists.map((m) => (
         <div
           key={m.id}
           className="absolute rounded-full"
@@ -198,7 +204,7 @@ function TidalActivationConfetti() {
             left: m.left,
             top: m.top,
             background: 'rgba(207,250,254,0.38)',
-            filter: 'blur(5px)',
+            filter: isMobile ? undefined : 'blur(5px)',
             animation: `tidal-mist-fade 1.0s ease-out ${m.delay}s both`
           }}
         />
@@ -259,7 +265,11 @@ const SF_CINDERS = Array.from({ length: 80 }, (_, i) => {
   }
 })
 
-function SolarActivationConfetti() {
+function SolarActivationConfetti({ isMobile }: { isMobile: boolean }) {
+  const activeSparks = isMobile ? SF_SPARKS.slice(0, 210) : SF_SPARKS
+  const activeCinders = isMobile ? SF_CINDERS.slice(0, 40) : SF_CINDERS
+  const activeCorona = isMobile ? SF_CORONA.slice(0, 2) : SF_CORONA
+
   return (
     <div className="fixed inset-0 pointer-events-none z-200 overflow-hidden">
       {/* Beams */}
@@ -276,7 +286,7 @@ function SolarActivationConfetti() {
                 transform: 'translateX(-50%)',
                 background:
                   'linear-gradient(to bottom, rgba(253,230,138,0.48), rgba(245,158,11,0.64), rgba(245,158,11,0.4), transparent)',
-                filter: `blur(${b.blur * 1.5}px)`,
+                filter: isMobile ? undefined : `blur(${b.blur * 1.5}px)`,
                 animation: `solar-beam-down-fs ${b.dur}s ease-in ${b.delay}s both`
               } as React.CSSProperties
             }
@@ -292,7 +302,7 @@ function SolarActivationConfetti() {
                 transform: 'translateX(-50%)',
                 background:
                   'linear-gradient(to bottom, rgba(255,255,255,0.97), rgba(253,230,138,0.91), rgba(245,158,11,0.74), rgba(239,68,68,0.34), transparent)',
-                filter: `blur(${b.blur}px)`,
+                filter: isMobile ? undefined : `blur(${b.blur}px)`,
                 animation: `solar-beam-down-fs ${b.dur}s ease-in ${b.delay}s both`
               } as React.CSSProperties
             }
@@ -308,7 +318,7 @@ function SolarActivationConfetti() {
                 transform: 'translateX(-50%)',
                 background:
                   'linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0.6), transparent)',
-                filter: 'blur(0.5px)',
+                filter: isMobile ? undefined : 'blur(0.5px)',
                 animation: `solar-beam-down-fs ${b.dur * 0.95}s ease-in ${b.delay}s both`
               } as React.CSSProperties
             }
@@ -334,14 +344,14 @@ function SolarActivationConfetti() {
             transform: 'translate(-50%, -50%)',
             background:
               'radial-gradient(circle, #ffffff 0%, #fbbf24 35%, #f97316 70%, transparent 100%)',
-            filter: 'blur(8px)',
+            filter: isMobile ? undefined : 'blur(8px)',
             opacity: 0,
             animation:
               'solar-supernova-flash 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) 1.0s both'
           }}
         />
 
-        {SF_CORONA.map((r, i) => (
+        {activeCorona.map((r, i) => (
           <div
             key={i}
             className="absolute rounded-full"
@@ -353,8 +363,9 @@ function SolarActivationConfetti() {
               border: `4px solid transparent`,
               background:
                 'radial-gradient(circle, transparent 40%, #fbbf24 75%, #ef4444 100%)',
-              boxShadow:
-                '0 0 60px rgba(245,158,11,0.6), inset 0 0 30px rgba(239,68,68,0.4)',
+              boxShadow: isMobile
+                ? undefined
+                : '0 0 60px rgba(245,158,11,0.6), inset 0 0 30px rgba(239,68,68,0.4)',
               opacity: 0,
               animation: `solar-corona-ring ${r.dur}s ease-out ${r.delay}s both`
             }}
@@ -373,14 +384,14 @@ function SolarActivationConfetti() {
               background:
                 'radial-gradient(ellipse, transparent 30%, #fde68a 70%, #f59e0b 100%)',
               borderRadius: '50%',
-              boxShadow: '0 0 45px rgba(251,191,36,0.7)',
+              boxShadow: isMobile ? undefined : '0 0 45px rgba(251,191,36,0.7)',
               opacity: 0,
               animation: `solar-corona-ring ${0.55 + i * 0.15}s ease-out ${1.02 + i * 0.03}s both`
             }}
           />
         ))}
 
-        {SF_SPARKS.map((s) => (
+        {activeSparks.map((s) => (
           <div
             key={s.id}
             className="absolute rounded-full"
@@ -391,7 +402,9 @@ function SolarActivationConfetti() {
                 left: '50%',
                 top: '85%',
                 background: s.color,
-                boxShadow: `0 0 ${s.size * 5}px ${s.glow}, 0 0 ${s.size * 10}px #ef4444`,
+                boxShadow: isMobile
+                  ? undefined
+                  : `0 0 ${s.size * 5}px ${s.glow}, 0 0 ${s.size * 10}px #ef4444`,
                 opacity: 0,
                 animation: `solar-spark-omnidirectional 1.1s ease-out ${s.delay}s both`,
                 ['--vx' as string]: `${s.vx}px`,
@@ -401,7 +414,7 @@ function SolarActivationConfetti() {
           />
         ))}
 
-        {SF_CINDERS.map((c) => (
+        {activeCinders.map((c) => (
           <div
             key={c.id}
             className="absolute rounded-full"
@@ -412,7 +425,7 @@ function SolarActivationConfetti() {
                 left: '50%',
                 top: '85%',
                 background: '#f97316',
-                boxShadow: '0 0 8px #ef4444',
+                boxShadow: isMobile ? undefined : '0 0 8px #ef4444',
                 opacity: 0,
                 animation: `solar-cinder-rise 0.9s ease-out ${c.delay}s both`,
                 ['--vx' as string]: `${c.vx}px`,
@@ -438,13 +451,7 @@ function SolarActivationConfetti() {
 
 // CYCLONE BLITZ full-screen
 const CB_COUNT = 240
-const CB_COLORS = [
-  '#0284c7',
-  '#0d9488',
-  '#475569',
-  '#2563eb', 
-  '#10b981'
-]
+const CB_COLORS = ['#0284c7', '#0d9488', '#475569', '#2563eb', '#10b981']
 
 // 48 tightly-spaced raging wind streaks spread out continuously over the full 2 seconds
 const CB_WINDS = Array.from({ length: 48 }, (_, i) => ({
@@ -493,11 +500,17 @@ const CB_VORTEX_WINDS = Array.from({ length: 24 }, (_, i) => {
   }
 })
 
-function CycloneActivationConfetti() {
+function CycloneActivationConfetti({ isMobile }: { isMobile: boolean }) {
+  const activeWinds = isMobile
+    ? CB_WINDS.filter((_, i) => i % 2 === 0)
+    : CB_WINDS
+  const activeShards = isMobile ? CB_SHARDS.slice(0, 120) : CB_SHARDS
+  const activeVortex = isMobile ? CB_VORTEX_WINDS.slice(0, 12) : CB_VORTEX_WINDS
+
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-50">
       {/* Colliding Wind Streaks */}
-      {CB_WINDS.map((w) => (
+      {activeWinds.map((w) => (
         <div
           key={w.id}
           className="absolute"
@@ -508,8 +521,10 @@ function CycloneActivationConfetti() {
             height: `${w.height}px`,
             background: `linear-gradient(to right, transparent, ${w.color} 15%, ${w.color} 85%, transparent)`,
             opacity: w.opacity,
-            filter: 'blur(0.5px)',
-            boxShadow: `0 0 12px ${w.color}ee, 0 0 20px rgba(255, 255, 255, 0.8)`,
+            filter: isMobile ? undefined : 'blur(0.5px)',
+            boxShadow: isMobile
+              ? undefined
+              : `0 0 12px ${w.color}ee, 0 0 20px rgba(255, 255, 255, 0.8)`,
             animation: `${w.direction === 'ltr' ? 'cyclone-wind-ltr-fs' : 'cyclone-wind-rtl-fs'} ${w.dur}s ease-out ${w.delay}s both`
           }}
         />
@@ -524,7 +539,7 @@ function CycloneActivationConfetti() {
         }}
       >
         {/* Spiraling Wind Trails */}
-        {CB_VORTEX_WINDS.map((vw) => (
+        {activeVortex.map((vw) => (
           <div key={`vortex-wind-${vw.id}`}>
             <div
               className="absolute"
@@ -555,7 +570,9 @@ function CycloneActivationConfetti() {
                   marginLeft: `-${vw.w / 2}px`,
                   marginTop: `-${vw.h / 2}px`,
                   background: vw.color,
-                  boxShadow: `0 0 6px ${vw.color}, 0 0 12px ${vw.color}88`,
+                  boxShadow: isMobile
+                    ? undefined
+                    : `0 0 6px ${vw.color}, 0 0 12px ${vw.color}88`,
                   borderRadius: '1px',
                   animation: `cyclone-expand-orbit ${vw.expandDur}s cubic-bezier(0.08,0.85,0.25,1) ${vw.expandDelay}s both`,
                   ['--angle' as string]: `${vw.angle}deg`,
@@ -587,7 +604,7 @@ function CycloneActivationConfetti() {
         ))}
 
         {/* Shards */}
-        {CB_SHARDS.map((s) => (
+        {activeShards.map((s) => (
           <React.Fragment key={s.id}>
             <div
               className="absolute"
@@ -618,7 +635,9 @@ function CycloneActivationConfetti() {
                   marginLeft: `-${s.w / 2}px`,
                   marginTop: `-${s.h / 2}px`,
                   background: s.color,
-                  boxShadow: `0 0 8px ${s.color}, 0 0 18px ${s.color}aa`,
+                  boxShadow: isMobile
+                    ? undefined
+                    : `0 0 8px ${s.color}, 0 0 18px ${s.color}aa`,
                   borderRadius: '1px',
                   animation: `cyclone-expand-orbit 0.7s cubic-bezier(0.08,0.85,0.25,1) ${s.expandDelay}s both`,
                   ['--angle' as string]: `${s.angle}deg`,
@@ -692,7 +711,10 @@ const MC_DUST = Array.from({ length: 150 }, (_, i) => ({
   startOpacity: 0.65 + (i % 4) * 0.1
 }))
 
-function MirageActivationConfetti() {
+function MirageActivationConfetti({ isMobile }: { isMobile: boolean }) {
+  const activeBurst = isMobile ? MC_BURST.slice(0, 100) : MC_BURST
+  const activeDust = isMobile ? MC_DUST.slice(0, 60) : MC_DUST
+
   return (
     <div className="fixed inset-0 pointer-events-none z-200 overflow-hidden">
       <div
@@ -704,7 +726,7 @@ function MirageActivationConfetti() {
           height: '100%',
           background:
             'linear-gradient(to left, transparent 0%, rgba(245,158,11,0.0) 4%, rgba(245,158,11,0.54) 26%, rgba(217,119,6,0.76) 48%, rgba(168,85,247,0.46) 68%, rgba(245,158,11,0.3) 84%, transparent 100%)',
-          filter: 'blur(10px)',
+          filter: isMobile ? undefined : 'blur(10px)',
           animation:
             'mirage-dust-wall-fs 1.6s cubic-bezier(0.12,0.55,0.3,1) 0.0s both'
         }}
@@ -718,7 +740,7 @@ function MirageActivationConfetti() {
           height: '88%',
           background:
             'linear-gradient(to left, transparent 0%, rgba(180,83,9,0.0) 7%, rgba(180,83,9,0.64) 30%, rgba(146,64,14,0.8) 52%, rgba(180,83,9,0.52) 70%, transparent 100%)',
-          filter: 'blur(14px)',
+          filter: isMobile ? undefined : 'blur(14px)',
           animation:
             'mirage-dust-wall-fs 1.65s cubic-bezier(0.12,0.55,0.3,1) 0.03s both'
         }}
@@ -732,7 +754,7 @@ function MirageActivationConfetti() {
           height: '78%',
           background:
             'linear-gradient(to left, transparent 0%, rgba(168,85,247,0.0) 11%, rgba(168,85,247,0.44) 37%, rgba(124,58,237,0.56) 56%, rgba(168,85,247,0.34) 73%, transparent 100%)',
-          filter: 'blur(7px)',
+          filter: isMobile ? undefined : 'blur(7px)',
           animation:
             'mirage-dust-wall-fs 1.58s cubic-bezier(0.12,0.55,0.3,1) 0.01s both'
         }}
@@ -746,7 +768,7 @@ function MirageActivationConfetti() {
           height: '100%',
           background:
             'linear-gradient(to left, transparent 0%, rgba(253,230,138,0.0) 11%, rgba(253,230,138,0.9) 34%, rgba(245,158,11,0.95) 41%, rgba(253,230,138,0.8) 48%, transparent 56%)',
-          filter: 'blur(2.5px)',
+          filter: isMobile ? undefined : 'blur(2.5px)',
           animation:
             'mirage-dust-wall-fs 1.55s cubic-bezier(0.14,0.58,0.3,1) 0.0s both'
         }}
@@ -760,7 +782,7 @@ function MirageActivationConfetti() {
           height: '20%',
           background:
             'linear-gradient(to left, transparent 5%, rgba(253,230,138,0.0) 14%, rgba(255,255,255,0.8) 38%, rgba(253,230,138,0.9) 46%, transparent 58%)',
-          filter: 'blur(1.5px)',
+          filter: isMobile ? undefined : 'blur(1.5px)',
           animation:
             'mirage-dust-wall-fs 1.52s cubic-bezier(0.15,0.55,0.3,1) 0.0s both'
         }}
@@ -774,7 +796,7 @@ function MirageActivationConfetti() {
           height: '16%',
           background:
             'linear-gradient(to left, transparent 5%, rgba(168,85,247,0.0) 16%, rgba(168,85,247,0.7) 40%, rgba(124,58,237,0.64) 48%, transparent 60%)',
-          filter: 'blur(2px)',
+          filter: isMobile ? undefined : 'blur(2px)',
           animation:
             'mirage-dust-wall-fs 1.62s cubic-bezier(0.15,0.55,0.3,1) 0.04s both'
         }}
@@ -788,7 +810,7 @@ function MirageActivationConfetti() {
           height: '50%',
           background:
             'linear-gradient(to left, transparent, rgba(168,85,247,0.38) 28%, rgba(245,158,11,0.48) 62%, transparent)',
-          filter: 'blur(6px)',
+          filter: isMobile ? undefined : 'blur(6px)',
           animation:
             'mirage-dust-wall-fs 1.8s cubic-bezier(0.12,0.55,0.3,1) 0.18s both'
         }}
@@ -802,12 +824,12 @@ function MirageActivationConfetti() {
           height: '100%',
           background:
             'linear-gradient(to left, transparent 0%, rgba(253,230,138,0.0) 18%, rgba(253,230,138,0.2) 43%, rgba(168,85,247,0.13) 60%, transparent 100%)',
-          filter: 'blur(22px)',
+          filter: isMobile ? undefined : 'blur(22px)',
           animation:
             'mirage-dust-wall-fs 1.7s cubic-bezier(0.12,0.65,0.3,1) 0.05s both'
         }}
       />
-      {MC_BURST.map((p) => (
+      {activeBurst.map((p) => (
         <div
           key={p.id}
           className="absolute rounded-sm"
@@ -818,7 +840,7 @@ function MirageActivationConfetti() {
               left: '50%',
               top: '50%',
               background: `radial-gradient(circle, ${p.color}, ${p.color}99)`,
-              boxShadow: `0 0 ${p.size * 3}px ${p.glow}`,
+              boxShadow: isMobile ? undefined : `0 0 ${p.size * 3}px ${p.glow}`,
               animation: `mirage-radial-burst 1.8s ease-out ${p.delay}s both`,
               ['--vx' as string]: `${p.vx}px`,
               ['--vy' as string]: `${p.vy}px`,
@@ -827,7 +849,7 @@ function MirageActivationConfetti() {
           }
         />
       ))}
-      {MC_DUST.map((d) => (
+      {activeDust.map((d) => (
         <div key={d.id}>
           <div
             className="absolute rounded-full"
@@ -869,7 +891,7 @@ function MirageActivationConfetti() {
           left: '50%',
           background:
             'radial-gradient(ellipse, rgba(245,158,11,0.78) 0%, rgba(168,85,247,0.48) 45%, transparent 72%)',
-          filter: 'blur(14px)',
+          filter: isMobile ? undefined : 'blur(14px)',
           animation: 'mirage-apex-bloom-fs 1.8s ease-out 0.05s both'
         }}
       />
@@ -954,6 +976,20 @@ export default function GlobalEventActivationOverlay({
     setPhase('burst')
   }
 
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    requestAnimationFrame(() => {
+      if (active) {
+        setIsMobile(window.innerWidth < 768)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [event])
+
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   useEffect(() => {
@@ -1005,10 +1041,18 @@ export default function GlobalEventActivationOverlay({
           transition: containerFading ? 'opacity 400ms ease-out' : 'none'
         }}
       >
-        {event === 'TIDAL_SURGE' && <TidalActivationConfetti />}
-        {event === 'SOLAR_FLARE' && <SolarActivationConfetti />}
-        {event === 'CYCLONE_BLITZ' && <CycloneActivationConfetti />}
-        {event === 'MIRAGE_CATACLYSM' && <MirageActivationConfetti />}
+        {event === 'TIDAL_SURGE' && (
+          <TidalActivationConfetti isMobile={isMobile} />
+        )}
+        {event === 'SOLAR_FLARE' && (
+          <SolarActivationConfetti isMobile={isMobile} />
+        )}
+        {event === 'CYCLONE_BLITZ' && (
+          <CycloneActivationConfetti isMobile={isMobile} />
+        )}
+        {event === 'MIRAGE_CATACLYSM' && (
+          <MirageActivationConfetti isMobile={isMobile} />
+        )}
       </div>
       <div
         className="fixed inset-0 pointer-events-none z-201 flex flex-col items-center justify-start pt-[22vh]"

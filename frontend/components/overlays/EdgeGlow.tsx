@@ -1,6 +1,7 @@
 'use client'
 
 import { useGameStore } from '@/app/stores/gameStore'
+import { useEffect, useState } from 'react'
 
 const EDGE_CONFIG: Record<string, { radial: string; shadow: string }> = {
   flash_lunar: {
@@ -88,6 +89,19 @@ interface EdgeGlowProps {
 export default function EdgeGlow({ visualMode }: EdgeGlowProps) {
   const storeVisualMode = useGameStore((s) => s.visualMode)
   const storeFestivalModeKey = useGameStore((s) => s.festivalModeKey)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    requestAnimationFrame(() => {
+      if (active) {
+        setIsMobile(window.innerWidth < 768)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
   const activeVisualMode = visualMode || storeVisualMode
   const activeFestivalKey = storeFestivalModeKey
@@ -104,7 +118,8 @@ export default function EdgeGlow({ visualMode }: EdgeGlowProps) {
       className="fixed inset-0 pointer-events-none z-30 transition-all duration-1000"
       style={{
         background: `radial-gradient(ellipse at center, transparent 55%, ${e.radial} 100%)`,
-        boxShadow: `inset 0 0 90px ${e.shadow}`
+        boxShadow: isMobile ? undefined : `inset 0 0 90px ${e.shadow}`,
+        willChange: 'opacity'
       }}
     />
   )

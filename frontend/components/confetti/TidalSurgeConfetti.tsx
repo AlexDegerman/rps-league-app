@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
 
 // 80 droplets bursting from wave impact - spread across full width
 const DROPLETS = Array.from({ length: 80 }, (_, i) => {
@@ -41,8 +43,28 @@ const MISTS = Array.from({ length: 40 }, (_, i) => ({
   dur: 1.3
 }))
 
-
 export default function TidalSurgeConfetti() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    requestAnimationFrame(() => {
+      if (active) {
+        setMounted(true)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  if (!mounted) return null
+
+  const isMobile = window.innerWidth < 768
+  const activeDroplets = isMobile ? DROPLETS.slice(0, 25) : DROPLETS
+  const activeFoam = isMobile ? FOAM_CHUNKS.slice(0, 10) : FOAM_CHUNKS
+  const activeMists = isMobile ? MISTS.slice(0, 15) : MISTS
+
   return (
     <div
       className="absolute inset-x-0 pointer-events-none z-50 overflow-hidden rounded-xl"
@@ -58,9 +80,10 @@ export default function TidalSurgeConfetti() {
           height: '100%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(34,211,238,0.0) 5%, rgba(34,211,238,0.52) 28%, rgba(8,145,178,0.75) 50%, rgba(34,211,238,0.6) 70%, rgba(103,232,249,0.32) 88%, transparent 100%)',
-          filter: 'blur(8px)',
+          filter: isMobile ? undefined : 'blur(8px)',
           animation:
-            'tidal-wave-slam 0.9s cubic-bezier(0.18,0.65,0.38,1) 0.0s both'
+            'tidal-wave-slam 0.9s cubic-bezier(0.18,0.65,0.38,1) 0.0s both',
+          willChange: 'transform, opacity'
         }}
       />
       {/* Deep teal underbody */}
@@ -73,9 +96,10 @@ export default function TidalSurgeConfetti() {
           height: '85%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(8,145,178,0.0) 8%, rgba(8,145,178,0.62) 35%, rgba(6,120,150,0.8) 55%, rgba(8,145,178,0.55) 72%, transparent 100%)',
-          filter: 'blur(12px)',
+          filter: isMobile ? undefined : 'blur(12px)',
           animation:
-            'tidal-wave-slam 0.92s cubic-bezier(0.18,0.65,0.38,1) 0.025s both'
+            'tidal-wave-slam 0.92s cubic-bezier(0.18,0.65,0.38,1) 0.025s both',
+          willChange: 'transform, opacity'
         }}
       />
       {/* Mid wall shimmer */}
@@ -88,9 +112,10 @@ export default function TidalSurgeConfetti() {
           height: '75%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(103,232,249,0.0) 10%, rgba(103,232,249,0.42) 38%, rgba(34,211,238,0.58) 56%, rgba(103,232,249,0.35) 74%, transparent 100%)',
-          filter: 'blur(5px)',
+          filter: isMobile ? undefined : 'blur(5px)',
           animation:
-            'tidal-wave-slam 0.88s cubic-bezier(0.2,0.62,0.36,1) 0.01s both'
+            'tidal-wave-slam 0.88s cubic-bezier(0.2,0.62,0.36,1) 0.01s both',
+          willChange: 'transform, opacity'
         }}
       />
       {/* Surface foam crest */}
@@ -103,9 +128,10 @@ export default function TidalSurgeConfetti() {
           height: '100%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.0) 12%, rgba(255,255,255,0.9) 38%, rgba(207,250,254,0.96) 44%, rgba(255,255,255,0.82) 50%, transparent 58%)',
-          filter: 'blur(2px)',
+          filter: isMobile ? undefined : 'blur(2px)',
           animation:
-            'tidal-foam-slam 0.85s cubic-bezier(0.15,0.58,0.32,1) 0.0s both'
+            'tidal-foam-slam 0.85s cubic-bezier(0.15,0.58,0.32,1) 0.0s both',
+          willChange: 'transform, opacity'
         }}
       />
       {/* Upper foam streak */}
@@ -118,9 +144,10 @@ export default function TidalSurgeConfetti() {
           height: '18%',
           background:
             'linear-gradient(to right, transparent 5%, rgba(207,250,254,0.0) 15%, rgba(255,255,255,0.85) 40%, rgba(207,250,254,0.92) 48%, transparent 60%)',
-          filter: 'blur(1.5px)',
+          filter: isMobile ? undefined : 'blur(1.5px)',
           animation:
-            'tidal-foam-slam 0.82s cubic-bezier(0.15,0.55,0.35,1) 0.0s both'
+            'tidal-foam-slam 0.82s cubic-bezier(0.15,0.55,0.35,1) 0.0s both',
+          willChange: 'transform, opacity'
         }}
       />
       {/* Lower foam streak */}
@@ -133,9 +160,10 @@ export default function TidalSurgeConfetti() {
           height: '14%',
           background:
             'linear-gradient(to right, transparent 5%, rgba(207,250,254,0.0) 18%, rgba(207,250,254,0.72) 42%, rgba(255,255,255,0.68) 50%, transparent 62%)',
-          filter: 'blur(2px)',
+          filter: isMobile ? undefined : 'blur(2px)',
           animation:
-            'tidal-foam-slam 0.86s cubic-bezier(0.15,0.55,0.35,1) 0.03s both'
+            'tidal-foam-slam 0.86s cubic-bezier(0.15,0.55,0.35,1) 0.03s both',
+          willChange: 'transform, opacity'
         }}
       />
       {/* Spray veil */}
@@ -148,12 +176,13 @@ export default function TidalSurgeConfetti() {
           height: '100%',
           background:
             'linear-gradient(to right, transparent 0%, rgba(207,250,254,0.0) 18%, rgba(207,250,254,0.2) 45%, rgba(207,250,254,0.16) 62%, transparent 100%)',
-          filter: 'blur(18px)',
+          filter: isMobile ? undefined : 'blur(18px)',
           animation:
-            'tidal-wave-slam 1.05s cubic-bezier(0.18,0.65,0.38,1) 0.04s both'
+            'tidal-wave-slam 1.05s cubic-bezier(0.18,0.65,0.38,1) 0.04s both',
+          willChange: 'transform, opacity'
         }}
       />
-      {FOAM_CHUNKS.map((c) => (
+      {activeFoam.map((c) => (
         <div
           key={c.id}
           className="absolute rounded-full"
@@ -165,15 +194,16 @@ export default function TidalSurgeConfetti() {
               top: `${10 + (c.id % 8) * 10}%`,
               background:
                 'radial-gradient(ellipse, rgba(255,255,255,0.95) 0%, rgba(207,250,254,0.8) 60%, transparent 100%)',
-              filter: 'blur(1px)',
+              filter: isMobile ? undefined : 'blur(1px)',
               animation: `tidal-droplet-gravity ${c.dur}s ease-out ${c.delay}s both`,
+              willChange: 'transform, opacity',
               '--vx': `${c.vx}px`,
               '--vy': `${c.vy}px`
             } as React.CSSProperties
           }
         />
       ))}
-      {DROPLETS.map((d) => (
+      {activeDroplets.map((d) => (
         <div
           key={d.id}
           className="absolute rounded-full"
@@ -184,8 +214,11 @@ export default function TidalSurgeConfetti() {
               left: d.startLeft,
               top: `${5 + (d.id % 9) * 10}%`,
               background: d.color,
-              boxShadow: `0 0 ${d.size * 2.5}px rgba(34,211,238,0.7)`,
+              boxShadow: isMobile
+                ? undefined
+                : `0 0 ${d.size * 2.5}px rgba(34,211,238,0.7)`,
               animation: `tidal-droplet-gravity ${d.dur}s ease-in ${d.delay}s both`,
+              willChange: 'transform, opacity',
               '--vx': `${d.vx}px`,
               '--vy': `${d.vy}px`
             } as React.CSSProperties
@@ -200,7 +233,7 @@ export default function TidalSurgeConfetti() {
           animation: 'tidal-submersion 3.0s ease-out 0.0s both'
         }}
       />
-      {MISTS.map((m) => (
+      {activeMists.map((m) => (
         <div
           key={m.id}
           className="absolute rounded-full"
@@ -210,7 +243,7 @@ export default function TidalSurgeConfetti() {
             left: m.left,
             top: m.top,
             background: 'rgba(207,250,254,0.38)',
-            filter: 'blur(4px)',
+            filter: isMobile ? undefined : 'blur(4px)',
             animation: `tidal-mist-fade ${m.dur}s ease-out ${m.delay}s both`
           }}
         />

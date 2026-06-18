@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import type { Match } from '@/types/rps'
-import { logger } from '@/lib/logger';
+import { logger } from '@/lib/logger'
 
 interface UseInfiniteScrollProps {
   fetchFn: (
@@ -19,6 +19,11 @@ export const useInfiniteScroll = ({
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const pageRef = useRef(1)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const stateRef = useRef({ isLoading, isLoadingMore, hasMore, enabled })
+
+  useEffect(() => {
+    stateRef.current = { isLoading, isLoadingMore, hasMore, enabled }
+  })
 
   const loadMatches = useCallback(
     async (targetPage: number) => {
@@ -53,10 +58,16 @@ export const useInfiniteScroll = ({
   )
 
   const loadNextPage = useCallback(() => {
-    if (isLoading || isLoadingMore || !hasMore || !enabled) return
+    const {
+      isLoading: l,
+      isLoadingMore: lm,
+      hasMore: h,
+      enabled: e
+    } = stateRef.current
+    if (l || lm || !h || !e) return
     pageRef.current += 1
     loadMatches(pageRef.current)
-  }, [isLoading, isLoadingMore, hasMore, enabled, loadMatches])
+  }, [loadMatches])
 
   const reset = useCallback(() => {
     pageRef.current = 1
@@ -67,22 +78,34 @@ export const useInfiniteScroll = ({
   // After initial load, check if the page is too short to trigger scroll events -
   // if so, proactively fetch the next page to fill the viewport
   const checkIfMoreNeeded = useCallback(() => {
-    if (isLoading || isLoadingMore || !hasMore || !enabled) return
+    const {
+      isLoading: l,
+      isLoadingMore: lm,
+      hasMore: h,
+      enabled: e
+    } = stateRef.current
+    if (l || lm || !h || !e) return
     if (document.documentElement.offsetHeight <= window.innerHeight * 1.2) {
       loadNextPage()
     }
-  }, [isLoading, isLoadingMore, hasMore, enabled, loadNextPage])
+  }, [loadNextPage])
 
   const handleScroll = useCallback(() => {
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current)
     // Debounce at 150ms to avoid firing on every pixel of scroll momentum
     scrollTimeoutRef.current = setTimeout(() => {
-      if (isLoading || isLoadingMore || !hasMore || !enabled) return
+      const {
+        isLoading: l,
+        isLoadingMore: lm,
+        hasMore: h,
+        enabled: e
+      } = stateRef.current
+      if (l || lm || !h || !e) return
       const scrollPos = window.innerHeight + window.scrollY
       const docHeight = document.documentElement.offsetHeight
       if (scrollPos >= docHeight * 0.8) loadNextPage()
     }, 150)
-  }, [isLoading, isLoadingMore, hasMore, enabled, loadNextPage])
+  }, [loadNextPage])
 
   useEffect(() => {
     if (matches.length > 0) {

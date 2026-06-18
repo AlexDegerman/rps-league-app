@@ -51,23 +51,24 @@ export default function ProfilePage() {
   const router = useRouter()
   const targetShortId = params.shortId as string
 
-  const {
-    rerollNickname,
-    setStylePreference: setStoreStylePreference,
-    laps,
-    setLaps,
-    fastestLapBets,
-    setFastestLapBets,
-    setPoints: setStorePoints,
-    userId: myUserId,
-    shortId: myShortId,
-    myBadges,
-    showLinkedinBadge: storeLinkedinEnabled,
-    setShowLinkedinBadge: setStoreLinkedinEnabled,
-    refreshBadges
-  } = useUserStore()
-  const { showAscensionPrompt, setShowAscensionPrompt } = useUIStore()
-  const { equippedRelic } = useRelicStore()
+  const rerollNickname = useUserStore((s) => s.rerollNickname)
+  const setStoreStylePreference = useUserStore((s) => s.setStylePreference)
+  const laps = useUserStore((s) => s.laps)
+  const setLaps = useUserStore((s) => s.setLaps)
+  const fastestLapBets = useUserStore((s) => s.fastestLapBets)
+  const setFastestLapBets = useUserStore((s) => s.setFastestLapBets)
+  const setStorePoints = useUserStore((s) => s.setPoints)
+  const myUserId = useUserStore((s) => s.userId)
+  const myShortId = useUserStore((s) => s.shortId)
+  const myBadges = useUserStore((s) => s.myBadges)
+  const storeLinkedinEnabled = useUserStore((s) => s.showLinkedinBadge)
+  const setStoreLinkedinEnabled = useUserStore((s) => s.setShowLinkedinBadge)
+  const refreshBadges = useUserStore((s) => s.refreshBadges)
+
+  const showAscensionPrompt = useUIStore((s) => s.showAscensionPrompt)
+  const setShowAscensionPrompt = useUIStore((s) => s.setShowAscensionPrompt)
+
+  const equippedRelic = useRelicStore((s) => s.equippedRelic)
   const [isOwnProfile, setIsOwnProfile] = useState(false)
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)

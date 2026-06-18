@@ -108,7 +108,11 @@ export default function PredictionTicker() {
   useEffect(() => {
     let demoTimer: ReturnType<typeof setTimeout>
     const scheduleDemoEvent = () => {
-      const delay = 400 + Math.random() * 1200
+      const isMobile = window.innerWidth < 768
+      const delay = isMobile
+        ? 1500 + Math.random() * 2500
+        : 400 + Math.random() * 1200
+
       demoTimer = setTimeout(() => {
         if (visible && !document.hidden && pendingRef.current.length < 40) {
           const name = generateNickname()
@@ -149,23 +153,32 @@ export default function PredictionTicker() {
 
   useEffect(() => {
     const currentTimeouts = cleanupTimeoutsRef.current
-    const interval = setInterval(() => {
-      if (pendingRef.current.length === 0 || !visible || document.hidden) return
+    let activeTimer: ReturnType<typeof setTimeout> | null = null
+
+    const tick = () => {
+      if (pendingRef.current.length === 0 || !visible || document.hidden) {
+        activeTimer = setTimeout(tick, 200)
+        return
+      }
 
       const now = Date.now()
-      const isMobile = window.innerWidth < 640
+      const isMobile = window.innerWidth < 768
       const lastEvent = lastEventRef.current
       let minDelay = 650
 
-      if (lastEvent)
+      if (lastEvent) {
         minDelay =
           ((lastEvent.message.length * 8 + 60) / velocity) * 1000 +
-          (isMobile ? 500 : 200)
+          (isMobile ? 600 : 200)
+      }
 
       const hasRealEvent = pendingRef.current.some((e) => e.isReal)
       const finalDelay = hasRealEvent ? Math.max(300, minDelay * 0.7) : minDelay
 
-      if (now - lastStartTimeRef.current < finalDelay) return
+      if (now - lastStartTimeRef.current < finalDelay) {
+        activeTimer = setTimeout(tick, isMobile ? 100 : 50)
+        return
+      }
 
       const realIndex = pendingRef.current.findIndex((e) => e.isReal)
       const next =
@@ -187,10 +200,14 @@ export default function PredictionTicker() {
         currentTimeouts.delete(removalId)
       }, eventDuration + 500)
       currentTimeouts.add(removalId)
-    }, 50)
+
+      activeTimer = setTimeout(tick, isMobile ? 100 : 50)
+    }
+
+    tick()
 
     return () => {
-      clearInterval(interval)
+      if (activeTimer) clearTimeout(activeTimer)
       currentTimeouts.forEach(clearTimeout)
       currentTimeouts.clear()
     }

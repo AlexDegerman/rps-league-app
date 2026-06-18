@@ -111,11 +111,22 @@ const setupMocks = (
     ...uiOverrides
   }
 
-  mockUserStore.mockReturnValue(userState)
+  mockUserStore.mockImplementation(
+    <T,>(selector?: (state: typeof userState) => T) =>
+      selector ? selector(userState) : userState
+  )
   mockUserStore.getState.mockReturnValue(userState)
-  mockGameStore.mockReturnValue(gameState)
+
+  mockGameStore.mockImplementation(
+    <T,>(selector?: (state: typeof gameState) => T) =>
+      selector ? selector(gameState) : gameState
+  )
   mockGameStore.getState.mockReturnValue(gameState)
-  mockUIStore.mockReturnValue(uiState)
+
+  mockUIStore.mockImplementation(
+    <T,>(selector?: (state: typeof uiState) => T) =>
+      selector ? selector(uiState) : uiState
+  )
   mockUIStore.getState.mockReturnValue(uiState)
 }
 

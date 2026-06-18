@@ -93,11 +93,11 @@
 
 .discovery-relic-halo {
   position: absolute;
-  inset: -15px; /* Subtle spill outside border */
+  inset: -15px;
   background: var(--halo-color);
   border-radius: 50px;
   z-index: -1;
-  filter: blur(35px); /* Soft, controlled bleed */
+  filter: blur(35px);
   animation: discovery-halo-glow 6s ease-in-out infinite;
 }
 
@@ -901,9 +901,8 @@
   animation: tempest-jetstream-flow 1.5s linear infinite;
 }
 .g-dtr::after {
-  /* \FE0E is the Variation Selector-15 that forces text rendering instead of graphical emoji */
   content: '\1F5F2\FE0E  .  \2694\FE0E  .  \2726\FE0E  .  \2694\FE0E  .  \1F5F2\FE0E';
-  font-variant-emoji: text; /* Modern browser support fallback */
+  font-variant-emoji: text;
   position: absolute;
   inset: -6px -24px;
   display: flex;
@@ -2430,7 +2429,6 @@
 .event-bg-festival_sanguine  { background: linear-gradient(to bottom, rgba(127, 29, 29, 0.05),   rgba(127, 29, 29, 0.25))   !important; }
 
 /* --- SECTION G: LEGACY FLASH AMBIENT (header / nav / side / ticker) --- */
-/* Keep: components still using short names (lunar vs flash_lunar) */
 
 .event-border-lunar    { border-image: linear-gradient(to right, transparent, #90cdf4, #ebf8ff, #90cdf4, transparent) 1; }
 .event-border-electric { border-image: linear-gradient(to right, transparent, #9f7aea, #e9d8fd, #9f7aea, transparent) 1; }
@@ -3022,4 +3020,16 @@
   0%   { transform: translateX(-50%) scale(0.2); opacity: 0.95; }
   40%  { opacity: 0.75; }
   100% { transform: translateX(-50%) scale(3.5); opacity: 0;    }
+}
+
+/* --- OPTIMIZATION --- */
+
+.event-dynamic-particles::before,
+.event-dynamic-particles::after,
+.oracle-scroll-content,
+.festival-effect-scroll,
+.ghost-echo {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000;
 }

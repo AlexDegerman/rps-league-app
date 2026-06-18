@@ -6,7 +6,8 @@ import { AchievementRarity } from '@/types/rps'
 import { useEffect, useRef } from 'react'
 
 export default function AchievementToast() {
-  const { achievementQueue, clearAllAchievements } = useGameStore()
+  const achievementQueue = useGameStore((s) => s.achievementQueue)
+  const clearAllAchievements = useGameStore((s) => s.clearAllAchievements)
 
   const disappearanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null

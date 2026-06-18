@@ -14,8 +14,10 @@ import { primeOracleVoices } from '@/lib/oracleTTS'
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
-  const { initUser, shortId } = useUserStore()
-  const { brandTheme, randomizeBrandTheme } = useUIStore()
+  const initUser = useUserStore((s) => s.initUser)
+  const shortId = useUserStore((s) => s.shortId)
+  const brandTheme = useUIStore((s) => s.brandTheme)
+  const randomizeBrandTheme = useUIStore((s) => s.randomizeBrandTheme)
 
   const visualMode = useGameStore((s) => s.visualMode)
   const festivalModeKey = useGameStore((s) => s.festivalModeKey)

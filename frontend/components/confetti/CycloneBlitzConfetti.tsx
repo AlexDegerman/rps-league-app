@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
 
 const SHARD_COUNT = 180
 const COLORS = [
@@ -6,7 +8,7 @@ const COLORS = [
   '#0d9488',
   '#475569',
   '#2563eb',
-  '#10b981', 
+  '#10b981',
   '#f8fafc'
 ]
 
@@ -62,6 +64,29 @@ const WIND_STREAKS = Array.from({ length: 32 }, (_, i) => ({
 }))
 
 export default function CycloneBlitzConfetti() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    requestAnimationFrame(() => {
+      if (active) {
+        setMounted(true)
+      }
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  if (!mounted) return null
+
+  const isMobile = window.innerWidth < 768
+  const activeShards = isMobile ? SHARDS.slice(0, 90) : SHARDS
+  const activeVortex = isMobile ? VORTEX_WINDS.slice(0, 10) : VORTEX_WINDS
+  const activeStreaks = isMobile
+    ? WIND_STREAKS.filter((_, i) => i % 2 === 0)
+    : WIND_STREAKS
+
   return (
     <div
       className="absolute inset-x-0 pointer-events-none z-50"
@@ -72,7 +97,7 @@ export default function CycloneBlitzConfetti() {
         className="absolute inset-x-0 pointer-events-none"
         style={{ top: 0, height: '100%' }}
       >
-        {WIND_STREAKS.map((w) => (
+        {activeStreaks.map((w) => (
           <div
             key={w.id}
             className="absolute"
@@ -83,8 +108,10 @@ export default function CycloneBlitzConfetti() {
               height: `${w.height}px`,
               background: `linear-gradient(to right, transparent, ${w.color} 15%, ${w.color} 85%, transparent)`,
               opacity: w.opacity,
-              filter: 'blur(0.5px)',
-              boxShadow: `0 0 10px ${w.color}ee, 0 0 18px rgba(255,255,255,0.8)`,
+              filter: isMobile ? undefined : 'blur(0.5px)',
+              boxShadow: isMobile
+                ? undefined
+                : `0 0 10px ${w.color}ee, 0 0 18px rgba(255,255,255,0.8)`,
               animation: `${w.direction === 'ltr' ? 'cyclone-wind-ltr' : 'cyclone-wind-rtl'} ${w.dur}s ease-out ${w.delay}s both`
             }}
           />
@@ -101,7 +128,7 @@ export default function CycloneBlitzConfetti() {
           }}
         >
           {/* Spiraling Wind Trails */}
-          {VORTEX_WINDS.map((vw) => (
+          {activeVortex.map((vw) => (
             <div key={`vortex-wind-${vw.id}`}>
               <div
                 className="absolute"
@@ -132,7 +159,9 @@ export default function CycloneBlitzConfetti() {
                     marginLeft: `-${vw.w / 2}px`,
                     marginTop: `-${vw.h / 2}px`,
                     background: vw.color,
-                    boxShadow: `0 0 6px ${vw.color}, 0 0 12px ${vw.color}88`,
+                    boxShadow: isMobile
+                      ? undefined
+                      : `0 0 6px ${vw.color}, 0 0 12px ${vw.color}88`,
                     borderRadius: '1px',
                     animation: `cyclone-expand-orbit ${vw.expandDur}s cubic-bezier(0.08,0.85,0.25,1) ${vw.expandDelay}s both`,
                     '--angle': `${vw.angle}deg`,
@@ -164,7 +193,7 @@ export default function CycloneBlitzConfetti() {
           ))}
 
           {/* Shards */}
-          {SHARDS.map((s) => (
+          {activeShards.map((s) => (
             <div key={`shard-${s.id}`}>
               <div
                 className="absolute"
@@ -195,7 +224,9 @@ export default function CycloneBlitzConfetti() {
                     marginLeft: `-${s.w / 2}px`,
                     marginTop: `-${s.h / 2}px`,
                     background: s.color,
-                    boxShadow: `0 0 6px ${s.color}, 0 0 12px ${s.color}88`,
+                    boxShadow: isMobile
+                      ? undefined
+                      : `0 0 6px ${s.color}, 0 0 12px ${s.color}88`,
                     borderRadius: '1px',
                     animation: `cyclone-expand-orbit ${s.expandDur}s cubic-bezier(0.08,0.85,0.25,1) ${s.expandDelay}s both`,
                     '--angle': `${s.angle}deg`,

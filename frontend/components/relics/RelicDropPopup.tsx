@@ -48,8 +48,13 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 export default function RelicDropPopup() {
-  const { activePopup, dequeuePopup, readyToShow } = useUIStore()
-  const { dropQueue, popDropQueue, equipRelic } = useRelicStore()
+  const activePopup = useUIStore((s) => s.activePopup)
+  const dequeuePopup = useUIStore((s) => s.dequeuePopup)
+  const readyToShow = useUIStore((s) => s.readyToShow)
+
+  const dropQueue = useRelicStore((s) => s.dropQueue)
+  const popDropQueue = useRelicStore((s) => s.popDropQueue)
+  const equipRelic = useRelicStore((s) => s.equipRelic)
   const { playRelicDrop } = useSound()
   const [visible, setVisible] = useState(false)
   const [equipping, setEquipping] = useState(false)

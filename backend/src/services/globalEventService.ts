@@ -19,10 +19,9 @@ export interface GlobalEventState {
 
 type Broadcast = (event: string, data: string) => void
 
-
-// Cooldown between events: 10-30 min
-const COOLDOWN_MIN_MS = 10 * 60 * 1000
-const COOLDOWN_MAX_MS = 30 * 60 * 1000
+// Cooldown between events: 7–12 min
+const COOLDOWN_MIN_MS = 7 * 60 * 1000
+const COOLDOWN_MAX_MS = 12 * 60 * 1000
 
 // Warning phase before active: 1.5-3 min (pick once per event)
 const WARNING_MIN_MS = 90 * 1000

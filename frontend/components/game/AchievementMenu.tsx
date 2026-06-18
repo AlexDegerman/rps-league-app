@@ -30,11 +30,9 @@ export default function AchievementMenu({
   const params = useParams()
   const targetShortId = params.shortId as string
 
-  const {
-    shortId: myShortId,
-    showLinkedinBadge,
-    refreshBadges
-  } = useUserStore()
+  const myShortId = useUserStore((s) => s.shortId)
+  const showLinkedinBadge = useUserStore((s) => s.showLinkedinBadge)
+  const refreshBadges = useUserStore((s) => s.refreshBadges)
   const isOwnProfile = myShortId === targetShortId
   const maxSlots = showLinkedinBadge ? 4 : 5
 

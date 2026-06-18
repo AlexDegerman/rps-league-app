@@ -8,17 +8,18 @@ import { postPrediction } from '@/lib/api'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
 
 export function useIdleBet() {
-  const {
-    idleSide,
-    isEligible,
-    isProcessing,
-    setIsProcessing,
-    processedGameIds,
-    markProcessed
-  } = useIdleStore()
+  const idleSide = useIdleStore((s) => s.idleSide)
+  const isEligible = useIdleStore((s) => s.isEligible)
+  const isProcessing = useIdleStore((s) => s.isProcessing)
+  const setIsProcessing = useIdleStore((s) => s.setIsProcessing)
+  const processedGameIds = useIdleStore((s) => s.processedGameIds)
+  const markProcessed = useIdleStore((s) => s.markProcessed)
 
-  const { pendingMatches, serverOffset, setPrediction } = useGameStore()
-  const { betAmount } = useUserStore()
+  const pendingMatches = useGameStore((s) => s.pendingMatches)
+  const serverOffset = useGameStore((s) => s.serverOffset)
+  const setPrediction = useGameStore((s) => s.setPrediction)
+
+  const betAmount = useUserStore((s) => s.betAmount)
 
   // Track visibility state to force resume when tabbing back
   const [isVisible, setIsVisible] = useState(true)

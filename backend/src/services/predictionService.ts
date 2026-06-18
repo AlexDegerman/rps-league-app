@@ -221,388 +221,390 @@ export const resolvePrediction = async (
     return
   }
 
-  for (const row of predictions.rows) {
-    try {
-      const flashEvent = getFlashEventForUser(row.user_id)
-      const flashEventType = flashEvent?.type ?? null
-      const flashActive = !!flashEvent
-      const snapshotRelic = flashEvent?.snapshotRelic ?? null
+  await Promise.all(
+    predictions.rows.map(async (row) => {
+      try {
+        const flashEvent = getFlashEventForUser(row.user_id)
+        const flashEventType = flashEvent?.type ?? null
+        const flashActive = !!flashEvent
+        const snapshotRelic = flashEvent?.snapshotRelic ?? null
 
-      const oracleUsed = await hasUserUsedOracle(row.user_id)
-      let oracleRigged = false
-      let defiedOracle = false
+        const oracleUsed = await hasUserUsedOracle(row.user_id)
+        let oracleRigged = false
+        let defiedOracle = false
 
-      if (!oracleUsed) {
-        const oracleState = getOracleState()
-        const oracleWinnerName =
-          oracleState.side === 'left' ? row.player_a_name : row.player_b_name
-        if (row.pick === oracleWinnerName) {
-          oracleRigged = true
-        } else {
-          defiedOracle = true
+        if (!oracleUsed) {
+          const oracleState = getOracleState()
+          const oracleWinnerName =
+            oracleState.side === 'left' ? row.player_a_name : row.player_b_name
+          if (row.pick === oracleWinnerName) {
+            oracleRigged = true
+          } else {
+            defiedOracle = true
+          }
         }
-      }
 
-      const activeFestival = getActiveFestival()
-      const sanguineActive = activeFestival?.type === 'SANGUINE'
-      const feverActive = activeFestival?.type === 'FEVER'
+        const activeFestival = getActiveFestival()
+        const sanguineActive = activeFestival?.type === 'SANGUINE'
+        const feverActive = activeFestival?.type === 'FEVER'
 
-      const activeGlobalEvent = getActiveGlobalEvent()
-      const isSolarFlareActive =
-        activeGlobalEvent?.type === 'SOLAR_FLARE' &&
-        activeGlobalEvent.phase === 'active'
+        const activeGlobalEvent = getActiveGlobalEvent()
+        const isSolarFlareActive =
+          activeGlobalEvent?.type === 'SOLAR_FLARE' &&
+          activeGlobalEvent.phase === 'active'
 
-      const result = oracleRigged
-        ? 'WIN'
-        : defiedOracle
-          ? 'LOSE'
-          : sanguineActive || flashActive
-            ? 'WIN'
-            : row.pick === winnerName
+        const result = oracleRigged
+          ? 'WIN'
+          : defiedOracle
+            ? 'LOSE'
+            : sanguineActive || flashActive
               ? 'WIN'
-              : 'LOSE'
-      const isWin = result === 'WIN'
+              : row.pick === winnerName
+                ? 'WIN'
+                : 'LOSE'
+        const isWin = result === 'WIN'
 
-      const currentPoints = BigInt(row.current_points)
-      const bet = BigInt(row.bet_amount)
-      const totalBets = Number(row.total_bets)
-      const currentPity = Number(row.bonus_pity_count)
-      const isNaturalPityHit = currentPity >= 3
+        const currentPoints = BigInt(row.current_points)
+        const bet = BigInt(row.bet_amount)
+        const totalBets = Number(row.total_bets)
+        const currentPity = Number(row.bonus_pity_count)
+        const isNaturalPityHit = currentPity >= 3
 
-      // Relic state
-      const equippedRelic = row.equipped_relic as string | null
-      let cycleCounter = Number(row.relic_counter ?? 0)
+        // Relic state
+        const equippedRelic = row.equipped_relic as string | null
+        let cycleCounter = Number(row.relic_counter ?? 0)
 
-      const betAgainstOracle = Boolean(row.bet_against_oracle)
+        const betAgainstOracle = Boolean(row.bet_against_oracle)
 
-      const resonanceActive = activeFestival?.type === 'RESONANCE'
+        const resonanceActive = activeFestival?.type === 'RESONANCE'
 
-      let bonus = rollBonus(
-        isWin,
-        resonanceActive ? 3 : totalBets <= 3 ? 3 : currentPity,
-        currentPoints,
-        row.user_id,
-        flashEventType,
-        equippedRelic
-      )
+        let bonus = rollBonus(
+          isWin,
+          resonanceActive ? 3 : totalBets <= 3 ? 3 : currentPity,
+          currentPoints,
+          row.user_id,
+          flashEventType,
+          equippedRelic
+        )
 
-      // Resonance cap: clamp to RARE max
-      const effectiveBonus =
-        resonanceActive && bonus
-          ? bonus.tier === 'EPIC' || bonus.tier === 'LEGENDARY'
-            ? {
-                multiplier: isWin
-                  ? 2.2 + Math.random() * 1.0
-                  : 0.25 + Math.random() * 0.25,
-                tier: 'RARE'
-              }
+        // Resonance cap: clamp to RARE max
+        const effectiveBonus =
+          resonanceActive && bonus
+            ? bonus.tier === 'EPIC' || bonus.tier === 'LEGENDARY'
+              ? {
+                  multiplier: isWin
+                    ? 2.2 + Math.random() * 1.0
+                    : 0.25 + Math.random() * 0.25,
+                  tier: 'RARE'
+                }
+              : bonus
             : bonus
-          : bonus
 
-      // LOGIC GATE: every 20 wins → guaranteed Legendary, wins counted while relic is equipped
-      let logicGateFired = false
-      if (equippedRelic === 'logic_gate' && isWin) {
-        cycleCounter++
-        if (cycleCounter % 20 === 0) {
-          bonus = { multiplier: 5.0, tier: 'LEGENDARY' }
-          logicGateFired = true
-        }
-        await pool.query(
-          'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
-          [cycleCounter, row.user_id, 'logic_gate']
-        )
-      }
-
-      // ARCHITECTS KEYSTONE: auto-upgrade bonus tier
-      if (equippedRelic === 'architects_keystone' && bonus) {
-        const upgraded = TIER_UPGRADE[bonus.tier]
-        if (upgraded) {
-          bonus = {
-            multiplier:
-              upgraded === 'MYTHICAL' ? MYTHICAL_MULTIPLIER : bonus.multiplier,
-            tier: upgraded
+        // LOGIC GATE: every 20 wins → guaranteed Legendary, wins counted while relic is equipped
+        let logicGateFired = false
+        if (equippedRelic === 'logic_gate' && isWin) {
+          cycleCounter++
+          if (cycleCounter % 20 === 0) {
+            bonus = { multiplier: 5.0, tier: 'LEGENDARY' }
+            logicGateFired = true
           }
-        }
-      }
-
-      // KINETIC CAPACITOR: every 30 wins → +x2 after all other multipliers, wins counted while relic is equipped
-      let kineticFired = false
-      if (equippedRelic === 'kinetic_capacitor' && isWin && !logicGateFired) {
-        cycleCounter++
-        if (cycleCounter % 30 === 0) kineticFired = true
-        await pool.query(
-          'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
-          [cycleCounter, row.user_id, 'kinetic_capacitor']
-        )
-      }
-
-      // BUFFER MODULE: every 15 matches → streak shield on next loss, matches counted while relic is equipped
-      let streakShielded = false
-      if (equippedRelic === 'buffer_module') {
-        cycleCounter++
-        if (!isWin && cycleCounter % 15 === 0) streakShielded = true
-        await pool.query(
-          'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
-          [cycleCounter, row.user_id, 'buffer_module']
-        )
-      }
-
-      let cycloneStreakBonus = 0
-
-      let streakAfter = isWin
-        ? Number(row.current_win_streak) + 1 + cycloneStreakBonus
-        : feverActive || streakShielded
-          ? Number(row.current_win_streak)
-          : 0
-
-      const streakMult =
-        streakAfter >= 5
-          ? 5n
-          : streakAfter >= 4
-            ? 3n
-            : streakAfter >= 3
-              ? 2n
-              : 1n
-
-      const streakNum = Number(streakMult)
-      let flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
-
-      if (isWin && flashEvent) {
-        if (snapshotRelic === 'lunar_siphon' && flashEventType === 'LUNAR')
-          flashMult += 0.5
-        if (
-          snapshotRelic === 'static_inductor' &&
-          flashEventType === 'ELECTRIC'
-        )
-          flashMult += 0.5
-        if (
-          snapshotRelic === 'volcanic_mantle' &&
-          flashEventType === 'HELLFIRE'
-        )
-          flashMult += 0.5
-        if (snapshotRelic === 'dealers_hand' && flashEventType === 'CARDS')
-          flashMult += 0.3
-
-        if (snapshotRelic === 'overdrive_relay') flashMult += 0.5
-      }
-
-      const bonusMultScale = effectiveBonus
-        ? BigInt(Math.floor(effectiveBonus.multiplier * 100))
-        : 100n
-      const flashMultScale =
-        isWin && flashEvent ? BigInt(Math.floor(flashMult * 100)) : 100n
-
-      const baseChange = isWin ? bet : bet / 2n
-
-      let gainLoss: bigint
-      let bonusDisplayAmount = 0n
-      let ghostEchoAmount = 0n
-      let preKineticAmount = 0n
-      let preSoulAmount = 0n
-      let soulProc = false
-      let globalBuff: GlobalEventBuffResult | null = null
-      let globalEchoAmount = 0n
-      let activeGlobalEventType: string | null = null
-
-      if (isWin) {
-        const afterStreak = baseChange * streakMult
-        const afterFlash = (afterStreak * flashMultScale) / 100n
-        const afterBonus = (afterFlash * bonusMultScale) / 100n
-
-        // Core Win Path (With Roll Bonus)
-        gainLoss = isSolarFlareActive ? afterBonus * 2n : afterBonus
-
-        // Core Win Path (Without Roll Bonus)
-        let gainLossWithoutBonus = isSolarFlareActive
-          ? afterFlash * 2n
-          : afterFlash
-
-        // Step-by-step points floor check
-        const provisionalPoints = currentPoints + gainLoss
-        if (provisionalPoints < POINTS_FLOOR) {
-          gainLoss = POINTS_FLOOR - currentPoints
-        }
-        const provisionalPointsWithout = currentPoints + gainLossWithoutBonus
-        if (provisionalPointsWithout < POINTS_FLOOR) {
-          gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+          await pool.query(
+            'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
+            [cycleCounter, row.user_id, 'logic_gate']
+          )
         }
 
-        // Ghost Festival (+20%)
-        if (activeFestival?.type === 'GHOST') {
-          ghostEchoAmount = gainLoss / 5n
-          gainLoss = gainLoss + ghostEchoAmount
-          const provisionalWithEcho = currentPoints + gainLoss
-          if (provisionalWithEcho < POINTS_FLOOR) {
-            gainLoss = POINTS_FLOOR - currentPoints
-            ghostEchoAmount = 0n
-          }
-
-          const ghostEchoWithout = gainLossWithoutBonus / 5n
-          gainLossWithoutBonus = gainLossWithoutBonus + ghostEchoWithout
-          const provisionalWithEchoWithout =
-            currentPoints + gainLossWithoutBonus
-          if (provisionalWithEchoWithout < POINTS_FLOOR) {
-            gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+        // ARCHITECTS KEYSTONE: auto-upgrade bonus tier
+        if (equippedRelic === 'architects_keystone' && bonus) {
+          const upgraded = TIER_UPGRADE[bonus.tier]
+          if (upgraded) {
+            bonus = {
+              multiplier:
+                upgraded === 'MYTHICAL'
+                  ? MYTHICAL_MULTIPLIER
+                  : bonus.multiplier,
+              tier: upgraded
+            }
           }
         }
 
-        // Surge Festival (2x)
-        if (activeFestival?.type === 'SURGE') {
-          gainLoss = gainLoss * 2n
-          const provisionalWithSurge = currentPoints + gainLoss
-          if (provisionalWithSurge < POINTS_FLOOR) {
+        // KINETIC CAPACITOR: every 30 wins → +x2 after all other multipliers, wins counted while relic is equipped
+        let kineticFired = false
+        if (equippedRelic === 'kinetic_capacitor' && isWin && !logicGateFired) {
+          cycleCounter++
+          if (cycleCounter % 30 === 0) kineticFired = true
+          await pool.query(
+            'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
+            [cycleCounter, row.user_id, 'kinetic_capacitor']
+          )
+        }
+
+        // BUFFER MODULE: every 15 matches → streak shield on next loss, matches counted while relic is equipped
+        let streakShielded = false
+        if (equippedRelic === 'buffer_module') {
+          cycleCounter++
+          if (!isWin && cycleCounter % 15 === 0) streakShielded = true
+          await pool.query(
+            'UPDATE relics SET counter = $1 WHERE user_id = $2 AND relic_key = $3',
+            [cycleCounter, row.user_id, 'buffer_module']
+          )
+        }
+
+        let cycloneStreakBonus = 0
+
+        let streakAfter = isWin
+          ? Number(row.current_win_streak) + 1 + cycloneStreakBonus
+          : feverActive || streakShielded
+            ? Number(row.current_win_streak)
+            : 0
+
+        const streakMult =
+          streakAfter >= 5
+            ? 5n
+            : streakAfter >= 4
+              ? 3n
+              : streakAfter >= 3
+                ? 2n
+                : 1n
+
+        const streakNum = Number(streakMult)
+        let flashMult = isWin && flashEvent ? flashEvent.multiplier : 1
+
+        if (isWin && flashEvent) {
+          if (snapshotRelic === 'lunar_siphon' && flashEventType === 'LUNAR')
+            flashMult += 0.5
+          if (
+            snapshotRelic === 'static_inductor' &&
+            flashEventType === 'ELECTRIC'
+          )
+            flashMult += 0.5
+          if (
+            snapshotRelic === 'volcanic_mantle' &&
+            flashEventType === 'HELLFIRE'
+          )
+            flashMult += 0.5
+          if (snapshotRelic === 'dealers_hand' && flashEventType === 'CARDS')
+            flashMult += 0.3
+
+          if (snapshotRelic === 'overdrive_relay') flashMult += 0.5
+        }
+
+        const bonusMultScale = effectiveBonus
+          ? BigInt(Math.floor(effectiveBonus.multiplier * 100))
+          : 100n
+        const flashMultScale =
+          isWin && flashEvent ? BigInt(Math.floor(flashMult * 100)) : 100n
+
+        const baseChange = isWin ? bet : bet / 2n
+
+        let gainLoss: bigint
+        let bonusDisplayAmount = 0n
+        let ghostEchoAmount = 0n
+        let preKineticAmount = 0n
+        let preSoulAmount = 0n
+        let soulProc = false
+        let globalBuff: GlobalEventBuffResult | null = null
+        let globalEchoAmount = 0n
+        let activeGlobalEventType: string | null = null
+
+        if (isWin) {
+          const afterStreak = baseChange * streakMult
+          const afterFlash = (afterStreak * flashMultScale) / 100n
+          const afterBonus = (afterFlash * bonusMultScale) / 100n
+
+          // Core Win Path (With Roll Bonus)
+          gainLoss = isSolarFlareActive ? afterBonus * 2n : afterBonus
+
+          // Core Win Path (Without Roll Bonus)
+          let gainLossWithoutBonus = isSolarFlareActive
+            ? afterFlash * 2n
+            : afterFlash
+
+          // Step-by-step points floor check
+          const provisionalPoints = currentPoints + gainLoss
+          if (provisionalPoints < POINTS_FLOOR) {
             gainLoss = POINTS_FLOOR - currentPoints
           }
-
-          gainLossWithoutBonus = gainLossWithoutBonus * 2n
-          const provisionalWithSurgeWithout =
-            currentPoints + gainLossWithoutBonus
-          if (provisionalWithSurgeWithout < POINTS_FLOOR) {
+          const provisionalPointsWithout = currentPoints + gainLossWithoutBonus
+          if (provisionalPointsWithout < POINTS_FLOOR) {
             gainLossWithoutBonus = POINTS_FLOOR - currentPoints
           }
-        }
 
-        // Prismatic Shard (+0.5x bet)
-        if (equippedRelic === 'prismatic_shard' && !flashActive) {
-          gainLoss = gainLoss + bet / 2n
-          gainLossWithoutBonus = gainLossWithoutBonus + bet / 2n
-        }
+          // Ghost Festival (+20%)
+          if (activeFestival?.type === 'GHOST') {
+            ghostEchoAmount = gainLoss / 5n
+            gainLoss = gainLoss + ghostEchoAmount
+            const provisionalWithEcho = currentPoints + gainLoss
+            if (provisionalWithEcho < POINTS_FLOOR) {
+              gainLoss = POINTS_FLOOR - currentPoints
+              ghostEchoAmount = 0n
+            }
 
-        // Kinetic Capacitor (2x)
-        preKineticAmount = gainLoss
-        if (kineticFired) {
-          gainLoss = gainLoss * 2n
-          gainLossWithoutBonus = gainLossWithoutBonus * 2n
-        }
+            const ghostEchoWithout = gainLossWithoutBonus / 5n
+            gainLossWithoutBonus = gainLossWithoutBonus + ghostEchoWithout
+            const provisionalWithEchoWithout =
+              currentPoints + gainLossWithoutBonus
+            if (provisionalWithEchoWithout < POINTS_FLOOR) {
+              gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+            }
+          }
 
-        // Soul of the Machine (3x)
-        preSoulAmount = gainLoss
-        if (equippedRelic === 'soul_of_the_machine') {
-          if (Math.random() < 0.05) {
-            gainLoss = gainLoss * 3n
-            soulProc = true
-            gainLossWithoutBonus = gainLossWithoutBonus * 3n
+          // Surge Festival (2x)
+          if (activeFestival?.type === 'SURGE') {
+            gainLoss = gainLoss * 2n
+            const provisionalWithSurge = currentPoints + gainLoss
+            if (provisionalWithSurge < POINTS_FLOOR) {
+              gainLoss = POINTS_FLOOR - currentPoints
+            }
+
+            gainLossWithoutBonus = gainLossWithoutBonus * 2n
+            const provisionalWithSurgeWithout =
+              currentPoints + gainLossWithoutBonus
+            if (provisionalWithSurgeWithout < POINTS_FLOOR) {
+              gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+            }
+          }
+
+          // Prismatic Shard (+0.5x bet)
+          if (equippedRelic === 'prismatic_shard' && !flashActive) {
+            gainLoss = gainLoss + bet / 2n
+            gainLossWithoutBonus = gainLossWithoutBonus + bet / 2n
+          }
+
+          // Kinetic Capacitor (2x)
+          preKineticAmount = gainLoss
+          if (kineticFired) {
+            gainLoss = gainLoss * 2n
+            gainLossWithoutBonus = gainLossWithoutBonus * 2n
+          }
+
+          // Soul of the Machine (3x)
+          preSoulAmount = gainLoss
+          if (equippedRelic === 'soul_of_the_machine') {
+            if (Math.random() < 0.05) {
+              gainLoss = gainLoss * 3n
+              soulProc = true
+              gainLossWithoutBonus = gainLossWithoutBonus * 3n
+            }
+          }
+
+          // Global Event Buffs
+          globalBuff = applyGlobalEventBuff(isWin, gainLoss, bet)
+          gainLoss = globalBuff.gainLossMultiplied
+          globalEchoAmount = globalBuff.echoAmount
+          activeGlobalEventType = globalBuff.buffType
+
+          // Mirror event scaling dynamically on the un-bonused track
+          if (activeGlobalEventType === 'TIDAL_SURGE') {
+            gainLossWithoutBonus =
+              gainLossWithoutBonus + gainLossWithoutBonus / 5n
+          } else if (activeGlobalEventType === 'MIRAGE_CATACLYSM') {
+            const finalGainRatio =
+              Number(gainLoss) /
+              Number(globalBuff.gainLossMultiplied - globalEchoAmount || 1n)
+            gainLossWithoutBonus =
+              (gainLossWithoutBonus *
+                BigInt(Math.round(finalGainRatio * 100))) /
+              100n
+          }
+
+          // Cyclone Blitz streak increment
+          if (activeGlobalEventType === 'CYCLONE_BLITZ') {
+            cycloneStreakBonus = 1
+            streakAfter += cycloneStreakBonus
+          }
+
+          // Final points floor fallback
+          const provisionalWithGlobal = currentPoints + gainLoss
+          if (provisionalWithGlobal < POINTS_FLOOR) {
+            gainLoss = POINTS_FLOOR - currentPoints
+          }
+          const provisionalWithGlobalWithout =
+            currentPoints + gainLossWithoutBonus
+          if (provisionalWithGlobalWithout < POINTS_FLOOR) {
+            gainLossWithoutBonus = POINTS_FLOOR - currentPoints
+          }
+
+          // Compounded visual bonus display amount (Realized Delta)
+          if (effectiveBonus) {
+            bonusDisplayAmount = gainLoss - gainLossWithoutBonus
+          }
+        } else {
+          // Loss flow (unaffected by win multipliers)
+          const safeguardActive = activeFestival?.type === 'SAFEGUARD'
+          const conductiveReduction =
+            equippedRelic === 'conductive_filament' ? 95n : 100n
+          const effectiveBase = safeguardActive
+            ? (bet * 40n) / 100n
+            : baseChange
+          const effectiveBaseWithRelic =
+            (effectiveBase * conductiveReduction) / 100n
+          const savedAmount = effectiveBonus
+            ? (effectiveBaseWithRelic * bonusMultScale) / 100n
+            : 0n
+          gainLoss = -(effectiveBaseWithRelic - savedAmount)
+
+          if (effectiveBonus) {
+            bonusDisplayAmount = savedAmount
+          }
+
+          // Fallback points floor check for losses
+          const provisionalWithGlobal = currentPoints + gainLoss
+          if (provisionalWithGlobal < POINTS_FLOOR) {
+            gainLoss = POINTS_FLOOR - currentPoints
           }
         }
-
-        // Global Event Buffs
-        globalBuff = applyGlobalEventBuff(isWin, gainLoss, bet)
-        gainLoss = globalBuff.gainLossMultiplied
-        globalEchoAmount = globalBuff.echoAmount
-        activeGlobalEventType = globalBuff.buffType
-
-        // Mirror event scaling dynamically on the un-bonused track
-        if (activeGlobalEventType === 'TIDAL_SURGE') {
-          gainLossWithoutBonus =
-            gainLossWithoutBonus + gainLossWithoutBonus / 5n
-        } else if (activeGlobalEventType === 'MIRAGE_CATACLYSM') {
-          const finalGainRatio =
-            Number(gainLoss) /
-            Number(globalBuff.gainLossMultiplied - globalEchoAmount || 1n)
-          gainLossWithoutBonus =
-            (gainLossWithoutBonus * BigInt(Math.round(finalGainRatio * 100))) /
-            100n
+        const triggerFlareInfernoCombo =
+          isWin && activeGlobalEventType === 'SOLAR_FLARE' && streakAfter >= 5
+        const triggerMirageHighEcho =
+          isWin &&
+          activeGlobalEventType === 'MIRAGE_CATACLYSM' &&
+          (globalBuff?.echoFactor ?? 0) >= 45
+        const triggerFlashPlusGlobalWin =
+          isWin && flashActive && !!activeGlobalEventType
+        const triggerDryMirage =
+          isWin &&
+          activeGlobalEventType === 'MIRAGE_CATACLYSM' &&
+          (globalBuff?.echoFactor ?? 0) === 15
+        const triggerEyeOfStorm =
+          !isWin && activeGlobalEventType === 'CYCLONE_BLITZ' && streakShielded
+        const triggerPrismaticWave =
+          isWin &&
+          activeGlobalEventType === 'TIDAL_SURGE' &&
+          equippedRelic === 'prismatic_shard'
+        const triggerThermalFusion =
+          isWin && activeGlobalEventType === 'SOLAR_FLARE' && soulProc
+        const streakDuringTidal =
+          isWin && activeGlobalEventType === 'TIDAL_SURGE' ? streakAfter : 0
+        const streakDuringCyclone =
+          isWin && activeGlobalEventType === 'CYCLONE_BLITZ' ? streakAfter : 0
+        let flashJustEndedFlag = false
+        if (isWin && flashEvent) {
+          flashJustEndedFlag = consumeFlashBetForUser(row.user_id)
+        }
+        if (oracleRigged || defiedOracle) {
+          await consumeOracleForUser(row.user_id)
         }
 
-        // Cyclone Blitz streak increment
-        if (activeGlobalEventType === 'CYCLONE_BLITZ') {
-          cycloneStreakBonus = 1
-          streakAfter += cycloneStreakBonus
+        let finalCombinedMult = Math.round(
+          streakNum *
+            flashMult *
+            (effectiveBonus ? effectiveBonus.multiplier : 1)
+        )
+        const festivalType = activeFestival?.type ?? null
+        const festivalMultValue = isWin && festivalType === 'SURGE' ? 3 : 1
+
+        if (isWin) {
+          if (activeFestival?.type === 'SURGE') finalCombinedMult *= 3
+          if (kineticFired) finalCombinedMult *= 2
+          if (soulProc) finalCombinedMult *= 3
+          if (isSolarFlareActive) finalCombinedMult *= 2
         }
 
-        // Final points floor fallback
-        const provisionalWithGlobal = currentPoints + gainLoss
-        if (provisionalWithGlobal < POINTS_FLOOR) {
-          gainLoss = POINTS_FLOOR - currentPoints
+        const savedFlashType = flashJustEndedFlag ? null : flashEventType
+        if (savedFlashType) {
+          recordSessionFlashType(row.user_id, savedFlashType)
         }
-        const provisionalWithGlobalWithout =
-          currentPoints + gainLossWithoutBonus
-        if (provisionalWithGlobalWithout < POINTS_FLOOR) {
-          gainLossWithoutBonus = POINTS_FLOOR - currentPoints
-        }
-
-        // Compounded visual bonus display amount (Realized Delta)
-        if (effectiveBonus) {
-          bonusDisplayAmount = gainLoss - gainLossWithoutBonus
-        }
-      } else {
-        // Loss flow (unaffected by win multipliers)
-        const safeguardActive = activeFestival?.type === 'SAFEGUARD'
-        const conductiveReduction =
-          equippedRelic === 'conductive_filament' ? 95n : 100n
-        const effectiveBase = safeguardActive ? (bet * 40n) / 100n : baseChange
-        const effectiveBaseWithRelic =
-          (effectiveBase * conductiveReduction) / 100n
-        const savedAmount = effectiveBonus
-          ? (effectiveBaseWithRelic * bonusMultScale) / 100n
-          : 0n
-        gainLoss = -(effectiveBaseWithRelic - savedAmount)
-
-        if (effectiveBonus) {
-          bonusDisplayAmount = savedAmount
-        }
-
-        // Fallback points floor check for losses
-        const provisionalWithGlobal = currentPoints + gainLoss
-        if (provisionalWithGlobal < POINTS_FLOOR) {
-          gainLoss = POINTS_FLOOR - currentPoints
-        }
-      }
-            const triggerFlareInfernoCombo =
-        isWin &&
-        activeGlobalEventType === 'SOLAR_FLARE' &&
-        streakAfter >= 5
-      const triggerMirageHighEcho =
-        isWin &&
-        activeGlobalEventType === 'MIRAGE_CATACLYSM' &&
-        (globalBuff?.echoFactor ?? 0) >= 45
-      const triggerFlashPlusGlobalWin =
-        isWin && flashActive && !!activeGlobalEventType
-      const triggerDryMirage =
-        isWin &&
-        activeGlobalEventType === 'MIRAGE_CATACLYSM' &&
-        (globalBuff?.echoFactor ?? 0) === 15
-      const triggerEyeOfStorm =
-        !isWin &&
-        activeGlobalEventType === 'CYCLONE_BLITZ' &&
-        streakShielded
-      const triggerPrismaticWave =
-        isWin &&
-        activeGlobalEventType === 'TIDAL_SURGE' &&
-        equippedRelic === 'prismatic_shard'
-      const triggerThermalFusion =
-        isWin &&
-        activeGlobalEventType === 'SOLAR_FLARE' &&
-        soulProc
-      const streakDuringTidal =
-        isWin && activeGlobalEventType === 'TIDAL_SURGE' ? streakAfter : 0
-      const streakDuringCyclone =
-        isWin && activeGlobalEventType === 'CYCLONE_BLITZ' ? streakAfter : 0
-      let flashJustEndedFlag = false
-      if (isWin && flashEvent) {
-        flashJustEndedFlag = consumeFlashBetForUser(row.user_id)
-      }
-      if (oracleRigged || defiedOracle) {
-        await consumeOracleForUser(row.user_id)
-      }
-
-      let finalCombinedMult = Math.round(
-        streakNum * flashMult * (effectiveBonus ? effectiveBonus.multiplier : 1)
-      )
-      const festivalType = activeFestival?.type ?? null
-      const festivalMultValue = isWin && festivalType === 'SURGE' ? 3 : 1
-
-      if (isWin) {
-        if (activeFestival?.type === 'SURGE') finalCombinedMult *= 3
-        if (kineticFired) finalCombinedMult *= 2
-        if (soulProc) finalCombinedMult *= 3
-        if (isSolarFlareActive) finalCombinedMult *= 2
-      }
-
-      const savedFlashType = flashJustEndedFlag ? null : flashEventType
-      if (savedFlashType) {
-        recordSessionFlashType(row.user_id, savedFlashType)
-      }
         await pool.query(
           `UPDATE predictions
         SET result = $1,
@@ -638,9 +640,8 @@ export const resolvePrediction = async (
           ]
         )
 
-
-      await pool.query(
-        `UPDATE users
+        await pool.query(
+          `UPDATE users
           SET points                    = points + $1,
               peak_points               = GREATEST(peak_points, points + $1),
               all_time_peak             = GREATEST(all_time_peak, points + $1),
@@ -683,36 +684,36 @@ export const resolvePrediction = async (
               max_streak_during_tidal_surge   = GREATEST(max_streak_during_tidal_surge,   $22),
               max_streak_during_cyclone_blitz = GREATEST(max_streak_during_cyclone_blitz, $23)
           WHERE user_id = $2`,
-        [
-          gainLoss.toString(),
-          row.user_id,
-          effectiveBonus ? 0 : currentPity + 1,
-          bet.toString(),
-          result,
-          isNaturalPityHit ? 1 : 0,
-          savedFlashType,
-          finalCombinedMult,
-          betAgainstOracle,
-          oracleRigged,
-          defiedOracle,
-          activeFestival !== null,
-          flashJustEndedFlag,
-          streakAfter,
-          triggerFlareInfernoCombo,
-          triggerMirageHighEcho,
-          triggerFlashPlusGlobalWin,
-          triggerDryMirage,
-          triggerEyeOfStorm,
-          triggerPrismaticWave,
-          triggerThermalFusion,
-          streakDuringTidal,
-          streakDuringCyclone
-        ]
-      )
+          [
+            gainLoss.toString(),
+            row.user_id,
+            effectiveBonus ? 0 : currentPity + 1,
+            bet.toString(),
+            result,
+            isNaturalPityHit ? 1 : 0,
+            savedFlashType,
+            finalCombinedMult,
+            betAgainstOracle,
+            oracleRigged,
+            defiedOracle,
+            activeFestival !== null,
+            flashJustEndedFlag,
+            streakAfter,
+            triggerFlareInfernoCombo,
+            triggerMirageHighEcho,
+            triggerFlashPlusGlobalWin,
+            triggerDryMirage,
+            triggerEyeOfStorm,
+            triggerPrismaticWave,
+            triggerThermalFusion,
+            streakDuringTidal,
+            streakDuringCyclone
+          ]
+        )
 
-      // Achievement check
-      const freshUser = await pool.query(
-        `SELECT wins, max_win_streak, laps, points,
+        // Achievement check
+        const freshUser = await pool.query(
+          `SELECT wins, max_win_streak, laps, points,
                 biggest_match_mult, total_pities_earned,
                 lunar_events_caught, electric_events_caught,
                 hellfire_events_caught, cards_events_caught,
@@ -725,221 +726,231 @@ export const resolvePrediction = async (
                 cyclone_blitz_participations, mirage_cataclysm_participations,
                 global_event_participations
                   FROM users WHERE user_id = $1`,
-        [row.user_id]
-      )
-      const u = freshUser.rows[0]
-
-      const earnedRes = await pool.query(
-        `SELECT achievement_code FROM user_achievements WHERE user_id = $1`,
-        [row.user_id]
-      )
-      const alreadyEarned = new Set<string>(
-        earnedRes.rows.map(
-          (r: { achievement_code: string }) => r.achievement_code
+          [row.user_id]
         )
-      )
+        const u = freshUser.rows[0]
 
-      // Count relics for achievement check
-      const relicCountRes = await pool.query(
-        'SELECT relic_key, rarity FROM relics WHERE user_id = $1',
-        [row.user_id]
-      )
-      const userRelicKeys = new Set(relicCountRes.rows.map((r) => r.relic_key))
-      const mythCount = relicCountRes.rows.filter(
-        (r) => r.rarity === 'MYTHICAL'
-      ).length
-      const commonRareEpicCount = relicCountRes.rows.filter((r) =>
-        ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
-      ).length
+        const earnedRes = await pool.query(
+          `SELECT achievement_code FROM user_achievements WHERE user_id = $1`,
+          [row.user_id]
+        )
+        const alreadyEarned = new Set<string>(
+          earnedRes.rows.map(
+            (r: { achievement_code: string }) => r.achievement_code
+          )
+        )
 
-      const stats: AchievementStats = {
-        wins: Number(u.wins),
-        maxWinStreak: Number(u.max_win_streak),
-        laps: Number(u.laps),
-        points: u.points.toString(),
-        biggestMatchMult: Number(u.biggest_match_mult),
-        totalPitiesEarned: Number(u.total_pities_earned),
-        lunarCaught: Number(u.lunar_events_caught),
-        electricCaught: Number(u.electric_events_caught),
-        hellfireCaught: Number(u.hellfire_events_caught),
-        cardsCaught: Number(u.cards_events_caught),
-        betAgainstOracleCount: Number(u.bet_against_oracle_count),
-        oracleMaxStreak: Number(u.oracle_max_streak),
-        festivalsTriggered: Number(u.festivals_triggered),
-        festivalsParticipated: Number(u.festivals_participated),
-        uniqueRelicsOwned: userRelicKeys.size,
-        allRelicsOwned: userRelicKeys.size >= RELICS.length,
-        allCommonRareEpicRelics: commonRareEpicCount >= 11,
-        allMythicalRelics: mythCount >= 3,
-        biggestMultiplierTier: null,
-        totalAchievementsEarned: alreadyEarned.size,
-        hadMythicRelicSlam: soulProc,
-        maxConsecutiveFlashEvents: Number(u.consecutive_flash_peak),
-        hasSeenAllFlashTypes: hasSeenAllFlashTypes(row.user_id),
-        hasUsedAutoBet: Boolean(u.has_used_auto_bet),
-        globalEventParticipations: Number(u.global_event_participations ?? 0),
-        tidalSurgeParticipations: Number(u.tidal_surge_participations ?? 0),
-        solarFlareParticipations: Number(u.solar_flare_participations ?? 0),
-        cycloneBlitzParticipations: Number(u.cyclone_blitz_participations ?? 0),
-        mirageCataclysmParticipations: Number(
-          u.mirage_cataclysm_participations ?? 0
-        ),
-        maxStreakDuringTidalSurge: Number(u.max_streak_during_tidal_surge ?? 0),
-        maxStreakDuringCycloneBlitz: Number(
-          u.max_streak_during_cyclone_blitz ?? 0
-        ),
-        hadFlareInfernoCombo: Boolean(u.had_flare_inferno_combo),
-        hadMirageHighEcho: Boolean(u.had_mirage_high_echo),
-        hadFlashPlusGlobalWin: Boolean(u.had_flash_plus_global_win),
-        hadDryMirage: Boolean(u.had_dry_mirage),
-        hadEyeOfStorm: Boolean(u.had_eye_of_storm),
-        hadPrismaticWave: Boolean(u.had_prismatic_wave),
-        hadThermalFusion: Boolean(u.had_thermal_fusion)
-      }
+        // Count relics for achievement check
+        const relicCountRes = await pool.query(
+          'SELECT relic_key, rarity FROM relics WHERE user_id = $1',
+          [row.user_id]
+        )
+        const userRelicKeys = new Set(
+          relicCountRes.rows.map((r) => r.relic_key)
+        )
+        const mythCount = relicCountRes.rows.filter(
+          (r) => r.rarity === 'MYTHICAL'
+        ).length
+        const commonRareEpicCount = relicCountRes.rows.filter((r) =>
+          ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
+        ).length
 
-      const firstPass = checkAchievements(stats, alreadyEarned)
-      const projectedTotal = alreadyEarned.size + firstPass.length
+        const stats: AchievementStats = {
+          wins: Number(u.wins),
+          maxWinStreak: Number(u.max_win_streak),
+          laps: Number(u.laps),
+          points: u.points.toString(),
+          biggestMatchMult: Number(u.biggest_match_mult),
+          totalPitiesEarned: Number(u.total_pities_earned),
+          lunarCaught: Number(u.lunar_events_caught),
+          electricCaught: Number(u.electric_events_caught),
+          hellfireCaught: Number(u.hellfire_events_caught),
+          cardsCaught: Number(u.cards_events_caught),
+          betAgainstOracleCount: Number(u.bet_against_oracle_count),
+          oracleMaxStreak: Number(u.oracle_max_streak),
+          festivalsTriggered: Number(u.festivals_triggered),
+          festivalsParticipated: Number(u.festivals_participated),
+          uniqueRelicsOwned: userRelicKeys.size,
+          allRelicsOwned: userRelicKeys.size >= RELICS.length,
+          allCommonRareEpicRelics: commonRareEpicCount >= 11,
+          allMythicalRelics: mythCount >= 3,
+          biggestMultiplierTier: null,
+          totalAchievementsEarned: alreadyEarned.size,
+          hadMythicRelicSlam: soulProc,
+          maxConsecutiveFlashEvents: Number(u.consecutive_flash_peak),
+          hasSeenAllFlashTypes: hasSeenAllFlashTypes(row.user_id),
+          hasUsedAutoBet: Boolean(u.has_used_auto_bet),
+          globalEventParticipations: Number(u.global_event_participations ?? 0),
+          tidalSurgeParticipations: Number(u.tidal_surge_participations ?? 0),
+          solarFlareParticipations: Number(u.solar_flare_participations ?? 0),
+          cycloneBlitzParticipations: Number(
+            u.cyclone_blitz_participations ?? 0
+          ),
+          mirageCataclysmParticipations: Number(
+            u.mirage_cataclysm_participations ?? 0
+          ),
+          maxStreakDuringTidalSurge: Number(
+            u.max_streak_during_tidal_surge ?? 0
+          ),
+          maxStreakDuringCycloneBlitz: Number(
+            u.max_streak_during_cyclone_blitz ?? 0
+          ),
+          hadFlareInfernoCombo: Boolean(u.had_flare_inferno_combo),
+          hadMirageHighEcho: Boolean(u.had_mirage_high_echo),
+          hadFlashPlusGlobalWin: Boolean(u.had_flash_plus_global_win),
+          hadDryMirage: Boolean(u.had_dry_mirage),
+          hadEyeOfStorm: Boolean(u.had_eye_of_storm),
+          hadPrismaticWave: Boolean(u.had_prismatic_wave),
+          hadThermalFusion: Boolean(u.had_thermal_fusion)
+        }
 
-      const statsPass2 = {
-        ...stats,
-        totalAchievementsEarned: projectedTotal
-      }
+        const firstPass = checkAchievements(stats, alreadyEarned)
+        const projectedTotal = alreadyEarned.size + firstPass.length
 
-      const collectorPass = checkAchievements(
-        statsPass2,
-        new Set([...alreadyEarned, ...firstPass.map((a) => a.code)])
-      )
-      const newAchievements = [...firstPass, ...collectorPass]
+        const statsPass2 = {
+          ...stats,
+          totalAchievementsEarned: projectedTotal
+        }
 
-      if (newAchievements.length > 0) {
-        const placeholders = newAchievements
-          .map((_, i) => `($1, $${i + 2}, ${Date.now()})`)
-          .join(', ')
+        const collectorPass = checkAchievements(
+          statsPass2,
+          new Set([...alreadyEarned, ...firstPass.map((a) => a.code)])
+        )
+        const newAchievements = [...firstPass, ...collectorPass]
 
-        await pool.query(
-          `INSERT INTO user_achievements (user_id, achievement_code, earned_at)
+        if (newAchievements.length > 0) {
+          const placeholders = newAchievements
+            .map((_, i) => `($1, $${i + 2}, ${Date.now()})`)
+            .join(', ')
+
+          await pool.query(
+            `INSERT INTO user_achievements (user_id, achievement_code, earned_at)
             VALUES ${placeholders}
             ON CONFLICT DO NOTHING`,
-          [row.user_id, ...newAchievements.map((a) => a.code)]
-        )
-
-        await pool.query(
-          `UPDATE users SET total_achievements = total_achievements + $1 WHERE user_id = $2`,
-          [newAchievements.length, row.user_id]
-        )
-
-        for (const achievement of newAchievements) {
-          broadcast(
-            'achievement_unlocked',
-            JSON.stringify({
-              userId: row.user_id,
-              code: achievement.code,
-              name: achievement.name,
-              icon: achievement.icon,
-              rarity: achievement.rarity,
-              category: achievement.category,
-              requirement: achievement.requirement
-            })
+            [row.user_id, ...newAchievements.map((a) => a.code)]
           )
-          // Safeguard Festival: Mythical achievement (100%) or Legendary (50%)
-          if (achievement.rarity === 'MYTHICAL') {
-            triggerSafeguardFestival(
-              row.nickname ?? 'Anonymous',
-              row.user_id,
-              broadcast
+
+          await pool.query(
+            `UPDATE users SET total_achievements = total_achievements + $1 WHERE user_id = $2`,
+            [newAchievements.length, row.user_id]
+          )
+
+          for (const achievement of newAchievements) {
+            broadcast(
+              'achievement_unlocked',
+              JSON.stringify({
+                userId: row.user_id,
+                code: achievement.code,
+                name: achievement.name,
+                icon: achievement.icon,
+                rarity: achievement.rarity,
+                category: achievement.category,
+                requirement: achievement.requirement
+              })
             )
-          } else if (
-            achievement.rarity === 'LEGENDARY' &&
-            Math.random() < 0.5
-          ) {
-            triggerSafeguardFestival(
-              row.nickname ?? 'Anonymous',
-              row.user_id,
-              broadcast
-            )
+            // Safeguard Festival: Mythical achievement (100%) or Legendary (50%)
+            if (achievement.rarity === 'MYTHICAL') {
+              triggerSafeguardFestival(
+                row.nickname ?? 'Anonymous',
+                row.user_id,
+                broadcast
+              )
+            } else if (
+              achievement.rarity === 'LEGENDARY' &&
+              Math.random() < 0.5
+            ) {
+              triggerSafeguardFestival(
+                row.nickname ?? 'Anonymous',
+                row.user_id,
+                broadcast
+              )
+            }
           }
         }
-      }
 
-      // Relic drop roll
-      const droppedRelic = await rollRelicDrop(
-        row.user_id,
-        equippedRelic,
-        Number(u.laps)
-      )
-      // Vault Festival: Mythical relic drop triggers globally
-      if (droppedRelic?.rarity === 'MYTHICAL') {
-        triggerVaultFestival(
-          row.nickname ?? 'Anonymous',
+        // Relic drop roll
+        const droppedRelic = await rollRelicDrop(
           row.user_id,
+          equippedRelic,
+          Number(u.laps)
+        )
+        // Vault Festival: Mythical relic drop triggers globally
+        if (droppedRelic?.rarity === 'MYTHICAL') {
+          triggerVaultFestival(
+            row.nickname ?? 'Anonymous',
+            row.user_id,
+            broadcast
+          )
+        }
+        broadcast(
+          'prediction_result',
+          JSON.stringify({
+            userId: row.user_id,
+            nickname: row.nickname,
+            result,
+            gameId,
+            amount:
+              gainLoss > 0n ? gainLoss.toString() : (-gainLoss).toString(),
+            bonus: effectiveBonus
+              ? {
+                  amount:
+                    bonusDisplayAmount > 0n
+                      ? bonusDisplayAmount.toString()
+                      : '0',
+                  tier: effectiveBonus.tier,
+                  visualMultiplier: Math.floor(effectiveBonus.multiplier * 100)
+                }
+              : null,
+            wasAllIn: bet === currentPoints,
+            streakAfter,
+            streakMult: streakNum,
+            flashEventType: savedFlashType,
+            flashMult: flashJustEndedFlag ? 1 : flashMult,
+            oracleRigged,
+            globalEventType: activeGlobalEventType,
+            globalEchoAmount:
+              globalEchoAmount > 0n ? globalEchoAmount.toString() : null,
+            ghostEchoAmount:
+              ghostEchoAmount > 0n ? ghostEchoAmount.toString() : null,
+            relicCounter: cycleCounter,
+            relicDrop: droppedRelic ?? null,
+            soulProc,
+            kineticFired,
+            preSoulAmount: soulProc
+              ? preSoulAmount.toString()
+              : kineticFired
+                ? preKineticAmount.toString()
+                : null
+          })
+        )
+
+        tryTriggerFlashEventForUser(row.user_id, broadcast)
+        // Festival trigger check, runs after flash trigger to avoid double-lockout race
+        checkAndTriggerFestival(
+          row.user_id,
+          row.nickname ?? 'Anonymous',
+          {
+            isWin,
+            bonusTier: effectiveBonus?.tier ?? null,
+            bonusMult: effectiveBonus?.multiplier ?? 1,
+            flashActive,
+            flashJustEnded: flashJustEndedFlag,
+            winStreakAfter: streakAfter,
+            totalMultiplier: finalCombinedMult,
+            flashType: flashEventType
+          },
           broadcast
         )
-      }
-      broadcast(
-        'prediction_result',
-        JSON.stringify({
+      } catch (err) {
+        logger.errorWithPoints('resolvePrediction: failed for user', err, {
           userId: row.user_id,
-          nickname: row.nickname,
-          result,
           gameId,
-          amount: gainLoss > 0n ? gainLoss.toString() : (-gainLoss).toString(),
-          bonus: effectiveBonus
-            ? {
-                amount:
-                  bonusDisplayAmount > 0n ? bonusDisplayAmount.toString() : '0',
-                tier: effectiveBonus.tier,
-                visualMultiplier: Math.floor(effectiveBonus.multiplier * 100)
-              }
-            : null,
-          wasAllIn: bet === currentPoints,
-          streakAfter,
-          streakMult: streakNum,
-          flashEventType: savedFlashType,
-          flashMult: flashJustEndedFlag ? 1 : flashMult,
-          oracleRigged,
-          globalEventType: activeGlobalEventType,
-          globalEchoAmount:
-            globalEchoAmount > 0n ? globalEchoAmount.toString() : null,
-          ghostEchoAmount:
-            ghostEchoAmount > 0n ? ghostEchoAmount.toString() : null,
-          relicCounter: cycleCounter,
-          relicDrop: droppedRelic ?? null,
-          soulProc,
-          kineticFired,
-          preSoulAmount: soulProc
-            ? preSoulAmount.toString()
-            : kineticFired
-              ? preKineticAmount.toString()
-              : null
+          points: BigInt(row.current_points),
+          betAmount: BigInt(row.bet_amount)
         })
-      )
-
-      tryTriggerFlashEventForUser(row.user_id, broadcast)
-      // Festival trigger check, runs after flash trigger to avoid double-lockout race
-      checkAndTriggerFestival(
-        row.user_id,
-        row.nickname ?? 'Anonymous',
-        {
-          isWin,
-          bonusTier: effectiveBonus?.tier ?? null,
-          bonusMult: effectiveBonus?.multiplier ?? 1,
-          flashActive,
-          flashJustEnded: flashJustEndedFlag,
-          winStreakAfter: streakAfter,
-          totalMultiplier: finalCombinedMult,
-          flashType: flashEventType
-        },
-        broadcast
-      )
-    } catch (err) {
-      logger.errorWithPoints('resolvePrediction: failed for user', err, {
-        userId: row.user_id,
-        gameId,
-        points: BigInt(row.current_points),
-        betAmount: BigInt(row.bet_amount)
-      })
-    }
-  }
+      }
+    })
+  )
 }
 
 export const getPaginatedUserPredictions = async (

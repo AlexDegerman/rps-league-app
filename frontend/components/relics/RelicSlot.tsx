@@ -60,7 +60,8 @@ export default function RelicSlot({
   align?: 'left' | 'right' | 'center'
 }) {
   const [showTooltip, setShowTooltip] = useState(false)
-  const { equippedRelic, setDrawerOpen } = useRelicStore()
+  const equippedRelic = useRelicStore((s) => s.equippedRelic)
+  const setDrawerOpen = useRelicStore((s) => s.setDrawerOpen)
   const relic = propRelic !== undefined ? propRelic : equippedRelic
 
   const dim = size === 'sm' ? 'w-8 h-8' : 'w-10 h-10'

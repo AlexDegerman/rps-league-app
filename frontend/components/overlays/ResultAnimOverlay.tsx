@@ -330,7 +330,7 @@ export default function ResultAnimOverlay({
   streakMult,
   animatedResult
 }: ResultAnimOverlayProps) {
-  const { stylePreference } = useUserStore()
+  const stylePreference = useUserStore((s) => s.stylePreference)
   const festivalType = useGameStore((s) => s.festivalType)
   const activeFestival = useGameStore((s) => s.activeFestival)
 

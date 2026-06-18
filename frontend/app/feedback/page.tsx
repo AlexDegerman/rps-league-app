@@ -36,13 +36,16 @@ const PLACEHOLDERS: Record<CategoryKey, string> = {
   balance: 'Thoughts on multipliers, streaks, or the point floor?',
   oracle: 'Was the Oracle accurate? Too long? Off-topic?',
   suggestion: 'What feature would you like to see?',
-  praise: 'Go ahead, we are listening.'
+  praise: 'Go ahead, I am listening.'
 }
 
 export default function FeedbackPage() {
   const pathname = usePathname()
-  const { displayNickname, points, winStreak } = useUserStore()
-  const { activeFlashEvent } = useGameStore()
+  const displayNickname = useUserStore((s) => s.displayNickname)
+  const points = useUserStore((s) => s.points)
+  const winStreak = useUserStore((s) => s.winStreak)
+
+  const activeFlashEvent = useGameStore((s) => s.activeFlashEvent)
 
   const [nickname, setNickname] = useState('')
   const [email, setEmail] = useState('')

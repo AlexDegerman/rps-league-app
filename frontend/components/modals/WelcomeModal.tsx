@@ -12,7 +12,7 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
   const [nickname, setNickname] = useState('')
   const [rerolling, setRerolling] = useState(false)
   const [justRerolled, setJustRerolled] = useState(false)
-  const { rerollNickname } = useUserStore()
+  const rerollNickname = useUserStore((s) => s.rerollNickname)
 
   useEffect(() => {
     const user = getOrCreateUser()

@@ -63,16 +63,14 @@ const RARITY_ORDER: RelicRarity[] = [
 ]
 
 export default function RelicDrawer() {
-  const {
-    drawerOpen,
-    setDrawerOpen,
-    inventory,
-    inventoryLoaded,
-    equippedRelic,
-    equipRelic,
-    unequipRelic,
-    fetchInventory
-  } = useRelicStore()
+  const drawerOpen = useRelicStore((s) => s.drawerOpen)
+  const setDrawerOpen = useRelicStore((s) => s.setDrawerOpen)
+  const inventory = useRelicStore((s) => s.inventory)
+  const inventoryLoaded = useRelicStore((s) => s.inventoryLoaded)
+  const equippedRelic = useRelicStore((s) => s.equippedRelic)
+  const equipRelic = useRelicStore((s) => s.equipRelic)
+  const unequipRelic = useRelicStore((s) => s.unequipRelic)
+  const fetchInventory = useRelicStore((s) => s.fetchInventory)
 
   useEffect(() => {
     if (drawerOpen) fetchInventory()

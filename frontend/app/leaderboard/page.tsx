@@ -35,11 +35,9 @@ function LeaderboardContent() {
   const [badgeMap, setBadgeMap] = useState<Record<string, BadgeData[]>>({})
   const [isLoading, setIsLoading] = useState(false)
 
-  const {
-    shortId: myShortId,
-    myBadges,
-    showLinkedinBadge: myStoreShowLinkedin
-  } = useUserStore()
+  const myShortId = useUserStore((s) => s.shortId)
+  const myBadges = useUserStore((s) => s.myBadges)
+  const myStoreShowLinkedin = useUserStore((s) => s.showLinkedinBadge)
 
   const updateUrl = useCallback(
     (params: Record<string, string>) => {

@@ -5,9 +5,14 @@ import { useUIStore } from '@/app/stores/uiStore'
 import { getOrCreateUser } from '@/lib/user'
 
 export default function IdleBetControls() {
-  const { isEligible, idleSide, setIdleSide, setHasInteractedWithIdle } =
-    useIdleStore()
-  const { setNotification } = useUIStore()
+  const isEligible = useIdleStore((s) => s.isEligible)
+  const idleSide = useIdleStore((s) => s.idleSide)
+  const setIdleSide = useIdleStore((s) => s.setIdleSide)
+  const setHasInteractedWithIdle = useIdleStore(
+    (s) => s.setHasInteractedWithIdle
+  )
+
+  const setNotification = useUIStore((s) => s.setNotification)
 
   const handleToggle = (side: 'left' | 'right') => {
     if (!isEligible) return

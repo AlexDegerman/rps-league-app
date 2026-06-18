@@ -3,6 +3,7 @@ import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest'
 import LeaderboardPage from '@/app/leaderboard/page'
 import * as api from '@/lib/api'
 import { useSearchParams } from 'next/navigation'
+import type { BadgeData } from '@/types/rps'
 
 const mockReplace = vi.fn()
 
@@ -17,12 +18,16 @@ vi.mock('@/lib/api', () => ({
   fetchAchievementsBulkBadges: vi.fn()
 }))
 
+const mockUserState = {
+  shortId: 'my-short-id',
+  myBadges: [] as BadgeData[],
+  showLinkedinBadge: false
+}
+
 vi.mock('../stores/userStore', () => ({
-  useUserStore: vi.fn(() => ({
-    shortId: 'my-short-id',
-    myBadges: [],
-    showLinkedinBadge: false
-  }))
+  useUserStore: vi.fn(<T,>(selector?: (state: typeof mockUserState) => T) =>
+    selector ? selector(mockUserState) : mockUserState
+  )
 }))
 
 const mockPredictors = [

@@ -8,7 +8,7 @@ A showcase of all Global Events, including their visual effects, backend synchro
 
 - **Synchronized State**: Every connected client receives the exact same event state, countdown progression, and modifier configurations from the backend.
 - **Three-Phase Lifecycle**:
-  - **Event Cooldown**: A randomized 10 to 30-minute quiet period after an event concludes before the next selection process starts.
+  - **Event Cooldown**: A randomized 7 to 12-minute quiet period after an event concludes before the next selection process starts.
   - **Warning Phase**: A 1.5 to 3-minute period alerting players of an incoming element. Warning banners render, the Oracle ticker announces the danger, and vocal alerts trigger at 60 and 30 seconds remaining.
   - **Active Phase**: A high-intensity 1 to 3-minute blitz window applying rule changes, elemental visual themes, and active interface tickers.
 - **Weighted Selection**: When a cooldown concludes, the backend selects the next event using a weighted random distribution:

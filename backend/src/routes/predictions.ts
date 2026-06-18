@@ -246,8 +246,28 @@ router.get('/stats/monthly', async (req, res, next) => {
 })
 
 // GET /api/stats/daily
+interface DailyStatsCache {
+  totalVolume: string
+  dailyPayout: string
+  totalBets: number
+  winRate: number
+  mvp: {
+    nickname: string
+    gain: string
+  } | null
+}
+
+let cachedDailyStats: DailyStatsCache | null = null
+let dailyStatsCacheExpiry = 0
+const CACHE_DURATION_MS = 15000
+
 router.get('/stats/daily', async (req, res) => {
   try {
+    const now = Date.now()
+    if (cachedDailyStats && now < dailyStatsCacheExpiry) {
+      return res.json(cachedDailyStats)
+    }
+
     const todayStart = new Date()
     todayStart.setUTCHours(0, 0, 0, 0)
     const todayStartMs = todayStart.getTime()
@@ -279,7 +299,7 @@ router.get('/stats/daily', async (req, res) => {
     const total = Number(row.total_bets)
     const wins = Number(row.wins)
 
-    res.json({
+    const statsResult: DailyStatsCache = {
       totalVolume: row.total_volume.toString(),
       dailyPayout: row.daily_payout.toString(),
       totalBets: total,
@@ -290,7 +310,12 @@ router.get('/stats/daily', async (req, res) => {
             gain: mvpRes.rows[0].total_gain.toString()
           }
         : null
-    })
+    }
+
+    cachedDailyStats = statsResult
+    dailyStatsCacheExpiry = now + CACHE_DURATION_MS
+
+    res.json(statsResult)
   } catch (err) {
     logger.error('GET /stats/daily failed', err)
     res.status(500).json({ error: 'Failed to fetch daily stats' })
