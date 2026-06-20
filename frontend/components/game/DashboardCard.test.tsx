@@ -157,7 +157,7 @@ describe('DashboardCard', () => {
     setupMocks({ autoAllIn: true, setAutoAllIn })
     render(<DashboardCard />)
 
-    fireEvent.click(screen.getByText(/AUTO ON/i))
+    fireEvent.click(screen.getByText(/AUTO\s*MAX\s*ON/i))
     expect(setAutoAllIn).toHaveBeenCalledWith(false)
   })
 
@@ -176,12 +176,12 @@ describe('DashboardCard', () => {
     expect(setBetAmount).toHaveBeenCalledWith(100000n)
   })
 
-  it('sets bet to max points when ALL IN is clicked', async () => {
+  it('sets bet to max points when MAX is clicked', async () => {
     const setBetAmount = vi.fn()
     setupMocks({ autoAllIn: false, points: 500000n, setBetAmount })
     render(<DashboardCard />)
 
-    fireEvent.click(screen.getByText(/ALL IN/i))
+    fireEvent.click(screen.getByText(/^MAX$/i))
     expect(setBetAmount).toHaveBeenCalledWith(500000n)
   })
 })
