@@ -149,7 +149,7 @@ export default function PredictionTicker() {
 
     const tick = () => {
       if (pendingRef.current.length === 0 || !visible || document.hidden) {
-        activeTimer = setTimeout(tick, 200)
+        activeTimer = setTimeout(tick, 500)
         return
       }
 
@@ -196,7 +196,7 @@ export default function PredictionTicker() {
       }, eventDuration + 500)
       currentTimeouts.add(removalId)
 
-      activeTimer = setTimeout(tick, 300)
+      activeTimer = setTimeout(tick, 400)
     }
 
     tick()

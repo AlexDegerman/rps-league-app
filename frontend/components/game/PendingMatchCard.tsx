@@ -39,7 +39,7 @@ function PendingMatchCardComponent({
       const remaining = calculateTimeLeft()
       setTimeLeft(remaining)
       if (remaining <= 0) clearInterval(id)
-    }, 200)
+    }, 500)
     return () => clearInterval(id)
   }, [calculateTimeLeft])
 

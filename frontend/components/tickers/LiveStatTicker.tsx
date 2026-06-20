@@ -46,7 +46,7 @@ export default function LiveStatsTicker() {
     }
 
     load()
-    const interval = setInterval(load, 15000)
+    const interval = setInterval(load, 30000)
     return () => clearInterval(interval)
   }, [])
 

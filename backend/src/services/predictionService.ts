@@ -73,7 +73,8 @@ export const savePrediction = async (
     )
     if (matchRes.rows.length === 0)
       return { success: false, error: 'Invalid match' }
-    if (Date.now() > Number(matchRes.rows[0].expires_at))
+    const GRACE_MS = 400
+    if (Date.now() > Number(matchRes.rows[0].expires_at) + GRACE_MS)
       return { success: false, error: 'Selection window closed' }
 
     const oracleUsed = await hasUserUsedOracle(userId)

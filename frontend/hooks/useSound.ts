@@ -39,11 +39,15 @@ if (typeof window !== 'undefined') {
   if (savedVolume !== null)
     currentVolume = parseFloat(savedVolume) || DEFAULT_VOLUME
   if (savedSound === 'false') currentSoundOn = false
-  ;(Object.keys(SOUND_MAP) as SoundKey[]).forEach((key) => {
+}
+
+function getAudio(key: SoundKey): HTMLAudioElement {
+  if (!audioInstances[key]) {
     const audio = new Audio(SOUND_MAP[key])
     audio.volume = currentVolume
     audioInstances[key] = audio
-  })
+  }
+  return audioInstances[key]!
 }
 
 function applyVolumeToAll(volume: number) {
@@ -109,7 +113,7 @@ export const useSound = () => {
   const stopAll = () => stopAllExcept([])
 
   const play = (key: SoundKey, onEnd?: () => void, volumeOverride?: number) => {
-    const instance = audioInstances[key]
+    const instance = getAudio(key)
     if (!soundOnRef.current || !instance) {
       if (onEnd) onEnd()
       return
@@ -142,7 +146,7 @@ export const useSound = () => {
     const playNext = (remaining: SoundKey[]) => {
       if (!remaining.length) return
       const [cur, ...tail] = remaining
-      const instance = audioInstances[cur]
+      const instance = getAudio(cur)
       if (!instance) {
         playNext(tail)
         return
@@ -157,7 +161,7 @@ export const useSound = () => {
       }
       instance.play().catch(() => playNext(tail))
     }
-    const firstInstance = audioInstances[first]
+    const firstInstance = getAudio(first)
     if (!firstInstance) {
       playNext(rest)
       return

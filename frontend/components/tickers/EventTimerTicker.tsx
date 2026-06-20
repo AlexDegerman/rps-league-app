@@ -126,7 +126,7 @@ export default function EventTimerTicker() {
     }
 
     tick()
-    intervalRef.current = setInterval(tick, 500)
+    intervalRef.current = setInterval(tick, 1000)
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
