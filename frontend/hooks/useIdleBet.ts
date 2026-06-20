@@ -65,8 +65,6 @@ export function useIdleBet() {
       totalMultiplier: 1
     })
 
-    console.log(`[IdleBet] 🚀 Auto-betting ${idleSide} for RoyalSilverFalcon`)
-
     postPrediction({
       userId: user.userId,
       gameId: target.gameId,

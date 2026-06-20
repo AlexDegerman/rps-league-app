@@ -303,6 +303,27 @@ export interface FestivalSSEData {
   speech?: string
 }
 
+export interface PredictionResultSSEData {
+  userId: string
+  gameId: string
+  result: 'WIN' | 'LOSE'
+  amount: string
+  nickname?: string
+  streakAfter?: number
+  streakMult?: number
+  bonus?: { tier: BonusTier; amount: string; multiplier?: number } | null
+  flashMult?: number
+  flashEventType?: string | null
+  relicDrop?: unknown
+  relicCounter?: number
+  soulProc?: boolean
+  kineticFired?: boolean
+  preSoulAmount?: string
+  ghostEchoAmount?: string
+  globalEventType?: GlobalEventType | null
+  globalEchoAmount?: string | null
+}
+
 export interface AchievementNotif {
   code: string
   name: string

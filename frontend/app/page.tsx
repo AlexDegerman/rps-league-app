@@ -618,6 +618,9 @@ export default function HomePage() {
     es.addEventListener('prediction_result', (event) => {
       const data = JSON.parse(event.data)
       const { userId } = getOrCreateUser()
+
+      useGameStore.getState().setLatestPredictionResult(data)
+
       if (data.userId !== userId) return
       updatePacketTimestamp()
 

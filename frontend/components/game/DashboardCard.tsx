@@ -408,7 +408,7 @@ export default function DashboardCard() {
           <ModeButton
             visualMode={visualMode}
             festivalModeKey={festivalModeKey}
-            label="ALL IN"
+            label="MAX"
             onClick={() => {
               setBetAmount(points)
               useUIStore.getState().setInputString(points.toString())
@@ -417,7 +417,7 @@ export default function DashboardCard() {
           <ModeButton
             visualMode={visualMode}
             festivalModeKey={festivalModeKey}
-            label={`AUTO\u00A0${autoAllIn ? 'ON' : 'OFF'}`}
+            label={`AUTO\u00A0MAX\u00A0${autoAllIn ? 'ON' : 'OFF'}`}
             onClick={() => setAutoAllIn(!autoAllIn)}
           />
         </div>

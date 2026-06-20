@@ -8,8 +8,6 @@ import { useGameStore } from '@/app/stores/gameStore'
 import { EVENT_TICKER_CONFIG } from '@/lib/eventConfig'
 import GemIcon from '../icons/GemIcon'
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-
 export interface TickerEvent {
   id: string
   message: string
@@ -55,7 +53,7 @@ export default function PredictionTicker() {
   const festivalModeKey = useGameStore((s) => s.festivalModeKey)
   const visualMode = useGameStore((s) => s.visualMode)
   const rawKey = liveTheme ?? festivalModeKey ?? null
-
+  const latestPredictionResult = useGameStore((s) => s.latestPredictionResult)
   const tcfg =
     rawKey && rawKey in EVENT_TICKER_CONFIG
       ? EVENT_TICKER_CONFIG[rawKey as keyof typeof EVENT_TICKER_CONFIG]
@@ -64,35 +62,29 @@ export default function PredictionTicker() {
   const modeKey = visualMode || festivalModeKey || null
 
   useEffect(() => {
-    const es = new EventSource(`${API_BASE}/api/live`)
+    if (!latestPredictionResult) return
+    if (document.hidden) return
 
-    es.addEventListener('prediction_result', (event) => {
-      if (document.hidden) return
+    const data = latestPredictionResult
+    const isMe = data.userId === getUserId()
+    const amount = BigInt(data.amount)
+    if (isMe && data.result === 'LOSE' && amount === 50000n) return
 
-      const data = JSON.parse(event.data)
-      const isMe = data.userId === getUserId()
-      const amount = BigInt(data.amount)
+    const name = data.nickname ?? 'Someone'
+    const displayName = isMe ? 'You' : name
+    const verb = data.result === 'WIN' ? 'won' : 'lost'
+    const formattedAmt = formatTickerPoints(amount)
+    const rawMsg = `${displayName} ${verb} ${formattedAmt} points`
 
-      if (isMe && data.result === 'LOSE' && amount === 50000n) return
-
-      const name = data.nickname ?? 'Someone'
-      const displayName = isMe ? 'You' : name
-      const verb = data.result === 'WIN' ? 'won' : 'lost'
-      const formattedAmt = formatTickerPoints(amount)
-      const rawMsg = `${displayName} ${verb} ${formattedAmt} points`
-
-      pendingRef.current.unshift({
-        id: crypto.randomUUID(),
-        message: rawMsg,
-        isReal: true,
-        timestamp: Date.now(),
-        amount,
-        parsedMessage: parseMessageWithGem(rawMsg)
-      })
+    pendingRef.current.unshift({
+      id: crypto.randomUUID(),
+      message: rawMsg,
+      isReal: true,
+      timestamp: Date.now(),
+      amount,
+      parsedMessage: parseMessageWithGem(rawMsg)
     })
-
-    return () => es.close()
-  }, [])
+  }, [latestPredictionResult])
 
   useEffect(() => {
     const updateVelocity = () => {

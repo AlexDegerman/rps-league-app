@@ -57,14 +57,14 @@ export default function IdleBetControls() {
         className={`${baseBtn} ${getStyle('left')} tooltip-left`}
       >
         <span className="text-[10px]">⚡</span>
-        <span className="hidden sm:inline">AUTO-BET</span>
+        <span className="hidden sm:inline">AUTO-PICK</span>
         <span>LEFT</span>
         {!isEligible && <span className="text-[8px]">🔒</span>}
       </button>
 
       <div className="flex sm:hidden flex-col items-center justify-center pointer-events-none">
         <span className="text-[7px] font-black text-gray-400 uppercase tracking-[0.2em] leading-none">
-          Auto-Bet
+          Auto-Pick
         </span>
         {idleSide && (
           <span className="text-[6px] font-bold text-indigo-500 animate-pulse mt-0.5">
@@ -81,7 +81,7 @@ export default function IdleBetControls() {
         className={`${baseBtn} ${getStyle('right')} tooltip-right`}
       >
         {!isEligible && <span className="text-[8px]">🔒</span>}
-        <span className="hidden sm:inline">AUTO-BET</span>
+        <span className="hidden sm:inline">AUTO-PICK</span>
         <span>RIGHT</span>
         <span className="text-[10px]">⚡</span>
       </button>

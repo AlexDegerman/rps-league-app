@@ -8,7 +8,8 @@ import type {
   EventTheme,
   AchievementNotif,
   GlobalEventType,
-  GlobalEventPhase
+  GlobalEventPhase,
+  PredictionResultSSEData
 } from '@/types/rps'
 
 interface GameState {
@@ -33,6 +34,8 @@ interface GameState {
   deletePrediction: (gameId: string) => void
   oracleSide: 'left' | 'right' | null
   setOracleSide: (side: 'left' | 'right' | null) => void
+  latestPredictionResult: PredictionResultSSEData | null
+  setLatestPredictionResult: (data: PredictionResultSSEData | null) => void
 
   // Festival State
   activeFestival: boolean
@@ -120,6 +123,7 @@ export const useGameStore = create<GameState>((set) => ({
   globalEventPhase: null,
   globalEventActiveAt: null,
   globalEventEndsAt: null,
+  latestPredictionResult: null,
 
   // Actions - Connection
   setBackendReady: (v) => set({ backendReady: v }),
@@ -165,6 +169,7 @@ export const useGameStore = create<GameState>((set) => ({
       return { predictions: next }
     }),
   setOracleSide: (side) => set({ oracleSide: side }),
+  setLatestPredictionResult: (data) => set({ latestPredictionResult: data }),
 
   // Actions - Event & Visuals
   setActiveFlashEvent: (type) =>
