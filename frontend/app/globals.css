@@ -218,11 +218,11 @@
   z-index: -1;
   color: #db2777;
   filter: drop-shadow(0 0 8px rgba(219, 39, 119, 0.8)) brightness(1.1);
-  animation: qa-pulse 2.5s ease-in-out infinite;
+  animation: qa-opacity-pulse 2.5s ease-in-out infinite;
   will-change: opacity;
 }
 
-@keyframes qa-pulse {
+@keyframes qa-opacity-pulse{
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
@@ -342,11 +342,11 @@
   background-clip: text;
   font-weight: 900;
   filter: drop-shadow(0 -2px 14px rgba(251, 146, 60, 0.95)) drop-shadow(0 2px 7px rgba(251, 146, 60, 0.6)) brightness(1.15);
-  animation: qi-shimmer 2s linear infinite, oc-flicker 2.5s ease-in-out infinite;
+  animation: qi-shimmer 2s linear infinite, oc-opacity-flicker 2.5s ease-in-out infinite;
   will-change: opacity;
 }
 
-@keyframes oc-flicker {
+@keyframes oc-opacity-flicker{
   0%, 100% { opacity: 0.2; }
   33% { opacity: 1; }
   66% { opacity: 0.1; }
@@ -2703,7 +2703,20 @@
 .lunar-ring    { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.7)); }
 .electric-ring { animation: dc-electric 2s ease-in-out infinite; }
 .cards-ring    { animation: qi-shimmer 3s linear infinite; }
-.hellfire-ring { animation: oc-flicker 2.5s ease-in-out infinite; }
+@keyframes hellfire-ring-pulse {
+  0%, 100% {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+  }
+  50% {
+    border-color: rgba(239, 68, 68, 1);
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.55);
+  }
+}
+
+.hellfire-ring {
+  animation: hellfire-ring-pulse 2.5s ease-in-out infinite;
+}
 
 /* --- SECTION E: FESTIVAL CARD RINGS --- */
 

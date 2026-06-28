@@ -64,7 +64,7 @@ export default function GlobalTickerWrapper() {
 
   return (
     <>
-      <EventEffectTicker />
+      {!oracleTickerMessage && <EventEffectTicker />}
       {oracleTickerMessage && (
         <OracleMessageTicker
           message={oracleTickerMessage}

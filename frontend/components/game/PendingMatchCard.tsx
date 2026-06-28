@@ -295,13 +295,16 @@ function PendingMatchCardComponent({
 
   return (
     <div
-      className={`relative rounded-xl shadow-sm border-2 p-2 sm:p-4 mb-3 animate-in fade-in zoom-in duration-300 overflow-hidden
-        ${cfg.border} ${cfg.card} ${cfg.cardAnim}`}
+      className={`relative z-0 rounded-xl shadow-sm border-2 p-2 sm:p-4 mb-3 animate-in fade-in zoom-in duration-300 overflow-hidden
+        ${cfg.border} ${cfg.cardAnim}`}
     >
+      <div className="absolute inset-0 bg-white -z-20" />
+      <div className={`absolute inset-0 -z-10 ${cfg.card}`} />
+
       {/* Ambient glow layer */}
       {isActive && cfg.glowColor && (
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none -z-10"
           style={{
             background: `radial-gradient(ellipse at top, ${cfg.glowColor} 0%, transparent 70%)`
           }}
