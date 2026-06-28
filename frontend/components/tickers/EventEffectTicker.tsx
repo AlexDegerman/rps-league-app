@@ -57,24 +57,13 @@ function EffectRow({ text, color, durationS = 14 }: EffectRowProps) {
 }
 
 export default function EventEffectTicker() {
-  const now = useGameStore((s) => s.now)
-  const serverOffset = useGameStore((s) => s.serverOffset)
   const activeFestival = useGameStore((s) => s.activeFestival)
   const festivalType = useGameStore((s) => s.festivalType)
-  const festivalEndsAt = useGameStore((s) => s.festivalEndsAt)
   const activeGlobalEvent = useGameStore((s) => s.activeGlobalEvent)
   const globalEventPhase = useGameStore((s) => s.globalEventPhase)
-  const globalEventEndsAt = useGameStore((s) => s.globalEventEndsAt)
 
-  const syncedNow = now + serverOffset
-  const festivalExpired = festivalEndsAt ? syncedNow >= festivalEndsAt : false
-  const globalExpired = globalEventEndsAt
-    ? syncedNow >= globalEventEndsAt
-    : false
-
-  const showFestival = activeFestival && festivalType && !festivalExpired
-  const showGlobal =
-    activeGlobalEvent && globalEventPhase === 'active' && !globalExpired
+  const showFestival = activeFestival && festivalType
+  const showGlobal = activeGlobalEvent && globalEventPhase === 'active'
 
   if (!showFestival && !showGlobal) return null
 

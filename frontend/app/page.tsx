@@ -8,7 +8,6 @@ import {
   fetchUnifiedLeaderboard,
   ascendUser,
   fetchOracleState,
-  fetchGlobalFlashState,
   fetchIdleEligibility,
   fetchUserFlashState,
   fetchFestivalState,
@@ -382,14 +381,6 @@ export default function HomePage() {
     }
   }, [setNotification, setShowUpdateModal, setShowWelcomeModal])
 
-  // auto all-in sync
-  useEffect(() => {
-    if (isHydrated && autoAllIn) {
-      setBetAmount(points)
-      if (!isFocused) setInputString(points.toString())
-    }
-  }, [autoAllIn, points, isHydrated, isFocused, setBetAmount, setInputString])
-
   useEffect(() => {
     if (isHydrated && !autoAllIn) {
       const floor = 100000n
@@ -430,19 +421,6 @@ export default function HomePage() {
       })
 
     useRelicStore.getState().initRelics()
-
-    fetchGlobalFlashState()
-      .then((data) => {
-        if (data?.type) {
-          setActiveFlashEvent(data.type)
-          setFlashBuffRemaining(data.betsRemaining)
-        }
-      })
-      .catch((err) => {
-        logger.warn('Failed to fetch flash state (global)', {
-          error: String(err)
-        })
-      })
 
     fetchOracleState(user.userId)
       .then((data) => {
@@ -526,9 +504,14 @@ export default function HomePage() {
     fetchGlobalEventState()
       .then((data) => {
         if (data?.event) {
-          const { type, phase, activeAt, endsAt } = data.event
+          const { type, phase, activeAt, endsAt, startedAt } = data.event
           if (phase === 'warning') {
-            setGlobalEventWarning(type, activeAt, endsAt)
+            setGlobalEventWarning(
+              type,
+              activeAt,
+              endsAt,
+              startedAt ?? Date.now()
+            )
           } else if (phase === 'active') {
             setGlobalEventActive(type, endsAt)
           }
@@ -824,9 +807,15 @@ export default function HomePage() {
 
     es.addEventListener('global_event_warning', (event) => {
       const data: GlobalEventWarningSSEData = JSON.parse(event.data)
-      if (Date.now() + serverOffset > data.endsAt) return
+      if (Date.now() + useGameStore.getState().serverOffset > data.endsAt)
+        return
 
-      setGlobalEventWarning(data.type, data.activeAt, data.endsAt)
+      setGlobalEventWarning(
+        data.type,
+        data.activeAt,
+        data.endsAt,
+        data.startedAt
+      )
 
       // Oracle-style warning announcement
       const modeKey = GLOBAL_EVENT_MODE_MAP[data.type as GlobalEventType]

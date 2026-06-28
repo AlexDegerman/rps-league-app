@@ -351,10 +351,8 @@ export const resolvePrediction = async (
           )
         }
 
-        let cycloneStreakBonus = 0
-
         let streakAfter = isWin
-          ? Number(row.current_win_streak) + 1 + cycloneStreakBonus
+          ? Number(row.current_win_streak) + 1
           : feverActive || streakShielded
             ? Number(row.current_win_streak)
             : 0
@@ -511,8 +509,7 @@ export const resolvePrediction = async (
 
           // Cyclone Blitz streak increment
           if (activeGlobalEventType === 'CYCLONE_BLITZ') {
-            cycloneStreakBonus = 1
-            streakAfter += cycloneStreakBonus
+            streakAfter += 1
           }
 
           // Final points floor fallback

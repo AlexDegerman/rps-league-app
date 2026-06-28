@@ -18,6 +18,7 @@ export const useInfiniteScroll = ({
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const pageRef = useRef(1)
+  const generationRef = useRef(0)
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const stateRef = useRef({ isLoading, isLoadingMore, hasMore, enabled })
 
@@ -27,11 +28,14 @@ export const useInfiniteScroll = ({
 
   const loadMatches = useCallback(
     async (targetPage: number) => {
+      const generation = generationRef.current
       if (targetPage === 1) setIsLoading(true)
       else setIsLoadingMore(true)
 
       try {
         const data = await fetchFn(targetPage)
+        if (generationRef.current !== generation) return
+
         if (!data) {
           setHasMore(false)
           return
@@ -48,10 +52,14 @@ export const useInfiniteScroll = ({
 
         setHasMore(data.hasMore ?? false)
       } catch (err) {
-        logger.warn('Failed to load matches', { error: String(err) })
+        if (generationRef.current === generation) {
+          logger.warn('Failed to load matches', { error: String(err) })
+        }
       } finally {
-        setIsLoading(false)
-        setIsLoadingMore(false)
+        if (generationRef.current === generation) {
+          setIsLoading(false)
+          setIsLoadingMore(false)
+        }
       }
     },
     [fetchFn]
@@ -70,6 +78,7 @@ export const useInfiniteScroll = ({
   }, [loadMatches])
 
   const reset = useCallback(() => {
+    generationRef.current++
     pageRef.current = 1
     setMatches([])
     setHasMore(true)

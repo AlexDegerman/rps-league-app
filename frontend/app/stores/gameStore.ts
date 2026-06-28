@@ -51,10 +51,12 @@ interface GameState {
   globalEventPhase: GlobalEventPhase | null
   globalEventActiveAt: number | null // warning → active transition timestamp
   globalEventEndsAt: number | null
+  globalEventStartedAt: number | null
   setGlobalEventWarning: (
     type: GlobalEventType,
     activeAt: number,
-    endsAt: number
+    endsAt: number,
+    startedAt: number
   ) => void
   setGlobalEventActive: (type: GlobalEventType, endsAt: number) => void
   clearGlobalEvent: () => void
@@ -123,6 +125,7 @@ export const useGameStore = create<GameState>((set) => ({
   globalEventPhase: null,
   globalEventActiveAt: null,
   globalEventEndsAt: null,
+  globalEventStartedAt: null,
   latestPredictionResult: null,
 
   // Actions - Connection
@@ -221,12 +224,13 @@ export const useGameStore = create<GameState>((set) => ({
     }),
 
   // Actions - Global Event
-  setGlobalEventWarning: (type, activeAt, endsAt) =>
+  setGlobalEventWarning: (type, activeAt, endsAt, startedAt) =>
     set({
       activeGlobalEvent: type,
       globalEventPhase: 'warning',
       globalEventActiveAt: activeAt,
-      globalEventEndsAt: endsAt
+      globalEventEndsAt: endsAt,
+      globalEventStartedAt: startedAt
     }),
 
   setGlobalEventActive: (type, endsAt) =>
@@ -242,7 +246,8 @@ export const useGameStore = create<GameState>((set) => ({
       activeGlobalEvent: null,
       globalEventPhase: null,
       globalEventActiveAt: null,
-      globalEventEndsAt: null
+      globalEventEndsAt: null,
+      globalEventStartedAt: null
     }),
 
   // Actions - Server Time
@@ -291,7 +296,8 @@ export const useGameStore = create<GameState>((set) => ({
                 activeGlobalEvent: null,
                 globalEventPhase: null,
                 globalEventActiveAt: null,
-                globalEventEndsAt: null
+                globalEventEndsAt: null,
+                globalEventStartedAt: null
               }
             : {})
         }

@@ -61,6 +61,7 @@ export default function EventTimerTicker() {
   const globalEventActiveAt = useGameStore((s) => s.globalEventActiveAt)
   const globalEventEndsAt = useGameStore((s) => s.globalEventEndsAt)
   const clearGlobalEvent = useGameStore((s) => s.clearGlobalEvent)
+  const globalEventStartedAt = useGameStore((s) => s.globalEventStartedAt)
 
   const [entries, setEntries] = useState<TimerEntry[]>([])
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -106,9 +107,7 @@ export default function EventTimerTicker() {
             color: config?.color ?? '#94a3b8',
             timeLeft: left,
             totalDuration: isWarning
-              ? globalEventActiveAt! -
-                (globalEventEndsAt! -
-                  GLOBAL_DURATIONS[activeGlobalEvent as GlobalEventType])
+              ? (globalEventActiveAt ?? 0) - (globalEventStartedAt ?? 0)
               : GLOBAL_DURATIONS[activeGlobalEvent as GlobalEventType],
             isWarning
           })
@@ -138,6 +137,7 @@ export default function EventTimerTicker() {
     globalEventPhase,
     globalEventActiveAt,
     globalEventEndsAt,
+    globalEventStartedAt,
     clearFestival,
     clearGlobalEvent
   ])

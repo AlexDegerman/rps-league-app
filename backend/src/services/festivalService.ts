@@ -175,7 +175,7 @@ const launchFestival = (
   broadcast: Broadcast,
   meta: LaunchMeta = {}
 ): boolean => {
-  if (!_festivalsEnabled) return false 
+  if (!_festivalsEnabled) return false
   if (isFestivalLocked()) return false
 
   const isDemo = meta.isDemo ?? false
@@ -189,69 +189,91 @@ const launchFestival = (
     triggeredBy
   }
 
-  if (type === 'SPARK') {
-    const randomFlash = getRandomFlashType()
-    refillAllFlashEvents(randomFlash.type)
-    newState.flashType = randomFlash.type
-
-    setTimeout(() => {
-      clearAllFlashEvents()
-    }, durationMs)
-
-    if (meta.streakTrigger && meta.triggerUserId) {
-      _userGuaranteedBonus.set(meta.triggerUserId, 3)
-      logger.info('Spark streak bonus granted', { userId: meta.triggerUserId })
-    }
-  }
-
   _activeFestival = newState
 
   if (!isDemo) {
     _lastPlayerFestivalAt = now
   }
 
-  logger.info('Festival launched', { type, triggeredBy, isDemo })
-
-  const message = buildFestivalBroadcastMessage(
-    triggeredBy,
-    type,
-    isDemo,
-    meta.lapCount
-  )
-
-  broadcast(
-    'festival_event',
-    JSON.stringify({
-      type,
-      triggeredBy,
-      triggerUserId: meta.triggerUserId ?? null,
-      message,
-      speech: buildFestivalSpeech(triggeredBy, type, isDemo, meta.lapCount),
-      isDemo,
-      startedAt: newState.startedAt,
-      endsAt: newState.endsAt,
-      durationMs,
-      flashType: newState.flashType
-    })
-  )
-
   if (type === 'SPARK') {
     _lockoutUntil = newState.endsAt + LOCKOUT_MS
   }
 
-  // Increment festivals_triggered for real player-triggered festivals only
-  if (!isDemo && meta.triggerUserId) {
-    pool
-      .query(
-        `UPDATE users SET festivals_triggered = festivals_triggered + 1 WHERE user_id = $1`,
-        [meta.triggerUserId]
-      )
-      .catch((err) =>
-        logger.error('festivals_triggered increment failed', err, {
-          userId: meta.triggerUserId,
-          type
-        })
-      )
+  const executeBroadcastAndDatabaseUpdates = () => {
+    logger.info('Festival launched', { type, triggeredBy, isDemo })
+
+    const message = buildFestivalBroadcastMessage(
+      triggeredBy,
+      type,
+      isDemo,
+      meta.lapCount
+    )
+
+    broadcast(
+      'festival_event',
+      JSON.stringify({
+        type,
+        triggeredBy,
+        triggerUserId: meta.triggerUserId ?? null,
+        message,
+        speech: buildFestivalSpeech(triggeredBy, type, isDemo, meta.lapCount),
+        isDemo,
+        startedAt: newState.startedAt,
+        endsAt: newState.endsAt,
+        durationMs,
+        flashType: newState.flashType
+      })
+    )
+
+    // Increment festivals_triggered for real player-triggered festivals only
+    if (!isDemo && meta.triggerUserId) {
+      pool
+        .query(
+          `UPDATE users SET festivals_triggered = festivals_triggered + 1 WHERE user_id = $1`,
+          [meta.triggerUserId]
+        )
+        .catch((err) =>
+          logger.error('festivals_triggered increment failed', err, {
+            userId: meta.triggerUserId,
+            type
+          })
+        )
+    }
+  }
+
+  if (type === 'SPARK') {
+    const randomFlash = getRandomFlashType()
+    newState.flashType = randomFlash.type
+
+    if (meta.streakTrigger && meta.triggerUserId) {
+      _userGuaranteedBonus.set(meta.triggerUserId, 3)
+      logger.info('Spark streak bonus granted', { userId: meta.triggerUserId })
+    }
+
+    refillAllFlashEvents(randomFlash.type)
+      .then(() => {
+        const actualStart = Date.now()
+        newState.startedAt = actualStart
+        newState.endsAt = actualStart + durationMs
+        _lockoutUntil = newState.endsAt + LOCKOUT_MS
+
+        setTimeout(() => {
+          clearAllFlashEvents()
+        }, durationMs)
+
+        executeBroadcastAndDatabaseUpdates()
+      })
+      .catch((err) => {
+        logger.error('SPARK flash refill failed, broadcasting fallback', err)
+
+        setTimeout(() => {
+          clearAllFlashEvents()
+        }, durationMs)
+
+        executeBroadcastAndDatabaseUpdates()
+      })
+  } else {
+    executeBroadcastAndDatabaseUpdates()
   }
 
   return true

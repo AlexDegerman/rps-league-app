@@ -305,7 +305,8 @@ export const applyGlobalEventBuff = (
       return {
         gainLossMultiplied: gainLoss + echo,
         echoAmount: echo,
-        buffType: 'MIRAGE_CATACLYSM'
+        buffType: 'MIRAGE_CATACLYSM',
+        echoFactor: factor
       }
     }
 

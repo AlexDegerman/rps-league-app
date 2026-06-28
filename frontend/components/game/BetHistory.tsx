@@ -22,8 +22,6 @@ const TAB_LABELS: Record<Tab, string> = {
   multipliers: 'Best Multipliers'
 }
 
-// --- GLOBAL EVENT CONFIG (inline, mirrors what lives in lib/globalEvents) ---
-
 const GLOBAL_EVENT_CARD: Record<
   string,
   {
