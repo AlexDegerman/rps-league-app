@@ -4,6 +4,7 @@ import { getLatestMatches } from '../services/matchService.js'
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
+import { maskIpForLogs } from '../utils/maskIp.js'
 
 const router = Router()
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
@@ -17,16 +18,13 @@ const CACHE_TTL = 1000 * 60 * 5 // 5 minutes
 
 /**
  * DISCORD AUDIT HELPERS
- * Masks the user IP for privacy and sends the consultation to your Discord channel.
+ * Sends the consultation audit log to your Discord channel with safe IP masking.
  */
-const maskIp = (ip: string): string => {
-  if (!ip || ip === 'unknown' || ip === 'anonymous') return 'anonymous'
-  const parts = ip.split('.')
-  // Returns 192.168.x.x style for privacy
-  return parts.length >= 2 ? `${parts[0]}.${parts[1]}.x.x` : ip
-}
-
-const logToDiscord = async (query: string, ip: string, response: string) => {
+const logToDiscord = async (
+  query: string,
+  ip: string | undefined,
+  response: string
+) => {
   const webhookUrl = process.env.DISCORD_LOG_WEBHOOK
   if (!webhookUrl || process.env.NODE_ENV !== 'production') return
 
@@ -46,7 +44,7 @@ const logToDiscord = async (query: string, ip: string, response: string) => {
               },
               {
                 name: '👤 Masked IP',
-                value: `\`${maskIp(ip)}\``,
+                value: `\`${maskIpForLogs(ip)}\``,
                 inline: true
               },
               {

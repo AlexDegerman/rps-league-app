@@ -121,6 +121,8 @@ Real players (predictors) with persistent accounts and progression.
 | `had_eye_of_storm` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Eye of the Storm |
 | `had_prismatic_wave` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Prismatic Wave |
 | `had_thermal_fusion` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Thermal Fusion |
+| `signup_town` | TEXT | Coarse city/town resolved from IP during initial account creation |
+| `signup_country` | TEXT | Country code resolved from IP during initial account creation |
 
 ---
 

@@ -1,6 +1,7 @@
 import pool from '../utils/db.js'
 import { wordList } from '../utils/wordList.js'
 import { logger } from '../utils/logger.js'
+import { getCoarseLocation } from '../utils/geo.js'
 
 const STARTING_POINTS = 200000n
 
@@ -9,7 +10,8 @@ const STARTING_POINTS = 200000n
 export const getOrCreateUser = async (
   userId: string,
   shortId: string,
-  nickname?: string
+  nickname?: string,
+  ip?: string
 ): Promise<{ points: bigint; nickname: string | null }> => {
   try {
     const existing = await pool.query(
@@ -44,19 +46,30 @@ export const getOrCreateUser = async (
       }
     }
 
+    const { town: signupTown, country: signupCountry } = getCoarseLocation(ip)
     const recoveryCode = generateRecoveryCode()
+
     await pool.query(
       `INSERT INTO users (
-          user_id, short_id, nickname, points, peak_points, recovery_code
+          user_id, 
+          short_id, 
+          nickname, 
+          points, 
+          peak_points, 
+          recovery_code,
+          signup_town,
+          signup_country
         )
-        VALUES ($1, $2, $3, $4, $4, $5)
+        VALUES ($1, $2, $3, $4, $4, $5, $6, $7)
         ON CONFLICT (user_id) DO NOTHING`,
       [
         userId,
         shortId,
         nickname ?? null,
         STARTING_POINTS.toString(),
-        recoveryCode
+        recoveryCode,
+        signupTown,
+        signupCountry
       ]
     )
 
@@ -65,7 +78,12 @@ export const getOrCreateUser = async (
       [userId]
     )
 
-    logger.info('New user created', { userId, shortId })
+    logger.info('New user created', {
+      userId,
+      shortId,
+      signupTown,
+      signupCountry
+    })
 
     return {
       points: BigInt(result.rows[0].points),
@@ -80,9 +98,10 @@ export const getOrCreateUser = async (
 export const getUserPoints = async (
   userId: string,
   shortId: string,
-  nickname?: string
+  nickname?: string,
+  ip?: string
 ): Promise<{ points: bigint; nickname: string | null }> => {
-  return getOrCreateUser(userId, shortId, nickname)
+  return getOrCreateUser(userId, shortId, nickname, ip)
 }
 
 export const generateRecoveryCode = (): string => {

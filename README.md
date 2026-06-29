@@ -67,7 +67,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - [🔌 API Reference](#-api-reference)
 - [📱 Device Compatibility](#-device-compatibility)
 - [⚠️ Disclaimer](#️-disclaimer)
-- [🔮 Oracle Privacy & Monitoring](#-oracle-privacy--monitoring)
+- [🔒 Privacy, Telemetry & Audit Logs](#-privacy-telemetry--audit-logs)
 - [📜 License](#-license)
 
 ---
@@ -667,11 +667,13 @@ No real-money gambling, cash payouts, or withdrawable rewards are supported.
 
 ---
 
-## 🔮 Oracle Privacy & Monitoring
-To maintain system stability and fine-tune AI behavior, anonymized queries are logged to a private administrative audit channel.
-- **Privacy**: IP addresses are masked (e.g., `192.168.x.x`). 
-- **Security**: No authentication tokens, passwords, or personally identifiable information are logged or stored
-- **Observability**: Enables real-time monitoring of model behavior, including hallucinations and edge-case detection during live matches
+## 🔒 Privacy, Telemetry & Audit Logs
+To protect user privacy while maintaining system stability, verifying developer telemetry, and monitoring AI behavior, the application implements the following privacy-by-design standards:
+- **Coarse Geolocation**: During initial account creation, the system resolves the approximate city and country of the predictor (e.g., `Helsinki, FI`) to help analyze regional engagement [1.1.1].
+- **IP Anonymization**: IP addresses are immediately anonymized at the application boundary prior to processing (e.g., zeroing out the host octet to truncate `203.0.113.195` to `203.0.113.0`) [1.1.6]. Geolocation lookups are performed entirely locally and offline using an in-memory database (`geoip-lite`), ensuring raw IP addresses are never stored or transmitted to external APIs [1.1.1, 1.1.3].
+- **Audit Logs**: For public administrative monitoring and Discord audit webhooks, IP addresses are cleanly masked to display subnets only (e.g., `84.250.x.x`).
+- **Security**: No credentials, passwords, session tokens, or personally identifiable information (PII) are ever logged or stored.
+- **Observability**: Enables real-time monitoring of AI Oracle model behavior, including hallucinations and edge-case detection during live matches.
 
 ---
 
