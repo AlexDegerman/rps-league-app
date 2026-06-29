@@ -118,43 +118,45 @@ router.get('/admin/stats', async (req, res) => {
       gSource.signups += signups
       gSource.total_points_raw += totalPoints
 
-      if (!countryMap.has(countryCode)) {
-        countryMap.set(countryCode, {
-          country: countryCode,
-          signups: 0,
-          total_points_raw: 0n,
-          townsMap: new Map()
+      if (countryCode !== 'unknown' && townName !== 'unknown') {
+        if (!countryMap.has(countryCode)) {
+          countryMap.set(countryCode, {
+            country: countryCode,
+            signups: 0,
+            total_points_raw: 0n,
+            townsMap: new Map()
+          })
+        }
+        const cData = countryMap.get(countryCode)!
+        cData.signups += signups
+        cData.total_points_raw += totalPoints
+
+        if (!cData.townsMap.has(townName)) {
+          cData.townsMap.set(townName, {
+            town: townName,
+            signups: 0,
+            total_points_raw: 0n,
+            avg_points_sum: 0n,
+            avg_points_count: 0n,
+            top_points_raw: 0n,
+            utm: []
+          })
+        }
+        const tData = cData.townsMap.get(townName)!
+        tData.signups += signups
+        tData.total_points_raw += totalPoints
+        tData.avg_points_sum += avgPoints * BigInt(signups)
+        tData.avg_points_count += BigInt(signups)
+        if (topPoints > tData.top_points_raw) {
+          tData.top_points_raw = topPoints
+        }
+
+        tData.utm.push({
+          source,
+          signups,
+          total_points: formatStat(totalPoints.toString()).formatted
         })
       }
-      const cData = countryMap.get(countryCode)!
-      cData.signups += signups
-      cData.total_points_raw += totalPoints
-
-      if (!cData.townsMap.has(townName)) {
-        cData.townsMap.set(townName, {
-          town: townName,
-          signups: 0,
-          total_points_raw: 0n,
-          avg_points_sum: 0n,
-          avg_points_count: 0n,
-          top_points_raw: 0n,
-          utm: []
-        })
-      }
-      const tData = cData.townsMap.get(townName)!
-      tData.signups += signups
-      tData.total_points_raw += totalPoints
-      tData.avg_points_sum += avgPoints * BigInt(signups)
-      tData.avg_points_count += BigInt(signups)
-      if (topPoints > tData.top_points_raw) {
-        tData.top_points_raw = topPoints
-      }
-
-      tData.utm.push({
-        source,
-        signups,
-        total_points: formatStat(totalPoints.toString()).formatted
-      })
     }
 
     const totalPointsRaw = Array.from(globalSourceMap.values()).reduce(
