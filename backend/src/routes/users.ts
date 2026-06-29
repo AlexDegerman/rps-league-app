@@ -93,8 +93,8 @@ router.get('/admin/stats', async (req, res) => {
         town: string
         signups: number
         total_points_raw: bigint
-        avg_points_sum: number
-        avg_points_count: number
+        avg_points_sum: bigint
+        avg_points_count: bigint
         top_points_raw: bigint
         utm: Array<{ source: string; signups: number; total_points: string }>
       }>
@@ -107,7 +107,9 @@ router.get('/admin/stats', async (req, res) => {
       const signups = Number(r.signups)
       const totalPoints = BigInt(r.total_points || '0')
       const topPoints = BigInt(r.top_points || '0')
-      const avgPoints = Number(r.avg_points || '0')
+      
+      const rawAvg = (r.avg_points || '0').split('.')[0] ?? '0'
+      const avgPoints = BigInt(rawAvg)
 
       if (!globalSourceMap.has(source)) {
         globalSourceMap.set(source, { source, signups: 0, total_points_raw: 0n })
@@ -133,8 +135,8 @@ router.get('/admin/stats', async (req, res) => {
           town: townName,
           signups: 0,
           total_points_raw: 0n,
-          avg_points_sum: 0,
-          avg_points_count: 0,
+          avg_points_sum: 0n,
+          avg_points_count: 0n,
           top_points_raw: 0n,
           utm: []
         })
@@ -142,8 +144,8 @@ router.get('/admin/stats', async (req, res) => {
       const tData = cData.townsMap.get(townName)!
       tData.signups += signups
       tData.total_points_raw += totalPoints
-      tData.avg_points_sum += avgPoints * signups
-      tData.avg_points_count += signups
+      tData.avg_points_sum += avgPoints * BigInt(signups)
+      tData.avg_points_count += BigInt(signups)
       if (topPoints > tData.top_points_raw) {
         tData.top_points_raw = topPoints
       }
@@ -178,7 +180,9 @@ router.get('/admin/stats', async (req, res) => {
       signups: c.signups,
       total_points: formatStat(c.total_points_raw.toString()).formatted,
       towns: Array.from(c.townsMap.values()).map((t) => {
-        const calculatedAvg = t.avg_points_count > 0 ? Math.round(t.avg_points_sum / t.avg_points_count) : 0
+        const calculatedAvg = t.avg_points_count > 0n 
+          ? t.avg_points_sum / t.avg_points_count 
+          : 0n
         return {
           town: t.town,
           signups: t.signups,
@@ -195,21 +199,21 @@ router.get('/admin/stats', async (req, res) => {
         users: Number(users.rows[0].count),
         predictions: Number(predictions.rows[0].count),
         matches: Number(matches.rows[0].count),
-        globalPoints: formatStat(globalSums.rows[0].pts),
-        globalVolume: formatStat(globalSums.rows[0].vol)
+        globalPoints: formatStat(globalSums.rows[0].pts).formatted,
+        globalVolume: formatStat(globalSums.rows[0].vol).formatted
       },
       records: {
         richest: {
           name: topPointsUser.rows[0]?.nickname,
           uid: topPointsUser.rows[0]?.user_id,
           sid: topPointsUser.rows[0]?.short_id,
-          value: formatStat(topPointsUser.rows[0]?.points)
+          value: formatStat(topPointsUser.rows[0]?.points).formatted
         },
         biggestWin: {
           name: topWinUser.rows[0]?.nickname,
           uid: topWinUser.rows[0]?.user_id,
           sid: topWinUser.rows[0]?.short_id,
-          value: formatStat(topWinUser.rows[0]?.biggest_win)
+          value: formatStat(topWinUser.rows[0]?.biggest_win).formatted
         },
         topStreak: {
           name: topStreakUser.rows[0]?.nickname,
