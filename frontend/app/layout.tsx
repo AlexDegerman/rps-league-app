@@ -20,13 +20,13 @@ export const metadata: Metadata = {
     title: 'RPS League',
     description:
       'Experience high-frequency, real-time Rock Paper Scissors betting with virtual points, live global leaderboards, and AI-driven match analytics.',
-    url: 'https://rpsleaguegame.vercel.app',
+    url: 'https://rpsleague.fi',
     siteName: 'RPS League',
     images: [
       {
-        url: 'https://rpsleaguegame.vercel.app/rpshomepagev2.png',
-        width: 1204,
-        height: 628,
+        url: 'https://rpsleague.fi/banner.png',
+        width: 2012,
+        height: 1045,
         alt: 'RPS League Virtual Betting Platform'
       }
     ],

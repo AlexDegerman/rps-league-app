@@ -200,17 +200,21 @@ export async function rollRelicDrop(
   const eligible = RELICS.filter((r) => !ownedKeys.has(r.key))
   if (eligible.length === 0) return null
 
-  // First relic ever: guaranteed common, pick randomly among commons
+  // First relic ever: 25% chance to get a common, picked randomly among commons
   if (isFirstRelicEver) {
-    const commons = eligible.filter((r) => r.rarity === 'COMMON')
-    const picked = commons[Math.floor(Math.random() * commons.length)]
-    if (!picked) return null
-    await pool.query(
-      'INSERT INTO relics (user_id, relic_key, rarity, found_at) VALUES ($1, $2, $3, $4)',
-      [userId, picked.key, picked.rarity, Date.now()]
-    )
-    return picked
+    if (Math.random() < 0.25) {
+      const commons = eligible.filter((r) => r.rarity === 'COMMON')
+      const picked = commons[Math.floor(Math.random() * commons.length)]
+      if (!picked) return null
+      await pool.query(
+        'INSERT INTO relics (user_id, relic_key, rarity, found_at) VALUES ($1, $2, $3, $4)',
+        [userId, picked.key, picked.rarity, Date.now()]
+      )
+      return picked
+    }
+    return null
   }
+
   // Shuffle so there's no implicit ordering bias (rarest checked last etc.)
   const shuffled = [...eligible].sort(() => Math.random() - 0.5)
 

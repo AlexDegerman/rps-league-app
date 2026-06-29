@@ -27,18 +27,18 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     screenshots: [
       {
-        src: '/rpshomepagev2.png',
+        src: '/banner.png',
         type: 'image/png',
-        sizes: '1204x628',
-        form_factor: 'narrow',
-        label: 'RPS League Mobile'
+        sizes: '2012x1046',
+        form_factor: 'wide',
+        label: 'RPS League'
       },
       {
-        src: '/rpshomepagev2.png',
+        src: '/rpsleaguemobile.png',
         type: 'image/png',
-        sizes: '1204x628',
-        form_factor: 'wide',
-        label: 'RPS League Desktop'
+        sizes: '321x670',
+        form_factor: 'narrow',
+        label: 'RPS League Mobile'
       }
     ]
   }
