@@ -283,14 +283,20 @@ export const oracleTemplates = [
 
 export const getFestivalEffectDescription = (type: FestivalType): string => {
   const descriptions: Record<FestivalType, string> = {
-    SPARK: 'Universal synchronization achieved. All flash buffers restored.',
-    GHOST: 'Win Echo active. All wins generate a 20% signal echo.',
-    SAFEGUARD: 'Risk Shield active. Losses deduct 40% instead of 50%.',
-    RESONANCE: 'Bonus floor stabilized. Common and Rare bonuses are mandatory.',
-    SURGE: 'Power Surge active. All wins multiplied by 3x.',
-    VAULT: 'Loot Echo active. Relic discovery rate doubled.',
-    FEVER: 'Streak Aegis active. Losses will not reset win streaks.',
-    SANGUINE: 'Absolute Correction active. All predictions resolve as wins.'
+    SPARK:
+      'Universal synchronization achieved. All flash event state buffers restored.',
+    GHOST:
+      'Win Echo active. Successful predictions generate a 20% signal echo.',
+    SAFEGUARD:
+      'Risk Shield active. Prediction losses deduct 40% instead of 50%.',
+    RESONANCE:
+      'Bonus floor stabilized. Common and Rare bonuses are designated as mandatory.',
+    SURGE: 'Power Surge active. Successful predictions are multiplied by 3x.',
+    VAULT: 'Loot Echo active. Relic discovery rates are boosted by 100%.',
+    FEVER:
+      'Streak Aegis active. Prediction failures will not break active win streaks.',
+    SANGUINE:
+      'Absolute Correction active. All incoming predictions resolve as wins.'
   }
   return descriptions[type]
 }
