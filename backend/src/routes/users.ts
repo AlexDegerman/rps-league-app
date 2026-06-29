@@ -2,6 +2,7 @@ import { Router } from 'express'
 import pool from '../utils/db.js'
 import { getUserPoints } from '../services/userService.js'
 import { logger } from '../utils/logger.js'
+import { formatStat } from '../utils/formatStat.js'
 
 const router = Router()
 
@@ -23,28 +24,54 @@ router.post('/recovery-tutorial-complete', async (req, res) => {
   }
 })
 
-// GET /api/admin/utm-stats
-router.get('/admin/utm-stats', async (req, res) => {
+// GET /api/admin/stats
+router.get('/admin/stats', async (req, res) => {
   try {
-    const [usersResult, visitsResult] = await Promise.all([
-      pool.query(`
-        SELECT
-          COALESCE(utm_source, 'direct') AS source,
-          COUNT(*)                        AS signups,
-          SUM(points)                     AS total_points,
-          AVG(points)                     AS avg_points,
-          MAX(points)                     AS top_points
-        FROM users
-        GROUP BY COALESCE(utm_source, 'direct')
-        ORDER BY signups DESC
-      `),
+    const [
+      users,
+      predictions,
+      matches,
+      globalSums,
+      topPointsUser,
+      topStreakUser,
+      topWinUser,
+      visitsResult,
+      geoUtmResult
+    ] = await Promise.all([
+      pool.query(`SELECT COUNT(*) FROM users`),
+      pool.query(`SELECT COUNT(*) FROM predictions`),
+      pool.query(`SELECT COUNT(*) FROM matches`),
+      pool.query(
+        `SELECT SUM(points) as pts, SUM(total_volume) as vol FROM users`
+      ),
+      pool.query(
+        `SELECT nickname, user_id, short_id, points FROM users ORDER BY points DESC LIMIT 1`
+      ),
+      pool.query(
+        `SELECT nickname, user_id, short_id, max_win_streak FROM users ORDER BY max_win_streak DESC LIMIT 1`
+      ),
+      pool.query(
+        `SELECT nickname, user_id, short_id, biggest_win FROM users ORDER BY biggest_win DESC LIMIT 1`
+      ),
       pool.query(`
         SELECT
           utm_source AS source,
           COUNT(*)   AS visits
         FROM utm_visits
         GROUP BY utm_source
-        ORDER BY visits DESC
+      `),
+      pool.query(`
+        SELECT 
+          COALESCE(signup_country, 'unknown') AS country,
+          COALESCE(signup_town, 'unknown')    AS town,
+          COALESCE(utm_source, 'direct')      AS source,
+          COUNT(*)::int                       AS signups,
+          SUM(points)                         AS total_points,
+          AVG(points)::numeric                AS avg_points,
+          MAX(points)                         AS top_points
+        FROM users
+        GROUP BY signup_country, signup_town, COALESCE(utm_source, 'direct')
+        ORDER BY signup_country ASC, signup_town ASC, signups DESC
       `)
     ])
 
@@ -52,30 +79,154 @@ router.get('/admin/utm-stats', async (req, res) => {
       visitsResult.rows.map((r) => [r.source, Number(r.visits)])
     )
 
-    const platforms = usersResult.rows.map((r) => ({
-      source: r.source,
-      signups: Number(r.signups),
-      visits: visitMap[r.source] ?? 0,
-      total_points: r.total_points?.toString() ?? '0',
-      avg_points: Math.round(Number(r.avg_points)).toString(),
-      top_points: r.top_points?.toString() ?? '0'
-    }))
+    const globalSourceMap = new Map<string, {
+      source: string
+      signups: number
+      total_points_raw: bigint
+    }>()
 
-    const totals = {
-      signups: platforms.reduce((s: number, p) => s + p.signups, 0),
-      visits: Object.values(visitMap).reduce(
-        (s: number, v) => s + Number(v),
-        0
-      ),
-      total_points: platforms
-        .reduce((s: bigint, p) => s + BigInt(p.total_points), 0n)
-        .toString()
+    const countryMap = new Map<string, {
+      country: string
+      signups: number
+      total_points_raw: bigint
+      townsMap: Map<string, {
+        town: string
+        signups: number
+        total_points_raw: bigint
+        avg_points_sum: number
+        avg_points_count: number
+        top_points_raw: bigint
+        utm: Array<{ source: string; signups: number; total_points: string }>
+      }>
+    }>()
+
+    for (const r of geoUtmResult.rows) {
+      const countryCode = r.country
+      const townName = r.town
+      const source = r.source
+      const signups = Number(r.signups)
+      const totalPoints = BigInt(r.total_points || '0')
+      const topPoints = BigInt(r.top_points || '0')
+      const avgPoints = Number(r.avg_points || '0')
+
+      if (!globalSourceMap.has(source)) {
+        globalSourceMap.set(source, { source, signups: 0, total_points_raw: 0n })
+      }
+      const gSource = globalSourceMap.get(source)!
+      gSource.signups += signups
+      gSource.total_points_raw += totalPoints
+
+      if (!countryMap.has(countryCode)) {
+        countryMap.set(countryCode, {
+          country: countryCode,
+          signups: 0,
+          total_points_raw: 0n,
+          townsMap: new Map()
+        })
+      }
+      const cData = countryMap.get(countryCode)!
+      cData.signups += signups
+      cData.total_points_raw += totalPoints
+
+      if (!cData.townsMap.has(townName)) {
+        cData.townsMap.set(townName, {
+          town: townName,
+          signups: 0,
+          total_points_raw: 0n,
+          avg_points_sum: 0,
+          avg_points_count: 0,
+          top_points_raw: 0n,
+          utm: []
+        })
+      }
+      const tData = cData.townsMap.get(townName)!
+      tData.signups += signups
+      tData.total_points_raw += totalPoints
+      tData.avg_points_sum += avgPoints * signups
+      tData.avg_points_count += signups
+      if (topPoints > tData.top_points_raw) {
+        tData.top_points_raw = topPoints
+      }
+
+      tData.utm.push({
+        source,
+        signups,
+        total_points: formatStat(totalPoints.toString()).formatted
+      })
     }
 
-    res.json({ totals, platforms })
+    const totalPointsRaw = Array.from(globalSourceMap.values()).reduce(
+      (s: bigint, p) => s + p.total_points_raw,
+      0n
+    )
+
+    const utmTotals = {
+      signups: Array.from(globalSourceMap.values()).reduce((s, p) => s + p.signups, 0),
+      visits: Object.values(visitMap).reduce((s: number, v) => s + Number(v), 0),
+      total_points: formatStat(totalPointsRaw.toString()).formatted
+    }
+
+    const utmPlatforms = Array.from(globalSourceMap.values()).map((p) => ({
+      source: p.source,
+      signups: p.signups,
+      visits: visitMap[p.source] ?? 0,
+      total_points: formatStat(p.total_points_raw.toString()).formatted
+    }))
+
+    const locations = Array.from(countryMap.values()).map((c) => ({
+      country: c.country,
+      signups: c.signups,
+      total_points: formatStat(c.total_points_raw.toString()).formatted,
+      towns: Array.from(c.townsMap.values()).map((t) => {
+        const calculatedAvg = t.avg_points_count > 0 ? Math.round(t.avg_points_sum / t.avg_points_count) : 0
+        return {
+          town: t.town,
+          signups: t.signups,
+          total_points: formatStat(t.total_points_raw.toString()).formatted,
+          avg_points: formatStat(calculatedAvg.toString()).formatted,
+          top_points: formatStat(t.top_points_raw.toString()).formatted,
+          utm_breakdown: t.utm
+        }
+      })
+    }))
+
+    res.json({
+      summary: {
+        users: Number(users.rows[0].count),
+        predictions: Number(predictions.rows[0].count),
+        matches: Number(matches.rows[0].count),
+        globalPoints: formatStat(globalSums.rows[0].pts),
+        globalVolume: formatStat(globalSums.rows[0].vol)
+      },
+      records: {
+        richest: {
+          name: topPointsUser.rows[0]?.nickname,
+          uid: topPointsUser.rows[0]?.user_id,
+          sid: topPointsUser.rows[0]?.short_id,
+          value: formatStat(topPointsUser.rows[0]?.points)
+        },
+        biggestWin: {
+          name: topWinUser.rows[0]?.nickname,
+          uid: topWinUser.rows[0]?.user_id,
+          sid: topWinUser.rows[0]?.short_id,
+          value: formatStat(topWinUser.rows[0]?.biggest_win)
+        },
+        topStreak: {
+          name: topStreakUser.rows[0]?.nickname,
+          uid: topStreakUser.rows[0]?.user_id,
+          sid: topStreakUser.rows[0]?.short_id,
+          value: topStreakUser.rows[0]?.max_win_streak
+        }
+      },
+      utm: {
+        totals: utmTotals,
+        platforms: utmPlatforms
+      },
+      locations
+    })
   } catch (err) {
-    logger.error('GET /admin/utm-stats failed', err)
-    res.status(500).json({ error: 'Failed to fetch UTM stats' })
+    logger.error('GET /api/admin/stats failed', err)
+    res.status(500).json({ error: 'Failed to fetch admin dashboard stats' })
   }
 })
 
