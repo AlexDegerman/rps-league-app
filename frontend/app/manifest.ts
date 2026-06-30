@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'RPS League',
     short_name: 'RPS League',
     description:
-      'Real-time Rock Paper Scissors betting with live matches and AI-driven analytics.',
+      'Bet virtual points on fast-paced, real-time Rock Paper Scissors matches featuring live leaderboards, flash events, and synchronized global spectacles.',
     start_url: '/',
     display: 'standalone',
     background_color: '#f3f4f6',

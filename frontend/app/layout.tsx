@@ -14,12 +14,12 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'RPS League',
   description:
-    'Experience high-frequency, real-time Rock Paper Scissors betting with virtual points, live global leaderboards, and AI-driven match analytics.',
+    'Bet virtual points on fast-paced, real-time Rock Paper Scissors matches featuring live leaderboards, flash events, and synchronized global spectacles.',
   manifest: '/manifest.webmanifest',
   openGraph: {
     title: 'RPS League',
     description:
-      'Experience high-frequency, real-time Rock Paper Scissors betting with virtual points, live global leaderboards, and AI-driven match analytics.',
+      'Bet virtual points on fast-paced, real-time Rock Paper Scissors matches featuring live leaderboards, flash events, and synchronized global spectacles.',
     url: 'https://rpsleague.fi',
     siteName: 'RPS League',
     images: [
