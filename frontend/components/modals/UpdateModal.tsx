@@ -8,7 +8,7 @@ interface UpdateModalProps {
 
 export default function UpdateModal({ onClose }: UpdateModalProps) {
   return (
-    <div className="fixed inset-x-0 top-0 bottom-14 z-60 flex items-center justify-center px-4 h-[calc(100svh-56px)]">
+    <div className="fixed inset-x-0 top-0 bottom-8 z-60 flex items-center justify-center px-4 h-[calc(100svh-32px)]">
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}

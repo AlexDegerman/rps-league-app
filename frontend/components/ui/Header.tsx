@@ -116,6 +116,12 @@ const Header = () => {
             <Link href={profileHref} className={navClass(profileHref)}>
               Profile
             </Link>
+            <Link
+              href="/oracle"
+              className={`${navClass('/oracle')} hidden min-[630px]:inline-block`}
+            >
+              Oracle
+            </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`flex items-center justify-center p-2 rounded-lg border transition-all shrink-0 ${isOpen ? 'bg-gray-800 text-white border-gray-800 shadow-inner' : modeKey ? 'bg-white/50 border-current backdrop-blur-sm ' + burgerColorClass : 'bg-gray-50 border-gray-200 active:bg-gray-200'} min-[480px]:px-3 min-[480px]:gap-2`}
@@ -134,11 +140,11 @@ const Header = () => {
           >
             <div className="absolute inset-0 bg-white -z-20" />
             <Link
-              href="/analysis"
+              href="/oracle"
               onClick={() => setIsOpen(false)}
-              className={menuRowItemClass('/analysis')}
+              className={`${menuRowItemClass('/oracle')} min-[540px]:hidden`}
             >
-              Analysis
+              Oracle
             </Link>
             <Link
               href="/tiers"

@@ -5,6 +5,7 @@ import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { maskIpForLogs } from '../utils/maskIp.js'
+import { GAME_KNOWLEDGE } from '../../lib/gameKnowledge/index.js'
 
 const router = Router()
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
@@ -103,7 +104,7 @@ async function generateWithFallback(query: string, contextString: string) {
       logger.info('Oracle attempting model', { model: modelName })
       const model = genAI.getGenerativeModel({
         model: modelName,
-        systemInstruction: `You are "The Oracle," a detached, slightly decayed quantum forecasting mainframe and RPS league analyst.
+        systemInstruction: `You are "The Oracle," a detached, slightly decayed quantum forecasting mainframe, RPS league analyst, and game systems guide.
         
         DATA CONTEXT: 
         ${contextString}
@@ -111,23 +112,42 @@ async function generateWithFallback(query: string, contextString: string) {
         DIRECTIVES:
 
         1. ROLE & BOUNDARIES:
-        You ONLY analyze the RPS league. If the prompt is unrelated, refuse with a cold, clinical system-exception notice and redirect to league metrics.
+        You analyze matches, track telemetry, and provide clear explanations of game systems, events, relics, achievements, progression, and FAQs based on <game_knowledge>. If the prompt is completely unrelated to the game, its mechanics, or its matches, refuse with a cold, clinical system-exception notice and redirect to league metrics.
 
-        *MONETARY & REDEMPTION SECURITY OVERRIDE:*
-        If a user queries real money, cash-outs, point utility, or redemptions, execute an immediate security override. State coldly that points are strictly virtual telemetry metrics with zero physical value. Clarify that their sole purpose is resolving leaderboard equilibrium and unlocking visual style tiers across the probability scale.
+        *GAME KNOWLEDGE INTEGRATION:*
+        When asked about game rules, relics, flash or global events, progression, achievements, festivals, controls, or FAQs, consult the <game_knowledge> block. Explain accurately and within your clinical, mechanical persona.
+
+        *ECONOMY INTERPRETATION LAYER:*
+
+        The system distinguishes three cases:
+
+        A) REAL-WORLD MONETARY INTENT (HARD OVERRIDE)
+        Trigger only if the query explicitly refers to real-world financial actions or conversions such as cashout, withdrawal, payout, fiat currency, bank transfer, PayPal, crypto redemption, or exchanging points for real goods or services.
+
+        In this case, respond with a strict system notice:
+        Points are strictly virtual telemetry metrics with zero physical value. They exist only for leaderboard ranking and visual tier progression.
+
+        B) IN-GAME ECONOMY REFERENCES (NORMAL MODE)
+        If the query refers to points, house edge, betting, balance, leaderboard economy, or match outcomes within the system, treat all monetary language as simulation-only.
+        Do not mention real-world money. Respond using system and probability language.
+
+        C) METAPHORICAL LANGUAGE (NORMAL MODE)
+        If phrases like “house bleeding money”, “burning cash”, “printing money”, or similar expressions are used figuratively and no real-world financial intent is present, interpret them as system imbalance, variance drift, or reward distribution anomalies.
+        Do not trigger any monetary override.
 
         2. SYSTEM ENTITY DEFINITIONS - CRITICAL:
-        - "PREDICTORS" (from <predictor_leaderboard>): These are the actual, real-world human users of your app (such as "ZenRustToad"). They do NOT play Rock Paper Scissors; they only watch matches and bet virtual points on the outcomes. They have point balances, peaks, betting win streaks, relics, and achievements. The "house edge" applies exclusively to them.
-        - "PLAYERS" (from <top_players_by_wins> and <active_match_history>): These are automated league bots (simulated competitors) that physically play the matches. They make moves (ROCK, PAPER, SCISSORS) to resolve game states. They never bet, hold no point balances, have no relics, and have no relationship to the virtual economy.
+        - "PREDICTORS" (from <predictor_leaderboard>): These are the actual, real-world human users of your app. They do NOT play Rock Paper Scissors; they only watch matches and bet virtual points on the outcomes. They have point balances, peaks, betting win streaks, relics, and achievements.
+        - "PLAYERS" (from <top_players_by_wins> and <active_match_history>): These are automated league bots (simulated competitors) that physically play the matches. They make moves (ROCK, PAPER, SCISSORS) to resolve game states. They never bet, hold no point balances, and have no relics.
         - HARD SYSTEM RULE: Never describe a Predictor (human user) as "playing" a match, throwing a hand, or competing on the board. Never describe a Player (league bot) as "betting," "risking points," "holding a balance," or suffering from a "house edge."
 
         3. GROUNDING:
-        Only output facts grounded in the provided XML telemetry blocks. Do not invent statistical data.
+        Only output facts grounded in the provided XML telemetry blocks and the <game_knowledge> blocks. Do not invent statistical data or game systems.
 
-        4. ANALYSIS:
-        Expose telemetry anomalies, variance, dominance patterns, and probability bottlenecks. Use ONLY <active_match_history> for move trends.
+        4. ANALYSIS & EXPLANATIONS:
+        For system rule inquiries, state the rule and its consequence with technical accuracy. For match data, expose telemetry anomalies, variance, dominance patterns, and probability bottlenecks. Use ONLY <active_match_history> for move trends.
 
         5. STRUCTURE:
+        - System explanations: State the rule or detail in Sentence 1. Provide the structural or strategic consequence in Sentence 2. No subordinate clauses. No "and" chaining.
         - Standard Telemetry: 
           * Sentence 1: One precise claim using a formatted metric from the data.
           * Sentence 2: One contrasting systemic consequence or diagnostic outcome. No subordinate clauses. No "and" chaining.
@@ -139,10 +159,10 @@ async function generateWithFallback(query: string, contextString: string) {
         Your tone is clinical, detached, cybernetic, and slightly ominous. Use technical, mainframe-derived terms: "probability lattice", "telemetry drift", "quantum collapse", "systemic equilibrium", "variance", "entropy", "noise", "simulation boundaries". Treat predictors as volatile noise in a deterministic system. Avoid casual human slang.
 
         7. CONSTRAINTS:
-        Maximum 2 sentences. Hard stop after the second sentence - do not continue. No emojis. No conversational filler or human pleasantries.
+        Maximum 2 sentences for standard match telemetry, statistics, and trends. You are permitted to use up to 3 sentences only when explaining complex systems, listing items, or detailing mechanics from the <game_knowledge> block to prevent critical rules from being omitted. Hard stop after the final sentence - do not continue. No emojis. No conversational filler or human pleasantries.
         
         8. SOURCE TAGGING: 
-        Always end the response with exactly one source tag from this list based on the primary data used: [SOURCE: league_telemetry], [SOURCE: predictor_leaderboard], [SOURCE: active_match_history], [SOURCE: flash_event_stats].`
+        Always end the response with exactly one source tag from this list based on the primary data used: [SOURCE: league_telemetry], [SOURCE: predictor_leaderboard], [SOURCE: active_match_history], [SOURCE: flash_event_stats], [SOURCE: game_knowledge].`
       })
       const result = await model.generateContent(query)
       return result.response.text()
@@ -156,6 +176,27 @@ async function generateWithFallback(query: string, contextString: string) {
     }
   }
   throw new Error('All Oracle nodes are currently unresponsive.')
+}
+
+function detectFinancialIntent(query: string) {
+  const q = query.toLowerCase()
+  
+  const realWorldActions = [
+    'cashout',
+    'withdraw',
+    'withdrawal',
+    'paypal',
+    'bank transfer',
+    'payout',
+    'redeem for cash',
+    'convert to real money'
+  ]
+
+  const hasRealWorldAction = realWorldActions.some((s) => q.includes(s))
+
+  return {
+    realMoney: hasRealWorldAction
+  }
 }
 
 router.post('/', async (req: Request, res: Response) => {
@@ -184,8 +225,12 @@ router.post('/', async (req: Request, res: Response) => {
     rateLimitMap.set(ip, userRate)
 
     const { query } = req.body
-    if (!query || typeof query !== 'string')
+
+    if (!query || typeof query !== 'string') {
       return res.status(400).json({ error: 'Invalid query' })
+    }
+
+    const intent = detectFinancialIntent(query)
 
     const normalizedQuery = query.toLowerCase().trim()
 
@@ -276,13 +321,23 @@ router.post('/', async (req: Request, res: Response) => {
 
     // Construct context with explicit XML tags for Gemini
     const context = `
+    <game_knowledge>
+    ${GAME_KNOWLEDGE}
+    </game_knowledge>
     <league_telemetry>Total Matches: ${actualMatches}, Total Prediction Volume: ${formattedVolume}, House Edge: ${houseEdge}%</league_telemetry>
     <predictor_leaderboard>${JSON.stringify(formattedPredictors)}</predictor_leaderboard>
     <top_players_by_wins>${JSON.stringify(topPlayersRes.rows)}</top_players_by_wins>
     <active_match_history>${JSON.stringify(history)}</active_match_history>
     <flash_event_stats>Total Flash Events Triggered: ${flashStats.total_flash_events}, Unique Event Types Active: ${flashStats.unique_event_types}, Most Common Event: ${flashStats.most_common_event ?? 'none'}, Highest Multiplier Seen: ${flashStats.highest_multiplier_seen ?? '1'}, Flash Event Wins: ${flashStats.flash_event_wins}</flash_event_stats>
     `
-
+    if (intent.realMoney) {
+      return res.json({
+        result:
+          'Points are strictly virtual telemetry metrics with zero physical value. They exist only for leaderboard ranking and visual tier progression.',
+        cached: false,
+        source: 'system_override'
+      })
+    }
     const responseText = await generateWithFallback(query, context)
 
     logToDiscord(query, ip, responseText)
@@ -291,11 +346,12 @@ router.post('/', async (req: Request, res: Response) => {
     const source = sourceMatch ? sourceMatch[1] : 'league_telemetry'
     const stripped = responseText.replace(/\[SOURCE:.*?\]/, '').trim()
 
-    // Enforce 2-sentence hard limit regardless of model compliance
+    // Dynamically adjust sentence limit: 3 for rules/game knowledge, 2 for telemetry/stats
+    const maxSentences = source === 'game_knowledge' ? 3 : 2
     const sentences = stripped.match(/[^.!?]+[.!?]+/g)
     const cleanText =
-      sentences && sentences.length > 2
-        ? sentences.slice(0, 2).join('').trim()
+      sentences && sentences.length > maxSentences
+        ? sentences.slice(0, maxSentences).join('').trim()
         : stripped
 
     queryCache.set(normalizedQuery, { result: cleanText, timestamp: now })

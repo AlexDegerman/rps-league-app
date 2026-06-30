@@ -477,22 +477,28 @@ To maintain a professional live-service standard and close the loop between user
 
 ---
 
-## 🤖 AI Oracle & Analytics
+## 🤖 AI Oracle: Game Systems Guide & Match Analysis
 
-The platform features **The Oracle**, a custom-tuned AI analyst powered by Google Gemini. Unlike standard chatbots, The Oracle is a domain-specific agent designed to provide snarky, data-driven insights into the RPS League.
+The platform features **The Oracle**, a custom-tuned AI agent powered by Google Gemini. Rather than acting as a standard chatbot, it functions as a dual-purpose cognitive system, delivering clinical, data-driven match analyses and explaining system-level mechanics, relics, active events, and progression rules.
 
 ### Core Features
 
-- Context-aware grounding via XML-tagged league telemetry and historical statistics from a 10,000+ match dataset.
-- Resilient multi-model fallback across Gemini variants to maintain uptime during temporary service failures and rate limits.
-- Strict intent guardrailing that rejects off-topic queries while maintaining the Oracle persona and minimizing hallucinations.
-- In-memory TTL caching and IP-based rate limiting to reduce latency and prevent abuse.
-- Curated analytical presets exposing hidden PostgreSQL telemetry such as move frequency distributions, real-time house edge, and league trends.
-- Daily Oracle Prophecy backed by server-side state and database tracking rather than local storage.
+- **Dual-Purpose Grounding Engine**: Integrates high-density match history with an expansive XML-wrapped game knowledge database to dynamically resolve both statistical telemetry queries and complex rules explanations.
+- **Dynamic Response Slicing**: Automatically scales output constraints, programmatically permitting up to 3 sentences for complex system explanations to ensure mechanical clarity, while enforcing a strict 2-sentence limit on standard match analyses.
+- **Resilient Multi-Model Fallback**: Employs automated model rotation across Gemini variants to mitigate uptime volatility, API rate limits, and service spikes.
+- **Strict Intent Guardrailing**: Filters out off-topic prompts to maintain the clinical Oracle persona and prevent hallucinations.
+- **Performance Optimization**: Features in-memory TTL caching and IP-bound rate limiting to manage query costs, control backend latency, and prevent abuse.
+- **Curated Analytics Presets**: Surfaces custom PostgreSQL database insights directly to the interface, detailing move frequency distributions, active house edge stats, and global trends.
+- **Server-Synced Prophecies**: Manages the Daily Oracle Prophecy via database tracking and server-side state to prevent exploit loops or local storage bypasses.
 
 <p align="center">
-  <em>Showcasing AI Analysis.</em><br>
+  <strong>Match Analysis</strong><br>
   <img src="./assets/ai_analysis_showcase.gif" width="220" />
+</p>
+
+<p align="center">
+  <strong>Game Systems Guide</strong><br>
+  <img src="./assets/gameguide_oracle_showcase.gif" width="220" />
 </p>
 
 ---
@@ -671,7 +677,7 @@ No real-money gambling, cash payouts, or withdrawable rewards are supported.
 To protect user privacy while maintaining system stability, verifying developer telemetry, and monitoring AI behavior, the application implements the following privacy-by-design standards:
 - **Coarse Geolocation**: During initial account creation, the system resolves the approximate city and country of the predictor (e.g., `Helsinki, FI`) to help analyze regional engagement [1.1.1].
 - **IP Anonymization**: IP addresses are immediately anonymized at the application boundary prior to processing (e.g., zeroing out the host octet to truncate `203.0.113.195` to `203.0.113.0`) [1.1.6]. Geolocation lookups are performed entirely locally and offline using an in-memory database (`geoip-lite`), ensuring raw IP addresses are never stored or transmitted to external APIs [1.1.1, 1.1.3].
-- **Audit Logs**: For public administrative monitoring and Discord audit webhooks, IP addresses are cleanly masked to display subnets only (e.g., `84.250.x.x`).
+- **Audit Logs**: For public administrative monitoring and Discord audit webhooks, IP addresses are cleanly masked to display subnets only (e.g., `203.0.113.x`).
 - **Security**: No credentials, passwords, session tokens, or personally identifiable information (PII) are ever logged or stored.
 - **Observability**: Enables real-time monitoring of AI Oracle model behavior, including hallucinations and edge-case detection during live matches.
 

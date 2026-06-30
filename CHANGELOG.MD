@@ -2,6 +2,20 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [2.1] - The Oracle & Game Systems Guide
+
+### Added
+
+* **Cognitive Knowledge Base Integration:** Upgraded the Gemini AI engine from a pure match analyst into a comprehensive game systems guide. Injected high-density, structured XML-tagged references (covering relics, global and flash events, Chrono-Lap prestige, achievements, user controls, and FAQs) into the RAG context window [1.1.4].
+* **Dynamic Sentence-Slicing Protocol:** Implemented a source-aware backend parsing engine that dynamically adjusts response limits based on query intent. Standard match telemetry, statistics, and trends are hard-capped at 2 sentences, while complex game knowledge explanations are programmatically allowed up to 3 sentences to prevent information loss.
+* **Programmatic Source Badging:** Integrated the `[SOURCE: game_knowledge]` tag into the frontend routing. Successfully mapped this tag to a custom emerald theme badge (`bg-emerald-50 text-emerald-600 border-emerald-200`) to differentiate system rules from telemetry-driven match history.
+* **Consultation Suggestions:** Replaced some match analysis suggestions with new gameplay questions to help users query the updated knowledge base.
+
+### Changed
+
+* **Oracle Voice and Persona Alignment:** Re-tuned the consult engine's system prompt instructions to align its personality with the ominous, clinical, and decayed cybernetic mainframe persona used during live Global Event notification rollouts and Player Festival verbal announcements.
+* **Server-Synced Prophecies:** Adjusted the daily Oracle prediction state check to enforce database validation, preventing local storage manipulation or profile cache bypasses.
+
 ## [2.0] - Global Events & Elemental Tiers
 
 ### Added

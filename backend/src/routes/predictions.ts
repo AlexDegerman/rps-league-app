@@ -300,14 +300,14 @@ router.get('/stats/daily', async (req, res) => {
     const wins = Number(row.wins)
 
     const statsResult: DailyStatsCache = {
-      totalVolume: formatStat(row.total_volume).formatted,
-      dailyPayout: formatStat(row.daily_payout).formatted,
+      totalVolume: row.total_volume.toString(),
+      dailyPayout: row.daily_payout.toString(),
       totalBets: total,
       winRate: total > 0 ? Math.round((wins / total) * 100) : 0,
       mvp: mvpRes.rows[0]
         ? {
             nickname: mvpRes.rows[0].nickname,
-            gain: formatStat(mvpRes.rows[0].total_gain).formatted
+            gain: mvpRes.rows[0].total_gain.toString()
           }
         : null
     }

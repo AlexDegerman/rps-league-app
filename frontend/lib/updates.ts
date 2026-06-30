@@ -6,6 +6,17 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '2.1',
+    label: 'The Oracle & Game Systems Update',
+    notes: [
+      'Dual-Purpose Cognitive Node: Upgrades the match analyst into a unified game guide equipped with a full structural knowledge base covering relics, global and flash events, prestige progression, achievements, and FAQs.',
+      'Dynamic Response Slicing: Implements a conditional backend slicing protocol that limits standard match telemetry to 2 sentences while programmatically permitting up to 3 sentences for complex system definitions.',
+      'Oracle Persona Alignment: Standardizes the chatbot consultation system instructions to align with the clinical, slightly decayed, and ritualistic voice used in live global event announcements and spoken festival alerts.',
+      'Refined Prompt Grounding: Restructures Google Gemini system directives to prevent off-topic queries and enforce clean semantic boundaries between human Predictors and bot Players.',
+      'Consultation Suggestions: Replaces some match analysis suggestions with new gameplay questions.'
+    ]
+  },
+  {
     version: '2.0',
     label: 'The Global Events Update',
     notes: [

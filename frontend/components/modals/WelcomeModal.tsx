@@ -34,7 +34,7 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
   }
 
   return (
-    <div className="fixed inset-x-0 top-0 bottom-14 z-50 flex items-center justify-center px-4 h-[calc(100svh-56px)]">
+    <div className="fixed inset-x-0 top-0 bottom-8 z-50 flex items-center justify-center px-4 h-[calc(100svh-32px)]">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
       <div className="relative w-full max-w-sm animate-in fade-in zoom-in-95 duration-300">
@@ -156,6 +156,9 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
             </p>
             <p className="text-[9px] text-black/30 font-medium leading-snug">
               Leave feedback of any kind in the feedback page
+            </p>
+            <p className="text-[9px] text-black/30 font-medium leading-snug">
+              Ask the Oracle for game guidance
             </p>
           </div>
         </div>

@@ -16,18 +16,27 @@ interface HistoryItem {
 
 const SUGGESTIONS = [
   'Is the house bleeding money?',
-  'Risk-reward ratio for Top 5?',
-  'Move heat map, latest matches?',
-  'How high are the stakes now?',
-  '#1 player vs the rest of Top 5?',
-  'Who has the longest win streak?'
+  'Who has the longest win streak?',
+  'What is ascension?',
+  'How do relics drop?',
+  'How do events trigger?',
+  'Why are there no ties?'
 ]
 
 const SOURCE_STYLES: Record<string, string> = {
   active_match_history: 'bg-blue-50 text-blue-600 border-blue-200',
   predictor_leaderboard: 'bg-amber-50 text-amber-600 border-amber-200',
   league_telemetry: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-  flash_event_stats: 'bg-purple-50 text-purple-600 border-purple-200'
+  flash_event_stats: 'bg-purple-50 text-purple-600 border-purple-200',
+  game_knowledge: 'bg-emerald-50 text-emerald-600 border-emerald-200'
+}
+
+function generateId(): number {
+  return Date.now()
+}
+
+function getTimestamp(): number {
+  return Date.now()
 }
 
 export default function AnalysisPage() {
@@ -36,9 +45,15 @@ export default function AnalysisPage() {
   const [error, setError] = useState<string | null>(null)
   const [currentResult, setCurrentResult] = useState<string | null>(null)
   const [currentSource, setCurrentSource] = useState<string | null>(null)
-  const [history, setHistory] = useState<HistoryItem[]>([])
   const [showPrivacyInfo, setShowPrivacyInfo] = useState(false)
   const [placeholder, setPlaceholder] = useState('Ask the Oracle...')
+  const [history, setHistory] = useState<HistoryItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aiQueryHistory')
+      return saved ? JSON.parse(saved) : []
+    }
+    return []
+  })
 
   useEffect(() => {
     const handleResize = () => {
@@ -53,11 +68,6 @@ export default function AnalysisPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  useEffect(() => {
-    const saved = localStorage.getItem('aiQueryHistory')
-    if (saved) setHistory(JSON.parse(saved))
-  }, [])
-
   const handleAsk = async (e?: React.FormEvent, overrideQuery?: string) => {
     e?.preventDefault()
     const activeQuery = overrideQuery || query
@@ -67,7 +77,7 @@ export default function AnalysisPage() {
     setError(null)
 
     try {
-      const res = await fetch(`${API_BASE}/api/analysis`, {
+      const res = await fetch(`${API_BASE}/api/oracle/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: activeQuery })
@@ -82,11 +92,11 @@ export default function AnalysisPage() {
       // Keep only the 5 most recent queries - avoids unbounded localStorage growth
       const newHistory: HistoryItem[] = [
         {
-          id: Date.now(),
+          id: generateId(),
           query: activeQuery,
           result: data.result,
           source: data.source,
-          timestamp: Date.now()
+          timestamp: getTimestamp()
         },
         ...history
       ].slice(0, 5)
@@ -95,11 +105,16 @@ export default function AnalysisPage() {
       localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
       if (!overrideQuery) setQuery('')
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'An unknown error occurred'
-      logger.error('Oracle query failed', err instanceof Error ? err : undefined, {
-        query: activeQuery
-        })
-        setError(message)
+      const message =
+        err instanceof Error ? err.message : 'An unknown error occurred'
+      logger.error(
+        'Oracle query failed',
+        err instanceof Error ? err : undefined,
+        {
+          query: activeQuery
+        }
+      )
+      setError(message)
     } finally {
       setLoading(false)
     }

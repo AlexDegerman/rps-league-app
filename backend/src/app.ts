@@ -7,7 +7,7 @@ import matchesRouter from './routes/matches.js'
 import leaderboardRouter from './routes/leaderboard.js'
 import liveRouter from './routes/live.js'
 import predictionsRouter from './routes/predictions.js'
-import aiRouter from './routes/analysis.js'
+import oracleConsultRouter from './routes/oracleConsult.js'
 import usersRouter from './routes/users.js'
 import feedbackRouter from './routes/feedback.js'
 import oracleRouter from './routes/oracle.js'
@@ -36,7 +36,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.set('trust proxy', 1) 
+app.set('trust proxy', 1)
 app.use(express.json())
 
 // Route Registration
@@ -44,7 +44,7 @@ app.use('/api/matches', matchesRouter)
 app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/live', liveRouter)
 app.use('/api/predictions', predictionsRouter)
-app.use('/api/analysis', aiRouter)
+app.use('/api/oracle/query', oracleConsultRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/ascend', ascendRouter)
 app.use('/api/feedback', feedbackRouter)
@@ -53,7 +53,6 @@ app.use('/api/festivals', festivalsRouter)
 app.use('/api/achievements', achievementsRouter)
 app.use('/api/relics', relicRouter)
 app.use('/api/globalevents', globaleventsRouter)
-
 
 // Sentry Error Handler
 Sentry.setupExpressErrorHandler(app)

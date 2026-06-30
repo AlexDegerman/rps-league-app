@@ -5,7 +5,6 @@ import pool from '../utils/db.js'
 import * as matchService from '../services/matchService.js'
 import { mockDbResponse } from '../test/setup.js'
 
-// Hoist before any imports so the mock is in place when analysis.js loads
 const { mockGenerateContent } = vi.hoisted(() => ({
   mockGenerateContent: vi.fn()
 }))
@@ -20,7 +19,7 @@ vi.mock('@google/generative-ai', () => ({
   })
 }))
 
-import analysisRouter from './analysis.js'
+import oracleConsultRouter from './oracleConsult.js'
 
 vi.mock('../services/matchService.js', () => ({
   getLatestMatches: vi.fn()
@@ -28,7 +27,7 @@ vi.mock('../services/matchService.js', () => ({
 
 const app = express()
 app.use(express.json())
-app.use('/analysis', analysisRouter)
+app.use('/oracleConsult', oracleConsultRouter)
 
 describe('Analysis Route', () => {
   const mockDb = vi.mocked(pool.query)
@@ -50,7 +49,7 @@ describe('Analysis Route', () => {
       .mockResolvedValueOnce({ response: { text: () => 'Fallback Success' } })
 
     const res = await request(app)
-      .post('/analysis')
+      .post('/oracleConsult')
       .set('x-forwarded-for', '1.1.1.1')
       .send({ query: 'Who is the goat?' })
 
@@ -62,7 +61,7 @@ describe('Analysis Route', () => {
     mockGenerateContent.mockRejectedValue(new Error('All models 503'))
 
     const res = await request(app)
-      .post('/analysis')
+      .post('/oracleConsult')
       .set('x-forwarded-for', '2.2.2.2')
       .send({ query: 'Crash me' })
 
@@ -77,11 +76,11 @@ describe('Analysis Route', () => {
 
     const payload = { query: 'UniqueCacheQuery' }
     await request(app)
-      .post('/analysis')
+      .post('/oracleConsult')
       .set('x-forwarded-for', '3.3.3.3')
       .send(payload)
     const res = await request(app)
-      .post('/analysis')
+      .post('/oracleConsult')
       .set('x-forwarded-for', '3.3.3.3')
       .send(payload)
 
@@ -95,13 +94,13 @@ describe('Analysis Route', () => {
     // Exhaust the limit (5 requests)
     for (let i = 0; i < 5; i++) {
       await request(app)
-        .post('/analysis')
+        .post('/oracleConsult')
         .set('x-forwarded-for', testIp)
         .send({ query: `limit-test-${i}` })
     }
 
     const res = await request(app)
-      .post('/analysis')
+      .post('/oracleConsult')
       .set('x-forwarded-for', testIp)
       .send({ query: 'one-too-many' })
 
