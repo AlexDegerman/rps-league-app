@@ -60,7 +60,7 @@ export default function AnalysisPage() {
       setPlaceholder(
         window.innerWidth < 640
           ? 'Ask the Oracle...'
-          : 'Ask about streaks, volume, or players...'
+          : 'Ask about match trends, events, or game mechanics...'
       )
     }
     handleResize()
