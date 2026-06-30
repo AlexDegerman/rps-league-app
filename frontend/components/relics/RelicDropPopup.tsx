@@ -73,7 +73,10 @@ export default function RelicDropPopup() {
 
   useEffect(() => {
     if (activePopup?.kind === 'relic_drop' && readyToShow && currentDrop) {
-      setVisible(true)
+      Promise.resolve().then(() => {
+        setVisible(true)
+      })
+
       if (!soundPlayedRef.current) {
         soundPlayedRef.current = true
         playRelicDrop(currentDrop.rarity)
@@ -93,7 +96,7 @@ export default function RelicDropPopup() {
     }
   }
 
-    if (!currentDrop) return null
+  if (!currentDrop) return null
 
   const rarity = currentDrop.rarity
   const styles = RARITY_STYLES[rarity]

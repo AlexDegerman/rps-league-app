@@ -1,4 +1,3 @@
-// components/ui/BetAmountInput.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -28,17 +27,21 @@ export default function BetAmountInput({
 
   useEffect(() => {
     if (!isFocused) {
-      setLocalVal(inputString)
+      Promise.resolve().then(() => {
+        setLocalVal(inputString)
+      })
     }
   }, [inputString, isFocused])
 
   useEffect(() => {
     if (isHydrated && autoAllIn) {
-      setBetAmount(points)
-      if (!isFocused) {
-        setInputString(points.toString())
-        setLocalVal(points.toString())
-      }
+      Promise.resolve().then(() => {
+        setBetAmount(points)
+        if (!isFocused) {
+          setInputString(points.toString())
+          setLocalVal(points.toString())
+        }
+      })
     }
   }, [autoAllIn, points, isHydrated, isFocused, setBetAmount, setInputString])
 
@@ -46,11 +49,14 @@ export default function BetAmountInput({
     if (isHydrated && !autoAllIn) {
       const floor = 100000n
       const resetTo = points < floor ? points : floor
-      setBetAmount(resetTo)
-      if (!isFocused) {
-        setInputString(resetTo.toString())
-        setLocalVal(resetTo.toString())
-      }
+
+      Promise.resolve().then(() => {
+        setBetAmount(resetTo)
+        if (!isFocused) {
+          setInputString(resetTo.toString())
+          setLocalVal(resetTo.toString())
+        }
+      })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoAllIn, isHydrated])

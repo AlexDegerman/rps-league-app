@@ -8,6 +8,7 @@ import { controls } from './controls.js'
 import { futureContent } from './futureContent.js'
 import { faq } from './faq.js'
 import { matchResolution } from './matchResolution.js'
+import { pwaAndIdentity } from './pwaAndIdentity.js'
 
 export const GAME_KNOWLEDGE = [
   matchResolution,
@@ -19,5 +20,6 @@ export const GAME_KNOWLEDGE = [
   relics,
   achievements,
   controls,
-  futureContent
+  futureContent,
+  pwaAndIdentity
 ].join('\n\n')

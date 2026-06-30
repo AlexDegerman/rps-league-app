@@ -182,7 +182,8 @@ export default function HomePage() {
   useEffect(() => {
     isStreamStaleRef.current = isStreamStale
   }, [isStreamStale])
-  const lastPacketRef = useRef(Date.now())
+
+  const lastPacketRef = useRef<number | null>(null)
   const isOffline = typeof window !== 'undefined' && !navigator.onLine
 
   const showConnectionWarning =
@@ -192,7 +193,10 @@ export default function HomePage() {
     (isOffline || isStreamStale)
 
   useEffect(() => {
+    lastPacketRef.current = Date.now()
+
     const checkStaleness = () => {
+      if (lastPacketRef.current === null) return
       const isStale = Date.now() - lastPacketRef.current > 10000
       setIsStreamStale(isStale)
     }

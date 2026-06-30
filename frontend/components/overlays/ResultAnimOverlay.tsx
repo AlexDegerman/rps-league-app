@@ -121,7 +121,6 @@ function getConfettiColors(
   }
 }
 
-
 function BottomConfetti({
   confettiType,
   confetti,
@@ -347,28 +346,42 @@ export default function ResultAnimOverlay({
   const festivalType = useGameStore((s) => s.festivalType)
   const activeFestival = useGameStore((s) => s.activeFestival)
 
-  const [slamActive, setSlamActive] = useState(false)
-  const slamTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { playJackpot } = useSound()
+
+  const [prevResultAnim, setPrevResultAnim] = useState<ResultAnim | null>(null)
+  const [slamActive, setSlamActive] = useState(false)
+  const [slamProps, setSlamProps] = useState({
+    multiplier: 2 as 2 | 3,
+    preSoulAmount: 0n,
+    finalAmount: 0n
+  })
+
+  if (resultAnim !== prevResultAnim) {
+    setPrevResultAnim(resultAnim)
+    setSlamActive(false)
+
+    if (resultAnim?.win && (resultAnim.soulProc || resultAnim.kineticFired)) {
+      setSlamProps({
+        multiplier: resultAnim.soulProc ? 3 : 2,
+        preSoulAmount: resultAnim.preSoulAmount ?? 0n,
+        finalAmount: resultAnim.amount
+      })
+    }
+  }
+
+  const slamTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const willSlam = !!(
     resultAnim?.win &&
     (resultAnim.soulProc || resultAnim.kineticFired)
   )
-  const slamIdRef = useRef(0)
-  const lastSlamResultRef = useRef<ResultAnim | null>(null)
 
   useEffect(() => {
     if (slamTimerRef.current) clearTimeout(slamTimerRef.current)
-    setSlamActive(false)
 
-    if (!willSlam || resultAnim === lastSlamResultRef.current) return
-
-    lastSlamResultRef.current = resultAnim
-    const thisSlam = ++slamIdRef.current
+    if (!willSlam) return
 
     slamTimerRef.current = setTimeout(() => {
-      if (slamIdRef.current !== thisSlam) return
       setSlamActive(true)
       slamState.active = true
       playJackpot()
@@ -377,23 +390,12 @@ export default function ResultAnimOverlay({
     return () => {
       if (slamTimerRef.current) clearTimeout(slamTimerRef.current)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [willSlam, resultAnim])
-
-  const slamPropsRef = useRef({
-    multiplier: 2 as 2 | 3,
-    preSoulAmount: 0n,
-    finalAmount: 0n
-  })
-  if (resultAnim?.win && (resultAnim.soulProc || resultAnim.kineticFired)) {
-    slamPropsRef.current = {
-      multiplier: resultAnim.soulProc ? 3 : 2,
-      preSoulAmount: resultAnim.preSoulAmount ?? 0n,
-      finalAmount: resultAnim.amount
-    }
-  }
+  }, [willSlam, resultAnim, playJackpot])
 
   if (!resultAnim) return null
+
+  const slamMultiplier = slamProps.multiplier
+  const preSoulAmount = slamProps.preSoulAmount
 
   const bonusTierKey = (resultAnim.bonus?.tier ?? 'COMMON') as BonusTier
   const bonusTierStyle =
@@ -441,9 +443,6 @@ export default function ResultAnimOverlay({
       : null
 
   const isGhostActive = activeFestival && festivalType === 'GHOST' && isWin
-
-  const slamMultiplier = slamPropsRef.current.multiplier
-  const preSoulAmount = slamPropsRef.current.preSoulAmount
 
   const adjustedScale =
     bonusTierKey === 'MYTHICAL'
@@ -589,7 +588,7 @@ export default function ResultAnimOverlay({
               show={slamActive}
               multiplier={slamMultiplier}
               preSoulAmount={preSoulAmount}
-              finalAmount={slamPropsRef.current.finalAmount}
+              finalAmount={slamProps.finalAmount}
             />
           )}
 
@@ -611,11 +610,8 @@ export default function ResultAnimOverlay({
                     )}
                   >
                     {
-                      formatPoints(
-                        willSlam
-                          ? slamPropsRef.current.preSoulAmount
-                          : animatedResult
-                      ).display
+                      formatPoints(willSlam ? preSoulAmount : animatedResult)
+                        .display
                     }
                   </span>
                 </span>

@@ -487,7 +487,15 @@ export default function FlashEventActivationOverlay({
   onDone
 }: FlashEventActivationOverlayProps) {
   const config = event ? EVENT_CONFIG[event] : null
+
+  const [prevEvent, setPrevEvent] = useState<EventTheme | null>(null)
   const [phase, setPhase] = useState<Phase>('burst')
+
+  if (event !== prevEvent) {
+    setPhase('burst')
+    setPrevEvent(event)
+  }
+
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
   const [isMobile, setIsMobile] = useState(false)
@@ -515,7 +523,6 @@ export default function FlashEventActivationOverlay({
       timersRef.current.push(t)
     }
 
-    setPhase('burst')
     push(() => setPhase('reveal'), config.revealDelayMs)
     push(() => setPhase('fade'), config.fadeStartMs)
     push(() => {

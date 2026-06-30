@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUserStore } from '@/app/stores/userStore'
 import { useUIStore } from '@/app/stores/uiStore'
@@ -42,78 +42,86 @@ function MatchFeedComponent({
   const oracleSide = useGameStore((s) => s.oracleSide)
   const winStreak = useUserStore((s) => s.winStreak)
 
-  const handlePick = useCallback(
-    async (gameId: string, playerName: string) => {
-      unlockOracle()
-      const user = getOrCreateUser()
-      const { betAmount: currentBet } = useUserStore.getState()
-      if (!isUserValid(user) || !user.nickname || currentBet <= 0n) return
+  const [now, setNow] = useState(0)
 
-      const currentNotification = useUIStore.getState().notification
-      if (currentNotification === 'new_visitor') {
-        localStorage.setItem('rps_welcomed', '1')
-        useUIStore.setState({ notification: null })
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setNow(Date.now())
+    })
+
+    const interval = setInterval(() => {
+      setNow(Date.now())
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const handlePick = useCallback(async (gameId: string, playerName: string) => {
+    unlockOracle()
+    const user = getOrCreateUser()
+    const { betAmount: currentBet } = useUserStore.getState()
+    if (!isUserValid(user) || !user.nickname || currentBet <= 0n) return
+
+    const currentNotification = useUIStore.getState().notification
+    if (currentNotification === 'new_visitor') {
+      localStorage.setItem('rps_welcomed', '1')
+      useUIStore.setState({ notification: null })
+    }
+
+    useGameStore.getState().setPrediction(gameId, {
+      gameId,
+      pick: playerName,
+      confirmed: false,
+      totalMultiplier: 1
+    })
+
+    let succeeded = false
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 5000)
+
+      const { ok, data } = await postPrediction(
+        {
+          userId: user.userId,
+          gameId,
+          pick: playerName,
+          betAmount: currentBet.toString(),
+          nickname: user.nickname,
+          shortId: user.shortId
+        },
+        controller.signal
+      )
+
+      clearTimeout(timeout)
+
+      if (ok && data?.success === true) {
+        succeeded = true
+        if (currentNotification === 'oracle') {
+          useUIStore.setState({ notification: null })
+          useGameStore.getState().setOracleSide(null)
+        }
+        useGameStore.getState().updatePrediction(gameId, { confirmed: true })
+      } else {
+        useUIStore.getState().triggerError(data?.error || 'MATCH ALREADY ENDED')
       }
-
-      useGameStore.getState().setPrediction(gameId, {
-        gameId,
-        pick: playerName,
-        confirmed: false,
-        totalMultiplier: 1
-      })
-
-      let succeeded = false
-      try {
-        const controller = new AbortController()
-        const timeout = setTimeout(() => controller.abort(), 5000)
-
-        const { ok, data } = await postPrediction(
-          {
-            userId: user.userId,
-            gameId,
-            pick: playerName,
-            betAmount: currentBet.toString(),
-            nickname: user.nickname,
-            shortId: user.shortId
-          },
-          controller.signal
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        logger.warn('Prediction POST aborted (timeout)', {
+          gameId,
+          playerName
+        })
+        useUIStore.getState().triggerError('CONNECTION TOO SLOW')
+      } else {
+        logger.error(
+          'Prediction POST failed',
+          err instanceof Error ? err : undefined,
+          { gameId, playerName }
         )
-
-        clearTimeout(timeout)
-
-        if (ok && data?.success === true) {
-          succeeded = true
-          if (currentNotification === 'oracle') {
-            useUIStore.setState({ notification: null })
-            useGameStore.getState().setOracleSide(null)
-          }
-          useGameStore.getState().updatePrediction(gameId, { confirmed: true })
-        } else {
-          useUIStore
-            .getState()
-            .triggerError(data?.error || 'MATCH ALREADY ENDED')
-        }
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          logger.warn('Prediction POST aborted (timeout)', {
-            gameId,
-            playerName
-          })
-          useUIStore.getState().triggerError('CONNECTION TOO SLOW')
-        } else {
-          logger.error(
-            'Prediction POST failed',
-            err instanceof Error ? err : undefined,
-            { gameId, playerName }
-          )
-          useUIStore.getState().triggerError('CONNECTION FAILED')
-        }
-      } finally {
-        if (!succeeded) useGameStore.getState().deletePrediction(gameId)
+        useUIStore.getState().triggerError('CONNECTION FAILED')
       }
-    },
-    []
-  )
+    } finally {
+      if (!succeeded) useGameStore.getState().deletePrediction(gameId)
+    }
+  }, [])
 
   return (
     <div className="min-h-[60vh]">
@@ -153,7 +161,10 @@ function MatchFeedComponent({
           )}
 
           {pendingMatches
-            .filter((pm) => pm.expiresAt - (Date.now() + serverOffset) > -5000)
+            .filter((pm) => {
+              if (now === 0) return true
+              return pm.expiresAt - (now + serverOffset) > -5000
+            })
             .map((pending) => (
               <PendingMatchCard
                 key={pending.gameId}

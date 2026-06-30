@@ -22,6 +22,7 @@ export interface FestivalState {
   flashType?: string | undefined
   endsAt: number
   triggeredBy: string
+  isDemo?: boolean
 }
 
 type Broadcast = (event: string, data: string) => void
@@ -85,7 +86,6 @@ const pickDemoFestival = (): FestivalType => {
   return DEMO_FESTIVAL_WEIGHTS[DEMO_FESTIVAL_WEIGHTS.length - 1]!.type
 }
 
-
 let _activeFestival: FestivalState | null = null
 let _lockoutUntil: number = 0
 let _lastPlayerFestivalAt: number = 0
@@ -110,7 +110,7 @@ export const buildFestivalBroadcastMessage = (
     const prefix = randomItem(ORACLE_TRIGGER_PREFIXES)
     return `${prefix} ${festivalType} FESTIVAL`
   }
-  
+
   if (festivalType === 'SURGE' && lapCount !== undefined) {
     return `${triggeredBy} has completed Chrono-Lap ${lapCount} and initiated the SURGE FESTIVAL`
   }
@@ -140,7 +140,9 @@ export const buildFestivalSpeech = (
 export const getActiveFestival = (): FestivalState | null => {
   if (!_activeFestival) return null
   if (Date.now() > _activeFestival.endsAt) {
-    logger.info('Festival expired', { type: _activeFestival.type })
+    if (!_activeFestival.isDemo) {
+      logger.info('Festival expired', { type: _activeFestival.type })
+    }
     _lockoutUntil = _activeFestival.endsAt + LOCKOUT_MS
     _activeFestival = null
     return null
@@ -186,7 +188,8 @@ const launchFestival = (
     type,
     startedAt: now,
     endsAt: now + durationMs,
-    triggeredBy
+    triggeredBy,
+    isDemo
   }
 
   _activeFestival = newState
@@ -200,7 +203,10 @@ const launchFestival = (
   }
 
   const executeBroadcastAndDatabaseUpdates = () => {
-    logger.info('Festival launched', { type, triggeredBy, isDemo })
+    // Check if the current launch is a real user event before logging
+    if (!isDemo) {
+      logger.info('Festival launched', { type, triggeredBy, isDemo })
+    }
 
     const message = buildFestivalBroadcastMessage(
       triggeredBy,
@@ -279,7 +285,6 @@ const launchFestival = (
   return true
 }
 
-
 export const recordBonusForUser = (
   userId: string,
   bonusTier: string | null
@@ -325,7 +330,6 @@ export const getLossStreakForUser = (userId: string): number =>
   _userLossStreak.get(userId) ?? 0
 export const resetLossStreakForUser = (userId: string): void =>
   void _userLossStreak.set(userId, 0)
-
 
 export const checkAndTriggerFestival = (
   userId: string,
@@ -498,7 +502,6 @@ export const triggerSurgeFestival = (
     lapCount
   })
 
-
 // Called from resolvePrediction when a Mythical relic drops.
 export const triggerVaultFestival = (
   nickname: string,
@@ -510,7 +513,6 @@ export const triggerVaultFestival = (
     triggerUserId
   })
 
-
 // Called from resolvePrediction when a Mythical or Legendary achievement unlocks.
 export const triggerSafeguardFestival = (
   nickname: string,
@@ -521,7 +523,6 @@ export const triggerSafeguardFestival = (
     isDemo: false,
     triggerUserId
   })
-
 
 const scheduleDemoFestival = (broadcast: Broadcast): void => {
   const delay =

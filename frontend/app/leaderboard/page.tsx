@@ -33,7 +33,7 @@ function LeaderboardContent() {
   )
   const [data, setData] = useState<LeaderboardEntry[]>([])
   const [badgeMap, setBadgeMap] = useState<Record<string, BadgeData[]>>({})
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const myShortId = useUserStore((s) => s.shortId)
   const myBadges = useUserStore((s) => s.myBadges)
@@ -48,33 +48,45 @@ function LeaderboardContent() {
     [searchParams, router, pathname]
   )
 
-  const load = useCallback(async (t: Tab, s: SortKey, d: SortDir) => {
-    setIsLoading(true)
-    try {
-      const entries = await fetchUnifiedLeaderboard(t, s, d)
-      setData(entries)
-      const shortIds = entries.map((e) => e.shortId)
-      const badges = await fetchAchievementsBulkBadges(shortIds)
-      if (badges) setBadgeMap(badges)
-    } catch (err) {
-      logger.error(
-        'Failed to load leaderboard',
-        err instanceof Error ? err : undefined
-      )
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
-    load(tab, sort, dir)
-  }, [tab, sort, dir, load])
+    let active = true
+
+    async function fetchLeaderboard() {
+      try {
+        const entries = await fetchUnifiedLeaderboard(tab, sort, dir)
+        if (!active) return
+        setData(entries)
+
+        const shortIds = entries.map((e) => e.shortId)
+        const badges = await fetchAchievementsBulkBadges(shortIds)
+        if (badges && active) {
+          setBadgeMap(badges)
+        }
+      } catch (err) {
+        logger.error(
+          'Failed to load leaderboard',
+          err instanceof Error ? err : undefined
+        )
+      } finally {
+        if (active) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    fetchLeaderboard()
+
+    return () => {
+      active = false
+    }
+  }, [tab, sort, dir])
 
   const handleTab = (t: Tab) => {
     const newSort = DEFAULT_SORT[t]
     setTab(t)
     setSort(newSort)
     setDir('desc')
+    setIsLoading(true)
     updateUrl({ tab: t, sort: newSort, dir: 'desc' })
   }
 
@@ -82,6 +94,7 @@ function LeaderboardContent() {
     const newDir: SortDir = sort === col && dir === 'desc' ? 'asc' : 'desc'
     setSort(col)
     setDir(newDir)
+    setIsLoading(true)
     updateUrl({ tab, sort: col, dir: newDir })
   }
 

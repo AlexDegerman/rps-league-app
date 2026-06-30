@@ -69,7 +69,9 @@ export default function ProfilePage() {
   const setShowAscensionPrompt = useUIStore((s) => s.setShowAscensionPrompt)
 
   const equippedRelic = useRelicStore((s) => s.equippedRelic)
-  const [isOwnProfile, setIsOwnProfile] = useState(false)
+
+  const isOwnProfile = myShortId === targetShortId
+
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -100,6 +102,9 @@ export default function ProfilePage() {
   const [profileRelic, setProfileRelic] = useState<RelicDef | null | undefined>(
     undefined
   )
+
+  const displayRelic = isOwnProfile ? equippedRelic : profileRelic
+
   const [profileStylePreference, setProfileStylePreference] = useState<
     string | null
   >(null)
@@ -112,9 +117,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!targetShortId) return
-    const own = myShortId === targetShortId
-    setIsOwnProfile(own)
-    setMounted(true)
 
     let isMounted = true
     let recoveryTimer: NodeJS.Timeout
@@ -122,7 +124,14 @@ export default function ProfilePage() {
     const checkWidth = () => {
       if (isMounted) setUseK(window.innerWidth <= 362)
     }
-    checkWidth()
+
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        setMounted(true)
+        checkWidth()
+      }
+    })
+
     window.addEventListener('resize', checkWidth)
 
     const loadProfile = async () => {
@@ -153,7 +162,7 @@ export default function ProfilePage() {
             targetShortId
           )
           if (isMounted && statsData) setStats(statsData)
-          if (own)
+          if (isOwnProfile)
             setStoreLinkedinEnabled(profileData.showLinkedinBadge ?? true)
         }
       } catch (err) {
@@ -163,7 +172,7 @@ export default function ProfilePage() {
           err instanceof Error ? err : undefined,
           { targetShortId }
         )
-        if (own) {
+        if (isOwnProfile) {
           setPoints('200000')
           const local = getOrCreateUser()
           setNickname(local.nickname || 'New Player')
@@ -184,7 +193,7 @@ export default function ProfilePage() {
       if (isMounted) setRanks({ daily: d, weekly: w, allTime: a })
     })
 
-    if (own && myUserId) {
+    if (isOwnProfile && myUserId) {
       const getRecovery = async () => {
         try {
           const data = await fetchRecoveryCode(myUserId)
@@ -208,11 +217,7 @@ export default function ProfilePage() {
       if (recoveryTimer) clearTimeout(recoveryTimer)
       window.removeEventListener('resize', checkWidth)
     }
-  }, [targetShortId, myShortId, myUserId, setStoreLinkedinEnabled])
-
-  useEffect(() => {
-    if (isOwnProfile) setProfileRelic(equippedRelic)
-  }, [equippedRelic, isOwnProfile])
+  }, [targetShortId, isOwnProfile, myUserId, setStoreLinkedinEnabled])
 
   const handleRegenerate = async () => {
     if (!isOwnProfile) return
@@ -336,22 +341,22 @@ export default function ProfilePage() {
             <p className="text-[1.4rem] min-[375px]:text-[1.5rem] sm:text-[clamp(1.5rem,6vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tighter">
               {nickname}
             </p>
-            {profileRelic !== undefined && (
+            {displayRelic !== undefined && (
               <div className="flex items-center gap-2 mt-1.5">
                 <RelicSlot
-                  relic={profileRelic}
+                  relic={displayRelic}
                   readonly={!isOwnProfile}
                   size="sm"
                   align="left"
                 />
-                {profileRelic && (
+                {displayRelic && (
                   <span
-                    className={`text-[9px] font-black uppercase tracking-widest ${RARITY_STYLES[profileRelic.rarity].text}`}
+                    className={`text-[9px] font-black uppercase tracking-widest ${RARITY_STYLES[displayRelic.rarity].text}`}
                   >
-                    {profileRelic.name}
+                    {displayRelic.name}
                   </span>
                 )}
-                {isOwnProfile && !profileRelic && (
+                {isOwnProfile && !displayRelic && (
                   <span className="text-[9px] text-gray-400 font-medium">
                     No relic equipped
                   </span>

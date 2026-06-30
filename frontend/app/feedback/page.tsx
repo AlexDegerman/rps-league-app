@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import * as Sentry from '@sentry/nextjs'
 import { getOrCreateUser } from '@/lib/user'
 import { useUserStore } from '@/app/stores/userStore'
@@ -47,7 +47,16 @@ export default function FeedbackPage() {
 
   const activeFlashEvent = useGameStore((s) => s.activeFlashEvent)
 
-  const [nickname, setNickname] = useState('')
+  const [nickname, setNickname] = useState(displayNickname || '')
+  const [prevDisplayNickname, setPrevDisplayNickname] = useState(
+    displayNickname || ''
+  )
+
+  if (displayNickname !== prevDisplayNickname) {
+    setNickname(displayNickname || '')
+    setPrevDisplayNickname(displayNickname || '')
+  }
+
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [category, setCategory] = useState<CategoryKey>('bug')
@@ -63,11 +72,6 @@ export default function FeedbackPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Pre-fill nickname from generated identity
-  useEffect(() => {
-    if (displayNickname) setNickname(displayNickname)
-  }, [displayNickname])
-
   // Check ban status before showing the form
   useEffect(() => {
     const user = getOrCreateUser()
@@ -79,6 +83,23 @@ export default function FeedbackPage() {
       .catch(() => {})
       .finally(() => setBanCheckDone(true))
   }, [])
+
+  const handleFile = useCallback(
+    (file: File) => {
+      if (!file.type.startsWith('image/')) {
+        setErrorMsg('Images only (png, jpg, webp)')
+        return
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setErrorMsg('Max 5 MB')
+        return
+      }
+      setErrorMsg('')
+      setScreenshot(file)
+      setScreenshotPreview(URL.createObjectURL(file))
+    },
+    [setErrorMsg, setScreenshot, setScreenshotPreview]
+  )
 
   // Handle clipboard paste for screenshots anywhere on the page
   useEffect(() => {
@@ -93,33 +114,14 @@ export default function FeedbackPage() {
     }
     window.addEventListener('paste', handlePaste)
     return () => window.removeEventListener('paste', handlePaste)
-    // handleFile is stable via useCallback, safe to omit from deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [handleFile])
 
-  const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith('image/')) {
-      setErrorMsg('Images only (png, jpg, webp)')
-      return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setErrorMsg('Max 5 MB')
-      return
-    }
-    setErrorMsg('')
-    setScreenshot(file)
-    setScreenshotPreview(URL.createObjectURL(file))
-  }, [])
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault()
-      setIsDragging(false)
-      const file = e.dataTransfer.files[0]
-      if (file) handleFile(file)
-    },
-    [handleFile]
-  )
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    if (file) handleFile(file)
+  }
 
   const removeScreenshot = () => {
     setScreenshot(null)

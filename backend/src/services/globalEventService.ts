@@ -131,7 +131,6 @@ const randomItem = <T>(arr: T[]): T =>
 export const getActiveGlobalEvent = (): GlobalEventState | null => {
   if (!_activeGlobalEvent) return null
   if (Date.now() > _activeGlobalEvent.endsAt) {
-    logger.info('Global event expired', { type: _activeGlobalEvent.type })
     _activeGlobalEvent = null
     return null
   }
@@ -172,11 +171,6 @@ const launchEvent = (broadcast: Broadcast): void => {
 
   const warningMsg = randomItem(ORACLE_WARNING_MESSAGES[type])
 
-  logger.info('Global event warning phase', {
-    type,
-    warningDuration,
-    activeDuration
-  })
 
   // Broadcast warning phase, clients show countdown to activeAt
     const warningSpeech = randomItem(ORACLE_WARNING_SPEECH[type])
@@ -200,8 +194,6 @@ const launchEvent = (broadcast: Broadcast): void => {
     if (!_activeGlobalEvent || _activeGlobalEvent.type !== type) return
     _activeGlobalEvent.phase = 'active'
 
-    logger.info('Global event now active', { type, activeDuration })
-
     broadcast(
       'global_event_start',
       JSON.stringify({
@@ -216,7 +208,6 @@ const launchEvent = (broadcast: Broadcast): void => {
     const endTimer = setTimeout(() => {
       if (_activeGlobalEvent?.type === type) {
         _activeGlobalEvent = null
-        logger.info('Global event ended', { type })
         broadcast('global_event_end', JSON.stringify({ type }))
       }
     }, activeDuration)
@@ -227,7 +218,6 @@ const launchEvent = (broadcast: Broadcast): void => {
 
 const scheduleNext = (broadcast: Broadcast): void => {
   const cooldown = randBetween(COOLDOWN_MIN_MS, COOLDOWN_MAX_MS)
-  logger.info('Global event cooldown scheduled', { cooldownMs: cooldown })
 
   _schedulerTimer = setTimeout(() => {
     launchEvent(broadcast)
@@ -242,7 +232,6 @@ const scheduleNext = (broadcast: Broadcast): void => {
 export const startGlobalEventScheduler = (broadcast: Broadcast): void => {
   if (_schedulerStarted) return
   _schedulerStarted = true
-  logger.info('Global event scheduler started')
   scheduleNext(broadcast)
 }
 

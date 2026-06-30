@@ -446,7 +446,8 @@ router.get('/:userId/points', async (req, res) => {
       const user = await getUserPoints(
         userId,
         shortId as string,
-        nickname as string
+        nickname as string,
+        req.ip
       )
 
       if (utmSource) {
