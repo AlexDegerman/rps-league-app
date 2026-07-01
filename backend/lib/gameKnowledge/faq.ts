@@ -337,4 +337,22 @@ A: Profiles surface joined date, longest recorded streak, lap count, live placem
 Q: What is the match history system on profiles?
 A: Each profile includes a full interactive match history organized into three tabs: Recent for chronological activity, Biggest Wins for highest-value outcomes ranked, and Best Multipliers for peak bonus and flash event combinations. The system uses infinite scrolling with progressive loading to handle large datasets.
 
+
+--- LIVE SERVICE STATUS ---
+
+Q: Is the game still being updated?
+A: Yes. RPS League is a live-service game with ongoing seasonal content updates introducing new achievements, events, relics, and gameplay systems over time.
+
+Q: How often are updates released?
+A: Update cadence is not published on a fixed schedule. Major system additions are documented in the in-app Update History page and surfaced to returning players via the What's New overlay on their next visit.
+
+Q: Are there seasonal events?
+A: Yes. Flash Events and Global Events form the continuous event cycle. Seasonal content updates introduce new event types, number tiers, achievements, and gameplay systems as part of the live-service structure.
+
+Q: Will old progress still matter after updates?
+A: Yes. Existing relics, achievements, laps, and leaderboard records are preserved through updates. New systems are additive rather than replacing existing progression.
+
+Q: Will my achievements become obsolete?
+A: No. The Achievement Codex is a permanent record. New achievements added in updates expand the codex without invalidating previously earned milestones.
+
 `
