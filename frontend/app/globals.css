@@ -2380,12 +2380,6 @@
   }
 }
 
-.oracle-glow-btn {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
-  color: white;
-  animation: oracle-pulse 1.4s ease-in-out infinite;
-}
-
 .ghost-echo-wrap {
   top: -0.5em;
   left: 55%;
@@ -2604,6 +2598,33 @@
   inset: 0;
   border-radius: inherit;
   box-shadow: 0 0 18px rgba(168, 85, 247, 1), 0 0 36px rgba(168, 85, 247, 0.75), 0 0 60px rgba(168, 85, 247, 0.4);
+  opacity: 0;
+  z-index: -1;
+  animation: pulse 1.4s ease-in-out infinite;
+  will-change: opacity;
+}
+
+.new-user-glow-btn {
+  position: relative;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  isolation: isolate;
+  border: 1.5px solid #bfdbfe;
+  box-shadow: 
+    0 0 10px rgba(37, 99, 235, 0.9), 
+    0 0 22px rgba(96, 165, 250, 0.6), 
+    0 0 40px rgba(191, 219, 254, 0.35);
+}
+
+.new-user-glow-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 
+    0 0 18px rgba(37, 99, 235, 1), 
+    0 0 36px rgba(96, 165, 250, 0.75), 
+    0 0 60px rgba(191, 219, 254, 0.4);
   opacity: 0;
   z-index: -1;
   animation: pulse 1.4s ease-in-out infinite;

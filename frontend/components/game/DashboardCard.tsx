@@ -420,7 +420,7 @@ export default function DashboardCard() {
                     >
                       {notification === 'no_bigint'
                         ? 'RPS League requires a modern browser for Vigintillion-scale math. Please update your browser or OS.'
-                        : 'Start betting to rank up the leaderboard. No progress is lost, saved automatically.'}
+                        : 'Start predicting to climb the leaderboard. Progress is saved automatically.'}
                     </p>
                   </div>
                 </div>

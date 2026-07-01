@@ -430,6 +430,7 @@ export default function HomePage() {
       .then((data) => {
         const alreadyWelcomed = !!localStorage.getItem('rps_welcomed')
         if (!alreadyWelcomed) return
+        if (useUIStore.getState().notification === 'new_visitor') return
 
         if (data && !data.used) {
           useGameStore.getState().setOracleSide(data.side)

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import type { PendingMatch, PredictionRecord } from '@/types/rps'
 import { formatDateTime } from '@/lib/format'
 import { useGameStore } from '@/app/stores/gameStore'
+import { useUIStore } from '@/app/stores/uiStore'
 
 interface PendingMatchCardProps {
   pending: PendingMatch
@@ -47,6 +48,8 @@ function PendingMatchCardComponent({
 
   const storeVisualMode = useGameStore((s) => s.visualMode)
   const storeFestivalModeKey = useGameStore((s) => s.festivalModeKey)
+  const notification = useUIStore((s) => s.notification)
+  const isNewUser = notification === 'new_visitor'
 
   const activeVisualMode = visualMode || storeVisualMode
   const activeFestivalKey = festivalModeKey || storeFestivalModeKey
@@ -333,7 +336,7 @@ function PendingMatchCardComponent({
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerA)}
-              className={`${betBtnClass} ${oracleSide === 'left' ? 'oracle-glow-btn' : ''}`}
+              className={`${betBtnClass} ${oracleSide === 'left' ? 'oracle-glow-btn' : isNewUser ? 'new-user-glow-btn' : ''}`}
             >
               {oracleSide === 'left' ? '👁️ PICK' : cfg.label}
             </button>
@@ -377,7 +380,7 @@ function PendingMatchCardComponent({
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerB)}
-              className={`${betBtnClass} ${oracleSide === 'right' ? 'oracle-glow-btn' : ''}`}
+              className={`${betBtnClass} ${oracleSide === 'right' ? 'oracle-glow-btn' : isNewUser ? 'new-user-glow-btn' : ''}`}
             >
               {oracleSide === 'right' ? '👁️ PICK' : cfg.label}
             </button>
