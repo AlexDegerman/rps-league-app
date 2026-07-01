@@ -1,5 +1,5 @@
-import 'dotenv/config'
 import './utils/instrument.js'
+import 'dotenv/config'
 import express from 'express'
 import * as Sentry from '@sentry/node'
 import { initDb } from './utils/initDb.js'

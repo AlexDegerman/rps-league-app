@@ -31,6 +31,7 @@ import {
   getActiveGlobalEvent,
   type GlobalEventBuffResult
 } from './globalEventService.js'
+import { recordInteraction } from './sessionService.js'
 
 const POINTS_FLOOR = 100000n
 // Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
@@ -102,6 +103,8 @@ export const savePrediction = async (
 
     if (insertResult.rowCount === 0)
       return { success: false, error: 'BET ALREADY PLACED' }
+
+    recordInteraction(userId, 'prediction').catch(() => {})
 
     return { success: true }
   } catch (err) {

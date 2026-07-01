@@ -3,6 +3,7 @@ import pool from '../utils/db.js'
 import { getUserPoints } from '../services/userService.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
+import { getSessionStats } from '../services/sessionService.js'
 
 const router = Router()
 
@@ -168,34 +169,51 @@ router.get('/admin/stats', async (req, res) => {
       0n
     )
 
+  
+    const sessionStats = getSessionStats()
+    
     const utmTotals = {
-      signups: Array.from(globalSourceMap.values()).reduce((s, p) => s + p.signups, 0),
-      visits: Object.values(visitMap).reduce((s: number, v) => s + Number(v), 0),
-      total_points: formatStat(totalPointsRaw.toString()).formatted
+      signups: Array.from(globalSourceMap.values()).reduce(
+        (s, p) => s + p.signups,
+        0
+      ),
+      visits: Object.values(visitMap).reduce(
+        (s: number, v) => s + Number(v),
+        0
+      ),
+      total_points: formatStat(totalPointsRaw.toString()).formatted,
+      session_stats: {
+        active: sessionStats.activeSessions,
+        avgDurationMin: sessionStats.avgDurationMin,
+        avgMatchesPerSession: sessionStats.avgMatchesPerSession
+      }
     }
 
     const utmPlatforms = Array.from(globalSourceMap.values()).map((p) => ({
       source: p.source,
       signups: p.signups,
       visits: visitMap[p.source] ?? 0,
-      total_points: formatStat(p.total_points_raw.toString()).formatted
+      total_points: formatStat(p.total_points_raw.toString()).formatted,
+      session_stats: sessionStats.byUtm[p.source] ?? null
     }))
 
     const locations = Array.from(countryMap.values()).map((c) => ({
       country: c.country,
       signups: c.signups,
       total_points: formatStat(c.total_points_raw.toString()).formatted,
+      session_stats: sessionStats.byCountry[c.country] ?? null,
       towns: Array.from(c.townsMap.values()).map((t) => {
-        const calculatedAvg = t.avg_points_count > 0n 
-          ? t.avg_points_sum / t.avg_points_count 
-          : 0n
+        const calculatedAvg =
+          t.avg_points_count > 0n ? t.avg_points_sum / t.avg_points_count : 0n
         return {
           town: t.town,
           signups: t.signups,
           total_points: formatStat(t.total_points_raw.toString()).formatted,
           avg_points: formatStat(calculatedAvg.toString()).formatted,
           top_points: formatStat(t.top_points_raw.toString()).formatted,
-          utm_breakdown: t.utm
+          utm_breakdown: t.utm,
+          session_stats:
+            sessionStats.byCountry[c.country]?.byTown[t.town] ?? null
         }
       })
     }))
@@ -232,7 +250,17 @@ router.get('/admin/stats', async (req, res) => {
         totals: utmTotals,
         platforms: utmPlatforms
       },
-      locations
+      locations,
+      sessions: {
+        active: sessionStats.activeSessions,
+        completed: sessionStats.completedSessions,
+        totalMatchesTracked: sessionStats.totalMatchesTracked,
+        avgDurationMin: sessionStats.avgDurationMin,
+        avgMatchesPerSession: sessionStats.avgMatchesPerSession,
+        firstSessionAvgDurationMin: sessionStats.firstSessionAvgDurationMin,
+        returningSessionAvgDurationMin:
+          sessionStats.returningSessionAvgDurationMin
+      }
     })
   } catch (err) {
     logger.error('GET /api/admin/stats failed', err)
