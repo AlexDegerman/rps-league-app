@@ -1,5 +1,6 @@
 import pool from '../utils/db.js'
 import { getActiveFestival } from './festivalService.js'
+import { logger } from '../utils/logger.js'
 
 export type RelicRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHICAL'
 
@@ -181,6 +182,29 @@ function getLapBonus(rarity: RelicRarity, userLaps: number) {
   return Math.min(bonus, cfg.max)
 }
 
+async function logRelicDrop(userId: string, relic: RelicDef) {
+  try {
+    const userRes = await pool.query(
+      'SELECT nickname FROM users WHERE user_id = $1',
+      [userId]
+    )
+    const nickname = userRes.rows[0]?.nickname ?? 'Anonymous'
+
+    logger.info('Relic dropped', {
+      nickname,
+      userId,
+      relicName: relic.name,
+      rarity: relic.rarity,
+      relicKey: relic.key
+    })
+  } catch (err) {
+    logger.warn('Failed to log relic drop event details', {
+      userId,
+      error: String(err)
+    })
+  }
+}
+
 export async function rollRelicDrop(
   userId: string,
   equippedRelic: string | null,
@@ -210,6 +234,9 @@ export async function rollRelicDrop(
         'INSERT INTO relics (user_id, relic_key, rarity, found_at) VALUES ($1, $2, $3, $4)',
         [userId, picked.key, picked.rarity, Date.now()]
       )
+
+      await logRelicDrop(userId, picked)
+
       return picked
     }
     return null
@@ -229,6 +256,9 @@ export async function rollRelicDrop(
         'INSERT INTO relics (user_id, relic_key, rarity, found_at) VALUES ($1, $2, $3, $4)',
         [userId, relic.key, relic.rarity, Date.now()]
       )
+
+      await logRelicDrop(userId, relic)
+
       return relic
     }
   }
