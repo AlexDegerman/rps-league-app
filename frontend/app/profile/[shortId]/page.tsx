@@ -58,7 +58,6 @@ export default function ProfilePage() {
   const fastestLapBets = useUserStore((s) => s.fastestLapBets)
   const setFastestLapBets = useUserStore((s) => s.setFastestLapBets)
   const setStorePoints = useUserStore((s) => s.setPoints)
-  const myUserId = useUserStore((s) => s.userId)
   const myShortId = useUserStore((s) => s.shortId)
   const myBadges = useUserStore((s) => s.myBadges)
   const storeLinkedinEnabled = useUserStore((s) => s.showLinkedinBadge)
@@ -70,7 +69,11 @@ export default function ProfilePage() {
 
   const equippedRelic = useRelicStore((s) => s.equippedRelic)
 
-  const isOwnProfile = myShortId === targetShortId
+  const localShortId =
+    typeof window !== 'undefined'
+      ? localStorage.getItem('rps_short_id') || ''
+      : ''
+  const isOwnProfile = (myShortId || localShortId) === targetShortId
 
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
@@ -118,8 +121,10 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!targetShortId) return
 
+    const localShortId = localStorage.getItem('rps_short_id') || ''
+    const isOwn = localShortId === targetShortId
+    
     let isMounted = true
-    let recoveryTimer: NodeJS.Timeout
 
     const checkWidth = () => {
       if (isMounted) setUseK(window.innerWidth <= 362)
@@ -193,20 +198,14 @@ export default function ProfilePage() {
       if (isMounted) setRanks({ daily: d, weekly: w, allTime: a })
     })
 
-    if (isOwnProfile && myUserId) {
+    if (isOwn) {
       const getRecovery = async () => {
         try {
-          const data = await fetchRecoveryCode(myUserId)
+          const data = await fetchRecoveryCode()
           if (!isMounted) return
-          if (data) {
-            setRecoveryCode(data.recoveryCode)
-          } else {
-            recoveryTimer = setTimeout(getRecovery, 2000)
-          }
+          setRecoveryCode(data?.recoveryCode ?? null)
         } catch {
-          if (isMounted) {
-            recoveryTimer = setTimeout(getRecovery, 3000)
-          }
+          if (isMounted) setRecoveryCode(null)
         }
       }
       getRecovery()
@@ -214,10 +213,11 @@ export default function ProfilePage() {
 
     return () => {
       isMounted = false
-      if (recoveryTimer) clearTimeout(recoveryTimer)
       window.removeEventListener('resize', checkWidth)
     }
-  }, [targetShortId, isOwnProfile, myUserId, setStoreLinkedinEnabled])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    targetShortId])
 
   const handleRegenerate = async () => {
     if (!isOwnProfile) return

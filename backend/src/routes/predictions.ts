@@ -55,13 +55,13 @@ router.get('/stats', async (req, res) => {
         `SELECT SUM(points) as pts, SUM(total_volume) as vol FROM users`
       ),
       pool.query(
-        `SELECT nickname, user_id, short_id, points FROM users ORDER BY points DESC LIMIT 1`
+        `SELECT nickname, short_id, points FROM users ORDER BY points DESC LIMIT 1`
       ),
       pool.query(
-        `SELECT nickname, user_id, short_id, max_win_streak FROM users ORDER BY max_win_streak DESC LIMIT 1`
+        `SELECT nickname, short_id, max_win_streak FROM users ORDER BY max_win_streak DESC LIMIT 1`
       ),
       pool.query(
-        `SELECT nickname, user_id, short_id, biggest_win FROM users ORDER BY biggest_win DESC LIMIT 1`
+        `SELECT nickname, short_id, biggest_win FROM users ORDER BY biggest_win DESC LIMIT 1`
       )
     ])
 
@@ -76,19 +76,16 @@ router.get('/stats', async (req, res) => {
       records: {
         richest: {
           name: topPointsUser.rows[0]?.nickname,
-          uid: topPointsUser.rows[0]?.user_id,
           sid: topPointsUser.rows[0]?.short_id,
           value: formatStat(topPointsUser.rows[0]?.points)
         },
         biggestWin: {
           name: topWinUser.rows[0]?.nickname,
-          uid: topWinUser.rows[0]?.user_id,
           sid: topWinUser.rows[0]?.short_id,
           value: formatStat(topWinUser.rows[0]?.biggest_win)
         },
         topStreak: {
           name: topStreakUser.rows[0]?.nickname,
-          uid: topStreakUser.rows[0]?.user_id,
           sid: topStreakUser.rows[0]?.short_id,
           value: topStreakUser.rows[0]?.max_win_streak
         }

@@ -5,7 +5,8 @@ import {
   isUserValid,
   regenerateNickname,
   resetUser,
-  clearUserCache
+  clearUserCache,
+  storeRecoveryCode
 } from '@/lib/user'
 import {
   fetchUserPoints,
@@ -199,6 +200,10 @@ export const useUserStore = create<UserState>((set, get) => ({
     })
 
     if (!data) return
+
+    if (data.recoveryCode) {
+      storeRecoveryCode(data.recoveryCode)
+    }
 
     set({
       linkedinUrl: data.linkedinUrl || null,

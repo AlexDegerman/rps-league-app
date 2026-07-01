@@ -91,6 +91,7 @@ export interface UserPointsData {
   fastestLapBets: number
   linkedinUrl: string | null
   showLinkedinBadge: boolean
+  recoveryCode?: string | null
 }
 
 export interface LeaderboardEntry {

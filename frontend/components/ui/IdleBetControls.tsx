@@ -2,6 +2,7 @@
 
 import { useIdleStore } from '@/app/stores/idleStore'
 import { useUIStore } from '@/app/stores/uiStore'
+import { markAutoBetUsed } from '@/lib/api'
 import { getOrCreateUser } from '@/lib/user'
 
 export default function IdleBetControls() {
@@ -24,10 +25,7 @@ export default function IdleBetControls() {
 
     if (turningOn) {
       const user = getOrCreateUser()
-      fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/${user.userId}/auto-bet-used`,
-        { method: 'POST' }
-      ).catch(() => {})
+      markAutoBetUsed(user.userId)
     }
   }
 

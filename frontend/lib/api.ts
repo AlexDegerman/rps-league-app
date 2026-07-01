@@ -16,6 +16,7 @@ import type {
   GlobalEventStateResponse
 } from '@/types/rps'
 import { logger } from '@/lib/logger'
+import { getOrCreateUser, getStoredRecoveryCode } from './user'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -126,12 +127,26 @@ export async function ascendUser(userId: string, shortId: string) {
   )
 }
 
+export async function markAutoBetUsed(userId: string): Promise<void> {
+  const { shortId } = getOrCreateUser()
+  try {
+    await fetch(`${API_BASE}/api/users/${userId}/auto-bet-used`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shortId })
+    })
+  } catch {
+  }
+}
+
 /* --- AUTH & RECOVERY --- */
 
-export async function fetchRecoveryCode(userId: string) {
-  return handleResponse<{ recoveryCode: string }>(
-    fetch(`${API_BASE}/api/users/recovery/${userId}`)
-  )
+export async function fetchRecoveryCode(): Promise<{
+  recoveryCode: string
+} | null> {
+  const stored = getStoredRecoveryCode()
+  if (stored) return { recoveryCode: stored }
+  return null
 }
 
 export async function handleRecoverProfile(recoveryCode: string) {

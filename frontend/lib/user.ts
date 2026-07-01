@@ -4,6 +4,7 @@ import { generateNickname } from './nicknames'
 const USER_ID_KEY = 'rps_user_id'
 const SHORT_ID_KEY = 'rps_short_id'
 const NICKNAME_KEY = 'rps_nickname'
+const RECOVERY_CODE_KEY = 'rps_recovery_code'
 
 const generateUserId = (): string => crypto.randomUUID()
 const generateShortId = (): string => nanoid(10)
@@ -69,7 +70,7 @@ export const resetUser = () => {
   localStorage.removeItem(USER_ID_KEY)
   localStorage.removeItem(SHORT_ID_KEY)
   localStorage.removeItem(NICKNAME_KEY)
-
+  localStorage.removeItem(RECOVERY_CODE_KEY)
   cachedUser = null
 }
 
@@ -93,4 +94,14 @@ export const getUserId = (): string | null => {
 export const getNickname = (): string | null => {
   if (typeof window === 'undefined') return null
   return localStorage.getItem(NICKNAME_KEY)
+}
+
+export const getStoredRecoveryCode = (): string | null => {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(RECOVERY_CODE_KEY)
+}
+
+export const storeRecoveryCode = (code: string): void => {
+  if (typeof window === 'undefined') return
+  localStorage.setItem(RECOVERY_CODE_KEY, code)
 }

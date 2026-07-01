@@ -26,6 +26,10 @@ router.post('/recovery-tutorial-complete', async (req, res) => {
 
 // GET /api/admin/stats
 router.get('/admin/stats', async (req, res) => {
+    const key = req.headers['x-admin-key'] ?? req.query.key
+    if (!key || key !== process.env.FEEDBACK_ADMIN_KEY) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
   try {
     const [
       users,
@@ -385,24 +389,6 @@ router.get('/profile/:shortId', async (req, res) => {
   }
 })
 
-// GET /api/users/recovery/:userId
-router.get('/recovery/:userId', async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT recovery_code FROM users WHERE user_id = $1`,
-      [req.params.userId]
-    )
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: 'User not found' })
-    res.json({ recoveryCode: result.rows[0].recovery_code })
-  } catch (err) {
-    logger.error('GET /users/recovery/:userId failed', err, {
-      userId: req.params.userId
-    })
-    res.status(500).json({ error: 'Failed to fetch recovery code' })
-  }
-})
-
 // GET /api/users/check-name/:nickname
 router.get('/check-name/:nickname', async (req, res) => {
   try {
@@ -459,6 +445,12 @@ router.get('/:userId/points', async (req, res) => {
           .catch((err) => logger.warn('New user utm update failed', err))
       }
 
+      const recoveryRes = await pool.query(
+        `SELECT recovery_code FROM users WHERE user_id = $1`,
+        [userId]
+      )
+      const recoveryCode = recoveryRes.rows[0]?.recovery_code ?? null
+
       return res.json({
         nickname: user.nickname ?? (nickname as string) ?? 'New Player',
         points: user.points.toString(),
@@ -469,7 +461,8 @@ router.get('/:userId/points', async (req, res) => {
         allTimePeak: user.points.toString(),
         pointStylePreference: null,
         laps: 0,
-        fastestLapBets: null
+        fastestLapBets: null,
+        recoveryCode
       })
     }
 
@@ -536,6 +529,16 @@ router.get('/idle-eligible/:userId', async (req, res) => {
 
 router.post('/:userId/auto-bet-used', async (req, res) => {
   const { userId } = req.params
+  const { shortId } = req.body
+
+  if (!shortId) return res.status(400).json({ error: 'Missing shortId' })
+
+  const check = await pool.query(
+    `SELECT 1 FROM users WHERE user_id = $1 AND short_id = $2`,
+    [userId, shortId]
+  )
+  if (check.rowCount === 0) return res.status(403).json({ error: 'Forbidden' })
+
   await pool.query(
     `UPDATE users SET has_used_auto_bet = true WHERE user_id = $1`,
     [userId]
