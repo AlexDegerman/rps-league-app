@@ -11,7 +11,8 @@ export const getOrCreateUser = async (
   userId: string,
   shortId: string,
   nickname?: string,
-  ip?: string
+  ip?: string,
+  utmSource?: string
 ): Promise<{ points: bigint; nickname: string | null }> => {
   try {
     const existing = await pool.query(
@@ -58,9 +59,10 @@ export const getOrCreateUser = async (
           peak_points, 
           recovery_code,
           signup_town,
-          signup_country
+          signup_country,
+          utm_source
         )
-        VALUES ($1, $2, $3, $4, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $4, $5, $6, $7, $8)
         ON CONFLICT (user_id) DO NOTHING`,
       [
         userId,
@@ -69,7 +71,8 @@ export const getOrCreateUser = async (
         STARTING_POINTS.toString(),
         recoveryCode,
         signupTown,
-        signupCountry
+        signupCountry,
+        utmSource ?? null
       ]
     )
 
@@ -82,7 +85,8 @@ export const getOrCreateUser = async (
       userId,
       shortId,
       signupTown,
-      signupCountry
+      signupCountry,
+      utmSource
     })
 
     return {
@@ -99,9 +103,10 @@ export const getUserPoints = async (
   userId: string,
   shortId: string,
   nickname?: string,
-  ip?: string
+  ip?: string,
+  utmSource?: string
 ): Promise<{ points: bigint; nickname: string | null }> => {
-  return getOrCreateUser(userId, shortId, nickname, ip)
+  return getOrCreateUser(userId, shortId, nickname, ip, utmSource)
 }
 
 export const generateRecoveryCode = (): string => {

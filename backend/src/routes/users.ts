@@ -433,7 +433,8 @@ router.get('/:userId/points', async (req, res) => {
         userId,
         shortId as string,
         nickname as string,
-        req.ip
+        req.ip,
+        utmSource
       )
 
       if (utmSource) {
