@@ -469,11 +469,12 @@ I engineered a Sequential Spectacle Queue using a Zustand-based state machine. T
 To maintain a professional live-service standard and close the loop between user experience and system logs:
 
 - **Unified Observability**: Integrated Sentry for full-stack error tracking and performance monitoring across the entire stack, frontend React/Next.js and backend Express, specifically guarding against BigInt overflows and SSE connection failures. Structured logging captures SSE client lifecycle events (connect, disconnect, client count) and match resolution errors in real time.
-- **Context-Aware Feedback**: An in-app portal for bug reports and suggestions. Submissions automatically bundle game state (points, streak, active events) and environment metadata (route, viewport, browser).
-- **Trace-Link Debugging**: Manual feedback is linked directly to Sentry’s `associatedEventId`, allowing for instantaneous lookup of the exact line of code that failed during a reported user session.
-- **Visual Reporting**: Support for screenshot attachments via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop functionality.
+- **Context-Aware Feedback**: An in-app portal for bug reports and suggestions. Submissions automatically bundle game state (points, streak, active events) and environment metadata (route, viewport, browser), and dynamically associate relevant player profile safely.
+- **Redirection-Safe Trace Link Debugging**: Manual feedback is linked directly to Sentry’s `associatedEventId`. Backend-side fallback event-generation ensures a trace ID is captured for every report. Discord alerts construct direct search URLs nested inside your friendly Sentry organization subdomain, resolving directly to Sentry events without losing context during subdomain redirections.
+- **Secure Visual Reporting**: Support for screenshot attachments (max 5MB) via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop. Uploads are strictly validated server-side using **magic-byte sniffing** to prevent MIME-type spoofing, and processed through automated, server-side AI content moderation filters.
+- **Graceful Error Recovery**: Custom upload middleware captures file size limit violations at the network boundary, returning clean, user-friendly API errors without dropping or crashing the server process. Memory-safe preview URL lifecycle management on the frontend prevents Object URL leaks.
 - **Operational Monitoring**: Automated real-time alerts for feedback and AI Oracle queries are dispatched via **Discord Webhooks** to a private administrative channel.
-- **Privacy & Security**: IP addresses are masked (e.g., `192.168.x.x`) for audit logs. No authentication tokens, passwords, or PII are ever logged or stored.
+- **Privacy & Security**: IP addresses are anonymized and masked for audit logs using normalization logic that robustly handles standard IPv4, external IPv6, and localhost loopbacks (e.g., `127.0.x.x` and `::1` formats). No authentication tokens, passwords, or PII are ever logged or stored.
 
 ---
 

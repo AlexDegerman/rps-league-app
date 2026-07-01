@@ -40,10 +40,15 @@ GEMINI_API_KEY=your_gemini_api_key
 
 # Observability & Operations
 SENTRY_DSN=https://your-key@o12345.ingest.sentry.io/project-id
+SENTRY_ORG=your_sentry_org
 API_BASE_URL=http://localhost:5000
 DISCORD_LOG_WEBHOOK=your_discord_log_url
 DISCORD_FEEDBACK_WEBHOOK=your_discord_feedback_url
 FEEDBACK_ADMIN_KEY=your_admin_secret
+
+# Sightengine Media Moderation
+SIGHTENGINE_USER=your_sightengine_user
+SIGHTENGINE_SECRET=your_sightengine_secret
 ```
 
 ---

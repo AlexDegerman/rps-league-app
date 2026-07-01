@@ -1,32 +1,26 @@
 import { Router } from 'express'
-import type { Request, Response } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import multer, { type FileFilterCallback } from 'multer'
 import * as Sentry from '@sentry/node'
+import { fileTypeFromBuffer } from 'file-type'
 import pool from '../utils/db.js'
 import rateLimit from 'express-rate-limit'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
+import { maskIpForLogs } from '../utils/maskIp.js'
 
-/**
- * CONFIGURATION
- * Environment-driven webhook + admin security keys.
- */
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_FEEDBACK_WEBHOOK!
 const ADMIN_KEY = process.env.FEEDBACK_ADMIN_KEY!
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:5000'
+const SIGHTENGINE_USER = process.env.SIGHTENGINE_USER
+const SIGHTENGINE_SECRET = process.env.SIGHTENGINE_SECRET
+const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+const SENTRY_ORG = process.env.SENTRY_ORG
 
-/**
- * PRODUCTION SAFETY CHECK
- * Ensures admin links are not broken in deployed environments.
- */
 if (!process.env.API_BASE_URL && process.env.NODE_ENV === 'production') {
   logger.warn('API_BASE_URL is missing. Admin links may break.')
 }
 
-/**
- * CATEGORY MAPPING
- * Maps frontend categories into structured Discord embeds.
- */
 const CATEGORIES: Record<string, { label: string; color: number }> = {
   bug: { label: '🐛 Technical Issue', color: 0xe74c3c },
   visuals: { label: '🎨 Visuals & Animations', color: 0x3498db },
@@ -36,10 +30,6 @@ const CATEGORIES: Record<string, { label: string; color: number }> = {
   praise: { label: '🙌 General Praise', color: 0x2ecc71 }
 }
 
-/**
- * UPLOAD HANDLING
- * In-memory storage for screenshots (max 5MB, images only).
- */
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
@@ -48,14 +38,24 @@ const upload = multer({
     file: Express.Multer.File,
     cb: FileFilterCallback
   ) => {
-    cb(null, file.mimetype.startsWith('image/'))
+    cb(null, ALLOWED_IMAGE_TYPES.includes(file.mimetype))
   }
 })
 
-/**
- * IP EXTRACTION
- * Normalizes proxy + socket IP sources into a consistent format.
- */
+const uploadMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  upload.single('screenshot')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'FILE_TOO_LARGE' })
+      }
+      return res.status(400).json({ error: err.code })
+    } else if (err) {
+      return res.status(400).json({ error: 'INVALID_FILE' })
+    }
+    next()
+  })
+}
+
 const getSafeIp = (req: Request): string => {
   const forwarded = req.headers['x-forwarded-for']
   if (forwarded) {
@@ -78,37 +78,6 @@ const feedbackLimiter = rateLimit({
 
 const router = Router()
 
-/**
- * IP MASKING
- * Privacy-safe representation supporting IPv4 and IPv6.
- */
-const maskIp = (ip: string): string => {
-  if (!ip || ip === 'unknown' || ip === 'anonymous') return 'anonymous'
-
-  // IPv4
-  if (ip.includes('.') && !ip.includes(':')) {
-    const parts = ip.split('.')
-    return parts.length >= 2 ? `${parts[0]}.${parts[1]}.x.x` : ip
-  }
-
-  // IPv6 localhost shortcuts
-  if (ip === '::1') return '127.0.x.x'
-
-  // IPv4-mapped IPv6 (::ffff:127.0.0.1)
-  const v4Match = ip.match(/(\d{1,3}\.\d{1,3})\.\d{1,3}\.\d{1,3}$/)
-  if (v4Match) return `${v4Match[1]}.x.x`
-
-  // Generic IPv6 (keep first 2 blocks, mask rest)
-  const parts = ip.split(':').filter(Boolean)
-  if (parts.length >= 2) return `${parts[0]}:${parts[1]}::x:x`
-
-  return 'anonymous'
-}
-
-/**
- * BAN CHECK
- * Verifies whether a user is restricted from submitting feedback.
- */
 async function isBanned(userId: string): Promise<boolean> {
   try {
     const result = await pool.query(
@@ -122,14 +91,86 @@ async function isBanned(userId: string): Promise<boolean> {
   }
 }
 
-/**
- * FEEDBACK INGESTION
- * Sends structured reports to Discord + Sentry.
- */
+// Validate actual file bytes server-side (mimetype is spoofable)
+async function isValidImage(buffer: Buffer): Promise<boolean> {
+  const type = await fileTypeFromBuffer(buffer)
+  return !!type && ALLOWED_IMAGE_TYPES.includes(type.mime)
+}
+
+// Check contents with Sightengine (fails closed on error or timeout)
+async function isImageSafe(buffer: Buffer): Promise<boolean> {
+  if (!SIGHTENGINE_USER || !SIGHTENGINE_SECRET) {
+    logger.warn('Sightengine credentials missing, rejecting image')
+    return false
+  }
+
+  const form = new FormData()
+  form.append('media', new Blob([new Uint8Array(buffer)]), 'screenshot.png')
+  form.append('models', 'nudity-2.1,weapon,violence')
+  form.append('api_user', SIGHTENGINE_USER)
+  form.append('api_secret', SIGHTENGINE_SECRET)
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 10_000)
+
+  try {
+    const res = await fetch('https://api.sightengine.com/1.0/check.json', {
+      method: 'POST',
+      body: form,
+      signal: controller.signal
+    })
+
+    clearTimeout(timeout)
+
+    if (!res.ok) {
+      logger.error('Sightengine request failed', {
+        status: res.status
+      })
+      return false
+    }
+
+    const data = await res.json()
+
+    if (data.status !== 'success') {
+      logger.error('Sightengine moderation failed', data)
+      return false
+    }
+
+    const nudity = data.nudity?.raw ?? 0
+    const violence = data.violence?.prob ?? 0
+
+    const firearm = data.weapon?.classes?.firearm ?? 0
+    const knife = data.weapon?.classes?.knife ?? 0
+    const weaponScore = Math.max(firearm, knife)
+
+    const safe = nudity < 0.5 && weaponScore < 0.5 && violence < 0.5
+
+    if (!safe) {
+      logger.info('Image rejected by moderation', {
+        nudity,
+        weapon: weaponScore,
+        violence
+      })
+    }
+
+    return safe
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      logger.error('Sightengine request timed out')
+    } else {
+      logger.error('Image moderation check failed', err)
+    }
+
+    return false
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 router.post(
   '/',
   feedbackLimiter,
-  upload.single('screenshot'),
+  uploadMiddleware,
   async (req: Request, res: Response) => {
     const multerReq = req as Request & { file?: Express.Multer.File }
 
@@ -155,11 +196,29 @@ router.post(
     if (userId && (await isBanned(userId)))
       return res.status(403).json({ error: 'BANNED' })
 
+    if (multerReq.file) {
+      const validType = await isValidImage(multerReq.file.buffer)
+      if (!validType) {
+        logger.info('Feedback screenshot rejected: invalid file type', {
+          userId
+        })
+        return res.status(400).json({ error: 'INVALID_FILE' })
+      }
+
+      const safe = await isImageSafe(multerReq.file.buffer)
+      if (!safe) {
+        logger.info('Feedback screenshot rejected by moderation', { userId })
+        return res.status(400).json({ error: 'IMAGE_REJECTED' })
+      }
+    }
+
     const cat = CATEGORIES[category] || {
       label: '❓ Uncategorized',
       color: 0x95a5a6
     }
     const banUrl = `${API_BASE}/api/feedback/ban/${userId}?key=${ADMIN_KEY}`
+
+    let linkedEventId = sentryEventId
 
     Sentry.withScope((scope) => {
       scope.setUser({
@@ -175,9 +234,14 @@ router.post(
       })
       scope.setTag('feedback_category', category || 'unknown')
 
-      const linkedEventId =
-        sentryEventId ||
-        Sentry.captureMessage(`[Feedback] ${message.slice(0, 50)}`, 'info')
+      if (!linkedEventId) {
+        const level: Sentry.SeverityLevel =
+          category === 'bug' ? 'error' : 'info'
+        linkedEventId = Sentry.captureMessage(
+          `[Feedback] ${message.slice(0, 50)}`,
+          level
+        )
+      }
 
       Sentry.captureFeedback({
         name: nickname || 'Anonymous',
@@ -188,6 +252,32 @@ router.post(
     })
 
     const discordData = new FormData()
+
+    let traceValue = 'No Trace'
+    if (linkedEventId) {
+      const dsn = process.env.SENTRY_DSN
+      if (dsn) {
+        try {
+          const u = new URL(dsn)
+          const parts = u.hostname.split('.')
+          const resolvedOrg =
+            SENTRY_ORG ||
+            (u.hostname.endsWith('sentry.io') && parts.length >= 3
+              ? parts[0]
+              : null)
+
+          if (resolvedOrg) {
+            traceValue = `[${linkedEventId.slice(0, 8)}](https://${resolvedOrg}.sentry.io/issues/?query=${linkedEventId})`
+          } else {
+            traceValue = `\`${linkedEventId.slice(0, 8)}\``
+          }
+        } catch {
+          traceValue = `\`${linkedEventId.slice(0, 8)}\``
+        }
+      } else {
+        traceValue = `\`${linkedEventId.slice(0, 8)}\``
+      }
+    }
 
     const embed = {
       title: cat.label,
@@ -210,12 +300,12 @@ router.post(
         { name: '🔥 Streak', value: `\`x${streak || 0}\``, inline: true },
         {
           name: '🌐 Context',
-          value: `Route: \`${route || '/'}\`\nIP: \`${maskIp(ip)}\``,
+          value: `Route: \`${route || '/'}\`\nIP: \`${maskIpForLogs(ip)}\``,
           inline: false
         },
         {
           name: '🛠️ Trace',
-          value: sentryEventId ? `[Sentry](${sentryEventId})` : 'No Trace',
+          value: traceValue,
           inline: true
         },
         { name: '🚫 Admin', value: `[Ban User](${banUrl})`, inline: true }
@@ -262,9 +352,6 @@ router.post(
   }
 )
 
-/**
- * ADMIN BAN ENDPOINT
- */
 router.get('/ban/:userId', async (req: Request, res: Response) => {
   const { userId } = req.params
   const { key } = req.query
@@ -290,9 +377,6 @@ router.get('/ban/:userId', async (req: Request, res: Response) => {
   }
 })
 
-/**
- * STATUS CHECK
- */
 router.get('/status', async (req: Request, res: Response) => {
   const { userId } = req.query
   if (!userId || typeof userId !== 'string') return res.json({ banned: false })

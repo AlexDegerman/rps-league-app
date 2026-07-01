@@ -86,8 +86,9 @@ export default function FeedbackPage() {
 
   const handleFile = useCallback(
     (file: File) => {
-      if (!file.type.startsWith('image/')) {
-        setErrorMsg('Images only (png, jpg, webp)')
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/webp']
+      if (!allowedTypes.includes(file.type)) {
+        setErrorMsg('Images only (PNG, JPG, WEBP)')
         return
       }
       if (file.size > 5 * 1024 * 1024) {
@@ -116,6 +117,17 @@ export default function FeedbackPage() {
     return () => window.removeEventListener('paste', handlePaste)
   }, [handleFile])
 
+  // Automatically revoke previous screenshot URLs when replaced or on unmount
+  useEffect(() => {
+    const currentPreview = screenshotPreview
+
+    return () => {
+      if (currentPreview) {
+        URL.revokeObjectURL(currentPreview)
+      }
+    }
+  }, [screenshotPreview])
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
@@ -125,7 +137,6 @@ export default function FeedbackPage() {
 
   const removeScreenshot = () => {
     setScreenshot(null)
-    if (screenshotPreview) URL.revokeObjectURL(screenshotPreview)
     setScreenshotPreview(null)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -166,7 +177,22 @@ export default function FeedbackPage() {
       setIsBanned(true)
       setStatus('idle')
     } else if (result.error === 'RATE_LIMITED') {
-      setStatus('ratelimited')
+      setErrorMsg('Too many requests. Please try again in a few minutes.')
+      setStatus('error')
+    } else if (result.error === 'FILE_TOO_LARGE') {
+      removeScreenshot()
+      setErrorMsg('That screenshot is too large. Keep it under 5 MB.')
+      setStatus('error')
+    } else if (result.error === 'INVALID_FILE') {
+      removeScreenshot()
+      setErrorMsg("That file isn't a valid image. Try a PNG, JPG, or WEBP.")
+      setStatus('error')
+    } else if (result.error === 'IMAGE_REJECTED') {
+      removeScreenshot()
+      setErrorMsg(
+        "That screenshot couldn't be accepted. Try a different one, or send feedback without it."
+      )
+      setStatus('error')
     } else {
       setErrorMsg(result.error ?? 'Submission failed')
       setStatus('error')
@@ -375,7 +401,7 @@ export default function FeedbackPage() {
             >
               <span className="text-xl sm:text-2xl">📎</span>
               <p className="text-[11px] sm:text-xs font-bold text-gray-500 text-center">
-                Drop, paste (Ctrl+V), or{' '}
+                Drop, paste (CtrlV), or{' '}
                 <span className="text-purple-600 underline">pick a file</span>
               </p>
               <p className="text-[9px] sm:text-[10px] text-gray-400">
