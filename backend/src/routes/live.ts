@@ -79,7 +79,6 @@ router.get('/', (req, res) => {
   // Sync client clock on connect so countdown timers stay accurate
   send('sync', JSON.stringify({ serverTime: Date.now() }))
   clients.add(send)
-  logger.info('SSE client connected', { clientCount: clients.size })
 
   if (!generatorStarted) {
     generatorStarted = true
@@ -119,7 +118,6 @@ router.get('/', (req, res) => {
 
   req.on('close', () => {
     clients.delete(send)
-    logger.info('SSE client disconnected', { clientCount: clients.size })
   })
 })
 
