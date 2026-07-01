@@ -176,9 +176,10 @@ export const tryTriggerFlashEventForUser = async (
   if (currentEvent && !currentEvent.isFestival) return
 
   const { rows } = await pool.query(
-    'SELECT first_flash_triggered FROM users WHERE user_id = $1',
+    'SELECT nickname, first_flash_triggered FROM users WHERE user_id = $1',
     [userId]
   )
+  const nickname = rows[0]?.nickname ?? 'Anonymous'
   const isFirstFlash = !rows[0]?.first_flash_triggered
 
   let chance = isFirstFlash ? 0.2 : FLASH_TRIGGER_CHANCE
@@ -208,6 +209,12 @@ export const tryTriggerFlashEventForUser = async (
       [userId]
     )
   }
+
+  logger.info('Flash event triggered', {
+    nickname,
+    userId,
+    type,
+  })
 
   broadcast(
     'flash_event',
