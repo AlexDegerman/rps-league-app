@@ -360,7 +360,7 @@ Operational control for feedback system abuse prevention.
 | GET | `/api/predictions/stats` | Global summary stats (user count, prediction count, match count, richest player, top streak) |
 | GET | `/api/predictions/stats/daily` | Real-time daily ticker (volume, payout, win rate, MVP) |
 | GET | `/api/predictions/stats/monthly` | Monthly stats report (`?year=&month=`) new users, volume, biggest win, top streak, most active, high roller, top win rate |
-| GET | `/api/admin/utm-stats` | UTM attribution breakdown, signups and visits per source |
+| GET | `/api/admin/stats` | Full admin analytics: system totals, leaderboards, UTM sources, and geographic signup breakdown|
 
 ---
 
