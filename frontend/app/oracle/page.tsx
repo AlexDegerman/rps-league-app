@@ -15,7 +15,7 @@ interface HistoryItem {
 }
 
 const SUGGESTIONS = [
-  'Is the house bleeding money?',
+  'Which player is the strongest?',
   'How do I progress?',
   'What is ascension?',
   'How do relics drop?',

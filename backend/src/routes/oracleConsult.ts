@@ -155,11 +155,15 @@ async function generateWithFallback(query: string, contextString: string) {
         C) METAPHORICAL LANGUAGE (NORMAL MODE)
         If phrases like “house bleeding money”, “burning cash”, “printing money”, or similar expressions are used figuratively and no real-world financial intent is present, interpret them as system imbalance, variance drift, or reward distribution anomalies.
         Do not trigger any monetary override.
-
-        2. SYSTEM ENTITY DEFINITIONS - CRITICAL:
-        - "PREDICTORS" (from <predictor_leaderboard>): These are the actual, real-world human users of your app. They do NOT play Rock Paper Scissors; they only watch matches and bet virtual points on the outcomes. They have point balances, peaks, betting win streaks, relics, and achievements.
-        - "PLAYERS" (from <top_players_by_wins> and <active_match_history>): These are automated league bots (simulated competitors) that physically play the matches. They make moves (ROCK, PAPER, SCISSORS) to resolve game states. They never bet, hold no point balances, and have no relics.
-        - HARD SYSTEM RULE: Never describe a Predictor (human user) as "playing" a match, throwing a hand, or competing on the board. Never describe a Player (league bot) as "betting," "risking points," "holding a balance," or suffering from a "house edge."
+        
+        2. SYSTEM ENTITY DEFINITIONS AND AMBIGUITY RULES:
+        PREDICTORS (from predictor_leaderboard): These are the actual, real-world human users of your app. They do not play Rock Paper Scissors. They only watch matches and bet virtual points on the outcomes. They have point balances, peaks, betting win streaks, relics, and achievements.
+        PLAYERS (from top_players_by_wins and active_match_history): These are automated league bots (simulated competitors) that physically play the matches. They make moves (ROCK, PAPER, SCISSORS) to resolve game states. They never bet, hold no point balances, and have no relics.
+        HARD SYSTEM RULE: Never describe a Predictor as playing a match, throwing a hand, or competing on the board. Never describe a Player as betting, risking points, holding a balance, or suffering from a house edge.
+        THE "PLAYER" LITERAL ROUTING RULE (CRITICAL OVERRIDE):
+        - Any query containing the exact word "player" or "players" (case-insensitive) MUST be routed to the automated bots (PLAYERS dataset, top_players_by_wins). You must never map the word "player" to human predictors.
+        - Any query containing the words "predictor", "user", "human", "account", or "balance" MUST be routed to human predictors (PREDICTORS dataset, predictor_leaderboard).
+        - AMBIGUOUS FALLBACK: If a query asks who is "the best", "the top", "the leader", or "the strongest" but completely lacks BOTH the words "player" and "predictor" (e.g., "who is the strongest?", "who is the best?"), only then must you default to evaluating the Predictor leaderboard data.
 
         3. GROUNDING:
         Only output facts grounded in the provided XML telemetry blocks and the <game_knowledge> blocks. Do not invent statistical data or game systems.
@@ -351,7 +355,7 @@ router.post('/', async (req: Request, res: Response) => {
         ) as winners
         GROUP BY name
         ORDER BY wins DESC
-        LIMIT 5
+        LIMIT 10
       `),
       pool.query(`
         SELECT
