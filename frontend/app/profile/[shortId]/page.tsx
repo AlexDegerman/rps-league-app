@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { clearUserCache, getOrCreateUser } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
-import type { UserStats } from '@/types/rps'
+import type { BadgeData, UserStats } from '@/types/rps'
 import {
   getDisplayTierClass,
   getFullNumberName,
@@ -18,7 +18,8 @@ import {
   fetchRecoveryCode,
   handleRecoverProfile,
   updateLinkedin,
-  ascendUser
+  ascendUser,
+  fetchAchievementsBulkBadges
 } from '@/lib/api'
 import BetHistory from '@/components/game/BetHistory'
 import { LinkedInBadge } from '@/components/badges/LinkedInBadge'
@@ -105,6 +106,7 @@ export default function ProfilePage() {
   const [profileRelic, setProfileRelic] = useState<RelicDef | null | undefined>(
     undefined
   )
+  const [profileBadges, setProfileBadges] = useState<BadgeData[]>([])
 
   const displayRelic = isOwnProfile ? equippedRelic : profileRelic
 
@@ -169,6 +171,12 @@ export default function ProfilePage() {
           if (isMounted && statsData) setStats(statsData)
           if (isOwnProfile)
             setStoreLinkedinEnabled(profileData.showLinkedinBadge ?? true)
+        }
+        if (!isOwnProfile) {
+          const badgeRes = await fetchAchievementsBulkBadges([targetShortId])
+          if (badgeRes && badgeRes[targetShortId] && isMounted) {
+            setProfileBadges(badgeRes[targetShortId])
+          }
         }
       } catch (err) {
         if (!isMounted) return
@@ -365,7 +373,7 @@ export default function ProfilePage() {
             )}
             <IdentityBadges
               linkedinUrl={linkedinUrl}
-              badges={isOwnProfile ? myBadges : []}
+              badges={isOwnProfile ? myBadges : profileBadges}
               showLinkedinBadge={
                 isOwnProfile ? storeLinkedinEnabled : showLinkedinBadge
               }
