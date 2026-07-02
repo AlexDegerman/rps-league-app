@@ -13,7 +13,8 @@ import type {
   BetHistoryEntry,
   PlayerStats,
   BadgeData,
-  GlobalEventStateResponse
+  GlobalEventStateResponse,
+  OracleResponse
 } from '@/types/rps'
 import { logger } from '@/lib/logger'
 import { getOrCreateUser, getStoredRecoveryCode } from './user'
@@ -135,8 +136,7 @@ export async function markAutoBetUsed(userId: string): Promise<void> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ shortId })
     })
-  } catch {
-  }
+  } catch {}
 }
 
 /* --- AUTH & RECOVERY --- */
@@ -426,3 +426,24 @@ export const fetchGlobalEventState =
       return null
     }
   }
+
+export const askOracle = async (
+  query: string,
+  nickname?: string
+): Promise<OracleResponse> => {
+  try {
+    const res = await fetch(`${API_BASE}/api/oracle/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, nickname })
+    })
+
+    const data = await res.json()
+    if (!res.ok) {
+      return { error: data.error || 'SYSTEM_ERROR' }
+    }
+    return data as OracleResponse
+  } catch {
+    return { error: 'SYSTEM_ERROR' }
+  }
+}

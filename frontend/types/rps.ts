@@ -230,7 +230,6 @@ export type ConfettiType =
   | 'cyclone_blitz'
   | 'mirage_cataclysm'
 
-
 export interface BonusData {
   tier: BonusTier
   amount: bigint
@@ -422,4 +421,11 @@ export interface GlobalEventStateResponse {
     endsAt: number
     startedAt: number
   } | null
+}
+
+export interface OracleResponse {
+  result?: string
+  source?: string
+  cached?: boolean
+  error?: string
 }

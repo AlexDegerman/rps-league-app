@@ -1,10 +1,10 @@
 'use client'
 
 import InfoIcon from '@/components/icons/InfoIcon'
+import { askOracle } from '@/lib/api'
 import { logger } from '@/lib/logger'
+import { getNickname } from '@/lib/user'
 import { useState, useEffect } from 'react'
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
 interface HistoryItem {
   id: number
@@ -16,7 +16,7 @@ interface HistoryItem {
 
 const SUGGESTIONS = [
   'Is the house bleeding money?',
-  'Who has the longest win streak?',
+  'How do I progress?',
   'What is ascension?',
   'How do relics drop?',
   'How do events trigger?',
@@ -68,57 +68,76 @@ export default function AnalysisPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const handleAsk = async (e?: React.FormEvent, overrideQuery?: string) => {
-    e?.preventDefault()
-    const activeQuery = overrideQuery || query
-    if (!activeQuery.trim() || loading) return
+const handleAsk = async (e?: React.FormEvent, overrideQuery?: string) => {
+  e?.preventDefault()
+  const activeQuery = overrideQuery || query
+  if (!activeQuery.trim() || loading) return
 
-    setLoading(true)
-    setError(null)
+  setLoading(true)
+  setError(null)
 
-    try {
-      const res = await fetch(`${API_BASE}/api/oracle/query`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: activeQuery })
-      })
+  try {
+    const nickname = getNickname() || undefined
 
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+    const data = await askOracle(activeQuery, nickname)
 
-      setCurrentResult(data.result)
-      setCurrentSource(data.source)
-
-      // Keep only the 5 most recent queries - avoids unbounded localStorage growth
-      const newHistory: HistoryItem[] = [
-        {
-          id: generateId(),
-          query: activeQuery,
-          result: data.result,
-          source: data.source,
-          timestamp: getTimestamp()
-        },
-        ...history
-      ].slice(0, 5)
-
-      setHistory(newHistory)
-      localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
-      if (!overrideQuery) setQuery('')
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'An unknown error occurred'
-      logger.error(
-        'Oracle query failed',
-        err instanceof Error ? err : undefined,
-        {
-          query: activeQuery
-        }
-      )
-      setError(message)
-    } finally {
-      setLoading(false)
+    if (data.error) {
+      if (data.error === 'RATE_LIMITED') {
+        throw new Error(
+          'The Oracle grows impatient. Wait a moment before seeking another vision.'
+        )
+      } else if (data.error === 'QUERY_TOO_LONG') {
+        throw new Error(
+          'The Oracle accepts questions, not tomes. Please be more concise.'
+        )
+      } else if (data.error === 'INVALID_QUERY') {
+        throw new Error(
+          'The Oracle cannot interpret that request. Ask a clear question.'
+        )
+      } else {
+        throw new Error(
+          'The Oracle has lost sight of the stars. Please try again shortly.'
+        )
+      }
     }
+
+    if (!data.result) {
+      throw new Error('The Oracle is currently blinded by the stars.')
+    }
+
+    setCurrentResult(data.result)
+    setCurrentSource(data.source ?? null)
+
+    // Keep only the 5 most recent queries - avoids unbounded localStorage growth
+    const newHistory: HistoryItem[] = [
+      {
+        id: generateId(),
+        query: activeQuery,
+        result: data.result,
+        source: data.source,
+        timestamp: getTimestamp()
+      },
+      ...history
+    ].slice(0, 5)
+
+    setHistory(newHistory)
+    localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
+    if (!overrideQuery) setQuery('')
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'An unknown error occurred'
+    logger.error(
+      'Oracle query failed',
+      err instanceof Error ? err : undefined,
+      {
+        query: activeQuery
+      }
+    )
+    setError(message)
+  } finally {
+    setLoading(false)
   }
+}
 
   const clearHistory = () => {
     setHistory([])

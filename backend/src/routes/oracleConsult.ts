@@ -10,9 +10,15 @@ import { GAME_KNOWLEDGE } from '../../lib/gameKnowledge/index.js'
 const router = Router()
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
+interface RateLimitState {
+  requestTimestamps: number[]
+  cooldownUntil: number
+  violations: number[]
+}
+
 // In-memory storage for performance and cost-saving
 const queryCache = new Map<string, { result: string; timestamp: number }>()
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+const rateLimitMap = new Map<string, RateLimitState>()
 
 const RATE_LIMIT = 5
 const CACHE_TTL = 1000 * 60 * 5 // 5 minutes
@@ -23,7 +29,7 @@ const CACHE_TTL = 1000 * 60 * 5 // 5 minutes
  */
 const logToDiscord = async (
   query: string,
-  ip: string | undefined,
+  nickname: string | undefined,
   response: string
 ) => {
   const webhookUrl = process.env.DISCORD_LOG_WEBHOOK
@@ -44,8 +50,8 @@ const logToDiscord = async (
                 value: `\`\`\`${query.substring(0, 1000)}\`\`\``
               },
               {
-                name: '👤 Masked IP',
-                value: `\`${maskIpForLogs(ip)}\``,
+                name: '👤 Nickname',
+                value: `\`${nickname || 'Anonymous'}\``,
                 inline: true
               },
               {
@@ -74,8 +80,8 @@ const logToDiscord = async (
 
 /**
  * MEMORY MANAGEMENT
- * Clears maps every hour to prevent memory leaks in production.
- * Prevents the heap from growing indefinitely by capping rateLimitMap.
+ * Prunes expired cache and rate limit entries every hour to prevent memory leaks.
+ * Prevents the heap from growing indefinitely by capping the rateLimitMap size.
  */
 setInterval(
   () => {
@@ -83,12 +89,28 @@ setInterval(
     for (const [key, value] of queryCache.entries()) {
       if (now - value.timestamp > CACHE_TTL) queryCache.delete(key)
     }
-    // Prevent memory leaks by capping the rate limit map size
+
+    for (const [ip, state] of rateLimitMap.entries()) {
+      state.requestTimestamps = state.requestTimestamps.filter(
+        (t) => now - t < 60 * 1000
+      )
+      state.violations = state.violations.filter(
+        (t) => now - t < 10 * 60 * 1000
+      )
+
+      const isCooldowned = now < state.cooldownUntil
+      const hasRecentRequests = state.requestTimestamps.length > 0
+      const hasRecentViolations = state.violations.length > 0
+
+      if (!isCooldowned && !hasRecentRequests && !hasRecentViolations) {
+        rateLimitMap.delete(ip)
+      }
+    }
+
     if (rateLimitMap.size > 1000) rateLimitMap.clear()
   },
   1000 * 60 * 60
 )
-
 /**
  * Fallback mechanism to rotate models during 503/429 spikes.
  */
@@ -230,37 +252,60 @@ router.post('/', async (req: Request, res: Response) => {
     const now = Date.now()
 
     // Rate limiting logic
-    const userRate = rateLimitMap.get(ip) || {
-      count: 0,
-      resetTime: now + 60000
+    let userState = rateLimitMap.get(ip) || {
+      requestTimestamps: [],
+      cooldownUntil: 0,
+      violations: []
     }
-    if (now > userRate.resetTime) {
-      userRate.count = 0
-      userRate.resetTime = now + 60000
-    }
-    if (userRate.count >= RATE_LIMIT) {
-      return res.status(429).json({
-        error:
-          'The Oracle is annoyed. Asking too many questions. Wait a minute.'
-      })
-    }
-    userRate.count++
-    rateLimitMap.set(ip, userRate)
 
-    const { query } = req.body
+    if (now < userState.cooldownUntil) {
+      return res.status(429).json({ error: 'RATE_LIMITED' })
+    }
+
+    userState.requestTimestamps = userState.requestTimestamps.filter(
+      (t) => now - t < 60 * 1000
+    )
+
+    if (userState.requestTimestamps.length >= RATE_LIMIT) {
+      userState.violations = userState.violations.filter(
+        (t) => now - t < 10 * 60 * 1000
+      )
+      userState.violations.push(now)
+      const violationCount = userState.violations.length
+
+      let cooldownDuration = 0
+      if (violationCount === 1) {
+        cooldownDuration = 1 * 60 * 1000
+      } else if (violationCount === 2) {
+        cooldownDuration = 5 * 60 * 1000
+      } else if (violationCount === 3) {
+        cooldownDuration = 15 * 60 * 1000
+      } else {
+        cooldownDuration = 60 * 60 * 1000
+      }
+
+      userState.cooldownUntil = now + cooldownDuration
+      rateLimitMap.set(ip, userState)
+
+      return res.status(429).json({ error: 'RATE_LIMITED' })
+    }
+
+    // 4. Record the request and save the state
+    userState.requestTimestamps.push(now)
+    rateLimitMap.set(ip, userState)
+
+    const { query, nickname } = req.body
 
     if (!query || typeof query !== 'string') {
-      return res.status(400).json({ error: 'Invalid query' })
+      return res.status(400).json({ error: 'INVALID_QUERY' })
     }
 
     const intent = detectFinancialIntent(query)
-
     const normalizedQuery = query.toLowerCase().trim()
 
-    if (query.length > 500)
-      return res
-        .status(400)
-        .json({ error: 'The Oracle does not accept essays.' })
+    if (query.length > 500) {
+      return res.status(400).json({ error: 'QUERY_TOO_LONG' })
+    }
 
     const cached = queryCache.get(normalizedQuery)
     if (cached && now - cached.timestamp < CACHE_TTL) {
@@ -363,7 +408,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
     const responseText = await generateWithFallback(query, context)
 
-    logToDiscord(query, ip, responseText)
+    logToDiscord(query, nickname, responseText)
 
     const sourceMatch = responseText.match(/\[SOURCE:\s*(.*?)\]/)
     const source = sourceMatch ? sourceMatch[1] : 'league_telemetry'
@@ -381,9 +426,7 @@ router.post('/', async (req: Request, res: Response) => {
     res.json({ result: cleanText, source, cached: false })
   } catch (err: any) {
     logger.error('Oracle critical error', err, { query: req.body?.query })
-    res
-      .status(500)
-      .json({ error: 'The Oracle is currently blinded by the stars.' })
+    res.status(500).json({ error: 'SYSTEM_ERROR' })
   }
 })
 
