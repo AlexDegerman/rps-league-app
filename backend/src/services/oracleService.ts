@@ -32,10 +32,17 @@ export function resetOracle() {
 export async function hasUserUsedOracle(userId: string): Promise<boolean> {
   const state = getOracleState()
   const result = await pool.query(
-    `SELECT oracle_used_date FROM users WHERE user_id = $1`,
+    `SELECT oracle_used_date, joined_date FROM users WHERE user_id = $1`,
     [userId]
   )
-  return result.rows[0]?.oracle_used_date === state.date
+  const row = result.rows[0]
+  if (!row) return true
+
+  // Oracle unlocks from day 2: block if user joined today UTC
+  const joinedDateUtc = new Date(Number(row.joined_date)).toISOString().slice(0, 10)
+  if (joinedDateUtc === state.date) return true
+
+  return row.oracle_used_date === state.date
 }
 
 export async function consumeOracleForUser(userId: string): Promise<void> {
