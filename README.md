@@ -279,9 +279,9 @@ The Oracle system also runs autonomous weighted festivals during low-concurrency
 
 ## 🏆 Predictor Achievements
 
-The Achievement Codex is a multi-tier progression system that tracks over 100 unique simulation milestones. From raw win volume and dimensional wealth to specialized Flash Event tracks and global Festival triggers, every interaction contributes to your public identity.
+The Achievement Codex is a multi-tier progression system tracking over 100 unique simulation milestones. Unlocking these milestones awards collectible badges, each dynamically styled with distinct borders, glowing text, and custom animated aura effects that scale based on the achievement's rarity tier (spanning from Common up to Mythical and Rainbow).
 
-Badges feature dynamic upgrading: earning a higher-rarity achievement automatically replaces the previous tier in your collection to keep your inventory clean. Predictors can curate their Top 5 earned badges to showcase on their public profile and the global leaderboard.
+Earned badges feature dynamic upgrading: unlocking a higher-rarity achievement automatically replaces lower-tier versions in your collection to keep your inventory clean. Predictors can manually curate their Top 5 badges to showcase on their public profile and global leaderboards, or toggle **Auto-Equip** to dynamically display their rarest badges in real-time with randomized tie-breakers.
 
 <p align="center">
   <strong>Achievements System in Action</strong><br/>
