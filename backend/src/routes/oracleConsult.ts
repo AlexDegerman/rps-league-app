@@ -101,7 +101,6 @@ async function generateWithFallback(query: string, contextString: string) {
 
   for (const modelName of modelNames) {
     try {
-      logger.info('Oracle attempting model', { model: modelName })
       const model = genAI.getGenerativeModel({
         model: modelName,
         systemInstruction: `You are "The Oracle," a detached, slightly decayed quantum forecasting mainframe, RPS league analyst, and game systems guide.

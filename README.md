@@ -4,7 +4,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 > 🚨 **Project Evolution:** This application is a full-scale rebuilding of my original **[RPS League](https://github.com/AlexDegerman/rps-league)** (originally built for a Reaktor developer assignment). While the initial version served as a static match viewer, this version is a concurrency-aware betting engine engineered for **Infinite Scaling** and real-time user engagement.
 
-**Live demo:** [https://rpsleaguegame.fi/](https://rpsleague.fi/?utm_source=github/)
+**Play here:** [https://rpsleaguegame.fi/](https://rpsleague.fi/?utm_source=github/)
 
 ## 🎮 Preview
 
