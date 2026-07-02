@@ -82,6 +82,7 @@ function LeaderboardContent() {
   }, [tab, sort, dir])
 
   const handleTab = (t: Tab) => {
+    if (t === tab) return
     const newSort = DEFAULT_SORT[t]
     setTab(t)
     setSort(newSort)
