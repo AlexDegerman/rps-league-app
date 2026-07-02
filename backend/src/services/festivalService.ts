@@ -97,6 +97,8 @@ const _userFlashStreak = new Map<string, number>()
 const _userLossStreak = new Map<string, number>()
 const _userGuaranteedBonus = new Map<string, number>()
 
+const _userHasTriggeredFeverOnStreak = new Map<string, boolean>()
+
 const randomItem = <T>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)]!
 
@@ -203,7 +205,6 @@ const launchFestival = (
   }
 
   const executeBroadcastAndDatabaseUpdates = () => {
-    // Check if the current launch is a real user event before logging
     if (!isDemo) {
       logger.info('Festival launched', { type, triggeredBy, isDemo })
     }
@@ -347,7 +348,6 @@ export const checkAndTriggerFestival = (
   broadcast: Broadcast
 ): void => {
   if (!_festivalsEnabled) return
-  if (isFestivalLocked()) return
 
   const {
     isWin,
@@ -376,6 +376,12 @@ export const checkAndTriggerFestival = (
   } else if (!flashActive && !flashJustEnded) {
     resetFlashStreakForUser(userId)
   }
+
+  if (winStreakAfter === 0) {
+    _userHasTriggeredFeverOnStreak.delete(userId)
+  }
+
+  if (isFestivalLocked()) return
 
   // SPARK: 2 flash events in a row OR LEGENDARY/MYTHICAL during flash
   if (getFlashStreakForUser(userId) >= 2) {
@@ -426,23 +432,28 @@ export const checkAndTriggerFestival = (
   }
 
   // FEVER: 5-win streak (20%) or 8-win streak (100%)
-  if (isWin) {
+  // Restricts a single continuous win streak to triggering FEVER at most once
+  if (isWin && !_userHasTriggeredFeverOnStreak.get(userId)) {
     if (winStreakAfter >= 8) {
       if (
         launchFestival('FEVER', nickname, broadcast, {
           isDemo: false,
           triggerUserId: userId
         })
-      )
+      ) {
+        _userHasTriggeredFeverOnStreak.set(userId, true)
         return
+      }
     } else if (winStreakAfter >= 5 && Math.random() < 0.2) {
       if (
         launchFestival('FEVER', nickname, broadcast, {
           isDemo: false,
           triggerUserId: userId
         })
-      )
+      ) {
+        _userHasTriggeredFeverOnStreak.set(userId, true)
         return
+      }
     }
   }
 
