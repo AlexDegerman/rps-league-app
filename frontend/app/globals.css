@@ -2670,18 +2670,6 @@ span.tracking-wider[title]:active::after {
   isolation: isolate;
 }
 
-.fever-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: 0 0 0 12px rgba(34, 197, 94, 0.7);
-  opacity: 0;
-  z-index: -1;
-  animation: fever-scale-pulse 1.4s ease-in-out infinite;
-  will-change: transform, opacity;
-}
-
 @keyframes fever-scale-pulse {
   0% {
     transform: scale(1);
@@ -2701,18 +2689,6 @@ span.tracking-wider[title]:active::after {
   color: white;
   border: none;
   isolation: isolate;
-}
-
-.inferno-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: 0 0 0 16px rgba(249, 115, 22, 0.8);
-  opacity: 0;
-  z-index: -1;
-  animation: inferno-scale-pulse 0.9s ease-in-out infinite;
-  will-change: transform, opacity;
 }
 
 @keyframes inferno-scale-pulse {
