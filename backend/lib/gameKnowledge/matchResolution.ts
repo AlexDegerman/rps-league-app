@@ -25,7 +25,7 @@ Q: Is there any skill involved in predicting?
 A: Because both bots select moves randomly and independently, every match is a 50/50 coin flip at the point of prediction. No move history, bot name, or previous result carries predictive value. The Bonus system, Flash Events, Global Events, Relics, and Win Streaks are the mechanisms that differentiate long-term Predictor outcomes, not prediction accuracy on any individual match.
 
 Q: What is the house edge?
-A: The asymmetric payout structure creates a built-in house edge. A correct prediction returns +100% of the wager, while an incorrect prediction costs -50% of the wager. On a 50/50 match, the expected value per unit wagered is -0.25 over the long run before bonuses. The Bonus system, event modifiers, and relic effects can offset or reverse this edge in the short term.
+A: The asymmetric payout structure creates an inherent player edge rather than a traditional house edge. A correct prediction returns +100% of the wager, while an incorrect prediction costs -50% of the wager. On a 50/50 match, the expected value per unit wagered is +0.25 (+25% return) over the long run before bonuses, meaning the mathematical house edge is negative (-25%).
 
 --- MATCH TIMING ---
 

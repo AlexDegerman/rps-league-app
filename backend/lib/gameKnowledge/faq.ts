@@ -15,9 +15,6 @@ A: No. The match generator guarantees that the two bots always produce different
 Q: Is there any skill involved in predicting?
 A: Because both bots select moves randomly and independently, every match is a 50/50 coin flip at the point of prediction. No move history, bot name, or previous result carries predictive value. The Bonus system, Flash Events, Global Events, Relics, and Win Streaks are the mechanisms that differentiate long-term Predictor outcomes, not prediction accuracy on any individual match.
 
-Q: What is the house edge?
-A: The asymmetric payout structure creates a built-in house edge. A correct prediction returns +100% of the wager while an incorrect prediction costs -50% of the wager. On a 50/50 match the expected value per unit wagered is slightly negative before bonuses. The Bonus system, event modifiers, and relic effects can offset or reverse this edge in the short term.
-
 Q: What is my starting balance?
 A: All new Predictors begin with 200,000 points. Points can never drop below a floor of 100,000 regardless of losses.
 

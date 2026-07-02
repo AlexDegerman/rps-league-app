@@ -333,7 +333,7 @@ router.post('/', async (req: Request, res: Response) => {
     const actualMatches = matchCountRes.rows[0].count
     const winRate =
       (Number(stats.win_count) / (Number(stats.total_count) || 1)) * 100
-    const houseEdge = (100 - winRate).toFixed(1)
+    const houseEdge = (50 - 1.5 * winRate).toFixed(1)
 
     const formattedVolume = formatStat(stats.total_volume).formatted
 
