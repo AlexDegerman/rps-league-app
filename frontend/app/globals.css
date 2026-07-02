@@ -79,8 +79,39 @@
     border-color: rgba(17, 24, 39, 0.95) transparent transparent transparent;
     z-index: 9999;
   }
-}
 
+span.achievement-badge-tooltip:active::after,
+span.tracking-wider[title]:active::after {
+  content: attr(title) !important;
+  display: inline-block !important;
+  height: max-content !important;
+  min-height: fit-content !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  box-sizing: border-box !important;
+  position: absolute !important;
+  top: auto !important; 
+  bottom: calc(100% + 8px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: max-content !important;
+  max-width: 260px !important;
+  background: rgba(17, 24, 39, 0.98) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+  padding: 14px 18px !important;
+  border-radius: 16px !important;
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+  text-transform: none !important;
+  text-align: center !important;
+  z-index: 99999 !important;
+}
+  span.achievement-badge-tooltip:active::before,
+  span.tracking-wider[title]:active::before {
+    display: none !important;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════════════
     SECTION 2: SHARED KEYFRAMES (used by multiple systems)
