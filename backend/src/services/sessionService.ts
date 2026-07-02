@@ -113,6 +113,9 @@ function createSession(
 
 // Cleanup (runs every 5 min)
 function cleanupStaleSessions(): void {
+    if (activeSessions.size === 0) {
+      return
+    }
   const now = Date.now()
   for (const [userId, session] of activeSessions.entries()) {
     if (now - session.lastInteractionAt > SESSION_TIMEOUT_MS) {
