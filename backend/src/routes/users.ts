@@ -27,10 +27,10 @@ router.post('/recovery-tutorial-complete', async (req, res) => {
 
 // GET /api/admin/stats
 router.get('/admin/stats', async (req, res) => {
-    const key = req.headers['x-admin-key'] ?? req.query.key
-    if (!key || key !== process.env.FEEDBACK_ADMIN_KEY) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
+  const key = req.headers['x-admin-key'] ?? req.query.key
+  if (!key || key !== process.env.FEEDBACK_ADMIN_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' })
+  }
   try {
     const [
       users,
@@ -70,12 +70,13 @@ router.get('/admin/stats', async (req, res) => {
           COALESCE(signup_country, 'unknown') AS country,
           COALESCE(signup_town, 'unknown')    AS town,
           COALESCE(utm_source, 'direct')      AS source,
+          COALESCE(signup_referrer, 'none')   AS referrer,
           COUNT(*)::int                       AS signups,
           SUM(points)                         AS total_points,
           AVG(points)::numeric                AS avg_points,
           MAX(points)                         AS top_points
         FROM users
-        GROUP BY signup_country, signup_town, COALESCE(utm_source, 'direct')
+        GROUP BY signup_country, signup_town, COALESCE(utm_source, 'direct'), COALESCE(signup_referrer, 'none')
         ORDER BY signup_country ASC, signup_town ASC, signups DESC
       `)
     ])
@@ -101,7 +102,7 @@ router.get('/admin/stats', async (req, res) => {
         avg_points_sum: bigint
         avg_points_count: bigint
         top_points_raw: bigint
-        utm: Array<{ source: string; signups: number; total_points: string }>
+        utm: Array<{ source: string; referrer: string; signups: number; total_points: string }>
       }>
     }>()
 
@@ -158,6 +159,7 @@ router.get('/admin/stats', async (req, res) => {
 
         tData.utm.push({
           source,
+          referrer: r.referrer ?? 'none',
           signups,
           total_points: formatStat(totalPoints.toString()).formatted
         })
@@ -169,7 +171,6 @@ router.get('/admin/stats', async (req, res) => {
       0n
     )
 
-  
     const sessionStats = getSessionStats()
     
     const utmTotals = {
@@ -439,10 +440,17 @@ router.get('/:userId/points', async (req, res) => {
     const { userId } = req.params
     const { shortId, nickname } = req.query
     const utmSource = (req.query.utm_source as string)?.toLowerCase().trim()
+    const referrer = (req.headers['referer'] ||
+      req.headers['referrer'] ||
+      '') as string
+    const cleanReferrer = referrer.slice(0, 500) || null
 
-    if (utmSource) {
+    if (utmSource || cleanReferrer) {
       pool
-        .query(`INSERT INTO utm_visits (utm_source) VALUES ($1)`, [utmSource])
+        .query(
+          `INSERT INTO utm_visits (utm_source, referrer) VALUES ($1, $2)`,
+          [utmSource || 'direct', cleanReferrer]
+        )
         .catch((err) => logger.warn('utm_visit insert failed', { err }))
     }
 
@@ -462,7 +470,8 @@ router.get('/:userId/points', async (req, res) => {
         shortId as string,
         nickname as string,
         req.ip,
-        utmSource
+        utmSource,
+        cleanReferrer
       )
 
       if (utmSource) {

@@ -120,9 +120,16 @@ export const initDb = async (): Promise<void> => {
       CREATE TABLE IF NOT EXISTS utm_visits (
         id SERIAL PRIMARY KEY,
         utm_source TEXT NOT NULL,
+        referrer TEXT,
         visited_at TIMESTAMPTZ DEFAULT now()
       )
     `)
+    await pool.query(
+      `ALTER TABLE utm_visits ADD COLUMN IF NOT EXISTS referrer TEXT`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS signup_referrer TEXT`
+    )
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS feedback_bans (
