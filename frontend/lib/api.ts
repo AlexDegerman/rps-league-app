@@ -139,6 +139,16 @@ export async function markAutoBetUsed(userId: string): Promise<void> {
   } catch {}
 }
 
+export async function updateAutoEquipBadges(shortId: string, autoEquip: boolean) {
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/users/auto-equip-badges`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ shortId, autoEquip })
+    })
+  )
+}
+
 /* --- AUTH & RECOVERY --- */
 
 export async function fetchRecoveryCode(): Promise<{

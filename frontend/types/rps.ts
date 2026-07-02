@@ -92,6 +92,7 @@ export interface UserPointsData {
   linkedinUrl: string | null
   showLinkedinBadge: boolean
   recoveryCode?: string | null
+  autoEquipBadges?: boolean
 }
 
 export interface LeaderboardEntry {
@@ -124,6 +125,7 @@ export interface ProfileData {
   showLinkedinBadge: boolean
   pointStylePreference: string | null
   allTimePeak: string
+  autoEquipBadges?: boolean
 }
 
 export interface RecoverResponse {

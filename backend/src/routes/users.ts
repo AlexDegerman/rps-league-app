@@ -4,6 +4,7 @@ import { getUserPoints } from '../services/userService.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { getSessionStats } from '../services/sessionService.js'
+import { autoEquipUserBadges } from '../utils/badgeHelper.js'
 
 const router = Router()
 
@@ -364,6 +365,34 @@ router.patch('/style-preference', async (req, res) => {
   }
 })
 
+// PATCH /api/users/auto-equip-badges
+router.patch('/auto-equip-badges', async (req, res) => {
+  try {
+    const { shortId, autoEquip } = req.body
+    if (!shortId) return res.status(400).json({ error: 'shortId required' })
+
+    await pool.query(
+      `UPDATE users SET auto_equip_badges = $1 WHERE short_id = $2`,
+      [autoEquip, shortId]
+    )
+
+    if (autoEquip) {
+      const userRes = await pool.query(
+        `SELECT user_id FROM users WHERE short_id = $1`,
+        [shortId]
+      )
+      if (userRes.rows.length > 0) {
+        const userId = userRes.rows[0].user_id
+        await autoEquipUserBadges(userId)
+      }
+    }
+
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update auto equip preference' })
+  }
+})
+
 // GET /api/users/profile/:shortId
 router.get('/profile/:shortId', async (req, res) => {
   try {
@@ -383,9 +412,10 @@ router.get('/profile/:shortId', async (req, res) => {
         point_style_preference,
         all_time_peak,
         laps,
-        fastest_lap_bets
-      FROM users
-      WHERE short_id = $1`,
+        fastest_lap_bets,
+        auto_equip_badges -- Added
+        FROM users
+        WHERE short_id = $1`,
       [shortId]
     )
 
@@ -403,6 +433,7 @@ router.get('/profile/:shortId', async (req, res) => {
       maxWinStreak: user.max_win_streak ?? 0,
       joinedDate: user.joined_date ?? null,
       linkedinUrl: user.linkedin_url ?? null,
+      autoEquipBadges: user.auto_equip_badges ?? true,
       showLinkedinBadge: user.show_linkedin_badge ?? true,
       pointStylePreference: user.point_style_preference ?? null,
       allTimePeak: user.all_time_peak?.toString() ?? '200000',
@@ -456,11 +487,12 @@ router.get('/:userId/points', async (req, res) => {
 
     const result = await pool.query(
       `SELECT utm_source, nickname, points, peak_points, daily_peak, weekly_peak,
-              current_win_streak, all_time_peak, point_style_preference,
-              laps, fastest_lap_bets
-        FROM users WHERE user_id = $1`,
+          current_win_streak, all_time_peak, point_style_preference,
+          laps, fastest_lap_bets, auto_equip_badges -- Added
+          FROM users WHERE user_id = $1`,
       [userId]
     )
+
 
     if (result.rows.length === 0) {
       if (!shortId) return res.status(400).json({ error: 'shortId required' })
@@ -500,6 +532,7 @@ router.get('/:userId/points', async (req, res) => {
         pointStylePreference: null,
         laps: 0,
         fastestLapBets: null,
+        autoEquipBadges: true,
         recoveryCode
       })
     }
@@ -526,6 +559,7 @@ router.get('/:userId/points', async (req, res) => {
       currentWinStreak: Number(row.current_win_streak ?? 0),
       allTimePeak: row.all_time_peak.toString(),
       pointStylePreference: row.point_style_preference ?? null,
+      autoEquipBadges: row.auto_equip_badges ?? true,
       laps: Number(row.laps ?? 0),
       fastestLapBets:
         row.fastest_lap_bets !== null ? Number(row.fastest_lap_bets) : null

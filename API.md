@@ -79,8 +79,8 @@ Real players (predictors) with persistent accounts and progression.
 | `biggest_win` | NUMERIC | Largest cumulative win session |
 | `biggest_single_win` | NUMERIC | Largest win from a single prediction |
 | `biggest_multiplier_win` | NUMERIC | Largest multiplier-boosted win |
-| `biggest_multiplier_tier` | TEXT | Tier label of the biggest multiplier win |
-| `biggest_match_mult` | NUMERIC | Highest total multiplier achieved in a single match |
+| `biggest_multiplier_tier` | TEXT | Tier label of biggest multiplier win |
+| `biggest_match_mult` | NUMERIC | Highest total multiplier in a single match |
 | `total_pities_earned` | INT4 | Lifetime pity bonuses earned |
 | `bonus_pity_count` | INT4 | Current pity accumulator |
 | `total_flash_events_caught` | INT4 | Total flash events participated in |
@@ -106,7 +106,9 @@ Real players (predictors) with persistent accounts and progression.
 | `displayed_badges` | TEXT[] | Array of badge codes shown on profile |
 | `total_achievements` | INT4 | Count of earned achievements |
 | `has_used_auto_bet` | BOOLEAN | Whether idle auto-bet has ever been used |
+| `auto_equip_badges` | BOOLEAN | Automatically equip newly earned badges |
 | `utm_source` | TEXT | Attribution source from first visit |
+| `signup_referrer` | TEXT | Referrer URL or source at signup |
 | `linkedin_url` | TEXT | Optional LinkedIn profile link |
 | `show_linkedin_badge` | BOOLEAN | Controls LinkedIn badge visibility |
 | `joined_date` | INT8 | Account creation timestamp (ms) |
@@ -205,6 +207,7 @@ Raw UTM attribution event log.
 | :--- | :--- | :--- |
 | `id` (PK) | SERIAL | Internal sequence ID |
 | `utm_source` | TEXT | Source parameter value |
+| `referrer` | TEXT | HTTP referrer or external source that led to the visit |
 | `visited_at` | TIMESTAMPTZ | Timestamp of visit |
 
 ---

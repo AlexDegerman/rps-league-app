@@ -66,7 +66,7 @@ describe('Analysis Route', () => {
       .send({ query: 'Crash me' })
 
     expect(res.status).toBe(500)
-    expect(res.body.error).toBe('The Oracle is currently blinded by the stars.')
+    expect(res.body.error).toBe('SYSTEM_ERROR')
   })
 
   it('serves cached result on identical query without calling AI again', async () => {
@@ -85,13 +85,11 @@ describe('Analysis Route', () => {
       .send(payload)
 
     expect(res.body.cached).toBe(true)
-    // AI should only have been called once - second request hit the cache
     expect(mockGenerateContent).toHaveBeenCalledTimes(1)
   })
 
   it('returns 429 after exceeding the per-IP rate limit', async () => {
     const testIp = '4.4.4.4'
-    // Exhaust the limit (5 requests)
     for (let i = 0; i < 5; i++) {
       await request(app)
         .post('/oracleConsult')
@@ -105,6 +103,6 @@ describe('Analysis Route', () => {
       .send({ query: 'one-too-many' })
 
     expect(res.status).toBe(429)
-    expect(res.body.error).toContain('The Oracle is annoyed')
+    expect(res.body.error).toContain('RATE_LIMITED')
   })
 })

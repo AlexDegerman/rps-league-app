@@ -181,7 +181,10 @@ describe('DashboardCard', () => {
     setupMocks({ autoAllIn: false, points: 500000n, setBetAmount })
     render(<DashboardCard />)
 
-    fireEvent.click(screen.getByText(/^MAX$/i))
+    await act(async () => {
+      fireEvent.click(screen.getByText(/^MAX$/i))
+    })
+
     expect(setBetAmount).toHaveBeenCalledWith(500000n)
   })
 })

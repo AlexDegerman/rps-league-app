@@ -35,7 +35,8 @@ export default function AchievementMenu({
   const refreshBadges = useUserStore((s) => s.refreshBadges)
   const isOwnProfile = myShortId === targetShortId
   const maxSlots = showLinkedinBadge ? 4 : 5
-
+  const autoEquipBadges = useUserStore((s) => s.autoEquipBadges)
+  const setAutoEquipBadges = useUserStore((s) => s.setAutoEquipBadges)
   const [achievements, setAchievements] = useState<AchievementEntry[]>([])
   const [userStats, setUserStats] = useState<AchievementStats | null>(null)
   const [displayedBadges, setDisplayedBadges] = useState<string[]>([])
@@ -117,6 +118,10 @@ export default function AchievementMenu({
       setDisplayedBadges(nextBadges)
       setSaveStatus('saving')
 
+      if (autoEquipBadges) {
+        setAutoEquipBadges(false)
+      }
+
       const result = await updateUserBadges(targetShortId, nextBadges)
 
       if (result) {
@@ -135,9 +140,40 @@ export default function AchievementMenu({
       targetShortId,
       isOwnProfile,
       refreshBadges,
-      onBadgeUpdate
+      onBadgeUpdate,
+      autoEquipBadges,
+      setAutoEquipBadges
     ]
   )
+  
+  const handleToggleAutoEquip = async () => {
+    if (!isOwnProfile) return
+    const nextValue = !autoEquipBadges
+
+    setSaveStatus('saving')
+
+    const result = await setAutoEquipBadges(nextValue)
+
+    if (nextValue && result.success) {
+      try {
+        const data = await fetchUserAchievements(targetShortId)
+        if (data) {
+          setAchievements(data.achievements || [])
+          setDisplayedBadges(data.displayedBadges || [])
+          setSaveStatus('saved')
+          if (onBadgeUpdate) onBadgeUpdate()
+          setTimeout(() => setSaveStatus('idle'), 1500)
+        } else {
+          setSaveStatus('idle')
+        }
+      } catch {
+        setSaveStatus('idle')
+      }
+    } else {
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 1500)
+    }
+  }
 
   const visibleAchievements = useMemo(
     () =>
@@ -167,48 +203,63 @@ export default function AchievementMenu({
       </div>
     )
 
-  return (
-    <div className="flex flex-col gap-4 max-w-2xl mx-auto">
-      {isOwnProfile && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                Badge Display
-              </h4>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-[11px] font-bold text-indigo-600">
-                  {displayedBadges.length} / {maxSlots} Achievement Slots
-                </p>
-                <span
-                  className={`text-[9px] font-black uppercase transition-opacity duration-300 ${saveStatus !== 'idle' ? 'opacity-100' : 'opacity-0'}`}
-                >
-                  {saveStatus === 'saving' ? (
-                    <span className="text-amber-500 animate-pulse">
-                      ● Saving...
-                    </span>
-                  ) : (
-                    <span className="text-emerald-500">✓ Changes Saved</span>
-                  )}
-                </span>
-              </div>
+return (
+  <div className="flex flex-col gap-4 max-w-2xl mx-auto">
+    {isOwnProfile && (
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-50">
+          <div>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              Badge Display
+            </h4>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-[11px] font-bold text-indigo-600">
+                {displayedBadges.length} / {maxSlots} Achievement Slots
+              </p>
+              <span
+                className={`text-[9px] font-black uppercase transition-opacity duration-300 ${saveStatus !== 'idle' ? 'opacity-100' : 'opacity-0'}`}
+              >
+                {saveStatus === 'saving' ? (
+                  <span className="text-amber-500 animate-pulse">
+                    ● Saving...
+                  </span>
+                ) : (
+                  <span className="text-emerald-500">✓ Changes Saved</span>
+                )}
+              </span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
-            {selectableBadges.map((badge) => {
-              const isSelected = displayedBadges.includes(badge.code)
-              const isRainbow = badge.rarity === 'RAINBOW'
-              const rarityStyle = isRainbow
-                ? 'rainbow-badge-bg text-purple-900 border-purple-400'
-                : RARITY_BADGE_STYLE[badge.rarity as AchievementRarity]
+          {/* Auto-equip toggle */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <div
+              onClick={handleToggleAutoEquip}
+              className={`relative w-8 h-4 rounded-full transition-colors ${autoEquipBadges ? 'bg-indigo-600' : 'bg-gray-200'}`}
+            >
+              <div
+                className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform ${autoEquipBadges ? 'translate-x-4' : 'translate-x-0.5'}`}
+              />
+            </div>
+            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">
+              Auto-Equip Rare
+            </span>
+          </label>
+        </div>
 
-              return (
-                <button
-                  key={badge.code}
-                  disabled={saveStatus === 'saving' && !isSelected}
-                  onClick={() => toggleBadge(badge.code)}
-                  className={`
+        <div className="flex flex-wrap gap-1.5">
+          {selectableBadges.map((badge) => {
+            const isSelected = displayedBadges.includes(badge.code)
+            const isRainbow = badge.rarity === 'RAINBOW'
+            const rarityStyle = isRainbow
+              ? 'rainbow-badge-bg text-purple-900 border-purple-400'
+              : RARITY_BADGE_STYLE[badge.rarity as AchievementRarity]
+
+            return (
+              <button
+                key={badge.code}
+                disabled={saveStatus === 'saving' && !isSelected}
+                onClick={() => toggleBadge(badge.code)}
+                className={`
               relative px-2 py-1 rounded-md border text-[9px] font-black transition-all 
               flex items-center gap-1 active:scale-95
               ${rarityStyle}
@@ -218,89 +269,87 @@ export default function AchievementMenu({
                   : 'opacity-85 border-dashed border-black/10'
               }
             `}
-                >
-                  <span>{badge.icon}</span>
-                  <span>{badge.code}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-            Categories
-          </span>
-          <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
-            {earnedSet.size} Total
-          </span>
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 snap-x">
-          <button
-            onClick={() => setActiveCategory('all')}
-            className={`flex-none snap-start p-3 rounded-xl border text-left transition-all min-w-25 ${activeCategory === 'all' ? 'bg-gray-900 border-gray-900 text-white shadow-md' : 'bg-white border-gray-100'}`}
-          >
-            <p className="text-[10px] font-black uppercase opacity-60">All</p>
-            <p className="text-xs font-black">Overview</p>
-          </button>
-          {categoryStats.map((cat) => (
-            <button
-              key={cat!.id}
-              onClick={() => setActiveCategory(cat!.id)}
-              className={`flex-none snap-start p-3 rounded-xl border text-left transition-all min-w-32.5 ${activeCategory === cat!.id ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white border-gray-100'}`}
-            >
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-base">{cat!.icon}</span>
-                <span className="text-[9px] font-bold opacity-70">
-                  {cat!.earnedCount}/{cat!.total}
-                </span>
-              </div>
-              <p className="text-[10px] font-black uppercase truncate">
-                {cat!.label}
-              </p>
-            </button>
-          ))}
+              >
+                <span>{badge.icon}</span>
+                <span>{badge.code}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
+    )}
 
-      <div className="flex flex-col gap-6 pb-10 mt-2">
-        {CATEGORY_ORDER.map((catId) => {
-          if (activeCategory !== 'all' && activeCategory !== catId) return null
-          const items = visibleAchievements.filter((a) => a.category === catId)
-          if (items.length === 0) return null
-          return (
-            <div
-              key={catId}
-              className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-            >
-              <div className="flex items-center gap-2 mb-3 px-1">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                  {CATEGORY_LABELS[catId]}
-                </h3>
-                <div className="h-px flex-1 bg-gray-100" />
-              </div>
-              <div className="flex flex-col gap-2">
-                {items
-                  .sort((a, b) =>
-                    a.earned === b.earned ? 0 : a.earned ? -1 : 1
-                  )
-                  .map((ach) => (
-                    <AchievementCard
-                      key={ach.code}
-                      ach={ach}
-                      stats={userStats}
-                      totalEarned={earnedSet.size}
-                    />
-                  ))}
-              </div>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+          Categories
+        </span>
+        <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
+          {earnedSet.size} Total
+        </span>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 snap-x">
+        <button
+          onClick={() => setActiveCategory('all')}
+          className={`flex-none snap-start p-3 rounded-xl border text-left transition-all min-w-25 ${activeCategory === 'all' ? 'bg-gray-900 border-gray-900 text-white shadow-md' : 'bg-white border-gray-100'}`}
+        >
+          <p className="text-[10px] font-black uppercase opacity-60">All</p>
+          <p className="text-xs font-black">Overview</p>
+        </button>
+        {categoryStats.map((cat) => (
+          <button
+            key={cat!.id}
+            onClick={() => setActiveCategory(cat!.id)}
+            className={`flex-none snap-start p-3 rounded-xl border text-left transition-all min-w-32.5 ${activeCategory === cat!.id ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white border-gray-100'}`}
+          >
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-base">{cat!.icon}</span>
+              <span className="text-[9px] font-bold opacity-70">
+                {cat!.earnedCount}/{cat!.total}
+              </span>
             </div>
-          )
-        })}
+            <p className="text-[10px] font-black uppercase truncate">
+              {cat!.label}
+            </p>
+          </button>
+        ))}
       </div>
     </div>
-  )
+
+    <div className="flex flex-col gap-6 pb-10 mt-2">
+      {CATEGORY_ORDER.map((catId) => {
+        if (activeCategory !== 'all' && activeCategory !== catId) return null
+        const items = visibleAchievements.filter((a) => a.category === catId)
+        if (items.length === 0) return null
+        return (
+          <div
+            key={catId}
+            className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+          >
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                {CATEGORY_LABELS[catId]}
+              </h3>
+              <div className="h-px flex-1 bg-gray-100" />
+            </div>
+            <div className="flex flex-col gap-2">
+              {items
+                .sort((a, b) => (a.earned === b.earned ? 0 : a.earned ? -1 : 1))
+                .map((ach) => (
+                  <AchievementCard
+                    key={ach.code}
+                    ach={ach}
+                    stats={userStats}
+                    totalEarned={earnedSet.size}
+                  />
+                ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  </div>
+)
 }
 
 function AchievementCard({

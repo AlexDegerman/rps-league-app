@@ -130,6 +130,9 @@ export const initDb = async (): Promise<void> => {
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS signup_referrer TEXT`
     )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS auto_equip_badges BOOLEAN NOT NULL DEFAULT true`
+    )
 
     await pool.query(`
       CREATE TABLE IF NOT EXISTS feedback_bans (

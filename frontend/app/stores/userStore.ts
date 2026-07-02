@@ -14,7 +14,8 @@ import {
   handleRecoverProfile,
   updateStylePreference,
   ascendUser,
-  fetchAchievementsBulkBadges
+  fetchAchievementsBulkBadges,
+  updateAutoEquipBadges
 } from '@/lib/api'
 import { logger } from '@/lib/logger'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
@@ -35,6 +36,10 @@ interface UserState {
   myBadges: BadgeData[]
   setMyBadges: (b: BadgeData[]) => void
   refreshBadges: () => Promise<void>
+  autoEquipBadges: boolean
+  setAutoEquipBadges: (
+    v: boolean
+  ) => Promise<{ success: boolean; error?: string }>
 
   // Balance & Betting
   points: bigint
@@ -99,6 +104,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   linkedinUrl: null,
   showLinkedinBadge: true,
   myBadges: [],
+  autoEquipBadges: true,
 
   // Setters - Identity
   setDisplayNickname: (name) => set({ displayNickname: name }),
@@ -220,7 +226,8 @@ export const useUserStore = create<UserState>((set, get) => ({
     if (data.laps !== undefined) set({ laps: data.laps })
     if (data.fastestLapBets !== undefined)
       set({ fastestLapBets: data.fastestLapBets ?? null })
-
+    if (data.autoEquipBadges !== undefined)
+      set({ autoEquipBadges: data.autoEquipBadges })
     if (data.nickname) {
       set({ displayNickname: data.nickname })
       Sentry.setContext('user', { username: data.nickname })
@@ -354,7 +361,34 @@ export const useUserStore = create<UserState>((set, get) => ({
       return { success: false, error: 'Failed to reset profile' }
     }
   },
-
+  setAutoEquipBadges: async (
+    v
+  ): Promise<{ success: boolean; error?: string }> => {
+    const { shortId } = get()
+    set({ autoEquipBadges: v })
+    if (shortId) {
+      try {
+        const res = await updateAutoEquipBadges(shortId, v)
+        if (res?.success) {
+          if (v) {
+            await get().refreshBadges()
+          }
+          return { success: true }
+        }
+        return { success: false, error: 'API update failed' }
+      } catch (err) {
+        logger.error(
+          'Failed to persist auto equip badges preference',
+          err instanceof Error ? err : undefined
+        )
+        return {
+          success: false,
+          error: err instanceof Error ? err.message : 'Unknown error'
+        }
+      }
+    }
+    return { success: false, error: 'No shortId found' }
+  },
   applyPointsUpdate: (newPoints, newPeak) =>
     set((s) => {
       const isNewPeak = newPeak > s.peakPoints

@@ -22,6 +22,7 @@ import {
   triggerSafeguardFestival
 } from './festivalService.js'
 import {
+  ACHIEVEMENT_MAP,
   checkAchievements,
   type AchievementStats
 } from './achievementChecker.js'
@@ -32,6 +33,7 @@ import {
   type GlobalEventBuffResult
 } from './globalEventService.js'
 import { recordInteraction } from './sessionService.js'
+import { autoEquipUserBadges } from '../utils/badgeHelper.js'
 
 const POINTS_FLOOR = 100000n
 // Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
@@ -715,18 +717,19 @@ export const resolvePrediction = async (
         // Achievement check
         const freshUser = await pool.query(
           `SELECT wins, max_win_streak, laps, points,
-                biggest_match_mult, total_pities_earned,
-                lunar_events_caught, electric_events_caught,
-                hellfire_events_caught, cards_events_caught,
-                bet_against_oracle_count, oracle_max_streak,
-                festivals_triggered, festivals_participated, consecutive_flash_peak, has_used_auto_bet,
-                max_streak_during_tidal_surge, max_streak_during_cyclone_blitz,
-                had_flare_inferno_combo, had_mirage_high_echo, had_flash_plus_global_win,
-                had_dry_mirage, had_eye_of_storm, had_prismatic_wave, had_thermal_fusion,
-                tidal_surge_participations, solar_flare_participations,
-                cyclone_blitz_participations, mirage_cataclysm_participations,
-                global_event_participations
-                  FROM users WHERE user_id = $1`,
+        biggest_match_mult, total_pities_earned,
+        lunar_events_caught, electric_events_caught,
+        hellfire_events_caught, cards_events_caught,
+        bet_against_oracle_count, oracle_max_streak,
+        festivals_triggered, festivals_participated, consecutive_flash_peak, has_used_auto_bet,
+        max_streak_during_tidal_surge, max_streak_during_cyclone_blitz,
+        had_flare_inferno_combo, had_mirage_high_echo, had_flash_plus_global_win,
+        had_dry_mirage, had_eye_of_storm, had_prismatic_wave, had_thermal_fusion,
+        tidal_surge_participations, solar_flare_participations,
+        cyclone_blitz_participations, mirage_cataclysm_participations,
+        global_event_participations,
+        displayed_badges, auto_equip_badges, show_linkedin_badge -- Added
+          FROM users WHERE user_id = $1`,
           [row.user_id]
         )
         const u = freshUser.rows[0]
@@ -826,8 +829,8 @@ export const resolvePrediction = async (
 
           await pool.query(
             `INSERT INTO user_achievements (user_id, achievement_code, earned_at)
-            VALUES ${placeholders}
-            ON CONFLICT DO NOTHING`,
+              VALUES ${placeholders}
+              ON CONFLICT DO NOTHING`,
             [row.user_id, ...newAchievements.map((a) => a.code)]
           )
 
@@ -835,6 +838,11 @@ export const resolvePrediction = async (
             `UPDATE users SET total_achievements = total_achievements + $1 WHERE user_id = $2`,
             [newAchievements.length, row.user_id]
           )
+
+          const autoEquip = u.auto_equip_badges
+          if (autoEquip) {
+            await autoEquipUserBadges(row.user_id)
+          }
 
           for (const achievement of newAchievements) {
             broadcast(

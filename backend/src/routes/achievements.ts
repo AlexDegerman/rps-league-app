@@ -189,7 +189,7 @@ router.patch('/:shortId/badges', async (req, res) => {
       .slice(0, 10)
 
     await pool.query(
-      `UPDATE users SET displayed_badges = $1 WHERE short_id = $2`,
+      `UPDATE users SET displayed_badges = $1, auto_equip_badges = false WHERE short_id = $2`,
       [filtered, shortId]
     )
 
