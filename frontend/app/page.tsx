@@ -1055,7 +1055,7 @@ export default function HomePage() {
       <GlobalTickerWrapper />
       <EdgeGlow visualMode={visualMode} />
 
-      <div className="relative">
+      <div className="relative z-40 isolate">
         <ConfettiOverlay
           confettiType={resultAnim?.confettiType ?? 'normal'}
           show={resultAnim?.win === true}
