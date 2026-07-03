@@ -339,7 +339,7 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     code: 'SYZY',
     name: 'Cosmic Alignment',
     icon: '🪐',
-    rarity: 'MYTHICAL'
+    rarity: 'EPIC'
   },
   CATA: {
     code: 'CATA',

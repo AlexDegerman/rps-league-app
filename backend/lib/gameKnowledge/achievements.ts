@@ -17,7 +17,6 @@ SIGNIFICANT ACHIEVEMENT CODES & CRITERIA:
   * Solar Maximum (SOL): Win during Solar Flare while on a 5+ win streak.
   * Fata Morgana (MIR): Roll 45%+ Echo Bonus during Mirage Cataclysm.
   * God-Killer (SLAY): Win with x100+ total multiplier.
-  * Cosmic Alignment (SYZY): Personal Flash Event + Server Global Event active simultaneously on win.
   * Sanguine Defiance / Rebel (REBL): Betting against the Oracle pick.
   * Rainbow Tiers: God King (KING) requires 1,000 Wins, 50 Laps, and 3 Mythical Relics. Cosmic Sovereign (COSM) requires 50 participations in each of the 4 Global Events.
 `

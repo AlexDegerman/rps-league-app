@@ -727,7 +727,7 @@ const META: AchievementDef[] = [
     requirement:
       'Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously',
     icon: '🪐',
-    rarity: 'MYTHICAL',
+    rarity: 'EPIC',
     category: 'Meta',
     check: (s) => s.hadFlashPlusGlobalWin
   },

@@ -183,11 +183,11 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🟣 Epic | Riding the Wave | Win 3 consecutive predictions during a single active Tidal Surge window | 🌊 | `TIDE` |
 | 🟣 Epic | Solar Maximum | Win a match during a Solar Flare while on an Inferno Win Streak (5+ wins) | ☀️ | `SOL` |
 | 🟣 Epic | Vortex Velocity | Reach a 10-win streak during a Cyclone Blitz | 🌪️ | `CYCL` |
+| 🟣 Epic | Cosmic Alignment | Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously | 🪐 | `SYZY` |
 | 🟡 Legendary | Fata Morgana | Roll a 45%+ Echo Bonus on a win during a Mirage Cataclysm | 🏜️ | `MIR` |
 | 🔴 Mythical | God-Killer | Win with x100+ multiplier | 👺 | `SLAY` |
 | 🔴 Mythical | Fever Dream | Back-to-back Flash Events on consecutive matches | 💤 | `DREM` |
 | 🔴 Mythical | Storm Chaser | Experience all 4 Flash Event themes in one session | 🌪️ | `STRM` |
-| 🔴 Mythical | Cosmic Alignment | Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously | 🪐 | `SYZY` |
 | 🔴 Mythical | Cataclysm Surveyor | Participate 15 times in each of the four separate Global Events | 🔱 | `CATA` |
 
 ---
