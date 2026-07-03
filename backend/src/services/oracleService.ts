@@ -38,8 +38,13 @@ export async function hasUserUsedOracle(userId: string): Promise<boolean> {
   const row = result.rows[0]
   if (!row) return true
 
-  // Oracle unlocks from day 2: block if user joined today UTC
-  const joinedDateUtc = new Date(Number(row.joined_date)).toISOString().slice(0, 10)
+  const joinedDateVal = row.joined_date ? Number(row.joined_date) : Date.now()
+
+  const joinedDateMs =
+    joinedDateVal < 100000000000 ? joinedDateVal * 1000 : joinedDateVal
+
+  // Oracle Prophecy unlocks from day 2: block if user joined today UTC
+  const joinedDateUtc = new Date(joinedDateMs).toISOString().slice(0, 10)
   if (joinedDateUtc === state.date) return true
 
   return row.oracle_used_date === state.date
