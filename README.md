@@ -373,16 +373,47 @@ All economic systems - bonus tiers, flash events, multipliers - are visually emb
 
 ## 🔴 Live Activity Feed
 
-High-frequency, concurrency-aware event stream handling:
+A priority-aware event stream displayed at the bottom of the screen, surfacing meaningful in-game events in real time.
 
-- Real user bets
-- Global results
-- Simulated demo traffic
+### Event priorities
 
-Guarantees:
-- No overlap between events
-- Immediate visibility for user actions
-- Continuous activity even during low traffic
+| Priority | Indicator | Events |
+|----------|-----------|--------|
+| 0 (Player events) | Gold ● | Relic discovered, achievement unlocked, streak milestones (3/5/8/10/15/20) |
+| 1 (My prediction) | Red ● | Your prediction resolved (win/loss) |
+| 2 (Other predictions) | Red ● | Other players' prediction results |
+| 3 (Demo specials) | None | Simulated relics, achievements, milestones, lap completions, streaks, and festivals |
+| 4 (Demo predictions) | None | Simulated prediction traffic during quiet periods |
+
+### Architecture
+
+```
+SSE handlers (page.tsx)
+        │
+        ▼
+ emitActivity()
+        │
+        ▼
+lib/activityFeed.ts (ring buffer)
+        │
+        ▼
+drainActivities() (polled every 400 ms)
+        │
+        ▼
+Priority queue (pendingRef)
+        │
+        ▼
+Animated LiveActivityFeed
+```
+
+### Guarantees
+
+- Events are displayed one at a time, and each animation completes before the next begins.
+- Live player events appear within 400 ms, taking priority over demo traffic.
+- Gold indicators identify priority 0 player events.
+- Red indicators identify live prediction results.
+- Feed events never write to Zustand, preventing unnecessary re-renders.
+- Demo events keep the feed active during low-traffic periods.
 
 ---
 

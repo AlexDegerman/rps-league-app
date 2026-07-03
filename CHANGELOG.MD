@@ -2,6 +2,26 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [2.2] - The Live Activity & Quality of Life Update
+
+### Added
+
+* **Priority-Aware Live Activity Feed:** Upgraded the footer activity feed from displaying only prediction results into a full real-time event stream. The feed now surfaces player milestones, relic discoveries, achievement unlocks, streak milestones, prediction results, and simulated background activity through a priority-based queue.
+* **Automatic Achievement Badge Equipping:** Added a new setting to automatically equip a player's highest rarity achievement badges. The feature is enabled by default and can be toggled on or off at any time.
+
+### Changed
+
+* **Cosmic Alignment Rarity:** Adjusted the Cosmic Alignment achievement from Mythical to Epic rarity to better reflect its intended difficulty.
+* **Fever Festival Trigger Limits:** Restricted Fever Festival to trigger only once per win streak cycle.
+* **Achievement Badge Tooltips:** Updated achievement badge tooltips to display the achievement requirement instead of just the name.
+* **Fever Mode Visuals:** Improved the appearance of Fever Mode mode buttons.
+* **Oracle Knowledge Base:** Expanded and refined the Oracle's gameplay knowledge for more accurate and consistent answers.
+
+### Fixed
+
+* **Profile Badge Display:** Fixed an issue where equipped achievement badges were not shown when viewing another player's profile.
+* **Leaderboard Layout:** Fixed a layout issue caused by Mythical achievement badges affecting leaderboard row alignment.
+
 ## [2.1] - The Oracle & Game Systems Guide
 
 ### Added

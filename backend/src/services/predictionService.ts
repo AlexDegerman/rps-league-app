@@ -849,6 +849,7 @@ export const resolvePrediction = async (
               'achievement_unlocked',
               JSON.stringify({
                 userId: row.user_id,
+                nickname: row.nickname ?? 'Anonymous',
                 code: achievement.code,
                 name: achievement.name,
                 icon: achievement.icon,

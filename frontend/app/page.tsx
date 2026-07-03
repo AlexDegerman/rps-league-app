@@ -64,6 +64,7 @@ import { speakOracle } from '@/lib/oracleTTS'
 import GlobalTickerWrapper from '@/components/layout/GlobalTickerWrapper'
 import { buildGlobalEventCountdownSpeech, GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/lib/globalEvents'
 import GlobalEventActivationOverlay from '@/components/overlays/GlobalEventActivationOverlay'
+import { emitActivity } from '@/lib/activityFeed'
 import EventTimerTicker from '@/components/tickers/EventTimerTicker'
 import DashboardCard from '@/components/game/DashboardCard'
 import MatchFeed from '@/components/game/MatchFeed'
@@ -597,6 +598,31 @@ export default function HomePage() {
     es.addEventListener('prediction_result', (event) => {
       const data = JSON.parse(event.data)
       useGameStore.getState().setLatestPredictionResult(data)
+
+      if (data.relicDrop) {
+        emitActivity({
+          id: `relic-${(data.relicDrop as { key: string }).key}-${Date.now()}`,
+          type: 'relic',
+          userId: data.userId,
+          nickname: data.nickname ?? 'Someone',
+          payload: { relic: data.relicDrop },
+          timestamp: Date.now()
+        })
+      }
+      if (
+        data.result === 'WIN' &&
+        [3, 5, 8, 10, 15, 20].includes(data.streakAfter ?? 0)
+      ) {
+        emitActivity({
+          id: `streak-${data.userId}-${data.streakAfter}-${Date.now()}`,
+          type: 'streak',
+          userId: data.userId,
+          nickname: data.nickname ?? 'Someone',
+          payload: { streak: data.streakAfter },
+          timestamp: Date.now()
+        })
+      }
+
       if (data.userId !== myUserId) return
       updatePacketTimestamp()
 
@@ -770,8 +796,18 @@ export default function HomePage() {
 
     es.addEventListener('festival_event', (event: MessageEvent) => {
       const data: FestivalSSEData = JSON.parse(event.data)
-      if (data.endsAt !== null && Date.now() > data.endsAt) return
-      const isStale = Date.now() - data.startedAt > 3000
+     if (data.endsAt !== null && Date.now() > data.endsAt) return
+
+    emitActivity({
+      id: `festival-feed-${data.type}-${Date.now()}`,
+      type: 'festival',
+      userId: data.triggerUserId ?? '',
+      nickname: data.triggeredBy ?? 'Oracle',
+      payload: { festivalType: data.type, isDemo: data.isDemo ?? false },
+      timestamp: Date.now()
+    })
+
+    const isStale = Date.now() - data.startedAt > 3000
       if (data.triggerUserId !== myUserId) {
         postFestivalParticipated(myUserId).catch(() => {})
       }
@@ -851,6 +887,15 @@ export default function HomePage() {
       if (Date.now() + serverOffset > data.endsAt) return
       setGlobalEventActive(data.type, data.endsAt)
 
+      emitActivity({
+        id: `global-feed-${data.type}-${Date.now()}`,
+        type: 'global_event',
+        userId: '',
+        nickname: 'System',
+        payload: { eventType: data.type },
+        timestamp: Date.now()
+      })
+
       useUIStore.getState().enqueuePopup({
         id: `global-start-${data.type}-${Date.now()}`,
         kind: 'global_event',
@@ -881,7 +926,22 @@ export default function HomePage() {
 
     es.addEventListener('achievement_unlocked', (event) => {
       const data = JSON.parse(event.data)
-      if (data.userId !== myUserId) return  
+
+      emitActivity({
+        id: `ach-feed-${data.code}-${data.userId}-${Date.now()}`,
+        type: 'achievement',
+        userId: data.userId,
+        nickname: data.nickname ?? 'Someone',
+        payload: {
+          code: data.code,
+          name: data.name,
+          rarity: data.rarity,
+          icon: data.icon
+        },
+        timestamp: Date.now()
+      })
+
+      if (data.userId !== myUserId) return
 
       useUserStore.getState().refreshBadges()
       useUIStore.getState().enqueuePopup({

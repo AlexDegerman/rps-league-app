@@ -302,6 +302,7 @@ export interface FestivalSSEData {
   flashType?: string
   isDemo: boolean
   triggerUserId?: string
+  triggeredBy?: string
   speech?: string
 }
 

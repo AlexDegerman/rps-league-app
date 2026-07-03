@@ -6,6 +6,21 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '2.2',
+    label: 'The Live Activity & Quality of Life Update',
+    notes: [
+      'Priority-Aware Live Activity Feed: Upgraded the footer feed from prediction results into a real-time event stream featuring player milestones, relic discoveries, achievement unlocks, prediction results, and simulated activity.',
+      "Automatic Achievement Badge Equipping: Added a new setting, enabled by default, to automatically equip a player's highest rarity achievement badges.",
+      'Cosmic Alignment Rarity: Adjusted the Cosmic Alignment achievement from Mythical to Epic.',
+      'Fever Festival Limits: Restricted Fever Festival to one activation per win streak cycle.',
+      'Achievement Badge Tooltips: Updated badge tooltips to show the unlock requirement directly.',
+      "Profile Badge Display: Fixed equipped achievement badges not appearing on other players' profiles.",
+      'Fever Mode Visual Refresh: Improved button readability and overall appearance.',
+      'Leaderboard Layout Fix: Resolved row alignment issues caused by high rarity achievement badges.',
+      'Oracle Knowledge Updates: Expanded and refined gameplay knowledge for more accurate responses.'
+    ]
+  },
+  {
     version: '2.1',
     label: 'The Oracle & Game Systems Update',
     notes: [

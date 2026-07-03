@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import Header from '../components/ui/Header'
-import PredictionTicker from '@/components/tickers/PredictionTicker'
+import LiveActivityFeed from '@/components/tickers/LiveActivityFeed'
 
 export const viewport: Viewport = {
   themeColor: '#f3f4f6',
@@ -59,9 +59,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="bg-gray-100 min-h-screen">
-          <Header />
-          <main className="w-full pb-24 pt-2">{children}</main>
-          <PredictionTicker />
+        <Header />
+        <main className="w-full pb-24 pt-2">{children}</main>
+        <LiveActivityFeed />
       </body>
     </html>
   )
