@@ -205,6 +205,18 @@ async function logRelicDrop(userId: string, relic: RelicDef) {
   }
 }
 
+/**
+ * Evaluates and processes relic drops using a single-roll cumulative probability model.
+ * 
+ * Logic:
+ * 1. Grants first-time players a 25% welcome drop chance to find their very first Common relic.
+ * 2. Compiles independent, non-overlapping drop rates for each rarity tier (factoring in Lap bonuses, 
+ *    Scavenger's Lens, and Vault Festival multipliers) and tests them against a single random float.
+ * 3. Maps the roll to its corresponding rarity range, ensuring no tier interferes with another's rate.
+ * 4. Applies a "Smart Loot" fallback: if the selected rarity is fully collected, the system 
+ *    gracefully searches outward starting with more common tiers first to preserve the economic rarity 
+ *    of high-tier items (such as Mythicals), wrapping around to rarer tiers only as a last resort.
+ */
 export async function rollRelicDrop(
   userId: string,
   equippedRelic: string | null,
@@ -242,24 +254,70 @@ export async function rollRelicDrop(
     return null
   }
 
-  // Shuffle so there's no implicit ordering bias (rarest checked last etc.)
-  const shuffled = [...eligible].sort(() => Math.random() - 0.5)
+  // Exact base rates defined for each rarity tier
+  const baseRates: Record<RelicRarity, number> = {
+    MYTHICAL: 0.001,   // 0.1%
+    LEGENDARY: 0.002,  // 0.2%
+    EPIC: 0.003,       // 0.3%
+    RARE: 0.01,        // 1.0%
+    COMMON: 0.03       // 3.0%
+  }
 
-  for (const relic of shuffled) {
-    const effectiveRate =
-      (relic.dropRate + getLapBonus(relic.rarity, userLaps)) *
-      lensMultiplier *
-      vaultMultiplier
+  // Calculate effective rates with active multipliers applied
+  const mythicalRate = (baseRates.MYTHICAL + getLapBonus('MYTHICAL', userLaps)) * lensMultiplier * vaultMultiplier
+  const legendaryRate = (baseRates.LEGENDARY + getLapBonus('LEGENDARY', userLaps)) * lensMultiplier * vaultMultiplier
+  const epicRate = (baseRates.EPIC + getLapBonus('EPIC', userLaps)) * lensMultiplier * vaultMultiplier
+  const rareRate = (baseRates.RARE + getLapBonus('RARE', userLaps)) * lensMultiplier * vaultMultiplier
+  const commonRate = (baseRates.COMMON + getLapBonus('COMMON', userLaps)) * lensMultiplier * vaultMultiplier
 
-    if (Math.random() < effectiveRate) {
+  const totalRate = mythicalRate + legendaryRate + epicRate + rareRate + commonRate
+  const roll = Math.random()
+
+  if (roll < totalRate) {
+    // Resolve the rolled rarity from the cumulative probability ranges.
+    let selectedRarity: RelicRarity = 'COMMON'
+    if (roll < mythicalRate) {
+      selectedRarity = 'MYTHICAL'
+    } else if (roll < mythicalRate + legendaryRate) {
+      selectedRarity = 'LEGENDARY'
+    } else if (roll < mythicalRate + legendaryRate + epicRate) {
+      selectedRarity = 'EPIC'
+    } else if (roll < mythicalRate + legendaryRate + epicRate + rareRate) {
+      selectedRarity = 'RARE'
+    }
+
+    // Smart Loot fallback order.
+    // Search toward more common tiers first to preserve high-tier rarity.
+    const fallbackOrders: Record<RelicRarity, RelicRarity[]> = {
+      MYTHICAL: ['MYTHICAL', 'LEGENDARY', 'EPIC', 'RARE', 'COMMON'],
+      LEGENDARY: ['LEGENDARY', 'EPIC', 'RARE', 'COMMON', 'MYTHICAL'],
+      EPIC: ['EPIC', 'RARE', 'COMMON', 'LEGENDARY', 'MYTHICAL'],
+      RARE: ['RARE', 'COMMON', 'EPIC', 'LEGENDARY', 'MYTHICAL'],
+      COMMON: ['COMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHICAL']
+    }
+
+    const fallbackOrder = fallbackOrders[selectedRarity]
+    let picked: RelicDef | null = null
+
+    // Award the first available relic in the fallback order.
+    for (const rarity of fallbackOrder) {
+      const unownedOfRarity = eligible.filter((r) => r.rarity === rarity)
+      if (unownedOfRarity.length > 0) {
+        picked =
+          unownedOfRarity[Math.floor(Math.random() * unownedOfRarity.length)]!
+        break
+      }
+    }
+
+    if (picked) {
       await pool.query(
         'INSERT INTO relics (user_id, relic_key, rarity, found_at) VALUES ($1, $2, $3, $4)',
-        [userId, relic.key, relic.rarity, Date.now()]
+        [userId, picked.key, picked.rarity, Date.now()]
       )
 
-      await logRelicDrop(userId, relic)
+      await logRelicDrop(userId, picked)
 
-      return relic
+      return picked
     }
   }
 
