@@ -40,13 +40,15 @@ export const getOrCreateUser = (): {
   let shortId = validate(localStorage.getItem(SHORT_ID_KEY))
   let nickname = validate(localStorage.getItem(NICKNAME_KEY))
 
-  if (!userId || !shortId || !nickname) {
-    if (!userId) userId = generateUserId()
-    if (!shortId) shortId = generateShortId()
-    if (!nickname) nickname = generateNickname()
-
+  if (!userId || !shortId) {
+    userId = generateUserId()
+    shortId = generateShortId()
     localStorage.setItem(USER_ID_KEY, userId)
     localStorage.setItem(SHORT_ID_KEY, shortId)
+  }
+
+  if (!nickname) {
+    nickname = generateNickname()
     localStorage.setItem(NICKNAME_KEY, nickname)
   }
 

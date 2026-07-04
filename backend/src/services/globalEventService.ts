@@ -1,5 +1,3 @@
-import { logger } from '../utils/logger.js'
-
 export type GlobalEventType =
   | 'TIDAL_SURGE'
   | 'SOLAR_FLARE'
