@@ -18,7 +18,7 @@ Each player may equip one active relic at a time.
 
 ## ⚙️ Drop System
 
-Relics drop after completed predictions (win or loss). Each roll evaluates all eligible relics using a weighted probability system.
+Relics drop after completed predictions (win or loss). Each completed prediction performs a single cumulative loot roll that determines whether a relic drops and, if successful, which rarity tier is selected.
 
 Once a relic is obtained, it is permanently added to the account and removed from future drop pools.
 
@@ -33,10 +33,13 @@ Once a relic is obtained, it is permanently added to the account and removed fro
 | 🔴 Mythical | 0.1% | +0.01% per lap (max +0.2%) |
 
 ### System Rules
-- Each match triggers exactly one relic roll (win or loss)
-- Relics are selected from a weighted global pool, not independent per-rarity rolls
+
+- Each completed prediction performs exactly one cumulative loot roll
+- Each rarity tier has a fixed base drop probability, modified by Lap bonuses and active drop-rate multipliers
+- A successful roll selects one unowned relic from the chosen rarity tier
+- If the selected rarity has been fully collected, Smart Loot redirects the drop according to the rarity fallback order
 - Each relic can only be obtained once (duplicate protection)
-- Lap scaling increases acquisition speed over long-term progression but is capped per rarity to prevent runaway inflation
+- Lap scaling increases acquisition speed over long-term progression while remaining capped per rarity
 
 ---
 

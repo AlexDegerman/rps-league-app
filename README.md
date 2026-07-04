@@ -195,9 +195,9 @@ Resets are visual-friendly. Any previously unlocked point-tier stylings (UVG, DV
 
 # 🧿 Relic System
 
-Relics are permanent collectible gameplay modifiers that introduce long-term progression and strategic specialization. Players discover relics through post-match drops across five rarity tiers (Common through Mythical) and can equip one active relic at a time.
+Relics are permanent collectible gameplay modifiers that introduce long-term progression and strategic specialization. Players discover relics through a single-roll cumulative loot table spanning five rarity tiers (Common through Mythical), and each relic can only be collected once.
 
-Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling, creating distinct build paths and playstyles. A permanent no-duplicate collection system turns acquisition into long-term progression rather than repetitive RNG farming.
+Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling, creating distinct build paths and playstyles. Players may equip one active relic at a time, while permanent duplicate protection turns collection into long-term progression rather than repetitive RNG farming.
 
 <p align="center">
   <strong>Relic Discovery & Equipment in Action</strong><br/>
@@ -605,6 +605,7 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 - **Leaderboard Service**: Tests SQL aggregations including win ranking, alphabetical tiebreaking, and date range padding.
 - **Match Service**: Validates deterministic winner logic, pagination offsets, and player stat aggregation.
 - **Prediction Service**: Ensures correct bet validation, win/loss point calculations, 100k floor enforcement, and secure recovery code formatting.
+- **Relic Service**: Tests the single-roll cumulative loot table, first-time welcome drops, cumulative rarity boundaries, downward-seeking Smart Loot fallback, Scavenger's Lens and Vault Festival modifiers, lap bonus caps, duplicate prevention, database persistence, and relic equipment state.
 
 **Frontend (Vitest + React Testing Library)**
 - **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
