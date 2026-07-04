@@ -249,15 +249,15 @@ export default function DashboardCard() {
                   >
                     <GemIcon size={24} className="shrink-0" />
                     <span className="text-xl font-bold tabular-nums">
-                      <span className="text-xl font-bold tabular-nums">
+                      {pointsLoaded ? (
                         <span
                           ref={pointsRef}
                           style={{ position: 'relative' }}
-                          data-text={pointsLoaded ? display : '...'}
-                        >
-                          {pointsLoaded ? '' : '...'}
-                        </span>
-                      </span>
+                          data-text={display}
+                        />
+                      ) : (
+                        <span>...</span>
+                      )}
                     </span>
                   </div>
                   {shouldShowTooltip && (
