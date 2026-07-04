@@ -486,13 +486,12 @@ router.get('/:userId/points', async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT utm_source, nickname, points, peak_points, daily_peak, weekly_peak,
+      `SELECT short_id, utm_source, nickname, points, peak_points, daily_peak, weekly_peak,
           current_win_streak, all_time_peak, point_style_preference,
           laps, fastest_lap_bets, auto_equip_badges -- Added
           FROM users WHERE user_id = $1`,
       [userId]
     )
-
 
     if (result.rows.length === 0) {
       if (!shortId) return res.status(400).json({ error: 'shortId required' })
@@ -522,6 +521,7 @@ router.get('/:userId/points', async (req, res) => {
       const recoveryCode = recoveryRes.rows[0]?.recovery_code ?? null
 
       return res.json({
+        shortId: user.shortId,
         nickname: user.nickname ?? (nickname as string) ?? 'New Player',
         points: user.points.toString(),
         peakPoints: user.points.toString(),
@@ -551,6 +551,7 @@ router.get('/:userId/points', async (req, res) => {
     }
 
     res.json({
+      shortId: row.short_id,
       nickname: row.nickname ?? (nickname as string) ?? 'Anonymous',
       points: row.points.toString(),
       peakPoints: row.peak_points.toString(),

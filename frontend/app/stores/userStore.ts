@@ -211,6 +211,12 @@ export const useUserStore = create<UserState>((set, get) => ({
       storeRecoveryCode(data.recoveryCode)
     }
 
+    if (data.shortId && data.shortId !== user.shortId) {
+      localStorage.setItem('rps_short_id', data.shortId)
+      set({ shortId: data.shortId })
+      clearUserCache()
+    }
+
     set({
       linkedinUrl: data.linkedinUrl || null,
       showLinkedinBadge: data.showLinkedinBadge ?? true
