@@ -36,39 +36,53 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 ## 📑 Table of Contents
 
-- [⚡ Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
-- [🕹️ Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
-- [📋 Overview](#-overview)
-- [⚡ Ascension System](#-ascension-system)
-- [🧿 Relic System](#-relic-system)
-- [🪐 Global Events](#-global-events)
-- [🌠 Flash Events](#-flash-events)
-- [👁️ Player Festivals](#️-player-festivals)
-- [🏆 Predictor Achievements](#-predictor-achievements)
-- [🌌 Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
-- [🔢 Global Number Formatting Engine](#-global-number-formatting-engine)
-- [📊 Competitive Analytics & Profiles](#-competitive-analytics--profiles)
-- [🧾 Match History Timeline](#-match-history-timeline)
-- [⚡ Live Activity Feed](#-live-activity-feed)
+### 🕹️ Core Systems
+- [Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
+- [Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
+- [Ascension System](#-ascension-system)
+- [Relic System](#-relic-system)
 
-- [🏗️ Architecture](#️-architecture)
-- [🎨 Design Decisions](#-design-decisions)
-- [🛠️ Technical Challenges & Solutions](#️-technical-challenges--solutions)
-- [🔮 Reliability & Feedback](#-reliability--feedback)
-- [🤖 AI Oracle & Analytics](#-ai-oracle--analytics)
-- [🔊 Oracle Voice](#-oracle-voice)
-- [📺 Extended Media Showcases](#-extended-media-showcases)
-- [📱 Mobile & PWA Experience](#-mobile--pwa-experience)
+### 🌍 World Systems
+- [Global Events](#-global-events)
+- [Flash Events](#-flash-events)
+- [Player Festivals](#️-player-festivals)
 
-- [🧪 Tests](#-tests)
-- [🚀 CI/CD & Automation](#-cicd--automation)
-- [🚀 Future Improvements](#-future-improvements)
-- [📦 How to Run](#-how-to-run)
-- [🔌 API Reference](#-api-reference)
-- [📱 Device Compatibility](#-device-compatibility)
-- [⚠️ Disclaimer](#️-disclaimer)
-- [🔒 Privacy, Telemetry & Audit Logs](#-privacy-telemetry--audit-logs)
-- [📜 License](#-license)
+### 📊 Progression Systems
+- [Predictor Achievements](#-predictor-achievements)
+- [Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
+- [Global Number Formatting Engine](#-global-number-formatting-engine)
+
+### 📈 Analytics
+- [Competitive Analytics & Profiles](#-competitive-analytics--profiles)
+- [Match History Timeline](#-match-history-timeline)
+- [Live Activity Feed](#-live-activity-feed)
+
+### 🏗️ Engineering
+- [Architecture](#️-architecture)
+- [Design Decisions](#-design-decisions)
+- [Technical Challenges & Solutions](#️-technical-challenges--solutions)
+- [Reliability & Feedback](#-reliability--feedback)
+
+### 🤖 AI Systems
+- [AI Oracle & Analytics](#-ai-oracle--analytics)
+- [Oracle Voice](#-oracle-voice)
+
+### 📱 Platform
+- [Extended Media Showcases](#-extended-media-showcases)
+- [Mobile & PWA Experience](#-mobile--pwa-experience)
+
+### 🧪 Development
+- [Tests](#-tests)
+- [CI/CD & Automation](#-cicd--automation)
+- [Future Improvements](#-future-improvements)
+- [How to Run](#-how-to-run)
+- [API Reference](#-api-reference)
+
+### 📦 Meta
+- [Device Compatibility](#-device-compatibility)
+- [Disclaimer](#️-disclaimer)
+- [Privacy, Telemetry & Audit Logs](#-privacy-telemetry--audit-logs)
+- [License](#-license)
 
 ---
 
