@@ -27,3 +27,23 @@ Frontend verification uses Vitest and React Testing Library to ensure correct re
 - **DashboardCard**: Tests betting flow ("ALL IN", floor clamping, AUTO toggle) and user store synchronization.
 - **Leaderboard Page**: Verifies default tab state, URL-based tab switching, and empty state handling.
 - **Format Utilities**: Validates BigInt shorthand parsing, tiered formatting with decimal rules and caps, and match result calculation from player perspective.
+
+---
+
+## ▶️ Running Tests
+
+Tests are executed using Vitest in both backend and frontend packages.
+
+### Backend
+
+```bash
+cd backend
+npm run test
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run test
+```

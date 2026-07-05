@@ -9,6 +9,15 @@ const { mockGenerateContent } = vi.hoisted(() => ({
   mockGenerateContent: vi.fn()
 }))
 
+vi.mock('../utils/logger.js', () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn()
+  }
+}))
+
 vi.mock('@google/generative-ai', () => ({
   GoogleGenerativeAI: vi.fn().mockImplementation(function () {
     return {
