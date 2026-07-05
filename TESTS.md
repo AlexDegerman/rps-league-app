@@ -24,7 +24,7 @@ The backend services are tested using Vitest to verify database behavior, BigInt
 Frontend verification uses Vitest and React Testing Library to ensure correct rendering, state handling, and UI behavior during dynamic updates.
 
 - **PendingMatchCard**: Confirms player rendering, bet button states, and countdown accuracy.
-- **DashboardCard**: Tests betting flow ("ALL IN", floor clamping, AUTO toggle) and user store synchronization.
+- **DashboardCard**: Tests betting interactions (MAX, floor clamping, AUTO toggle), user and UI store synchronization, animated balance updates, tooltips, notifications, sound controls, visual mode styling, and browser compatibility states.
 - **Leaderboard Page**: Verifies default tab state, URL-based tab switching, and empty state handling.
 - **Format Utilities**: Validates BigInt shorthand parsing, tiered formatting with decimal rules and caps, and match result calculation from player perspective.
 - **Idle Bet Hook**: Tests early-return guard conditions (including document visibility, eligibility, processing state, and user validation), match expiration boundary behavior, idle-side selection, and prediction state transitions during asynchronous API interactions.
