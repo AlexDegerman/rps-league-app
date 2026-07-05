@@ -607,6 +607,7 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 - **Prediction Service**: Ensures correct bet validation, win/loss point calculations, 100k floor enforcement, and secure recovery code formatting.
 - **Relic Service**: Tests the single-roll cumulative loot table, first-time welcome drops, cumulative rarity boundaries, downward-seeking Smart Loot fallback, Scavenger's Lens and Vault Festival modifiers, lap bonus caps, duplicate prevention, database persistence, and relic equipment state.
 - **Global Event Service**: Coordinates the server-wide synchronized event cycle across cooldown, warning, and active phases, validates timed SSE broadcasts, and verifies BigInt-safe point scaling and variable percentage calculations.
+- **Festival Service**: Manages player and system festival events, including streak-based triggers, bonus tier tracking, cooldown and lockout enforcement, database updates, and scheduler safety rules such as quiet windows and state synchronization.
 
 **Frontend (Vitest + React Testing Library)**
 - **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
