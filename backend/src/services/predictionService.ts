@@ -293,19 +293,6 @@ export const resolvePrediction = async (
           equippedRelic
         )
 
-        // Resonance cap: clamp to RARE max
-        const effectiveBonus =
-          resonanceActive && bonus
-            ? bonus.tier === 'EPIC' || bonus.tier === 'LEGENDARY'
-              ? {
-                  multiplier: isWin
-                    ? 2.2 + Math.random() * 1.0
-                    : 0.25 + Math.random() * 0.25,
-                  tier: 'RARE'
-                }
-              : bonus
-            : bonus
-
         // LOGIC GATE: every 20 wins → guaranteed Legendary, wins counted while relic is equipped
         let logicGateFired = false
         if (equippedRelic === 'logic_gate' && isWin) {
@@ -333,6 +320,21 @@ export const resolvePrediction = async (
             }
           }
         }
+
+        // Resonance cap: clamp to RARE max
+        const effectiveBonus =
+          resonanceActive && bonus
+            ? bonus.tier === 'EPIC' ||
+              bonus.tier === 'LEGENDARY' ||
+              bonus.tier === 'MYTHICAL'
+              ? {
+                  multiplier: isWin
+                    ? 2.2 + Math.random() * 1.0
+                    : 0.25 + Math.random() * 0.25,
+                  tier: 'RARE'
+                }
+              : bonus
+            : bonus
 
         // KINETIC CAPACITOR: every 30 wins → +x2 after all other multipliers, wins counted while relic is equipped
         let kineticFired = false

@@ -11,7 +11,7 @@ The backend services are tested using Vitest to verify database behavior, BigInt
 - **Oracle Consult Route**: Verifies model fallback rotation, query caching, and IP-based rate limiting for API stability.
 - **Leaderboard Service**: Tests SQL aggregations including player ranking, alphabetical tiebreaking, and time-windowed results.
 - **Match Service**: Validates deterministic winner logic, pagination, and player stat aggregation.
-- **Prediction Service**: Ensures bet validation, win/loss point calculations, 100k floor enforcement, and recovery code formatting.
+- **Prediction Service**: Validates bet placement, prediction resolution, point gain/loss calculations, 100k point floor enforcement, relic mechanics, festival interactions, pagination, user statistics, global betting summaries, and database edge cases using mocked services and SQL routing.
 - **Relic Service**: Tests loot table rolls, rarity boundaries, Smart Loot fallback behavior, modifiers, cap logic, duplicate prevention, persistence, and equipment state handling.
 - **Global Event Service**: Coordinates event phases (cooldown, warning, active), validates SSE broadcasts, BigInt-safe scaling, and percentage calculations.
 - **Festival Service**: Manages streak triggers, bonus tiers, cooldown and lockout rules, database updates, and scheduler safety windows.
