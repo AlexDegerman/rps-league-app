@@ -294,7 +294,6 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(429).json({ error: 'RATE_LIMITED' })
     }
 
-    // 4. Record the request and save the state
     userState.requestTimestamps.push(now)
     rateLimitMap.set(ip, userState)
 

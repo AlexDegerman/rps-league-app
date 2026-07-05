@@ -8,7 +8,7 @@ Comprehensive unit, integration, and UI tests covering backend services, game lo
 
 The backend services are tested using Vitest to verify database behavior, BigInt scaling boundaries, and stable match lifecycle execution.
 
-- **Oracle Consult Route**: Verifies model fallback rotation, query caching, and IP-based rate limiting for API stability.
+- **Oracle Consult Route**: Verifies model fallback rotation, query caching, IP-based rate limiting, system override responses, query validation, and response formatting to ensure reliable AI-assisted API behavior.
 - **Leaderboard Service**: Tests SQL aggregations including player ranking, alphabetical tiebreaking, and time-windowed results.
 - **Match Service**: Validates deterministic winner logic, pagination, and player stat aggregation.
 - **Prediction Service**: Validates bet placement, prediction resolution, point gain/loss calculations, 100k point floor enforcement, relic mechanics, festival interactions, pagination, user statistics, global betting summaries, and database edge cases using mocked services and SQL routing.
