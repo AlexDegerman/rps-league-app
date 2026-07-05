@@ -359,5 +359,32 @@ describe('Relic Service', () => {
       expect(mockQuery).toHaveBeenCalledTimes(2)
       expect(mockQuery.mock.calls[1]![1]).toEqual(['user_1'])
     })
+
+    it('specifically resets the dynamic charging counter of the active relic (e.g. buffer_module) to zero', async () => {
+      // Reset query execution
+      mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+      // Clear equipped relic execution
+      mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+
+      const userId = 'user_999'
+      await expect(relicService.unequipRelic(userId)).resolves.not.toThrow()
+
+      expect(mockQuery).toHaveBeenCalledTimes(2)
+
+      // Verify the equipped relic's dynamic counter is reset before unequipping.
+      const [resetQuery, resetParams] = mockQuery.mock.calls[0]!
+
+      expect(resetQuery).toContain('UPDATE relics')
+      expect(resetQuery).toContain('SET counter = 0')
+      expect(resetQuery).toContain('WHERE user_id = $1')
+      expect(resetQuery).toContain('SELECT equipped_relic FROM users')
+      expect(resetParams).toEqual([userId])
+
+      // Verify the equipped relic slot is cleared.
+      const [nullifyQuery, nullifyParams] = mockQuery.mock.calls[1]!
+      expect(nullifyQuery).toContain('UPDATE users')
+      expect(nullifyQuery).toContain('SET equipped_relic = NULL')
+      expect(nullifyParams).toEqual([userId])
+    })
   })
 })
