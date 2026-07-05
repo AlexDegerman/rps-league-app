@@ -27,6 +27,7 @@ Frontend verification uses Vitest and React Testing Library to ensure correct re
 - **DashboardCard**: Tests betting flow ("ALL IN", floor clamping, AUTO toggle) and user store synchronization.
 - **Leaderboard Page**: Verifies default tab state, URL-based tab switching, and empty state handling.
 - **Format Utilities**: Validates BigInt shorthand parsing, tiered formatting with decimal rules and caps, and match result calculation from player perspective.
+- **Idle Bet Hook**: Tests early-return guard conditions (including document visibility, eligibility, processing state, and user validation), match expiration boundary behavior, idle-side selection, and prediction state transitions during asynchronous API interactions.
 
 ---
 
