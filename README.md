@@ -600,19 +600,9 @@ RPS League is designed with a mobile-first approach, leveraging modern PWA stand
 
 ## 🧪 Tests
 
-**Backend (Vitest)**
-- **Analysis Route**: Verifies model fallback rotation, caching, and rate limiting to ensure API stability.
-- **Leaderboard Service**: Tests SQL aggregations including win ranking, alphabetical tiebreaking, and date range padding.
-- **Match Service**: Validates deterministic winner logic, pagination offsets, and player stat aggregation.
-- **Prediction Service**: Ensures correct bet validation, win/loss point calculations, 100k floor enforcement, and secure recovery code formatting.
-- **Relic Service**: Tests the single-roll cumulative loot table, first-time welcome drops, cumulative rarity boundaries, downward-seeking Smart Loot fallback, Scavenger's Lens and Vault Festival modifiers, lap bonus caps, duplicate prevention, database persistence, and relic equipment state.
-- **Global Event Service**: Coordinates the server-wide synchronized event cycle across cooldown, warning, and active phases, validates timed SSE broadcasts, and verifies BigInt-safe point scaling and variable percentage calculations.
-- **Festival Service**: Manages player and system festival events, including streak-based triggers, bonus tier tracking, cooldown and lockout enforcement, database updates, and scheduler safety rules such as quiet windows and state synchronization.
+Comprehensive Vitest coverage across backend services and frontend components, including game logic, economy systems, event orchestration, and UI behavior.
 
-**Frontend (Vitest + React Testing Library)**
-- **PendingMatchCard**: Confirms correct player rendering, interactive bet button states, and countdown timer accuracy.
-- **DashboardCard**: Tests core betting loop ("ALL IN", floor clamping, AUTO toggle), user store integration (nickname display, bet amount sync).
-- **Leaderboard Page**: Verifies default tab states, URL-synchronized tab switching, and empty state handling for new players.
+👉 [View full Test Suite Documentation →](./tests.md)
 
 ---
 
