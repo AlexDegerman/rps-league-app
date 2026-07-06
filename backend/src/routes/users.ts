@@ -5,11 +5,9 @@ import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { getSessionStats } from '../services/sessionService.js'
 import { autoEquipUserBadges } from '../utils/badgeHelper.js'
+import { ASCENSION_THRESHOLD } from './ascend.js'
 
 const router = Router()
-
-// 999 STR. To raise cap: update exponents to match new max tier.
-export const ASCENSION_THRESHOLD = 999n * 10n ** 111n
 
 // POST /api/users/recovery-tutorial-complete
 router.post('/recovery-tutorial-complete', async (req, res) => {
