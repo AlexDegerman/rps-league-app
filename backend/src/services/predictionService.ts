@@ -22,7 +22,6 @@ import {
   triggerSafeguardFestival
 } from './festivalService.js'
 import {
-  ACHIEVEMENT_MAP,
   checkAchievements,
   type AchievementStats
 } from './achievementChecker.js'
@@ -38,7 +37,6 @@ import { autoEquipUserBadges } from '../utils/badgeHelper.js'
 const POINTS_FLOOR = 100000n
 // Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
 const MYTHICAL_MULTIPLIER = 7.0
-      let recordIndex = 0
 const TIER_UPGRADE: Record<string, string> = {
   COMMON: 'RARE',
   RARE: 'EPIC',

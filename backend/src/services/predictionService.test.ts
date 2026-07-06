@@ -71,11 +71,6 @@ vi.mock('./globalEventService.js', () => ({
   getActiveGlobalEvent: vi.fn(() => mockActiveGlobalEvent.value)
 }))
 
-vi.mock('./achievementChecker.js', () => ({
-  ACHIEVEMENT_MAP: {},
-  checkAchievements: vi.fn(() => [])
-}))
-
 vi.mock('./relicService.js', () => ({
   RELICS: Array.from({ length: 15 }, (_, i) => ({ key: `relic_${i}` })),
   rollRelicDrop: vi.fn(() => Promise.resolve(null))

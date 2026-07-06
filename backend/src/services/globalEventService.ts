@@ -107,7 +107,6 @@ export const buildGlobalEventCountdownSpeech = (
 
 let _activeGlobalEvent: GlobalEventState | null = null
 let _schedulerStarted = false
-let _schedulerTimer: ReturnType<typeof setTimeout> | null = null
 let _phaseTimer: ReturnType<typeof setTimeout> | null = null
 
 const pickEvent = (): GlobalEventType => {
@@ -217,7 +216,7 @@ const launchEvent = (broadcast: Broadcast): void => {
 const scheduleNext = (broadcast: Broadcast): void => {
   const cooldown = randBetween(COOLDOWN_MIN_MS, COOLDOWN_MAX_MS)
 
-  _schedulerTimer = setTimeout(() => {
+  setTimeout(() => {
     launchEvent(broadcast)
 
     // After warning + active finishes, schedule the next cooldown
