@@ -286,7 +286,7 @@ router.post(
       fields: [
         {
           name: '👤 Player',
-          value: `**${nickname || 'Anonymous'}**\n\`${shortId || 'n/a'}\``,
+          value: `**${nickname || 'Anonymous'}**${email ? `\n*${email}*` : ''}\n\`${shortId || 'n/a'}\``,
           inline: true
         },
         {

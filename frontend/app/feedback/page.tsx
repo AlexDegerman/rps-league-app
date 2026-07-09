@@ -11,6 +11,9 @@ import { submitFeedback } from '@/lib/api'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
+const MONETARY_INTENT_REGEX =
+  /cash|withdraw|payout|fiat|bank\s*transfer|paypal|venmo|gcash|gift\s*card|giftcard|real\s*money|dollar|usd|eur|crypto|redeem|convert|exchange/i
+
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'ratelimited'
 
 type CategoryKey =
@@ -71,6 +74,8 @@ export default function FeedbackPage() {
   const [banCheckDone, setBanCheckDone] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const hasMonetaryIntent = MONETARY_INTENT_REGEX.test(message)
 
   // Check ban status before showing the form
   useEffect(() => {
@@ -146,6 +151,11 @@ export default function FeedbackPage() {
       setErrorMsg('Message is required')
       return
     }
+
+    if (hasMonetaryIntent) {
+      return
+    }
+
     setErrorMsg('')
     setStatus('submitting')
 
@@ -355,7 +365,11 @@ export default function FeedbackPage() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder={PLACEHOLDERS[category]}
             rows={3}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all resize-none"
+            className={`w-full border rounded-lg px-3 py-2 text-sm font-medium text-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition-all resize-none ${
+              hasMonetaryIntent
+                ? 'border-red-300 focus:ring-red-300 bg-red-50/10'
+                : 'border-gray-200'
+            }`}
           />
         </div>
 
@@ -422,17 +436,27 @@ export default function FeedbackPage() {
           />
         </div>
 
-        {/* Inline error */}
-        {(errorMsg || status === 'error') && (
-          <p className="text-xs font-bold text-red-600 uppercase tracking-wide">
-            {errorMsg || 'Something went wrong. Try again.'}
-          </p>
+        {/* Inline error or System Notice */}
+        {(errorMsg || status === 'error' || hasMonetaryIntent) && (
+          <div
+            className={`text-xs leading-relaxed ${
+              hasMonetaryIntent
+                ? 'bg-amber-50 border-l-4 border-amber-500 p-3.5 font-medium text-amber-900 rounded-r-lg normal-case'
+                : 'font-bold text-red-600 uppercase tracking-wide'
+            }`}
+          >
+            {hasMonetaryIntent
+              ? 'Notice: Points are strictly virtual telemetry metrics with zero physical value. They exist only for leaderboard ranking and visual tier progression.'
+              : errorMsg || 'Something went wrong. Try again.'}
+          </div>
         )}
 
         {/* Submit */}
         <button
           onClick={handleSubmit}
-          disabled={status === 'submitting' || !message.trim()}
+          disabled={
+            status === 'submitting' || !message.trim() || hasMonetaryIntent
+          }
           className="w-full py-2.5 sm:py-3 mt-1 sm:mt-0 rounded-xl font-black text-sm uppercase tracking-widest transition-all disabled:opacity-40 bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]"
         >
           {status === 'submitting' ? 'Sending...' : 'Send Feedback'}
