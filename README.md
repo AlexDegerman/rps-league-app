@@ -236,13 +236,9 @@ Selectable events are weighted randomly, featuring **Tidal Surge** (incorporatin
 
 > 📋 **[View all Global Event showcases →](./GLOBALEVENTS.md)**
 
-### Featured Showcase: Tidal Surge
-
-An oceanic-themed event built around crashing waves, deep currents, and hydro-telemetry effects that activates the Win Echo Protocol, applying a +20% signal echo to all successful predictions.
-
 <p align="center">
-  <strong>GLobal Event Trigger Animations</strong><br/>
-  <img src="./assets/globaleventanimations.gif" width="220" />
+  <strong>Global Event Trigger Animations</strong><br/>
+  <img src="./assets/globalevents_showcase.gif" width="220" />
 </p>
 
 ---
@@ -389,15 +385,15 @@ All economic systems - bonus tiers, flash events, multipliers - are visually emb
 
 A priority-aware event stream displayed at the bottom of the screen, surfacing meaningful in-game events in real time.
 
-### Event priorities
+### Event Priorities
 
 | Priority | Indicator | Events |
 |----------|-----------|--------|
-| 0 (Player events) | Gold ● | Relic discovered, achievement unlocked, streak milestones (3/5/8/10/15/20) |
-| 1 (My prediction) | Red ● | Your prediction resolved (win/loss) |
-| 2 (Other predictions) | Red ● | Other players' prediction results |
-| 3 (Demo specials) | None | Simulated relics, achievements, milestones, lap completions, streaks, and festivals |
-| 4 (Demo predictions) | None | Simulated prediction traffic during quiet periods |
+| 0 (Player Events) | Gold ● | Relics discovered, achievements unlocked, streak milestones (3/5/8/10/15/20) |
+| 1 (My Predictions) | Red ● | Your prediction results (win/loss) |
+| 2 (Other Predictions) | Red ● | Other players' prediction results |
+| 3 (Demo Specials) | None | Simulated relics, achievements, milestones, lap completions, streaks, and festivals |
+| 4 (Demo Predictions) | None | Simulated prediction traffic during quiet periods |
 
 ### Architecture
 
@@ -422,13 +418,12 @@ Animated LiveActivityFeed
 
 ### Guarantees
 
-- Events are displayed one at a time, and each animation completes before the next begins.
-- Live player events appear within 400 ms, taking priority over demo traffic.
-- Gold indicators identify priority 0 player events.
+- Events are displayed sequentially, with each animation completing before the next begins.
+- Live player events appear within 400 ms and always take priority over demo traffic.
+- Gold indicators identify Priority 0 player events.
 - Red indicators identify live prediction results.
-- Feed events never write to Zustand, preventing unnecessary re-renders.
+- Feed events bypass Zustand, preventing unnecessary re-renders.
 - Demo events keep the feed active during low-traffic periods.
-
 ---
 
 ## 🏗️ Architecture
@@ -713,12 +708,14 @@ No real-money gambling, cash payouts, or withdrawable rewards are supported.
 ---
 
 ## 🔒 Privacy, Telemetry & Audit Logs
-To protect user privacy while maintaining system stability, verifying developer telemetry, and monitoring AI behavior, the application implements the following privacy-by-design standards:
-- **Coarse Geolocation**: During initial account creation, the system resolves the approximate city and country of the predictor (e.g., `Helsinki, FI`) to help analyze regional engagement [1.1.1].
-- **IP Anonymization**: IP addresses are immediately anonymized at the application boundary prior to processing (e.g., zeroing out the host octet to truncate `203.0.113.195` to `203.0.113.0`) [1.1.6]. Geolocation lookups are performed entirely locally and offline using an in-memory database (`geoip-lite`), ensuring raw IP addresses are never stored or transmitted to external APIs [1.1.1, 1.1.3].
-- **Audit Logs**: For public administrative monitoring and Discord audit webhooks, IP addresses are cleanly masked to display subnets only (e.g., `203.0.113.x`).
-- **Security**: No credentials, passwords, session tokens, or personally identifiable information (PII) are ever logged or stored.
-- **Observability**: Enables real-time monitoring of AI Oracle model behavior, including hallucinations and edge-case detection during live matches.
+
+RPS League follows privacy-by-design principles while maintaining system stability, developer observability, and AI quality monitoring.
+
+- **Coarse Geolocation:** During account creation, the application resolves the approximate city and country of the predictor (e.g., `Helsinki, FI`) to analyze regional engagement.
+- **IP Anonymization:** IP addresses are anonymized immediately at the application boundary before processing (e.g., `203.0.113.195` → `203.0.113.0`). Geolocation is performed entirely offline using the in-memory `geoip-lite` database, ensuring raw IP addresses are never stored or transmitted to third-party services.
+- **Audit Logs:** Administrative logs display only masked IP subnets (e.g., `203.0.113.x`).
+- **Security:** Passwords, credentials, session tokens, and other personally identifiable information (PII) are never logged or stored.
+- **Observability:** Anonymous telemetry enables monitoring of AI Oracle behavior, including hallucination detection, model fallback events, and other edge cases during live operation.
 
 ---
 
