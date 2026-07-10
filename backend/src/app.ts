@@ -7,7 +7,6 @@ import matchesRouter from './routes/matches.js'
 import leaderboardRouter from './routes/leaderboard.js'
 import liveRouter from './routes/live.js'
 import predictionsRouter from './routes/predictions.js'
-import oracleConsultRouter from './routes/oracleConsult.js'
 import usersRouter from './routes/users.js'
 import feedbackRouter from './routes/feedback.js'
 import oracleRouter from './routes/oracle.js'
@@ -47,7 +46,6 @@ app.use('/api/matches', matchesRouter)
 app.use('/api/leaderboard', leaderboardRouter)
 app.use('/api/live', liveRouter)
 app.use('/api/predictions', predictionsRouter)
-app.use('/api/oracle/query', oracleConsultRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/ascend', ascendRouter)
 app.use('/api/feedback', feedbackRouter)

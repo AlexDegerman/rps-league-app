@@ -23,7 +23,6 @@ vi.mock('../utils/logger.js', () => ({
   }
 }))
 
-// Mock the Gemini SDK so fallback behavior can be tested deterministically.
 vi.mock('@google/generative-ai', () => ({
   GoogleGenerativeAI: vi.fn().mockImplementation(function () {
     return {
@@ -38,11 +37,11 @@ vi.mock('../services/matchService.js', () => ({
   getLatestMatches: vi.fn()
 }))
 
-import oracleConsultRouter from './oracleConsult.js'
+import oracleRouter from '../routes/oracle.js'
 
 const app = express()
 app.use(express.json())
-app.use('/oracleConsult', oracleConsultRouter)
+app.use('/oracleConsult', oracleRouter)
 
 describe('Analysis Route', () => {
   const mockDb = vi.mocked(pool.query)
@@ -54,7 +53,6 @@ describe('Analysis Route', () => {
       matches: [],
       hasMore: false
     } as unknown as MatchesReturnType)
-    // Mock the Gemini SDK so fallback behavior can be tested deterministically.
     mockDb.mockImplementation(async (sql: string) => {
       let rows: Record<string, unknown>[] = []
       if (sql.includes('predictions')) {
@@ -69,36 +67,16 @@ describe('Analysis Route', () => {
             }
           ]
         } else {
-          rows = [
-            {
-              total_count: '10',
-              total_volume: '1000',
-              win_count: '5'
-            }
-          ]
+          rows = [{ total_count: '10', total_volume: '1000', win_count: '5' }]
         }
       } else if (sql.includes('matches')) {
         if (sql.includes('player_a_played')) {
-          rows = [
-            {
-              name: 'BotA',
-              wins: '5'
-            }
-          ]
+          rows = [{ name: 'BotA', wins: '5' }]
         } else {
-          rows = [
-            {
-              count: '15'
-            }
-          ]
+          rows = [{ count: '15' }]
         }
       } else if (sql.includes('users')) {
-        rows = [
-          {
-            nickname: 'User1',
-            points: 1000
-          }
-        ]
+        rows = [{ nickname: 'User1', points: 1000 }]
       }
       return {
         rows,
@@ -118,7 +96,7 @@ describe('Analysis Route', () => {
       })
 
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', '1.1.1.1')
       .send({ query: 'Who is the goat?' })
 
@@ -130,7 +108,7 @@ describe('Analysis Route', () => {
     mockGenerateContent.mockRejectedValue(new Error('All models 503'))
 
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', '2.2.2.2')
       .send({ query: 'Crash me' })
 
@@ -145,11 +123,11 @@ describe('Analysis Route', () => {
 
     const payload = { query: 'UniqueCacheQuery' }
     await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', '3.3.3.3')
       .send(payload)
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', '3.3.3.3')
       .send(payload)
 
@@ -161,13 +139,13 @@ describe('Analysis Route', () => {
     const testIp = '4.4.4.4'
     for (let i = 0; i < 5; i++) {
       await request(app)
-        .post('/oracleConsult')
+        .post('/oracleConsult/consult')
         .set('x-forwarded-for', testIp)
         .send({ query: `limit-test-${i}` })
     }
 
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', testIp)
       .send({ query: 'one-too-many' })
 
@@ -178,7 +156,7 @@ describe('Analysis Route', () => {
   it('returns 400 when query length exceeds 500 characters', async () => {
     const longQuery = 'a'.repeat(501)
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', '5.5.5.5')
       .send({ query: longQuery })
 
@@ -188,7 +166,7 @@ describe('Analysis Route', () => {
 
   it('bypasses AI and returns system override when financial intent is detected', async () => {
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', '6.6.6.6')
       .send({ query: 'How do I cashout?' })
 
@@ -208,7 +186,7 @@ describe('Analysis Route', () => {
     })
 
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult') // <-- Updated
       .set('x-forwarded-for', '7.7.7.7')
       .send({ query: 'Explain relic rules' })
 
@@ -226,7 +204,7 @@ describe('Analysis Route', () => {
     })
 
     const res = await request(app)
-      .post('/oracleConsult')
+      .post('/oracleConsult/consult')
       .set('x-forwarded-for', '8.8.8.8')
       .send({ query: 'Who won the last match?' })
 

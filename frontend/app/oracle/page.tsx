@@ -47,13 +47,21 @@ export default function AnalysisPage() {
   const [currentSource, setCurrentSource] = useState<string | null>(null)
   const [showPrivacyInfo, setShowPrivacyInfo] = useState(false)
   const [placeholder, setPlaceholder] = useState('Ask the Oracle...')
-  const [history, setHistory] = useState<HistoryItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('aiQueryHistory')
-      return saved ? JSON.parse(saved) : []
+  const [history, setHistory] = useState<HistoryItem[]>([])
+
+  useEffect(() => {
+    const saved = localStorage.getItem('aiQueryHistory')
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        requestAnimationFrame(() => {
+          setHistory(parsed)
+        })
+      } catch (e) {
+        logger.error('Failed to parse history', e)
+      }
     }
-    return []
-  })
+  }, [])
 
   useEffect(() => {
     const handleResize = () => {

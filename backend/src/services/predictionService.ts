@@ -5,14 +5,14 @@ import {
   consumeFlashBetForUser,
   tryTriggerFlashEventForUser,
   recordSessionFlashType,
-  hasSeenAllFlashTypes,
+  hasSeenAllFlashTypes
 } from './flashEventService.js'
 import { logger } from '../utils/logger.js'
 import {
   consumeOracleForUser,
   getOracleState,
   hasUserUsedOracle
-} from './oracleService.js'
+} from './oracleProphecyService.js'
 import {
   checkAndTriggerFestival,
   getGuaranteedBonusRemaining,
@@ -1038,29 +1038,28 @@ export const getPaginatedUserPredictions = async (
     }
   }))
 
-    const predictions = data.rows.map((row) => ({
-      id: row.id,
-      gameId: row.gameId,
-      pick: row.pick,
-      betAmount: row.betAmount?.toString() ?? '0',
-      gainLoss: row.gainLoss?.toString() ?? '0',
-      result: row.result,
-      bonusTier: row.bonusTier ?? null,
-      bonusMultiplier: Number(row.bonusMultiplier ?? 0),
-      flashEventType: row.flashEventType ?? null,
-      flashMult: Number(row.flashMult ?? 1),
-      streakMultiplier: Number(row.streakMultiplier ?? 1),
-      createdAt: Number(row.createdAt),
-      relicMultiplier: Number(row.relicMultiplier ?? 1),
-      totalMultiplier: Number(row.totalMultiplier || row.total_multiplier || 1),
-      festivalMultiplier: Number(row.festivalMultiplier || 1),
-      festivalType: row.festivalType || null,
-      globalEventType: row.globalEventType ?? null,
-      globalEchoAmount: row.globalEchoAmount
-        ? row.globalEchoAmount.toString()
-        : null
-    }))
-
+  const predictions = data.rows.map((row) => ({
+    id: row.id,
+    gameId: row.gameId,
+    pick: row.pick,
+    betAmount: row.betAmount?.toString() ?? '0',
+    gainLoss: row.gainLoss?.toString() ?? '0',
+    result: row.result,
+    bonusTier: row.bonusTier ?? null,
+    bonusMultiplier: Number(row.bonusMultiplier ?? 0),
+    flashEventType: row.flashEventType ?? null,
+    flashMult: Number(row.flashMult ?? 1),
+    streakMultiplier: Number(row.streakMultiplier ?? 1),
+    createdAt: Number(row.createdAt),
+    relicMultiplier: Number(row.relicMultiplier ?? 1),
+    totalMultiplier: Number(row.totalMultiplier || row.total_multiplier || 1),
+    festivalMultiplier: Number(row.festivalMultiplier || 1),
+    festivalType: row.festivalType || null,
+    globalEventType: row.globalEventType ?? null,
+    globalEchoAmount: row.globalEchoAmount
+      ? row.globalEchoAmount.toString()
+      : null
+  }))
 
   return { matches, predictions, total, hasMore: offset + limit < total }
 }

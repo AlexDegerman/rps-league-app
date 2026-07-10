@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { maskIpForLogs } from '../utils/maskIp.js'
+import { sendDiscordWebhook } from '../utils/discord.js'
 
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_FEEDBACK_WEBHOOK!
 const ADMIN_KEY = process.env.FEEDBACK_ADMIN_KEY!
@@ -66,7 +67,7 @@ const getSafeIp = (req: Request): string => {
 }
 
 const feedbackLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
@@ -91,13 +92,11 @@ async function isBanned(userId: string): Promise<boolean> {
   }
 }
 
-// Validate actual file bytes server-side (mimetype is spoofable)
 async function isValidImage(buffer: Buffer): Promise<boolean> {
   const type = await fileTypeFromBuffer(buffer)
   return !!type && ALLOWED_IMAGE_TYPES.includes(type.mime)
 }
 
-// Check contents with Sightengine (fails closed on error or timeout)
 async function isImageSafe(buffer: Buffer): Promise<boolean> {
   if (!SIGHTENGINE_USER || !SIGHTENGINE_SECRET) {
     logger.warn('Sightengine credentials missing, rejecting image')
@@ -123,9 +122,7 @@ async function isImageSafe(buffer: Buffer): Promise<boolean> {
     clearTimeout(timeout)
 
     if (!res.ok) {
-      logger.error('Sightengine request failed', {
-        status: res.status
-      })
+      logger.error('Sightengine request failed', { status: res.status })
       return false
     }
 
@@ -138,7 +135,6 @@ async function isImageSafe(buffer: Buffer): Promise<boolean> {
 
     const nudity = data.nudity?.raw ?? 0
     const violence = data.violence?.prob ?? 0
-
     const firearm = data.weapon?.classes?.firearm ?? 0
     const knife = data.weapon?.classes?.knife ?? 0
     const weaponScore = Math.max(firearm, knife)
@@ -160,7 +156,6 @@ async function isImageSafe(buffer: Buffer): Promise<boolean> {
     } else {
       logger.error('Image moderation check failed', err)
     }
-
     return false
   } finally {
     clearTimeout(timeout)
@@ -251,8 +246,6 @@ router.post(
       })
     })
 
-    const discordData = new FormData()
-
     let traceValue = 'No Trace'
     if (linkedEventId) {
       const dsn = process.env.SENTRY_DSN
@@ -266,11 +259,9 @@ router.post(
               ? parts[0]
               : null)
 
-          if (resolvedOrg) {
-            traceValue = `[${linkedEventId.slice(0, 8)}](https://${resolvedOrg}.sentry.io/issues/?query=${linkedEventId})`
-          } else {
-            traceValue = `\`${linkedEventId.slice(0, 8)}\``
-          }
+          traceValue = resolvedOrg
+            ? `[${linkedEventId.slice(0, 8)}](https://${resolvedOrg}.sentry.io/issues/?query=${linkedEventId})`
+            : `\`${linkedEventId.slice(0, 8)}\``
         } catch {
           traceValue = `\`${linkedEventId.slice(0, 8)}\``
         }
@@ -303,46 +294,25 @@ router.post(
           value: `Route: \`${route || '/'}\`\nIP: \`${maskIpForLogs(ip)}\``,
           inline: false
         },
-        {
-          name: '🛠️ Trace',
-          value: traceValue,
-          inline: true
-        },
+        { name: '🛠️ Trace', value: traceValue, inline: true },
         { name: '🚫 Admin', value: `[Ban User](${banUrl})`, inline: true }
       ],
       timestamp: new Date().toISOString(),
       footer: { text: `Viewport: ${viewport || 'unknown'}` }
     }
 
-    discordData.append('payload_json', JSON.stringify({ embeds: [embed] }))
-
-    if (multerReq.file) {
-      const blob = new Blob([new Uint8Array(multerReq.file.buffer)], {
-        type: multerReq.file.mimetype
-      })
-      discordData.append(
-        'file',
-        blob,
-        multerReq.file.originalname || 'screenshot.png'
-      )
-    }
-
     try {
-      const discordRes = await fetch(DISCORD_WEBHOOK_URL, {
-        method: 'POST',
-        body: discordData
-      })
-
-      if (!discordRes.ok) {
-        const errorText = await discordRes.text()
-        logger.error('Discord webhook returned error', undefined, {
-          status: discordRes.status,
-          body: errorText,
-          userId,
-          category
-        })
-        throw new Error('Discord dispatch failed')
-      }
+      await sendDiscordWebhook(
+        DISCORD_WEBHOOK_URL,
+        embed,
+        multerReq.file
+          ? {
+              buffer: multerReq.file.buffer,
+              mimetype: multerReq.file.mimetype,
+              filename: multerReq.file.originalname || 'screenshot.png'
+            }
+          : undefined
+      )
 
       res.json({ ok: true })
     } catch (err) {

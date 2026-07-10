@@ -442,7 +442,7 @@ export const askOracle = async (
   nickname?: string
 ): Promise<OracleResponse> => {
   try {
-    const res = await fetch(`${API_BASE}/api/oracle/query`, {
+    const res = await fetch(`${API_BASE}/api/oracle/consult`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, nickname })
