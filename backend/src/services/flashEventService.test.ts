@@ -610,14 +610,14 @@ describe('Festival Service', () => {
       randomSpy.mockRestore()
     })
 
-    it('should prevent double-instantiation of demo scheduler loops', () => {
+    it('should prevent double-instantiation of demo scheduler loops', async () => {
       const firstBroadcast = vi.fn()
       const secondBroadcast = vi.fn()
 
       festivalService.startDemoFestivalScheduler(firstBroadcast)
       festivalService.startDemoFestivalScheduler(secondBroadcast)
 
-      vi.advanceTimersByTime(25 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(25 * 60 * 1000)
 
       expect(firstBroadcast).toHaveBeenCalled()
       expect(secondBroadcast).not.toHaveBeenCalled()
