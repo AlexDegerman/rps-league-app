@@ -796,7 +796,7 @@ export default function HomePage() {
 
     es.addEventListener('festival_event', (event: MessageEvent) => {
       const data: FestivalSSEData = JSON.parse(event.data)
-     if (data.endsAt !== null && Date.now() > data.endsAt) return
+      if (data.endsAt !== null && Date.now() > data.endsAt) return
 
     emitActivity({
       id: `festival-feed-${data.type}-${Date.now()}`,
