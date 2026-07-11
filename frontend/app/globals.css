@@ -2556,6 +2556,90 @@ span.tracking-wider[title]:active::after {
   }
 }
 
+/* === MATCH REVEAL ANIMATIONS === */
+
+@keyframes rps-shake {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-3deg); }
+}
+
+@keyframes rps-clash-in-left-mobile {
+  0% { transform: translateX(0) scale(1); }
+  100% { transform: translateX(38px) scale(1.35); }
+}
+@keyframes rps-clash-in-left-desktop {
+  0% { transform: translateX(0) scale(1); }
+  100% { transform: translateX(50px) scale(1.35); }
+}
+@keyframes rps-clash-in-right-mobile {
+  0% { transform: translateX(0) scale(1); }
+  100% { transform: translateX(-38px) scale(1.35); }
+}
+@keyframes rps-clash-in-right-desktop {
+  0% { transform: translateX(0) scale(1); }
+  100% { transform: translateX(-50px) scale(1.35); }
+}
+
+@keyframes rps-impact-flash {
+  0% { opacity: 0; transform: scale(0.6); }
+  30% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+@keyframes rps-winner-pulse {
+  0%   { filter: drop-shadow(0 0 0px transparent) brightness(1); }
+  40%  { filter: drop-shadow(0 0 10px #22c55e) brightness(1.3); }
+  100% { filter: drop-shadow(0 0 5px #22c55e) brightness(1.1); }
+}
+
+@keyframes rps-loser-dim {
+  0%   { opacity: 1;    filter: grayscale(0); }
+  100% { opacity: 0.3;  filter: grayscale(0.8); }
+}
+
+@keyframes outcome-rewrite-in {
+  0% { opacity: 0; transform: translateY(4px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.rps-shuffle-fast {
+  animation: rps-shake 0.22s ease-in-out infinite;
+}
+.rps-shuffle-slow {
+  animation: rps-shake 0.35s ease-in-out infinite;
+}
+.rps-clash-left {
+  animation: rps-clash-in-left-mobile 0.4s ease-in-out forwards;
+}
+.rps-clash-right {
+  animation: rps-clash-in-right-mobile 0.4s ease-in-out forwards;
+}
+
+@media (min-width: 640px) {
+  .rps-clash-left {
+    animation: rps-clash-in-left-desktop 0.4s ease-in-out forwards;
+  }
+  .rps-clash-right {
+    animation: rps-clash-in-right-desktop 0.4s ease-in-out forwards;
+  }
+}
+
+.rps-reveal-winner {
+  animation: rps-winner-pulse 0.5s ease-out forwards;
+}
+.rps-reveal-loser {
+  animation: rps-loser-dim 0.4s ease-out forwards;
+}
+.rps-reveal-pop {
+  animation: rps-reveal-pop 0.2s ease-out forwards;
+}
+.rps-impact-flash {
+  animation: rps-impact-flash 0.2s ease-out forwards;
+}
+.outcome-rewrite-badge {
+  animation: outcome-rewrite-in 0.25s ease-out forwards;
+}
+
 /* ═══════════════════════════════════════════════════════════════════
     MASTER EVENT SYSTEM
     Flash:    lunar · electric · cards · hellfire          (4)

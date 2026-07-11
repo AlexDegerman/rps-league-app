@@ -27,6 +27,11 @@ interface GameState {
   setMatches: (fn: (prev: Match[]) => Match[]) => void
   addMatch: (match: Match) => void
 
+  // Reveal State
+  revealResults: Map<string, Match>
+  setRevealResult: (gameId: string, result: Match) => void
+  getRevealResult: (gameId: string) => Match | undefined
+
   // Prediction State
   predictions: Map<string, PredictionRecord>
   setPrediction: (gameId: string, record: PredictionRecord) => void
@@ -101,11 +106,12 @@ const FESTIVAL_MAP: Record<string, FestivalModeKey> = {
   SANGUINE: 'festival_sanguine'
 }
 
-export const useGameStore = create<GameState>((set) => ({
+export const useGameStore = create<GameState>((set, get) => ({
   // Defaults
   backendReady: false,
   pendingMatches: [],
   matches: [],
+  revealResults: new Map(),
   predictions: new Map(),
   activeFlashEvent: null,
   flashBuffRemaining: 0,
@@ -150,6 +156,15 @@ export const useGameStore = create<GameState>((set) => ({
       if (s.matches.some((m) => m.gameId === match.gameId)) return s
       return { matches: [match, ...s.matches].slice(0, 20) }
     }),
+
+  // Actions - Reveal State
+  setRevealResult: (gameId, result) =>
+    set((s) => {
+      const next = new Map(s.revealResults)
+      next.set(gameId, result)
+      return { revealResults: next }
+    }),
+  getRevealResult: (gameId) => get().revealResults.get(gameId),
 
   // Actions - Predictions
   setPrediction: (gameId, record) =>

@@ -2,6 +2,14 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [2.3] - The Animated RPS Matches Update
+
+### Added
+
+* **Animated RPS Matches:** Pending match cards now animate during the final second before results are revealed.
+* **Match Clash Sequence:** Move icons shake, cycle through random moves, then slide together for a center clash before revealing the final outcome.
+* **Polished Result Reveal:** Added an impact flash, winner glow, and loser dim effects for a more satisfying match resolution.
+
 ## [2.2] - The Live Activity & Quality of Life Update
 
 ### Added

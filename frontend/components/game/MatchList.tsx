@@ -185,6 +185,28 @@ const MatchRow = React.memo(
             </span>
             <MoveIcon move={right.played} />
           </div>
+          {/* Outcome Rewritten overlay, permanent on card */}
+          {match.outcomeRewritten && (
+            <div
+              className="absolute inset-x-0 flex justify-center"
+              style={{
+                top: '50%',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none'
+              }}
+            >
+              <span
+                className="outcome-rewrite-badge text-[8px] font-black uppercase tracking-widest text-cyan-400 px-2 py-0.5 rounded"
+                style={{
+                  background: 'rgba(8,145,178,0.08)',
+                  border: '1px solid rgba(34,211,238,0.25)',
+                  textShadow: '0 0 6px rgba(34,211,238,0.6)'
+                }}
+              >
+                Outcome Rewritten
+              </span>
+            </div>
+          )}
 
           {/* Right player */}
           <div className="flex flex-col items-end flex-1 min-w-0">

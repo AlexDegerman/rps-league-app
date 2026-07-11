@@ -581,13 +581,7 @@ Implementation highlights:
 
 ## 📺 Extended Media Showcases
 
-Extended visual breakdowns and gameplay recordings for the following systems:
-
-- **🏆 Achievement Styling**: Mythical & Rainbow leaderboard row overrides.
-- **🎁 Mechanic Reference**: Interactive guide for Bonuses, Streaks, Events, and Relics.
-- **🤖 Automation & Prophecy**: Idle Auto-Betting and the Daily Oracle system.
-- **🌌 Tier Customization**: Point-styling selection for unlocked milestones.
-- **🔮 Service Reliability**: Sentry-integrated Feedback Portal and Update Logs.
+Extended visual breakdowns and gameplay recordings covering achievement styling, automation systems, and more.
 
 📄 [View Extended Media Gallery →](./EXTENDED_MEDIA.md)
 

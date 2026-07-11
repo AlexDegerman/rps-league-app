@@ -82,3 +82,14 @@ Sentry integrated across the full stack for runtime and SSE monitoring. The in-a
     <td><img src="./assets/feedback3.png" /></td>
   </tr>
 </table>
+
+---
+
+## ⚔️ Animated RPS Matches
+
+Match results are presented through a cinematic reveal sequence that builds anticipation before the outcome is shown. As the countdown reaches zero, both players' moves rapidly cycle before colliding in the center. Once the server confirms the result, the final moves are revealed with impact, winner, and loser animations for a more engaging finish.
+
+<p align="center">
+  <strong>Animated Match Results Showcase</strong><br/>
+  <img src="./assets/animatedmatchresults_demo.gif" width="220" />
+</p>

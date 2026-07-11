@@ -775,11 +775,15 @@ export default function HomePage() {
     es.addEventListener('result', (event) => {
       const match: Match = JSON.parse(event.data)
       updatePacketTimestamp()
-      removePendingMatch(match.gameId)
-      setMatches((prev) => {
-        if (prev.some((m) => m.gameId === match.gameId)) return prev
-        return [match, ...prev].slice(0, 20)
-      })
+      useGameStore.getState().setRevealResult(match.gameId, match)
+
+      setTimeout(() => {
+        removePendingMatch(match.gameId)
+        setMatches((prev) => {
+          if (prev.some((m) => m.gameId === match.gameId)) return prev
+          return [match, ...prev].slice(0, 20)
+        })
+      }, 1200)
     })
 
     es.addEventListener('flash_event', (event) => {

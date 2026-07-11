@@ -1,5 +1,13 @@
 export type Move = 'ROCK' | 'PAPER' | 'SCISSORS'
 
+export type Phase =
+  | 'shuffle_fast'
+  | 'shuffle_slow'
+  | 'waiting_for_result'
+  | 'clash'
+  | 'reveal'
+  | 'done'
+
 export interface Player {
   name: string
   played: Move
@@ -11,6 +19,7 @@ export interface Match {
   time: number
   playerA: Player
   playerB: Player
+  outcomeRewritten?: boolean
 }
 
 export interface PlayerStats {

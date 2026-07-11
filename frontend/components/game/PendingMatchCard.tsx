@@ -1,10 +1,10 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import type { PendingMatch, PredictionRecord } from '@/types/rps'
-import { formatDateTime } from '@/lib/format'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUIStore } from '@/app/stores/uiStore'
+import RevealAnimation from './RevealAnimation'
 
 interface PendingMatchCardProps {
   pending: PendingMatch
@@ -34,13 +34,25 @@ function PendingMatchCardComponent({
   }, [pending.expiresAt, serverOffset])
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft())
+  const [revealPhase, setRevealPhase] = useState<'idle' | 'animating' | 'done'>(
+    'idle'
+  )
+  const revealTriggeredRef = useRef(false)
+  const revealResults = useGameStore((s) => s.revealResults)
+  const revealResult = revealResults.get(pending.gameId)
 
   useEffect(() => {
     const id = setInterval(() => {
       const remaining = calculateTimeLeft()
       setTimeLeft(remaining)
+
+      if (remaining <= 1.0 && !revealTriggeredRef.current) {
+        revealTriggeredRef.current = true
+        setRevealPhase('animating')
+      }
+
       if (remaining <= 0) clearInterval(id)
-    }, 500)
+    }, 100)
     return () => clearInterval(id)
   }, [calculateTimeLeft])
 
@@ -296,9 +308,36 @@ function PendingMatchCardComponent({
 
   const betBtnClass = `w-full py-3 rounded-xl font-black text-sm active:scale-95 shadow-md transition-all tracking-wide ${cfg.btnClass}`
 
+  let leftMove: 'ROCK' | 'PAPER' | 'SCISSORS' | null = null
+  let rightMove: 'ROCK' | 'PAPER' | 'SCISSORS' | null = null
+  let winningSide: 'left' | 'right' | 'draw' | null = null
+  let outcomeRewritten = false
+
+  if (revealResult) {
+    const isAOnLeft = revealResult.playerA.name === pending.playerA
+    const leftPlayer = isAOnLeft ? revealResult.playerA : revealResult.playerB
+    const rightPlayer = isAOnLeft ? revealResult.playerB : revealResult.playerA
+
+    leftMove = leftPlayer.played as 'ROCK' | 'PAPER' | 'SCISSORS'
+    rightMove = rightPlayer.played as 'ROCK' | 'PAPER' | 'SCISSORS'
+    outcomeRewritten = !!revealResult.outcomeRewritten
+
+    if (leftMove === rightMove) {
+      winningSide = 'draw'
+    } else if (
+      (leftMove === 'ROCK' && rightMove === 'SCISSORS') ||
+      (leftMove === 'SCISSORS' && rightMove === 'PAPER') ||
+      (leftMove === 'PAPER' && rightMove === 'ROCK')
+    ) {
+      winningSide = 'left'
+    } else {
+      winningSide = 'right'
+    }
+  }
+
   return (
     <div
-      className={`relative z-0 rounded-xl shadow-sm border-2 p-2 sm:p-4 mb-3 animate-in fade-in zoom-in duration-300 overflow-hidden
+      className={`relative z-0 rounded-xl shadow-sm border-2 py-2 px-3 sm:p-4 mb-3 animate-in fade-in zoom-in duration-300 overflow-hidden
         ${cfg.border} ${cfg.cardAnim}`}
     >
       <div className="absolute inset-0 bg-white -z-20" />
@@ -314,25 +353,59 @@ function PendingMatchCardComponent({
         />
       )}
 
-      {/* Top row: date + timer */}
-      <div className="flex justify-between items-center gap-2 mb-2 relative z-10">
-        <span className={`text-xs shrink-0 font-medium ${cfg.dateText}`}>
-          {formatDateTime(pending.time)}
+      {/* Top row: Timer only */}
+      <div className="flex items-center justify-between relative z-10 px-1 mb-1">
+        <span className="text-[11px] font-bold text-gray-400 truncate w-[35%] text-left leading-tight">
+          {pending.playerA}
         </span>
         <span
           className={`text-[13px] font-black px-3 py-1 rounded-lg shrink-0 transition-colors min-w-18.75 text-center shadow-sm ${timerClass}`}
         >
           {timeLeft > 0 ? `${timeLeft}s left` : 'Revealing...'}
         </span>
+        <span className="text-[11px] font-bold text-gray-400 truncate w-[35%] text-right leading-tight">
+          {pending.playerB}
+        </span>
       </div>
 
-      {/* VS row */}
-      <div className="flex items-start justify-between gap-0.5 sm:gap-3 relative z-10">
-        {/* Left player */}
-        <div className="flex flex-col items-center flex-1 gap-2">
-          <span className="font-bold text-sm text-center leading-tight min-h-7 flex items-center text-gray-800">
-            {pending.playerA}
-          </span>
+      {/* Name & Duel Row */}
+      <div className="flex justify-center items-center h-9 mb-2 relative z-10">
+        <div className="shrink-0 w-28 sm:w-36 px-1">
+          {/* VS divider, becomes RevealAnimation when timer expires */}
+          {revealPhase !== 'idle' ? (
+            <RevealAnimation
+              leftMove={leftMove}
+              rightMove={rightMove}
+              winningSide={winningSide}
+              outcomeRewritten={outcomeRewritten}
+              onDone={() => setRevealPhase('done')}
+            />
+          ) : (
+            <div className="flex items-center justify-between w-full px-1">
+              <span
+                className={`w-9 h-9 flex items-center justify-center text-lg font-black ${cfg.vsText}`}
+              >
+                ?
+              </span>
+              <span
+                className={`text-[10px] font-black uppercase ${cfg.vsText}`}
+              >
+                vs
+              </span>
+              <span
+                className={`w-9 h-9 flex items-center justify-center text-lg font-black ${cfg.vsText}`}
+              >
+                ?
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom row: Pick Buttons / Badges */}
+      <div className="flex items-center justify-between gap-3 relative z-10">
+        {/* Left Button / Badge */}
+        <div className="flex-1 flex justify-center">
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerA)}
@@ -340,43 +413,19 @@ function PendingMatchCardComponent({
             >
               {oracleSide === 'left' ? '👁️ PICK' : cfg.label}
             </button>
+          ) : prediction?.pick === pending.playerA ? (
+            <span
+              className={`text-[10px] font-black px-4 py-2 rounded-lg text-white uppercase tracking-widest text-center w-full ${cfg.confirmBg}`}
+            >
+              {prediction.confirmed ? 'PICKED' : 'CONFIRMING...'}
+            </span>
           ) : (
-            prediction?.pick === pending.playerA && (
-              <span
-                className={`text-[10px] font-black px-3 py-1 rounded-lg text-white uppercase tracking-widest ${cfg.confirmBg}`}
-              >
-                {prediction.confirmed ? 'PICKED' : 'CONFIRMING...'}
-              </span>
-            )
+            <div className="h-10 w-full" />
           )}
         </div>
 
-        {/* VS divider */}
-        <div className="flex flex-col items-center pt-2 shrink-0">
-          <div className="flex items-center gap-0.5 sm:gap-2">
-            <span
-              className={`w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center text-xs sm:text-lg font-black ${cfg.vsText}`}
-            >
-              ?
-            </span>
-            <span
-              className={`text-[8px] sm:text-[10px] font-black uppercase ${cfg.vsText}`}
-            >
-              vs
-            </span>
-            <span
-              className={`w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center text-xs sm:text-lg font-black ${cfg.vsText}`}
-            >
-              ?
-            </span>
-          </div>
-        </div>
-
-        {/* Right player */}
-        <div className="flex flex-col items-center flex-1 gap-2">
-          <span className="font-bold text-sm text-center leading-tight min-h-7 flex items-center text-gray-800">
-            {pending.playerB}
-          </span>
+        {/* Right Button / Badge */}
+        <div className="flex-1 flex justify-center">
           {canPick ? (
             <button
               onClick={() => onPick(pending.gameId, pending.playerB)}
@@ -384,14 +433,14 @@ function PendingMatchCardComponent({
             >
               {oracleSide === 'right' ? '👁️ PICK' : cfg.label}
             </button>
+          ) : prediction?.pick === pending.playerB ? (
+            <span
+              className={`text-[10px] font-black px-4 py-2 rounded-lg text-white uppercase tracking-widest text-center w-full ${cfg.confirmBg}`}
+            >
+              {prediction.confirmed ? 'PICKED' : 'CONFIRMING...'}
+            </span>
           ) : (
-            prediction?.pick === pending.playerB && (
-              <span
-                className={`text-[10px] font-black px-3 py-1 rounded-lg text-white uppercase tracking-widest ${cfg.confirmBg}`}
-              >
-                {prediction.confirmed ? 'PICKED' : 'CONFIRMING...'}
-              </span>
-            )
+            <div className="h-10 w-full" />
           )}
         </div>
       </div>
