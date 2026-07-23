@@ -33,6 +33,13 @@ import {
 } from './globalEventService.js'
 import { recordInteraction } from './sessionService.js'
 import { autoEquipUserBadges } from '../utils/badgeHelper.js'
+import {
+  isWorldBossActive,
+  getCurrentState as getBossState,
+  registerParticipant,
+  recordMiss,
+  applyDamage
+} from './worldBossService.js'
 
 const POINTS_FLOOR = 100000n
 // Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
@@ -191,11 +198,104 @@ const rollBonus = (
   }
 }
 
+const resolveWorldBossPrediction = async (
+  gameId: string,
+  winnerName: string,
+  broadcast: (event: string, data: string) => void
+): Promise<void> => {
+  let predictions
+  try {
+    predictions = await pool.query(
+      `SELECT p.user_id, p.pick, u.nickname, u.equipped_relics
+        FROM predictions p
+        JOIN users u ON p.user_id = u.user_id
+        WHERE p.game_id = $1 AND p.result IS NULL`,
+      [gameId]
+    )
+  } catch (err) {
+    logger.error('resolveWorldBossPrediction: fetch failed', err, { gameId })
+    return
+  }
+
+  const bossState = getBossState()
+  const now = Date.now()
+  const timeRemaining = bossState.encounterEndsAt
+    ? Math.max(0, Math.ceil((bossState.encounterEndsAt - now) / 1000))
+    : 0
+
+  await Promise.all(
+    predictions.rows.map(async (row) => {
+      try {
+        const isWin = row.pick === winnerName
+        const relics: string[] = row.equipped_relics?.filter(Boolean) ?? []
+
+        registerParticipant(
+          row.user_id,
+          timeRemaining,
+          row.nickname ?? 'Player'
+        )
+
+        if (!isWin) {
+          recordMiss(row.user_id)
+        }
+
+        let damage = 0
+        if (isWin) {
+          damage = 1
+          // Temporal Charge: first 10s registers as 2 damage
+          if (
+            relics.includes('temporal_charge') &&
+            bossState.encounterStartedAt &&
+            now - bossState.encounterStartedAt < 10_000
+          )
+            damage = 2
+          // Omega Shard: 10% chance for 3 damage
+          if (relics.includes('omega_shard') && Math.random() < 0.1) damage = 3
+
+          applyDamage(row.user_id, damage, broadcast)
+        }
+        // Phantom Reach: misses still contribute 1 damage (50% proc)
+        else if (relics.includes('phantom_reach') && Math.random() < 0.5) {
+          applyDamage(row.user_id, 1, broadcast)
+          damage = 1 // for SSE reporting
+        }
+
+        await pool.query(
+          `UPDATE predictions SET result = $1, gain_loss = 0 WHERE user_id = $2 AND game_id = $3`,
+          [isWin ? 'WIN' : 'LOSE', row.user_id, gameId]
+        )
+
+        const fresh = getBossState()
+        const hpPct = fresh.hpPct
+        broadcast(
+          'world_boss_hit',
+          JSON.stringify({
+            userId: row.user_id,
+            result: isWin ? 'HIT' : 'MISS',
+            bossHpPct: hpPct,
+            damage
+          })
+        )
+      } catch (err) {
+        logger.error('resolveWorldBossPrediction: per-user error', err, {
+          userId: row.user_id,
+          gameId
+        })
+      }
+    })
+  )
+}
+
 export const resolvePrediction = async (
   gameId: string,
   winnerName: string,
   broadcast: (event: string, data: string) => void
 ): Promise<void> => {
+  // World Boss mode: completely separate path
+  if (isWorldBossActive()) {
+    return resolveWorldBossPrediction(gameId, winnerName, broadcast)
+  }
+
   let predictions
   try {
     // JOIN fetches balance, bet count, relic state, and match players in one query to avoid N+1 calls per bettor
@@ -728,7 +828,11 @@ export const resolvePrediction = async (
         tidal_surge_participations, solar_flare_participations,
         cyclone_blitz_participations, mirage_cataclysm_participations,
         global_event_participations,
-        displayed_badges, auto_equip_badges, show_linkedin_badge -- Added
+        displayed_badges, auto_equip_badges, show_linkedin_badge,
+        boss_kills_total, hexurion_kills, orphion_kills,
+        fracturon_kills, apexion_kills, world_boss_chests_opened,
+        had_final_strike, had_perfect_assault, had_lucky_shot,
+        had_clutch_victory, had_divine_intervention
           FROM users WHERE user_id = $1`,
           [row.user_id]
         )
@@ -805,7 +909,18 @@ export const resolvePrediction = async (
           hadDryMirage: Boolean(u.had_dry_mirage),
           hadEyeOfStorm: Boolean(u.had_eye_of_storm),
           hadPrismaticWave: Boolean(u.had_prismatic_wave),
-          hadThermalFusion: Boolean(u.had_thermal_fusion)
+          hadThermalFusion: Boolean(u.had_thermal_fusion),
+          worldBossKills: Number(u.boss_kills_total ?? 0),
+          hexurionKills: Number(u.hexurion_kills ?? 0),
+          orphionKills: Number(u.orphion_kills ?? 0),
+          fracturonKills: Number(u.fracturon_kills ?? 0),
+          apexionKills: Number(u.apexion_kills ?? 0),
+          worldBossChestsOpened: Number(u.world_boss_chests_opened ?? 0),
+          hadFinalStrike: Boolean(u.had_final_strike),
+          hadPerfectAssault: Boolean(u.had_perfect_assault),
+          hadLuckyShot: Boolean(u.had_lucky_shot),
+          hadClutchVictory: Boolean(u.had_clutch_victory),
+          hadDivineIntervention: Boolean(u.had_divine_intervention)
         }
 
         const firstPass = checkAchievements(stats, alreadyEarned)
@@ -879,9 +994,15 @@ export const resolvePrediction = async (
         }
 
         // Relic drop roll
+        const relicsArrayRes = await pool.query(
+          'SELECT equipped_relics FROM users WHERE user_id = $1',
+          [row.user_id]
+        )
+        const allEquippedKeys: string[] =
+          relicsArrayRes.rows[0]?.equipped_relics?.filter(Boolean) ?? []
         const droppedRelic = await rollRelicDrop(
           row.user_id,
-          equippedRelic,
+          allEquippedKeys,
           Number(u.laps)
         )
         // Vault Festival: Mythical relic drop triggers globally

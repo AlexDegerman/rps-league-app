@@ -111,6 +111,20 @@ export const EVENT_HEADER_CONFIG = {
   global_mirage_cataclysm: {
     textClass: 'text-amber-600',
     borderClass: 'border-purple-400'
+  },
+  // Bosses
+  boss_hexurion: { textClass: 'text-cyan-400', borderClass: 'border-cyan-500' },
+  boss_orphion: {
+    textClass: 'text-purple-400',
+    borderClass: 'border-purple-500'
+  },
+  boss_fracturon: {
+    textClass: 'text-green-400',
+    borderClass: 'border-green-500'
+  },
+  boss_apexion: {
+    textClass: 'text-orange-500',
+    borderClass: 'border-orange-500'
   }
 } as const
 
@@ -244,6 +258,35 @@ export const EVENT_TICKER_CONFIG = {
     bgClass: 'event-bg-global_mirage_cataclysm',
     dotClass: 'bg-amber-500',
     particleClass: ''
+  },
+  // Bosses
+  boss_hexurion: {
+    borderClass: 'border-cyan-400',
+    topGlowClass: 'ticker-glow-tidal',
+    bgClass: 'event-bg-boss_hexurion',
+    dotClass: 'bg-cyan-400',
+    particleClass: ''
+  },
+  boss_orphion: {
+    borderClass: 'border-purple-400',
+    topGlowClass: 'ticker-glow-electric',
+    bgClass: 'event-bg-boss_orphion',
+    dotClass: 'bg-purple-400',
+    particleClass: ''
+  },
+  boss_fracturon: {
+    borderClass: 'border-green-400',
+    topGlowClass: 'ticker-glow-ghost',
+    bgClass: 'event-bg-boss_fracturon',
+    dotClass: 'bg-green-400',
+    particleClass: ''
+  },
+  boss_apexion: {
+    borderClass: 'border-orange-400',
+    topGlowClass: 'ticker-glow-hellfire',
+    bgClass: 'event-bg-boss_apexion',
+    dotClass: 'bg-orange-500',
+    particleClass: 'ticker-hellfire-ember'
   }
 } as const
 

@@ -17,6 +17,8 @@ export const CATEGORY_ORDER = [
   'Meta',
   'Collector',
   'Miscellaneous',
+  'WorldBoss',
+  'WorldBossChests',
   'Rainbow'
 ] as const
 
@@ -42,6 +44,8 @@ export const CATEGORY_ICONS: Record<string, string> = {
   Festival: '🎪',
   Cosmic: '🪐',
   Collector: '📖',
+  WorldBoss: '👹',
+  WorldBossChests: '📦',
   Rainbow: '🌈'
 }
 
@@ -62,7 +66,9 @@ export const CATEGORY_LABELS: Record<string, string> = {
   Festival: 'Festival Catalyst',
   Cosmic: 'Cosmic Events',
   Collector: 'The Grand Archive',
-  Rainbow: 'God King'
+  WorldBoss: 'World Bosses',
+  WorldBossChests: 'Boss Chests',
+  Rainbow: 'Ultimate Mastery'
 }
 
 export const RARITY_ORDER: AchievementRarity[] = [
@@ -324,6 +330,51 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     icon: '🔮',
     rarity: 'MYTHICAL'
   },
+  // World Boss
+  WB01: { code: 'WB01', name: 'First Contact', icon: '⚔️', rarity: 'COMMON' },
+  WB02: { code: 'WB02', name: 'Entity Hunter', icon: '🛡️', rarity: 'RARE' },
+  WB03: { code: 'WB03', name: 'World Defender', icon: '🌍', rarity: 'EPIC' },
+  WB04: {
+    code: 'WB04',
+    name: 'Cataclysm Breaker',
+    icon: '💥',
+    rarity: 'LEGENDARY'
+  },
+  WB05: { code: 'WB05', name: 'World Savior', icon: '🌟', rarity: 'MYTHICAL' },
+  HEXM: {
+    code: 'HEXM',
+    name: "Hexurion's Bane",
+    icon: '⬢',
+    rarity: 'MYTHICAL'
+  },
+  ORBM: { code: 'ORBM', name: 'Orbitbreaker', icon: '🪐', rarity: 'MYTHICAL' },
+  FRAM: {
+    code: 'FRAM',
+    name: 'Fractal Collapse',
+    icon: '💎',
+    rarity: 'MYTHICAL'
+  },
+  APXM: { code: 'APXM', name: 'Pyramid Fall', icon: '🔺', rarity: 'MYTHICAL' },
+  CH01: { code: 'CH01', name: 'Treasure Seeker', icon: '📦', rarity: 'COMMON' },
+  CH02: { code: 'CH02', name: 'Treasure Hunter', icon: '🎁', rarity: 'RARE' },
+  CH03: { code: 'CH03', name: 'Vault Raider', icon: '💰', rarity: 'EPIC' },
+  CH04: {
+    code: 'CH04',
+    name: 'Treasure Hoard',
+    icon: '🏆',
+    rarity: 'LEGENDARY'
+  },
+  CH05: { code: 'CH05', name: 'Living Vault', icon: '👑', rarity: 'MYTHICAL' },
+  LAST: { code: 'LAST', name: 'Final Strike', icon: '🎯', rarity: 'COMMON' },
+  PERF: { code: 'PERF', name: 'Perfect Assault', icon: '💯', rarity: 'RARE' },
+  LUCK: { code: 'LUCK', name: 'Lucky Shot', icon: '🍀', rarity: 'RARE' },
+  CLUT: { code: 'CLUT', name: 'Clutch Victory', icon: '⏱️', rarity: 'EPIC' },
+  DIVN: {
+    code: 'DIVN',
+    name: 'Divine Intervention',
+    icon: '🌠',
+    rarity: 'MYTHICAL'
+  },
   // Meta
   PITY: { code: 'PITY', name: 'Pity King', icon: '🩹', rarity: 'COMMON' },
   FND: { code: 'FND', name: 'Founder', icon: '⭐', rarity: 'RARE' },
@@ -371,7 +422,8 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     name: 'Cosmic Sovereign',
     icon: '🪐',
     rarity: 'RAINBOW'
-  }
+  },
+  PURI: { code: 'PURI', name: 'World Purifier', icon: '🌍', rarity: 'RAINBOW' }
 }
 
 // Chained tracks: only show the highest tier earned.
@@ -406,6 +458,18 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
   CosmicCyclone: ['CBL1', 'CBL2', 'CBL3', 'CBL4', 'CBL5'],
   CosmicMirage: ['MCA1', 'MCA2', 'MCA3', 'MCA4', 'MCA5'],
   Collector: ['COL10', 'COL25', 'COL45', 'COL70', 'COLMAX'],
+  WorldBoss: [
+    'WB01',
+    'WB02',
+    'WB03',
+    'WB04',
+    'WB05',
+    'HEXM',
+    'ORBM',
+    'FRAM',
+    'APXM'
+  ],
+  WorldBossChests: ['CH01', 'CH02', 'CH03', 'CH04', 'CH05'],
   Meta: [
     'PITY',
     'FND',
@@ -421,7 +485,7 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
     'CATA'
   ],
   Miscellaneous: ['REBL', 'DRYM', 'EYEC', 'PRIS', 'FUSN'],
-  Rainbow: ['KING', 'COSM']
+  Rainbow: ['KING', 'COSM', 'PURI']
 }
 
 const STANDALONE_CATEGORIES = new Set(['Meta', 'Miscellaneous', 'Rainbow'])
@@ -526,11 +590,11 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   MIR: 'Roll a 45%+ Echo Bonus on a win during a Mirage Cataclysm',
   SYZY: 'Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously',
   CATA: 'Participate 15 times in each of the four separate Global Events',
-  COL10: 'Earn 10 Achievements',
-  COL25: 'Earn 25 Achievements',
-  COL45: 'Earn 45 Achievements',
-  COL70: 'Earn 70 Achievements',
-  COLMAX: 'Earn 105 Achievements',
+  COL15: 'Earn 15 Achievements',
+  COL30: 'Earn 30 Achievements',
+  COL50: 'Earn 50 Achievements',
+  COL75: 'Earn 75 Achievements',
+  COLMAX: 'Earn 130 Achievements',
   REBL: 'Bet against the Oracle',
   DRYM: 'Roll the minimum Echo Bonus (15%) on a win during Mirage Cataclysm',
   EYEC: 'Have your win streak shielded by the Buffer Module during Cyclone Blitz',
@@ -571,6 +635,26 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   MCA3: 'Participate in 15 Mirage Cataclysms',
   MCA4: 'Participate in 25 Mirage Cataclysms',
   MCA5: 'Participate in 50 Mirage Cataclysms',
+  WB01: 'Defeat 1 World Boss',
+  WB02: 'Defeat 10 World Bosses',
+  WB03: 'Defeat 30 World Bosses',
+  WB04: 'Defeat 75 World Bosses',
+  WB05: 'Defeat 200 World Bosses',
+  HEXM: 'Defeat Hexurion 50 times',
+  ORBM: 'Defeat Orphion 50 times',
+  FRAM: 'Defeat Fracturon 50 times',
+  APXM: 'Defeat Apexion 50 times',
+  CH01: 'Open 5 World Boss Chests',
+  CH02: 'Open 20 World Boss Chests',
+  CH03: 'Open 50 World Boss Chests',
+  CH04: 'Open 100 World Boss Chests',
+  CH05: 'Open 250 World Boss Chests',
+  LAST: 'Land the finishing blow on a World Boss',
+  PERF: 'Defeat a World Boss without missing a single prediction',
+  LUCK: 'Land the finishing blow while contributing 10% or less of total boss damage',
+  CLUT: 'Land the finishing blow with less than 5 seconds remaining',
+  DIVN: 'Join a World Boss during its final 10 seconds and land the finishing blow',
+  PURI: 'Defeat each of the four World Bosses 50 times',
   KING: '1000 Wins + 50 Laps + 3 Mythical Relics',
   COSM: 'Participate 50 times in each of the 4 Global Events'
 }

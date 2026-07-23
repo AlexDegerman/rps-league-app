@@ -70,15 +70,14 @@ const GLOBAL_EVENT_CARD: Record<
 // Card class priority: flash > global event > festival > streak > bonus tier > default
 function resolveCardClass(entry: BetHistoryEntry): string {
   if (entry.result !== 'WIN') {
-    // Loss cards: still show global event styling if applicable
     if (entry.globalEventType && GLOBAL_EVENT_CARD[entry.globalEventType]) {
       return GLOBAL_EVENT_CARD[entry.globalEventType].cardClass
     }
     return 'bg-white border-gray-100 shadow-sm'
   }
 
-  // Win path — priority hierarchy
-  // 1. Flash event — light theme
+  // Win path + priority hierarchy
+  // 1. Flash event
   if (entry.flashEventType) {
     const FLASH_CARD_CLASSES: Record<string, string> = {
       LUNAR:
@@ -99,7 +98,7 @@ function resolveCardClass(entry: BetHistoryEntry): string {
     return GLOBAL_EVENT_CARD[entry.globalEventType].cardClass
   }
 
-  // 3. Festival — light theme matching global event style
+  // 3. Festival
   if (entry.festivalType) {
     const FESTIVAL_CARD_CLASSES: Record<string, string> = {
       SPARK:

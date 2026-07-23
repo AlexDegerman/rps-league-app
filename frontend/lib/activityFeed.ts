@@ -4,6 +4,7 @@ export type ActivityType =
   | 'festival'
   | 'global_event'
   | 'streak'
+  | 'world_boss_hit'
 
 export interface ActivityBroadcast {
   id: string

@@ -8,6 +8,7 @@ export interface RelicDef {
   effect: string
   threshold?: number
   counter?: number
+  bossExclusive?: boolean
 }
 
 export const RARITY_STYLES: Record<
@@ -182,6 +183,127 @@ export const RELICS: RelicDef[] = [
     rarity: 'MYTHICAL',
     icon: 'Diamond',
     effect: 'Triggered bonus rarity auto-upgrades to next tier'
+  },
+  {
+    key: 'fortune_satchel',
+    name: 'Fortune Satchel',
+    rarity: 'COMMON' as RelicRarity,
+    icon: 'Backpack',
+    effect: '+25% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'treasure_compass',
+    name: 'Treasure Compass',
+    rarity: 'COMMON' as RelicRarity,
+    icon: 'Compass',
+    effect:
+      '+25% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'lucky_crest',
+    name: 'Lucky Crest',
+    rarity: 'COMMON' as RelicRarity,
+    icon: 'BadgePlus',
+    effect:
+      '+10% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'kings_purse',
+    name: "King's Purse",
+    rarity: 'RARE' as RelicRarity,
+    icon: 'Wallet',
+    effect: '+50% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'relic_magnet',
+    name: 'Relic Magnet',
+    rarity: 'RARE' as RelicRarity,
+    icon: 'Magnet',
+    effect:
+      '+50% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'fortune_seal',
+    name: 'Fortune Seal',
+    rarity: 'RARE' as RelicRarity,
+    icon: 'Stamp',
+    effect:
+      '+20% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'royal_treasury',
+    name: 'Royal Treasury',
+    rarity: 'EPIC' as RelicRarity,
+    icon: 'Landmark',
+    effect: '+100% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'vault_key',
+    name: 'Vault Key',
+    rarity: 'EPIC' as RelicRarity,
+    icon: 'KeyRound',
+    effect:
+      '+100% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'ascension_sigil',
+    name: 'Ascension Sigil',
+    rarity: 'EPIC' as RelicRarity,
+    icon: 'Sparkles',
+    effect:
+      '+35% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'dragons_hoard',
+    name: "Dragon's Hoard",
+    rarity: 'LEGENDARY' as RelicRarity,
+    icon: 'Gem',
+    effect: '+150% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'collectors_vault',
+    name: "Collector's Vault",
+    rarity: 'LEGENDARY' as RelicRarity,
+    icon: 'Archive',
+    effect:
+      '+150% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'celestial_crown',
+    name: 'Celestial Crown',
+    rarity: 'LEGENDARY' as RelicRarity,
+    icon: 'Crown',
+    effect:
+      '+50% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'twin_fortune',
+    name: 'Twin Fortune',
+    rarity: 'MYTHICAL' as RelicRarity,
+    icon: 'CopyPlus',
+    effect: '25% chance to duplicate the earned World Boss Chest.',
+    bossExclusive: true
+  },
+  {
+    key: 'prism_key',
+    name: 'Prism Key',
+    rarity: 'MYTHICAL' as RelicRarity,
+    icon: 'Diamond',
+    effect:
+      'Enables the Rainbow World Boss Chest tier when combined with chest upgrade relics.',
+    bossExclusive: true
   }
 ]
 

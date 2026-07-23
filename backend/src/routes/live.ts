@@ -13,6 +13,16 @@ import {
   getFestivalLockoutRemaining
 } from '../services/festivalService.js'
 import { getGlobalEventState, startGlobalEventScheduler } from '../services/globalEventService.js'
+import {
+  startScheduler as startWorldBossScheduler,
+  registerExternalSystems,
+  getCurrentState as getBossState
+} from '../services/worldBossService.js'
+import { pauseFestival, resumeFestival } from '../services/festivalService.js'
+import {
+  pauseGlobalEvent,
+  resumeGlobalEvent
+} from '../services/globalEventService.js'
 
 const router = Router()
 
@@ -78,6 +88,7 @@ router.get('/', (req, res) => {
 
   // Sync client clock on connect so countdown timers stay accurate
   send('sync', JSON.stringify({ serverTime: Date.now() }))
+  send('world_boss_sync', JSON.stringify(getBossState()))
   clients.add(send)
 
   if (!generatorStarted) {
@@ -114,6 +125,13 @@ router.get('/', (req, res) => {
     )
     startDemoFestivalScheduler(broadcast)
     startGlobalEventScheduler(broadcast)
+    registerExternalSystems(
+      pauseFestival,
+      resumeFestival,
+      pauseGlobalEvent,
+      resumeGlobalEvent
+    )
+    startWorldBossScheduler(broadcast)
   }
 
   req.on('close', () => {

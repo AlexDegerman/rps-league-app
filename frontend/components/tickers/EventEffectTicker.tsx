@@ -1,12 +1,15 @@
 'use client'
 
 import { useGameStore } from '@/app/stores/gameStore'
-import { FESTIVAL_REGISTRY } from '@/lib/festivals'
+import {
+  FESTIVAL_REGISTRY,
+  getFestivalEffectDescription
+} from '@/lib/festivals'
 import {
   GLOBAL_EVENT_REGISTRY,
   GLOBAL_EVENT_MODE_MAP
 } from '@/lib/globalEvents'
-import { getFestivalEffectDescription } from '@/lib/oracleTemplates'
+import { BOSS_COLORS, BOSS_EFFECT_TEXT } from '@/lib/worldBosses'
 import { FestivalModeKey, FestivalType, GlobalEventType } from '@/types/rps'
 
 const LOCAL_FESTIVAL_MAP: Record<string, FestivalModeKey> = {
@@ -62,10 +65,15 @@ export default function EventEffectTicker() {
   const activeGlobalEvent = useGameStore((s) => s.activeGlobalEvent)
   const globalEventPhase = useGameStore((s) => s.globalEventPhase)
 
+  // World boss
+  const worldBossPhase = useGameStore((s) => s.worldBossPhase)
+  const worldBossType = useGameStore((s) => s.worldBossType)
+
   const showFestival = activeFestival && festivalType
   const showGlobal = activeGlobalEvent && globalEventPhase === 'active'
+  const showBoss = worldBossPhase === 'ACTIVE' && !!worldBossType
 
-  if (!showFestival && !showGlobal) return null
+  if (!showFestival && !showGlobal && !showBoss) return null
 
   // Festival row
   const festivalRow = (() => {
@@ -98,8 +106,26 @@ export default function EventEffectTicker() {
     )
   })()
 
+  // World boss row
+  const bossRow = (() => {
+    if (!showBoss) return null
+    const color = BOSS_COLORS[worldBossType!] ?? '#e879f9'
+    const text =
+      BOSS_EFFECT_TEXT[worldBossType!] ??
+      'WORLD BOSS ENCOUNTER ACTIVE, STRIKE NOW'
+    return (
+      <EffectRow
+        key={`boss-${worldBossType}`}
+        text={text}
+        color={color}
+        durationS={18}
+      />
+    )
+  })()
+
   return (
     <>
+      {bossRow}
       {globalRow}
       {festivalRow}
     </>

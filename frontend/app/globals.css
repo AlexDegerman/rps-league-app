@@ -731,7 +731,789 @@ span.tracking-wider[title]:active::after {
   50% { opacity: 1; }
 }
 
-/* --- SEASON 2 ANIMATED TIERS --- */
+/* --- SEASON 3 NUMBER TIERS --- */
+
+/* TIER 1: SEPTENTRIGINTILLION - Reinforced Lattice */
+
+/* Horizontal text gradient sweep */
+@keyframes stg-isometric-sweep {
+  0% {
+    background-position-x: 0%;
+  }
+  100% {
+    background-position-x: 200%;
+  }
+}
+
+/* Constantly present, smooth reinforcing opacity shimmer of the static lattice lines */
+@keyframes stg-lattice-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* Slowly spinning 3D hexagonal prism core background */
+@keyframes stg-sentinel-rotate {
+  0% {
+    transform: translate(-50%, -50%) rotateY(0deg) rotateZ(0deg) scale(0.95);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-50%, -50%) rotateY(180deg) rotateZ(10deg) scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotateY(360deg) rotateZ(0deg) scale(0.95);
+    opacity: 0.45;
+  }
+}
+
+/* Main text element with multi-stop amethyst prism gradient and drop-shadow filter */
+.g-stg {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(90deg, #1e0b36 0%, #6d28d9 20%, #a78bfa 40%, #ffffff 50%, #c084fc 60%, #4c1d95 80%, #1e0b36 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.5px rgba(250, 245, 255, 0.85);
+  filter: drop-shadow(0 2px 8px rgba(109, 40, 217, 0.65));
+  will-change: background-position;
+  animation: stg-isometric-sweep 2.5s linear infinite;
+}
+
+/* Stationary, constantly dense hexagonal lattice isometric webbing background */
+.g-stg::before {
+  content: '';
+  position: absolute;
+  inset: -12px -16px;
+  background-image:
+    repeating-linear-gradient(30deg, rgba(139, 92, 246, 0.22) 0px, rgba(139, 92, 246, 0.22) 1.2px, transparent 1.2px, transparent 12px),
+    repeating-linear-gradient(-30deg, rgba(139, 92, 246, 0.22) 0px, rgba(139, 92, 246, 0.22) 1.2px, transparent 1.2px, transparent 12px),
+    repeating-linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0px, rgba(139, 92, 246, 0.15) 1.2px, transparent 1.2px, transparent 12px);
+  pointer-events: none;
+  z-index: -1;
+  will-change: opacity;
+  animation: stg-lattice-pulse 3s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* Slowly spinning 3D hexagonal prism core background */
+.g-stg::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.2em;
+  height: 1.4em;
+  transform: translate(-50%, -50%);
+  z-index: -2;
+  pointer-events: none;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.45) 0%, rgba(139, 92, 246, 0.15) 50%, rgba(30, 11, 54, 0.4) 100%);
+  filter: blur(0.5px) drop-shadow(0 0 6px rgba(109, 40, 217, 0.65));
+  will-change: transform, opacity;
+  animation: stg-sentinel-rotate 6s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* TIER 2: OCTOTRIGINTILLION - Hard-Light Breach */
+
+/* Horizontal text gradient sweep */
+@keyframes otg-flow {
+  0% {
+    background-position-x: 0%;
+  }
+  100% {
+    background-position-x: 200%;
+  }
+}
+
+/* Rotating hexagonal portal breach background */
+@keyframes otg-portal-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.95);
+    opacity: 0.4;
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg) scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Expanding hard-light hexagonal barrier explosion */
+@keyframes otg-breach-expand {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.4);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.95;
+  }
+  90% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(120deg) scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* Main text element with electric cyan hard-light sweep and drop-shadow filter */
+.g-otg {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(90deg, #090514 0%, #1e1b4b 20%, #7c3aed 40%, #a5f3fc 50%, #ffffff 52%, #a5f3fc 54%, #7c3aed 65%, #4c1d95 80%, #090514 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.5px rgba(165, 243, 252, 0.85);
+  filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.65));
+  will-change: background-position;
+  animation: otg-flow 3s linear infinite;
+}
+
+/* Rotating, shattered hexagonal light breach portal background */
+.g-otg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.2em;
+  height: 2.2em;
+  pointer-events: none;
+  z-index: -2;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(167, 139, 250, 0.5) 60deg, transparent 120deg, transparent 180deg, rgba(167, 139, 250, 0.5) 240deg, transparent 300deg);
+  will-change: transform, opacity;
+  animation: otg-portal-spin 5s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* Expanding, high-voltage hard-light hexagonal barrier explosion overlay */
+.g-otg::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.2em;
+  height: 2.2em;
+  pointer-events: none;
+  z-index: -1;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: transparent;
+  border: 1.5px solid rgba(167, 139, 250, 0.85);
+  box-shadow: 
+    0 0 6px rgba(124, 58, 237, 0.65), 
+    inset 0 0 6px rgba(124, 58, 237, 0.65);
+  will-change: transform, opacity;
+  animation: otg-breach-expand 2s cubic-bezier(0.1, 0.8, 0.25, 1) infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* TIER 3: NOVEMTRIGINTILLION - Singularity Orbit */
+@keyframes ntg-text-flow { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+@keyframes ntg-ring-cw   { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(360deg); } }
+@keyframes ntg-ring-ccw  { from { transform: translate(-50%,-50%) rotate(0deg); } to { transform: translate(-50%,-50%) rotate(-360deg); } }
+
+.g-ntg {
+  font-weight: 900; display: inline-block; position: relative; isolation: isolate;
+  background: linear-gradient(90deg, #14532d 0%, #16a34a 18%, #4ade80 38%, #bbf7d0 52%, #4ade80 66%, #15803d 82%, #14532d 100%);
+  background-size: 200% auto; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; -webkit-text-stroke: .4px rgba(134,239,172,.75);
+  filter: drop-shadow(0 0 6px rgba(34,197,94,.8)) drop-shadow(0 0 18px rgba(16,185,129,.5));
+  animation: ntg-text-flow 3.5s linear infinite;
+}
+.g-ntg::before {
+  content: ''; position: absolute; top: 50%; left: 50%; width: 2.8em; height: 2.8em;
+  border-radius: 50%; border: 1.5px solid transparent;
+  border-top-color: rgba(187,247,208,.95); border-right-color: rgba(74,222,128,.55);
+  pointer-events: none; z-index: -1; filter: blur(.5px) drop-shadow(0 0 4px rgba(74,222,128,.65));
+  will-change: transform; animation: ntg-ring-cw 2.4s linear infinite;
+  -webkit-background-clip: initial !important; background-clip: initial !important; -webkit-text-fill-color: initial;
+}
+.g-ntg::after {
+  content: ''; position: absolute; top: 50%; left: 50%; width: 4.2em; height: 4.2em;
+  border-radius: 50%; border: 1.2px solid transparent;
+  border-bottom-color: rgba(187,247,208,.75); border-left-color: rgba(34,197,94,.45);
+  pointer-events: none; z-index: -1; filter: blur(1.2px);
+  will-change: transform; animation: ntg-ring-ccw 4.2s linear infinite;
+  -webkit-background-clip: initial !important; background-clip: initial !important; -webkit-text-fill-color: initial;
+}
+
+/* TIER 4: QUADRAGINTILLION - Event Horizon */
+
+/* Keyframe animation for the horizontal text gradient sweep */
+@keyframes qag-divine-flow {
+  0% {
+    background-position-x: 0%;
+  }
+  100% {
+    background-position-x: 200%;
+  }
+}
+
+/* Keyframe animation for the inner clockwise accretion disk spin starting at baseline */
+@keyframes qag-horizon-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Keyframe animation for the outer clockwise accretion disk spin starting at an offset */
+@keyframes qag-horizon-spin-offset {
+  from {
+    transform: translate(-50%, -50%) rotate(120deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(480deg);
+  }
+}
+
+/* Main text element styling with an intense emerald-silver-mint spectrum */
+.g-qag {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(90deg, #022c22 0%, #059669 16%, #10b981 35%, #a7f3d0 48%, #ffffff 50%, #a7f3d0 52%, #10b981 65%, #047857 82%, #022c22 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.4px rgba(167, 243, 208, 0.95);
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.9)) drop-shadow(0 0 24px rgba(5, 150, 105, 0.6));
+  animation: qag-divine-flow 3.5s linear infinite;
+}
+
+/* Inner conic-gradient accretion disk spinning clockwise */
+.g-qag::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.6em;
+  height: 2.6em;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(16, 185, 129, 0.55) 45deg, rgba(255, 255, 255, 0.9) 60deg, transparent 80deg, transparent 180deg, rgba(16, 185, 129, 0.55) 225deg, rgba(255, 255, 255, 0.9) 240deg, transparent 260deg);
+  filter: blur(1.5px);
+  pointer-events: none;
+  z-index: -2;
+  will-change: transform;
+  animation: qag-horizon-spin 3s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* Outer conic-gradient accretion disk spinning clockwise from a offset position */
+.g-qag::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.8em;
+  height: 2.8em;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(16, 185, 129, 0.55) 45deg, rgba(255, 255, 255, 0.9) 60deg, transparent 80deg, transparent 180deg, rgba(16, 185, 129, 0.55) 225deg, rgba(255, 255, 255, 0.9) 240deg, transparent 260deg);
+  filter: blur(1.5px);
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+  animation: qag-horizon-spin-offset 4s linear infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* TIER 5: UNQUADRAGINTILLION - Prism Scanner */
+
+/* Smooth, relaxed horizontal metallic sweep across the text core */
+@keyframes uqg-sweep {
+  0%   { background-position-x: 0%; }
+  100% { background-position-x: 200%; }
+}
+
+/* vertical laser scanning sweep  */
+@keyframes uqg-laser-sweep {
+  0% {
+    transform: translateY(-0.3em);
+    opacity: 0.15;
+  }
+  15% {
+    opacity: 0.95;
+  }
+  85% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(1.1em);
+    opacity: 0.15;
+  }
+}
+
+/* Horizontal/vertical scaling and opacity pulse of the grid */
+@keyframes uqg-grid-flow {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.92);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 0.75;
+  }
+}
+
+.g-uqg {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  transform-origin: center;
+  background: linear-gradient(
+    90deg, 
+    #5c1d06 0%, 
+    #ea580c 25%, 
+    #ffedd5 45%, 
+    #fed7aa 55%, 
+    #f97316 70%, 
+    #9a3412 85%, 
+    #5c1d06 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.5px #2d0b00;
+  paint-order: stroke fill;
+  text-shadow:
+    0px 2px 4px rgba(45, 11, 0, 0.85),
+    0px 0px 8px rgba(249, 115, 22, 0.45);
+  will-change: background-position;
+  animation: uqg-sweep 3s linear infinite;
+}
+
+/* Holographic Rhombic Fractal Core */
+.g-uqg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.2em;
+  height: 1.4em;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+  z-index: -2;
+  pointer-events: none;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  background: 
+    repeating-linear-gradient(0deg, rgba(253, 186, 116, 0.16) 0px, rgba(253, 186, 116, 0.16) 1px, transparent 2px, transparent 6px),
+    repeating-linear-gradient(90deg, rgba(253, 186, 116, 0.16) 0px, rgba(253, 186, 116, 0.16) 1px, transparent 2px, transparent 6px),
+    radial-gradient(circle at center, rgba(194, 65, 12, 0.4) 0%, transparent 70%);
+  background-size: 8px 8px, 8px 8px, 100% 100%;
+  background-repeat: repeat, repeat, no-repeat;
+  will-change: transform, opacity;
+  animation: uqg-grid-flow 3s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* Active Laser Scanning Sweep */
+.g-uqg::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -12px;
+  right: -12px;
+  height: 4px;
+  pointer-events: none;
+  z-index: 10;
+  background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.9) 20%, #ffffff 50%, rgba(249, 115, 22, 0.9) 80%, transparent);
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.7);
+  will-change: transform, opacity;
+  animation: uqg-laser-sweep 2.5s ease-in-out infinite;
+}
+
+/* TIER 6: DUOQUADRAGINTILLION - Spectrum Corruption */
+@keyframes dqg-base-sweep    { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+@keyframes dqg-ghost-left {
+  0%, 100% { transform: translate(-3px, 1px) skewX(0deg); opacity: 0.5; }
+  15%      { transform: translate(1px, -2px) skewX(3deg); opacity: 0.8; }
+  30%      { transform: translate(-2px, -1px) skewX(-4deg); opacity: 0.4; }
+  45%      { transform: translate(3px, 2px) skewX(1deg); opacity: 0.9; }
+  60%      { transform: translate(-1px, 2px) skewX(-2deg); opacity: 0.5; }
+  85%      { transform: translate(2px, -3px) skewX(5deg); opacity: 0.85; }
+}
+@keyframes dqg-ghost-right {
+  0%, 100% { transform: translate(3px, -1px) skewY(0deg); opacity: 0.45; }
+  20%      { transform: translate(-2px, 2px) skewY(-2deg); opacity: 0.85; }
+  40%      { transform: translate(1px, 1px) skewY(3deg); opacity: 0.35; }
+  55%      { transform: translate(-3px, -2px) skewY(-1deg); opacity: 0.9; }
+  75%      { transform: translate(2px, -1px) skewY(2deg); opacity: 0.5; }
+  90%      { transform: translate(-1px, 3px) skewY(-3deg); opacity: 0.75; }
+}
+
+.g-dqg {
+  font-weight: 900; display: inline-block; position: relative; isolation: isolate;
+  background: linear-gradient(135deg, #92400e 0%, #d97706 18%, #fbbf24 34%, #fef9c3 50%, #fbbf24 66%, #d97706 82%, #92400e 100%);
+  background-size: 200% auto; -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; -webkit-text-stroke: .45px rgba(254,249,195,.95);
+  filter: drop-shadow(0 0 10px rgba(251,191,36,.65)) drop-shadow(0 1px 3px rgba(146,64,14,0.85));
+  animation: dqg-base-sweep 3.2s linear infinite;
+}
+.g-dqg::before {
+  content: attr(data-text); position: absolute; top: 0; left: 0;
+  white-space: nowrap; font-weight: 900; -webkit-text-fill-color: rgba(34,211,238,.45);
+  pointer-events: none; z-index: -1; will-change: transform, opacity;
+  animation: dqg-ghost-left 1.4s step-end infinite;
+  -webkit-background-clip: initial !important; background-clip: initial !important;
+}
+.g-dqg::after {
+  content: attr(data-text); position: absolute; top: 0; left: 0;
+  white-space: nowrap; font-weight: 900; -webkit-text-fill-color: rgba(236,72,153,.45);
+  pointer-events: none; z-index: -1; will-change: transform, opacity;
+  animation: dqg-ghost-right 1.6s step-end infinite;
+  -webkit-background-clip: initial !important; background-clip: initial !important;
+}
+
+
+/* TIER 7: TRESQUADRAGINTILLION - Holographic Monolith */
+
+/* Metallic chrome sweep flashing between amethyst violet and acid green */
+@keyframes tqg-chromatic-sweep {
+  0%   { background-position-x: 0%; }
+  100% { background-position-x: 200%; }
+}
+
+/* Unstable structural skew of the text, matching the swarm's surge */
+@keyframes tqg-kinetic-vibe {
+  0%, 100% {
+    transform: scale(1) skewX(0deg);
+    filter: 
+      drop-shadow(0 2px 4px rgba(12, 2, 26, 0.85)) 
+      drop-shadow(0 0 5px rgba(139, 92, 246, 0.45));
+  }
+  15% {
+    transform: scale(1.03) skewX(-1.5deg);
+    filter: 
+      drop-shadow(0 2px 4px rgba(12, 2, 26, 0.85)) 
+      drop-shadow(0 0 8px rgba(163, 230, 53, 0.6));
+  }
+  30% {
+    transform: scale(0.98) skewX(1deg);
+  }
+  45% {
+    transform: scale(1.01) skewX(0deg);
+  }
+}
+
+/* 2.5s heavy vertical breathing loop */
+@keyframes apexion-background-pyramid {
+  0%, 100% {
+    transform: translateX(-50%) scaleY(0.9);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translateX(-50%) scaleY(1.1);
+    opacity: 0.65;
+  }
+}
+
+/* High-frequency, tight-proximity vibration of the micro-shatter swarm */
+@keyframes tqg-micro-shatter-swarm {
+  0%, 100% {
+    transform: translate3d(0, -2px, 0) scale(0.95);
+    opacity: 0.55;
+  }
+  20% {
+    transform: translate3d(-2px, 1px, 0) scale(1.03);
+    opacity: 0.95;
+  }
+  40% {
+    transform: translate3d(1px, -2px, 0) scale(0.98);
+    opacity: 0.7;
+  }
+  60% {
+    transform: translate3d(-1px, -1px, 0) scale(1.02);
+    opacity: 0.85;
+  }
+  80% {
+    transform: translate3d(2px, 2px, 0) scale(0.97);
+    opacity: 0.9;
+  }
+}
+
+.g-tqg {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  transform-origin: center;
+  letter-spacing: -0.01em;
+  
+  /* Amethyst purple, obsidian basalt, sterling silver, and acid green */
+  background: linear-gradient(
+    90deg, 
+    #0f051d 0%, 
+    #8b5cf6 20%, 
+    #a3e635 45%, 
+    #ffffff 55%, 
+    #8b5cf6 75%, 
+    #0f051d 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px #0f051d; 
+  paint-order: stroke fill;
+  will-change: transform;
+  animation: 
+    tqg-chromatic-sweep 1.6s linear infinite, 
+    tqg-kinetic-vibe 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+/* Holographic, vertical-breathing background pyramid core (tightened size) */
+.g-tqg::before {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 1.8em;
+  height: 1.3em;
+  transform: translateX(-50%);
+  transform-origin: bottom;
+  
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  background: linear-gradient(
+    180deg, 
+    rgba(168, 85, 247, 0.32) 0%, 
+    rgba(163, 230, 53, 0.12) 60%, 
+    transparent 95%
+  );
+  
+  pointer-events: none;
+  z-index: -2;
+  will-change: transform, opacity;
+  animation: apexion-background-pyramid 2.5s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* Holographic Matrix Grid & Swirling Core (Radar Scanning Field) */
+.g-tqg::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.2em;
+  height: 2.2em;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
+  background-image: 
+    linear-gradient(rgba(167, 139, 250, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(163, 230, 53, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at center, rgba(139, 92, 246, 0.4) 0%, rgba(163, 230, 53, 0.15) 50%, transparent 75%);
+  background-size: 8px 8px, 8px 8px, 100% 100%;
+  background-repeat: repeat, repeat, no-repeat;
+  filter: blur(2.5px);
+  will-change: transform, opacity, background-position;
+  animation: tqg-hologram-pulse 3.5s ease-in-out infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* Diagonally-scrolling matrix grid & breathing holographic scale */
+@keyframes tqg-hologram-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.92);
+    background-position: 0px 0px, 0px 0px, center;
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    background-position: 8px 8px, -8px -8px, center;
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.92);
+    background-position: 16px 16px, -16px -16px, center;
+    opacity: 0.45;
+  }
+}
+
+/* TIER 8: QUATTUORQUADRAGINTILLION - Obsidian Apex */
+
+/* Core kinetic compression loop */
+@keyframes qqg-kinetic-compress {
+  0%, 100% {
+    transform: scaleY(1) scaleX(1);
+  }
+  30% {
+    transform: scaleY(1.18) scaleX(0.93);
+  }
+  45% {
+    transform: scaleY(0.92) scaleX(1.05);
+  }
+  65% {
+    transform: scaleY(1.04) scaleX(0.98);
+  }
+  80% {
+    transform: scaleY(0.98) scaleX(1.01);
+  }
+}
+
+/* Monolith gold shift with a neon purple unstable flash */
+@keyframes qqg-apex-sweep {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Base shadow expanding and contracting */
+@keyframes qqg-base-shadow {
+  0%, 100% {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 0.6;
+  }
+  30% {
+    transform: translateX(-50%) scaleX(0.7);
+    opacity: 0.3;
+  }
+  45% {
+    transform: translateX(-50%) scaleX(1.35);
+    opacity: 0.95;
+  }
+  65% {
+    transform: translateX(-50%) scaleX(0.9);
+    opacity: 0.5;
+  }
+  80% {
+    transform: translateX(-50%) scaleX(1.05);
+    opacity: 0.7;
+  }
+}
+
+/* Facetted apex shard floating animation */
+@keyframes qqg-apex-shard-float {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0) scale(1) rotate(0deg);
+  }
+  30% {
+    transform: translateX(-50%) translateY(-6px) scale(1.12) rotate(3deg);
+  }
+  45% {
+    transform: translateX(-50%) translateY(2px) scale(0.93) rotate(-2deg);
+  }
+  65% {
+    transform: translateX(-50%) translateY(-2px) scale(1.03) rotate(1deg);
+  }
+  80% {
+    transform: translateX(-50%) translateY(0) scale(0.98) rotate(0deg);
+  }
+}
+
+/* Main text styling */
+.g-qqg {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  transform-origin: bottom;
+  background: linear-gradient(
+    135deg, 
+    #1e053a 0%, 
+    #581c0c 25%, 
+    #ea580c 48%, 
+    #fbbf24 65%, 
+    #8b5cf6 82%, 
+    #1e053a 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.6px #3b0707;
+  text-shadow: 
+    0 2px 4px rgba(59, 7, 7, 0.85), 
+    0 0 8px rgba(234, 88, 12, 0.45);
+  will-change: transform;
+  animation: 
+    qqg-apex-sweep 3s linear infinite, 
+    qqg-kinetic-compress 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+/* Ambient volcanic base shadow */
+.g-qqg::before {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 105%;
+  height: 6px;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at center, 
+    rgba(234, 88, 12, 0.8) 0%, 
+    rgba(139, 92, 246, 0.35) 45%, 
+    transparent 75%
+  );
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+  animation: qqg-base-shadow 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* 3D facetted apex shard */
+.g-qqg::after {
+  content: '';
+  position: absolute;
+  bottom: 95%;
+  left: 50%;
+  width: 1.3em;
+  height: 1.1em;
+  transform: translateX(-50%);
+  clip-path: polygon(50% 0%, 100% 85%, 80% 70%, 50% 100%, 20% 70%, 0% 85%);
+  background: 
+    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 50%, rgba(0, 0, 0, 0.22) 50%),
+    linear-gradient(180deg, #ffffff 0%, #fbbf24 45%, #ea580c 100%);
+  pointer-events: none;
+  z-index: 5;
+  filter: drop-shadow(0 3px 6px rgba(234, 88, 12, 0.8));
+  will-change: transform;
+  animation: qqg-apex-shard-float 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial;
+}
+
+/* --- SEASON 2 NUMBER TIERS --- */
 
 /* TIER 1: ABYSSAL TRENCH  10^90  Novemvigintillion */
 @keyframes abyssal-text-flow {
@@ -2642,10 +3424,10 @@ span.tracking-wider[title]:active::after {
 
 /* ═══════════════════════════════════════════════════════════════════
     MASTER EVENT SYSTEM
-    Flash:    lunar · electric · cards · hellfire          (4)
-    Festival: spark · ghost · safeguard · resonance
-              surge · vault · fever · sanguine             (8)
-    Streak:   card-fever · card-inferno                    (2)
+    Flash:    lunar · electric · cards · hellfire
+    Festival: spark · ghost · safeguard · resonance· surge · vault · fever · sanguine    
+    Streak:   card-fever · card-inferno    
+    World Bosses: hexurion · orphion · fracturon · apexion   
    ═══════════════════════════════════════════════════════════════════ */
 
 /* --- SECTION A: STREAK & PULSE KEYFRAMES --- */
@@ -2701,7 +3483,7 @@ span.tracking-wider[title]:active::after {
 }
 
 .oracle-glow-btn::after {
-  content: 'a';
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -3005,6 +3787,30 @@ span.tracking-wider[title]:active::after {
 .event-bg-festival_vault     { background: linear-gradient(to bottom, rgba(59, 91, 219, 0.05),   rgba(59, 91, 219, 0.2))    !important; }
 .event-bg-festival_fever     { background: linear-gradient(to bottom, rgba(220, 38, 38, 0.05),   rgba(220, 38, 38, 0.2))    !important; }
 .event-bg-festival_sanguine  { background: linear-gradient(to bottom, rgba(127, 29, 29, 0.05),   rgba(127, 29, 29, 0.25))   !important; }
+
+/* Background silk - World Bosses */
+.event-bg-boss_hexurion  { background: linear-gradient(to bottom, rgba(34, 211, 238, 0.05), rgba(34, 211, 238, 0.18)) !important; }
+.event-bg-boss_orphion   { background: linear-gradient(to bottom, rgba(168, 85, 247, 0.05), rgba(168, 85, 247, 0.18)) !important; }
+.event-bg-boss_fracturon { background: linear-gradient(to bottom, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.18)) !important; }
+.event-bg-boss_apexion   { background: linear-gradient(to bottom, rgba(249, 115, 22, 0.05), rgba(249, 115, 22, 0.18)) !important; }
+
+/* Side shadows - World Bosses */
+.event-side-boss_hexurion  { box-shadow: inset 50px 0 80px -50px rgba(34,211,238,0.3),  inset -50px 0 80px -50px rgba(34,211,238,0.3); }
+.event-side-boss_orphion   { box-shadow: inset 50px 0 80px -50px rgba(168,85,247,0.3),  inset -50px 0 80px -50px rgba(168,85,247,0.3); }
+.event-side-boss_fracturon { box-shadow: inset 50px 0 80px -50px rgba(34,197,94,0.3),  inset -50px 0 80px -50px rgba(34,197,94,0.3); }
+.event-side-boss_apexion   { box-shadow: inset 50px 0 80px -50px rgba(249,115,22,0.3),  inset -50px 0 80px -50px rgba(249,115,22,0.3); }
+
+/* Nav glows - World Bosses */
+.nav-glow-boss_hexurion  { box-shadow: 0 10px 30px -10px rgba(34,211,238,0.35); }
+.nav-glow-boss_orphion   { box-shadow: 0 10px 30px -10px rgba(168,85,247,0.35); }
+.nav-glow-boss_fracturon { box-shadow: 0 10px 30px -10px rgba(34,197,94,0.3); }
+.nav-glow-boss_apexion   { box-shadow: 0 10px 30px -10px rgba(249,115,22,0.35); }
+
+/* Particles maps - World Bosses */
+.particles-boss_hexurion::before, .particles-boss_hexurion::after { background-image: radial-gradient(ellipse 2px 4px at 20% 80%, #a5f3fc 0%, transparent 70%), radial-gradient(ellipse 1.5px 3.5px at 50% 40%, #22d3ee 0%, transparent 70%); }
+.particles-boss_orphion::before,  .particles-boss_orphion::after  { background-image: radial-gradient(ellipse 1.5px 3px at 15% 90%, #fff 0%, #f3e8ff 30%, transparent 80%), radial-gradient(ellipse 2px 4px at 35% 50%, #e9d8fd 0%, #d6bcfa 50%, transparent 100%); }
+.particles-boss_fracturon::before, .particles-boss_fracturon::after { background-image: radial-gradient(ellipse 2px 4px at 25% 75%, #e2e8f0 0%, transparent 70%), radial-gradient(ellipse 1.5px 3.5px at 60% 35%, #22c55e 0%, transparent 70%); }
+.particles-boss_apexion::before,  .particles-boss_apexion::after  { background-image: radial-gradient(ellipse 1.5px 3px at 15% 90%, #fff 0%, #ffcc00 30%, transparent 80%), radial-gradient(ellipse 2px 4px at 35% 50%, #f97316 0%, #ff4400 50%, transparent 100%); }
 
 /* --- SECTION G: LEGACY FLASH AMBIENT (header / nav / side / ticker) --- */
 
@@ -3572,6 +4378,530 @@ span.tracking-wider[title]:active::after {
   100% { transform: translateX(-50%) scale(3.5); opacity: 0;    }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+    WORLD BOSS SYSTEM
+    Hexurion · Orphion · Fracturon · Apexion
+   ═══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════════
+    WORLD BOSS ARENA LAYOUT
+   ═══════════════════════════════════════════════════════════════════ */
+
+.world-boss-arena {
+  position: relative; width: 100%;
+  background: radial-gradient(ellipse at 50% 60%, rgba(20,10,40,.98) 0%, rgba(5,3,15,1) 100%);
+  border-radius: 24px; border: 1px solid rgba(168,85,247,.2);
+  display: flex; flex-direction: column; gap: 10px; padding: 14px;
+  overflow: hidden; isolation: isolate;
+}
+.world-boss-arena::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 55% 35% at 50% 75%, rgba(168,85,247,.06) 0%, transparent 70%);
+  pointer-events: none; z-index: -1; animation: arena-ambient 4s ease-in-out infinite;
+}
+@keyframes arena-ambient { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+
+.boss-top-row { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+.boss-hp-section { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.boss-type-label { font-size: .58rem; font-weight: 900; text-transform: uppercase; letter-spacing: .28em; color: rgba(216,180,254,.75); }
+.boss-hp-bar { height: 8px; width: 100%; background: rgba(255,255,255,.04); border-radius: 999px; border: 1px solid rgba(168,85,247,.18); overflow: hidden; }
+.boss-hp-fill { height: 100%; border-radius: 999px; transition: width 300ms ease-out; will-change: width; }
+.boss-hp-fill.boss-hexurion  { background: linear-gradient(90deg,#0e7490,#22d3ee,#67e8f9); box-shadow: 0 0 8px rgba(34,211,238,.9); }
+.boss-hp-fill.boss-orphion   { background: linear-gradient(90deg,#7c3aed,#a855f7,#d8b4fe); box-shadow: 0 0 8px rgba(168,85,247,.9); }
+.boss-hp-fill.boss-fracturon { background: linear-gradient(90deg,#15803d,#22c55e,#86efac); box-shadow: 0 0 8px rgba(34,197,94,.9); }
+.boss-hp-fill.boss-apexion   { background: linear-gradient(90deg,#c2410c,#f97316,#fdba74); box-shadow: 0 0 8px rgba(249,115,22,.9); }
+.boss-hp-pct { font-size: .48rem; font-weight: 900; text-transform: uppercase; letter-spacing: .14em; color: rgba(168,85,247,.45); }
+
+.boss-sound-area { flex-shrink: 0; position: relative; display: flex; align-items: flex-start; }
+.boss-sound-btn  { padding: 7px; border-radius: 50%; border: 1px solid rgba(168,85,247,.25); background: rgba(168,85,247,.08); color: rgba(216,180,254,.7); cursor: pointer; transition: background .15s ease,color .15s ease; display: flex; align-items: center; justify-content: center; }
+.boss-sound-btn:hover { background: rgba(168,85,247,.18); color: rgba(216,180,254,1); }
+
+.boss-mid-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+.boss-model-area { flex: 1; min-width: 0; height: 190px; display: flex; align-items: center; justify-content: center; position: relative; }
+.boss-ranking-panel { width: 108px; flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; align-self: center; }
+.boss-ranking-title { font-size: .46rem; font-weight: 900; text-transform: uppercase; letter-spacing: .2em; color: rgba(168,85,247,.4); text-align: center; }
+.boss-rank-row { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 4px 7px; background: rgba(168,85,247,.06); border: 1px solid rgba(168,85,247,.12); border-radius: 10px; font-size: .54rem; font-weight: 900; color: rgba(216,180,254,.5); text-transform: uppercase; letter-spacing: .05em; }
+.boss-rank-row.top-rank { background: rgba(168,85,247,.12); border-color: rgba(168,85,247,.32); color: #d8b4fe; }
+.boss-rank-row.my-rank  { border-color: rgba(34,211,238,.35); color: #67e8f9; background: rgba(34,211,238,.06); }
+.boss-rank-num  { font-size: .58rem; opacity: .8; }
+.boss-rank-dmg  { font-variant-numeric: tabular-nums; }
+ 
+.boss-footer-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding-top: 2px; border-top: 1px solid rgba(168,85,247,.08); }
+.boss-strike-counter { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.boss-strike-number  { font-size: 1.5rem; font-weight: 900; color: #e879f9; text-shadow: 0 0 14px rgba(232,121,249,.8); font-variant-numeric: tabular-nums; line-height: 1; will-change: transform; transition: transform 80ms ease-out; }
+.boss-strike-number.bump { transform: scale(1.3); }
+.boss-strike-label { font-size: .46rem; font-weight: 900; text-transform: uppercase; letter-spacing: .2em; color: rgba(216,180,254,.35); }
+.boss-countdown  { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.boss-countdown-num   { font-size: 1.5rem; font-weight: 900; color: rgba(216,180,254,.85); font-variant-numeric: tabular-nums; line-height: 1; }
+.boss-countdown-label { font-size: .46rem; font-weight: 900; text-transform: uppercase; letter-spacing: .2em; color: rgba(168,85,247,.3); }
+
+.boss-damage-pool { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+@keyframes dmg-float { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
+
+.boss-miss-flash { position: absolute; inset: 0; pointer-events: none; border-radius: 24px; will-change: opacity; animation: boss-miss-flash .32s ease-out forwards; }
+@keyframes boss-miss-flash { 0% { box-shadow: inset 0 0 50px rgba(239,68,68,.6); } 100% { box-shadow: inset 0 0 0 rgba(239,68,68,0); } }
+
+/* Chest opening keyframes */
+@keyframes chest-drop {
+  0%   { transform: translateY(-180%) scale(.55); opacity: 0; }
+  55%  { transform: translateY(10px)   scale(1.06); opacity: 1; }
+  75%  { transform: translateY(-5px)   scale(.97); }
+  90%  { transform: translateY(3px)    scale(1.02); }
+  100% { transform: translateY(0)      scale(1);   opacity: 1; }
+}
+@keyframes ray-spin {
+  from { transform: rotate(0deg) translateY(-60px); }
+  to   { transform: rotate(360deg) translateY(-60px); }
+}
+@keyframes rainbow-glow-pulse {
+  0% { opacity: 0.45; }
+  100% { opacity: 0.95; }
+}
+
+@keyframes rainbow-text-cycle {
+  0%, 100% { color: #fca5a5; }
+  33% { color: #a7f3d0; }
+  66% { color: #c7d2fe; }
+}
+
+@keyframes rainbow-text-glow-cycle {
+  0%, 100% {
+    color: #fee2e2;
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+  }
+  33% {
+    color: #d1fae5;
+    text-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+  }
+  66% {
+    color: #e0e7ff;
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
+  }
+}
+
+.animate-rainbow-chest {
+  position: relative;
+  background: linear-gradient(135deg,
+    rgba(239, 68, 68, 0.15) 0%,
+    rgba(249, 115, 22, 0.15) 20%,
+    rgba(34, 197, 94, 0.15) 40%,
+    rgba(34, 211, 238, 0.15) 60%,
+    rgba(59, 130, 246, 0.15) 80%,
+    rgba(168, 85, 247, 0.15) 100%
+  ) !important;
+  border-color: rgba(219, 39, 119, 0.4) !important;
+  border-width: 2px !important;
+}
+
+.animate-rainbow-chest::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: -1;
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.65), inset 0 0 10px rgba(34, 211, 238, 0.3);
+  animation: rainbow-glow-pulse 2.5s ease-in-out infinite alternate;
+  will-change: opacity;
+}
+
+.animate-rainbow-chest-lid {
+  background: linear-gradient(135deg,
+    rgba(239, 68, 68, 0.25) 0%,
+    rgba(249, 115, 22, 0.25) 20%,
+    rgba(34, 197, 94, 0.25) 40%,
+    rgba(34, 211, 238, 0.25) 60%,
+    rgba(59, 130, 246, 0.25) 80%,
+    rgba(168, 85, 247, 0.25) 100%
+  ) !important;
+  border-bottom-width: 2px !important;
+  border-color: rgba(219, 39, 119, 0.4) !important;
+}
+
+.animate-rainbow-text {
+  animation: rainbow-text-cycle 4s linear infinite !important;
+}
+
+.animate-rainbow-text-glow {
+  animation: rainbow-text-glow-cycle 4s linear infinite !important;
+}
+
+.animate-rainbow-relic-badge {
+  background: linear-gradient(135deg,
+    rgba(239, 68, 68, 0.12) 0%,
+    rgba(249, 115, 22, 0.12) 20%,
+    rgba(34, 197, 94, 0.12) 40%,
+    rgba(34, 211, 238, 0.12) 60%,
+    rgba(59, 130, 246, 0.12) 80%,
+    rgba(168, 85, 247, 0.12) 100%
+  ) !important;
+  border-color: rgba(219, 39, 119, 0.3) !important;
+  border-width: 1.5px !important;
+}
+/* Boss hit/miss result text - centered on model */
+.boss-result-text {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  transform: translateX(-50%) translateY(-50%);
+  font-size: 1.4rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 20;
+}
+
+.boss-result-text.hit {
+  color: #67e8f9;
+  text-shadow: 0 0 14px rgba(34,211,238,0.95), 0 0 35px rgba(34,211,238,0.55);
+  -webkit-text-stroke: 0.5px rgba(6,182,212,0.9);
+  animation: boss-hit-text 1.5s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+/* Temporal Charge (x2) or Omega Shard (x3) */
+.boss-result-text.hit-crit {
+  color: #fbbf24;
+  font-size: 1.75rem;
+  text-shadow: 0 0 16px rgba(251,191,36,0.95), 0 0 40px rgba(251,191,36,0.6);
+  -webkit-text-stroke: 0.5px rgba(217,119,6,0.9);
+  animation: boss-hit-text 1.8s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+.boss-result-text.miss {
+  color: rgba(239,68,68,0.95);
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px rgba(239,68,68,0.7);
+  -webkit-text-stroke: 0.5px rgba(255,255,255,0.6);
+  animation: boss-miss-text 1.1s ease-out forwards;
+}
+
+@keyframes boss-hit-text {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(-50%) scale(1.35); }
+  20%  { opacity: 1; transform: translateX(-50%) translateY(-65%) scale(1.0);  }
+  70%  { opacity: 1; transform: translateX(-50%) translateY(-80%) scale(0.95); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-115%) scale(0.8); }
+}
+
+@keyframes boss-miss-text {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(-50%) scale(1.1); }
+  60%  { opacity: 1; transform: translateX(-50%) translateY(-65%) scale(0.95); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-85%) scale(0.9); }
+}
+
+@keyframes boss-miss-flash {
+  0%   {
+    box-shadow: inset 0 0 0 3px rgba(239,68,68,0.95),
+                inset 0 0 80px rgba(239,68,68,0.45);
+    background: rgba(239,68,68,0.08);
+  }
+  50%  {
+    box-shadow: inset 0 0 0 2px rgba(239,68,68,0.6),
+                inset 0 0 50px rgba(239,68,68,0.25);
+    background: rgba(239,68,68,0.04);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 rgba(239,68,68,0),
+                inset 0 0 0   rgba(239,68,68,0);
+    background: transparent;
+  }
+}
+
+.boss-hit-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 12px;
+  animation: boss-hit-flash-anim 0.3s ease-out forwards;
+}
+
+@keyframes boss-hit-flash-anim {
+  0%   { background: rgba(34,211,238,0.28); }
+  100% { background: rgba(34,211,238,0);    }
+}
+
+/* Damage pool text  */
+.boss-dmg-number {
+  position: absolute;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(103,232,249,0.7);
+  text-shadow: 0 0 6px rgba(34,211,238,0.5);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+/* Override for crit hits in pool */
+.boss-dmg-number.crit {
+  color: rgba(251,191,36,0.85);
+  text-shadow: 0 0 8px rgba(251,191,36,0.6);
+  font-size: 0.8rem;
+}
+/* ═══════════════════════════════════════════════════════════════════
+    BOSS 1: HEXURION - The Hexagonal Prism Core
+    Colour: Cyan #22d3ee  |  Accent: #67e8f9
+   ═══════════════════════════════════════════════════════════════════ */
+
+.hex-prism {
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  position: absolute;
+  will-change: transform, opacity;
+}
+
+.hexurion-container {
+  position: relative; width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  will-change: transform;
+}
+.hexurion-container.idle { animation: hexurion-float 6s ease-in-out infinite; }
+
+@keyframes hexurion-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+.hexurion-model {
+  position: relative; width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center;
+  will-change: transform;
+}
+.hexurion-model.rotating   { animation: hexurion-spin 14s linear infinite; }
+.hexurion-model.assembling { animation: hexurion-assemble 1.4s cubic-bezier(.22,1,.36,1) forwards; }
+.hexurion-model.wince      { animation: hexurion-wince .4s ease-in-out; }
+.hexurion-model.pain       { animation: hexurion-pain .28s steps(1) 2; }
+.hexurion-model.dying      { animation: hexurion-die 1.1s ease-out forwards; }
+
+@keyframes hexurion-spin     { from { transform: rotateZ(0deg); } to { transform: rotateZ(360deg); } }
+@keyframes hexurion-assemble { 0% { opacity:0; transform:rotateZ(720deg) scale(.05); } 40% { opacity:1; } 80% { transform:rotateZ(-15deg) scale(1.05); } 100% { opacity:1; transform:rotateZ(0deg) scale(1); } }
+@keyframes hexurion-wince    { 0%,100% { transform:scale(1) rotateZ(0deg); } 40% { transform:scale(1.22) rotateZ(12deg); } 70% { transform:scale(.94) rotateZ(-4deg); } }
+@keyframes hexurion-pain     { 0% { transform:translate(0,0); } 20% { transform:translate(-4px,2px); } 40% { transform:translate(4px,-3px); } 60% { transform:translate(-3px,-4px); } 80% { transform:translate(3px,4px); } 100% { transform:translate(0,0); } }
+@keyframes hexurion-die      { 0% { opacity:1; transform:scale(1) rotateZ(0deg); } 20% { opacity:1; transform:scale(1.3) rotateZ(18deg); } 60% { opacity:.7; transform:scale(2.2) rotateZ(55deg); } 100% { opacity:0; transform:scale(3.5) rotateZ(90deg); } }
+
+.hex-outer {
+  width: 155px; height: 155px;
+  background: linear-gradient(135deg,rgba(34,211,238,.12),rgba(6,182,212,.06));
+  box-shadow: 0 0 0 2px rgba(34,211,238,.55), 0 0 20px rgba(34,211,238,.4), 0 0 50px rgba(34,211,238,.15), inset 0 0 30px rgba(34,211,238,.04);
+}
+.hex-mid {
+  width: 108px; height: 108px;
+  background: linear-gradient(135deg,rgba(34,211,238,.2),rgba(6,182,212,.1));
+  box-shadow: 0 0 0 1.5px rgba(34,211,238,.7), 0 0 16px rgba(34,211,238,.55), inset 0 0 18px rgba(34,211,238,.08);
+  opacity: .85;
+}
+.hex-inner {
+  width: 68px; height: 68px;
+  background: linear-gradient(135deg,rgba(34,211,238,.45),rgba(6,182,212,.25));
+  box-shadow: 0 0 0 1px rgba(103,232,249,.8), 0 0 28px rgba(34,211,238,.8), 0 0 55px rgba(34,211,238,.3);
+}
+.hex-core-dot {
+  position: absolute; width: 18px; height: 18px; border-radius: 50%;
+  background: radial-gradient(circle,#ffffff 0%,#67e8f9 45%,rgba(34,211,238,0) 100%);
+  box-shadow: 0 0 18px #22d3ee, 0 0 36px rgba(34,211,238,.7);
+  z-index: 10;
+}
+
+/* Hexurion arena tier overlays */
+.boss-tier-hex-lattice .hexurion-model::after {
+  content: ''; position: absolute; inset: -20px;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(34,211,238,.07) 0px,rgba(34,211,238,.07) 1px,transparent 1px,transparent 20px),
+    repeating-linear-gradient(90deg,rgba(34,211,238,.07) 0px,rgba(34,211,238,.07) 1px,transparent 1px,transparent 20px);
+  pointer-events: none; z-index: -1; animation: hex-grid-pulse 3s ease-in-out infinite;
+}
+@keyframes hex-grid-pulse { 0%,100% { opacity:.3; } 50% { opacity:.9; } }
+
+.boss-tier-hex-breach .hexurion-model::before {
+  content: ''; position: absolute; inset: -30px;
+  background: radial-gradient(ellipse at center, rgba(34,211,238,.25) 0%, rgba(103,232,249,.1) 35%, transparent 65%);
+  pointer-events: none; z-index: -1; animation: hex-breach-glow 1.8s ease-in-out infinite;
+}
+@keyframes hex-breach-glow { 0%,100% { opacity:.6; transform:scale(1); } 50% { opacity:1; transform:scale(1.1); } }
+
+/* ═══════════════════════════════════════════════════════════════════
+    BOSS 2: ORPHION - The Concentric Orbiting Rings
+    Colour: Purple #a855f7  |  Accent: #d8b4fe
+   ═══════════════════════════════════════════════════════════════════ */
+
+.orphion-container {
+  position: relative; width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center; will-change: transform;
+}
+.orphion-container.idle { animation: orphion-core-idle-float 4s ease-in-out infinite; }
+@keyframes orphion-core-idle-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+
+.orphion-ring { position: absolute; border-radius: 50%; will-change: transform; }
+.orphion-ring::before {
+  content: ''; position: absolute; top: -3px; left: 50%; transform: translateX(-50%);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(216,180,254,.9); box-shadow: 0 0 8px rgba(192,132,252,.9);
+}
+.orphion-ring-outer { width:148px; height:148px; border: 2px solid rgba(168,85,247,.65); box-shadow: 0 0 14px rgba(168,85,247,.45),inset 0 0 14px rgba(168,85,247,.06); }
+.orphion-ring-mid   { width:104px; height:104px; border: 2.5px solid rgba(192,132,252,.75); box-shadow: 0 0 18px rgba(192,132,252,.55); }
+.orphion-ring-inner { width:64px;  height:64px;  border: 2px solid rgba(216,180,254,.85); box-shadow: 0 0 22px rgba(216,180,254,.65); }
+
+.orphion-container.idle .orphion-ring-outer { animation: orphion-spin-cw  5s linear infinite; }
+.orphion-container.idle .orphion-ring-mid   { animation: orphion-spin-ccw 3.5s linear infinite; }
+.orphion-container.idle .orphion-ring-inner { animation: orphion-spin-cw  2.5s linear infinite; }
+@keyframes orphion-spin-cw  { from { transform:rotate(0deg);   } to { transform:rotate(360deg);  } }
+@keyframes orphion-spin-ccw { from { transform:rotate(0deg);   } to { transform:rotate(-360deg); } }
+
+.orphion-core {
+  position: absolute; width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(circle,#ffffff 0%,#c084fc 35%,#7c3aed 75%,rgba(76,29,149,0) 100%);
+  box-shadow: 0 0 22px #c084fc, 0 0 44px rgba(168,85,247,.55), 0 0 80px rgba(168,85,247,.18);
+  z-index: 10; will-change: transform, opacity;
+}
+.orphion-container.idle .orphion-core { animation: orphion-core-pulse 3s ease-in-out infinite; }
+@keyframes orphion-core-pulse { 0%,100% { transform:scale(1); opacity:.85; } 50% { transform:scale(1.18); opacity:1; } }
+
+.orphion-container.assembling .orphion-ring-outer { animation: orphion-assemble-outer 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+.orphion-container.assembling .orphion-ring-mid   { animation: orphion-assemble-mid   1.1s .1s cubic-bezier(.22,1,.36,1) both; }
+.orphion-container.assembling .orphion-ring-inner { animation: orphion-assemble-inner 1s   .2s cubic-bezier(.22,1,.36,1) both; }
+.orphion-container.assembling .orphion-core       { animation: orphion-assemble-core  .9s  .3s cubic-bezier(.22,1,.36,1) both; }
+@keyframes orphion-assemble-outer { 0% { opacity:0;transform:scale(4);filter:brightness(5); } 30% { opacity:1;filter:brightness(2); } 100% { opacity:1;transform:scale(1);filter:brightness(1); } }
+@keyframes orphion-assemble-mid   { 0% { opacity:0;transform:scale(3);filter:brightness(4); } 100% { opacity:1;transform:scale(1);filter:brightness(1); } }
+@keyframes orphion-assemble-inner { 0% { opacity:0;transform:scale(2.5);filter:brightness(3); } 100% { opacity:1;transform:scale(1);filter:brightness(1); } }
+@keyframes orphion-assemble-core  { 0% { opacity:0;transform:scale(.1); } 60% { transform:scale(1.3); } 100% { opacity:1;transform:scale(1); } }
+
+.orphion-container.wince .orphion-ring-outer { animation: orphion-wince-outer .45s ease-out; }
+.orphion-container.wince .orphion-ring-mid   { animation: orphion-wince-mid   .45s ease-out; }
+.orphion-container.wince .orphion-ring-inner { animation: orphion-wince-inner .45s ease-out; }
+@keyframes orphion-wince-outer { 0%,100% { transform:scale(1); } 40% { transform:scale(1.5); } }
+@keyframes orphion-wince-mid   { 0%,100% { transform:scale(1); } 40% { transform:scale(1.7); } }
+@keyframes orphion-wince-inner { 0%,100% { transform:scale(1); } 40% { transform:scale(2.0); } }
+
+.orphion-container.pain .orphion-core { animation: orphion-pain-core .32s steps(2) 2; }
+@keyframes orphion-pain-core { 0%,100% { filter:brightness(1) saturate(1); } 50% { filter:brightness(4) saturate(0) invert(1); } }
+
+.orphion-container.dying .orphion-ring-outer { animation: orphion-die-ring .9s ease-in forwards; }
+.orphion-container.dying .orphion-ring-mid   { animation: orphion-die-ring .75s .1s ease-in forwards; }
+.orphion-container.dying .orphion-ring-inner { animation: orphion-die-ring .6s  .2s ease-in forwards; }
+.orphion-container.dying .orphion-core       { animation: orphion-die-core .7s  .3s ease-in forwards; }
+@keyframes orphion-die-ring { 0% { opacity:1;transform:scale(1) scaleY(1); } 40% { transform:scale(.8) scaleY(.05); } 70% { transform:scale(1.5) scaleY(.02);opacity:.5; } 100% { transform:scale(0) scaleY(0);opacity:0; } }
+@keyframes orphion-die-core { 0% { opacity:1;transform:scale(1); } 100% { opacity:0;transform:scale(4); } }
+
+/* Orphion arena tier overlays */
+.boss-tier-orph-orbit .orphion-container::before {
+  content: ''; position: absolute; inset: -12px; border-radius: 50%;
+  border: 1px solid rgba(168,85,247,.3); border-top-color: rgba(168,85,247,.8);
+  animation: orphion-halo-spin 2s linear infinite; filter: blur(1px); pointer-events: none;
+}
+@keyframes orphion-halo-spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
+.boss-tier-orph-horizon .orphion-container::after {
+  content: ''; position: absolute; inset: -8px; border-radius: 50%;
+  backdrop-filter: blur(2px) saturate(2); pointer-events: none;
+  animation: orphion-warp-pulse 3s ease-in-out infinite;
+}
+@keyframes orphion-warp-pulse { 0%,100% { opacity:.4; } 50% { opacity:.9; } }
+
+/* ═══════════════════════════════════════════════════════════════════
+    BOSS 3: FRACTURON - The Rhombic Grid Core
+    Colour: Green #22c55e  |  Accent: #86efac
+   ═══════════════════════════════════════════════════════════════════ */
+
+.fracturon-container {
+  position: relative; width: 160px; height: 160px;
+  display: flex; align-items: center; justify-content: center; will-change: transform;
+}
+.fracturon-grid {
+  display: grid; grid-template-columns: repeat(7,17px); grid-template-rows: repeat(7,17px);
+  gap: 2.5px; transform: rotate(45deg); will-change: transform, opacity;
+}
+.fracturon-cell { width:17px; height:17px; background:rgba(34,197,94,.75); box-shadow:0 0 4px rgba(34,197,94,.7); will-change:transform,opacity; transition:transform 80ms ease-out,opacity 80ms ease-out; }
+.fracturon-cell.invisible { opacity:0; pointer-events:none; }
+.fracturon-cell.edge { background:rgba(134,239,172,.85); box-shadow:0 0 8px rgba(134,239,172,.9),0 0 16px rgba(34,197,94,.4); }
+
+.fracturon-container.idle .fracturon-grid { animation: fracturon-heartbeat 4s ease-in-out infinite; }
+@keyframes fracturon-heartbeat { 0%,70%,100% { transform:rotate(45deg) scaleY(1); } 78% { transform:rotate(45deg) scaleY(.06); } 85% { transform:rotate(45deg) scaleY(1.12); } 91% { transform:rotate(45deg) scaleY(.94); } }
+
+.fracturon-container.assembling .fracturon-grid { animation: fracturon-assemble 1.3s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes fracturon-assemble { 0% { opacity:0;transform:rotate(45deg) skewX(25deg) scale(.3); } 20% { opacity:1;transform:rotate(45deg) skewX(-12deg) scale(1.1); } 50% { transform:rotate(45deg) skewX(6deg) scale(.97); } 75% { transform:rotate(45deg) skewX(-3deg) scale(1.03); } 100% { opacity:1;transform:rotate(45deg) scaleY(1); } }
+
+.fracturon-container.wince .fracturon-grid { animation: fracturon-wince .38s ease-out; }
+@keyframes fracturon-wince { 0%,100% { transform:rotate(45deg) translateX(0); } 28% { transform:rotate(45deg) translateX(28px); } 65% { transform:rotate(45deg) translateX(-12px); } }
+
+.fracturon-container.pain .fracturon-grid { animation: fracturon-pain .3s steps(2) 2; }
+@keyframes fracturon-pain { 0%,100% { transform:rotate(45deg) skewX(0deg); } 30% { transform:rotate(45deg) skewX(18deg); } 60% { transform:rotate(45deg) skewX(-14deg); } }
+
+.fracturon-container.dying .fracturon-grid { animation: fracturon-die 1s ease-in forwards; }
+@keyframes fracturon-die { 0% { opacity:1;transform:rotate(45deg) scale(1); } 30% { transform:rotate(45deg) scale(1.25); } 60% { opacity:.6;transform:rotate(45deg) scale(.5); } 100% { opacity:0;transform:rotate(45deg) scale(.02); } }
+
+/* Fracturon arena tier overlays */
+.boss-tier-frac-matrix .fracturon-cell { transition: filter .2s ease; }
+.boss-tier-frac-matrix .fracturon-grid:hover .fracturon-cell { filter: hue-rotate(120deg); }
+
+.boss-tier-frac-corrupt .fracturon-container::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none; will-change: transform,opacity;
+  box-shadow: -4px 0 0 rgba(34,211,238,.25); animation: frac-chroma-l 2s ease-in-out infinite;
+}
+.boss-tier-frac-corrupt .fracturon-container::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; will-change: transform,opacity;
+  box-shadow: 4px 0 0 rgba(236,72,153,.25); animation: frac-chroma-r 2s ease-in-out infinite;
+}
+@keyframes frac-chroma-l { 0%,100% { transform:translateX(-2px);opacity:.5; } 50% { transform:translateX(-5px);opacity:1; } }
+@keyframes frac-chroma-r { 0%,100% { transform:translateX(2px); opacity:.5; } 50% { transform:translateX(5px); opacity:1; } }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+    BOSS 4: APEXION - The Pulsing Pyramid
+    Colour: Orange #f97316  |  Accent: #fdba74
+   ═══════════════════════════════════════════════════════════════════ */
+
+.apexion-container {
+  position: relative; width: 160px; height: 160px;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 12px; will-change: transform;
+}
+.apexion-pyramid {
+  width: 124px; height: 132px;
+  clip-path: polygon(50% 0%,100% 100%,0% 100%);
+  background: linear-gradient(180deg,#fdba74 0%,#f97316 28%,#ea580c 55%,#c2410c 78%,#7c2d12 100%);
+  box-shadow: 0 0 24px rgba(249,115,22,.6),0 0 60px rgba(249,115,22,.2);
+  transform-origin: bottom center; will-change: transform,opacity; position: relative;
+}
+.apexion-shadow {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  width: 90px; height: 10px; border-radius: 50%;
+  background: rgba(249,115,22,.35); filter: blur(8px); will-change: transform,opacity;
+}
+
+.apexion-container.idle .apexion-pyramid { animation: apexion-breathe 2.5s ease-in-out infinite; }
+.apexion-container.idle .apexion-shadow  { animation: apexion-shadow-breathe 2.5s ease-in-out infinite; }
+@keyframes apexion-breathe        { 0%,100% { transform:scaleY(1); } 50% { transform:scaleY(1.26); } }
+@keyframes apexion-shadow-breathe { 0%,100% { transform:translateX(-50%) scaleX(1);   opacity:.35; } 50% { transform:translateX(-50%) scaleX(1.35); opacity:.65; } }
+
+.apexion-container.assembling .apexion-pyramid { animation: apexion-assemble 1.3s cubic-bezier(.22,1,.36,1) forwards; }
+.apexion-container.assembling .apexion-shadow  { animation: apexion-shadow-assemble 1.3s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes apexion-assemble        { 0% { transform:scaleY(0);opacity:0; } 25% { opacity:1; } 45% { transform:scaleY(1.65); } 65% { transform:scaleY(.82); } 82% { transform:scaleY(1.18); } 92% { transform:scaleY(.95); } 100% { transform:scaleY(1);opacity:1; } }
+@keyframes apexion-shadow-assemble { 0% { opacity:0;transform:translateX(-50%) scaleX(0); } 45% { transform:translateX(-50%) scaleX(1.6); } 100% { opacity:.35;transform:translateX(-50%) scaleX(1); } }
+
+.apexion-container.wince .apexion-pyramid { animation: apexion-wince .42s ease-out; }
+@keyframes apexion-wince { 0%,100% { transform:scaleY(1) scaleX(1); } 30% { transform:scaleY(1.5) scaleX(.75); } 65% { transform:scaleY(.88) scaleX(1.12); } }
+
+.apexion-container.pain .apexion-pyramid { animation: apexion-pain .28s steps(2) 2; }
+@keyframes apexion-pain { 0%,100% { filter:invert(0) brightness(1); } 50% { filter:invert(1) brightness(1.8) hue-rotate(180deg); } }
+
+.apexion-container.dying .apexion-pyramid { animation: apexion-die 1s ease-in forwards; }
+.apexion-container.dying .apexion-shadow  { animation: apexion-die-shadow 1s ease-in forwards; }
+@keyframes apexion-die        { 0% { transform:scaleY(1);opacity:1; } 35% { transform:scaleY(.04) scaleX(2.5);opacity:.9; } 60% { transform:scaleY(.02) scaleX(3.5);opacity:.5; } 100% { transform:scaleY(0) scaleX(0);opacity:0; } }
+@keyframes apexion-die-shadow { 0% { opacity:.35;transform:translateX(-50%) scaleX(1); } 40% { opacity:.8;transform:translateX(-50%) scaleX(4); } 100% { opacity:0;transform:translateX(-50%) scaleX(6); } }
+
+/* Apexion arena tier overlays */
+.boss-tier-apex-kinetic .apexion-container { animation: apexion-kinetic-bg 1.8s ease-in-out infinite; }
+@keyframes apexion-kinetic-bg { 0%,100% { transform:scale(1); } 50% { transform:scale(1.025); } }
+
+.boss-tier-apex-zenith .apexion-pyramid::before {
+  content: ''; position: absolute; inset: -20px;
+  background: radial-gradient(ellipse at center,rgba(255,255,255,.45) 0%,rgba(249,115,22,.2) 40%,transparent 70%);
+  pointer-events: none; animation: apex-flare 1.2s ease-in-out infinite;
+}
+@keyframes apex-flare { 0%,100% { opacity:.3;transform:scale(.9); } 50% { opacity:.95;transform:scale(1.15); } }
+
+.boss-tier-apex-zenith .apexion-pyramid::after {
+  content: ''; position: absolute; left: 50%; bottom: 100%; width: 2px; height: 60px;
+  background: linear-gradient(to top,rgba(249,115,22,.8),rgba(255,255,255,0) 100%);
+  transform: translateX(-50%); pointer-events: none; animation: apex-spike .8s ease-in-out infinite alternate;
+}
+@keyframes apex-spike { 0% { height:30px;opacity:.5; } 100% { height:70px;opacity:1; } }
+
 /* --- OPTIMIZATION --- */
 
 .event-dynamic-particles::before,
@@ -3585,7 +4915,7 @@ span.tracking-wider[title]:active::after {
 }
 .g-qi, .g-sx, .g-oc, .g-ud, .g-dd, .g-td, .g-spd, .g-vg, .g-nod, .g-ocd, 
 .g-sxd, .g-qid, .g-qad, .g-nvg, .g-trg, .g-utr, .g-dtr, .g-ttr, .g-qtr, 
-.g-qntr, .g-str, .g-uvg, .g-dvg, .g-tvg, .g-qvg, .g-qiv, .g-svg, .g-spv, .g-ovg {
-  transform: translate3d(0, 0, 0);
+.g-qntr, .g-str, .g-uvg, .g-dvg, .g-tvg, .g-qvg, .g-qiv, .g-svg, .g-spv, .g-ovg, .g-stg, .g-otg, .g-ntg, .g-qag, .g-uqg, .g-dqg, .g-tqg, .g-qqg {
+  transform: translate3d(0,0,0);
   backface-visibility: hidden;
 }

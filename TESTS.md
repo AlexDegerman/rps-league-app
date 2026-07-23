@@ -14,6 +14,7 @@ The backend services are tested using Vitest to verify database behavior, BigInt
 - **Prediction Service**: Validates bet placement, prediction resolution, point gain/loss calculations, 100k point floor enforcement, relic mechanics, festival interactions, pagination, user statistics, global betting summaries, and database edge cases using mocked services and SQL routing.
 - **Relic Service**: Tests loot table rolls, rarity boundaries, Smart Loot fallback behavior, modifiers, cap logic, duplicate prevention, persistence, equipment state handling, and unequip counter reset behavior.
 - **Global Event Service**: Coordinates event phases (cooldown, warning, active), validates SSE broadcasts, BigInt-safe scaling, and percentage calculations.
+- **World Boss Service**: Validates the full encounter lifecycle (IDLE → WARNING → ACTIVE → QUIET → COOLDOWN), participant scaling, damage and leaderboard logic, phase guards, reward and chest generation, relic interactions, point scaling, achievement evaluation, encounter persistence, restart recovery, external pause/resume integration, and global event coordination.
 - **Festival Service**: Manages streak triggers, bonus tiers, cooldown and lockout rules, database updates, and scheduler safety windows.
 - **IP Mask Utility**: Validates IPv4/IPv6 anonymization for database storage, human-readable log masking, proxy chain extraction, and edge-case fallback handling.
 

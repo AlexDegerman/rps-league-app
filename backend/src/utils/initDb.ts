@@ -213,7 +213,7 @@ export const initDb = async (): Promise<void> => {
       CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id
         ON user_achievements(user_id)
     `)
-    // Participation counters (incremented via POST /api/global-events/participated)
+    // Participation counters
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS global_event_participations   INTEGER NOT NULL DEFAULT 0`
     )
@@ -260,10 +260,154 @@ export const initDb = async (): Promise<void> => {
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_thermal_fusion        BOOLEAN NOT NULL DEFAULT false`
     )
+    // ── World Boss ─────────────────────────────────────────────────
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS world_boss_encounters (
+        id SERIAL PRIMARY KEY,
+        boss_type TEXT NOT NULL,
+        started_at BIGINT NOT NULL,
+        ended_at BIGINT,
+        outcome TEXT,
+        hp_depleted_pct NUMERIC DEFAULT 0,
+        participant_count INTEGER DEFAULT 0,
+        interrupted BOOLEAN DEFAULT false
+      )
+    `)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS world_boss_damage (
+        id SERIAL PRIMARY KEY,
+        encounter_id INTEGER REFERENCES world_boss_encounters(id),
+        user_id TEXT NOT NULL,
+        damage_dealt INTEGER DEFAULT 0,
+        first_hit_at BIGINT,
+        last_hit_at BIGINT
+      )
+    `)
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS idx_wbd_encounter ON world_boss_damage(encounter_id)`
+    )
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS idx_wbd_user ON world_boss_damage(user_id)`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS equipped_relics TEXT[] DEFAULT '{}'`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_encounters_total INTEGER DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_kills_total INTEGER DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS world_boss_chests_opened INTEGER DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS hexurion_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS orphion_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS fracturon_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS apexion_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_final_strike BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_perfect_assault BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_lucky_shot BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_clutch_victory BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_divine_intervention BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(`
+      UPDATE users SET equipped_relics = ARRAY[equipped_relic]
+      WHERE equipped_relic IS NOT NULL AND (equipped_relics = '{}' OR equipped_relics IS NULL)
+    `)
+    // World Boss
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS world_boss_encounters (
+        id SERIAL PRIMARY KEY,
+        boss_type TEXT NOT NULL,
+        started_at BIGINT NOT NULL,
+        ended_at BIGINT,
+        outcome TEXT,
+        hp_depleted_pct NUMERIC DEFAULT 0,
+        participant_count INTEGER DEFAULT 0,
+        interrupted BOOLEAN DEFAULT false
+      )
+    `)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS world_boss_damage (
+        id SERIAL PRIMARY KEY,
+        encounter_id INTEGER REFERENCES world_boss_encounters(id),
+        user_id TEXT NOT NULL,
+        damage_dealt INTEGER DEFAULT 0,
+        first_hit_at BIGINT,
+        last_hit_at BIGINT
+      )
+    `)
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS idx_wbd_encounter ON world_boss_damage(encounter_id)`
+    )
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS idx_wbd_user ON world_boss_damage(user_id)`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS equipped_relics TEXT[] DEFAULT '{}'`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_encounters_total INTEGER DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_kills_total INTEGER DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS world_boss_chests_opened INTEGER DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS hexurion_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS orphion_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS fracturon_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS apexion_kills INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_final_strike BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_perfect_assault BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_lucky_shot BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_clutch_victory BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_divine_intervention BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(`
+      UPDATE users SET equipped_relics = ARRAY[equipped_relic]
+      WHERE equipped_relic IS NOT NULL AND (equipped_relics = '{}' OR equipped_relics IS NULL)
+    `)
 
     logger.info('Database initialized')
   } catch (err) {
     logger.error('Database initialization failed', err)
-    throw err // re-throw - app should not start with broken schema
+    throw err
   }
 }

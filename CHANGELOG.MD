@@ -2,6 +2,41 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [3.0] - World Boss Encounters
+
+### Added
+
+* **World Boss System:** Introduced server-wide cooperative raid encounters that replace the standard prediction arena on a 10 to 12-minute cycle. Four bosses rotate through the schedule, each rendered and animated entirely in CSS with a full animation lifecycle covering assembly, idle breathing, hit reaction, pain, and death states, accompanied by unique sound effects for spawning, attacks, taking damage, and defeat:
+  * **Hexurion:** A three-layered hexagonal prism core with a rotating outer shell and a glowing central dot.
+  * **Orphion:** Three concentric rings orbiting in alternating directions around a pulsing purple core.
+  * **Fracturon:** A 7x7 rhombic cell grid clipped into a diamond shape with a digital heartbeat idle state.
+  * **Apexion:** A vertically breathing pyramid casting an expanding ground shadow synchronized to its idle cycle.
+* **Collective HP Mechanic:** Boss HP scales dynamically with participant count based on join timing. Early participants contribute up to 4 HP per player to the shared pool. Winning predictions deal damage. Missing predictions are blocked. All encounters run on a 60-second timer.
+* **Chest Reward System:** Encounter outcome determines base chest rarity across six tiers:
+  * **Common:** Less than 25% HP depleted on retreat.
+  * **Rare:** 25% or more HP depleted on retreat.
+  * **Epic:** 50% or more HP depleted on retreat.
+  * **Legendary:** 75% or more HP depleted on retreat.
+  * **Mythical:** Boss fully defeated.
+  * **Rainbow:** Requires Prism Key relic combined with a successful upgrade roll.
+  * All point rewards are calculated as a percentage of the player's current balance, scaling from 0.5x at Common to 7.5x at Rainbow.
+* **World Boss Relics:** Added 14 new boss-exclusive relics that drop only from chest rewards and never from standard predictions. Relics are organized across three categories: flat point bonus multipliers, chest upgrade chance modifiers, and relic appearance chance boosters. Mythical-tier relics Twin Fortune and Prism Key introduce chest duplication and Rainbow tier access respectively.
+* **Three-Slot Relic System:** Expanded the relic loadout from a single equipped slot to three simultaneous active relics. All three slots contribute passively during encounters. Relic swapping is locked while a World Boss encounter is active.
+* **Themed Animated Number Tiers:** Integrated eight new high-end animated number styles aligned with the World Boss themes, arranged in descending order from highest threshold:
+  * **Obsidian Apex (Quattuorquadragintillion - Qqg - 10^135):** Basalt-obsidian typography transitioning into molten gold with unstable violet energy surges, crowned by a floating faceted crystal suspended above a pulsing energy platform.
+  * **Holographic Monolith (Tresquadragintillion - Tqg - 10^132):** Amethyst-and-silver typography animated by chromatic holographic sweeps, backed by a breathing pyramid core, scrolling matrix grid, and rotating radar field.
+  * **Spectrum Corruption (Duoquadragintillion - Dqg - 10^129):** Radiant amber typography surrounded by severe digital corruption effects, layered with cyan and magenta ghost copies that jitter independently under constant signal interference.
+  * **Prism Scanner (Unquadragintillion - Uqg - 10^126):** Polished copper-gold typography illuminated by a sweeping laser scan across a pulsing rhombus grid, recreating the look of a high-fidelity digital scanning interface.
+  * **Event Horizon (Quadragintillion - Qag - 10^123):** Brilliant emerald typography surrounded by layered concentric accretion disks rotating at non-harmonic speeds, simulating a hyper-velocity cosmic event horizon.
+  * **Singularity Orbit (Novemtrigintillion - Ntg - 10^120):** Emerald-and-mint typography wrapped in dual counter-rotating orbital halos, creating the illusion of a compact artificial singularity.
+  * **Hard-Light Breach (Octotrigintillion - Otg - 10^117):** Electric indigo typography surrounding a blazing cyan core, accompanied by a rotating hexagonal light portal and continuously shattering energy barriers.
+  * **Reinforced Lattice (Septentrigintillion - Stg - 10^114):** Amethyst-silver typography framed by a pristine white-lavender outline, backed by a breathing isometric hexagonal lattice and a slowly rotating crystalline prism core.
+* **Twenty New Achievements:** Expanded the achievement system with World Boss participation milestones, per-boss kill mastery tracks requiring 50 defeats of each individual boss, a five-tier chest opening progression chain, five high-difficulty meta achievements tied to rare encounter conditions including final strike, perfect assault, lucky shot, clutch victory, and divine intervention, and World Purifier, a Rainbow-tier achievement requiring completion of all four boss mastery tracks.
+* **System Coordination:** Active World Boss encounters pause Festival and Global Event timers for the duration of the encounter. Both systems resume with their remaining time intact after the encounter resolves, preventing lost progress from system overlap.
+* **Global Event Pacing:** Shortened the warning, active, and cooldown phases of Global Events to create a faster gameplay cadence. Events now trigger more frequently with reduced downtime between encounters while maintaining the existing event rotation and reward structure.
+* **Real-Time Damage Leaderboard:** Added a live top-3 damage ranking rendered inside the arena UI during encounters, displaying each player's percentage contribution relative to total boss HP.
+* **Ascension Threshold Expansion:** Raised the ascension threshold from `999 × 10^111` to `999 × 10^135` to accommodate the eight new number tiers added in this update.
+
 ## [2.3] - The Animated RPS Matches Update
 
 ### Added
@@ -9,6 +44,7 @@ All notable changes to the platform will be documented in this file.
 * **Animated RPS Matches:** Pending match cards now animate during the final second before results are revealed.
 * **Match Clash Sequence:** Move icons shake, cycle through random moves, then slide together for a center clash before revealing the final outcome.
 * **Polished Result Reveal:** Added an impact flash, winner glow, and loser dim effects for a more satisfying match resolution.
+* **Active Match Card Redesign:** Updated the active match card to better accommodate the new animated reveal while preserving a clean, compact layout.
 
 ## [2.2] - The Live Activity & Quality of Life Update
 

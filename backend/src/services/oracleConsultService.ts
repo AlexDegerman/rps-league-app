@@ -30,7 +30,6 @@ function hasRealMoneyIntent(query: string): boolean {
   return REAL_MONEY_TRIGGERS.some((trigger) => q.includes(trigger))
 }
 
-// Fire-and-forget — embed construction lives here, next to the data that shapes it
 function logOracleConsultation(
   query: string,
   nickname: string | undefined,

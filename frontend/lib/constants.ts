@@ -319,6 +319,14 @@ export const MODE_CONFIG = {
 }
 
 export const TIER_THRESHOLDS = [
+  { label: 'Quattuorquadragintillion', cls: 'g-qqg', min: 10n ** 135n },
+  { label: 'Tresquadragintillion', cls: 'g-tqg', min: 10n ** 132n },
+  { label: 'Duoquadragintillion', cls: 'g-dqg', min: 10n ** 129n },
+  { label: 'Unquadragintillion', cls: 'g-uqg', min: 10n ** 126n },
+  { label: 'Quadragintillion', cls: 'g-qag', min: 10n ** 123n },
+  { label: 'Novemtrigintillion', cls: 'g-ntg', min: 10n ** 120n },
+  { label: 'Octotrigintillion', cls: 'g-otg', min: 10n ** 117n },
+  { label: 'Septentrigintillion', cls: 'g-stg', min: 10n ** 114n },
   { label: 'Sextrigintillion', cls: 'g-str', min: 10n ** 111n },
   { label: 'Quintrigintillion', cls: 'g-qntr', min: 10n ** 108n },
   { label: 'Quattuortrigintillion', cls: 'g-qtr', min: 10n ** 105n },
@@ -361,4 +369,4 @@ export const TIER_THRESHOLDS = [
   { label: 'Million', cls: 'g-m1', min: 1_000_000n }
 ] as const
 
-export const ASCENSION_THRESHOLD = 999n * 10n ** 111n
+export const ASCENSION_THRESHOLD = 999n * 10n ** 135n

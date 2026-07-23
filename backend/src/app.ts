@@ -15,6 +15,7 @@ import festivalsRouter from './routes/festivals.js'
 import achievementsRouter from './routes/achievements.js'
 import relicRouter from './routes/relics.js'
 import globaleventsRouter from './routes/globalevents.js'
+import worldbossRouter from './routes/worldboss.js'
 
 const app = express()
 
@@ -54,6 +55,7 @@ app.use('/api/festivals', festivalsRouter)
 app.use('/api/achievements', achievementsRouter)
 app.use('/api/relics', relicRouter)
 app.use('/api/globalevents', globaleventsRouter)
+app.use('/api/worldboss', worldbossRouter)
 
 // Sentry Error Handler
 Sentry.setupExpressErrorHandler(app)

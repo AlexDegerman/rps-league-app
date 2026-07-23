@@ -46,25 +46,3 @@ export const GLOBAL_EVENT_CONFETTI_COLORS: Record<GlobalEventType, string[]> = {
   CYCLONE_BLITZ: ['#94a3b8', '#10b981', '#e2e8f0', '#64748b', '#6ee7b7'],
   MIRAGE_CATACLYSM: ['#d97706', '#a855f7', '#fde68a', '#7c3aed', '#fef3c7']
 }
-
-const ORACLE_COUNTDOWN_SPEECH: Record<
-  GlobalEventType,
-  (label: string) => string
-> = {
-  TIDAL_SURGE: (t) => `Tidal... Surge... in... ${t}.`,
-  SOLAR_FLARE: (t) => `Solar... Flare... strikes... in... ${t}.`,
-  CYCLONE_BLITZ: (t) => `Cyclone... Blitz... descends... in... ${t}.`,
-  MIRAGE_CATACLYSM: (t) => `The Mirage... awakens... in... ${t}.`
-}
-
-export const buildGlobalEventCountdownSpeech = (
-  type: GlobalEventType,
-  msRemaining: number
-): string => {
-  const seconds = Math.round(msRemaining / 1000)
-  const label =
-    seconds >= 90
-      ? `${Math.round(seconds / 60)}... minutes`
-      : `${seconds}... seconds`
-  return ORACLE_COUNTDOWN_SPEECH[type](label)
-}

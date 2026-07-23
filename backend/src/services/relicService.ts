@@ -10,9 +10,9 @@ export interface RelicDef {
   rarity: RelicRarity
   icon: string
   effect: string
-  dropRate: number
   threshold?: number
   counter?: number
+  bossExclusive?: boolean
 }
 
 export const RELICS: RelicDef[] = [
@@ -22,7 +22,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'COMMON',
     icon: 'Settings',
     effect: '+10% Tiered Bonus trigger chance',
-    dropRate: 0.03
   },
   {
     key: 'conductive_filament',
@@ -30,7 +29,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'COMMON',
     icon: 'Zap',
     effect: 'Reduces point losses by 5%',
-    dropRate: 0.03
   },
   {
     key: 'scavengers_lens',
@@ -38,7 +36,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'COMMON',
     icon: 'Search',
     effect: '+20% relic drop rates',
-    dropRate: 0.03
   },
   {
     key: 'lunar_siphon',
@@ -47,7 +44,6 @@ export const RELICS: RelicDef[] = [
     icon: 'Moon',
     effect:
       "+50% Moon's Blessing spawn rate. Adds +0.5x win multiplier if equipped when event starts.",
-    dropRate: 0.01
   },
   {
     key: 'static_inductor',
@@ -56,7 +52,6 @@ export const RELICS: RelicDef[] = [
     icon: 'CloudLightning',
     effect:
       '+50% Electric Surge spawn rate. Adds +0.5x win multiplier if equipped when event starts.',
-    dropRate: 0.01
   },
   {
     key: 'dealers_hand',
@@ -65,7 +60,6 @@ export const RELICS: RelicDef[] = [
     icon: 'Spade',
     effect:
       '+50% Luck in the Card spawn rate. Adds +0.3x win multiplier if equipped when event starts.',
-    dropRate: 0.01
   },
   {
     key: 'volcanic_mantle',
@@ -74,7 +68,6 @@ export const RELICS: RelicDef[] = [
     icon: 'Flame',
     effect:
       '+50% Hellfire spawn rate. Adds +0.5x win multiplier if equipped when event starts.',
-    dropRate: 0.01
   },
   {
     key: 'cobalt_core',
@@ -82,7 +75,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'RARE',
     icon: 'Cpu',
     effect: '+15% Flash Event appearance rate',
-    dropRate: 0.01
   },
   {
     key: 'biased_oscillator',
@@ -90,7 +82,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'RARE',
     icon: 'Waves',
     effect: '+10% increased chance for Epic and Legendary bonuses',
-    dropRate: 0.01
   },
   {
     key: 'buffer_module',
@@ -99,7 +90,6 @@ export const RELICS: RelicDef[] = [
     icon: 'ShieldCheck',
     effect:
       "Every 15 matches while equipped, your next loss won't reset your streak",
-    dropRate: 0.003,
     threshold: 15
   },
   {
@@ -109,7 +99,6 @@ export const RELICS: RelicDef[] = [
     icon: 'Repeat',
     effect:
       'Flash Events triggered while equipped grant an additional +0.5x multiplier.',
-    dropRate: 0.003
   },
   {
     key: 'prismatic_shard',
@@ -117,7 +106,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'LEGENDARY',
     icon: 'Gem',
     effect: '+0.5x win multiplier while no Flash Event is active',
-    dropRate: 0.002
   },
   {
     key: 'kinetic_capacitor',
@@ -126,7 +114,6 @@ export const RELICS: RelicDef[] = [
     icon: 'BatteryCharging',
     effect:
       'Every 30 wins while equipped, your next win gains an extra x2 multiplier.',
-    dropRate: 0.002,
     threshold: 30
   },
   {
@@ -136,7 +123,6 @@ export const RELICS: RelicDef[] = [
     icon: 'CircuitBoard',
     effect:
       'Every 20 wins while equipped, your next win guarantees a Legendary Bonus.',
-    dropRate: 0.002,
     threshold: 20
   },
   {
@@ -145,7 +131,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'MYTHICAL',
     icon: 'Fingerprint',
     effect: '5% chance for wins to pay out 3x rewards',
-    dropRate: 0.001
   },
   {
     key: 'temporal_anchor',
@@ -153,7 +138,6 @@ export const RELICS: RelicDef[] = [
     rarity: 'MYTHICAL',
     icon: 'Anchor',
     effect: 'Flash Events triggered while equipped last 4 rounds instead of 3.',
-    dropRate: 0.001
   },
   {
     key: 'architects_keystone',
@@ -161,7 +145,127 @@ export const RELICS: RelicDef[] = [
     rarity: 'MYTHICAL',
     icon: 'Diamond',
     effect: 'Triggered bonus rarity auto-upgrades to next tier',
-    dropRate: 0.001
+  },
+  {
+    key: 'fortune_satchel',
+    name: 'Fortune Satchel',
+    rarity: 'COMMON',
+    icon: 'Backpack',
+    effect: '+25% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'treasure_compass',
+    name: 'Treasure Compass',
+    rarity: 'COMMON',
+    icon: 'Compass',
+    effect:
+      '+25% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'lucky_crest',
+    name: 'Lucky Crest',
+    rarity: 'COMMON',
+    icon: 'BadgePlus',
+    effect:
+      '+10% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'kings_purse',
+    name: "King's Purse",
+    rarity: 'RARE',
+    icon: 'Wallet',
+    effect: '+50% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'relic_magnet',
+    name: 'Relic Magnet',
+    rarity: 'RARE',
+    icon: 'Magnet',
+    effect:
+      '+50% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'fortune_seal',
+    name: 'Fortune Seal',
+    rarity: 'RARE',
+    icon: 'Stamp',
+    effect:
+      '+20% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'royal_treasury',
+    name: 'Royal Treasury',
+    rarity: 'EPIC',
+    icon: 'Landmark',
+    effect: '+100% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'vault_key',
+    name: 'Vault Key',
+    rarity: 'EPIC',
+    icon: 'KeyRound',
+    effect:
+      '+100% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'ascension_sigil',
+    name: 'Ascension Sigil',
+    rarity: 'EPIC',
+    icon: 'Sparkles',
+    effect:
+      '+35% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'dragons_hoard',
+    name: "Dragon's Hoard",
+    rarity: 'LEGENDARY',
+    icon: 'Gem',
+    effect: '+150% to World Boss Chest point rewards',
+    bossExclusive: true
+  },
+  {
+    key: 'collectors_vault',
+    name: "Collector's Vault",
+    rarity: 'LEGENDARY',
+    icon: 'Archive',
+    effect:
+      '+150% chance for a World Boss relic to appear in a World Boss Chest',
+    bossExclusive: true
+  },
+  {
+    key: 'celestial_crown',
+    name: 'Celestial Crown',
+    rarity: 'LEGENDARY',
+    icon: 'Crown',
+    effect:
+      '+50% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
+    bossExclusive: true
+  },
+  {
+    key: 'twin_fortune',
+    name: 'Twin Fortune',
+    rarity: 'MYTHICAL',
+    icon: 'CopyPlus',
+    effect: '25% chance to duplicate the earned World Boss Chest.',
+    bossExclusive: true
+  },
+  {
+    key: 'prism_key',
+    name: 'Prism Key',
+    rarity: 'MYTHICAL',
+    icon: 'Diamond',
+    effect:
+      'Enables the Rainbow World Boss Chest tier when combined with chest upgrade relics.',
+    bossExclusive: true
   }
 ]
 
@@ -219,7 +323,7 @@ async function logRelicDrop(userId: string, relic: RelicDef) {
  */
 export async function rollRelicDrop(
   userId: string,
-  equippedRelic: string | null,
+  equippedRelicsKeys: string[],
   userLaps: number = 0
 ): Promise<RelicDef | null> {
   const owned = await pool.query(
@@ -232,8 +336,12 @@ export async function rollRelicDrop(
   )
   const isFirstRelicEver = ownedKeys.size === 0
   const vaultMultiplier = getActiveFestival()?.type === 'VAULT' ? 2.0 : 1.0
-  const lensMultiplier = equippedRelic === 'scavengers_lens' ? 1.2 : 1.0
-  const eligible = RELICS.filter((r) => !ownedKeys.has(r.key))
+  const lensMultiplier = equippedRelicsKeys.includes('scavengers_lens')
+    ? 1.2
+    : 1.0
+  const eligible = RELICS.filter(
+    (r) => !ownedKeys.has(r.key) && !r.bossExclusive
+  )
   if (eligible.length === 0) return null
 
   // First relic ever: 25% chance to get a common, picked randomly among commons
@@ -256,21 +364,37 @@ export async function rollRelicDrop(
 
   // Exact base rates defined for each rarity tier
   const baseRates: Record<RelicRarity, number> = {
-    MYTHICAL: 0.001,   // 0.1%
-    LEGENDARY: 0.002,  // 0.2%
-    EPIC: 0.003,       // 0.3%
-    RARE: 0.01,        // 1.0%
-    COMMON: 0.03       // 3.0%
+    MYTHICAL: 0.001, // 0.1%
+    LEGENDARY: 0.002, // 0.2%
+    EPIC: 0.003, // 0.3%
+    RARE: 0.01, // 1.0%
+    COMMON: 0.03 // 3.0%
   }
 
   // Calculate effective rates with active multipliers applied
-  const mythicalRate = (baseRates.MYTHICAL + getLapBonus('MYTHICAL', userLaps)) * lensMultiplier * vaultMultiplier
-  const legendaryRate = (baseRates.LEGENDARY + getLapBonus('LEGENDARY', userLaps)) * lensMultiplier * vaultMultiplier
-  const epicRate = (baseRates.EPIC + getLapBonus('EPIC', userLaps)) * lensMultiplier * vaultMultiplier
-  const rareRate = (baseRates.RARE + getLapBonus('RARE', userLaps)) * lensMultiplier * vaultMultiplier
-  const commonRate = (baseRates.COMMON + getLapBonus('COMMON', userLaps)) * lensMultiplier * vaultMultiplier
+  const mythicalRate =
+    (baseRates.MYTHICAL + getLapBonus('MYTHICAL', userLaps)) *
+    lensMultiplier *
+    vaultMultiplier
+  const legendaryRate =
+    (baseRates.LEGENDARY + getLapBonus('LEGENDARY', userLaps)) *
+    lensMultiplier *
+    vaultMultiplier
+  const epicRate =
+    (baseRates.EPIC + getLapBonus('EPIC', userLaps)) *
+    lensMultiplier *
+    vaultMultiplier
+  const rareRate =
+    (baseRates.RARE + getLapBonus('RARE', userLaps)) *
+    lensMultiplier *
+    vaultMultiplier
+  const commonRate =
+    (baseRates.COMMON + getLapBonus('COMMON', userLaps)) *
+    lensMultiplier *
+    vaultMultiplier
 
-  const totalRate = mythicalRate + legendaryRate + epicRate + rareRate + commonRate
+  const totalRate =
+    mythicalRate + legendaryRate + epicRate + rareRate + commonRate
   const roll = Math.random()
 
   if (roll < totalRate) {
@@ -343,31 +467,72 @@ export async function getUserRelics(userId: string): Promise<RelicDef[]> {
     .filter((relic): relic is RelicDef => relic !== null)
 }
 
-export async function equipRelic(
+export async function equipRelicToSlot(
   userId: string,
-  relicKey: string
+  relicKey: string,
+  slotIndex: number
 ): Promise<void> {
   const owned = await pool.query(
     'SELECT id FROM relics WHERE user_id = $1 AND relic_key = $2',
     [userId, relicKey]
   )
   if (owned.rows.length === 0) throw new Error('Relic not owned')
-  await pool.query('UPDATE users SET equipped_relic = $1 WHERE user_id = $2', [
-    relicKey,
-    userId
-  ])
-}
 
-export async function unequipRelic(userId: string): Promise<void> {
-  await pool.query(
-    `UPDATE relics 
-      SET counter = 0 
-      WHERE user_id = $1 AND relic_key = (SELECT equipped_relic FROM users WHERE user_id = $1)`,
+  const current = await pool.query(
+    'SELECT equipped_relics FROM users WHERE user_id = $1',
     [userId]
   )
+  const slots: (string | null)[] = current.rows[0]?.equipped_relics ?? [
+    null,
+    null,
+    null
+  ]
+  while (slots.length < 3) slots.push(null)
+
+  // Remove from any existing slot first (no duplicate keys)
+  const existingSlot = slots.findIndex((k) => k === relicKey)
+  if (existingSlot !== -1 && existingSlot !== slotIndex)
+    slots[existingSlot] = null
+
+  slots[slotIndex] = relicKey
 
   await pool.query(
-    'UPDATE users SET equipped_relic = NULL WHERE user_id = $1',
-    [userId]
+    `UPDATE users SET equipped_relics = $1, equipped_relic = $2 WHERE user_id = $3`,
+    [slots, slots[0] ?? null, userId]
   )
 }
+
+export async function unequipRelicFromSlot(
+  userId: string,
+  slotIndex: number
+): Promise<void> {
+  const current = await pool.query(
+    'SELECT equipped_relics FROM users WHERE user_id = $1',
+    [userId]
+  )
+  const slots: (string | null)[] = current.rows[0]?.equipped_relics ?? [
+    null,
+    null,
+    null
+  ]
+  while (slots.length < 3) slots.push(null)
+
+  const relicKey = slots[slotIndex]
+  slots[slotIndex] = null
+
+  if (relicKey) {
+    await pool.query(
+      'UPDATE relics SET counter = 0 WHERE user_id = $1 AND relic_key = $2',
+      [userId, relicKey]
+    )
+  }
+
+  await pool.query(
+    `UPDATE users SET equipped_relics = $1, equipped_relic = $2 WHERE user_id = $3`,
+    [slots, slots[0] ?? null, userId]
+  )
+}
+
+export const equipRelic = (userId: string, relicKey: string) =>
+  equipRelicToSlot(userId, relicKey, 0)
+export const unequipRelic = (userId: string) => unequipRelicFromSlot(userId, 0)

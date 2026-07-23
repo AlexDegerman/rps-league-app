@@ -130,6 +130,19 @@ Real players (predictors) with persistent accounts and progression.
 | `had_thermal_fusion` | BOOLEAN | Hidden miscellaneous achievement: Unlocked Thermal Fusion |
 | `signup_town` | TEXT | Coarse city/town resolved from IP during initial account creation |
 | `signup_country` | TEXT | Country code resolved from IP during initial account creation |
+| `equipped_relics` | TEXT[] | Array of up to 3 equipped relic keys |
+| `boss_encounters_total` | INT4 | Total World Boss encounters participated in |
+| `boss_kills_total` | INT4 | Total World Boss defeats participated in (outcome = DEFEAT) |
+| `world_boss_chests_opened` | INT4 | Total World Boss chests opened |
+| `hexurion_kills` | INT4 | Hexurion defeat participations |
+| `orphion_kills` | INT4 | Orphion defeat participations |
+| `fracturon_kills` | INT4 | Fracturon defeat participations |
+| `apexion_kills` | INT4 | Apexion defeat participations |
+| `had_final_strike` | BOOLEAN | Achievement latch: landed the killing blow on a World Boss |
+| `had_perfect_assault` | BOOLEAN | Achievement latch: defeated a World Boss without any missed predictions |
+| `had_lucky_shot` | BOOLEAN | Achievement latch: killing blow while contributing ≤10% of total damage |
+| `had_clutch_victory` | BOOLEAN | Achievement latch: killing blow with <5 seconds remaining |
+| `had_divine_intervention` | BOOLEAN | Achievement latch: joined in final 10 seconds and landed the killing blow |
 
 ---
 
@@ -222,6 +235,36 @@ Operational control for feedback system abuse prevention.
 
 ---
 
+## `world_boss_encounters`
+One row per World Boss encounter lifecycle.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` (PK) | SERIAL | Internal sequence ID |
+| `boss_type` | TEXT | Which boss: HEXURION, ORPHION, FRACTURON, APEXION |
+| `started_at` | BIGINT | Encounter start timestamp (ms) |
+| `ended_at` | BIGINT | Encounter end timestamp (ms); NULL while active |
+| `outcome` | TEXT | DEFEAT or RETREAT; NULL while active |
+| `hp_depleted_pct` | NUMERIC | Percentage of boss HP depleted before encounter ended |
+| `participant_count` | INT4 | Number of unique players who submitted at least one prediction |
+| `interrupted` | BOOLEAN | True if server restarted mid-encounter and forcibly closed the row |
+
+---
+
+## `world_boss_damage`
+Per-user damage records for each encounter.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` (PK) | SERIAL | Internal sequence ID |
+| `encounter_id` | INT4 | References `world_boss_encounters.id` |
+| `user_id` | TEXT | References `users.user_id` |
+| `damage_dealt` | INT4 | Total damage units this user dealt in the encounter |
+| `first_hit_at` | BIGINT | Timestamp of user's first successful hit (ms) |
+| `last_hit_at` | BIGINT | Timestamp of user's last successful hit (ms) |
+
+---
+
 ### Notes
 - `short_id` is a unique public identifier (`nanoid(10)`), but not used as a foreign key, all internal relationships rely on `user_id`
 - `points` enforces a 100,000 floor at the application layer
@@ -234,6 +277,8 @@ Operational control for feedback system abuse prevention.
 - `predictions.game_id` → `matches.game_id`
 - `relics.user_id` → `users.user_id`
 - `user_achievements.user_id` → `users.user_id`
+- `world_boss_damage.encounter_id` → `world_boss_encounters.id`
+- `world_boss_damage.user_id` → `users.user_id`
 
 ---
 
@@ -257,6 +302,8 @@ Operational control for feedback system abuse prevention.
 | `matches` | `player_b_name` | Bot stats and by-player filtering |
 | `relics` | `user_id` | FK not auto-indexed by Postgres, all relic lookups are `WHERE user_id = $1` |
 | `user_achievements` | `user_id` | Fast achievement lookup per user |
+| `world_boss_damage` | `encounter_id` | Fast lookup of all damage records per encounter during reward distribution |
+| `world_boss_damage` | `user_id` | Fast lookup of a user's damage history across encounters |
 
 ---
 
@@ -270,6 +317,20 @@ Operational control for feedback system abuse prevention.
 | GET | `/api/live` | Persistent SSE stream for real-time match events (`pending`, `result`, `prediction_result`, `festival_event`, `sync`) |
 | GET | `/api/live/flash-state` | Active Flash Event state for a user (`?userId=`) |
 | GET | `/api/live/festival-state` | Active Festival state and lockout countdown |
+| GET | `/api/live/global-event-state` | Current Global Event state (type, phase, activeAt, endsAt). Used on reconnect to hydrate clients that missed the global_event_warning or global_event_start SSE. |
+
+### SSE Events (`/api/live`)
+
+| Event | Payload | Description |
+| :--- | :--- | :--- |
+| `world_boss_warning` | `{ bossType, activeAt, endsAt, message, speech }` | Broadcast when the warning phase begins. |
+| `world_boss_start` | `{ bossType, endsAt, encounterId }` | Broadcast when the World Boss encounter starts. |
+| `world_boss_damage_burst` | `{ events: [{ userId, nickname, damage }], timestamp }` | Batched player damage updates. |
+| `world_boss_hp_update` | `{ hpPct, bossMaxHp, topDamagers, strikeCount }` | Updated boss HP, leaderboard, and strike count. |
+| `world_boss_hit` | `{ userId, result: 'HIT'\|'MISS', bossHpPct, damage }` | Individual player hit result. |
+| `world_boss_end` | `{ outcome, hpDepleted, bossType }` | Broadcast when the encounter ends. |
+| `world_boss_reward` | `{ userId, chestRarity, pointReward, relicDrop, twinFortune, twinFortuneReward, twinRelicDrop }` | Player reward information. |
+| `world_boss_sync` | `getCurrentState()` | Full World Boss state sent when a client connects or reconnects. |
 
 ---
 
@@ -333,10 +394,10 @@ Operational control for feedback system abuse prevention.
 ## 💎 Relics
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| GET | `/api/relics` | All relics owned by user (`?userId=`) |
-| GET | `/api/relics/equipped` | Currently equipped relic with counter (`?userId=`) |
-| POST | `/api/relics/equip` | Equip a relic by key |
-| POST | `/api/relics/unequip` | Unequip current relic |
+| GET | `/api/relics` | Returns all relics owned by the specified user (`?userId=`). |
+| GET | `/api/relics/equipped` | Returns the user's equipped relics, including up to three equipped relics and their current counters (`?userId=`). |
+| POST | `/api/relics/equip` | Equips a relic to the specified slot (`{ userId, relicKey, slotIndex }`). Validates ownership and prevents duplicate relics from being equipped. |
+| POST | `/api/relics/unequip` | Unequips the relic from the specified slot (`{ userId, slotIndex }`). Resets the relic's counter. |
 
 ---
 
@@ -344,6 +405,14 @@ Operational control for feedback system abuse prevention.
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | POST | `/api/festivals/participated` | Increment `festivals_participated` for a user (called client-side on receiving `festival_event` SSE) |
+
+---
+
+## 🏰 World Boss
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| GET | `/api/worldboss/state` | Returns the current World Boss encounter state, including phase, boss type, HP, strike count, and encounter timers. |
+| POST | `/api/worldboss/reward/claim` | Claims any pending World Boss rewards if they have not already been received. Intended as a fallback for missed reward events. |
 
 ---
 

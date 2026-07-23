@@ -457,3 +457,55 @@ export const askOracle = async (
     return { error: 'SYSTEM_ERROR' }
   }
 }
+
+export async function fetchWorldBossState() {
+  return handleResponse<{
+    phase: string
+    bossType: string | null
+    hpPct: number
+    bossMaxHp: number
+    strikeCount: number
+    encounterEndsAt: number | null
+    warningEndsAt: number | null
+  }>(fetch(`${API_BASE}/api/worldboss/state`))
+}
+
+export async function claimWorldBossReward(userId: string) {
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/worldboss/reward/claim`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId })
+    })
+  )
+}
+
+export async function fetchEquippedRelics(userId: string) {
+  return handleResponse<{ relics: (import('@/lib/relics').RelicDef | null)[] }>(
+    fetch(`${API_BASE}/api/relics/equipped?userId=${userId}`)
+  )
+}
+
+export async function equipRelicToSlot(
+  userId: string,
+  relicKey: string,
+  slotIndex: number
+) {
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/relics/equip`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, relicKey, slotIndex })
+    })
+  )
+}
+
+export async function unequipRelicFromSlot(userId: string, slotIndex: number) {
+  return handleResponse<{ success: boolean }>(
+    fetch(`${API_BASE}/api/relics/unequip`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, slotIndex })
+    })
+  )
+}

@@ -4,7 +4,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 
 > 🚨 **Project Evolution:** This application is a full-scale rebuilding of my original **[RPS League](https://github.com/AlexDegerman/rps-league)** (originally built for a Reaktor developer assignment). While the initial version served as a static match viewer, this version is a concurrency-aware betting engine engineered for **Infinite Scaling** and real-time user engagement.
 
-**Play here:** [https://rpsleague.fi/](https://rpsleague.fi/?utm_source=github/)
+**Play Here:** [https://rpsleague.fi/](https://rpsleague.fi/?utm_source=github/)
 
 ## 🎮 Preview
 
@@ -43,6 +43,7 @@ A fast-paced live-service Rock Paper Scissors league web app where players bet v
 - [Relic System](#-relic-system)
 
 ### 🌍 World Systems
+- [World Bosses](#️-world-bosses)
 - [Global Events](#-global-events)
 - [Flash Events](#-flash-events)
 - [Player Festivals](#️-player-festivals)
@@ -207,11 +208,13 @@ Resets are visual-friendly. Any previously unlocked point-tier stylings (UVG, DV
 
 ---
 
-# 🧿 Relic System
+## 🧿 Relic System
 
 Relics are permanent collectible gameplay modifiers that introduce long-term progression and strategic specialization. Players discover relics through a single-roll cumulative loot table spanning five rarity tiers (Common through Mythical), and each relic can only be collected once.
 
-Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling, creating distinct build paths and playstyles. Players may equip one active relic at a time, while permanent duplicate protection turns collection into long-term progression rather than repetitive RNG farming.
+Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling, creating distinct build paths and playstyles. Players may equip up to three active relics simultaneously, while permanent duplicate protection turns collection into long-term progression rather than repetitive RNG farming.
+
+A second category of 14 World Boss exclusive relics exists outside the standard drop pool entirely. These relics are only obtainable through World Boss chest rewards and specialize in chest point multipliers, relic appearance chance, chest upgrade chance, and two Mythical-tier chase items: Twin Fortune, which duplicates the entire chest reward on a 25% proc, and Prism Key, which unlocks Rainbow chest tier when combined with any upgrade-chance relic.
 
 <p align="center">
   <strong>Relic Discovery & Equipment in Action</strong><br/>
@@ -219,6 +222,29 @@ Each relic meaningfully alters prediction strategy, event behavior, or multiplie
 </p>
 
 > 📋 **[View full Relic system breakdown →](./RELICS.md)**
+
+---
+
+## ⚔️ World Bosses
+ 
+World Bosses introduce server-wide cooperative raid encounters to RPS League. Triggered automatically by the backend on a 10 to 12-minute cooldown cycle and broadcast in real-time via Server-Sent Events (SSE), encounters temporarily replace the prediction arena for all active players simultaneously. Every prediction submitted during an encounter becomes a damage strike against a shared boss HP pool that scales dynamically with participant count.
+ 
+Each encounter includes:
+- Shared HP pool scaling with participant arrival timing
+- 60-second encounter window replacing the prediction dashboard entirely
+- Six-tier chest reward system scaling from Common to Rainbow, calculated as a percentage of current player balance
+- Fourteen new boss-exclusive relics available only through chest drops
+- Real-time damage leaderboard tracking percentage contributions across all participants
+- Full CSS-only boss animation lifecycle covering assembly, idle, hit reaction, pain, and death states
+- Four dedicated sound effects per boss covering spawn, hit reaction, player miss, and death sequences
+Four bosses rotate through the schedule: **Hexurion** (hexagonal prism core), **Orphion** (concentric orbital rings), **Fracturon** (rhombic grid lattice), and **Apexion** (breathing pyramid monolith).
+ 
+> 📋 **[View all World Boss showcases →](./WORLDBOSSES.md)**
+ 
+<p align="center">
+  <strong>World Boss Encounter</strong><br/>
+  <img src="./assets/worldboss_showcase.gif" width="220" />
+</p>
 
 ---
 

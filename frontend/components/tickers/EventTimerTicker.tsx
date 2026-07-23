@@ -47,7 +47,8 @@ interface TimerEntry {
   color: string
   timeLeft: number
   totalDuration: number
-  isWarning?: boolean // global event in warning phase
+  isWarning?: boolean
+  kind: 'festival' | 'global' | 'boss_warning' | 'boss_active'
 }
 
 export default function EventTimerTicker() {
@@ -62,6 +63,14 @@ export default function EventTimerTicker() {
   const globalEventEndsAt = useGameStore((s) => s.globalEventEndsAt)
   const clearGlobalEvent = useGameStore((s) => s.clearGlobalEvent)
   const globalEventStartedAt = useGameStore((s) => s.globalEventStartedAt)
+
+  const worldBossPhase = useGameStore((s) => s.worldBossPhase)
+  const worldBossType = useGameStore((s) => s.worldBossType)
+  const worldBossWarningActiveAt = useGameStore(
+    (s) => s.worldBossWarningActiveAt
+  )
+  const worldBossEndsAt = useGameStore((s) => s.worldBossEndsAt)
+  const clearWorldBoss = useGameStore((s) => s.clearWorldBoss)
 
   const [entries, setEntries] = useState<TimerEntry[]>([])
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -83,7 +92,8 @@ export default function EventTimerTicker() {
             label: theme?.label ?? festivalType,
             color: theme?.color ?? '#eab308',
             timeLeft: left,
-            totalDuration: FESTIVAL_DURATIONS[festivalType] ?? 60000
+            totalDuration: FESTIVAL_DURATIONS[festivalType] ?? 60000,
+            kind: 'festival'
           })
         }
       }
@@ -109,7 +119,30 @@ export default function EventTimerTicker() {
             totalDuration: isWarning
               ? (globalEventActiveAt ?? 0) - (globalEventStartedAt ?? 0)
               : GLOBAL_DURATIONS[activeGlobalEvent as GlobalEventType],
-            isWarning
+            isWarning,
+            kind: 'global'
+          })
+        }
+      }
+
+      // World Boss
+      if (worldBossPhase && worldBossType) {
+        const isWarning = worldBossPhase === 'WARNING'
+        const targetTs = isWarning
+          ? (worldBossWarningActiveAt ?? 0)
+          : (worldBossEndsAt ?? 0)
+        const left = targetTs - now
+
+        if (!isWarning && left <= 0) {
+          clearWorldBoss()
+        } else if (left > 0 && isWarning) {
+          next.push({
+            label: worldBossType,
+            color: '#e879f9',
+            timeLeft: left,
+            totalDuration: 30000,
+            isWarning: true,
+            kind: 'boss_warning'
           })
         }
       }
@@ -138,8 +171,13 @@ export default function EventTimerTicker() {
     globalEventActiveAt,
     globalEventEndsAt,
     globalEventStartedAt,
+    worldBossPhase,
+    worldBossType,
+    worldBossWarningActiveAt,
+    worldBossEndsAt,
     clearFestival,
-    clearGlobalEvent
+    clearGlobalEvent,
+    clearWorldBoss
   ])
 
   if (entries.length === 0) return null
@@ -153,11 +191,11 @@ export default function EventTimerTicker() {
           background:
             entries.length === 1
               ? `linear-gradient(to bottom, ${entries[0]!.color}15, transparent)`
-              : `linear-gradient(to right, ${entries[0]!.color}15, ${entries[1]!.color}15)`
+              : `linear-gradient(to right, ${entries[0]!.color}15, ${entries[entries.length - 1]!.color}15)`
         }}
       />
 
-      {/* Progress bar for first entry (most visually prominent) */}
+      {/* Progress bar for first entry */}
       {entries[0] && (
         <div
           className="absolute inset-y-0 left-0 transition-all duration-700 ease-linear opacity-[0.06]"
@@ -169,10 +207,13 @@ export default function EventTimerTicker() {
       )}
 
       <div className="relative z-10 w-full px-2.5 flex items-center justify-between gap-2">
-        {/* Left: all event labels + times combined */}
-        <div className="flex items-center gap-2 min-w-0">
+        {/* Left: all event labels */}
+        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
           {entries.map((e, i) => (
-            <div key={e.label} className="flex items-center gap-1.5 min-w-0">
+            <div
+              key={e.label}
+              className="flex items-center gap-1.5 min-w-0 shrink-0"
+            >
               {i > 0 && (
                 <span className="text-[9px] text-gray-400 font-bold shrink-0">
                   /
@@ -183,14 +224,16 @@ export default function EventTimerTicker() {
                 style={{
                   color: e.color,
                   textShadow: `0 0 8px ${e.color}60`,
-                  opacity: e.isWarning ? 0.7 : 1
+                  opacity: e.isWarning && e.kind !== 'boss_warning' ? 0.7 : 1
                 }}
               >
-                {e.isWarning ? '⚡ ' : ''}
+                {e.kind === 'boss_warning' && '⚔️ '}
+                {e.kind === 'boss_active' && '💀 '}
+                {e.kind === 'global' && e.isWarning && '⚡ '}
                 {e.label}
-                {e.isWarning && (
+                {e.isWarning && e.kind !== 'boss_active' && (
                   <span className="ml-1 text-[8px] font-medium normal-case tracking-normal opacity-70">
-                    incoming
+                    {e.kind === 'boss_warning' ? 'spawning' : 'incoming'}
                   </span>
                 )}
               </span>
@@ -206,7 +249,7 @@ export default function EventTimerTicker() {
                 <span className="text-[9px] text-gray-400 font-bold">/</span>
               )}
               <div
-                className={`px-2 py-0.5 rounded border flex items-center justify-center min-w-11 shadow-sm ${e.isWarning ? 'animate-pulse' : ''}`}
+                className="px-2 py-0.5 rounded border flex items-center justify-center min-w-11 shadow-sm"
                 style={{
                   backgroundColor: 'rgba(0, 0, 0, 0.15)',
                   borderColor: `${e.color}60`,

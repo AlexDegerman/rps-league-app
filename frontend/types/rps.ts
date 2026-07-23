@@ -295,13 +295,20 @@ export type FestivalModeKey =
 
 export type WinStreakModeKey = 'winstreak_inferno' | 'winstreak_fever'
 
+export type BossModeKey =
+  | 'boss_hexurion'
+  | 'boss_orphion'
+  | 'boss_fracturon'
+  | 'boss_apexion'
+
 export type VisualMode =
   | FlashModeKey
   | GlobalEventModeKey
   | FestivalModeKey
   | WinStreakModeKey
+  | BossModeKey
   | null
-
+  
 export interface FestivalSSEData {
   type: string
   startedAt: number
@@ -440,4 +447,28 @@ export interface OracleResponse {
   source?: string
   cached?: boolean
   error?: string
+}
+
+export type WorldBossPhase = 'IDLE' | 'COOLDOWN' | 'WARNING' | 'ACTIVE'
+export type WorldBossType = 'HEXURION' | 'ORPHION' | 'FRACTURON' | 'APEXION'
+
+export interface DamagerEntry {
+  userId: string
+  nickname: string
+  damageDealt: number
+  rank: number
+}
+
+export interface WorldBossSyncPayload {
+  phase: WorldBossPhase
+  bossType: WorldBossType | null
+  encounterId: number | null
+  bossMaxHp: number
+  bossCurrentHp: number
+  hpPct: number
+  strikeCount: number
+  encounterStartedAt: number | null
+  encounterEndsAt: number | null
+  warningStartedAt: number | null
+  warningEndsAt: number | null
 }

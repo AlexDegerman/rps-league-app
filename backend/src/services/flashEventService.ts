@@ -1,5 +1,6 @@
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
+import { isWorldBossActive } from './worldBossService.js'
 
 export type FlashEventType = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
 const _userSessionFlashTypes = new Map<string, Set<string>>()
@@ -68,6 +69,8 @@ const _userFlashEvents = new Map<string, FlashEventState>()
 export const getFlashEventForUser = (
   userId: string
 ): FlashEventState | null => {
+  if (isWorldBossActive()) return null
+
   const event = _userFlashEvents.get(userId)
   if (!event) return null
 

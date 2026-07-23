@@ -4,7 +4,7 @@ Relics are permanent collectible gameplay modifiers that introduce long-term acc
 
 Unlike temporary Flash Events, relics persist across sessions and fundamentally alter how players approach prediction strategies, event targeting, streak preservation, and high-tier multiplier scaling.
 
-Each player may equip one active relic at a time.
+Each player may equip up to three active relics simultaneously.
 
 ---
 
@@ -21,6 +21,8 @@ Each player may equip one active relic at a time.
 Relics drop after completed predictions (win or loss). Each completed prediction performs a single cumulative loot roll that determines whether a relic drops and, if successful, which rarity tier is selected.
 
 Once a relic is obtained, it is permanently added to the account and removed from future drop pools.
+
+**World Boss exclusive relics never drop from predictions.** They are only obtainable through World Boss chest rewards.
 
 ### Base Drop Rates (per roll)
 
@@ -40,6 +42,23 @@ Once a relic is obtained, it is permanently added to the account and removed fro
 - If the selected rarity has been fully collected, Smart Loot redirects the drop according to the rarity fallback order
 - Each relic can only be obtained once (duplicate protection)
 - Lap scaling increases acquisition speed over long-term progression while remaining capped per rarity
+- World Boss exclusive relics are excluded from the prediction drop pool entirely
+
+---
+
+## ⚔️ World Boss Exclusive Relics
+
+A separate category of 14 relics obtainable only through World Boss chest rewards. These relics never appear in prediction drop rolls and are not affected by Scavenger's Lens or Vault Festival multipliers.
+
+World Boss relics specialize in three functional areas:
+
+- **Point Bonus** - Flat additive increases to chest point rewards, stacking with base chest rarity percentages
+- **Relic Appearance** - Increases the chance for a relic to appear inside a chest reward
+- **Upgrade Chance** - Increases the chance for a chest to upgrade by one rarity tier after the base rarity is determined
+
+Upgrade relics can push chests from Common through Mythical. Reaching Rainbow tier requires Prism Key equipped alongside any upgrade-chance relic. Upgrade rolls are applied per player individually based on their equipped relics at the time of reward distribution.
+
+Twin Fortune triggers a full second chest with an independent relic roll, and the two drops are guaranteed to be different keys. Both rewards are combined into a single payout.
 
 ---
 
@@ -60,21 +79,26 @@ Some relics accumulate progress only while actively equipped.
 - Unequipping resets stored counter state in live gameplay logic
 - Applies to: Buffer Module, Kinetic Capacitor, Logic Gate
 
+### 3. World Boss Encounter Lock
+Relic equipping and unequipping is fully blocked for all players while a World Boss encounter is active. Loadouts lock at encounter start and restore to interactive state after rewards are distributed.
+
 ---
 
 ## 🧩 UI Architecture
 
-### Primary Relic Slot
-Always visible in the main gameplay header. Shows currently equipped relic and opens the Relic Drawer.
+### Relic Slots
+Three relic slots are always visible in the main gameplay header. Each slot shows the currently equipped relic or an empty state, and any slot opens the Relic Drawer on tap. The slot capacity indicator (e.g. 1/3) is always visible regardless of whether a relic is equipped.
 
 ### Relic Drawer
 Mobile-first overlay panel containing:
-- Full inventory
-- Equipped highlight
-- Equip/unequip actions
+- Full inventory organized by rarity
+- Active slots summary bar at the top showing all three slots
+- Slot selector on equip - choose which of the three slots to assign the relic to
+- Equip and remove actions per relic
+- Locked state display during active World Boss encounters
 
 ### Profile Integration
-Players display equipped relic publicly, enabling build comparison across leaderboards.
+Players display all equipped relics publicly, enabling build comparison across leaderboards. Up to three relics are shown on profile pages with rarity-matched styling.
 
 ---
 
@@ -82,53 +106,67 @@ Players display equipped relic publicly, enabling build comparison across leader
 
 ### 🟢 Common
 
-| Relic | Icon | Effect |
-|---|---|---|
-| Precision Bearing | Settings | +10% Tiered Bonus trigger chance |
-| Conductive Filament | Zap | Reduces point loss by 5% |
-| The Scavenger's Lens | Search | +20% relic acquisition rate |
+| Relic | Icon | Effect | Boss Exclusive |
+|---|---|---|---|
+| Precision Bearing | Settings | +10% Tiered Bonus trigger chance | ✗ |
+| Conductive Filament | Zap | Reduces point loss by 5% | ✗ |
+| The Scavenger's Lens | Search | +20% relic acquisition rate | ✗ |
+| Fortune Satchel | Backpack | +25% World Boss Chest point rewards (flat additive) | ✓ |
+| Treasure Compass | Compass | +25% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
+| Lucky Crest | BadgePlus | +10% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
 
 ---
 
 ### 🔵 Rare
 
-| Relic | Icon | Effect |
-|---|---|---|
-| Lunar Siphon | Moon | +50% Moon event rate + 0.5x multiplier |
-| Static Inductor | CloudLightning | +50% Electric Surge rate + 0.5x multiplier |
-| Dealer's Hand | Spade | +50% Card event rate + 0.3x multiplier |
-| Volcanic Mantle | Flame | +50% Hellfire rate + 0.5x multiplier |
-| Cobalt Core | Cpu | +25% Flash Event appearance rate |
-| Biased Oscillator | Waves | +10% Epic/Legendary bonus chance |
+| Relic | Icon | Effect | Boss Exclusive |
+|---|---|---|---|
+| Lunar Siphon | Moon | +50% Moon event rate + 0.5x multiplier | ✗ |
+| Static Inductor | CloudLightning | +50% Electric Surge rate + 0.5x multiplier | ✗ |
+| Dealer's Hand | Spade | +50% Card event rate + 0.3x multiplier | ✗ |
+| Volcanic Mantle | Flame | +50% Hellfire rate + 0.5x multiplier | ✗ |
+| Cobalt Core | Cpu | +25% Flash Event appearance rate | ✗ |
+| Biased Oscillator | Waves | +10% Epic/Legendary bonus chance | ✗ |
+| King's Purse | Wallet | +50% World Boss Chest point rewards (flat additive) | ✓ |
+| Relic Magnet | Magnet | +50% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
+| Fortune Seal | Stamp | +20% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
 
 ---
 
 ### 🟣 Epic
 
-| Relic | Icon | Effect |
-|---|---|---|
-| Buffer Module | ShieldCheck | Every 15 matches, next loss does not reset streak |
-| Overdrive Relay | Repeat | +0.5x multiplier during Flash Events |
+| Relic | Icon | Effect | Boss Exclusive |
+|---|---|---|---|
+| Buffer Module | ShieldCheck | Every 15 matches, next loss does not reset streak | ✗ |
+| Overdrive Relay | Repeat | +0.5x multiplier during Flash Events | ✗ |
+| Royal Treasury | Landmark | +100% World Boss Chest point rewards (flat additive) | ✓ |
+| Vault Key | KeyRound | +100% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
+| Ascension Sigil | Sparkles | +35% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
 
 ---
 
 ### 🟡 Legendary
 
-| Relic | Icon | Effect |
-|---|---|---|
-| Prismatic Shard | Gem | +0.5x multiplier when no Flash Event is active |
-| Kinetic Capacitor | BatteryCharging | Every 30 wins, next win gains x2 multiplier |
-| Logic Gate | CircuitBoard | Every 20 wins, next win guarantees Legendary bonus |
+| Relic | Icon | Effect | Boss Exclusive |
+|---|---|---|---|
+| Prismatic Shard | Gem | +0.5x multiplier when no Flash Event is active | ✗ |
+| Kinetic Capacitor | BatteryCharging | Every 30 wins, next win gains x2 multiplier | ✗ |
+| Logic Gate | CircuitBoard | Every 20 wins, next win guarantees Legendary bonus | ✗ |
+| Dragon's Hoard | Gem | +150% World Boss Chest point rewards (flat additive) | ✓ |
+| Collector's Vault | Archive | +150% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
+| Celestial Crown | Crown | +50% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
 
 ---
 
 ### 🔴 Mythical
 
-| Relic | Icon | Effect |
-|---|---|---|
-| Soul of the Machine | Fingerprint | 5% chance for 3x reward multiplier |
-| Temporal Anchor | Anchor | Flash Events last +1 round |
-| The Architect's Keystone | Diamond | Upgrades triggered bonuses to next rarity |
+| Relic | Icon | Effect | Boss Exclusive |
+|---|---|---|---|
+| Soul of the Machine | Fingerprint | 5% chance for 3x reward multiplier | ✗ |
+| Temporal Anchor | Anchor | Flash Events last +1 round | ✗ |
+| The Architect's Keystone | Diamond | Upgrades triggered bonuses to next rarity | ✗ |
+| Twin Fortune | CopyPlus | 25% chance to duplicate the earned World Boss Chest. Both rewards combined with independent relic rolls. | ✓ |
+| Prism Key | Diamond | Enables Rainbow Chest tier when combined with any chest-upgrade relic. Does not increase upgrade chance alone. | ✓ |
 
 ---
 
@@ -151,7 +189,7 @@ A post-result escalation layer that triggers only on high-tier relic procs. It i
 ---
 
 ### x2 Slam
-- Large orange “x2” drops in with a weighted fall animation
+- Large orange "x2" drops in with a weighted fall animation
 - Brief impact freeze frame locks the result state
 - Subtle screen shake on landing to emphasize force
 - Multiplier stays visible throughout the payout climb
@@ -170,9 +208,9 @@ A post-result escalation layer that triggers only on high-tier relic procs. It i
 ---
 
 ### Sequence
-1. Base result resolves and locks in a pre-slam state  
-2. Freeze frame triggers on impact timing window  
-3. Multiplier slam enters with animated drop and impact feedback  
+1. Base result resolves and locks in a pre-slam state
+2. Freeze frame triggers on impact timing window
+3. Multiplier slam enters with animated drop and impact feedback
 4. Payout value ticks upward until final total is reached
 
 ---
@@ -189,14 +227,21 @@ A post-result escalation layer that triggers only on high-tier relic procs. It i
 
 ## 🎁 Relic Drop Presentation
 
-When a relic drops:
+When a relic drops from a prediction:
 
-- “🧿 RELIC FOUND” popup appears
+- "🧿 RELIC FOUND" popup appears
 - Rarity-matched animated background plays behind the popup
 - Relic is automatically added to inventory on drop
 - Player can choose Equip or Dismiss
-- Equipping sets the relic as active without removing it from inventory
+- Equipping opens the slot selector to assign the relic to one of three available slots
 - Dismiss closes the popup and the relic remains in inventory for later use
+
+When a relic drops from a World Boss chest:
+
+- Chest opening animation plays first
+- Relic popup enters after the chest reward resolves
+- Twin Fortune triggers two sequential relic popups if both drops contain relics
+- Same Equip or Dismiss flow applies
 
 ---
 
@@ -210,4 +255,6 @@ At high point scales, raw numbers lose meaning. The relic system restores engage
 - High-impact visual moments
 - Strategic specialization across rarity tiers
 
-It transforms RPS League into a live progression system with evolving meta builds and escalating spectacle.
+World Boss exclusive relics add a second specialization axis entirely separate from the prediction meta. Point bonus relics compound passively with chest rarity. Relic appearance relics accelerate collection. Upgrade relics shift expected chest tier upward. Twin Fortune and Prism Key sit at the top of the system as rare chase items that fundamentally change what a single encounter can yield.
+
+It transforms RPS League into a live progression system with evolving meta builds, cooperative raid encounters, and escalating spectacle across both the prediction and World Boss planes.

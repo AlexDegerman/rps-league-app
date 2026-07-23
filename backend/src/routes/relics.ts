@@ -2,13 +2,15 @@ import { Router } from 'express'
 import pool from '../utils/db.js'
 import {
   getUserRelics,
-  equipRelic,
-  unequipRelic,
+  equipRelicToSlot,
+  unequipRelicFromSlot,
   RELIC_MAP
 } from '../services/relicService.js'
+import { isWorldBossActive } from '../services/worldBossService.js'
 
 const router = Router()
 
+// GET /api/relics: full inventory
 router.get('/', async (req, res) => {
   const { userId } = req.query
   if (!userId || typeof userId !== 'string')
@@ -21,6 +23,7 @@ router.get('/', async (req, res) => {
   }
 })
 
+// GET /api/relics/equipped: returns array of up to 3 equipped relics
 router.get('/equipped', async (req, res) => {
   const { userId } = req.query
   if (!userId || typeof userId !== 'string')
@@ -28,54 +31,70 @@ router.get('/equipped', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT u.equipped_relic, r.counter 
-        FROM users u 
-        LEFT JOIN relics r ON (r.user_id = u.user_id AND r.relic_key = u.equipped_relic)
-        WHERE u.user_id = $1`,
+      `SELECT equipped_relics FROM users WHERE user_id = $1`,
       [userId]
     )
+    const keys: (string | null)[] = result.rows[0]?.equipped_relics ?? []
 
-    const row = result.rows[0]
-    const key = row?.equipped_relic
-    const counter = row?.counter
+    // Fetch counters for equipped relics
+    const counterRes = await pool.query(
+      'SELECT relic_key, counter FROM relics WHERE user_id = $1 AND relic_key = ANY($2)',
+      [userId, keys.filter(Boolean)]
+    )
+    const counterMap = new Map<string, number>()
+    for (const r of counterRes.rows)
+      counterMap.set(r.relic_key, Number(r.counter ?? 0))
 
-    if (!key) {
-      return res.json({ relic: null })
+    const relics: (object | null)[] = [null, null, null]
+    for (let i = 0; i < 3; i++) {
+      const key = keys[i]
+      if (!key) continue
+      const def = RELIC_MAP[key]
+      if (def) relics[i] = { ...def, counter: counterMap.get(key) ?? 0 }
     }
 
-    const relicData = RELIC_MAP[key]
-      ? {
-          ...RELIC_MAP[key],
-          counter: Number(counter || 0)
-        }
-      : null
-
-    res.json({ relic: relicData })
+    res.json({ relics })
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch equipped relic' })
+    console.error('GET /relics/equipped error:', err)
+    res.status(500).json({ error: 'Failed to fetch equipped relics' })
   }
 })
 
+// POST /api/relics/equip
 router.post('/equip', async (req, res) => {
-  const { userId, relicKey } = req.body
-  if (!userId || !relicKey)
+  const { userId, relicKey, slotIndex } = req.body
+  if (!userId || !relicKey || slotIndex === undefined)
     return res.status(400).json({ error: 'Missing fields' })
+  if (typeof slotIndex !== 'number' || slotIndex < 0 || slotIndex > 2)
+    return res.status(400).json({ error: 'Invalid slotIndex (must be 0-2)' })
+  if (isWorldBossActive())
+    return res
+      .status(403)
+      .json({ error: 'Relic swapping locked during World Boss encounter' })
+
   try {
-    await equipRelic(userId, relicKey)
+    await equipRelicToSlot(userId, relicKey, slotIndex)
     res.json({ success: true })
   } catch (e: any) {
     res.status(403).json({ error: e.message })
   }
 })
 
+// POST /api/relics/unequip
 router.post('/unequip', async (req, res) => {
-  const { userId } = req.body
+  const { userId, slotIndex } = req.body
   if (!userId) return res.status(400).json({ error: 'Missing userId' })
+  if (isWorldBossActive())
+    return res
+      .status(403)
+      .json({ error: 'Relic swapping locked during World Boss encounter' })
+
+  const slot = typeof slotIndex === 'number' ? slotIndex : 0
   try {
-    await unequipRelic(userId)
+    await unequipRelicFromSlot(userId, slot)
     res.json({ success: true })
   } catch {
-    res.status(500).json({ error: 'Failed' })
+    res.status(500).json({ error: 'Failed to unequip' })
   }
 })
 

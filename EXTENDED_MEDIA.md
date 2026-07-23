@@ -3,7 +3,9 @@
 A complete visual archive of the RPS League ecosystem.
 
 ### 🚩 Primary Feature Showcases
+
 Detailed gameplay and cinematic recordings for core systems:
+
 > 🕹️ [**Flash Event Deep-Dive** →](./FLASHEVENTS.md)
 
 > 🎭 [**Player Festival Deep-Dive** →](./FESTIVALS.md)
@@ -13,7 +15,9 @@ Detailed gameplay and cinematic recordings for core systems:
 ---
 
 ### 🔍 Extended Feature Showcases
+
 Visual breakdowns of UI systems, automation, and reliability tools:
+
 ## 🏆 Achievement Badges Leaderboard Styling (Mythical & Rainbow)
 
 Achievement badges are earned through player milestones and progression. When equipped, they visually transform leaderboard rows to reflect achievement rarity and status. Mythical achievement badges create a deep red reactive energy field that gives the row a volatile, high-intensity presence, while Rainbow achievement badges represent the highest achievement tier and fully override all visuals with a shifting multicolor shimmer that continuously flows across the row.
@@ -90,6 +94,6 @@ Sentry integrated across the full stack for runtime and SSE monitoring. The in-a
 Match results are presented through a cinematic reveal sequence that builds anticipation before the outcome is shown. As the countdown reaches zero, both players' moves rapidly cycle before colliding in the center. Once the server confirms the result, the final moves are revealed with impact, winner, and loser animations for a more engaging finish.
 
 <p align="center">
-  <strong>Animated Match Results Showcase</strong><br/>
+  <strong>Animated RPS Matches Showcase</strong><br/>
   <img src="./assets/animatedmatchresults_demo.gif" width="220" />
 </p>

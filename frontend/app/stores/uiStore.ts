@@ -83,6 +83,8 @@ interface UIState {
   setShowBonusModal: (v: boolean) => void
   showGlobalActivationOverlay: boolean
   setShowGlobalActivationOverlay: (v: boolean) => void
+  worldBossUIActive: boolean
+  setWorldBossUIActive: (v: boolean) => void
 
   // Input State
   isFocused: boolean
@@ -107,6 +109,7 @@ export const useUIStore = create<UIState>((set) => ({
   showUpdateModal: false,
   showBonusModal: false,
   showGlobalActivationOverlay: false,
+  worldBossUIActive: false,
   showAscensionPrompt: false,
   oracleTickerMessage: null,
   ascensionDeclinedThisSession: false,
@@ -163,6 +166,7 @@ export const useUIStore = create<UIState>((set) => ({
   setShowBonusModal: (v) => set({ showBonusModal: v }),
   setShowGlobalActivationOverlay: (v) =>
     set({ showGlobalActivationOverlay: v }),
+  setWorldBossUIActive: (v) => set({ worldBossUIActive: v }),
   setShowJumpButton: (v) => set({ showJumpButton: v }),
   setShowPointsInfo: (v) => set({ showPointsInfo: v }),
   setShowPointsExplainer: (v) => set({ showPointsExplainer: v }),

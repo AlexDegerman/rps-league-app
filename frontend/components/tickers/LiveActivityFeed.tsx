@@ -61,6 +61,14 @@ const FESTIVAL_COLOR: Record<string, string> = {
   SANGUINE: '#991b1b'
 }
 
+const BOSS_TYPE_COLOR: Record<string, string> = {
+  HEXURION: '#22d3ee',
+  ORPHION: '#a855f7',
+  FRACTURON: '#22c55e',
+  APEXION: '#f97316'
+}
+
+
 const DEMO_MILESTONES = [
   { name: 'Quadrillion', color: '#3b82f6' },
   { name: 'Quintillion', color: '#a855f7' },
@@ -215,7 +223,7 @@ function buildDemoEvent(): Omit<LiveEvent, 'id' | 'timestamp'> {
     }
   }
 
-  // 7% — lap / prestige
+  // 7% - lap / prestige
   const lap = Math.floor(Math.random() * 25) + 1
   const name = generateNickname()
   const msg = `🔄 ${name} completed Lap ${lap}!`
@@ -295,6 +303,21 @@ function buildFromBroadcast(
       isReal: !isDemo,
       priority: isDemo ? 2 : 0,
       category: 'festival',
+      color
+    }
+  }
+
+  if (type === 'world_boss_hit') {
+    const bossType = payload.bossType as string
+    const dmgPct = payload.dmgPct as string
+    const color = BOSS_TYPE_COLOR[bossType] ?? '#e879f9'
+    const msg = `⚔️ ${nickname} hit ${bossType} for ${dmgPct} dmg`
+    return {
+      message: msg,
+      parsedMessage: plain(msg),
+      isReal: true,
+      priority: 2,
+      category: 'world_boss_hit' as EventCategory,
       color
     }
   }

@@ -16,9 +16,256 @@ export default function Showcase() {
             Light theme · Live animation · No precision loss
           </div>
         </div>
+        {/* SECTION: SEASON 3 */}
+        <div className="pt-4 px-1 pb-2 text-[10px] tracking-[0.12em] uppercase text-[#bbb] font-[DM_Mono] flex items-center gap-2">
+          <span> Season 3 tiers</span>
+          <div className="h-px flex-1 bg-[#e8e6e1]/50"></div>
+        </div>
 
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Quattuorquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹³⁵</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fff7ed] text-[#c2410c] border border-[#ffedd5] font-medium uppercase tracking-wider">
+                  obsidian apex
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-qqg">1.2Qqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Basalt-obsidian text transitioning through saturated volcanic lava
+            to a brilliant monolith-gold core, accented by unstable neon-purple
+            flashes. The entire structure breathes in a heavy 2.5-second kinetic
+            compression loop. Hovering above, a 3D facetted apex crystal shard
+            drifts in dynamic counter-phase, anchored by a pulsing horizontal
+            energy platform at the baseline.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Tresquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹³²</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#faf5ff] text-[#7e22ce] font-medium uppercase tracking-wider">
+                  holographic monolith
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-tqg" data-text="1.2Tqg">
+                1.2Tqg
+              </span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Amethyst-purple and sterling-silver gradient text flowing with a
+            constant chromatic color sweep and an unstable kinetic vibration. A
+            soft, vertical-breathing holographic pyramid core looms directly
+            behind the numbers, overlaid by a diagonally-scrolling holographic
+            matrix grid and a swirling amethyst-green radar scanning field.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Duoquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹²⁹</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fef3c7] text-[#b45309] font-medium uppercase tracking-wider">
+                  spectrum corruption
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-dqg" data-text="1.2Dqg">
+                1.2Dqg
+              </span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Radiant amber-gold gradient text sweeping across a warm spectrum,
+            framed by high-frequency glitched artifacts. Staggered cyan and
+            magenta ghost duplicate copy layers render offset behind the
+            characters, jittering intensely using step-end animations to
+            simulate a severe digital signal interference.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Unquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹²⁶</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fff7ed] text-[#ea580c] font-medium uppercase tracking-wider">
+                  prism scanner
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-uqg" data-text="1.2Uqg">
+                1.2Uqg
+              </span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Polished copper-gold metallic text with a smooth, constant
+            horizontal shimmer, framed by a soft, centered amber glow. A
+            low-opacity landscape-rhombus grid of squares pulses softly in the
+            background, while a white-hot orange laser wire continuously scans
+            down across the characters to simulate a high-fidelity digital
+            refraction interface.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Quadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹²³</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f0fdf4] text-[#16a34a] font-medium uppercase tracking-wider">
+                  event horizon
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-qag">1.2Qag</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Intense emerald and mint gradient text with a brilliant silver-white
+            reflection core sweeping smoothly horizontally. Centered tightly
+            around the characters, a double-layered system of concentric,
+            clockwise-spinning conic-gradient accretion disks rotates
+            dynamically at non-harmonic speeds, simulating a hyper-velocity
+            cosmic event horizon.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Novemtrigintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹²⁰</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#ecfdf5] text-[#059669] font-medium uppercase tracking-wider">
+                  singularity orbit
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-ntg">1.2Ntg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Vibrant emerald-and-mint gradient text animated by a constant,
+            linear horizontal sweep. Two nested neon-green orbital halos
+            encircle the characters, rotating asynchronously. The inner ring
+            revolves clockwise with a sharp glow, while the outer ring spins
+            counterclockwise with a soft, out-of-focus blur.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Octotrigintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹¹⁷</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f5f3ff] text-[#6d28d9] font-medium uppercase tracking-wider">
+                  hard-light breach
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-otg">1.2Otg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Electric royal-indigo gradient text with a blazing hard-light cyan
+            core sweeping smoothly horizontally, framed by a sharp neon-cyan
+            outline. A rotating hexagonal light-burst portal casts sweeping rays
+            in the background, while a high-voltage hexagonal barrier
+            continuously shatters and expands outwards from behind the text.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Septentrigintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹¹⁴</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#faf5ff] text-[#6b21a8] font-medium uppercase tracking-wider">
+                  reinforced lattice
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-stg" data-text="1.2Stg">
+                1.2Stg
+              </span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Amethyst-silver and lavender gradient text with a brilliant
+            gold-rose facet sweeping smoothly horizontally, framed by a pristine
+            white-lavender outline. A stationary hexagonal lattice isometric
+            webbing background breathes gently in place, layered over a slowly
+            spinning 3D hexagonal prism core.
+          </div>
+        </div>
+        {/* SECTION: SEASON 2 */}
         <div className="flex flex-col gap-2 pb-20">
-          {/* SECTION: SEASON 2 */}
           <div className="pt-4 px-1 pb-2 text-[10px] tracking-[0.12em] uppercase text-[#bbb] font-[DM_Mono] flex items-center gap-2">
             <span> Season 2 tiers</span>
             <div className="h-px flex-1 bg-[#e8e6e1]/50"></div>

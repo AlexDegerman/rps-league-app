@@ -79,6 +79,22 @@ const EDGE_CONFIG: Record<string, { radial: string; shadow: string }> = {
   global_mirage_cataclysm: {
     radial: 'rgba(168,85,247,0.18)',
     shadow: 'rgba(217,119,6,0.3)'
+  },
+  boss_hexurion: {
+    radial: 'rgba(34,211,238,0.2)',
+    shadow: 'rgba(34,211,238,0.35)'
+  },
+  boss_orphion: {
+    radial: 'rgba(168,85,247,0.25)',
+    shadow: 'rgba(168,85,247,0.4)'
+  },
+  boss_fracturon: {
+    radial: 'rgba(34,197,94,0.15)',
+    shadow: 'rgba(34,197,94,0.2)'
+  },
+  boss_apexion: {
+    radial: 'rgba(249,115,22,0.25)',
+    shadow: 'rgba(249,115,22,0.35)'
   }
 }
 

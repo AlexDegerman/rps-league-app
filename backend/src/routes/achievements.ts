@@ -130,7 +130,21 @@ router.get('/:shortId', async (req, res) => {
       maxConsecutiveFlashEvents: Number(u.consecutive_flash_peak),
       hasSeenAllFlashTypes: hasSeenAllFlashTypes(u.user_id),
       hasUsedAutoBet: !!u.has_used_auto_bet,
-      biggestMultiplierTier: null
+      biggestMultiplierTier: null,
+
+      // World Boss Stats
+      worldBossKills:         Number(u.boss_kills_total ?? 0),
+      hexurionKills:          Number(u.hexurion_kills  ?? 0),
+      orphionKills:           Number(u.orphion_kills   ?? 0),
+      fracturonKills:         Number(u.fracturon_kills ?? 0),
+      apexionKills:           Number(u.apexion_kills   ?? 0),
+      worldBossChestsOpened:  Number(u.world_boss_chests_opened ?? 0),
+      hadFinalStrike:         Boolean(u.had_final_strike),
+      hadPerfectAssault:      Boolean(u.had_perfect_assault),
+      hadLuckyShot:           Boolean(u.had_lucky_shot),
+      hadClutchVictory:       Boolean(u.had_clutch_victory),
+      hadDivineIntervention:  Boolean(u.had_divine_intervention),
+
     }
 
     const achievements = ALL_ACHIEVEMENTS.map((def) => ({

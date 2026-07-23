@@ -4,72 +4,41 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import {
   X,
   Gem,
-  Settings,
-  Zap,
-  Search,
-  Moon,
-  CloudLightning,
-  Spade,
-  Flame,
-  Cpu,
-  Waves,
-  ShieldCheck,
-  Repeat,
-  BatteryCharging,
-  CircuitBoard,
-  Fingerprint,
-  Anchor,
-  Diamond,
-  LucideIcon
 } from 'lucide-react'
 import { RARITY_STYLES } from '@/lib/relics'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { useSound } from '@/hooks/useSound'
 import { useUIStore } from '@/app/stores/uiStore'
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Settings,
-  Zap,
-  Search,
-  Moon,
-  CloudLightning,
-  Spade,
-  Flame,
-  Cpu,
-  Waves,
-  ShieldCheck,
-  Repeat,
-  Gem,
-  BatteryCharging,
-  CircuitBoard,
-  Fingerprint,
-  Anchor,
-  Diamond
-}
+import { ICON_MAP } from '@/lib/relicIcons'
 
 export default function RelicDropPopup() {
+  const soundPlayedRef = useRef(false)
+
   const activePopup = useUIStore((s) => s.activePopup)
   const dequeuePopup = useUIStore((s) => s.dequeuePopup)
   const readyToShow = useUIStore((s) => s.readyToShow)
 
-  const dropQueue = useRelicStore((s) => s.dropQueue)
-  const popDropQueue = useRelicStore((s) => s.popDropQueue)
+  const relicDropQueue = useRelicStore((s) => s.relicDropQueue)
+  const shiftDropQueue = useRelicStore((s) => s.shiftDropQueue)
   const equipRelic = useRelicStore((s) => s.equipRelic)
+  const equippedRelics = useRelicStore((s) => s.equippedRelics)
+
   const { playRelicDrop } = useSound()
   const [visible, setVisible] = useState(false)
   const [equipping, setEquipping] = useState(false)
+  const [showSlotSelector, setShowSlotSelector] = useState(false)
 
-  const currentDrop = dropQueue[0] || null
+  const currentDrop = relicDropQueue[0] || null
 
   const dismiss = useCallback(() => {
     setVisible(false)
     setTimeout(() => {
-      popDropQueue()
+      shiftDropQueue()
       dequeuePopup()
+      setShowSlotSelector(false)
+      soundPlayedRef.current = false
     }, 300)
-  }, [popDropQueue, dequeuePopup])
-
-  const soundPlayedRef = useRef(false)
+  }, [shiftDropQueue, dequeuePopup])
 
   useEffect(() => {
     if (activePopup?.kind === 'relic_drop' && readyToShow && currentDrop) {
@@ -85,14 +54,15 @@ export default function RelicDropPopup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePopup?.kind, readyToShow, currentDrop])
 
-  const handleEquip = async () => {
+  const handleEquipSelect = async (slotIndex: number) => {
     if (!currentDrop) return
     setEquipping(true)
     try {
-      await equipRelic(currentDrop)
+      await equipRelic(currentDrop, slotIndex)
       dismiss()
     } finally {
       setEquipping(false)
+      setShowSlotSelector(false)
     }
   }
 
@@ -161,21 +131,66 @@ export default function RelicDropPopup() {
               {currentDrop.effect}
             </p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={dismiss}
-              className="flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-gray-400 bg-black/20 hover:bg-black/40 transition-all border border-white/5"
-            >
-              Dismiss
-            </button>
-            <button
-              onClick={handleEquip}
-              disabled={equipping}
-              className={`flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all shadow-lg active:scale-95 disabled:opacity-40 ${styles.text} ${styles.border} ${styles.bg} hover:brightness-125`}
-            >
-              {equipping ? '...' : 'Equip Now'}
-            </button>
-          </div>
+
+          {showSlotSelector ? (
+            <div className="flex flex-col gap-3 w-full">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
+                  Choose a slot to equip
+                </span>
+                <button
+                  onClick={() => setShowSlotSelector(false)}
+                  className="text-[9px] font-black uppercase tracking-wider text-gray-500 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="flex gap-2">
+                {[0, 1, 2].map((i) => {
+                  const occupant = equippedRelics[i]
+                  const isSameRelic = occupant?.key === currentDrop.key
+                  return (
+                    <button
+                      key={i}
+                      disabled={isSameRelic || equipping}
+                      onClick={() => handleEquipSelect(i)}
+                      className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all border flex flex-col items-center justify-center disabled:opacity-40 ${
+                        isSameRelic
+                          ? 'border-gray-800 bg-gray-950/40 text-gray-700 cursor-not-allowed'
+                          : occupant
+                            ? 'border-amber-500/30 text-amber-400 bg-amber-500/5 hover:bg-amber-500/15 hover:border-amber-500/50 active:scale-95'
+                            : 'border-dashed border-indigo-500/30 text-indigo-300 bg-indigo-500/5 hover:bg-indigo-500/15 hover:border-indigo-500/50 active:scale-95'
+                      }`}
+                    >
+                      <span className="text-[7px] opacity-60 mb-0.5 tracking-normal">
+                        SLOT {i + 1}
+                      </span>
+                      {isSameRelic
+                        ? 'Equipped'
+                        : occupant
+                          ? 'Replace'
+                          : 'Empty'}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <button
+                onClick={dismiss}
+                className="flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-gray-400 bg-black/20 hover:bg-black/40 transition-all border border-white/5"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={() => setShowSlotSelector(true)}
+                className={`flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all shadow-lg active:scale-95 disabled:opacity-40 ${styles.text} ${styles.border} ${styles.bg} hover:brightness-125`}
+              >
+                Equip Now
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

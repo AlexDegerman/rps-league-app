@@ -59,6 +59,18 @@ export interface AchievementStats {
   hadEyeOfStorm: boolean
   hadPrismaticWave: boolean
   hadThermalFusion: boolean
+  // World Boss
+  worldBossKills: number
+  hexurionKills: number
+  orphionKills: number
+  fracturonKills: number
+  apexionKills: number
+  worldBossChestsOpened: number
+  hadFinalStrike: boolean
+  hadPerfectAssault: boolean
+  hadLuckyShot: boolean
+  hadClutchVictory: boolean
+  hadDivineIntervention: boolean
 }
 
 // Category 1: Combatants
@@ -1139,52 +1151,52 @@ const COSMIC_MIRAGE: AchievementDef[] = [
   }
 ]
 
-// Category 16: Achievement Collector (Updated scaling: 10 -> 25 -> 45 -> 70 -> 105)
+// Category 16: Achievement Collector
 const COLLECTOR: AchievementDef[] = [
   {
-    code: 'COL10',
+    code: 'COL15',
     name: 'Curious',
-    requirement: 'Earn 10 Achievements',
+    requirement: 'Earn 15 Achievements',
     icon: '📖',
     rarity: 'COMMON',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 10
+    check: (s) => s.totalAchievementsEarned >= 15
   },
   {
-    code: 'COL25',
+    code: 'COL30',
     name: 'Dedicated',
-    requirement: 'Earn 25 Achievements',
+    requirement: 'Earn 30 Achievements',
     icon: '📚',
     rarity: 'RARE',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 25
+    check: (s) => s.totalAchievementsEarned >= 30
   },
   {
-    code: 'COL45',
+    code: 'COL50',
     name: 'Completionist',
-    requirement: 'Earn 45 Achievements',
+    requirement: 'Earn 50 Achievements',
     icon: '🗂️',
     rarity: 'EPIC',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 45
+    check: (s) => s.totalAchievementsEarned >= 50
   },
   {
-    code: 'COL70',
+    code: 'COL75',
     name: 'Archivist',
-    requirement: 'Earn 70 Achievements',
+    requirement: 'Earn 75 Achievements',
     icon: '🏛️',
     rarity: 'LEGENDARY',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 70
+    check: (s) => s.totalAchievementsEarned >= 75
   },
   {
     code: 'COLMAX',
     name: 'Omnivore',
-    requirement: 'Earn 105 Achievements',
+    requirement: 'Earn 130 Achievements',
     icon: '🌟',
     rarity: 'MYTHICAL',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 105
+    check: (s) => s.totalAchievementsEarned >= 130
   }
 ]
 
@@ -1214,6 +1226,205 @@ const RAINBOW_CAT: AchievementDef[] = [
   }
 ]
 
+const WORLD_BOSSES: AchievementDef[] = [
+  {
+    code: 'WB01',
+    name: 'First Contact',
+    requirement: 'Defeat 1 World Boss',
+    icon: '⚔️',
+    rarity: 'COMMON',
+    category: 'WorldBoss',
+    check: (s) => s.worldBossKills >= 1
+  },
+  {
+    code: 'WB02',
+    name: 'Entity Hunter',
+    requirement: 'Defeat 10 World Bosses',
+    icon: '🛡️',
+    rarity: 'RARE',
+    category: 'WorldBoss',
+    check: (s) => s.worldBossKills >= 10
+  },
+  {
+    code: 'WB03',
+    name: 'World Defender',
+    requirement: 'Defeat 30 World Bosses',
+    icon: '🌍',
+    rarity: 'EPIC',
+    category: 'WorldBoss',
+    check: (s) => s.worldBossKills >= 30
+  },
+  {
+    code: 'WB04',
+    name: 'Cataclysm Breaker',
+    requirement: 'Defeat 75 World Bosses',
+    icon: '💥',
+    rarity: 'LEGENDARY',
+    category: 'WorldBoss',
+    check: (s) => s.worldBossKills >= 75
+  },
+  {
+    code: 'WB05',
+    name: 'World Savior',
+    requirement: 'Defeat 200 World Bosses',
+    icon: '🌟',
+    rarity: 'MYTHICAL',
+    category: 'WorldBoss',
+    check: (s) => s.worldBossKills >= 200
+  },
+  {
+    code: 'HEXM',
+    name: "Hexurion's Bane",
+    requirement: 'Defeat Hexurion 50 times',
+    icon: '⬢',
+    rarity: 'MYTHICAL',
+    category: 'WorldBoss',
+    check: (s) => s.hexurionKills >= 50
+  },
+  {
+    code: 'ORBM',
+    name: 'Orbitbreaker',
+    requirement: 'Defeat Orphion 50 times',
+    icon: '🪐',
+    rarity: 'MYTHICAL',
+    category: 'WorldBoss',
+    check: (s) => s.orphionKills >= 50
+  },
+  {
+    code: 'FRAM',
+    name: 'Fractal Collapse',
+    requirement: 'Defeat Fracturon 50 times',
+    icon: '💎',
+    rarity: 'MYTHICAL',
+    category: 'WorldBoss',
+    check: (s) => s.fracturonKills >= 50
+  },
+  {
+    code: 'APXM',
+    name: 'Pyramid Fall',
+    requirement: 'Defeat Apexion 50 times',
+    icon: '🔺',
+    rarity: 'MYTHICAL',
+    category: 'WorldBoss',
+    check: (s) => s.apexionKills >= 50
+  }
+]
+
+const WORLD_BOSS_CHESTS: AchievementDef[] = [
+  {
+    code: 'CH01',
+    name: 'Treasure Seeker',
+    requirement: 'Open 5 World Boss Chests',
+    icon: '📦',
+    rarity: 'COMMON',
+    category: 'WorldBossChests',
+    check: (s) => s.worldBossChestsOpened >= 5
+  },
+  {
+    code: 'CH02',
+    name: 'Treasure Hunter',
+    requirement: 'Open 20 World Boss Chests',
+    icon: '🎁',
+    rarity: 'RARE',
+    category: 'WorldBossChests',
+    check: (s) => s.worldBossChestsOpened >= 20
+  },
+  {
+    code: 'CH03',
+    name: 'Vault Raider',
+    requirement: 'Open 50 World Boss Chests',
+    icon: '💰',
+    rarity: 'EPIC',
+    category: 'WorldBossChests',
+    check: (s) => s.worldBossChestsOpened >= 50
+  },
+  {
+    code: 'CH04',
+    name: 'Treasure Hoard',
+    requirement: 'Open 100 World Boss Chests',
+    icon: '🏆',
+    rarity: 'LEGENDARY',
+    category: 'WorldBossChests',
+    check: (s) => s.worldBossChestsOpened >= 100
+  },
+  {
+    code: 'CH05',
+    name: 'Living Vault',
+    requirement: 'Open 250 World Boss Chests',
+    icon: '👑',
+    rarity: 'MYTHICAL',
+    category: 'WorldBossChests',
+    check: (s) => s.worldBossChestsOpened >= 250
+  }
+]
+
+const WORLD_BOSS_META: AchievementDef[] = [
+  {
+    code: 'LAST',
+    name: 'Final Strike',
+    requirement: 'Land the finishing blow on a World Boss',
+    icon: '🎯',
+    rarity: 'COMMON',
+    category: 'Meta',
+    check: (s) => s.hadFinalStrike
+  },
+  {
+    code: 'PERF',
+    name: 'Perfect Assault',
+    requirement: 'Defeat a World Boss without missing a single prediction',
+    icon: '💯',
+    rarity: 'RARE',
+    category: 'Meta',
+    check: (s) => s.hadPerfectAssault
+  },
+  {
+    code: 'LUCK',
+    name: 'Lucky Shot',
+    requirement:
+      'Land the finishing blow while contributing 10% or less of total boss damage',
+    icon: '🍀',
+    rarity: 'RARE',
+    category: 'Meta',
+    check: (s) => s.hadLuckyShot
+  },
+  {
+    code: 'CLUT',
+    name: 'Clutch Victory',
+    requirement: 'Land the finishing blow with less than 5 seconds remaining',
+    icon: '⏱️',
+    rarity: 'EPIC',
+    category: 'Meta',
+    check: (s) => s.hadClutchVictory
+  },
+  {
+    code: 'DIVN',
+    name: 'Divine Intervention',
+    requirement:
+      'Join a World Boss during its final 10 seconds and land the finishing blow',
+    icon: '🌠',
+    rarity: 'MYTHICAL',
+    category: 'Meta',
+    check: (s) => s.hadDivineIntervention
+  }
+]
+
+const WORLD_BOSS_RAINBOW: AchievementDef[] = [
+  {
+    code: 'PURI',
+    name: 'World Purifier',
+    requirement: 'Defeat each of the four World Bosses 50 times',
+    icon: '🌍',
+    rarity: 'RAINBOW',
+    category: 'Rainbow',
+    check: (s) =>
+      s.hexurionKills >= 50 &&
+      s.orphionKills >= 50 &&
+      s.fracturonKills >= 50 &&
+      s.apexionKills >= 50
+  }
+]
+
+
 export const ALL_ACHIEVEMENTS: AchievementDef[] = [
   ...COMBATANTS,
   ...MOMENTUM,
@@ -1235,7 +1446,11 @@ export const ALL_ACHIEVEMENTS: AchievementDef[] = [
   ...COSMIC_CYCLONE,
   ...COSMIC_MIRAGE,
   ...COLLECTOR,
-  ...RAINBOW_CAT
+  ...RAINBOW_CAT,
+  ...WORLD_BOSSES,
+  ...WORLD_BOSS_CHESTS,
+  ...WORLD_BOSS_META,
+  ...WORLD_BOSS_RAINBOW
 ]
 
 export const ACHIEVEMENT_MAP = new Map<string, AchievementDef>(

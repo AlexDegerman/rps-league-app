@@ -1,3 +1,5 @@
+import { isWorldBossActive, isWorldBossBlocking } from "./worldBossService.js"
+
 export type GlobalEventType =
   | 'TIDAL_SURGE'
   | 'SOLAR_FLARE'
@@ -17,17 +19,11 @@ export interface GlobalEventState {
 
 type Broadcast = (event: string, data: string) => void
 
-// Cooldown between events: 7–12 min
-const COOLDOWN_MIN_MS = 7 * 60 * 1000
+const COOLDOWN_MIN_MS = 10 * 60 * 1000
 const COOLDOWN_MAX_MS = 12 * 60 * 1000
-
-// Warning phase before active: 1.5-3 min (pick once per event)
-const WARNING_MIN_MS = 90 * 1000
-const WARNING_MAX_MS = 180 * 1000
-
-// Active blitz window: 1.0-3 min
-const ACTIVE_MIN_MS = 1 * 60 * 1000
-const ACTIVE_MAX_MS = 3 * 60 * 1000
+const WARNING_DURATION_MS = 30 * 1000
+const ACTIVE_DURATION_MS = 60 * 1000
+const QUIET_DURATION_MS = 60 * 1000
 
 const EVENT_WEIGHTS: { type: GlobalEventType; weight: number }[] = [
   { type: 'TIDAL_SURGE', weight: 30 },
@@ -82,32 +78,113 @@ const ORACLE_WARNING_SPEECH: Record<GlobalEventType, string[]> = {
   ]
 }
 
-const ORACLE_COUNTDOWN_SPEECH: Record<
-  GlobalEventType,
-  (label: string) => string
-> = {
-  TIDAL_SURGE: (t) => `Tidal... Surge... in... ${t}.`,
-  SOLAR_FLARE: (t) => `Solar... Flare... strikes... in... ${t}.`,
-  CYCLONE_BLITZ: (t) => `Cyclone... Blitz... descends... in... ${t}.`,
-  MIRAGE_CATACLYSM: (t) => `The Mirage... awakens... in... ${t}.`
-}
-
-export const buildGlobalEventCountdownSpeech = (
-  type: GlobalEventType,
-  msRemaining: number
-): string => {
-  const seconds = Math.round(msRemaining / 1000)
-  const label =
-    seconds >= 90
-      ? `${Math.round(seconds / 60)}... minutes`
-      : `${seconds}... seconds`
-  return ORACLE_COUNTDOWN_SPEECH[type](label)
-}
-
-
 let _activeGlobalEvent: GlobalEventState | null = null
 let _schedulerStarted = false
 let _phaseTimer: ReturnType<typeof setTimeout> | null = null
+let _globalPausedAt: number | null = null
+let _inGlobalQuietPeriod = false
+let _broadcastRef: Broadcast | null = null
+
+export const isGlobalEventBlocking = (): boolean => {
+  return getActiveGlobalEvent() !== null || _inGlobalQuietPeriod
+}
+
+export const pauseGlobalEvent = (): void => {
+  if (!_activeGlobalEvent) return
+  _globalPausedAt = Date.now()
+  if (_phaseTimer) {
+    clearTimeout(_phaseTimer)
+    _phaseTimer = null
+  }
+}
+
+export const resumeGlobalEvent = (): void => {
+  if (_globalPausedAt === null || !_activeGlobalEvent) return
+  const pausedDuration = Date.now() - _globalPausedAt
+  _globalPausedAt = null
+
+  _activeGlobalEvent.endsAt += pausedDuration
+  if (_activeGlobalEvent.phase === 'warning') {
+    _activeGlobalEvent.activeAt += pausedDuration
+  }
+
+  if (!_broadcastRef) return
+
+  const now = Date.now()
+
+  if (_activeGlobalEvent.phase === 'warning') {
+    _broadcastRef(
+      'global_event_warning',
+      JSON.stringify({
+        type: _activeGlobalEvent.type,
+        phase: 'warning',
+        startedAt: _activeGlobalEvent.startedAt,
+        activeAt: _activeGlobalEvent.activeAt,
+        endsAt: _activeGlobalEvent.endsAt,
+        message: `Global event warning resumed: ${_activeGlobalEvent.type}`,
+        speech: `The... ${_activeGlobalEvent.type}... event... warning... resumes.`
+      })
+    )
+  } else if (_activeGlobalEvent.phase === 'active') {
+    _broadcastRef(
+      'global_event_start',
+      JSON.stringify({
+        type: _activeGlobalEvent.type,
+        phase: 'active',
+        startedAt: _activeGlobalEvent.startedAt,
+        activeAt: _activeGlobalEvent.activeAt,
+        endsAt: _activeGlobalEvent.endsAt
+      })
+    )
+  }
+
+  if (_activeGlobalEvent.phase === 'warning') {
+    const remainingWarning = Math.max(0, _activeGlobalEvent.activeAt - now)
+    _phaseTimer = setTimeout(() => {
+      transitionToActive(_broadcastRef!)
+    }, remainingWarning)
+  } else if (_activeGlobalEvent.phase === 'active') {
+    const remainingActive = Math.max(0, _activeGlobalEvent.endsAt - now)
+    _phaseTimer = setTimeout(() => {
+      transitionToEnd(_broadcastRef!)
+    }, remainingActive)
+  }
+}
+
+const transitionToActive = (broadcast: Broadcast): void => {
+  if (!_activeGlobalEvent) return
+  _activeGlobalEvent.phase = 'active'
+  const type = _activeGlobalEvent.type
+
+  broadcast(
+    'global_event_start',
+    JSON.stringify({
+      type,
+      phase: 'active',
+      startedAt: _activeGlobalEvent.startedAt,
+      activeAt: _activeGlobalEvent.activeAt,
+      endsAt: _activeGlobalEvent.endsAt
+    })
+  )
+
+  const remainingActive = Math.max(0, _activeGlobalEvent.endsAt - Date.now())
+  _phaseTimer = setTimeout(() => {
+    transitionToEnd(broadcast)
+  }, remainingActive)
+}
+
+const transitionToEnd = (broadcast: Broadcast): void => {
+  if (!_activeGlobalEvent) return
+  const type = _activeGlobalEvent.type
+  _activeGlobalEvent = null
+  broadcast('global_event_end', JSON.stringify({ type }))
+
+  _inGlobalQuietPeriod = true
+  setTimeout(() => {
+    _inGlobalQuietPeriod = false
+    scheduleNext(broadcast)
+  }, QUIET_DURATION_MS)
+}
 
 const pickEvent = (): GlobalEventType => {
   const total = EVENT_WEIGHTS.reduce((s, e) => s + e.weight, 0)
@@ -126,6 +203,7 @@ const randomItem = <T>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)]!
 
 export const getActiveGlobalEvent = (): GlobalEventState | null => {
+  if (isWorldBossActive()) return null
   if (!_activeGlobalEvent) return null
   if (Date.now() > _activeGlobalEvent.endsAt) {
     _activeGlobalEvent = null
@@ -149,13 +227,19 @@ export const getGlobalEventState = () => {
   }
 }
 
+const tryLaunchEvent = (broadcast: Broadcast): void => {
+  if (isWorldBossBlocking()) {
+    setTimeout(() => tryLaunchEvent(broadcast), 5000)
+    return
+  }
+  launchEvent(broadcast)
+}
+
 const launchEvent = (broadcast: Broadcast): void => {
   const type = pickEvent()
   const now = Date.now()
-  const warningDuration = randBetween(WARNING_MIN_MS, WARNING_MAX_MS)
-  const activeDuration = randBetween(ACTIVE_MIN_MS, ACTIVE_MAX_MS)
-  const activeAt = now + warningDuration
-  const endsAt = activeAt + activeDuration
+  const activeAt = now + WARNING_DURATION_MS
+  const endsAt = activeAt + ACTIVE_DURATION_MS
 
   _activeGlobalEvent = {
     type,
@@ -167,66 +251,36 @@ const launchEvent = (broadcast: Broadcast): void => {
   }
 
   const warningMsg = randomItem(ORACLE_WARNING_MESSAGES[type])
+  const warningSpeech = randomItem(ORACLE_WARNING_SPEECH[type])
 
+  broadcast(
+    'global_event_warning',
+    JSON.stringify({
+      type,
+      phase: 'warning',
+      startedAt: now,
+      activeAt,
+      endsAt,
+      message: warningMsg,
+      speech: warningSpeech
+    })
+  )
 
-  // Broadcast warning phase, clients show countdown to activeAt
-    const warningSpeech = randomItem(ORACLE_WARNING_SPEECH[type])
-
-    broadcast(
-      'global_event_warning',
-      JSON.stringify({
-        type,
-        phase: 'warning',
-        startedAt: now,
-        activeAt,
-        endsAt,
-        message: warningMsg,
-        speech: warningSpeech
-      })
-    )
-
-  // Transition to active phase
   if (_phaseTimer) clearTimeout(_phaseTimer)
   _phaseTimer = setTimeout(() => {
-    if (!_activeGlobalEvent || _activeGlobalEvent.type !== type) return
-    _activeGlobalEvent.phase = 'active'
-
-    broadcast(
-      'global_event_start',
-      JSON.stringify({
-        type,
-        phase: 'active',
-        startedAt: _activeGlobalEvent.startedAt,
-        activeAt,
-        endsAt
-      })
-    )
-
-    const endTimer = setTimeout(() => {
-      if (_activeGlobalEvent?.type === type) {
-        _activeGlobalEvent = null
-        broadcast('global_event_end', JSON.stringify({ type }))
-      }
-    }, activeDuration)
-
-    _phaseTimer = endTimer
-  }, warningDuration)
+    transitionToActive(broadcast)
+  }, WARNING_DURATION_MS)
 }
 
 const scheduleNext = (broadcast: Broadcast): void => {
   const cooldown = randBetween(COOLDOWN_MIN_MS, COOLDOWN_MAX_MS)
-
   setTimeout(() => {
-    launchEvent(broadcast)
-
-    // After warning + active finishes, schedule the next cooldown
-    // Max possible event duration: WARNING_MAX + ACTIVE_MAX
-    const maxEventDuration = WARNING_MAX_MS + ACTIVE_MAX_MS
-    setTimeout(() => scheduleNext(broadcast), maxEventDuration + 5000)
+    tryLaunchEvent(broadcast)
   }, cooldown)
 }
 
 export const startGlobalEventScheduler = (broadcast: Broadcast): void => {
+  _broadcastRef = broadcast
   if (_schedulerStarted) return
   _schedulerStarted = true
   scheduleNext(broadcast)

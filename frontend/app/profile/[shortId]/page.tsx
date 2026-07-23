@@ -32,14 +32,16 @@ import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import AscensionModal from '@/components/modals/AscensionModal'
 import RecoveryTutorial from '@/components/layout/RecoveryTutorial'
 import AchievementMenu from '@/components/game/AchievementMenu'
-import RelicSlot from '@/components/relics/RelicSlot'
 import RelicDrawer from '@/components/relics/RelicDrawer'
 import { useRelicStore } from '@/app/stores/relicStore'
-import { fetchEquippedRelic } from '@/lib/api'
+import { fetchEquippedRelics } from '@/lib/api'
 import type { RelicDef } from '@/lib/relics'
 import { RARITY_STYLES } from '@/lib/relics'
 import { StatSection } from '@/components/game/StatSection'
 import { StatBox } from '@/components/game/StatBox'
+import { useGameStore } from '@/app/stores/gameStore'
+import { Package, X } from 'lucide-react'
+import { ICON_MAP } from '@/lib/relicIcons'
 
 interface Ranks {
   daily: number | null
@@ -68,7 +70,12 @@ export default function ProfilePage() {
   const showAscensionPrompt = useUIStore((s) => s.showAscensionPrompt)
   const setShowAscensionPrompt = useUIStore((s) => s.setShowAscensionPrompt)
 
-  const equippedRelic = useRelicStore((s) => s.equippedRelic)
+  const equippedRelics = useRelicStore((s) => s.equippedRelics)
+  const unequipRelic = useRelicStore((s) => s.unequipRelic)
+  const setDrawerOpen = useRelicStore((s) => s.setDrawerOpen)
+
+  const worldBossPhase = useGameStore((s) => s.worldBossPhase)
+  const bossActive = worldBossPhase === 'ACTIVE'
 
   const localShortId =
     typeof window !== 'undefined'
@@ -103,12 +110,10 @@ export default function ProfilePage() {
   const [linkedinInput, setLinkedinInput] = useState('')
   const [linkedinSaved, setLinkedinSaved] = useState(false)
   const [linkedinError, setLinkedinError] = useState('')
-  const [profileRelic, setProfileRelic] = useState<RelicDef | null | undefined>(
-    undefined
-  )
+  const [profileRelics, setProfileRelics] = useState<
+    (RelicDef | null)[] | undefined
+  >(undefined)
   const [profileBadges, setProfileBadges] = useState<BadgeData[]>([])
-
-  const displayRelic = isOwnProfile ? equippedRelic : profileRelic
 
   const [profileStylePreference, setProfileStylePreference] = useState<
     string | null
@@ -155,10 +160,10 @@ export default function ProfilePage() {
           setShowLinkedinBadge(profileData.showLinkedinBadge ?? true)
           setLinkedinInput(profileData.linkedinUrl ?? '')
           try {
-            const data = await fetchEquippedRelic(profileData.userId)
-            setProfileRelic(data?.relic ?? null)
+            const data = await fetchEquippedRelics(profileData.userId)
+            setProfileRelics(data?.relics ?? [null, null, null])
           } catch {
-            setProfileRelic(null)
+            setProfileRelics([null, null, null])
           }
           setProfileStylePreference(profileData.pointStylePreference ?? null)
           setAutoStyle(profileData.pointStylePreference === null)
@@ -349,28 +354,6 @@ export default function ProfilePage() {
             <p className="text-[1.4rem] min-[375px]:text-[1.5rem] sm:text-[clamp(1.5rem,6vw,1.75rem)] font-black text-gray-900 leading-tight tracking-tighter">
               {nickname}
             </p>
-            {displayRelic !== undefined && (
-              <div className="flex items-center gap-2 mt-1.5">
-                <RelicSlot
-                  relic={displayRelic}
-                  readonly={!isOwnProfile}
-                  size="sm"
-                  align="left"
-                />
-                {displayRelic && (
-                  <span
-                    className={`text-[9px] font-black uppercase tracking-widest ${RARITY_STYLES[displayRelic.rarity].text}`}
-                  >
-                    {displayRelic.name}
-                  </span>
-                )}
-                {isOwnProfile && !displayRelic && (
-                  <span className="text-[9px] text-gray-400 font-medium">
-                    No relic equipped
-                  </span>
-                )}
-              </div>
-            )}
             <IdentityBadges
               linkedinUrl={linkedinUrl}
               badges={isOwnProfile ? myBadges : profileBadges}
@@ -457,6 +440,98 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
+        {(() => {
+          const slots = isOwnProfile ? equippedRelics : (profileRelics ?? [null, null, null])
+          const activeSlots = slots.map((r, i) => ({ relic: r, index: i }))
+          const hasAnyRelic = slots.some(Boolean)
+
+          if (!hasAnyRelic) {
+            if (!isOwnProfile) return null
+            return (
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="mt-3.5 mb-6 w-full py-3.5 rounded-2xl border-2 border-dashed border-gray-100 bg-gray-50/20 hover:bg-gray-50 hover:border-gray-200 transition-all flex items-center justify-center gap-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+              >
+                <Package size={16} />
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  Equip Relics
+                </span>
+              </button>
+            )
+          }
+
+          return (
+            <div className="flex flex-col gap-2 mt-4 mb-6 w-full">
+              {activeSlots.map(({ relic, index }) => {
+                if (!relic) {
+                  if (!isOwnProfile) return null
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => setDrawerOpen(true)}
+                      className="flex items-center justify-between px-3.5 py-2 rounded-xl border border-dashed border-gray-100 hover:border-gray-300 hover:bg-gray-50/50 transition-all focus:outline-none w-full"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-50 border border-gray-100">
+                          <Package size={14} className="text-gray-300" />
+                        </div>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          Slot {index + 1} - Empty
+                        </span>
+                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-wider text-indigo-500">
+                        Equip +
+                      </span>
+                    </button>
+                  )
+                }
+
+                const styles = RARITY_STYLES[relic.rarity]
+                const Icon = ICON_MAP[relic.icon] ?? Package
+
+                return (
+                  <div
+                    key={index}
+                    onClick={() => isOwnProfile && setDrawerOpen(true)}
+                    className={`group/row relative flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-all ${
+                      isOwnProfile
+                        ? 'cursor-pointer hover:border-gray-300 hover:bg-gray-50/30'
+                        : ''
+                    } ${styles.border}`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gray-950 border ${styles.border}`}>
+                        <Icon size={16} className={styles.text} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-[11px] font-black leading-tight truncate ${styles.text}`}>
+                          {relic.name}
+                        </p>
+                        <p className="text-[9.5px] text-gray-500 font-medium leading-tight mt-0.5 pr-4 truncate">
+                          {relic.effect}
+                        </p>
+                      </div>
+                    </div>
+
+                    {isOwnProfile && !bossActive && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          unequipRelic(index)
+                        }}
+                        title="Unequip"
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center active:scale-95 shrink-0 focus:outline-none"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
 
         {/* Tab switcher */}
         <div className="flex gap-2 mb-5">

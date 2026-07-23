@@ -5,6 +5,7 @@ import {
   getRandomFlashType,
   refillAllFlashEvents
 } from './flashEventService.js'
+import { isWorldBossBlocking } from './worldBossService.js'
 
 export type FestivalType =
   | 'SPARK'
@@ -98,6 +99,58 @@ const _userLossStreak = new Map<string, number>()
 const _userGuaranteedBonus = new Map<string, number>()
 
 const _userHasTriggeredFeverOnStreak = new Map<string, boolean>()
+let _pausedFestivalRemaining: number | null = null
+let _isBossActive = false
+let _broadcastRef: ((event: string, data: string) => void) | null = null
+
+export const pauseFestival = (): void => {
+  const festival = getActiveFestival()
+  _isBossActive = true
+  if (!festival) return
+  _pausedFestivalRemaining = Math.max(0, festival.endsAt - Date.now())
+  logger.info('Festival paused for World Boss', {
+    type: festival.type,
+    remainingMs: _pausedFestivalRemaining
+  })
+}
+
+export const resumeFestival = (): void => {
+  _isBossActive = false
+  if (_pausedFestivalRemaining === null || !_activeFestival) return
+  const remaining = _pausedFestivalRemaining
+  _pausedFestivalRemaining = null
+  if (remaining <= 0) return
+
+  const now = Date.now()
+  _activeFestival.endsAt = now + remaining
+  _activeFestival.startedAt = now
+
+  logger.info('Festival resumed after World Boss', {
+    type: _activeFestival.type,
+    remainingMs: remaining
+  })
+
+  if (_broadcastRef) {
+    const message = buildFestivalBroadcastMessage(
+      _activeFestival.triggeredBy,
+      _activeFestival.type,
+      _activeFestival.isDemo ?? false
+    )
+    _broadcastRef(
+      'festival_event',
+      JSON.stringify({
+        type: _activeFestival.type,
+        triggeredBy: _activeFestival.triggeredBy,
+        message,
+        speech: `The... ${_activeFestival.type}... Festival... resumes.`,
+        isDemo: _activeFestival.isDemo ?? false,
+        startedAt: _activeFestival.startedAt,
+        endsAt: _activeFestival.endsAt,
+        durationMs: remaining
+      })
+    )
+  }
+}
 
 const randomItem = <T>(arr: T[]): T =>
   arr[Math.floor(Math.random() * arr.length)]!
@@ -140,6 +193,7 @@ export const buildFestivalSpeech = (
 }
 
 export const getActiveFestival = (): FestivalState | null => {
+  if (_isBossActive) return null
   if (!_activeFestival) return null
   if (Date.now() > _activeFestival.endsAt) {
     if (!_activeFestival.isDemo) {
@@ -156,6 +210,7 @@ export const getFestivalLockoutRemaining = (): number =>
   Math.max(0, _lockoutUntil - Date.now())
 
 export const isFestivalLocked = (): boolean => {
+  if (_isBossActive || isWorldBossBlocking()) return true
   getActiveFestival()
   return _activeFestival !== null || Date.now() < _lockoutUntil
 }
@@ -180,7 +235,7 @@ const launchFestival = (
   meta: LaunchMeta = {}
 ): boolean => {
   if (!_festivalsEnabled) return false
-  if (isFestivalLocked()) return false
+  if (isFestivalLocked() || isWorldBossBlocking()) return false
 
   const isDemo = meta.isDemo ?? false
   const now = Date.now()
@@ -546,7 +601,12 @@ const scheduleDemoFestival = (broadcast: Broadcast): void => {
       _lastPlayerFestivalAt > 0 &&
       now - _lastPlayerFestivalAt < PLAYER_FESTIVAL_QUIET_MS
 
-    if (_festivalsEnabled && !isFestivalLocked() && !playerFestivalRecent) {
+    if (
+      _festivalsEnabled &&
+      !isFestivalLocked() &&
+      !playerFestivalRecent &&
+      !isWorldBossBlocking()
+    ) {
       const type = pickDemoFestival()
       launchFestival(type, 'Oracle', broadcast, { isDemo: true })
     }
@@ -555,6 +615,7 @@ const scheduleDemoFestival = (broadcast: Broadcast): void => {
 }
 
 export const startDemoFestivalScheduler = (broadcast: Broadcast): void => {
+  _broadcastRef = broadcast
   if (_demoFestivalTimer) return
   logger.info('Demo festival scheduler started')
   scheduleDemoFestival(broadcast)

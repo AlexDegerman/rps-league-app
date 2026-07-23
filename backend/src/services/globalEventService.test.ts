@@ -3,6 +3,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 // Control the scheduler's perceived time.
 const INITIAL_SYSTEM_TIME = new Date('2026-04-02T10:00:00Z').getTime()
 
+vi.mock('./worldBossService.js', () => ({
+  isWorldBossActive: vi.fn(() => false),
+  isWorldBossBlocking: vi.fn(() => false)
+}))
+
 describe('Global Event Service', () => {
   let globalEventService: typeof import('./globalEventService.js')
 
@@ -69,7 +74,7 @@ describe('Global Event Service', () => {
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
         // Advance into the warning phase.
-        vi.advanceTimersByTime(7 * 60 * 1000)
+        vi.advanceTimersByTime(10 * 60 * 1000)
 
         expect(broadcastMock).toHaveBeenCalledTimes(1)
         const warningCall = broadcastMock.mock.calls[0]!
@@ -80,7 +85,7 @@ describe('Global Event Service', () => {
         expect(warningPayload.phase).toBe('warning')
 
         // Advance into the active phase.
-        vi.advanceTimersByTime(90 * 1000)
+        vi.advanceTimersByTime(30 * 1000)
 
         expect(broadcastMock).toHaveBeenCalledTimes(2)
         expect(broadcastMock.mock.calls[1]![0]).toBe('global_event_start')
@@ -106,7 +111,7 @@ describe('Global Event Service', () => {
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
         // Fast-forward past the 7-minute cooldown and 90-second warning countdown
-        vi.advanceTimersByTime(7 * 60 * 1000 + 90 * 1000)
+        vi.advanceTimersByTime(10 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 999n // 999 is not cleanly divisible by 5
         const result = globalEventService.applyGlobalEventBuff(
@@ -133,15 +138,13 @@ describe('Global Event Service', () => {
           .spyOn(Math, 'random')
           .mockReturnValueOnce(0.0) // Cooldown
           .mockReturnValueOnce(0.95) // Event type: MIRAGE_CATACLYSM
-          .mockReturnValueOnce(0.0) // Warning duration
-          .mockReturnValueOnce(0.0) // Active duration
           .mockReturnValueOnce(0.0) // Msg index
           .mockReturnValueOnce(0.0) // Speech index
           .mockReturnValueOnce(0.0) // Echo factor roll (yields 15)
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(7 * 60 * 1000)
+        vi.advanceTimersByTime(10 * 60 * 1000)
         const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
         vi.advanceTimersByTime(warningData.activeAt - warningData.startedAt)
 
@@ -166,15 +169,13 @@ describe('Global Event Service', () => {
           .spyOn(Math, 'random')
           .mockReturnValueOnce(0.0) // Cooldown
           .mockReturnValueOnce(0.9) // Event type: MIRAGE_CATACLYSM
-          .mockReturnValueOnce(0.0) // Warning duration
-          .mockReturnValueOnce(0.0) // Active duration
           .mockReturnValueOnce(0.0) // Msg index
           .mockReturnValueOnce(0.0) // Speech index
           .mockReturnValueOnce(0.999) // Echo factor roll (yields 50)
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(7 * 60 * 1000 + 90 * 1000)
+        vi.advanceTimersByTime(10 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -198,14 +199,12 @@ describe('Global Event Service', () => {
           .spyOn(Math, 'random')
           .mockReturnValueOnce(0.0) // Cooldown
           .mockReturnValueOnce(0.7) // Event type: SOLAR_FLARE
-          .mockReturnValueOnce(0.0) // Warning duration
-          .mockReturnValueOnce(0.0) // Active duration
           .mockReturnValueOnce(0.0) // Msg index
           .mockReturnValueOnce(0.0) // Speech index
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(7 * 60 * 1000 + 90 * 1000)
+        vi.advanceTimersByTime(10 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -227,14 +226,12 @@ describe('Global Event Service', () => {
           .spyOn(Math, 'random')
           .mockReturnValueOnce(0.0) // Cooldown
           .mockReturnValueOnce(0.4) // Maps to CYCLONE_BLITZ
-          .mockReturnValueOnce(0.0) // Warning duration
-          .mockReturnValueOnce(0.0) // Active duration
           .mockReturnValueOnce(0.0) // Msg index
           .mockReturnValueOnce(0.0) // Speech index
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(7 * 60 * 1000)
+        vi.advanceTimersByTime(10 * 60 * 1000)
         const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
         vi.advanceTimersByTime(warningData.activeAt - warningData.startedAt)
 
@@ -261,15 +258,13 @@ describe('Global Event Service', () => {
         .spyOn(Math, 'random')
         .mockReturnValueOnce(0.0) // Cooldown (7 minutes)
         .mockReturnValueOnce(0.4) // Maps to CYCLONE_BLITZ
-        .mockReturnValueOnce(0.0) // Warning duration (90 seconds)
-        .mockReturnValueOnce(0.0) // Active duration (60 seconds)
         .mockReturnValueOnce(0.0) // Msg index
         .mockReturnValueOnce(0.0) // Speech index
 
       globalEventService.startGlobalEventScheduler(broadcastMock)
 
       // Advance into the warning phase.
-      vi.advanceTimersByTime(7 * 60 * 1000)
+      vi.advanceTimersByTime(10 * 60 * 1000)
 
       expect(broadcastMock).toHaveBeenCalledTimes(1)
       const warningCall = broadcastMock.mock.calls[0]!
@@ -327,14 +322,12 @@ describe('Global Event Service', () => {
         .spyOn(Math, 'random')
         .mockReturnValueOnce(0.0) // Cooldown (7 minutes)
         .mockReturnValueOnce(0.1) // Maps to TIDAL_SURGE
-        .mockReturnValueOnce(0.0) // Warning duration (90 seconds)
-        .mockReturnValueOnce(0.0) // Active duration (60 seconds)
         .mockReturnValueOnce(0.0) // Msg index
         .mockReturnValueOnce(0.0) // Speech index
 
       globalEventService.startGlobalEventScheduler(broadcastMock)
 
-      vi.advanceTimersByTime(7 * 60 * 1000)
+      vi.advanceTimersByTime(10 * 60 * 1000)
       const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
 
       // Advance into the active phase.

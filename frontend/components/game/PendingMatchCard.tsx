@@ -281,6 +281,50 @@ function PendingMatchCardComponent({
       btnClass: 'bg-indigo-600 hover:bg-indigo-700 text-white',
       label: 'PICK',
       confirmBg: 'bg-indigo-400'
+    },
+    boss_hexurion: {
+      border: 'border-cyan-300',
+      card: 'bg-gradient-to-b from-white to-cyan-50/40',
+      glowColor: 'rgba(34,211,238,0.07)',
+      cardAnim: 'tidal-ring',
+      dateText: 'text-cyan-400/70',
+      vsText: 'text-cyan-200',
+      btnClass: 'bg-cyan-500 hover:bg-cyan-600 text-white',
+      label: '⚡ STRIKE',
+      confirmBg: 'bg-cyan-500'
+    },
+    boss_orphion: {
+      border: 'border-purple-400',
+      card: 'bg-gradient-to-b from-white to-purple-50/40',
+      glowColor: 'rgba(168,85,247,0.07)',
+      cardAnim: 'electric-ring',
+      dateText: 'text-purple-400/70',
+      vsText: 'text-purple-200',
+      btnClass: 'electric-btn',
+      label: '⚡ STRIKE',
+      confirmBg: 'bg-purple-500'
+    },
+    boss_fracturon: {
+      border: 'border-green-400',
+      card: 'bg-gradient-to-b from-white to-green-50/40',
+      glowColor: 'rgba(34,197,94,0.07)',
+      cardAnim: 'card-fever',
+      dateText: 'text-green-600/70',
+      vsText: 'text-green-300',
+      btnClass: 'bg-green-500 hover:bg-green-600 text-white',
+      label: '⚡ STRIKE',
+      confirmBg: 'bg-green-500'
+    },
+    boss_apexion: {
+      border: 'border-orange-500',
+      card: 'bg-gradient-to-b from-white to-orange-50/40',
+      glowColor: 'rgba(249,115,22,0.1)',
+      cardAnim: 'fever-festival-ring',
+      dateText: 'text-orange-400/60',
+      vsText: 'text-orange-300',
+      btnClass: 'bg-orange-600 text-white',
+      label: '⚡ STRIKE',
+      confirmBg: 'bg-orange-600'
     }
   } as const
 

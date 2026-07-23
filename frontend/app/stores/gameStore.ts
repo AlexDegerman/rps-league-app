@@ -9,7 +9,11 @@ import type {
   AchievementNotif,
   GlobalEventType,
   GlobalEventPhase,
-  PredictionResultSSEData
+  PredictionResultSSEData,
+  WorldBossPhase,
+  WorldBossType,
+  DamagerEntry,
+  WorldBossSyncPayload,
 } from '@/types/rps'
 
 interface GameState {
@@ -92,6 +96,46 @@ interface GameState {
   pushAchievement: (a: AchievementNotif) => void
   shiftAchievement: () => void
   clearAllAchievements: () => void
+  // World Boss State
+  worldBossPhase: WorldBossPhase | null
+  worldBossType: WorldBossType | null
+  worldBossHpPct: number
+  worldBossMaxHp: number
+  worldBossEndsAt: number | null
+  worldBossWarningActiveAt: number | null
+  worldBossStrikeCount: number
+  worldBossTopDamagers: DamagerEntry[]
+  worldBossMyRank: number | null
+  worldBossMyDamagePct: number
+  worldBossEncounterEndsAt: number | null
+  lastBossHitResult: 'HIT' | 'MISS' | null
+  lastBossHitDamage: number
+  worldBossParticipantCount: number
+
+  setWorldBossWarning: (payload: {
+    bossType: WorldBossType
+    activeAt: number
+    endsAt: number
+  }) => void
+  setWorldBossActive: (payload: {
+    bossType: WorldBossType
+    endsAt: number
+  }) => void
+  setWorldBossHp: (
+    pct: number,
+    maxHp?: number,
+    participantCount?: number
+  ) => void
+  setWorldBossDamagers: (
+    top: DamagerEntry[],
+    myRank: number | null,
+    myPct: number
+  ) => void
+  setWorldBossStrikeCount: (n: number) => void
+  clearWorldBoss: () => void
+  setWorldBossSync: (payload: WorldBossSyncPayload) => void
+  setLastBossHitResult: (r: 'HIT' | 'MISS', damage?: number) => void
+  clearLastBossHitResult: () => void
 }
 
 // Helper for consistent mapping
@@ -133,6 +177,20 @@ export const useGameStore = create<GameState>((set, get) => ({
   globalEventEndsAt: null,
   globalEventStartedAt: null,
   latestPredictionResult: null,
+  worldBossPhase: null,
+  worldBossType: null,
+  worldBossHpPct: 100,
+  worldBossMaxHp: 0,
+  worldBossEndsAt: null,
+  worldBossWarningActiveAt: null,
+  worldBossStrikeCount: 0,
+  worldBossTopDamagers: [],
+  worldBossMyRank: null,
+  worldBossMyDamagePct: 0,
+  worldBossEncounterEndsAt: null,
+  lastBossHitResult: null,
+  lastBossHitDamage: 0,
+  worldBossParticipantCount: 0,
 
   // Actions - Connection
   setBackendReady: (v) => set({ backendReady: v }),
@@ -264,6 +322,77 @@ export const useGameStore = create<GameState>((set, get) => ({
       globalEventEndsAt: null,
       globalEventStartedAt: null
     }),
+  // Actions - World Boss
+  setWorldBossWarning: ({ bossType, activeAt, endsAt }) =>
+    set({
+      worldBossPhase: 'WARNING',
+      worldBossType: bossType,
+      worldBossWarningActiveAt: activeAt,
+      worldBossEndsAt: endsAt
+    }),
+
+  setWorldBossActive: ({ bossType, endsAt }) =>
+    set({
+      worldBossPhase: 'ACTIVE',
+      worldBossType: bossType,
+      worldBossWarningActiveAt: null,
+      worldBossEncounterEndsAt: endsAt,
+      worldBossEndsAt: endsAt
+    }),
+
+  setWorldBossHp: (pct, maxHp, participantCount) =>
+    set((s) => ({
+      worldBossHpPct: pct,
+      worldBossMaxHp: maxHp !== undefined ? maxHp : s.worldBossMaxHp,
+      worldBossParticipantCount:
+        participantCount !== undefined
+          ? participantCount
+          : s.worldBossParticipantCount
+    })),
+
+  setWorldBossDamagers: (top, myRank, myPct) =>
+    set({
+      worldBossTopDamagers: top,
+      worldBossMyRank: myRank,
+      worldBossMyDamagePct: myPct
+    }),
+
+  setWorldBossStrikeCount: (n) => set({ worldBossStrikeCount: n }),
+
+  clearWorldBoss: () =>
+    set({
+      worldBossPhase: 'COOLDOWN',
+      worldBossType: null,
+      worldBossHpPct: 100,
+      worldBossMaxHp: 0,
+      worldBossEndsAt: null,
+      worldBossWarningActiveAt: null,
+      worldBossStrikeCount: 0,
+      worldBossTopDamagers: [],
+      worldBossMyRank: null,
+      worldBossMyDamagePct: 0,
+      worldBossEncounterEndsAt: null,
+      lastBossHitResult: null,
+      lastBossHitDamage: 0,
+      worldBossParticipantCount: 0
+    }),
+
+  setWorldBossSync: (payload) =>
+    set({
+      worldBossPhase: payload.phase,
+      worldBossType: payload.bossType,
+      worldBossHpPct: payload.hpPct,
+      worldBossMaxHp: payload.bossMaxHp ?? 0,
+      worldBossStrikeCount: payload.strikeCount,
+      worldBossEncounterEndsAt: payload.encounterEndsAt,
+      worldBossWarningActiveAt: payload.warningEndsAt,
+      worldBossEndsAt: payload.encounterEndsAt ?? payload.warningEndsAt
+    }),
+
+  setLastBossHitResult: (r, damage) =>
+    set({ lastBossHitResult: r, lastBossHitDamage: damage ?? 1 }),
+  clearLastBossHitResult: () =>
+    set({ lastBossHitResult: null, lastBossHitDamage: 0 }),
 
   // Actions - Server Time
   setServerOffset: (offset) => set({ serverOffset: offset }),

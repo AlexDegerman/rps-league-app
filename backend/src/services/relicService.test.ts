@@ -42,7 +42,7 @@ describe('Relic Service', () => {
         mockDbResponse(RELICS.map((r) => ({ relic_key: r.key })))
       )
 
-      const result = await relicService.rollRelicDrop('u1', null, 0)
+      const result = await relicService.rollRelicDrop('u1', [], 0)
 
       expect(result).toBeNull()
       expect(mockQuery).toHaveBeenCalledTimes(1)
@@ -63,7 +63,7 @@ describe('Relic Service', () => {
 
         randomSpy.mockReturnValue(roll)
 
-        const result = await relicService.rollRelicDrop('u1', null, 0)
+        const result = await relicService.rollRelicDrop('u1', [], 0)
         expect(result).not.toBeNull()
         expect(result?.rarity).toBe(expectedRarity)
       }
@@ -112,7 +112,7 @@ describe('Relic Service', () => {
 
       randomSpy.mockReturnValue(0.9)
 
-      const result = await relicService.rollRelicDrop('u1', null, 0)
+      const result = await relicService.rollRelicDrop('u1', [], 0)
 
       expect(result).toBeNull()
     })
@@ -134,7 +134,7 @@ describe('Relic Service', () => {
 
         const result = await relicService.rollRelicDrop(
           'u1',
-          'scavengers_lens',
+          ['scavengers_lens'],
           0
         )
 
@@ -148,7 +148,7 @@ describe('Relic Service', () => {
 
         randomSpy.mockReturnValue(0.05)
 
-        const result = await relicService.rollRelicDrop('u1', null, 0)
+        const result = await relicService.rollRelicDrop('u1', [], 0)
 
         expect(result).toBeNull()
       })
@@ -175,7 +175,7 @@ describe('Relic Service', () => {
         // A roll of 0.08 fails under standard conditions (0.08 >= 0.046) but succeeds here.
         randomSpy.mockReturnValue(0.08)
 
-        const result = await relicService.rollRelicDrop('u1', null, 0)
+        const result = await relicService.rollRelicDrop('u1', [], 0)
 
         expect(result).not.toBeNull()
       })
@@ -197,7 +197,7 @@ describe('Relic Service', () => {
         // A roll of 0.17 should succeed under the capped rate (0.17 < 0.18).
         randomSpy.mockReturnValue(0.17)
 
-        const result = await relicService.rollRelicDrop('u1', null, 40)
+        const result = await relicService.rollRelicDrop('u1', [], 40)
 
         expect(result).not.toBeNull()
         expect(result?.rarity).toBe('COMMON')
@@ -210,7 +210,7 @@ describe('Relic Service', () => {
 
         randomSpy.mockReturnValue(0.29)
 
-        const result = await relicService.rollRelicDrop('u1', null, 40)
+        const result = await relicService.rollRelicDrop('u1', [], 40)
 
         expect(result).toBeNull()
       })
@@ -228,7 +228,7 @@ describe('Relic Service', () => {
       // Roll within the Common probability range.
       randomSpy.mockReturnValue(0.03)
 
-      const result = await relicService.rollRelicDrop('u1', null, 0)
+      const result = await relicService.rollRelicDrop('u1', [], 0)
 
       expect(result).not.toBeNull()
       expect(result?.rarity).toBe('COMMON')
@@ -255,7 +255,7 @@ describe('Relic Service', () => {
       // Roll within the Mythical probability range.
       randomSpy.mockReturnValue(0.0005)
 
-      const result = await relicService.rollRelicDrop('u1', null, 0)
+      const result = await relicService.rollRelicDrop('u1', [], 0)
 
       expect(result).not.toBeNull()
       // Mythical fallback path: MYTHICAL -> LEGENDARY -> EPIC -> RARE -> COMMON
@@ -276,7 +276,7 @@ describe('Relic Service', () => {
       // Roll falls inside Mythical range [0 .. 0.001)
       randomSpy.mockReturnValue(0.0005)
 
-      const result = await relicService.rollRelicDrop('u1', null, 0)
+      const result = await relicService.rollRelicDrop('u1', [], 0)
 
       expect(result).not.toBeNull()
       expect(result?.rarity).toBe('MYTHICAL')
@@ -330,14 +330,21 @@ describe('Relic Service', () => {
   describe('equipRelic', () => {
     it('successfully equips an owned relic', async () => {
       mockQuery.mockResolvedValueOnce(mockDbResponse([{ id: 45 }]))
+      mockQuery.mockResolvedValueOnce(
+        mockDbResponse([{ equipped_relics: [null, null, null] }])
+      )
       mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
       await expect(
         relicService.equipRelic('user_1', 'scavengers_lens')
       ).resolves.not.toThrow()
 
-      expect(mockQuery).toHaveBeenCalledTimes(2)
-      expect(mockQuery.mock.calls[1]![1]).toEqual(['scavengers_lens', 'user_1'])
+      expect(mockQuery).toHaveBeenCalledTimes(3)
+      expect(mockQuery.mock.calls[2]![1]).toEqual([
+        ['scavengers_lens', null, null],
+        'scavengers_lens',
+        'user_1'
+      ])
     })
 
     it('rejects equipping an unowned relic', async () => {
@@ -357,34 +364,40 @@ describe('Relic Service', () => {
       await expect(relicService.unequipRelic('user_1')).resolves.not.toThrow()
 
       expect(mockQuery).toHaveBeenCalledTimes(2)
-      expect(mockQuery.mock.calls[1]![1]).toEqual(['user_1'])
+      expect(mockQuery.mock.calls[1]![1]).toEqual([
+        [null, null, null],
+        null,
+        'user_1'
+      ])
     })
 
     it('specifically resets the dynamic charging counter of the active relic (e.g. buffer_module) to zero', async () => {
       // Reset query execution
-      mockQuery.mockResolvedValueOnce(mockDbResponse([]))
+      mockQuery.mockResolvedValueOnce(
+        mockDbResponse([{ equipped_relics: ['buffer_module', null, null] }])
+      )
       // Clear equipped relic execution
+      mockQuery.mockResolvedValueOnce(mockDbResponse([]))
       mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 
       const userId = 'user_999'
       await expect(relicService.unequipRelic(userId)).resolves.not.toThrow()
 
-      expect(mockQuery).toHaveBeenCalledTimes(2)
+      expect(mockQuery).toHaveBeenCalledTimes(3)
 
       // Verify the equipped relic's dynamic counter is reset before unequipping.
-      const [resetQuery, resetParams] = mockQuery.mock.calls[0]!
+      const [resetQuery, resetParams] = mockQuery.mock.calls[1]!
 
       expect(resetQuery).toContain('UPDATE relics')
       expect(resetQuery).toContain('SET counter = 0')
-      expect(resetQuery).toContain('WHERE user_id = $1')
-      expect(resetQuery).toContain('SELECT equipped_relic FROM users')
-      expect(resetParams).toEqual([userId])
+      expect(resetQuery).toContain('WHERE user_id = $1 AND relic_key = $2')
+      expect(resetParams).toEqual([userId, 'buffer_module'])
 
       // Verify the equipped relic slot is cleared.
-      const [nullifyQuery, nullifyParams] = mockQuery.mock.calls[1]!
+      const [nullifyQuery, nullifyParams] = mockQuery.mock.calls[2]!
       expect(nullifyQuery).toContain('UPDATE users')
-      expect(nullifyQuery).toContain('SET equipped_relic = NULL')
-      expect(nullifyParams).toEqual([userId])
+      expect(nullifyQuery).toContain('SET equipped_relics = $1')
+      expect(nullifyParams).toEqual([[null, null, null], null, userId])
     })
   })
 })

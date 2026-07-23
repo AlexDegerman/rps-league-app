@@ -6,12 +6,29 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '3.0',
+    label: 'The World Boss Update',
+    notes: [
+      'World Boss System: Introduces server-wide cooperative raid encounters that replace the prediction arena every 10 to 12 minutes. Four unique bosses rotate through the schedule: Hexurion, Orphion, Fracturon, and Apexion, each with a full CSS-only animation lifecycle covering assembly, idle, hit reaction, pain, and death states, accompanied by unique sound effects for spawning, attacks, taking damage, and defeat.',
+      'Collective HP Mechanic: Boss HP scales dynamically with participant count. Joining early contributes up to 4 HP to the shared pool. Winning predictions deal damage. Missing predictions are blocked. A 60-second encounter timer drives the entire raid.',
+      "Chest Reward System: Encounter outcome determines chest rarity across six tiers from Common to Rainbow. Defeat rewards Mythical. Retreat rewards are scaled to percentage of HP depleted. All rewards are calculated as a percentage of the player's current point balance.",
+      'World Boss Relics: Adds 14 new boss-exclusive relics that drop only from chest rewards, never from predictions. Relics cover flat point bonuses, chest upgrade chance, relic appearance chance, Twin Fortune (25% chest duplication), and Prism Key (enables Rainbow tier).',
+      'Three-Slot Relic System: Expands the relic loadout from one slot to three simultaneous equipped relics. Relic swapping is locked during active encounters.',
+      'Eight Animated Number Tiers: Integrates eight new high-end animated number styles aligned with World Boss themes, spanning Septentrigintillion to Quattuorquadragintillion: Reinforced Lattice, Hard-Light Breach, Singularity Orbit, Event Horizon, Prism Scanner, Spectrum Corruption, Holographic Monolith, and Obsidian Apex.',
+      'Twenty New Achievements: Adds World Boss participation milestones, per-boss kill mastery tracks at 50 kills each, chest opening progression, five high-difficulty meta achievements tied to rare encounter conditions, and World Purifier, a Rainbow-tier achievement requiring all four boss mastery tracks completed.',
+      'System Coordination: Active World Boss encounters pause Festival and Global Event timers for the duration. Both systems resume with remaining time intact after the encounter resolves.',
+      'Global Event Pacing: Shortens the warning, active, and cooldown phases of Global Events to create a faster gameplay cadence. Events now trigger more frequently with reduced downtime while maintaining the existing event rotation and reward structure.',
+      'Damage Leaderboard: Real-time top-3 damage ranking rendered inside the arena UI during encounters, displaying percentage contribution relative to total boss HP.'
+    ]
+  },
+  {
     version: '2.3',
     label: 'The Animated RPS Matches Update',
     notes: [
       'Animated RPS Matches: Pending match cards now animate during the final second before results are revealed.',
       'Match Clash Sequence: Move icons shake, cycle through random moves, then slide together for a center clash before revealing the final outcome.',
-      'Polished Result Reveal: Added an impact flash, winner glow, and loser dim effects for a more satisfying match resolution.'
+      'Polished Result Reveal: Added an impact flash, winner glow, and loser dim effects for a more satisfying match resolution.',
+      'Active Match Card Redesign: Updated the active match card to better accommodate the new animated reveal while preserving a clean, compact layout.'
     ]
   },
   {

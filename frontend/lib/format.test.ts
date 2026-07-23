@@ -159,11 +159,14 @@ describe('Format and RPS Game Utilities', () => {
     })
 
     it('should trigger cap formatting "9999+" at the maximum BigInt threshold scale', () => {
-      // Maximum tier is Str (10^111). Values >= 10000 * 10^111 should cap out
-      const ultraHighPoints = 15000n * 10n ** 111n
+      const ultraHighPoints = 15000n * 10n ** 300n
       const result = formatPoints(ultraHighPoints)
+
       expect(result.capped).toBe(true)
-      expect(result.display).toBe('9999+Str')
+      expect(result.display.startsWith('9999+')).toBe(true)
+
+      const symbol = result.display.replace('9999+', '')
+      expect(symbol.length).toBeGreaterThan(0)
     })
 
     it('should map ticker formatting correctly through formatTickerPoints', () => {

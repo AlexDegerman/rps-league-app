@@ -46,7 +46,7 @@ export const parseShorthand = (val: string): bigint => {
   if (!clean) return 0n
 
   const match = clean.match(
-    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg|uvg|dvg|tvg|qvg|qiv|svg|spv|ovg|nvg|trg|utr|dtr|ttr|qtr|qntr|str)?$/
+    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg|uvg|dvg|tvg|qvg|qiv|svg|spv|ovg|nvg|trg|utr|dtr|ttr|qtr|qntr|str|stg|otg|ntg|qag|uqg|dqg|tqg|qqg)?$/
   )
   if (!match) return 0n
 
@@ -77,7 +77,7 @@ export const parseShorthand = (val: string): bigint => {
     uvg: 10n ** 66n,
     dvg: 10n ** 69n,
     tvg: 10n ** 72n,
-    qag: 10n ** 75n,
+    qvg: 10n ** 75n,
     qiv: 10n ** 78n,
     svg: 10n ** 81n,
     spv: 10n ** 84n,
@@ -89,7 +89,15 @@ export const parseShorthand = (val: string): bigint => {
     ttr: 10n ** 102n,
     qtr: 10n ** 105n,
     qntr: 10n ** 108n,
-    str: 10n ** 111n
+    str: 10n ** 111n,
+    stg: 10n ** 114n,
+    otg: 10n ** 117n,
+    ntg: 10n ** 120n,
+    qag: 10n ** 123n,
+    uqg: 10n ** 126n,
+    dqg: 10n ** 129n,
+    tqg: 10n ** 132n,
+    qqg: 10n ** 135n
   }
 
   if (suffix && multipliers[suffix]) {
@@ -135,6 +143,14 @@ export const formatPoints = (
   const sign = bigN < 0n ? '-' : ''
 
   const tiers = [
+    { threshold: 10n ** 135n, symbol: 'Qqg' },
+    { threshold: 10n ** 132n, symbol: 'Tqg' },
+    { threshold: 10n ** 129n, symbol: 'Dqg' },
+    { threshold: 10n ** 126n, symbol: 'Uqg' },
+    { threshold: 10n ** 123n, symbol: 'Qag' },
+    { threshold: 10n ** 120n, symbol: 'Ntg' },
+    { threshold: 10n ** 117n, symbol: 'Otg' },
+    { threshold: 10n ** 114n, symbol: 'Stg' },
     { threshold: 10n ** 111n, symbol: 'Str' },
     { threshold: 10n ** 108n, symbol: 'Qntr' },
     { threshold: 10n ** 105n, symbol: 'Qtr' },
@@ -212,6 +228,16 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   const absN = bigN < 0n ? -bigN : bigN
 
   const names = [
+    { t: 135, n: 'Quattuorquadragintillion' },
+    { t: 132, n: 'Tresquadragintillion' },
+    { t: 129, n: 'Duoquadragintillion' },
+    { t: 126, n: 'Unquadragintillion' },
+    { t: 123, n: 'Quadragintillion' },
+    { t: 120, n: 'Novemtrigintillion' },
+    { t: 117, n: 'Octotrigintillion' },
+    { t: 114, n: 'Septentrigintillion' },
+    { t: 111, n: 'Sextrigintillion' },
+    { t: 108, n: 'Quintrigintillion' },
     { t: 111, n: 'Sextrigintillion' },
     { t: 108, n: 'Quintrigintillion' },
     { t: 105, n: 'Quattuortrigintillion' },

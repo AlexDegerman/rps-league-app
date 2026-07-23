@@ -12,7 +12,8 @@ import {
   fetchUserFlashState,
   fetchFestivalState,
   postFestivalParticipated,
-  fetchGlobalEventState
+  fetchGlobalEventState,
+  fetchWorldBossState
 } from '@/lib/api'
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
@@ -62,12 +63,16 @@ import FlashEventActivationOverlay from '@/components/overlays/FlashEventActivat
 import { usePopupQueue } from '@/hooks/usePopupQueue'
 import { speakOracle } from '@/lib/oracleTTS'
 import GlobalTickerWrapper from '@/components/layout/GlobalTickerWrapper'
-import { buildGlobalEventCountdownSpeech, GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/lib/globalEvents'
+import { GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/lib/globalEvents'
 import GlobalEventActivationOverlay from '@/components/overlays/GlobalEventActivationOverlay'
 import { emitActivity } from '@/lib/activityFeed'
 import EventTimerTicker from '@/components/tickers/EventTimerTicker'
 import DashboardCard from '@/components/game/DashboardCard'
 import MatchFeed from '@/components/game/MatchFeed'
+import { buildWorldBossWarningSpeech } from '@/lib/eventCountdown'
+import { pushBurstEvent } from '@/lib/worldBossFeed'
+import WorldBossArena from '@/components/game/WorldBossArena'
+import WorldBossChestOpening, { ChestResult } from '@/components/game/WorldBossChestOpening'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -89,9 +94,21 @@ export default function HomePage() {
   const festivalModeKey = useGameStore((s) => s.festivalModeKey)
   const activeGlobalEvent = useGameStore((s) => s.activeGlobalEvent)
   const globalEventPhase = useGameStore((s) => s.globalEventPhase)
+  const globalEventActiveAt = useGameStore((s) => s.globalEventActiveAt)
   const setGlobalEventWarning = useGameStore((s) => s.setGlobalEventWarning)
   const setGlobalEventActive = useGameStore((s) => s.setGlobalEventActive)
-  const globalEventActiveAt = useGameStore((s) => s.globalEventActiveAt)
+  const worldBossPhase = useGameStore((s) => s.worldBossPhase)
+  const worldBossType = useGameStore((s) => s.worldBossType)
+  const setWorldBossWarning = useGameStore((s) => s.setWorldBossWarning)
+  const setWorldBossActive = useGameStore((s) => s.setWorldBossActive)
+  const clearWorldBoss = useGameStore((s) => s.clearWorldBoss)
+  const setWorldBossHp = useGameStore((s) => s.setWorldBossHp)
+  const setWorldBossDamagers = useGameStore((s) => s.setWorldBossDamagers)
+  const setWorldBossStrikeCount = useGameStore((s) => s.setWorldBossStrikeCount)
+  const setWorldBossSync = useGameStore((s) => s.setWorldBossSync)
+  const setLastBossHitResult = useGameStore((s) => s.setLastBossHitResult)
+  const worldBossUIActive = useUIStore((s) => s.worldBossUIActive)
+  const setWorldBossUIActive = useUIStore((s) => s.setWorldBossUIActive)
 
   // --- User Store Selectors ---
   const points = useUserStore((s) => s.points)
@@ -156,7 +173,9 @@ export default function HomePage() {
     playTidalSurge,
     playSolarFlare,
     playCycloneBlitz,
-    playMirageCataclysm
+    playMirageCataclysm,
+    playBossSpawn,
+    playBossDie
   } = useSound()
 
   usePopupQueue({
@@ -176,6 +195,10 @@ export default function HomePage() {
   const isDuplicate = useTabGuard(() => {
     esRef.current?.close()
   })
+  const [bossChestResult, setBossChestResult] = useState<ChestResult | null>(
+    null
+  )
+  const bossCountdownAnnouncedRef = useRef<Set<string>>(new Set())
 
   const [isStreamStale, setIsStreamStale] = useState(false)
   const isStreamStaleRef = useRef(false)
@@ -215,6 +238,14 @@ export default function HomePage() {
     festival: FestivalModeKey | null,
     streak: number
   ): VisualMode => {
+    // If a World Boss is active, override all other layouts to use the custom Boss theme
+    if (worldBossPhase === 'ACTIVE' && worldBossUIActive && worldBossType) {
+      if (worldBossType === 'HEXURION') return 'boss_hexurion'
+      if (worldBossType === 'ORPHION') return 'boss_orphion'
+      if (worldBossType === 'FRACTURON') return 'boss_fracturon'
+      if (worldBossType === 'APEXION') return 'boss_apexion'
+    }
+
     if (flash === 'LUNAR') return 'flash_lunar'
     if (flash === 'ELECTRIC') return 'flash_electric'
     if (flash === 'CARDS') return 'flash_cards'
@@ -256,7 +287,7 @@ export default function HomePage() {
     )
   }, [visualMode, setVisualMode, setLiveTheme])
 
-  // Global event warning countdown TTS, fires at 60s and 30s before active
+  // Global event warning countdown, fires at 60s and 30s before active (visual ticker only, no TTS)
   const countdownAnnouncedRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
@@ -282,11 +313,6 @@ export default function HomePage() {
 
       if (shouldAnnounce60 && !countdownAnnouncedRef.current.has(key60)) {
         countdownAnnouncedRef.current.add(key60)
-        const speech = buildGlobalEventCountdownSpeech(
-          activeGlobalEvent,
-          msLeft
-        )
-        if (oracleTTSEnabled) speakOracle(speech, oracleVolume)
         setOracleTickerMessage({
           id: `global-countdown-60-${Date.now()}`,
           content: (
@@ -315,11 +341,6 @@ export default function HomePage() {
 
       if (shouldAnnounce30 && !countdownAnnouncedRef.current.has(key30)) {
         countdownAnnouncedRef.current.add(key30)
-        const speech = buildGlobalEventCountdownSpeech(
-          activeGlobalEvent,
-          msLeft
-        )
-        if (oracleTTSEnabled) speakOracle(speech, oracleVolume)
         setOracleTickerMessage({
           id: `global-countdown-30-${Date.now()}`,
           content: (
@@ -348,7 +369,84 @@ export default function HomePage() {
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [activeGlobalEvent, globalEventPhase, globalEventActiveAt, serverOffset, oracleVolume, setOracleTickerMessage, oracleTTSEnabled])
+  }, [
+    activeGlobalEvent,
+    globalEventPhase,
+    globalEventActiveAt,
+    serverOffset,
+    setOracleTickerMessage
+  ])
+
+  // World Boss countdown, fires at 60s and 30s before spawn (visual ticker only, no TTS)
+  useEffect(() => {
+    if (worldBossPhase !== 'WARNING' || !worldBossType) {
+      bossCountdownAnnouncedRef.current.clear()
+      return
+    }
+
+    const warningAt = useGameStore.getState().worldBossWarningActiveAt
+    if (!warningAt) return
+
+    const interval = setInterval(() => {
+      const msLeft = warningAt - (Date.now() + serverOffset)
+      if (msLeft <= 0) return
+
+      const key60 = `${worldBossType}-60`
+      const key30 = `${worldBossType}-30`
+
+      if (
+        msLeft <= 62000 &&
+        msLeft >= 58000 &&
+        !bossCountdownAnnouncedRef.current.has(key60)
+      ) {
+        bossCountdownAnnouncedRef.current.add(key60)
+        setOracleTickerMessage({
+          id: `boss-countdown-60-${Date.now()}`,
+          content: (
+            <span>
+              ⚔️{' '}
+              <span
+                className="font-black uppercase"
+                style={{ color: '#e879f9' }}
+              >
+                {worldBossType}
+              </span>{' '}
+              encounter in approximately 1 minute.
+            </span>
+          ),
+          accentColor: '#e879f9',
+          durationMs: 5_000
+        })
+      }
+
+      if (
+        msLeft <= 32000 &&
+        msLeft >= 28000 &&
+        !bossCountdownAnnouncedRef.current.has(key30)
+      ) {
+        bossCountdownAnnouncedRef.current.add(key30)
+        setOracleTickerMessage({
+          id: `boss-countdown-30-${Date.now()}`,
+          content: (
+            <span>
+              ⚔️{' '}
+              <span
+                className="font-black uppercase"
+                style={{ color: '#e879f9' }}
+              >
+                {worldBossType}
+              </span>{' '}
+              imminent. 30 seconds.
+            </span>
+          ),
+          accentColor: '#e879f9',
+          durationMs: 4_000
+        })
+      }
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [worldBossPhase, worldBossType, serverOffset, setOracleTickerMessage])
 
   // scroll-to-top button
   useEffect(() => {
@@ -525,6 +623,16 @@ export default function HomePage() {
       })
       .catch(() => {})
 
+    fetchWorldBossState()
+      .then((data) => {
+        if (!data) return
+        if (data.phase === 'ACTIVE') {
+          setWorldBossHp(data.hpPct, data.bossMaxHp)
+          setWorldBossUIActive(true)
+        }
+      })
+      .catch(() => {})
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
 
@@ -568,7 +676,7 @@ export default function HomePage() {
   // SSE live stream
   useEffect(() => {
     if (isDuplicate) return
-    const { userId: myUserId } = getOrCreateUser() 
+    const { userId: myUserId } = getOrCreateUser()
     const es = new EventSource(`${API_BASE}/api/live`)
     esRef.current = es
     const updatePacketTimestamp = () => {
@@ -802,16 +910,16 @@ export default function HomePage() {
       const data: FestivalSSEData = JSON.parse(event.data)
       if (data.endsAt !== null && Date.now() > data.endsAt) return
 
-    emitActivity({
-      id: `festival-feed-${data.type}-${Date.now()}`,
-      type: 'festival',
-      userId: data.triggerUserId ?? '',
-      nickname: data.triggeredBy ?? 'Oracle',
-      payload: { festivalType: data.type, isDemo: data.isDemo ?? false },
-      timestamp: Date.now()
-    })
+      emitActivity({
+        id: `festival-feed-${data.type}-${Date.now()}`,
+        type: 'festival',
+        userId: data.triggerUserId ?? '',
+        nickname: data.triggeredBy ?? 'Oracle',
+        payload: { festivalType: data.type, isDemo: data.isDemo ?? false },
+        timestamp: Date.now()
+      })
 
-    const isStale = Date.now() - data.startedAt > 3000
+      const isStale = Date.now() - data.startedAt > 3000
       if (data.triggerUserId !== myUserId) {
         postFestivalParticipated(myUserId).catch(() => {})
       }
@@ -961,6 +1069,148 @@ export default function HomePage() {
       })
     })
 
+    es.addEventListener('world_boss_warning', (event) => {
+      const data = JSON.parse(event.data)
+      setWorldBossWarning({
+        bossType: data.bossType,
+        activeAt: data.activeAt,
+        endsAt: data.endsAt
+      })
+      const speech = buildWorldBossWarningSpeech(data.bossType)
+      if (oracleTTSEnabled) speakOracle(speech, oracleVolume)
+      setOracleTickerMessage({
+        id: `boss-warning-${data.bossType}-${Date.now()}`,
+        content: (
+          <span>
+            ⚠️{' '}
+            <span className="font-black uppercase" style={{ color: '#e879f9' }}>
+              {data.bossType}
+            </span>{' '}
+            {data.message}
+          </span>
+        ),
+        speech,
+        accentColor: '#e879f9',
+        durationMs: 12_000
+      })
+    })
+
+    es.addEventListener('world_boss_start', (event) => {
+      const data = JSON.parse(event.data)
+      useGameStore.getState().clearFestival()
+      useGameStore.getState().clearGlobalEvent()
+      setWorldBossActive({ bossType: data.bossType, endsAt: data.endsAt })
+      setWorldBossUIActive(true)
+      bossCountdownAnnouncedRef.current.clear()
+      playBossSpawn(data.bossType)
+      setOracleTickerMessage({
+        id: `boss-start-${data.bossType}-${Date.now()}`,
+        content: (
+          <span>
+            ⚔️{' '}
+            <span className="font-black uppercase" style={{ color: '#e879f9' }}>
+              {data.bossType}
+            </span>{' '}
+            ENCOUNTER ACTIVE, Strike now!
+          </span>
+        ),
+        accentColor: '#e879f9',
+        durationMs: 6_000
+      })
+    })
+
+    es.addEventListener('world_boss_end', (event) => {
+      const data = JSON.parse(event.data)
+      clearWorldBoss()
+      if (data.outcome === 'DEFEAT') playBossDie(data.bossType)
+      // Delay UI swap so chest animation plays first
+      setTimeout(() => setWorldBossUIActive(false), 2500)
+      const outcomeMsg =
+        data.outcome === 'DEFEAT'
+          ? `${data.bossType} DEFEATED, Rewards incoming!`
+          : `${data.bossType} retreated, ${Math.round(data.hpDepleted)}% depleted.`
+      setOracleTickerMessage({
+        id: `boss-end-${Date.now()}`,
+        content: <span>🏆 {outcomeMsg}</span>,
+        accentColor: '#e879f9',
+        durationMs: 8_000
+      })
+    })
+
+    es.addEventListener('world_boss_damage_burst', (event) => {
+      const data = JSON.parse(event.data)
+      if (!Array.isArray(data.events)) return
+      const currentBossType = useGameStore.getState().worldBossType
+      const currentBossMaxHp = useGameStore.getState().worldBossMaxHp
+
+      for (const ev of data.events) {
+        pushBurstEvent({
+          userId: ev.userId,
+          nickname: ev.nickname ?? 'Player',
+          damage: ev.damage
+        })
+
+        if (ev.userId !== myUserId) {
+          const dmgPct =
+            currentBossMaxHp > 0
+              ? `${((ev.damage / currentBossMaxHp) * 100).toFixed(1)}%`
+              : `${ev.damage}`
+          emitActivity({
+            id: `boss-hit-${ev.userId}-${Date.now()}-${Math.random()}`,
+            type: 'world_boss_hit',
+            userId: ev.userId,
+            nickname: ev.nickname ?? 'Player',
+            payload: {
+              bossType: currentBossType ?? '',
+              damage: ev.damage,
+              dmgPct
+            },
+            timestamp: Date.now()
+          })
+        }
+      }
+    })
+
+    es.addEventListener('world_boss_hp_update', (event) => {
+      const data = JSON.parse(event.data)
+      setWorldBossHp(data.hpPct, data.bossMaxHp, data.participantCount)
+      if (data.topDamagers) setWorldBossDamagers(data.topDamagers, null, 0)
+      if (typeof data.strikeCount === 'number')
+        setWorldBossStrikeCount(data.strikeCount)
+    })
+
+    es.addEventListener('world_boss_hit', (event) => {
+      const data = JSON.parse(event.data)
+      if (data.userId !== myUserId) return
+      setLastBossHitResult(data.result, data.damage)
+    })
+
+    es.addEventListener('world_boss_reward', (event) => {
+      const data = JSON.parse(event.data)
+      if (data.userId !== myUserId) return
+      fetchUpdatedPoints()
+      setBossChestResult({
+        chestRarity: data.chestRarity,
+        pointReward: BigInt(data.pointReward),
+        relicDrop: data.relicDrop ?? null,
+        twinFortune: data.twinFortune ?? false,
+        twinFortuneReward: data.twinFortuneReward
+          ? BigInt(data.twinFortuneReward)
+          : null,
+        twinRelicDrop: data.twinRelicDrop ?? null
+      })
+    })
+
+    es.addEventListener('world_boss_sync', (event) => {
+      const data = JSON.parse(event.data)
+      setWorldBossSync(data)
+      if (data.phase === 'ACTIVE' || data.phase === 'WARNING') {
+        setWorldBossUIActive(true)
+        useGameStore.getState().clearFestival()
+        useGameStore.getState().clearGlobalEvent()
+      }
+    })
+
     es.onerror = () => {
       if (es.readyState === EventSource.CLOSED) {
         logger.error(
@@ -997,6 +1247,8 @@ export default function HomePage() {
     localStorage.setItem('rps_last_version', CURRENT_VERSION)
     setShowUpdateModal(false)
   }
+
+  const isBossActive = worldBossPhase === 'ACTIVE' && worldBossUIActive
 
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
@@ -1055,27 +1307,47 @@ export default function HomePage() {
             )}
         </>
       )}
+      {/* World Boss Chest Opening */}
+      {bossChestResult && (
+        <WorldBossChestOpening
+          result={bossChestResult}
+          onComplete={() => {
+            setBossChestResult(null)
+          }}
+        />
+      )}
 
       <GlobalTickerWrapper />
       <EdgeGlow visualMode={visualMode} />
 
-      <div className="relative z-40 isolate">
-        <ConfettiOverlay
-          confettiType={resultAnim?.confettiType ?? 'normal'}
-          show={resultAnim?.win === true}
-        />
-        <AchievementToast />
+      {/* World Boss UI swap: hides dashboard during active encounter */}
+      {isBossActive ? (
+        <div className="relative z-40 isolate">
+          <AchievementToast />
+          <WorldBossArena serverOffset={serverOffset} />
+        </div>
+      ) : (
+        <div className="relative z-40 isolate">
+          <ConfettiOverlay
+            confettiType={resultAnim?.confettiType ?? 'normal'}
+            show={resultAnim?.win === true}
+          />
+          <AchievementToast />
+          <ResultAnimOverlay
+            resultAnim={resultAnim}
+            streakMult={streakMult}
+            animatedResult={animatedResult}
+          />
+          <DashboardCard />
+        </div>
+      )}
 
-        <ResultAnimOverlay
-          resultAnim={resultAnim}
-          streakMult={streakMult}
-          animatedResult={animatedResult}
-        />
-
-        <DashboardCard />
-      </div>
-      <LiveStatsTicker />
-      <EventTimerTicker />
+      {!isBossActive && (
+        <>
+          <LiveStatsTicker />
+          <EventTimerTicker />
+        </>
+      )}
 
       {errorMessage && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 animate-in fade-in duration-200">
@@ -1085,18 +1357,19 @@ export default function HomePage() {
           </p>
         </div>
       )}
-
       {/* Rules bar */}
-      <div className="flex flex-row items-center justify-between mb-1 gap-1 px-1">
-        <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-cyan-600 font-bold uppercase tracking-tight whitespace-nowrap">
-          <p>PTS FLOOR: 100K</p>
-          <p className="text-indigo-400/90">No Ties</p>
+      {!isBossActive && (
+        <div className="flex flex-row items-center justify-between mb-1 gap-1 px-1">
+          <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-cyan-600 font-bold uppercase tracking-tight whitespace-nowrap">
+            <p>PTS FLOOR: 100K</p>
+            <p className="text-indigo-400/90">No Ties</p>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
+            <span className="text-green-600">WIN: +100%</span>
+            <BonusExplainerTrigger onClick={() => setShowBonusModal(true)} />
+          </div>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 text-[9px] sm:text-[10px] font-bold whitespace-nowrap">
-          <span className="text-green-600">WIN: +100%</span>
-          <BonusExplainerTrigger onClick={() => setShowBonusModal(true)} />
-        </div>
-      </div>
+      )}
 
       <IdleBetControls />
 
