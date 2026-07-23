@@ -1144,13 +1144,15 @@ export default function HomePage() {
       const currentBossMaxHp = useGameStore.getState().worldBossMaxHp
 
       for (const ev of data.events) {
+        if (ev.userId === myUserId) continue
+
         pushBurstEvent({
           userId: ev.userId,
           nickname: ev.nickname ?? 'Player',
           damage: ev.damage
         })
 
-        if (ev.userId !== myUserId && ev.damage > 0) {
+        if (ev.damage > 0) {
           const dmgPct =
             currentBossMaxHp > 0
               ? `${((ev.damage / currentBossMaxHp) * 100).toFixed(1)}%`

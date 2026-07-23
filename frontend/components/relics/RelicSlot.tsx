@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import {
   Package,
 } from 'lucide-react'
@@ -13,7 +12,6 @@ export default function RelicSlot({
   relic: propRelic,
   readonly = false,
   size = 'md',
-  align = 'center',
   totalSlots = 3
 }: {
   relic?: RelicDef | null
