@@ -22,7 +22,6 @@ export default function RelicSlot({
   align?: 'left' | 'right' | 'center'
   totalSlots?: number
 }) {
-  const [showTooltip, setShowTooltip] = useState(false)
   const equippedRelics = useRelicStore((s) => s.equippedRelics)
   const setDrawerOpen = useRelicStore((s) => s.setDrawerOpen)
 
@@ -66,8 +65,6 @@ export default function RelicSlot({
       <div className="relative">
         <button
           onClick={readonly ? undefined : () => setDrawerOpen(true)}
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
           className={`
             relative ${dim} rounded-xl flex items-center justify-center shrink-0
             bg-gray-950 border-2 ${styles.border}
@@ -76,39 +73,6 @@ export default function RelicSlot({
         >
           <Icon size={iconSize} className={styles.text} />
         </button>
-
-        {showTooltip && (
-          <div
-            className={`absolute bottom-full mb-3 z-50 w-52 p-3 bg-gray-950 border border-gray-800 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-150 pointer-events-none ${
-              align === 'left'
-                ? 'left-0'
-                : align === 'right'
-                  ? 'right-0'
-                  : 'left-1/2 -translate-x-1/2'
-            }`}
-          >
-            <div className="flex items-center gap-2 mb-1.5">
-              <Icon size={14} className={styles.text} />
-              <span
-                className={`text-[10px] font-black uppercase tracking-wider ${styles.text}`}
-              >
-                {relic.name}
-              </span>
-            </div>
-            <p className="text-[10px] text-gray-400 leading-snug">
-              {relic.effect}
-            </p>
-            <div
-              className={`absolute top-full w-0 h-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-gray-950 ${
-                align === 'left'
-                  ? 'left-4'
-                  : align === 'right'
-                    ? 'right-4'
-                    : 'left-1/2 -translate-x-1/2'
-              }`}
-            />
-          </div>
-        )}
       </div>
 
       {/* Capacity, always visible even when relic equipped */}
