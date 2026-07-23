@@ -1150,7 +1150,7 @@ export default function HomePage() {
           damage: ev.damage
         })
 
-        if (ev.userId !== myUserId) {
+        if (ev.userId !== myUserId && ev.damage > 0) {
           const dmgPct =
             currentBossMaxHp > 0
               ? `${((ev.damage / currentBossMaxHp) * 100).toFixed(1)}%`

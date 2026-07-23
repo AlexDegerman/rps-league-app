@@ -30,7 +30,12 @@ vi.mock('./relicService.js', () => ({
 }))
 
 vi.mock('../utils/logger.js', () => ({
-  logger: { error: vi.fn() }
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn()
+  }
 }))
 
 const mockQuery = vi.mocked(pool.query)

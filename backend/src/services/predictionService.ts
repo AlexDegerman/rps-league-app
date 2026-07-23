@@ -258,6 +258,8 @@ const resolveWorldBossPrediction = async (
         else if (relics.includes('phantom_reach') && Math.random() < 0.5) {
           applyDamage(row.user_id, 1, broadcast)
           damage = 1 // for SSE reporting
+        } else {
+          applyDamage(row.user_id, 0, broadcast)
         }
 
         await pool.query(

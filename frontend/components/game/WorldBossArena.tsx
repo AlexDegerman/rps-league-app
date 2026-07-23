@@ -166,7 +166,13 @@ const DamageNumberPool = memo(function DamageNumberPool({
           next[targetIdx] = {
             id: next[targetIdx].id,
             content:
-              ev.damage >= 3 ? 'CRIT!' : ev.damage >= 2 ? 'STRIKE' : 'HIT',
+              ev.damage >= 3
+                ? 'CRIT'
+                : ev.damage === 2
+                  ? 'STRIKE'
+                  : ev.damage === 1
+                    ? 'HIT'
+                    : 'BLOCKED',
             isCrit: ev.damage > 1,
             x: 14 + Math.random() * (w - 50),
             y: 14 + Math.random() * (h - 50),
@@ -289,7 +295,7 @@ export default memo(function WorldBossArena({
         const isCrit = damage >= 3
         const isDouble = damage === 2
         setOwnResultText({
-          text: isCrit ? `CRIT ×${damage}` : isDouble ? 'STRIKE ×2' : 'STRIKE',
+          text: isCrit ? 'CRIT' : isDouble ? 'STRIKE' : 'HIT',
           cls: isCrit ? 'hit-crit' : 'hit'
         })
 
