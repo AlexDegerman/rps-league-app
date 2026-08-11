@@ -1,11 +1,14 @@
 # 🎲 RPS League App
 
-A fast-paced live-service Rock Paper Scissors league web app where players bet virtual cosmetic points on live matches, track rankings, and explore analytics.
+A real-time live-service Rock Paper Scissors platform where players bet virtual cosmetic points, track rankings, and interact with an AI-powered game guide and match analysis system. I am the sole developer and maintainer, running it continuously in production: monitoring the system, shipping fixes, and building new features on an ongoing basis.
 
-> 🚨 **Project Evolution:** This application is a full-scale rebuilding of my original **[RPS League](https://github.com/AlexDegerman/rps-league)** (originally built for a Reaktor developer assignment). While the initial version served as a static match viewer, this version is a concurrency-aware betting engine engineered for **Infinite Scaling** and real-time user engagement.
+> 🚨 **Project Evolution:** This is a full-scale rebuild of my original
+> **[RPS League](https://github.com/AlexDegerman/rps-league)**, originally
+> built for a Reaktor developer assignment as a static match viewer. This
+> version is a concurrency-aware prediction engine engineered for infinite
+> scaling and real-time user engagement.
 
 **Play Here:** [https://rpsleague.fi/](https://rpsleague.fi/?utm_source=github/)
-
 ## 🎮 Preview
 
 <p align="center">
