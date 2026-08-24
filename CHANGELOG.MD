@@ -1,6 +1,46 @@
 # Changelog
 
 All notable changes to the platform will be documented in this file.
+## [4.0] - Neon Paradise
+
+### Added
+
+* **Neon Paradise Bonus System:** Introduced a new bonus-stage system containing nine interactive experiences that activate during eligible manual prediction sessions. Neon Paradise has a combined 2.00% trigger chance per eligible resolved prediction, with all nine stages having equal selection probability.
+
+  * **Treasure Vault:** Choose one of three pre-generated reward chests, with the selected chest opening first before the remaining rewards are revealed.
+  * **Double Down:** Climb a multiplier ladder from a guaranteed 2× payout toward a maximum 10× reward by choosing whether to secure or continue.
+  * **Wild Prediction:** Reveal three sequential cards, with each result contributing to the final multiplier.
+  * **Surge Frenzy:** Survive a five-second energy-node sequence by tapping every active node before it expires, with rewards scaling up to 10×.
+  * **Rainbow Rush:** Complete three server-generated spectrum spins, with each result contributing to the final reward.
+  * **Sniper Challenge:** Time a shot against a moving reticle, with accuracy determining the resulting multiplier.
+  * **Oracle Vision:** Reproduce sequences of Oracle glyphs through a timed 16-glyph input interface.
+  * **Crystal Mine:** Use five mining charges across a 5×5 excavation grid to uncover hidden crystal deposits and determine the final multiplier.
+  * **King's Vault:** Select from five royal chests containing exactly one reward of every available tier.
+
+* **Neon Paradise Trigger Rules:** Bonus stages activate only during active manual prediction sessions. They are disabled during auto-betting, minimized application states, and AFK periods. Bonus stages cannot overlap with Flash Events, Global Events, Festivals, or World Boss encounters.
+
+* **Neon Paradise Payout System:** All bonus stages use the last recorded bet as their reward basis. Every stage guarantees a minimum payout of +2× the last bet, with rewards scaling up to a maximum of 10×. Bonus rewards are added directly to the player's existing balance and cannot reduce the existing balance.
+
+* **Neon Paradise Entry Experience:** Added a unified transition from prediction results into the bonus experience, including the persistent NEON PARADISE banner, Oracle voice announcement, Oracle ticker message, stage-specific presentation, dedicated audio, and shared final payout presentation.
+
+* **Nine New Bonus Stage Experiences:** Added nine distinct gameplay formats spanning reward selection, multiplier decisions, card reveals, survival tapping, spectrum spins, timing, memory, excavation, and chest selection.
+
+* **Stage-Specific Audio and Visual Systems:** Each Neon Paradise stage introduces its own visual language, animations, effects, interaction feedback, reward cues, and Oracle announcement while remaining part of the shared Neon Paradise presentation.
+
+* **Session Persistence:** Active Neon Paradise sessions are persisted server-side, allowing a player to resume from the last confirmed state after reconnecting.
+
+* **Navigation Lockout:** Standard and external navigation are blocked while a Neon Paradise session is active to preserve gameplay continuity.
+
+* **Nine New Themed Number Tiers:** Extends the point progression system from Quattuorquadragintillion through Trequinquagintillion with nine new tiers featuring dedicated visual treatments ranging from mechanical vault and split-risk designs to spectral, tactical, cipher, crystalline, and royal treasure presentations.
+
+* **Ascension Expansion:** Raised the Ascension threshold from `999 × 10^111` to `999 × 10^162` to accommodate the nine new Neon Paradise number tiers and extend endgame progression.
+
+### System Integration
+
+* Neon Paradise stages are isolated from other major event systems and cannot activate while a conflicting event is active.
+* Only one bonus stage can be active for a player at any time.
+* Reward outcomes, progression, and gameplay-critical state remain server-authoritative.
+* The standard prediction interface resumes after the bonus stage completes.
 
 ## [3.0] - World Boss Encounters
 
@@ -262,8 +302,44 @@ All notable changes to the platform will be documented in this file.
 
 ### Added
 
-- **Launched the Oracle:** Integrated an AI-powered analysis engine providing real-time move heat maps and player dominance tracking.
-- **Built low-barrier onboarding:** Created an instant-start system with 200,000 credits and no mandatory registration.
-- **Deployed a live match engine:** Built a service processing 17,000+ matches daily via low-latency streams.
-- **Integrated support for Vigintillion-scale scores:** Custom-built a numeric system to support values scaling into the Vigintillions.
-- **Launched global indexing:** Deployed a multi-tab leaderboard for Daily, Weekly, and All-Time competitive data.
+- **Live Prediction Platform:** Launched the core Rock Paper Scissors prediction experience with matches generated every 5 seconds and a 3-second prediction window. Every match produces a decisive winner with no ties.
+
+- **Zero-Friction Account System:** Introduced instant participation with no mandatory registration or email. A persistent anonymous identity is created automatically on first visit, with local session persistence and backend-generated recovery codes for restoring progression across devices.
+
+- **Virtual Point Economy:** Added the core point system with dynamic prediction odds:
+
+  * **WIN:** +100% of the predicted amount
+  * **LOSE:** -50% of the predicted amount
+  * **Floor:** Balance cannot fall below 100,000 points
+
+- **Tiered Bonus System:** Added a 40% per-match chance to trigger a tiered bonus that modifies prediction payouts and losses. Bonus tiers range from Common through Mythical, with a pity system guaranteeing at least one bonus within every four matches if no bonus triggers naturally.
+
+- **Infinite Number Scaling:** Built the economy around native `BigInt` progression, allowing point values to scale far beyond conventional numeric limits and into astronomical number tiers.
+
+- **Global Number Formatting Engine:** Introduced a unified BigInt-first formatting system for parsing, scaling, and rendering extreme point values across the economy, leaderboards, profiles, live activity, bonuses, and tier-based visual transitions.
+
+- **Animated Number Tier System:** Added distinct visual identities for progression tiers, with animated gradients, glow effects, and styling that evolves as players reach increasingly extreme point thresholds.
+
+- **Competitive Analytics & Profiles:** Added public player profiles with progression, ranking, record, wealth, and performance statistics. Profiles expose historical metrics including peak balances, daily and weekly highs, total gains, total risked, biggest wins, win rate, streaks, and prediction records.
+
+- **Global Leaderboards:** Added competitive rankings across Daily, Weekly, and All-Time periods, with player performance tracked through live point values and historical progression.
+
+- **Live Activity Feed:** Added a real-time activity stream displaying prediction results, player milestones, relic discoveries, achievements, streak milestones, and simulated background activity through a priority-aware event queue.
+
+- **AI Oracle Match Analysis:** Introduced The Oracle, a Google Gemini-powered analysis engine focused on real-time match telemetry. The Oracle analyzes historical match data, move frequencies, player behavior, dominance patterns, and global trends to provide data-driven prediction analysis.
+
+- **Curated Oracle Analytics:** Added database-backed analytics presets covering move frequency distributions, house edge statistics, player trends, and global match activity.
+
+- **Real-Time Match Infrastructure:** Built a high-frequency live event system capable of continuously processing and broadcasting thousands of match events per day while maintaining synchronized gameplay state across connected players.
+
+- **Live League Insights:** Added real-time statistical telemetry including daily betting volume, net community gains, and Daily MVP updates.
+
+### Technical Foundation
+
+- **BigInt-Based Economy:** All core point calculations are designed around arbitrary-scale integer arithmetic to prevent precision loss as balances reach extreme values.
+
+- **Real-Time Architecture:** Implemented live match delivery and activity synchronization through server-driven event streams.
+
+- **Persistent Progression:** Player identity, statistics, rankings, and progression are maintained across sessions rather than being tied to a single temporary play session.
+
+- **Continuous Production Platform:** Established the foundation for an ongoing live-service system designed around continuous monitoring, maintenance, fixes, balancing, and feature expansion.

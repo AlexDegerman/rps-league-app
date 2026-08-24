@@ -32,6 +32,7 @@ export function useIdleBet() {
 
   useEffect(() => {
     if (!isVisible) return
+    if (useGameStore.getState().isBonusActive) return
     if (!idleSide || !isEligible || isProcessing) return
 
     const user = getOrCreateUser()

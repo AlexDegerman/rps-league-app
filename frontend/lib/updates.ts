@@ -6,6 +6,23 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '4.0',
+    label: 'Neon Paradise',
+    notes: [
+      'Neon Paradise: Introduces nine interactive bonus stages that trigger during eligible manual prediction sessions with a combined 2.00% chance per resolved prediction. All nine stages have equal selection probability.',
+
+      "Nine Bonus Stages: Adds Treasure Vault, Double Down, Wild Prediction, Surge Frenzy, Rainbow Rush, Sniper Challenge, Oracle Vision, Crystal Mine, and King's Vault, each featuring a distinct gameplay format, visual identity, audio design, and reward presentation.",
+
+      'Bonus Payout System: All stages calculate rewards from the last recorded bet, guaranteeing at least 2x the bet and scaling up to 10x. Bonus rewards are added to the existing balance without reducing it.',
+
+      'Nine New Themed Number Tiers: Extends the point progression system from Quattuorquadragintillion through Trequinquagintillion with nine new tiers featuring dedicated visual treatments ranging from mechanical vault and split-risk designs to spectral, tactical, cipher, crystalline, and royal treasure presentations.',
+
+      'Ascension Expansion: Raises the Ascension threshold from 999 x 10^111 to 999 x 10^162, extending endgame progression through the new Neon Paradise number tiers.',
+
+      'Session Protection: Active bonus stages are isolated from Flash Events, Global Events, Festivals, and World Bosses, with server-side session persistence and navigation lockout protecting active runs.'
+    ]
+  },
+  {
     version: '3.0',
     label: 'The World Boss Update',
     notes: [
@@ -240,13 +257,13 @@ export const UPDATES: Update[] = [
     version: '1.0',
     label: 'League Launch',
     notes: [
-      'The Oracle: Introduced an AI-powered competitive analyst for real-time move heat maps and player dominance tracking.',
+      'The Oracle: Introduced an AI-powered match analyst for real-time match analysis and player performance insights.',
       'Zero-Friction Identity: Start with 200,000 points instantly with no registration or login required.',
-      'High-Frequency Simulation: A live-service engine delivering over 17,000 matches per day via low-latency streams.',
-      'Vigintillion Scale: Custom-built architecture supporting scores into the Vigintillions.',
-      'Dynamic Economy: Win/Loss multipliers combined with a tiered bonus system (Common to Legendary).',
-      'Pity Mechanic: Internal protection guarantees a bonus event trigger at least once every 4 matches.',
-      'Global Rankings: Full predictor leaderboard featuring Daily, Weekly, and All-Time competitive tabs.'
+      'Live Match System: Introduced a fast-paced prediction experience with matches resolving every 5 seconds.',
+      'Infinite Progression: Introduced an expandable point progression system reaching into the Vigintillions and beyond.',
+      'Dynamic Economy: Added win and loss multipliers alongside a tiered bonus system spanning Common to Legendary rewards.',
+      'Pity Mechanic: Added a protection system guaranteeing a bonus event trigger at least once every 4 predictions.',
+      'Global Rankings: Added Daily, Weekly, and All-Time competitive leaderboards for tracking player performance.'
     ]
   }
 ]

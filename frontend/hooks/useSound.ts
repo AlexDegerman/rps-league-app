@@ -22,6 +22,7 @@ const SOUND_MAP = {
   solar_flare_explosion: '/sounds/solar_flare_explosion.mp3',
   cyclone_blitz: '/sounds/wind_raging.mp3',
   mirage_cataclysm: '/sounds/mystical.mp3',
+  neon_click: '/sounds/neon_click.mp3',
   // World Boss
   hexurion_spawn: '/sounds/hexurionspawn.mp3',
   hexurion_attack: '/sounds/hexurionattack.mp3',
@@ -45,6 +46,7 @@ type SoundKey = keyof typeof SOUND_MAP
 
 const DEFAULT_VOLUME = 0.5
 
+// Volume adjustments for individual sounds.
 const VOLUME_MULTIPLIERS: Partial<Record<SoundKey, number>> = {
   fracturon_takedmg: 0.15,
   fracturon_attack: 0.8,
@@ -54,6 +56,7 @@ const VOLUME_MULTIPLIERS: Partial<Record<SoundKey, number>> = {
   orphion_spawn: 0.5,
   orphion_attack: 0.5,
   apexion_attack: 0.5,
+  hexurion_spawn: 0.7
 }
 
 function getVolumeForKey(key: SoundKey, masterVolume: number): number {
@@ -61,6 +64,7 @@ function getVolumeForKey(key: SoundKey, masterVolume: number): number {
   return Math.max(0, Math.min(1, masterVolume * multiplier))
 }
 
+// Single-instance audio pool.
 const audioInstances: Partial<Record<SoundKey, HTMLAudioElement>> = {}
 
 let currentVolume = DEFAULT_VOLUME
@@ -89,6 +93,14 @@ function applyVolumeToAll(volume: number) {
     const instance = audioInstances[key]
     if (instance) instance.volume = getVolumeForKey(key, volume)
   })
+  // Also update the Web Audio gain node if initialised
+  if (_neonClickGain) {
+    _neonClickGain.gain.setTargetAtTime(
+      getVolumeForKey('neon_click', volume),
+      _neonCtx!.currentTime,
+      0.01
+    )
+  }
 }
 
 function stopAllExcept(keep: SoundKey[]) {
@@ -103,6 +115,67 @@ function stopAllExcept(keep: SoundKey[]) {
   })
 }
 
+// Neon click uses a decoded Web Audio buffer for polyphonic playback.
+let _neonCtx: AudioContext | null = null
+let _neonBuffer: AudioBuffer | null = null
+let _neonClickGain: GainNode | null = null
+
+// Tracks active clicks for the polyphony limit.
+const _activeClicks: { source: AudioBufferSourceNode; gain: GainNode }[] = []
+const MAX_CLICK_POLY = 6
+
+async function _initNeonAudio(): Promise<void> {
+  if (_neonCtx) return
+  _neonCtx = new AudioContext()
+  _neonClickGain = _neonCtx.createGain()
+  _neonClickGain.gain.value = getVolumeForKey('neon_click', currentVolume)
+  _neonClickGain.connect(_neonCtx.destination)
+  try {
+    const res = await fetch(SOUND_MAP['neon_click'])
+    const arrBuf = await res.arrayBuffer()
+    _neonBuffer = await _neonCtx.decodeAudioData(arrBuf)
+  } catch {
+    // Clicks remain disabled until the buffer is available.
+  }
+}
+
+function _playNeonClick(): void {
+  if (!currentSoundOn || !_neonCtx || !_neonBuffer || !_neonClickGain) return
+  if (_neonCtx.state === 'suspended') _neonCtx.resume().catch(() => {})
+
+  // Remove the oldest click when the polyphony limit is reached.
+  if (_activeClicks.length >= MAX_CLICK_POLY) {
+    const oldest = _activeClicks.shift()
+    if (oldest) {
+      oldest.gain.gain.setTargetAtTime(0, _neonCtx.currentTime, 0.015)
+      setTimeout(() => {
+        try {
+          oldest.source.stop()
+        } catch {
+          /* already ended */
+        }
+      }, 60)
+    }
+  }
+
+  const source = _neonCtx.createBufferSource()
+  source.buffer = _neonBuffer
+
+  const instanceGain = _neonCtx.createGain()
+  instanceGain.gain.value = 1 // Final volume is controlled by the channel gain.
+  source.connect(instanceGain)
+  instanceGain.connect(_neonClickGain)
+
+  const entry = { source, gain: instanceGain }
+  _activeClicks.push(entry)
+
+  source.onended = () => {
+    const idx = _activeClicks.indexOf(entry)
+    if (idx !== -1) _activeClicks.splice(idx, 1)
+  }
+  source.start()
+}
+
 export const useSound = () => {
   const [soundOn, setOn] = useState<boolean>(true)
   const [volume, setVolumeState] = useState<number>(DEFAULT_VOLUME)
@@ -111,10 +184,9 @@ export const useSound = () => {
 
   useEffect(() => {
     soundOnRef.current = currentSoundOn
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOn(currentSoundOn)
-    setVolumeState(currentVolume)
     Promise.resolve().then(() => {
+      setOn(currentSoundOn)
+      setVolumeState(currentVolume)
       syncedRef.current = true
     })
   }, [])
@@ -145,77 +217,93 @@ export const useSound = () => {
 
   const stopAll = () => stopAllExcept([])
 
-  const play = (key: SoundKey, onEnd?: () => void, volumeOverride?: number) => {
-    const instance = getAudio(key)
-    if (!soundOnRef.current || !instance) {
-      if (onEnd) onEnd()
-      return
-    }
-    stopAllExcept([key])
-    instance.currentTime = 0
-
-    const baseVolume = getVolumeForKey(key, currentVolume)
-    instance.volume =
-      volumeOverride !== undefined
-        ? Math.max(0, Math.min(1, volumeOverride))
-        : baseVolume
-
-    instance.onended = () => {
-      instance.onended = null
-      instance.volume = baseVolume
-      if (onEnd) onEnd()
-    }
-    instance.play().catch(() => {
-      if (onEnd) onEnd()
-    })
-  }
-
-  const playChain = (keys: SoundKey[], volumeOverride?: number) => {
-    if (!soundOnRef.current) return
-    const [first, ...rest] = keys
-    if (!first) return
-    if (rest.length === 0) {
-      play(first, undefined, volumeOverride)
-      return
-    }
-    stopAllExcept(keys)
-    const playNext = (remaining: SoundKey[]) => {
-      if (!remaining.length) return
-      const [cur, ...tail] = remaining
-      const instance = getAudio(cur)
-      if (!instance) {
-        playNext(tail)
+  const play = useCallback(
+    (key: SoundKey, onEnd?: () => void, volumeOverride?: number) => {
+      const instance = getAudio(key)
+      if (!soundOnRef.current || !instance) {
+        if (onEnd) onEnd()
         return
       }
+      stopAllExcept([key])
       instance.currentTime = 0
-
-      const baseVolume = getVolumeForKey(cur, currentVolume)
+      const baseVolume = getVolumeForKey(key, currentVolume)
       instance.volume =
-        volumeOverride !== undefined ? volumeOverride : baseVolume
+        volumeOverride !== undefined
+          ? Math.max(0, Math.min(1, volumeOverride))
+          : baseVolume
       instance.onended = () => {
         instance.onended = null
         instance.volume = baseVolume
-        playNext(tail)
+        if (onEnd) onEnd()
       }
-      instance.play().catch(() => playNext(tail))
-    }
-    const firstInstance = getAudio(first)
-    if (!firstInstance) {
-      playNext(rest)
-      return
-    }
-    firstInstance.currentTime = 0
+      instance.play().catch(() => {
+        if (onEnd) onEnd()
+      })
+    },
+    []
+  )
 
-    const firstBaseVolume = getVolumeForKey(first, currentVolume)
-    firstInstance.volume =
-      volumeOverride !== undefined ? volumeOverride : firstBaseVolume
-    firstInstance.onended = () => {
-      firstInstance.onended = null
-      firstInstance.volume = firstBaseVolume
-      playNext(rest)
-    }
-    firstInstance.play().catch(() => playNext(rest))
-  }
+  // Play a sound without stopping other audio.
+  const playLayer = useCallback((key: string, volumeOverride?: number) => {
+    if (!soundOnRef.current) return
+    const soundPath = SOUND_MAP[key as SoundKey]
+    if (!soundPath) return
+    const audio = new Audio(soundPath)
+    const baseVol = getVolumeForKey(key as SoundKey, currentVolume)
+    audio.volume =
+      volumeOverride !== undefined
+        ? Math.max(0, Math.min(1, volumeOverride))
+        : baseVol
+    audio.play().catch(() => {})
+  }, [])
+
+  const playChain = useCallback(
+    (keys: string[], volumeOverride?: number) => {
+      if (!soundOnRef.current) return
+      const [first, ...rest] = keys as SoundKey[]
+      if (!first) return
+      if (rest.length === 0) {
+        play(first, undefined, volumeOverride)
+        return
+      }
+      stopAllExcept(keys as SoundKey[])
+      const playNext = (remaining: SoundKey[]) => {
+        if (!remaining.length) return
+        const [cur, ...tail] = remaining
+        const instance = getAudio(cur)
+        if (!instance) {
+          playNext(tail)
+          return
+        }
+        instance.currentTime = 0
+        const baseVolume = getVolumeForKey(cur, currentVolume)
+        instance.volume =
+          volumeOverride !== undefined ? volumeOverride : baseVolume
+        instance.onended = () => {
+          instance.onended = null
+          instance.volume = baseVolume
+          playNext(tail)
+        }
+        instance.play().catch(() => playNext(tail))
+      }
+      const firstInstance = getAudio(first)
+      if (!firstInstance) {
+        playNext(rest)
+        return
+      }
+      firstInstance.currentTime = 0
+      const firstBaseVolume = getVolumeForKey(first, currentVolume)
+      firstInstance.volume =
+        volumeOverride !== undefined ? volumeOverride : firstBaseVolume
+      firstInstance.onended = () => {
+        firstInstance.onended = null
+        firstInstance.volume = firstBaseVolume
+        playNext(rest)
+      }
+      firstInstance.play().catch(() => playNext(rest))
+    },
+    [play]
+  )
 
   const toggleSound = () => {
     setOn((prev) => {
@@ -231,10 +319,59 @@ export const useSound = () => {
     })
   }
 
-  const playJackpot = () => {
+  const playJackpot = useCallback(() => {
     if (!soundOnRef.current) return
     playChain(['slam', 'cascade', 'shimmer'])
-  }
+  }, [playChain])
+
+  // Pre-decodes the click buffer before gameplay.
+  const initNeonAudio = useCallback(() => {
+    _initNeonAudio().catch(() => {})
+  }, [])
+
+  const playNeonClick = useCallback(() => {
+    if (!soundOnRef.current) return
+    _playNeonClick()
+  }, [])
+
+  // Maps the payout multiplier to a relic tier sound.
+  const playNeonReward = useCallback(
+    (multiplier: number) => {
+      if (!soundOnRef.current) return
+      const key: SoundKey =
+        multiplier >= 10
+          ? 'relic_mythical'
+          : multiplier >= 8
+            ? 'relic_legendary'
+            : multiplier >= 6
+              ? 'relic_epic'
+              : multiplier >= 4
+                ? 'relic_rare'
+                : 'relic_common'
+      playLayer(key)
+    },
+    [playLayer]
+  )
+
+  // Plays the reveal sound without interrupting other audio.
+  const playNeonShimmer = useCallback(() => {
+    if (!soundOnRef.current) return
+    playLayer('shimmer')
+  }, [playLayer])
+
+  // Plays the completion sound based on the payout tier.
+  const playNeonComplete = useCallback(
+    (isMaxPayout: boolean) => {
+      if (!soundOnRef.current) return
+      if (isMaxPayout) {
+        // Play the celebration fanfare for the maximum payout
+        play('fanfare')
+      } else {
+        play('win')
+      }
+    },
+    [play]
+  )
 
   return {
     soundOn,
@@ -256,25 +393,42 @@ export const useSound = () => {
     playCycloneBlitz: () => play('cyclone_blitz'),
     playMirageCataclysm: () => play('mirage_cataclysm'),
     getDuration: (key: SoundKey) => audioInstances[key]?.duration || 0,
-    playRelicDrop: useCallback((rarity: RelicRarity) => {
-      const key = `relic_${rarity.toLowerCase()}` as SoundKey
-      play(key)
-    }, []),
-    playBossSpawn: useCallback((bossType: string) => {
-      const key = `${bossType.toLowerCase()}_spawn` as SoundKey
-      play(key)
-    }, []),
-    playBossAttack: useCallback((bossType: string) => {
-      const key = `${bossType.toLowerCase()}_attack` as SoundKey
-      play(key)
-    }, []),
-    playBossTakeDmg: useCallback((bossType: string) => {
-      const key = `${bossType.toLowerCase()}_takedmg` as SoundKey
-      play(key)
-    }, []),
-    playBossDie: useCallback((bossType: string) => {
-      const key = `${bossType.toLowerCase()}_die` as SoundKey
-      play(key)
-    }, []),
+    playRelicDrop: useCallback(
+      (rarity: RelicRarity) => {
+        play(`relic_${rarity.toLowerCase()}` as SoundKey)
+      },
+      [play]
+    ),
+    playBossSpawn: useCallback(
+      (bossType: string) => {
+        play(`${bossType.toLowerCase()}_spawn` as SoundKey)
+      },
+      [play]
+    ),
+    playBossAttack: useCallback(
+      (bossType: string) => {
+        play(`${bossType.toLowerCase()}_attack` as SoundKey)
+      },
+      [play]
+    ),
+    playBossTakeDmg: useCallback(
+      (bossType: string) => {
+        play(`${bossType.toLowerCase()}_takedmg` as SoundKey)
+      },
+      [play]
+    ),
+    playBossDie: useCallback(
+      (bossType: string) => {
+        play(`${bossType.toLowerCase()}_die` as SoundKey)
+      },
+      [play]
+    ),
+    initNeonAudio,
+    playNeonClick,
+    playNeonReward,
+    playNeonShimmer,
+    playNeonComplete,
+    playLayer,
+    playChain
   }
 }

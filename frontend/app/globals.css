@@ -730,6 +730,958 @@ span.tracking-wider[title]:active::after {
   0%, 100% { opacity: 0; }
   50% { opacity: 1; }
 }
+/* --- SEASON 4 NUMBER TIERS --- */
+
+/* TIER 1: Quinquadragintillion - Vessel Lock */
+/* Steel-blue engraved characters, rotating gold ring, amber pulse */
+@keyframes qnqg-spin {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes qnqg-amber-sweep {
+  0%   { background-position: -200% 0, 0 0, 0 0; }
+  100% { background-position: 300% 0, 0 0, 0 0; }
+}
+
+.g-qnqg {
+  transform: translateZ(0);
+  display: inline-block;
+  position: relative;
+  padding: 0 0.12em;
+  isolation: isolate;
+
+  /* Fast amber sweep + engraved micro-lines + steel-blue gradient */
+  background: 
+    linear-gradient(90deg, rgba(255, 191, 0, 0) 0%, #ffffff 40%, #ffb300 50%, #ffb300 60%, rgba(255, 191, 0, 0) 100%) no-repeat,
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0px, rgba(0, 0, 0, 0.12) 1px, transparent 1px, transparent 3px),
+    linear-gradient(180deg, #b0c4de 0%, #4682b4 40%, #1c3d5a 100%);
+  background-size: 150px 100%, 100% 100%, 100% 100%;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  -webkit-text-stroke: 0.5px #1c3d5a;
+
+  /* Blue-steel glow text-shadow */
+  text-shadow:
+    0 0 3px rgba(70, 130, 180, 0.75),
+    0 0 10px rgba(70, 130, 180, 0.3);
+
+  animation: qnqg-amber-sweep 2s linear infinite;
+}
+
+/* Ring*/
+.g-qnqg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.6em; /* Fixed relative dimensions to force a perfect circle */
+  height: 1.6em;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+
+  /* Gilded vault lock ring boundaries */
+  border: 1.5px solid transparent;
+  border-top-color: #ffd700;
+  border-right-color: #ffd700;
+  border-bottom-color: rgba(255, 215, 0, 0.2);
+  border-left-color: rgba(255, 215, 0, 0.2);
+
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.75));
+
+  animation: qnqg-spin 1.8s linear infinite;
+}
+
+/* Amber sweep */
+.g-qnqg::after {
+  content: none !important;
+  display: none !important;
+}
+/* TIER 2: Sexquadragintillion - Risk Split */
+/* Diagonal mint/coral split, central energy pulse */
+.g-sxqg {
+  transform: translateZ(0);
+  position: relative;
+  display: inline-block;
+  padding: 0 0.15em;
+  isolation: isolate;
+
+  /* Sharp diagonal split at exactly 50% */
+  background: linear-gradient(
+    45deg,
+    #00ff88 0%,
+    #00ff88 49.5%,
+    #ff4422 50.5%,
+    #ff4422 100%
+  );
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  -webkit-text-stroke: 0.5px #110301;
+  filter: drop-shadow(0 1.5px 1.5px rgba(17, 3, 1, 0.75));
+}
+
+/* Energy bar */
+.g-sxqg::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute;
+  inset: -1px -4px;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, opacity;
+  filter: blur(4px);
+  opacity: 0.72;
+
+  /* 45-degree diagonal split background matching the text exactly */
+  background: linear-gradient(
+    45deg,
+    #00ff88 0%,
+    #00ff88 49.5%,
+    #ff4422 50.5%,
+    #ff4422 100%
+  );
+}
+
+/* TIER 3: Septenquadragintillion - Sequential Card Flips */
+/* Indigo-purple characters, three ghost cards rotating behind */
+@keyframes spqg-flip1 {
+  0%, 5% {
+    transform: rotateY(0deg);
+    /* Face-down holographic amethyst star chart */
+    background: 
+      radial-gradient(circle at center, #ffd700 0.5px, transparent 1px),
+      linear-gradient(135deg, #1e1b4b 0%, #49108b 50%, #7c3aed 100%);
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 2px rgba(124, 58, 237, 0.2);
+  }
+  20%, 30% {
+    transform: rotateY(180deg);
+    /* Face-up gleaming gold card with central multiplier glint */
+    background: 
+      radial-gradient(circle at center, #ffffff 1px, transparent 2px),
+      linear-gradient(135deg, #fff3a8 0%, #ffd700 50%, #b48a04 100%);
+    border-color: rgba(255, 215, 0, 0.85);
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+  45%, 100% {
+    transform: rotateY(360deg);
+    /* Continuous smooth loop back to holographic face-down */
+    background: 
+      radial-gradient(circle at center, #ffd700 0.5px, transparent 1px),
+      linear-gradient(135deg, #1e1b4b 0%, #49108b 50%, #7c3aed 100%);
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 2px rgba(124, 58, 237, 0.2);
+  }
+}
+
+@keyframes spqg-flip2 {
+  0%, 55% {
+    transform: rotateY(0deg);
+    /* Face-down holographic amethyst star chart */
+    background: 
+      radial-gradient(circle at center, #ffd700 0.5px, transparent 1px),
+      linear-gradient(135deg, #1e1b4b 0%, #49108b 50%, #7c3aed 100%);
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 2px rgba(124, 58, 237, 0.2);
+  }
+  70%, 80% {
+    transform: rotateY(180deg);
+    /* Face-up gleaming gold card with central multiplier glint */
+    background: 
+      radial-gradient(circle at center, #ffffff 1px, transparent 2px),
+      linear-gradient(135deg, #fff3a8 0%, #ffd700 50%, #b48a04 100%);
+    border-color: rgba(255, 215, 0, 0.85);
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+  95%, 100% {
+    transform: rotateY(360deg);
+    /* Continuous smooth loop back to holographic face-down */
+    background: 
+      radial-gradient(circle at center, #ffd700 0.5px, transparent 1px),
+      linear-gradient(135deg, #1e1b4b 0%, #49108b 50%, #7c3aed 100%);
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 2px rgba(124, 58, 237, 0.2);
+  }
+}
+
+/* Indigo-purple characters, three ghost cards rotating behind */
+.g-spqg {
+  transform: translateZ(0);
+  position: relative;
+  display: inline-block;
+  padding: 0 0.12em;
+
+  /* Amethyst-chrome core gradient */
+  background: linear-gradient(180deg, #7c3aed 0%, #5b21b6 50%, #2e1065 100%);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  -webkit-text-stroke: 0.5px #ffd700;
+
+  /* Warm gold and purple glows */
+  text-shadow:
+    0 0 3px rgba(255, 215, 0, 0.7),
+    0 0 10px rgba(124, 58, 237, 0.35);
+}
+
+/* Three tiny card silhouettes */
+.g-spqg::before {
+  content: '';
+  position: absolute;
+  top: -38%;
+  left: 20%;
+  width: 0.32em;
+  height: 0.48em;
+  border-radius: 2px;
+  border: 0.5px solid transparent;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, background, border-color, box-shadow;
+  perspective: 200px;
+  animation: spqg-flip1 4s ease-in-out infinite;
+}
+
+.g-spqg::after {
+  content: '';
+  position: absolute;
+  top: -38%;
+  right: 20%;
+  width: 0.32em;
+  height: 0.48em;
+  border-radius: 2px;
+  border: 0.5px solid transparent;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform, background, border-color, box-shadow;
+  perspective: 200px;
+  animation: spqg-flip2 4s ease-in-out infinite;
+}
+
+/* TIER 4: Octoquadragintillion - Static Overload */
+/* Cyan-blue with magenta edge, lightning via dash animation */
+@keyframes ocqg-static-noise {
+  0%   { background-position: 0% 0, 0 0; }
+  100% { background-position: 200% 0, 0 0; }
+}
+
+@keyframes ocqg-glow-surge {
+  0% {
+    text-shadow:
+      0 0 2px rgba(0, 180, 216, 0.65),
+      0 0 6px rgba(0, 180, 216, 0.25);
+  }
+  100% {
+    text-shadow:
+      0 0 5px rgba(0, 180, 216, 0.95),
+      0 0 14px rgba(219, 39, 119, 0.55);
+  }
+}
+
+@keyframes ocqg-grid-pulse {
+  0%   { opacity: 0.45; }
+  100% { opacity: 0.95; }
+}
+
+@keyframes ocqg-current-surge {
+  0% {
+    border-color: rgba(0, 150, 200, 0.45);
+    filter: drop-shadow(0 0 1px rgba(0, 150, 200, 0.35));
+    opacity: 0.55;
+  }
+  100% {
+    border-color: rgba(219, 39, 119, 0.95);
+    filter: drop-shadow(0 0 4px rgba(219, 39, 119, 0.8));
+    opacity: 1;
+  }
+}
+
+/* Cyan-blue with magenta edge */
+.g-ocqg {
+  transform: translateZ(0);
+  display: inline-block;
+  position: relative;
+  padding: 0 0.15em;
+
+  /* Flowing high-voltage current + cyan-blue core gradient */
+  background: 
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0) 25%,
+      #ffffff 30%,
+      #00f0ff 35%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0) 65%,
+      #ffffff 70%,
+      #00f0ff 75%,
+      rgba(255, 255, 255, 0) 80%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    linear-gradient(180deg, #00f0ff 0%, #0077b6 100%);
+  background-size: 200% 100%, 100% 100%;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  -webkit-text-stroke: 0.5px #ff00dc;
+  letter-spacing: 0.08em;
+  font-family: ui-monospace, 'Courier New', monospace;
+
+  /* Soft chromatic glows */
+  text-shadow:
+    0 0 3px rgba(0, 180, 216, 0.85),
+    0 0 10px rgba(219, 39, 119, 0.35);
+
+  animation: 
+    ocqg-static-noise 4.5s linear infinite,
+    ocqg-glow-surge 2s ease-in-out infinite alternate;
+}
+
+/* Dot-matrix pulse grid */
+.g-ocqg::before {
+  content: '';
+  position: absolute;
+  inset: -4px -8px;
+  z-index: -2;
+  pointer-events: none;
+  will-change: opacity;
+
+  /* Procedural coordinate matrix */
+  background: radial-gradient(circle, rgba(0, 180, 216, 0.6) 1.2px, transparent 1.8px);
+  background-size: 6px 6px;
+
+  animation: ocqg-grid-pulse 2.5s ease-in-out infinite alternate;
+}
+
+/* Microscopic lightning currents */
+.g-ocqg::after {
+  content: '';
+  position: absolute;
+  inset: -4px -8px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 4px;
+  will-change: filter, border-color, opacity;
+
+  /* High-voltage dashed border */
+  border: 1.2px dashed #0096c7;
+
+  animation: ocqg-current-surge 2.5s ease-in-out infinite alternate;
+}
+
+/* TIER 5: Novemquadragintillion - spectral Sweep */
+@keyframes noqg-prism-spin {
+  0%   { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes noqg-glisten {
+  0%   { background-position: -200% 0, 0 0; }
+  45%  { background-position: 300% 0, 0 0; }
+  60%, 100% { background-position: 300% 0, 0 0; }
+}
+
+/* Chromatic gradient shift */
+.g-noqg {
+  transform: translateZ(0);
+  display: inline-block;
+  position: relative;
+  padding: 0 0.12em;
+
+  /* Specular glisten bar layered directly on top of the base silver gradient */
+  background: 
+    linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0) 100%) no-repeat,
+    linear-gradient(180deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+  background-size: 150px 100%, 100% 100%;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  -webkit-text-stroke: 0.5px #1e293b;
+
+  /* Chromatic aberration border shadows */
+  filter: 
+    drop-shadow(0 0.5px 0px #1e293b)
+    drop-shadow(0 -0.5px 0px #1e293b)
+    drop-shadow(0 0 2px rgba(236, 72, 153, 0.35))
+    drop-shadow(0 0 6px rgba(56, 189, 248, 0.25));
+
+  animation: noqg-glisten 4s ease-in-out infinite;
+}
+
+/* Prism diffraction fan */
+.g-noqg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.8em;
+  height: 1.8em;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+  filter: blur(2px);
+
+  /* Dispersed light spectrum */
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(236, 72, 153, 0.5) 0deg,
+    rgba(234, 179, 8, 0.5) 60deg,
+    rgba(34, 197, 94, 0.5) 120deg,
+    rgba(56, 189, 248, 0.5) 180deg,
+    rgba(168, 85, 247, 0.5) 240deg,
+    rgba(236, 72, 153, 0.5) 300deg,
+    rgba(236, 72, 153, 0.5) 360deg
+  );
+
+  /* Radial mask hollowing out the center to form a clean rotating ring */
+  -webkit-mask-image: radial-gradient(circle at center, transparent 38%, #000000 42%, #000000 58%, transparent 65%);
+  mask-image: radial-gradient(circle at center, transparent 38%, #000000 42%, #000000 58%, transparent 65%);
+
+  animation: noqg-prism-spin 10s linear infinite;
+}
+
+/* Chromatic gradient shift */
+.g-noqg {
+  transform: translateZ(0);
+  display: inline-block;
+  position: relative;
+  padding: 0 0.12em;
+
+  /* Pristine sterling silver chrome gradient */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #cbd5e1 50%,
+    #94a3b8 100%
+  );
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  -webkit-text-stroke: 0.5px #1e293b;
+
+  /* Chromatic aberration border shadows */
+  filter: 
+    drop-shadow(0 0.5px 0px #1e293b)
+    drop-shadow(0 -0.5px 0px #1e293b)
+    drop-shadow(0 0 2px rgba(236, 72, 153, 0.35))
+    drop-shadow(0 0 6px rgba(56, 189, 248, 0.25));
+}
+
+@keyframes noqg-sweep-line {
+  0%   { left: 5%; opacity: 0; }
+  10%  { left: 5%; opacity: 1; }
+  80%  { left: 95%; opacity: 1; }
+  90%  { left: 95%; opacity: 0; }
+  100% { left: 5%; opacity: 0; }
+}
+
+/* Prismatic glisten */
+.g-noqg::after {
+  content: '' !important;
+  display: block !important;
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: 5%;
+  width: 0.08em; /* Ultra-thin refracting light-line */
+  pointer-events: none;
+  z-index: 2;
+  will-change: left, opacity;
+
+  /* White-hot center with vertical fade-outs to prevent box leakage */
+  background: linear-gradient(
+    180deg,
+    rgba(236, 72, 153, 0) 0%,
+    #ffffff 50%,
+    rgba(56, 189, 248, 0) 100%
+  );
+
+  /* High-intensity magenta-cyan spectral glow */
+  box-shadow: 
+    0 0 4px #ffffff,
+    0 0 8px rgba(236, 72, 153, 0.8),
+    0 0 15px rgba(56, 189, 248, 0.65);
+
+  animation: noqg-sweep-line 2.2s ease-in-out infinite;
+}
+
+/* TIER 6: Quinquagintillion - Reticle Sweep */
+/* Tactical dark-green monospace */
+@keyframes qg-reticle {
+  0% { 
+    left: -35%; 
+    transform: translate(-50%, -50%) scale(1.4); 
+    opacity: 0; 
+  }
+  12% {
+    opacity: 0.85;
+  }
+  35% { 
+    left: 50%; 
+    transform: translate(-50%, -50%) scale(1); 
+    opacity: 1; 
+  }
+  35%, 48% { 
+    left: 50%; 
+    transform: translate(-50%, -50%) scale(0.72); /* Reticle shrinks to lock on */
+    opacity: 1; 
+  }
+  58% { 
+    left: 50%; 
+    transform: translate(-50%, -50%) scale(1.1); 
+    opacity: 1; 
+  }
+  88% {
+    opacity: 0.85;
+  }
+  100% { 
+    left: 135%; 
+    transform: translate(-50%, -50%) scale(1.4); 
+    opacity: 0; 
+  }
+}
+
+@keyframes qg-flash {
+  0%, 46% { 
+    transform: translate(-50%, -50%) scale(0); 
+    opacity: 0; 
+  }
+  48% { 
+    transform: translate(-50%, -50%) scale(1); 
+    opacity: 1; /* Instant white-hot flash detonation */
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(2.4); 
+    opacity: 0.8; /* Expands into lens flare */
+  }
+  65% { 
+    transform: translate(-50%, -50%) scale(3); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(0); 
+    opacity: 0; 
+  }
+}
+
+@keyframes qg-text-scan {
+  0%   { background-position: 0% 100%, 0% 0%, 0% 0%; }
+  100% { background-position: 0% -100%, 0% 0%, 0% 0%; }
+}
+
+/* Tactical dark-green monospace */
+.g-qg {
+  transform: translateZ(0);
+  display: inline-block;
+  position: relative;
+  padding: 0 0.15em;
+
+  /* Layered HUD diagonal grid + animated scanning laser bar */
+  background: 
+    linear-gradient(180deg, rgba(34, 197, 94, 0) 35%, #22c55e 46%, #ffffff 50%, #22c55e 54%, rgba(34, 197, 94, 0) 65%) no-repeat,
+    repeating-linear-gradient(45deg, rgba(34, 197, 94, 0.12) 0px, rgba(34, 197, 94, 0.12) 1.5px, transparent 1.5px, transparent 4px),
+    linear-gradient(180deg, #14532d 0%, #166534 40%, #052e16 100%);
+  background-size: 100% 200%, 100% 100%, 100% 100%;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  /* Deep tactical stroke border */
+  -webkit-text-stroke: 0.6px #14532d;
+  letter-spacing: 0.08em;
+  font-family: ui-monospace, 'Courier New', monospace;
+
+  /* Soft tactical glows */
+  text-shadow:
+    0 0 3px rgba(34, 197, 94, 0.85),
+    0 0 10px rgba(34, 197, 94, 0.25);
+
+  animation: qg-text-scan 3s linear infinite;
+}
+
+/* Reticle crosshair arms */
+.g-qg::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.85em;
+  height: 0.85em;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+  will-change: left, transform;
+
+  /* Red-to-red alpha crosshair gradients */
+  background: 
+    radial-gradient(circle, rgba(255, 34, 34, 0) 3px, #ff2222 3.5px, #ff2222 5px, rgba(255, 34, 34, 0) 5.5px) no-repeat center,
+    linear-gradient(90deg, rgba(255, 34, 34, 0), #ff2222 20%, #ff2222 80%, rgba(255, 34, 34, 0)) no-repeat center / 100% 1px,
+    linear-gradient(180deg, rgba(255, 34, 34, 0), #ff2222 20%, #ff2222 80%, rgba(255, 34, 34, 0)) no-repeat center / 1px 100%;
+
+  filter: drop-shadow(0 0 2px rgba(255, 34, 34, 0.85));
+
+  animation: qg-reticle 2.8s ease-in-out infinite;
+}
+
+/* Vertical crosshair arm */
+.g-qg::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.6em;
+  height: 0.6em;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  z-index: 2;
+  will-change: transform, opacity;
+
+  /* Red-to-red alpha gradient */
+  background: radial-gradient(circle, #ffffff 0%, rgba(255, 34, 34, 0.55) 45%, rgba(255, 34, 34, 0) 70%);
+
+  animation: qg-flash 2.8s ease-in-out infinite;
+}
+
+/* TIER 7: Unquinquagintillion - Monochrome Cipher */
+/* Terminal emerald-green, runic scroll */
+@keyframes uqg-scroll {
+  0%   { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(-35%); }
+}
+
+@keyframes uqg-refresh {
+  0%, 100% { opacity: 0.65; }
+  50%      { opacity: 1; }
+}
+
+.g-uqgs {
+  transform: translateZ(0);
+  display: inline-block;
+  position: relative;
+  padding: 0 0.1em;
+
+  color: #00ff66;
+  font-family: ui-monospace, 'Courier New', monospace;
+  -webkit-text-stroke: 0.5px #003311;
+  
+  /* High-end neon CRT monitor bloom */
+  filter:
+    drop-shadow(0 0.5px 0px #003311)
+    drop-shadow(0 -0.5px 0px #003311)
+    drop-shadow(0 0 3px rgba(0, 255, 102, 0.8))
+    drop-shadow(0 0 10px rgba(0, 255, 102, 0.35));
+}
+
+/* Scrolling rune mask */
+.g-uqgs::before {
+  content: 'Ψ Ω Δ Σ Φ\A Λ Θ Ξ Π Γ\A β λ ξ ζ θ\A ψ Ψ Ω Δ Σ\A Φ Λ Θ Ξ Π\A Ψ Ω Δ Σ Φ\A Λ Θ Ξ Π Γ\A β λ ξ ζ θ\A ψ Ψ Ω Δ Σ\A Φ Λ Θ Ξ Π';
+  white-space: pre; 
+  position: absolute;
+  top: -15%;
+  left: 50%;
+  transform: translateX(-50%) translateZ(0);
+  width: 130%;
+  height: 130%;
+  overflow: hidden;
+  font-size: 0.24em;
+  line-height: 1.15;
+  letter-spacing: 0.18em;
+  color: rgba(0, 255, 102, 0.25);
+  -webkit-text-stroke: none !important;
+  -webkit-text-stroke-width: 0px !important;
+  text-align: center;
+  word-break: break-all;
+  pointer-events: none;
+  z-index: -1;
+  will-change: transform;
+  animation: uqg-scroll 10s ease-in-out infinite alternate;
+}
+
+/* Soft scanline grid */
+.g-uqgs::after {
+  content: '';
+  position: absolute;
+  inset: -4px -8px;
+  pointer-events: none;
+  z-index: 2;
+
+  /* Double-layered horizontal and vertical terminal CRT screen grid */
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 255, 102, 0.08) 3px,
+      rgba(0, 255, 102, 0.08) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 4px,
+      rgba(0, 255, 102, 0.04) 4px,
+      rgba(0, 255, 102, 0.04) 5px
+    );
+
+  animation: uqg-refresh 2.5s ease-in-out infinite;
+  will-change: opacity;
+}
+/* TIER 8: Duoquinquagintillion - Prismatic Extraction */
+/* Purple-to-magenta crystalline gradient, floating shard reflections */
+@keyframes dqg-sweep {
+  to { background-position-x: 200%; }
+}
+
+@keyframes dqg-shard1 {
+  0%, 100% { 
+    transform: rotateZ(0deg) translateY(0px) scale(1); 
+    filter: drop-shadow(0 0.5px 0px #4a044e) brightness(1); 
+  }
+  50% { 
+    transform: rotateZ(18deg) translateY(-4px) scale(1.08); 
+    filter: drop-shadow(0 2px 4px rgba(255, 215, 0, 0.65)) brightness(1.22); 
+  }
+}
+
+@keyframes dqg-shard2 {
+  0%, 100% { 
+    transform: rotateZ(0deg) translateY(0px) scale(1); 
+    filter: drop-shadow(0 0.5px 0px #4a044e) brightness(1); 
+  }
+  35% { 
+    transform: rotateZ(-22deg) translateY(-3px) scale(1.05); 
+    filter: drop-shadow(0 1.5px 3px rgba(255, 215, 0, 0.55)) brightness(1.25); 
+  }
+}
+
+.g-dqgs {
+  transform: translateZ(0);
+  display: inline-block;
+  position: relative;
+  padding: 0 0.15em;
+
+  /* Layered faceted stripe pattern + crystal violet-to-magenta gradient */
+  background: 
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0px, rgba(255, 255, 255, 0.12) 2px, transparent 2px, transparent 5px),
+    linear-gradient(90deg, #4c1d95 0%, #a855f7 25%, #fffbeb 50%, #ec4899 75%, #701a75 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  /* Amethyst stroke contrast */
+  -webkit-text-stroke: 0.5px #4a044e;
+
+  /* 4-way sub-pixel outline to define boundaries on white templates */
+  filter:
+    drop-shadow(0 0.5px 0px #4a044e)
+    drop-shadow(0 -0.5px 0px #4a044e)
+    drop-shadow(0 0 3px rgba(236, 72, 153, 0.65))
+    drop-shadow(0 0 10px rgba(168, 85, 247, 0.3));
+
+  animation: dqg-sweep 6s linear infinite;
+}
+
+/* Crystal shard 1 */
+.g-dqgs::before {
+  content: '';
+  position: absolute;
+  width: 0.22em;
+  height: 0.4em;
+  bottom: -15%;
+  left: 20%;
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: center center;
+  will-change: transform, filter;
+
+  /* Prismatic warm gold, magenta, and purple blend */
+  background: linear-gradient(135deg, #ffe042 0%, #ec4899 50%, #8b5cf6 100%);
+
+  /* Diamond polygon geometry */
+  clip-path: polygon(50% 0%, 90% 50%, 50% 100%, 10% 50%);
+
+  animation: dqg-shard1 3.6s ease-in-out infinite;
+}
+
+/* Crystal shard 2 */
+.g-dqgs::after {
+  content: '';
+  position: absolute;
+  width: 0.18em;
+  height: 0.34em;
+  bottom: -10%;
+  right: 18%;
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: center center;
+  will-change: transform, filter;
+
+  /* Prismatic warm gold, magenta, and purple blend */
+  background: linear-gradient(135deg, #ffe042 0%, #ec4899 55%, #a855f7 100%);
+
+  /* Diamond polygon geometry */
+  clip-path: polygon(50% 0%, 90% 50%, 50% 100%, 10% 50%);
+
+  animation: dqg-shard2 4.8s ease-in-out infinite;
+}
+
+/* TIER 9: ROYAL TREASURE PILE  10^162  Trequinquagintillion */
+/* Overall Effect: Volcanic gold core with soft bronze-gold outline topped by a hovering  
+   golden crown and anchored in a massive high-density vertical mound of gold coins. */
+@keyframes tqg-gold-flow {
+  0%   { background-position-x: 0%; }
+  100% { background-position-x: 200%; }
+}
+@keyframes tqg-crown-hover {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0) scale(1);
+    filter: drop-shadow(0 0.5px 0px #78350f) drop-shadow(0 0 3px rgba(255, 215, 0, 0.9));
+  }
+  50% {
+    transform: translateX(-50%) translateY(-3px) scale(1.05);
+    filter: drop-shadow(0 0.5px 0px #78350f) drop-shadow(0 0 6px rgba(255, 215, 0, 1));
+  }
+}
+@keyframes tqg-coin-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+    opacity: 0.92;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 1;
+  }
+}
+.g-tqgs {
+  font-weight: 900;
+  display: inline-block;
+  position: relative;
+  isolation: isolate;
+  z-index: 1;
+  padding: 0 0.12em;
+
+  /* Radiant Liquid Gold Flow with white-hot center reflection */
+  background: linear-gradient(
+    90deg,
+    #b45309 0%,
+    #d97706 15%,
+    #f59e0b 30%,
+    #fffbeb 45%,
+    #ffffff 50%,
+    #fffbeb 55%,
+    #fbbf24 70%,
+    #d97706 85%,
+    #b45309 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  /* Clean gold-bronze stroke framing */
+  -webkit-text-stroke: 0.6px #78350f;
+
+  filter: 
+    drop-shadow(0 0.5px 0px #78350f)
+    drop-shadow(0 0 3px rgba(251, 191, 36, 0.85))
+    drop-shadow(0 0 10px rgba(255, 234, 117, 0.3));
+
+  animation: tqg-gold-flow 4s linear infinite;
+}
+
+/* Royal Crown */
+.g-tqgs:before {
+  content: '';
+  position: absolute;
+  top: -34%;
+  left: 50%;
+  width: 0.46em;
+  height: 0.32em;
+  transform: translateX(-50%) translateZ(0);
+  pointer-events: none;
+  z-index: 5;
+  will-change: transform, filter;
+
+  /* Saturated gold-to-amber gradient to prevent background blend-in */
+  background: linear-gradient(180deg, #ffe853 0%, #f59e0b 60%, #d97706 100%);
+
+  /* Multi-directional micro-outline to define the peaks on light backdrops */
+  filter: 
+    drop-shadow(0 -0.5px 0px #78350f)
+    drop-shadow(-0.5px 0px 0px #78350f)
+    drop-shadow(0.5px 0px 0px #78350f)
+    drop-shadow(0 0.5px 0px #78350f)
+    drop-shadow(0 0 3px rgba(251, 191, 36, 0.45));
+
+  /* Geometric 5-peak royal crown clip-path */
+  clip-path: polygon(
+    10% 90%, 
+    90% 90%, 
+    85% 30%, 
+    70% 58%, 
+    50% 15%, 
+    30% 58%, 
+    15% 30%
+  );
+
+  animation: tqg-crown-hover 2.5s ease-in-out infinite;
+}
+
+/* Massive Gold Coin Pile (Vertical Height x5) */
+.g-tqgs::after {
+  content: '';
+  position: absolute;
+  bottom: -0.38em; 
+  left: 3%;
+  right: 3%;
+  height: 0.55em; 
+  z-index: -1;
+  pointer-events: none;
+  will-change: transform, opacity;
+
+  clip-path: polygon(
+    0% 100%, 
+    5% 85%, 15% 50%, 25% 68%, 35% 38%, 45% 58%, 
+    50% 15%, 55% 58%, 65% 32%, 75% 62%, 85% 45%, 
+    95% 78%, 100% 100%
+  );
+
+  background: 
+    repeating-radial-gradient(
+      circle at 50% 100%, 
+      rgba(255, 255, 255, 0.4) 0px, 
+      rgba(255, 255, 255, 0.4) 3px, 
+      transparent 3px, 
+      transparent 6px, 
+      rgba(138, 90, 0, 0.2) 6px, 
+      rgba(138, 90, 0, 0.2) 7px
+    ),
+    linear-gradient(180deg, #ffea75 0%, #ffcf00 50%, #b45309 100%);
+  background-size: 200% 100%;
+
+  filter: drop-shadow(0 1px 2px rgba(138, 90, 0, 0.4));
+
+  animation: tqg-coin-shimmer 6s ease-in-out infinite;
+}
 
 /* --- SEASON 3 NUMBER TIERS --- */
 
@@ -3084,6 +4036,7 @@ span.tracking-wider[title]:active::after {
   -webkit-text-fill-color: initial !important;
   color: inherit !important;
 }
+
 .tier-clean-text::before,
 .tier-clean-text::after {
   content: none !important;
@@ -3302,19 +4255,12 @@ span.tracking-wider[title]:active::after {
 
 .row-prestige-mythical {
   color: #7f1d1d;
-  
-  /* Added: Fills the entire row container with a solid, visible pink base */
   background-color: rgba(220, 38, 38, 0.10) !important; 
-  
-  /* Scaled up the ellipse percentages slightly for a wider horizontal spread */
   background-image:
     radial-gradient(ellipse 55% 130% at 50% 50%, rgba(220, 38, 38, 0.24), transparent),
     radial-gradient(ellipse 45% 120% at 50% 50%, rgba(153, 27, 27, 0.20), transparent),
     radial-gradient(ellipse 75% 160% at 50% 50%, rgba(185, 28, 28, 0.12), transparent);
-    
-  /* Sized slightly wider (e.g. 80% instead of 68%) to extend coverage to the edges */
   background-size: 60% 100%, 50% 100%, 80% 100%;
-  
   background-repeat: no-repeat;
   animation: liquid-boil 12s ease-in-out infinite;
   will-change: background-position;
@@ -3867,7 +4813,8 @@ span.tracking-wider[title]:active::after {
   background-size: 200% 200% !important;
   animation: event-card-bg-shimmer 3s linear infinite;
 }
-/* ─── Global event badge shimmer text animations ─── */
+
+/* Global event badge shimmer text animations */
 
 @keyframes global-shimmer-tidal {
   0%   { background-position: -200% center; }
@@ -4424,7 +5371,7 @@ span.tracking-wider[title]:active::after {
 .boss-rank-row.my-rank  { border-color: rgba(34,211,238,.35); color: #67e8f9; background: rgba(34,211,238,.06); }
 .boss-rank-num  { font-size: .58rem; opacity: .8; }
 .boss-rank-dmg  { font-variant-numeric: tabular-nums; }
- 
+
 .boss-footer-row { display: flex; align-items: center; justify-content: space-between; width: 100%; padding-top: 2px; border-top: 1px solid rgba(168,85,247,.08); }
 .boss-strike-counter { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
 .boss-strike-number  { font-size: 1.5rem; font-weight: 900; color: #e879f9; text-shadow: 0 0 14px rgba(232,121,249,.8); font-variant-numeric: tabular-nums; line-height: 1; will-change: transform; transition: transform 80ms ease-out; }
@@ -4901,6 +5848,789 @@ span.tracking-wider[title]:active::after {
   transform: translateX(-50%); pointer-events: none; animation: apex-spike .8s ease-in-out infinite alternate;
 }
 @keyframes apex-spike { 0% { height:30px;opacity:.5; } 100% { height:70px;opacity:1; } }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+    NEON PARADISE CONTAINER + STAGE SHARED STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.neon-paradise-container {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  position: relative;
+  animation: np-fade-in 0.3s ease-out forwards;
+}
+
+@keyframes np-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.neon-paradise-header {
+  width: 100%;
+  text-align: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 1rem;
+}
+
+/* Banner */
+.banner-system {
+  font-size: 1.25rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  color: #4f46e5;
+}
+
+.banner-stage {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #7c3aed;
+  margin-top: 0.15rem;
+  text-transform: uppercase;
+}
+
+.bonus-status-bar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.bonus-reward-label {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bonus-reward-value {
+  color: #16a34a;
+  font-weight: 800;
+  margin-left: 0.35rem;
+}
+
+.bonus-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.bonus-loading-text {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Shared stage shell */
+.stage-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  color: #334155;
+}
+
+.stage-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-align: center;
+  color: #1e293b;
+}
+
+.stage-subtitle {
+  font-size: 0.825rem;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.4;
+  margin-top: -0.5rem;
+}
+
+.stage-resolving {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-weight: 600;
+  animation: np-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes np-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.stage-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.stage-result-label {
+  font-size: 0.78rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.stage-result-amount {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #16a34a;
+}
+
+.stage-claim-btn {
+  min-height: 48px;
+  min-width: 160px;
+  padding: 0 1.5rem;
+  border-radius: 9999px;
+  background: #4f46e5;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
+  transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.stage-claim-btn:hover {
+  background: #4338ca;
+}
+
+.stage-claim-btn:active {
+  transform: scale(0.97);
+}
+
+/* Shared chest grid */
+.chest-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.chest-row-five { gap: 0.6rem; }
+
+.chest-btn {
+  min-width: 90px;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 1rem;
+  border: 2px solid #e2e8f0;
+  background: #f8fafc;
+  color: #1e293b;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.75rem;
+  transition: transform 0.1s, border-color 0.15s, background-color 0.15s;
+}
+
+.chest-btn-kings { min-width: 64px; min-height: 80px; }
+
+.chest-btn.chest-idle:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.chest-btn.chest-idle:active {
+  transform: scale(0.95);
+}
+
+.chest-btn:disabled { cursor: default; }
+
+.chest-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.chest-label {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chest-chosen {
+  border-color: #6366f1;
+  background: #f5f3ff;
+}
+
+.chest-chosen .chest-label {
+  color: #6366f1;
+}
+
+.chest-revealed {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  cursor: default;
+}
+
+.chest-reward {
+  font-size: 0.8rem;
+  font-weight: 800;
+  margin-top: 0.15rem;
+}
+
+.chest-reward-chosen {
+  color: #16a34a;
+}
+
+.chest-reward-other {
+  color: #94a3b8;
+}
+
+.chest-tier-label { font-size: 0.68rem; font-weight: 700; text-align: center; line-height: 1.3; }
+.chest-tier-mult  { font-size: 0.72rem; font-weight: 800; }
+
+/* Double Down */
+.don-ladder {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.don-ladder-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  font-size: 0.78rem;
+  color: #64748b;
+  transition: border-color 0.2s, color 0.2s;
+}
+.don-ladder-current {
+  border-width: 2px;
+  background: rgba(255,255,255,0.07);
+  font-weight: 700;
+}
+.don-ladder-past { opacity: 0.4; }
+.don-ladder-step { font-size: 0.7rem; opacity: 0.6; }
+.don-ladder-mult { font-weight: 700; }
+.don-ladder-amount { font-size: 0.72rem; color: #a3e635; }
+
+.don-roll-result { font-size: 0.82rem; font-weight: 700; }
+.don-roll-win  { color: #a3e635; }
+.don-roll-loss { color: #f87171; }
+
+.don-current-reward {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+}
+.don-reward-label  { color: #94a3b8; }
+.don-reward-amount { color: #a3e635; font-weight: 800; }
+
+.don-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+.don-claim-btn  { background: linear-gradient(135deg, #16a34a, #22c55e); }
+.don-gamble-btn {
+  min-height: 52px;
+  min-width: 160px;
+  padding: 0 1.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #b45309, #f59e0b);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.don-gamble-btn:active { opacity: 0.8; }
+
+/* Wild Prediction */
+.card-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  perspective: 600px;
+}
+
+.card-flip-wrapper {
+  width: 80px;
+  height: 112px;
+  position: relative;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.32s ease-in-out;
+  border-radius: 10px;
+}
+.card-flip-wrapper.card-flipping { transform: rotateY(90deg); }
+.card-flip-wrapper.card-flipped  { transform: rotateY(180deg); }
+.card-flip-wrapper.card-next     { box-shadow: 0 0 12px rgba(168, 85, 247, 0.5); }
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(20, 10, 40, 0.9);
+}
+
+.card-back { transform: rotateY(0deg); }
+.card-front { transform: rotateY(180deg); }
+.card-back-icon { font-size: 1.4rem; opacity: 0.4; }
+
+.card-value-name { font-size: 0.62rem; font-weight: 700; text-align: center; line-height: 1.2; }
+.card-value-mult { font-size: 0.9rem;  font-weight: 900; margin-top: 0.2rem; }
+
+.wp-running-total { font-size: 0.8rem; color: #94a3b8; }
+.wp-instruction   { margin-top: -0.4rem; }
+
+/* Rainbow Rush */
+.rr-slots {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.rr-slot {
+  width: 80px;
+  height: 96px;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: border-color 0.3s;
+}
+.rr-slot-spinning { animation: rr-spin-anim 0.18s steps(1) infinite; }
+.rr-slot-revealed { background: rgba(255,255,255,0.07); }
+.rr-slot-pending  { opacity: 0.45; }
+.rr-slot-empty    { font-size: 1.4rem; color: #334155; }
+.rr-slot-spinner  { font-size: 1.6rem; }
+.rr-slot-label    { font-size: 0.7rem;  font-weight: 700; }
+.rr-slot-tier     { font-size: 1.2rem; font-weight: 900; }
+
+@keyframes rr-spin-anim {
+  0%   { opacity: 1;    }
+  50%  { opacity: 0.6;  }
+  100% { opacity: 1;    }
+}
+
+.rr-counter      { font-size: 0.78rem; color: #94a3b8; }
+.rr-final-tier   {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.rr-spin-btn {
+  min-height: 56px;
+  min-width: 180px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #6d28d9, #a855f7);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  letter-spacing: 0.05em;
+}
+.rr-spin-btn:active { opacity: 0.8; }
+
+.rr-payout-table { width: 100%; display: flex; flex-direction: column; gap: 0.3rem; }
+.rr-payout-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+.rr-payout-active {
+  background: rgba(255,255,255,0.06);
+  font-weight: 700;
+}
+
+/* Sniper Challenge*/
+.sniper-difficulty-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+.sniper-diff-btn {
+  min-width: 130px;
+  min-height: 80px;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.04);
+  color: #f1f5f9;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.sniper-diff-btn:active { transform: scale(0.96) translateZ(0); }
+.sniper-diff-easy { border-color: #22c55e; }
+.sniper-diff-hard { border-color: #f59e0b; }
+.sniper-diff-label { font-size: 1rem; font-weight: 800; }
+.sniper-diff-desc  { font-size: 0.68rem; color: #94a3b8; }
+
+.sniper-arena {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 160px;
+  background: rgba(10, 20, 10, 0.8);
+  border: 1px solid rgba(26, 107, 26, 0.4);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sniper-target {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sniper-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(26, 107, 26, 0.5);
+}
+.sniper-ring-outer  { width: 80px; height: 80px; }
+.sniper-ring-mid    { width: 52px; height: 52px; }
+.sniper-ring-inner  { width: 28px; height: 28px; }
+.sniper-bullseye {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff2020;
+  box-shadow: 0 0 4px rgba(255, 32, 32, 0.8);
+}
+
+.sniper-reticle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 1.4rem;
+  color: rgba(255, 30, 30, 0.9);
+  line-height: 1;
+  margin-top: -0.7rem;
+  margin-left: -0.7rem;
+  will-change: transform;
+  text-shadow: 0 0 4px rgba(255,30,30,0.7);
+}
+
+.sniper-fire-btn {
+  min-height: 60px;
+  min-width: 180px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #991b1b, #ef4444);
+  color: #fff;
+  font-weight: 900;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.1s;
+}
+.sniper-fire-btn:active { opacity: 0.75; }
+
+.sniper-zone-ref { width: 100%; display: flex; flex-direction: column; gap: 0.25rem; }
+.sniper-zone-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #64748b;
+  padding: 0.2rem 0.5rem;
+}
+.sniper-zone-result {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+/* Oracle Vision */
+.ov-seq-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ov-seq-pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transition: background 0.2s;
+}
+.ov-seq-done    { background: #00cc44; }
+.ov-seq-current { background: #a855f7; box-shadow: 0 0 6px rgba(168,85,247,0.7); }
+.ov-seq-future  { background: rgba(255,255,255,0.1); }
+.ov-seq-label   { font-size: 0.72rem; color: #64748b; }
+
+.ov-show-phase  { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+.ov-show-label  { font-size: 0.8rem; color: #94a3b8; }
+.ov-show-glyphs { display: flex; gap: 0.75rem; }
+.ov-show-glyph  {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 204, 68, 0.5);
+  background: rgba(0, 204, 68, 0.07);
+  font-family: ui-monospace, monospace;
+  font-size: 1.4rem;
+  color: #00cc44;
+  text-shadow: 0 0 6px rgba(0,204,68,0.8);
+}
+
+.ov-between       { display: flex; align-items: center; justify-content: center; min-height: 80px; }
+.ov-between-label { font-size: 0.85rem; color: #22c55e; font-weight: 700; }
+
+.ov-timer-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.ov-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #00cc44);
+  border-radius: 9999px;
+  transition: width 1s linear;
+}
+.ov-timer-label { font-size: 0.75rem; color: #64748b; align-self: flex-end; }
+
+.ov-progress-dots { display: flex; gap: 0.5rem; }
+.ov-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  transition: background 0.15s, border-color 0.15s;
+}
+.ov-dot-filled  { background: #a855f7; border-color: #a855f7; }
+.ov-dot-correct { background: #22c55e; border-color: #22c55e; }
+.ov-dot-wrong   { background: #ef4444; border-color: #ef4444; }
+
+.ov-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 320px;
+}
+.ov-glyph-btn {
+  min-height: 60px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 204, 68, 0.25);
+  background: rgba(0, 204, 68, 0.05);
+  color: #00cc44;
+  font-family: ui-monospace, monospace;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.1s;
+}
+.ov-glyph-btn:active   { transform: scale(0.92) translateZ(0); }
+.ov-glyph-correct      { background: rgba(34, 197, 94, 0.25); border-color: #22c55e; }
+
+.ov-floor-reminder { font-size: 0.7rem; color: #475569; text-align: center; }
+
+/* Crystal Mine*/
+.cm-status {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+}
+.cm-charges        { display: flex; align-items: center; gap: 0.3rem; }
+.cm-charge-pip     { font-size: 1rem; transition: color 0.2s; }
+.cm-charge-active  { color: #22d3ee; text-shadow: 0 0 4px rgba(34,211,238,0.7); }
+.cm-charge-spent   { color: rgba(255,255,255,0.12); }
+.cm-charges-label  { font-size: 0.68rem; color: #64748b; margin-left: 0.2rem; }
+.cm-crystals-found { color: #94a3b8; font-weight: 700; }
+.cm-running-total  { color: #a3e635; font-weight: 800; }
+.cm-last-found     { font-size: 0.8rem; font-weight: 700; text-align: center; }
+
+.cm-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+  width: 100%;
+  max-width: 340px;
+}
+.cm-tile {
+  min-height: 52px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.2s, transform 0.1s;
+}
+.cm-tile:active:not(:disabled) { transform: scale(0.9) translateZ(0); }
+.cm-tile-hidden  { background: rgba(30, 20, 50, 0.6); }
+.cm-tile-empty   { background: rgba(10, 10, 20, 0.5); border-color: rgba(255,255,255,0.06); cursor: default; }
+.cm-tile-crystal { background: rgba(255,255,255,0.07); cursor: default; }
+.cm-tile:disabled { cursor: default; }
+
+.cm-tile-icon { font-size: 1.3rem; line-height: 1; }
+.cm-tile-rock { font-size: 0.9rem; color: rgba(255,255,255,0.15); }
+
+.cm-legend      { width: 100%; display: flex; flex-direction: column; gap: 0.2rem; }
+.cm-legend-row  {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.4rem;
+  color: #64748b;
+}
+.cm-exhausted { font-size: 0.78rem; color: #64748b; }
+.cm-bonus-label { font-size: 0.82rem; color: #ffd700; font-weight: 700; }
+
+/* Surge Frenzy */
+.sf-hud {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  gap: 0.5rem;
+}
+.sf-hud > div { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+
+.sf-timer-label, .sf-combo-label, .sf-mult-label {
+  font-size: 0.62rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.sf-timer-value { font-size: 1.3rem; font-weight: 900; color: #f1f5f9; }
+.sf-timer-urgent { color: #ef4444; text-shadow: 0 0 6px rgba(239,68,68,0.6); }
+.sf-combo-value  { font-size: 1.3rem; font-weight: 900; color: #f1f5f9; }
+.sf-combo-high   { color: #f59e0b; }
+.sf-combo-max    { color: #ff0080; text-shadow: 0 0 8px rgba(255,0,128,0.6); }
+.sf-mult-value   { font-size: 1.1rem; font-weight: 800; color: #a3e635; }
+
+.sf-timer-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+.sf-timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+  border-radius: 9999px;
+}
+
+.sf-arena {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  height: 240px;
+  background: rgba(5, 10, 20, 0.85);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sf-node {
+  border-radius: 50%;
+  border: 2px solid rgba(0, 212, 255, 0.6);
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(0, 212, 255, 0.35),
+    rgba(0, 100, 200, 0.15)
+  );
+  color: #00d4ff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  will-change: transform, opacity;
+  transition: none;
+  border: none;
+}
+.sf-node:active { filter: brightness(1.4); }
+
+.sf-final-combo { font-size: 0.9rem; color: #94a3b8; }
+
+.sf-payout-ref { width: 100%; display: flex; flex-direction: column; gap: 0.25rem; }
+.sf-payout-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #475569;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+.sf-payout-active {
+  background: rgba(255,255,255,0.05);
+  color: #f1f5f9;
+  font-weight: 700;
+}
 
 /* --- OPTIMIZATION --- */
 

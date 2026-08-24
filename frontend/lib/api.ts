@@ -139,7 +139,10 @@ export async function markAutoBetUsed(userId: string): Promise<void> {
   } catch {}
 }
 
-export async function updateAutoEquipBadges(shortId: string, autoEquip: boolean) {
+export async function updateAutoEquipBadges(
+  shortId: string,
+  autoEquip: boolean
+) {
   return handleResponse<{ success: boolean }>(
     fetch(`${API_BASE}/api/users/auto-equip-badges`, {
       method: 'PATCH',
@@ -506,6 +509,50 @@ export async function unequipRelicFromSlot(userId: string, slotIndex: number) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, slotIndex })
+    })
+  )
+}
+
+export async function fetchActiveBonusSession(userId: string) {
+  return handleResponse<{
+    active: boolean
+    session?: {
+      id: string
+      stageType: import('@/types/rps').StageType
+      accumulatedPayout: string
+      lastBetAmount: string
+      stageStepsCompleted: number
+      maxSteps: number | null
+    }
+    reconnectData?: unknown
+  }>(
+    fetch(`${API_BASE}/api/bonus/active`, {
+      headers: { 'x-user-id': userId }
+    })
+  )
+}
+
+export async function postBonusAction(
+  userId: string,
+  actionPayload: Record<string, unknown>
+) {
+  return handleResponse<{ session: unknown }>(
+    fetch(`${API_BASE}/api/bonus/action`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': userId
+      },
+      body: JSON.stringify({ actionPayload })
+    })
+  )
+}
+
+export async function claimBonusWinnings(userId: string) {
+  return handleResponse<{ finalPayout: string }>(
+    fetch(`${API_BASE}/api/bonus/claim`, {
+      method: 'POST',
+      headers: { 'x-user-id': userId }
     })
   )
 }

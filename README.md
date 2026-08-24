@@ -50,6 +50,7 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 - [Global Events](#-global-events)
 - [Flash Events](#-flash-events)
 - [Player Festivals](#️-player-festivals)
+- [Neon Paradise](#-neon-paradise)
 
 ### 📊 Progression Systems
 - [Predictor Achievements](#-predictor-achievements)
@@ -313,6 +314,22 @@ The Oracle system also runs autonomous weighted festivals during low-concurrency
 </p>
 
 > 📋 **[View all Festival showcases →](./FESTIVALS.md)**
+
+---
+
+## 🌴 Neon Paradise
+
+Neon Paradise is the Season 4 bonus stage system. When a bonus stage triggers, the standard prediction interface transforms into an interactive mini-game, with nine self-contained experiences featuring distinct gameplay, visuals, audio, and reward systems.
+
+Bonus stages trigger exclusively during active manual prediction sessions at a combined 2% chance per resolved prediction. Every stage guarantees at least +2x the triggering bet, with stronger performance reaching higher reward tiers up to +10x.
+
+<p align="center">
+  <em><strong>Neon Paradise</strong>: Nine distinct interactive bonus stages, each with its own gameplay mechanic and presentation.</em>
+  <br />
+  <img src="./assets/neonparadise_showcase.gif" width="280" />
+</p>
+
+> 📋 **[View the full Neon Paradise breakdown →](./NEONPARADISE.md)**
 
 ---
 

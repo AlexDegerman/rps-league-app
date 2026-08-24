@@ -138,7 +138,7 @@ All Relic drop rates are doubled (2x) for the duration.
 **Duration:** 30 seconds, 6 matches
 
 **Effect: Streak Aegis**
-Losses do not reset win streaks for the duration. Streak multipliers are frozen in place regardless of match outcome.
+Losses do not reset the win streak for the duration.
 
 **Theme:** Crimson Red and Burning Orange, pulsing heat-haze distortion
 

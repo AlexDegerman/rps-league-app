@@ -73,6 +73,13 @@ import { buildWorldBossWarningSpeech } from '@/lib/eventCountdown'
 import { pushBurstEvent } from '@/lib/worldBossFeed'
 import WorldBossArena from '@/components/game/WorldBossArena'
 import WorldBossChestOpening, { ChestResult } from '@/components/game/WorldBossChestOpening'
+import NeonParadiseContainer from '@/components/game/NeonParadiseContainer'
+import type {
+  BonusStageTriggerSSEData,
+  BonusStageCompletedSSEData
+} from '@/types/rps'
+import { ORACLE_VOICE_LINES } from '@/lib/constants'
+import { fetchActiveBonusSession } from '@/lib/api'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -109,6 +116,8 @@ export default function HomePage() {
   const setLastBossHitResult = useGameStore((s) => s.setLastBossHitResult)
   const worldBossUIActive = useUIStore((s) => s.worldBossUIActive)
   const setWorldBossUIActive = useUIStore((s) => s.setWorldBossUIActive)
+  const setBonusActive = useGameStore((s) => s.setBonusActive)
+  const isBonusActive = useGameStore((s) => s.isBonusActive)
 
   // --- User Store Selectors ---
   const points = useUserStore((s) => s.points)
@@ -633,6 +642,18 @@ export default function HomePage() {
       })
       .catch(() => {})
 
+      fetchActiveBonusSession(user.userId)
+        .then((data) => {
+          if (data?.active && data.session) {
+            setBonusActive(
+              data.session.stageType,
+              BigInt(data.session.lastBetAmount),
+              data.reconnectData ?? null
+            )
+          }
+        })
+        .catch(() => {})
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
 
@@ -1121,10 +1142,12 @@ export default function HomePage() {
 
     es.addEventListener('world_boss_end', (event) => {
       const data = JSON.parse(event.data)
-      clearWorldBoss()
       if (data.outcome === 'DEFEAT') playBossDie(data.bossType)
       // Delay UI swap so chest animation plays first
-      setTimeout(() => setWorldBossUIActive(false), 2500)
+      setTimeout(() => {
+        clearWorldBoss()
+        setWorldBossUIActive(false)
+      }, 1000)
       const outcomeMsg =
         data.outcome === 'DEFEAT'
           ? `${data.bossType} DEFEATED, Rewards incoming!`
@@ -1201,6 +1224,36 @@ export default function HomePage() {
           : null,
         twinRelicDrop: data.twinRelicDrop ?? null
       })
+    })
+
+    es.addEventListener('bonus_stage_triggered', (event) => {
+      const data = JSON.parse(event.data) as BonusStageTriggerSSEData & {
+        userId: string
+      }
+      if (data.userId !== myUserId) return
+
+      setTimeout(() => {
+        setBonusActive(
+          data.stageType,
+          BigInt(data.session.lastBetAmount),
+          data.initialData ?? null
+        )
+        setOracleTickerMessage({
+          id: `bonus-stage-${Date.now()}`,
+          content: <span>🔮 {ORACLE_VOICE_LINES[data.stageType]}</span>,
+          speech: ORACLE_VOICE_LINES[data.stageType],
+          accentColor: '#a855f7',
+          durationMs: 8000
+        })
+      }, 1200)
+    })
+
+    es.addEventListener('bonus_stage_completed', (event) => {
+      const data = JSON.parse(event.data) as BonusStageCompletedSSEData & {
+        userId: string
+      }
+      if (data.userId !== myUserId) return
+      fetchUpdatedPoints()
     })
 
     es.addEventListener('world_boss_sync', (event) => {
@@ -1322,8 +1375,12 @@ export default function HomePage() {
       <GlobalTickerWrapper />
       <EdgeGlow visualMode={visualMode} />
 
-      {/* World Boss UI swap: hides dashboard during active encounter */}
-      {isBossActive ? (
+      {/* Swap dashboard for the active bonus stage or World Boss encounter */}
+      {isBonusActive ? (
+        <div className="relative z-40 isolate">
+          <NeonParadiseContainer />
+        </div>
+      ) : isBossActive ? (
         <div className="relative z-40 isolate">
           <AchievementToast />
           <WorldBossArena serverOffset={serverOffset} />
@@ -1344,7 +1401,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {!isBossActive && (
+      {!isBossActive && !isBonusActive && (
         <>
           <LiveStatsTicker />
           <EventTimerTicker />
@@ -1360,7 +1417,7 @@ export default function HomePage() {
         </div>
       )}
       {/* Rules bar */}
-      {!isBossActive && (
+      {!isBossActive && !isBonusActive && (
         <div className="flex flex-row items-center justify-between mb-1 gap-1 px-1">
           <div className="flex items-center gap-1.5 text-[9px] sm:text-[10px] text-cyan-600 font-bold uppercase tracking-tight whitespace-nowrap">
             <p>PTS FLOOR: 100K</p>
@@ -1373,20 +1430,22 @@ export default function HomePage() {
         </div>
       )}
 
-      <IdleBetControls />
+      {!isBonusActive && <IdleBetControls />}
 
       {/* Match feed */}
-      <MatchFeed
-        visualMode={visualMode}
-        matches={matches}
-        isLoadingMore={isLoadingMore}
-        hasMore={hasMore}
-        backendReady={backendReady}
-        persistentError={persistentError}
-        isDuplicate={isDuplicate}
-        showConnectionWarning={showConnectionWarning}
-        isOffline={isOffline}
-      />
+      {!isBonusActive && (
+        <MatchFeed
+          visualMode={visualMode}
+          matches={matches}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          backendReady={backendReady}
+          persistentError={persistentError}
+          isDuplicate={isDuplicate}
+          showConnectionWarning={showConnectionWarning}
+          isOffline={isOffline}
+        />
+      )}
 
       <RelicDrawer />
 

@@ -1,3 +1,5 @@
+import pool from '../utils/db.js'
+
 export type AchievementRarity =
   | 'COMMON'
   | 'RARE'
@@ -71,6 +73,19 @@ export interface AchievementStats {
   hadLuckyShot: boolean
   hadClutchVictory: boolean
   hadDivineIntervention: boolean
+  // Neon Paradise
+  bonusStagesPlayed: number
+  crystalMineClears: number
+  oracleVisionPerfectClears: number
+  doubleDownmaxClears: number
+  wildPredictionMaxCombos: number
+  royalTreasureChestsOpened: number
+  royalKingsChestsFound: number
+  hadPerfectSnipe: boolean
+  rainbowTierRolls: number
+  surgeFrenzyMaxComboFinishes: number
+  neonParadiseMinigamesPlayed: Record<string, number>
+  neonFullCircuitToday: boolean
 }
 
 // Category 1: Combatants
@@ -1154,49 +1169,49 @@ const COSMIC_MIRAGE: AchievementDef[] = [
 // Category 16: Achievement Collector
 const COLLECTOR: AchievementDef[] = [
   {
-    code: 'COL15',
+    code: 'COL20',
     name: 'Curious',
-    requirement: 'Earn 15 Achievements',
+    requirement: 'Earn 20 Achievements',
     icon: '📖',
     rarity: 'COMMON',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 15
+    check: (s) => s.totalAchievementsEarned >= 20
   },
   {
-    code: 'COL30',
+    code: 'COL40',
     name: 'Dedicated',
-    requirement: 'Earn 30 Achievements',
+    requirement: 'Earn 40 Achievements',
     icon: '📚',
     rarity: 'RARE',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 30
+    check: (s) => s.totalAchievementsEarned >= 40
   },
   {
-    code: 'COL50',
+    code: 'COL65',
     name: 'Completionist',
-    requirement: 'Earn 50 Achievements',
+    requirement: 'Earn 65 Achievements',
     icon: '🗂️',
     rarity: 'EPIC',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 50
+    check: (s) => s.totalAchievementsEarned >= 65
   },
   {
-    code: 'COL75',
+    code: 'COL95',
     name: 'Archivist',
-    requirement: 'Earn 75 Achievements',
+    requirement: 'Earn 95 Achievements',
     icon: '🏛️',
     rarity: 'LEGENDARY',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 75
+    check: (s) => s.totalAchievementsEarned >= 95
   },
   {
     code: 'COLMAX',
     name: 'Omnivore',
-    requirement: 'Earn 130 Achievements',
+    requirement: 'Earn 142 Achievements',
     icon: '🌟',
     rarity: 'MYTHICAL',
     category: 'Collector',
-    check: (s) => s.totalAchievementsEarned >= 130
+    check: (s) => s.totalAchievementsEarned >= 142
   }
 ]
 
@@ -1223,6 +1238,30 @@ const RAINBOW_CAT: AchievementDef[] = [
       s.solarFlareParticipations >= 50 &&
       s.cycloneBlitzParticipations >= 50 &&
       s.mirageCataclysmParticipations >= 50
+  },
+  {
+    code: 'PURI',
+    name: 'World Purifier',
+    requirement: 'Defeat each of the four World Bosses 50 times',
+    icon: '🌍',
+    rarity: 'RAINBOW',
+    category: 'Rainbow',
+    check: (s) =>
+      s.hexurionKills >= 50 &&
+      s.orphionKills >= 50 &&
+      s.fracturonKills >= 50 &&
+      s.apexionKills >= 50
+  },
+  {
+    code: 'NEON',
+    name: 'Paradise Ascendant',
+    requirement: '50 clears of every bonus stage',
+    icon: '🌈',
+    rarity: 'RAINBOW',
+    category: 'Rainbow',
+    check: (s) =>
+      Object.values(s.neonParadiseMinigamesPlayed).length >= 9 &&
+      Object.values(s.neonParadiseMinigamesPlayed).every((n) => n >= 50)
   }
 ]
 
@@ -1408,22 +1447,163 @@ const WORLD_BOSS_META: AchievementDef[] = [
   }
 ]
 
-const WORLD_BOSS_RAINBOW: AchievementDef[] = [
+const NEON_PARADISE: AchievementDef[] = [
   {
-    code: 'PURI',
-    name: 'World Purifier',
-    requirement: 'Defeat each of the four World Bosses 50 times',
-    icon: '🌍',
-    rarity: 'RAINBOW',
-    category: 'Rainbow',
+    code: 'NEO1',
+    name: 'Paradise Visitor',
+    requirement: 'Trigger 1 bonus stage',
+    icon: '🎰',
+    rarity: 'COMMON',
+    category: 'NEON_PARADISE',
+    check: (s) => s.bonusStagesPlayed >= 1
+  },
+  {
+    code: 'NEO2',
+    name: 'Paradise Explorer',
+    requirement: 'Trigger 10 bonus stages',
+    icon: '🎰',
+    rarity: 'RARE',
+    category: 'NEON_PARADISE',
+    check: (s) => s.bonusStagesPlayed >= 10
+  },
+  {
+    code: 'NEO3',
+    name: 'Paradise Regular',
+    requirement: 'Trigger 50 bonus stages',
+    icon: '🎰',
+    rarity: 'EPIC',
+    category: 'NEON_PARADISE',
+    check: (s) => s.bonusStagesPlayed >= 50
+  },
+  {
+    code: 'NEO4',
+    name: 'Paradise Legend',
+    requirement: 'Trigger 150 bonus stages',
+    icon: '🎰',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.bonusStagesPlayed >= 150
+  },
+  {
+    code: 'NEO5',
+    name: 'Neon Sovereign',
+    requirement: 'Trigger 300 bonus stages',
+    icon: '👑',
+    rarity: 'MYTHICAL',
+    category: 'NEON_PARADISE',
+    check: (s) => s.bonusStagesPlayed >= 300
+  },
+  {
+    code: 'TVLT',
+    name: 'Open the Royal Chest',
+    requirement: 'Get the 10x reward from Treasure Vault',
+    icon: '🏆',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.royalTreasureChestsOpened >= 1
+  },
+  {
+    code: 'KVAL',
+    name: 'Find the Royal Chest',
+    requirement: "Pick the Royal chest in King's Vault",
+    icon: '👑',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.royalKingsChestsFound >= 1
+  },
+  {
+    code: 'DON3',
+    name: 'Reach the 10x Payout',
+    requirement: 'Reach step 3 in Double Down',
+    icon: '⚡',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.doubleDownmaxClears >= 1
+  },
+  {
+    code: 'WILD',
+    name: 'Reveal the Maximum Combination',
+    requirement: 'Flip three Oracle cards in Wild Prediction',
+    icon: '🃏',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.wildPredictionMaxCombos >= 1
+  },
+  {
+    code: 'SFX5',
+    name: 'Reach the 10x Payout',
+    requirement: 'Get the 10x reward in Surge Frenzy',
+    icon: '⚡',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.surgeFrenzyMaxComboFinishes >= 1
+  },
+  {
+    code: 'RRSH',
+    name: 'Roll Rainbow Tier',
+    requirement: 'Average Rainbow spectrum in Rainbow Rush',
+    icon: '🌈',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.rainbowTierRolls >= 1
+  },
+  {
+    code: 'SNIP',
+    name: 'Hit the Perfect Bullseye',
+    requirement: 'Get the 10x reward in Sniper Challenge',
+    icon: '🎯',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.hadPerfectSnipe
+  },
+  {
+    code: 'OVIS',
+    name: 'Complete All Five Sequences',
+    requirement: 'Complete all 5 sequences in Oracle Vision',
+    icon: '🔮',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.oracleVisionPerfectClears >= 1
+  },
+  {
+    code: 'MINE',
+    name: 'Strike the Motherlode',
+    requirement: 'Find 5 diamonds for the 10x reward in Crystal Mine',
+    icon: '💎',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.crystalMineClears >= 1
+  },
+  {
+    code: 'NEO9',
+    name: 'Complete Every Neon Paradise Minigame',
+    requirement: 'Play all 9 bonus stages at least once',
+    icon: '🌈',
+    rarity: 'EPIC',
+    category: 'NEON_PARADISE',
+    check: (s) => Object.keys(s.neonParadiseMinigamesPlayed).length >= 9
+  },
+  {
+    code: 'NE20',
+    name: 'Complete Every Minigame 20 Times',
+    requirement: '20 clears of every bonus stage',
+    icon: '🌈',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
     check: (s) =>
-      s.hexurionKills >= 50 &&
-      s.orphionKills >= 50 &&
-      s.fracturonKills >= 50 &&
-      s.apexionKills >= 50
+      Object.values(s.neonParadiseMinigamesPlayed).length >= 9 &&
+      Object.values(s.neonParadiseMinigamesPlayed).every((n) => n >= 20)
+  },
+  {
+    code: 'CIRC',
+    name: 'Play Every Minigame in a Single Day',
+    requirement: 'All 9 bonus stages in one calendar day',
+    icon: '🌈',
+    rarity: 'LEGENDARY',
+    category: 'NEON_PARADISE',
+    check: (s) => s.neonFullCircuitToday
   }
 ]
-
 
 export const ALL_ACHIEVEMENTS: AchievementDef[] = [
   ...COMBATANTS,
@@ -1450,7 +1630,7 @@ export const ALL_ACHIEVEMENTS: AchievementDef[] = [
   ...WORLD_BOSSES,
   ...WORLD_BOSS_CHESTS,
   ...WORLD_BOSS_META,
-  ...WORLD_BOSS_RAINBOW
+  ...NEON_PARADISE
 ]
 
 export const ACHIEVEMENT_MAP = new Map<string, AchievementDef>(
@@ -1475,4 +1655,94 @@ export function checkAchievements(
     if (a.check(stats)) unlocked.push(a)
   }
   return unlocked
+}
+
+import type { BonusSession, SniperSession } from '../types/bonusStage.js'
+
+export async function checkBonusAchievements(
+  userId: string,
+  session: BonusSession,
+  _finalPayout: bigint
+): Promise<void> {
+  try {
+    if (session.stageType === 'SNIPER_CHALLENGE') {
+      const grid = session.gridState as
+        | (SniperSession & { resolvedZone?: string })
+        | null
+
+      if (grid?.resolvedZone === 'bullseye') {
+        await pool.query(
+          'UPDATE users SET had_perfect_snipe = true WHERE user_id = $1',
+          [userId]
+        )
+      }
+    }
+
+    const userResult = await pool.query(
+      `SELECT bonus_stages_played, had_perfect_snipe,
+        crystal_mine_clears, oracle_vision_perfect_clears,
+              double_down_max_clears, wild_prediction_max_combos,
+              royal_treasure_chests_opened, royal_kings_chests_found,
+              rainbow_tier_rolls, surge_frenzy_max_combo_finishes,
+              neon_paradise_minigames_played, neon_full_circuit_today
+        FROM users WHERE user_id = $1`,
+      [userId]
+    )
+    const u = userResult.rows[0]
+    if (!u) return
+
+    const earnedRes = await pool.query(
+      `SELECT achievement_code FROM user_achievements WHERE user_id = $1`,
+      [userId]
+    )
+    const alreadyEarned = new Set<string>(
+      earnedRes.rows.map(
+        (r: { achievement_code: string }) => r.achievement_code
+      )
+    )
+
+    const partialStats = {
+      bonusStagesPlayed: Number(u.bonus_stages_played ?? 0),
+      hadPerfectSnipe: Boolean(u.had_perfect_snipe),
+      crystalMineClears: Number(u.crystal_mine_clears ?? 0),
+      oracleVisionPerfectClears: Number(u.oracle_vision_perfect_clears ?? 0),
+      doubleDownmaxClears: Number(u.double_down_max_clears ?? 0),
+      wildPredictionMaxCombos: Number(u.wild_prediction_max_combos ?? 0),
+      royalTreasureChestsOpened: Number(u.royal_treasure_chests_opened ?? 0),
+      royalKingsChestsFound: Number(u.royal_kings_chests_found ?? 0),
+      rainbowTierRolls: Number(u.rainbow_tier_rolls ?? 0),
+      surgeFrenzyMaxComboFinishes: Number(
+        u.surge_frenzy_max_combo_finishes ?? 0
+      ),
+      neonParadiseMinigamesPlayed:
+        (u.neon_paradise_minigames_played as Record<string, number>) ?? {},
+      neonFullCircuitToday: Boolean(u.neon_full_circuit_today)
+    } as unknown as AchievementStats
+
+    const newAchievements = [
+      ...NEON_PARADISE,
+      ...RAINBOW_CAT.filter((a) => a.code === 'NEON')
+    ].filter((a) => !alreadyEarned.has(a.code) && a.check(partialStats))
+
+    if (newAchievements.length === 0) return
+
+    const placeholders = newAchievements
+      .map((_, i) => `($1, $${i + 2}, ${Date.now()})`)
+      .join(', ')
+
+    await pool.query(
+      `INSERT INTO user_achievements (user_id, achievement_code, earned_at)
+        VALUES ${placeholders}
+        ON CONFLICT DO NOTHING`,
+      [userId, ...newAchievements.map((a) => a.code)]
+    )
+
+    await pool.query(
+      `UPDATE users SET total_achievements = total_achievements + $1
+        WHERE user_id = $2`,
+      [newAchievements.length, userId]
+    )
+  } catch (err) {
+    console.error('[checkBonusAchievements] error:', err)
+  }
 }

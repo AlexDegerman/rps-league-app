@@ -22,6 +22,7 @@ interface MockGameStoreState {
   pendingMatches: PendingMatch[]
   serverOffset: number
   setPrediction: (gameId: string, prediction: PredictionRecord) => void
+  isBonusActive: boolean
 }
 
 interface MockUserStoreState {
@@ -38,12 +39,21 @@ vi.mock('@/app/stores/idleStore', () => ({
       selector(mockIdleStoreState)
   )
 }))
-vi.mock('@/app/stores/gameStore', () => ({
-  useGameStore: vi.fn(
+vi.mock('@/app/stores/gameStore', () => {
+  const mockStoreFn = vi.fn(
     <T>(selector: (s: MockGameStoreState) => T): T =>
       selector(mockGameStoreState)
   )
-}))
+  const mockStore = Object.assign(mockStoreFn, {
+    getState: () => mockGameStoreState
+  })
+  return {
+    useGameStore: mockStore as unknown as {
+      <T>(selector: (s: MockGameStoreState) => T): T
+      getState: () => MockGameStoreState
+    }
+  }
+})
 vi.mock('@/app/stores/userStore', () => ({
   useUserStore: vi.fn(
     <T>(selector: (s: MockUserStoreState) => T): T =>
@@ -95,13 +105,14 @@ describe('useIdleBet Hook', () => {
         {
           gameId: 'game-101',
           time: INITIAL_SYSTEM_TIME,
-          expiresAt: INITIAL_SYSTEM_TIME + 5000, // 5 seconds remaining
+          expiresAt: INITIAL_SYSTEM_TIME + 5000,
           playerA: 'Alice',
           playerB: 'Bob'
         }
       ],
       serverOffset: 0,
-      setPrediction: vi.fn()
+      setPrediction: vi.fn(),
+      isBonusActive: false
     }
 
     mockUserStoreState = {

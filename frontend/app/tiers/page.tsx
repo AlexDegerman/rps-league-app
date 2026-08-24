@@ -16,6 +16,278 @@ export default function Showcase() {
             Light theme · Live animation · No precision loss
           </div>
         </div>
+        {/* SECTION: SEASON 4 */}
+        <div className="pt-4 px-1 pb-2 text-[10px] tracking-[0.12em] uppercase text-[#bbb] font-[DM_Mono] flex items-center gap-2">
+          <span> Season 4 tiers</span>
+          <div className="h-px flex-1 bg-[#e8e6e1]/50"></div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Trequinquagintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁶²</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fffbeb] text-[#b45309] border border-[#fef3c7] font-medium uppercase tracking-wider">
+                  royal treasure pile
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-tqgs animated">1.2Tqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Radiant liquid-gold gradient text featuring a brilliant, white-hot
+            metallic center reflection and a clean golden-bronze stroke.
+            Hovering in a floating loop above the digits is a geometric, 5-peak
+            gold-to-amber crown framed in sharp sub-pixel bronze shadows, while
+            the baseline anchors into a massive, tall multi-peaked mound of gold
+            coins highlighted by a textured, repeating radial coin-rim pattern
+            and a warm golden ambient glow.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Duoquinquagintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁵⁹</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#faf5ff] text-[#7e22ce] border border-[#f3e8ff] font-medium uppercase tracking-wider">
+                  prismatic extraction
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-dqgs">1.2Dqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Rich purple-to-magenta crystalline gradient text flowing with an
+            active horizontal sweep and overlaid by reflective diagonal
+            micro-facet stripes, framed in a sub-pixel grape-purple stroke.
+            Beneath the baseline, dual geometric diamond crystal shards float
+            and pivot asynchronously, dynamically shifting in brightness to
+            flash with warm golden-to-pink specular reflections.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Unquinquagintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁵⁶</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f0fdf4] text-[#16a34a] border border-[#dcfce7] font-medium uppercase tracking-wider">
+                  monochrome cipher
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-uqgs">1.2Uqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Terminal neon-emerald characters glowing with a high-intensity CRT
+            monitor bloom, overlaid by a pulsing, double-layered horizontal and
+            vertical monitor scanline grid. Features a multi-line matrix
+            waterfall of Greek runic ciphers drifting smoothly up and down in a
+            continuous, fluid alternate loop behind the digits.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Quinquagintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁵³</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#ecfdf5] text-[#047857] border border-[#d1fae5] font-medium uppercase tracking-wider">
+                  reticle sweep
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-qg">1.2Qg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Tactical dark-green monospace digits styled with sharp outer glow
+            shadows. Active horizontal and vertical red laser crosshair lines
+            continuously lock onto and sweep back and forth across the text
+            boundaries.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Novemquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁵⁰</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fdf2f8] text-[#be185d] border border-[#fce7f3] font-medium uppercase tracking-wider">
+                  spectral sweep
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-noqg">1.2Noqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Pristine sterling-silver chrome characters framed by subtle
+            chromatic aberration border shadows. Centered behind the digits, a
+            soft-focused, hollowed-out spectral ring rotates continuously to
+            cast an orbiting rainbow aura, while a razor-thin, vertical
+            refracting scanline sweeps horizontally across the face of the text
+            with smooth vertical fade-offs and a vibrant magenta-cyan glow.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Octoquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁴⁷</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#ecfeff] text-[#0891b2] border border-[#cffafe] font-medium uppercase tracking-wider">
+                  static overload
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-ocqg">1.2Ocqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Vivid cyan-blue gradient characters with a sharp electric-magenta
+            outline, featuring a smooth, continuously flowing white-hot
+            horizontal electric current sweep inside the digits. The entire
+            system is anchored by a high-contrast radial dot-matrix coordinate
+            grid pulsing softly in the background and a static, high-voltage
+            dashed border that morphs smoothly in color and glow intensity
+            between a deep cyan and an electric-magenta surge.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Septenquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁴⁴</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#f5f3ff] text-[#5b21b6] border border-[#eedffc] font-medium uppercase tracking-wider">
+                  sequential flips
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-spqg">1.2Spqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Deep amethyst-chrome characters framed by a delicate gold outline
+            and soft, glowing gold-violet ambient shadows. Symmetrically
+            flanking the top corners of the digits, two luxury 3D playing cards
+            rotate asynchronously in a continuous, split-timeline sequence,
+            seamlessly swapping between holographic indigo star-chart backs and
+            gleaming gold faces with central multiplier glints.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Sexquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹⁴¹</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#fff1f2] text-[#e11d48] border border-[#ffe4e6] font-medium uppercase tracking-wider">
+                  risk split
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-sxqg">1.2Sxqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            High-contrast split layout dividing the text diagonally down the
+            middle into solid neon mint-green and coral-red zones. Framed
+            directly on the character borders by a sharp charcoal outline and a
+            brilliant, color-splitting neon border that expands softly into a
+            massive, dual-colored background backlight bloom.
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl border border-[#e8e6e1]/60 p-4 shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div className="font-[DM_Mono]">
+              <span className="text-xs text-[#444] font-bold block mb-0.5">
+                Quinquadragintillion
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-[#aaa]">10¹³⁸</span>
+                <span className="text-[9px] py-0.5 px-1.5 rounded bg-[#eff6ff] text-[#1d4ed8] border border-[#dbeafe] font-medium uppercase tracking-wider">
+                  vessel lock
+                </span>
+              </div>
+            </div>
+            <div
+              className="text-2xl font-bold leading-none tracking-tight relative"
+              style={{ overflow: 'visible' }}
+            >
+              <span className="g-qnqg">1.2Qnqg</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-[#aaa] font-[DM_Mono] leading-normal border-t border-[#f8f7f4] pt-3">
+            Deep steel-blue metallic gradient characters featuring horizontal
+            micro-engraved lines inside the stroke and a fast, constant
+            white-hot amber glisten sweep. Centered exactly behind the digits, a
+            perfect, warp-free circular gold-gilded orbit spins constantly to
+            highlight the mechanical vault-locking design.
+          </div>
+        </div>
         {/* SECTION: SEASON 3 */}
         <div className="pt-4 px-1 pb-2 text-[10px] tracking-[0.12em] uppercase text-[#bbb] font-[DM_Mono] flex items-center gap-2">
           <span> Season 3 tiers</span>

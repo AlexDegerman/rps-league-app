@@ -55,7 +55,7 @@ Theme: Deep Cobalt and Chrome Silver, liquid metallic sheen on UI containers.
 7. THE FEVER FESTIVAL
 Trigger: 5-win streak (20% chance) OR 8-win streak (100%).
 Duration: 30 seconds, 6 matches.
-Effect (Streak Aegis): Losses do not reset win streaks for the duration. Streak multipliers are frozen in place regardless of match outcome.
+Effect (Streak Aegis): Losses do not reset the win streak for the duration.
 Theme: Crimson Red and Burning Orange, pulsing heat-haze distortion.
 
 8. THE SANGUINE FESTIVAL

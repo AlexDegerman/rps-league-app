@@ -6,17 +6,25 @@ A showcase of all Global Events, including their visual effects, backend synchro
 
 ## System Rules
 
-- **Synchronized State**: Every connected client receives the exact same event state, countdown progression, and modifier configurations from the backend.
-- **Three-Phase Lifecycle**:
-  - **Event Cooldown**: A randomized 7 to 12-minute quiet period after an event concludes before the next selection process starts.
-  - **Warning Phase**: A 1.5 to 3-minute period alerting players of an incoming element. Warning banners render, the Oracle ticker announces the danger, and vocal alerts trigger at 60 and 30 seconds remaining.
-  - **Active Phase**: A high-intensity 1 to 3-minute blitz window applying rule changes, elemental visual themes, and active interface tickers.
-- **Weighted Selection**: When a cooldown concludes, the backend selects the next event using a weighted random distribution:
+- **Synchronized State**: Every connected client receives the same event state, countdown progression, and modifier configurations from the backend.
+
+- **Automated Event Cycle**: Global Events are scheduled automatically with a randomized 10 to 12-minute cooldown before the next event launch.
+
+- **Announcement Phase**: Each event begins with a 30-second announcement period. The Oracle announces the incoming event before its active effects begin.
+
+- **Active Phase**: Each Global Event remains active for 60 seconds, applying its gameplay modifier and themed visual effects across the interface.
+
+- **Quiet Period**: A 60-second separation period follows each Global Event before the next cooldown begins, providing a buffer between major encounters and preventing immediate event chaining.
+
+- **Weighted Selection**: When the cooldown concludes, the backend selects the next event using a weighted random distribution:
   - **Tidal Surge**: 30% weight
   - **Cyclone Blitz**: 25% weight
   - **Solar Flare**: 20% weight
   - **Mirage Cataclysm**: 20% weight
-- **Visual Stacking**: Active Global Event visual styling applies across the entire interface, dynamically shifting card themes, particle layers, and background container glows.
+
+- **World Boss Coordination**: Global Events do not launch while a World Boss encounter is active. If the scheduler reaches an event launch while a World Boss is blocking the system, the launch is deferred until the World Boss is no longer active.
+
+- **Visual Theming**: Active Global Events apply themed visual effects across the interface, including card transformations, particle layers, background effects, and event-specific presentation.
 
 ---
 

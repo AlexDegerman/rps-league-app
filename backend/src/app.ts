@@ -16,6 +16,7 @@ import achievementsRouter from './routes/achievements.js'
 import relicRouter from './routes/relics.js'
 import globaleventsRouter from './routes/globalevents.js'
 import worldbossRouter from './routes/worldboss.js'
+import bonusStageRouter from './routes/bonusStage.js'
 
 const app = express()
 
@@ -32,7 +33,7 @@ app.use((req, res, next) => {
   )
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'Content-Type,Authorization,x-admin-key'
+    'Content-Type,Authorization,x-admin-key,x-user-id'
   )
   res.setHeader('Access-Control-Allow-Credentials', 'false')
   if (req.method === 'OPTIONS') return res.sendStatus(204)
@@ -56,6 +57,7 @@ app.use('/api/achievements', achievementsRouter)
 app.use('/api/relics', relicRouter)
 app.use('/api/globalevents', globaleventsRouter)
 app.use('/api/worldboss', worldbossRouter)
+app.use('/api/bonus', bonusStageRouter)
 
 // Sentry Error Handler
 Sentry.setupExpressErrorHandler(app)

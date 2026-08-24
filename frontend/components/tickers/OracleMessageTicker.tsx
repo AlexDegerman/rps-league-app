@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { speakOracle } from '@/lib/oracleTTS'
 import { useUIStore } from '@/app/stores/uiStore'
+import { useGameStore } from '@/app/stores/gameStore'
 
 export interface OracleTickerMessage {
   id: string
@@ -70,6 +71,7 @@ export default function OracleMessageTicker({
 
   const oracleTTSEnabled = useUIStore((s) => s.oracleTTSEnabled)
   const oracleVolume = useUIStore((s) => s.oracleVolume)
+  const isBonusActive = useGameStore((s) => s.isBonusActive)
 
   const dismissRef = useRef(onDismiss)
   const messageRef = useRef(message)
@@ -123,7 +125,7 @@ export default function OracleMessageTicker({
 
   return (
     <div
-      className={`relative overflow-hidden h-9 flex items-center transition-all duration-500 border-b border-gray-100/50 ${
+      className={`${isBonusActive ? 'absolute top-0 left-0 w-full z-50' : 'relative'} overflow-hidden h-9 flex items-center transition-all duration-500 border-b border-gray-100/50 ${
         animOut ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0'
       }`}
       style={{ background: `${accent}10`, backdropFilter: 'blur(10px)' }}

@@ -472,3 +472,37 @@ export interface WorldBossSyncPayload {
   warningStartedAt: number | null
   warningEndsAt: number | null
 }
+
+export type StageType =
+  | 'TREASURE_VAULT'
+  | 'KINGS_VAULT'
+  | 'DOUBLE_DOWN'
+  | 'WILD_PREDICTION'
+  | 'SURGE_FRENZY'
+  | 'RAINBOW_RUSH'
+  | 'SNIPER_CHALLENGE'
+  | 'ORACLE_VISION'
+  | 'CRYSTAL_MINE'
+
+export interface BonusStageSession {
+  id: string
+  stageType: StageType
+  accumulatedPayout: string
+  lastBetAmount: string
+  stageStepsCompleted: number
+  maxSteps: number | null
+  gridState: unknown | null
+}
+
+export interface BonusStageTriggerSSEData {
+  sessionId: string
+  stageType: StageType
+  session: BonusStageSession
+  initialData: unknown | null
+  reconnect?: boolean
+}
+
+export interface BonusStageCompletedSSEData {
+  finalPayout: string
+  stageType: StageType
+}

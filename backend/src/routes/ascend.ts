@@ -6,9 +6,7 @@ import { logger } from '../utils/logger.js'
 
 const router = Router()
 
-// Threshold is 999 QQG
-// To raise the cap in future: update this constant and the frontend ASCENSION_THRESHOLD
-export const ASCENSION_THRESHOLD = 999n * 10n ** 135n
+export const ASCENSION_THRESHOLD = 999n * 10n ** 162n
 
 router.post('/', async (req, res) => {
   try {

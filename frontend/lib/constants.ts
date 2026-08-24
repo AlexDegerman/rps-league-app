@@ -1,4 +1,5 @@
 import { BonusStyle, BonusTier } from '@/types/rps'
+import type { StageType } from '@/types/rps'
 
 export const BONUS_TIER_STYLES: Record<BonusTier, BonusStyle> = {
   MYTHICAL: {
@@ -319,6 +320,15 @@ export const MODE_CONFIG = {
 }
 
 export const TIER_THRESHOLDS = [
+  { label: 'Trequinquagintillion', cls: 'g-tqgs', min: 10n ** 162n },
+  { label: 'Duoquinquagintillion', cls: 'g-dqgs', min: 10n ** 159n },
+  { label: 'Unquinquagintillion', cls: 'g-uqgs', min: 10n ** 156n },
+  { label: 'Quinquagintillion', cls: 'g-qg', min: 10n ** 153n },
+  { label: 'Novemquadragintillion', cls: 'g-noqg', min: 10n ** 150n },
+  { label: 'Octoquadragintillion', cls: 'g-ocqg', min: 10n ** 147n },
+  { label: 'Septenquadragintillion', cls: 'g-spqg', min: 10n ** 144n },
+  { label: 'Sexquadragintillion', cls: 'g-sxqg', min: 10n ** 141n },
+  { label: 'Quinquadragintillion', cls: 'g-qnqg', min: 10n ** 138n },
   { label: 'Quattuorquadragintillion', cls: 'g-qqg', min: 10n ** 135n },
   { label: 'Tresquadragintillion', cls: 'g-tqg', min: 10n ** 132n },
   { label: 'Duoquadragintillion', cls: 'g-dqg', min: 10n ** 129n },
@@ -369,4 +379,28 @@ export const TIER_THRESHOLDS = [
   { label: 'Million', cls: 'g-m1', min: 1_000_000n }
 ] as const
 
-export const ASCENSION_THRESHOLD = 999n * 10n ** 135n
+export const STAGE_DISPLAY_NAMES: Record<StageType, string> = {
+  TREASURE_VAULT: 'TREASURE VAULT',
+  KINGS_VAULT: "KING'S VAULT",
+  DOUBLE_DOWN: 'DOUBLE DOWN',
+  WILD_PREDICTION: 'WILD PREDICTION',
+  SURGE_FRENZY: 'SURGE FRENZY',
+  RAINBOW_RUSH: 'RAINBOW RUSH',
+  SNIPER_CHALLENGE: 'SNIPER CHALLENGE',
+  ORACLE_VISION: 'ORACLE VISION',
+  CRYSTAL_MINE: 'CRYSTAL MINE'
+}
+
+export const ORACLE_VOICE_LINES: Record<StageType, string> = {
+  TREASURE_VAULT: 'A vault... has materialized... claim what awaits...',
+  KINGS_VAULT: 'The vaults... of the king... have opened...',
+  DOUBLE_DOWN: 'Risk... and reward... entangled...',
+  WILD_PREDICTION: 'The cards... have chosen... to speak...',
+  SURGE_FRENZY: 'The storm... remembers your name...',
+  RAINBOW_RUSH: 'Colors... beyond prediction threshold...',
+  SNIPER_CHALLENGE: 'One shot... one moment... make it count...',
+  ORACLE_VISION: 'The glyphs... demand... to be remembered...',
+  CRYSTAL_MINE: 'The crystal depths... awaken...'
+}
+
+export const ASCENSION_THRESHOLD = 999n * 10n ** 162n

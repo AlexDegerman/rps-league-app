@@ -210,6 +210,19 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 
 ---
 
+## 📖 Category 14: The Grand Archive (Collector)
+*Rewarding the completion of the achievement codex itself.*
+
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Curious | Earn 20 Achievements | 📖 | `COL20` |
+| 🔵 Rare | Dedicated | Earn 40 Achievements | 📚 | `COL40` |
+| 🟣 Epic | Completionist | Earn 65 Achievements | 🗂️ | `COL65` |
+| 🟡 Legendary | Archivist | Earn 95 Achievements | 🏛️ | `COL95` |
+| 🔴 Mythical | Omnivore | Earn 142 Achievements | 🌟 | `COLMAX` |
+
+---
+
 ## 🪐 Category 15: Cosmic (Global Events)
 *Ecosystem tracking across all Unified Server Events.*
 
@@ -260,20 +273,77 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 
 ---
 
-## 📖 Category 14: The Grand Archive (Collector)
-*Rewarding the completion of the achievement codex itself.*
+## ⚔️ Category 16: World Boss Arena
+*Progression tracking for simulated entity combat and vaults.*
 
+### Defeat Track
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
-| 🟢 Common | Curious | Earn 10 Achievements | 📖 | `COL10` |
-| 🔵 Rare | Dedicated | Earn 25 Achievements | 📚 | `COL25` |
-| 🟣 Epic | Completionist | Earn 45 Achievements | 🗂️ | `COL45` |
-| 🟡 Legendary | Archivist | Earn 70 Achievements | 🏛️ | `COL55` |
-| 🔴 Mythical | Omnivore | Earn 105 Achievements | 🌟 | `COLMAX` |
+| 🟢 Common | First Contact | Defeat 1 World Boss | ⚔️ | `WB01` |
+| 🔵 Rare | Entity Hunter | Defeat 10 World Bosses | 🛡️ | `WB02` |
+| 🟣 Epic | World Defender | Defeat 30 World Bosses | 🌍 | `WB03` |
+| 🟡 Legendary | Cataclysm Breaker | Defeat 75 World Bosses | 💥 | `WB04` |
+| 🔴 Mythical | World Savior | Defeat 200 World Bosses | 🌟 | `WB05` |
+| 🔴 Mythical | Hexurion's Bane | Defeat Hexurion 50 times | ⬢ | `HEXM` |
+| 🔴 Mythical | Orbitbreaker | Defeat Orphion 50 times | 🪐 | `ORBM` |
+| 🔴 Mythical | Fractal Collapse | Defeat Fracturon 50 times | 💎 | `FRAM` |
+| 🔴 Mythical | Pyramid Fall | Defeat Apexion 50 times | 🔺 | `APXM` |
+
+### Chest & Vault Track
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Treasure Seeker | Open 5 World Boss Chests | 📦 | `CH01` |
+| 🔵 Rare | Treasure Hunter | Open 20 World Boss Chests | 🎁 | `CH02` |
+| 🟣 Epic | Vault Raider | Open 50 World Boss Chests | 💰 | `CH03` |
+| 🟡 Legendary | Treasure Hoard | Open 100 World Boss Chests | 🏆 | `CH04` |
+| 🔴 Mythical | Living Vault | Open 250 World Boss Chests | 👑 | `CH05` |
+
+### World Boss Meta Accomplishments
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Final Strike | Land the finishing blow on a World Boss | 🎯 | `LAST` |
+| 🔵 Rare | Perfect Assault | Defeat a World Boss without missing a single prediction | 💯 | `PERF` |
+| 🔵 Rare | Lucky Shot | Land the finishing blow while contributing 10% or less of total boss damage | 🍀 | `LUCK` |
+| 🟣 Epic | Clutch Victory | Land the finishing blow with less than 5 seconds remaining | ⏱️ | `CLUT` |
+| 🔴 Mythical | Divine Intervention | Join a World Boss during its final 10 seconds and land the finishing blow | 🌠 | `DIVN` |
 
 ---
 
-## 🎲 Category 15: Miscellaneous
+## 🎰 Category 17: Neon Paradise
+*Tracking metrics and masteries inside the Neon Paradise bonus stages and minigames.*
+
+### Milestone Track
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟢 Common | Paradise Visitor | Trigger 1 bonus stage | 🎰 | `NEO1` |
+| 🔵 Rare | Paradise Explorer | Trigger 10 bonus stages | 🎰 | `NEO2` |
+| 🟣 Epic | Paradise Regular | Trigger 50 bonus stages | 🎰 | `NEO3` |
+| 🟡 Legendary | Paradise Legend | Trigger 150 bonus stages | 🎰 | `NEO4` |
+| 🔴 Mythical | Neon Sovereign | Trigger 300 bonus stages | 👑 | `NEO5` |
+
+### Minigame Masteries & Challenges
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟡 Legendary | Open the Royal Chest | Get the 10x reward from Treasure Vault | 🏆 | `TVLT` |
+| 🟡 Legendary | Find the Royal Chest | Pick the Royal chest in King's Vault | 👑 | `KVAL` |
+| 🟡 Legendary | Reach the 10× Payout | Reach step 3 in Double Down | ⚡ | `DON3` |
+| 🟡 Legendary | Reveal the Maximum Combination | Flip three Oracle cards in Wild Prediction | 🃏 | `WILD` |
+| 🟡 Legendary | Reach the 10× Payout | Get the 10× reward in Surge Frenzy | ⚡ | `SFX5` |
+| 🟡 Legendary | Roll Rainbow Tier | Average Rainbow spectrum in Rainbow Rush | 🌈 | `RRSH` |
+| 🟡 Legendary| Hit the Perfect Bullseye | Get the 10× reward in Sniper Challenge | 🎯 | `SNIP` |
+| 🟡 Legendary | Complete All Five Sequences | Complete all 5 sequences in Oracle Vision | 🔮 | `OVIS` |
+| 🟡 Legendary  | Strike the Motherlode | Find 5 diamonds for the 10× reward in Crystal Mine | 💎 | `MINE` |
+
+### Multi-Game Complete Achievements
+| Rarity | Name | Requirement | Icon | Code |
+| :--- | :--- | :--- | :--- | :--- |
+| 🟣 Epic | Complete Every Neon Paradise Minigame | Play all 9 bonus stages at least once | 🌈 | `NEO9` |
+| 🟡 Legendary | Complete Every Minigame 20 Times | 20 clears of every bonus stage | 🌈 | `NE20` |
+| 🟡 Legendary | Play Every Minigame in a Single Day | All 9 bonus stages in one calendar day | 🌈 | `CIRC` |
+
+---
+
+## 🎲 Category 18: Miscellaneous
 
 *Hidden accomplishments revealed only upon acquisition.*
 
@@ -299,3 +369,5 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | :--- | :--- | :--- | :--- | :--- |
 | 🌈 Rainbow | God King | 1000 Wins + 50 Laps + Trinity of Relics | 👑 | `KING` |
 | 🌈 Rainbow | Cosmic Sovereign | Participate 50 times in each of the 4 Global Events | 🪐 | `COSM` |
+| 🌈 Rainbow | World Purifier | Defeat each of the four World Bosses 50 times | 🌍 | `PURI` |
+| 🌈 Rainbow | Paradise Ascendant | 50 clears of every bonus stage | 🌈 | `NEON` |

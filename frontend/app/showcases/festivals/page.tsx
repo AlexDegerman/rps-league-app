@@ -211,7 +211,7 @@ export default function Festivals() {
             effect="Streak Aegis"
             trigger="5-win streak (20% chance) OR 8-win streak (100%)"
             duration="30 seconds · 6 matches"
-            description="Losses do not reset win streaks for the duration. Streak multipliers are frozen in place regardless of match outcome."
+            description="Losses do not reset the win streak for the duration."
             theme="Crimson Red and Burning Orange, pulsing heat-haze distortion"
             color="#f97316"
             badge="streak shield"

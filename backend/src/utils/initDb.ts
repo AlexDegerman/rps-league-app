@@ -260,7 +260,7 @@ export const initDb = async (): Promise<void> => {
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_thermal_fusion        BOOLEAN NOT NULL DEFAULT false`
     )
-    // ── World Boss ─────────────────────────────────────────────────
+    // World Boss
     await pool.query(`
       CREATE TABLE IF NOT EXISTS world_boss_encounters (
         id SERIAL PRIMARY KEY,
@@ -360,6 +360,66 @@ export const initDb = async (): Promise<void> => {
     )
     await pool.query(
       `CREATE INDEX IF NOT EXISTS idx_wbd_user ON world_boss_damage(user_id)`
+    )
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS bonus_stage_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    stage_type TEXT NOT NULL CHECK (stage_type IN (
+      'TREASURE_VAULT', 'KINGS_VAULT', 'DOUBLE_DOWN',
+      'WILD_PREDICTION', 'SURGE_FRENZY', 'RAINBOW_RUSH',
+      'SNIPER_CHALLENGE', 'ORACLE_VISION', 'CRYSTAL_MINE'
+    )),
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    accumulated_payout NUMERIC NOT NULL DEFAULT 0,
+    last_bet_amount NUMERIC NOT NULL DEFAULT 0,
+    stage_steps_completed INTEGER NOT NULL DEFAULT 0,
+    max_steps INTEGER,
+    verification_salt TEXT NOT NULL,
+    grid_state JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )
+`)
+    await pool.query(
+      `CREATE INDEX IF NOT EXISTS idx_bonus_stage_sessions_user_active
+      ON bonus_stage_sessions(user_id, is_active)`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS bonus_stages_played INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_perfect_snipe BOOLEAN NOT NULL DEFAULT false`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS crystal_mine_clears INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS oracle_vision_perfect_clears INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS double_down_max_clears INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS wild_prediction_max_combos INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS royal_treasure_chests_opened INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS royal_kings_chests_found INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS rainbow_tier_rolls INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS surge_frenzy_max_combo_finishes INTEGER NOT NULL DEFAULT 0`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS neon_paradise_minigames_played JSONB NOT NULL DEFAULT '{}'`
+    )
+    await pool.query(
+      `ALTER TABLE users ADD COLUMN IF NOT EXISTS neon_full_circuit_today BOOLEAN NOT NULL DEFAULT false`
     )
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS equipped_relics TEXT[] DEFAULT '{}'`

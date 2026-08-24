@@ -14,6 +14,7 @@ import type {
   WorldBossType,
   DamagerEntry,
   WorldBossSyncPayload,
+  StageType,
 } from '@/types/rps'
 
 interface GameState {
@@ -136,6 +137,22 @@ interface GameState {
   setWorldBossSync: (payload: WorldBossSyncPayload) => void
   setLastBossHitResult: (r: 'HIT' | 'MISS', damage?: number) => void
   clearLastBossHitResult: () => void
+  // Neon Paradise
+  isBonusActive: boolean
+  activeBonusStage: StageType | null
+  accumulatedBonusReward: bigint
+  bonusLastBet: bigint
+  bonusGridState: unknown | null
+  bonusFinalPayout: bigint | null
+  bonusCompletionMetric: string | null
+  setBonusActive: (
+    stageType: StageType,
+    lastBetAmount: bigint,
+    reconnectData: unknown
+  ) => void
+  updateBonusReward: (amount: bigint) => void
+  setBonusFinalPayout: (payout: bigint, metric?: string) => void
+  clearBonusState: () => void
 }
 
 // Helper for consistent mapping
@@ -191,6 +208,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastBossHitResult: null,
   lastBossHitDamage: 0,
   worldBossParticipantCount: 0,
+  isBonusActive: false,
+  activeBonusStage: null,
+  accumulatedBonusReward: 0n,
+  bonusLastBet: 0n,
+  bonusGridState: null,
+  bonusFinalPayout: null,
+  bonusCompletionMetric: null,
 
   // Actions - Connection
   setBackendReady: (v) => set({ backendReady: v }),
@@ -454,5 +478,32 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((s) => ({ achievementQueue: [...s.achievementQueue, a] })),
   shiftAchievement: () =>
     set((s) => ({ achievementQueue: s.achievementQueue.slice(1) })),
-  clearAllAchievements: () => set({ achievementQueue: [] })
+  clearAllAchievements: () => set({ achievementQueue: [] }),
+  // Neon Paradise actions
+  setBonusActive: (stageType, lastBetAmount, reconnectData) =>
+    set({
+      isBonusActive: true,
+      activeBonusStage: stageType,
+      accumulatedBonusReward: 0n,
+      bonusLastBet: lastBetAmount,
+      bonusGridState: reconnectData,
+      bonusFinalPayout: null,
+      bonusCompletionMetric: null
+    }),
+  updateBonusReward: (amount) => set({ accumulatedBonusReward: amount }),
+  setBonusFinalPayout: (payout, metric) =>
+    set({
+      bonusFinalPayout: payout,
+      bonusCompletionMetric: metric ?? null
+    }),
+  clearBonusState: () =>
+    set({
+      isBonusActive: false,
+      activeBonusStage: null,
+      accumulatedBonusReward: 0n,
+      bonusLastBet: 0n,
+      bonusGridState: null,
+      bonusFinalPayout: null,
+      bonusCompletionMetric: null
+    })
 }))

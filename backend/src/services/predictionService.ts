@@ -40,6 +40,12 @@ import {
   recordMiss,
   applyDamage
 } from './worldBossService.js'
+import {
+  rollBonusTrigger,
+  createSession,
+  getActiveSession,
+  getClientInitialData
+} from './bonusStageService.js'
 
 const POINTS_FLOOR = 100000n
 // Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
@@ -291,7 +297,8 @@ const resolveWorldBossPrediction = async (
 export const resolvePrediction = async (
   gameId: string,
   winnerName: string,
-  broadcast: (event: string, data: string) => void
+  broadcast: (event: string, data: string) => void,
+  isAutobet = false
 ): Promise<void> => {
   // World Boss mode: completely separate path
   if (isWorldBossActive()) {
@@ -922,7 +929,26 @@ export const resolvePrediction = async (
           hadPerfectAssault: Boolean(u.had_perfect_assault),
           hadLuckyShot: Boolean(u.had_lucky_shot),
           hadClutchVictory: Boolean(u.had_clutch_victory),
-          hadDivineIntervention: Boolean(u.had_divine_intervention)
+          hadDivineIntervention: Boolean(u.had_divine_intervention),
+          bonusStagesPlayed: Number(u.bonus_stages_played ?? 0),
+          crystalMineClears: Number(u.crystal_mine_clears ?? 0),
+          oracleVisionPerfectClears: Number(
+            u.oracle_vision_perfect_clears ?? 0
+          ),
+          doubleDownmaxClears: Number(u.double_down_max_clears ?? 0),
+          wildPredictionMaxCombos: Number(u.wild_prediction_max_combos ?? 0),
+          royalTreasureChestsOpened: Number(
+            u.royal_treasure_chests_opened ?? 0
+          ),
+          royalKingsChestsFound: Number(u.royal_kings_chests_found ?? 0),
+          hadPerfectSnipe: Boolean(u.had_perfect_snipe),
+          rainbowTierRolls: Number(u.rainbow_tier_rolls ?? 0),
+          surgeFrenzyMaxComboFinishes: Number(
+            u.surge_frenzy_max_combo_finishes ?? 0
+          ),
+          neonParadiseMinigamesPlayed:
+            (u.neon_paradise_minigames_played as Record<string, number>) ?? {},
+          neonFullCircuitToday: Boolean(u.neon_full_circuit_today)
         }
 
         const firstPass = checkAchievements(stats, alreadyEarned)
@@ -1056,7 +1082,45 @@ export const resolvePrediction = async (
                 : null
           })
         )
+        // Bonus Stage Trigger
+        const isGlobalEventActive =
+          activeGlobalEvent && activeGlobalEvent.phase === 'active'
+        const isFestivalActive = !!activeFestival
 
+        if (!isAutobet && !isGlobalEventActive && !isFestivalActive) {
+          try {
+            const existingSession = await getActiveSession(row.user_id)
+            if (!existingSession) {
+              const stageType = rollBonusTrigger()
+              if (stageType) {
+                const session = await createSession(row.user_id, bet, stageType)
+                broadcast(
+                  'bonus_stage_triggered',
+                  JSON.stringify({
+                    type: 'bonus_stage_triggered',
+                    userId: row.user_id,
+                    sessionId: session.id,
+                    stageType: session.stageType,
+                    session: {
+                      id: session.id,
+                      stageType: session.stageType,
+                      accumulatedPayout: session.accumulatedPayout.toString(),
+                      lastBetAmount: session.lastBetAmount.toString(),
+                      stageStepsCompleted: session.stageStepsCompleted,
+                      maxSteps: session.maxSteps,
+                      gridState: null
+                    },
+                    initialData: getClientInitialData(session)
+                  })
+                )
+              }
+            }
+          } catch (err) {
+            logger.error('bonusStage trigger error', err, {
+              userId: row.user_id
+            })
+          }
+        }
         tryTriggerFlashEventForUser(row.user_id, broadcast)
         // Festival trigger check, runs after flash trigger to avoid double-lockout race
         checkAndTriggerFestival(

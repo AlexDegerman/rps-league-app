@@ -50,6 +50,7 @@ export function usePopupQueue(sounds: PopupQueueSounds) {
 
     timerRef.current = setTimeout(() => {
       if (!isMountedRef.current) return
+      if (useGameStore.getState().isBonusActive) return
 
       // Flash event
       if (activePopup.kind === 'flash_event') {

@@ -19,6 +19,7 @@ export const CATEGORY_ORDER = [
   'Miscellaneous',
   'WorldBoss',
   'WorldBossChests',
+  'NEON_PARADISE',
   'Rainbow'
 ] as const
 
@@ -46,6 +47,7 @@ export const CATEGORY_ICONS: Record<string, string> = {
   Collector: '📖',
   WorldBoss: '👹',
   WorldBossChests: '📦',
+  NEON_PARADISE: '🎰',
   Rainbow: '🌈'
 }
 
@@ -68,6 +70,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
   Collector: 'The Grand Archive',
   WorldBoss: 'World Bosses',
   WorldBossChests: 'Boss Chests',
+  NEON_PARADISE: 'Neon Paradise',
   Rainbow: 'Ultimate Mastery'
 }
 
@@ -399,10 +402,10 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     rarity: 'MYTHICAL'
   },
   // Collector
-  COL10: { code: 'COL10', name: 'Curious', icon: '📖', rarity: 'COMMON' },
-  COL25: { code: 'COL25', name: 'Dedicated', icon: '📚', rarity: 'RARE' },
-  COL45: { code: 'COL45', name: 'Completionist', icon: '🗂️', rarity: 'EPIC' },
-  COL70: { code: 'COL70', name: 'Archivist', icon: '🏛️', rarity: 'LEGENDARY' },
+  COL20: { code: 'COL20', name: 'Curious', icon: '📖', rarity: 'COMMON' },
+  COL40: { code: 'COL40', name: 'Dedicated', icon: '📚', rarity: 'RARE' },
+  COL65: { code: 'COL65', name: 'Completionist', icon: '🗂️', rarity: 'EPIC' },
+  COL95: { code: 'COL95', name: 'Archivist', icon: '🏛️', rarity: 'LEGENDARY' },
   COLMAX: { code: 'COLMAX', name: 'Omnivore', icon: '🌟', rarity: 'MYTHICAL' },
   // Miscellaneous (hidden)
   REBL: { code: 'REBL', name: 'The Rebel', icon: '🎭', rarity: 'RARE' },
@@ -423,7 +426,116 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     icon: '🪐',
     rarity: 'RAINBOW'
   },
-  PURI: { code: 'PURI', name: 'World Purifier', icon: '🌍', rarity: 'RAINBOW' }
+  PURI: { code: 'PURI', name: 'World Purifier', icon: '🌍', rarity: 'RAINBOW' },
+  NEON: {
+    code: 'NEON',
+    name: 'Paradise Ascendant',
+    icon: '🌈',
+    rarity: 'RAINBOW'
+  },
+  // Neon Paradise
+  NEO1: {
+    code: 'NEO1',
+    name: 'Paradise Visitor',
+    icon: '🎰',
+    rarity: 'COMMON'
+  },
+  NEO2: {
+    code: 'NEO2',
+    name: 'Paradise Explorer',
+    icon: '🎰',
+    rarity: 'RARE'
+  },
+  NEO3: {
+    code: 'NEO3',
+    name: 'Paradise Regular',
+    icon: '🎰',
+    rarity: 'EPIC'
+  },
+  NEO4: {
+    code: 'NEO4',
+    name: 'Paradise Legend',
+    icon: '🎰',
+    rarity: 'LEGENDARY'
+  },
+  NEO5: {
+    code: 'NEO5',
+    name: 'Neon Sovereign',
+    icon: '👑',
+    rarity: 'MYTHICAL'
+  },
+  TVLT: {
+    code: 'TVLT',
+    name: 'Open the Royal Chest',
+    icon: '🏆',
+    rarity: 'LEGENDARY'
+  },
+  KVAL: {
+    code: 'KVAL',
+    name: 'Find the Royal Chest',
+    icon: '👑',
+    rarity: 'LEGENDARY'
+  },
+  DON3: {
+    code: 'DON3',
+    name: 'Reach the 10× Payout',
+    icon: '⚡',
+    rarity: 'LEGENDARY'
+  },
+  WILD: {
+    code: 'WILD',
+    name: 'Reveal the Maximum Combination',
+    icon: '🃏',
+    rarity: 'LEGENDARY'
+  },
+  SFX5: {
+    code: 'SFX5',
+    name: 'Reach the 10× Payout',
+    icon: '⚡',
+    rarity: 'LEGENDARY'
+  },
+  RRSH: {
+    code: 'RRSH',
+    name: 'Roll Rainbow Tier',
+    icon: '🌈',
+    rarity: 'LEGENDARY'
+  },
+  SNIP: {
+    code: 'SNIP',
+    name: 'Hit the Perfect Bullseye',
+    icon: '🎯',
+    rarity: 'LEGENDARY'
+  },
+  OVIS: {
+    code: 'OVIS',
+    name: 'Complete All Five Sequences',
+    icon: '🔮',
+    rarity: 'MYTHICAL'
+  },
+  MINE: {
+    code: 'MINE',
+    name: 'Strike the Motherlode',
+    icon: '💎',
+    rarity: 'LEGENDARY'
+  },
+  NEO9: {
+    code: 'NEO9',
+    name: 'Complete Every Neon Paradise Minigame',
+    icon: '🌈',
+    rarity: 'EPIC'
+  },
+  NE20: {
+    code: 'NE20',
+    name: 'Complete Every Minigame 20 Times',
+    icon: '🌈',
+    rarity: 'LEGENDARY'
+  },
+  CIRC: {
+    code: 'CIRC',
+    name: 'Play Every Minigame in a Single Day',
+    icon: '🌈',
+    rarity: 'LEGENDARY'
+  }
 }
 
 // Chained tracks: only show the highest tier earned.
@@ -457,7 +569,7 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
   CosmicSolar: ['SFL1', 'SFL2', 'SFL3', 'SFL4', 'SFL5'],
   CosmicCyclone: ['CBL1', 'CBL2', 'CBL3', 'CBL4', 'CBL5'],
   CosmicMirage: ['MCA1', 'MCA2', 'MCA3', 'MCA4', 'MCA5'],
-  Collector: ['COL10', 'COL25', 'COL45', 'COL70', 'COLMAX'],
+  Collector: ['COL20', 'COL40', 'COL65', 'COL95', 'COLMAX'],
   WorldBoss: [
     'WB01',
     'WB02',
@@ -485,7 +597,26 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
     'CATA'
   ],
   Miscellaneous: ['REBL', 'DRYM', 'EYEC', 'PRIS', 'FUSN'],
-  Rainbow: ['KING', 'COSM', 'PURI']
+  NEON_PARADISE: [
+    'NEO1',
+    'NEO2',
+    'NEO3',
+    'NEO4',
+    'NEO5',
+    'TVLT',
+    'KVAL',
+    'DON3',
+    'WILD',
+    'SFX5',
+    'RRSH',
+    'SNIP',
+    'OVIS',
+    'MINE',
+    'NEO9',
+    'NE20',
+    'CIRC'
+  ],
+  Rainbow: ['KING', 'COSM', 'PURI', 'NEON']
 }
 
 const STANDALONE_CATEGORIES = new Set(['Meta', 'Miscellaneous', 'Rainbow'])
@@ -590,11 +721,11 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   MIR: 'Roll a 45%+ Echo Bonus on a win during a Mirage Cataclysm',
   SYZY: 'Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously',
   CATA: 'Participate 15 times in each of the four separate Global Events',
-  COL15: 'Earn 15 Achievements',
-  COL30: 'Earn 30 Achievements',
-  COL50: 'Earn 50 Achievements',
-  COL75: 'Earn 75 Achievements',
-  COLMAX: 'Earn 130 Achievements',
+  COL20: 'Earn 20 Achievements',
+  COL40: 'Earn 40 Achievements',
+  COL65: 'Earn 65 Achievements',
+  COL95: 'Earn 95 Achievements',
+  COLMAX: 'Earn 142 Achievements',
   REBL: 'Bet against the Oracle',
   DRYM: 'Roll the minimum Echo Bonus (15%) on a win during Mirage Cataclysm',
   EYEC: 'Have your win streak shielded by the Buffer Module during Cyclone Blitz',
@@ -656,5 +787,23 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   DIVN: 'Join a World Boss during its final 10 seconds and land the finishing blow',
   PURI: 'Defeat each of the four World Bosses 50 times',
   KING: '1000 Wins + 50 Laps + 3 Mythical Relics',
-  COSM: 'Participate 50 times in each of the 4 Global Events'
+  COSM: 'Participate 50 times in each of the 4 Global Events',
+  NEO1: 'Trigger 1 bonus stage',
+  NEO2: 'Trigger 10 bonus stages',
+  NEO3: 'Trigger 50 bonus stages',
+  NEO4: 'Trigger 150 bonus stages',
+  NEO5: 'Trigger 300 bonus stages',
+  TVLT: 'Get the 10x reward from Treasure Vault',
+  KVAL: "Pick the Royal chest in King's Vault",
+  DON3: 'Get the 10x reward in Double Down',
+  WILD: 'Get the maximum combination in Wild Prediction',
+  SFX5: 'Get the 10x reward in Surge Frenzy',
+  RRSH: 'Average Rainbow spectrum in Rainbow Rush',
+  SNIP: 'Get the 10x reward in Sniper Challenge',
+  OVIS: 'Complete all 5 sequences in Oracle Vision',
+  MINE: 'Find 5 diamonds for the 10x reward in Crystal Mine',
+  NEO9: 'Play all 9 bonus stages at least once',
+  NE20: '20 clears of every bonus stage',
+  CIRC: 'All 9 bonus stages in one calendar day',
+  NEON: '50 clears of every bonus stage'
 }

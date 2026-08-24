@@ -1,15 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
 
-interface ExpandedState {
+type ExpandedState = {
   bonuses: boolean
   streaks: boolean
   flash: boolean
   relics: boolean
   festivals: boolean
   globalevents: boolean
+  worldbosses: boolean
+  neonparadise: boolean
 }
 
 interface AccordionSectionProps {
@@ -36,7 +37,9 @@ export default function BonusExplainerModal({
     flash: false,
     relics: false,
     festivals: false,
-    globalevents: false
+    globalevents: false,
+    worldbosses: false,
+    neonparadise: false
   })
 
   const toggleSection = (section: keyof ExpandedState) => {
@@ -93,13 +96,12 @@ export default function BonusExplainerModal({
                   <p className="text-[10px] text-gray-500 leading-relaxed">
                     Every prediction has a{' '}
                     <span className="text-gray-800 font-bold">40% chance</span>{' '}
-                    to roll a tiered bonus (80% under 2M points). If no bonus
-                    triggers for 3 consecutive matches, the 4th is{' '}
+                    to trigger a tiered bonus. If no bonus triggers naturally
+                    for 3 consecutive matches, the 4th match is{' '}
                     <span className="text-purple-600 font-bold underline decoration-purple-200">
                       guaranteed
                     </span>
-                    . The <span className="font-bold text-gray-800">Cards</span>{' '}
-                    flash event always produces a Legendary bonus on wins.
+                    .
                   </p>
 
                   <div className="grid grid-cols-2 gap-1.5">
@@ -109,7 +111,6 @@ export default function BonusExplainerModal({
                       bg="bg-gray-50 border-gray-200"
                       winText="1.5x - 2.2x win"
                       lossText="Save 10-25% of loss"
-                      chance="~59.5%"
                     />
                     <BonusTierCard
                       name="Rare"
@@ -117,7 +118,6 @@ export default function BonusExplainerModal({
                       bg="bg-blue-50 border-blue-100"
                       winText="2.2x - 3.2x win"
                       lossText="Save 25-50% of loss"
-                      chance="~25%"
                     />
                     <BonusTierCard
                       name="Epic"
@@ -125,15 +125,13 @@ export default function BonusExplainerModal({
                       bg="bg-purple-50 border-purple-100"
                       winText="3.2x - 4.2x win"
                       lossText="Save 60-90% of loss"
-                      chance="~13%"
                     />
                     <BonusTierCard
                       name="Legendary"
                       color="text-yellow-600"
                       bg="bg-yellow-50 border-yellow-200"
-                      winText="5.0x win"
+                      winText="5x win"
                       lossText="Loss fully negated"
-                      chance="~2%"
                     />
                   </div>
 
@@ -146,18 +144,15 @@ export default function BonusExplainerModal({
                         7x win · Loss fully negated
                       </p>
                       <p className="text-[9px] text-red-400 italic mt-0.5">
-                        Primarily via Architect&apos;s Keystone relic
+                        Primarily enabled by Architect&apos;s Keystone
                       </p>
                     </div>
-                    <span className="text-[8px] font-bold bg-red-100 text-red-600 px-1.5 py-1 rounded border border-red-200">
-                      0.5%
-                    </span>
                   </div>
 
                   <div className="text-[9px] text-gray-400 italic border-t border-gray-100 pt-2">
-                    Precision Bearing relic adds +10% flat chance. Biased
-                    Oscillator shifts the tier distribution toward
-                    Epic/Legendary.
+                    Precision Bearing increases bonus trigger chance. Biased
+                    Oscillator improves Epic and Legendary odds. Luck in the
+                    Card guarantees a Legendary Bonus on wins.
                   </div>
                 </div>
               </AccordionSection>
@@ -169,6 +164,8 @@ export default function BonusExplainerModal({
                 dotColor="bg-orange-400"
                 isOpen={expanded.streaks}
                 onClick={() => toggleSection('streaks')}
+                badge="Escalating"
+                badgeColor="bg-orange-100 text-orange-700"
               >
                 <div className="space-y-3">
                   <p className="text-[10px] text-gray-500 leading-relaxed">
@@ -248,12 +245,12 @@ export default function BonusExplainerModal({
                 <div className="space-y-3">
                   <p className="text-[10px] text-gray-500 leading-relaxed">
                     Personal events that trigger mid-match with a 5% chance per
-                    bet. Last{' '}
+                    prediction. Last{' '}
                     <span className="font-bold text-gray-800">
                       3 predictions
                     </span>{' '}
-                    with guaranteed 100% win rates, full UI theme overrides,
-                    custom particles, and event-specific audio.
+                    with guaranteed wins, unique visual themes, custom effects,
+                    and event-specific audio.
                   </p>
 
                   <div className="space-y-1.5">
@@ -275,11 +272,11 @@ export default function BonusExplainerModal({
                     />
                     <FlashEventRow
                       emoji="🃏"
-                      name="Card's Fortune"
+                      name="Luck in the Card"
                       color="text-amber-700"
                       bg="bg-amber-50 border-amber-200"
                       mult="1.5x + Legendary bonus"
-                      desc="Always triggers Legendary bonus on wins"
+                      desc="Always triggers a Legendary bonus on wins"
                       special
                     />
                     <FlashEventRow
@@ -292,18 +289,13 @@ export default function BonusExplainerModal({
                     />
                   </div>
 
-                  <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-lg space-y-1.5">
+                  <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-lg">
                     <p className="text-[10px] text-blue-800 leading-relaxed">
-                      Flash events execute purely client-side. Trigger them by
-                      making predictions on active matches.
+                      Each Flash Event guarantees wins while its unique theme
+                      and effects take over the interface. Event-specific relics
+                      can further enhance Flash Event frequency, duration, or
+                      multipliers.
                     </p>
-                    <Link
-                      href="/showcases/flashevents"
-                      onClick={onClose}
-                      className="inline-flex items-center gap-1 text-[10px] text-blue-600 font-black uppercase tracking-tight hover:underline"
-                    >
-                      View all Flash Events <ExternalLinkIcon />
-                    </Link>
                   </div>
 
                   <p className="text-[9px] text-gray-400 italic border-t border-gray-100 pt-2">
@@ -327,10 +319,12 @@ export default function BonusExplainerModal({
               >
                 <div className="space-y-3">
                   <p className="text-[10px] text-gray-500 leading-relaxed">
-                    Permanent collectible modifiers that drop after any
-                    completed prediction. One active relic at a time. No
-                    duplicates ever, each relic is a one-time acquisition that
-                    permanently joins your collection.
+                    Permanent collectible modifiers that drop from completed
+                    predictions. Each relic can only be obtained once, and up to{' '}
+                    <span className="font-bold text-gray-800">
+                      three relics
+                    </span>{' '}
+                    can be equipped at a time.
                   </p>
 
                   <div className="grid grid-cols-5 gap-1.5 text-center">
@@ -382,20 +376,13 @@ export default function BonusExplainerModal({
                     ))}
                   </div>
 
-                  <div className="p-2.5 bg-indigo-50 border border-indigo-100 rounded-lg space-y-1.5">
-                    <p className="text-[10px] text-indigo-800 leading-relaxed">
-                      Drop rates increase per Chrono-Lap completed. Effects
-                      include Flash Event buffs, win multipliers, bonus tier
-                      shifting, and streak protection. Anti-Swap Protocol
-                      prevents mid-event relic swapping to maintain balance.
+                  <div className="p-2.5 bg-indigo-50 border border-indigo-100 rounded-lg">
+                    <p className="text-[9px] text-indigo-700 leading-relaxed">
+                      Drop rates scale with completed Chrono-Laps. Prediction
+                      relics permanently join your collection, while exclusive
+                      World Boss relics are obtained only from boss chests.
+                      Relic loadouts lock during World Boss encounters.
                     </p>
-                    <Link
-                      href="/showcases/relics"
-                      onClick={onClose}
-                      className="inline-flex items-center gap-1 text-[10px] text-indigo-600 font-black uppercase tracking-tight hover:underline"
-                    >
-                      View full Relic Catalogue <ExternalLinkIcon />
-                    </Link>
                   </div>
                 </div>
               </AccordionSection>
@@ -407,17 +394,18 @@ export default function BonusExplainerModal({
                 dotColor="bg-cyan-400"
                 isOpen={expanded.festivals}
                 onClick={() => toggleSection('festivals')}
+                badge="Milestones"
+                badgeColor="bg-cyan-100 text-cyan-700"
               >
                 <div className="space-y-3">
                   <p className="text-[10px] text-gray-500 leading-relaxed">
-                    Rare globally-triggered events that affect{' '}
+                    Rare globally-triggered gameplay events that affect{' '}
                     <span className="font-bold text-gray-800">
                       every active player simultaneously
                     </span>
-                    . Triggered by specific player milestones, streaks,
-                    multipliers, relic discoveries, and Ascension completions.
-                    Only one can be active at a time; a 5-minute cooldown
-                    follows each.
+                    . Festivals emerge from player milestones and special
+                    achievements, while the Oracle can trigger autonomous demo
+                    festivals during low-activity periods.
                   </p>
 
                   <div className="space-y-1.5">
@@ -426,22 +414,22 @@ export default function BonusExplainerModal({
                         name: 'Sanguine',
                         emoji: '🩸',
                         trigger: '4-loss streak',
-                        effect: 'All bets resolve as wins for 3 matches',
+                        effect: 'All predictions resolve as wins for 3 matches',
                         color: 'text-red-600',
                         bg: 'bg-red-50 border-red-100'
                       },
                       {
                         name: 'Fever',
                         emoji: '🌡️',
-                        trigger: '8-win streak (100%) / 5-win (20%)',
-                        effect: 'Streak resets frozen for 6 matches',
+                        trigger: '5-win streak (20%) / 8-win (100%)',
+                        effect: 'Losses do not reset win streaks for 6 matches',
                         color: 'text-orange-600',
                         bg: 'bg-orange-50 border-orange-100'
                       },
                       {
                         name: 'Ghost',
                         emoji: '👻',
-                        trigger: '30x total multiplier (40%) / 60x (100%)',
+                        trigger: '30x multiplier (40%) / 60x (100%)',
                         effect: '+20% echo on all wins for 12 matches',
                         color: 'text-teal-600',
                         bg: 'bg-teal-50 border-teal-100'
@@ -458,24 +446,23 @@ export default function BonusExplainerModal({
                         name: 'Spark',
                         emoji: '✨',
                         trigger:
-                          '2 Flash Events in a row / Leg. bonus during Flash',
-                        effect: 'All players get 3-bet Flash Event instantly',
+                          '2 Flash Events / Legendary or Mythical Flash Bonus',
+                        effect: 'All players enter a 3-bet Flash Event',
                         color: 'text-violet-600',
                         bg: 'bg-violet-50 border-violet-100'
                       },
                       {
                         name: 'Resonance',
                         emoji: '🔔',
-                        trigger: '3 bonuses in a row (100%) / Leg. bonus (30%)',
-                        effect: 'Every bet guaranteed Common or Rare bonus',
+                        trigger: '3 bonuses in a row / Legendary Bonus',
+                        effect: 'Every prediction guarantees Common or Rare',
                         color: 'text-amber-600',
                         bg: 'bg-amber-50 border-amber-100'
                       },
                       {
                         name: 'Safeguard',
                         emoji: '🛡️',
-                        trigger:
-                          'Mythical (100%) or Legendary achievement (50%)',
+                        trigger: 'Mythical Achievement / Legendary Achievement',
                         effect: 'Loss deductions reduced to 40% for 12 matches',
                         color: 'text-slate-600',
                         bg: 'bg-slate-50 border-slate-200'
@@ -483,7 +470,7 @@ export default function BonusExplainerModal({
                       {
                         name: 'Vault',
                         emoji: '🔒',
-                        trigger: 'Mythical relic discovery',
+                        trigger: 'Mythical Relic discovery',
                         effect: 'Relic drop rates doubled for 24 matches',
                         color: 'text-blue-600',
                         bg: 'bg-blue-50 border-blue-100'
@@ -517,18 +504,11 @@ export default function BonusExplainerModal({
 
                   <div className="p-2.5 bg-cyan-50 border border-cyan-100 rounded-lg space-y-1.5">
                     <p className="text-[9px] text-cyan-700 leading-relaxed">
-                      The triggering player&apos;s name is broadcast globally
-                      via the Oracle ticker. The Oracle also runs autonomous
-                      weighted festivals every 18-24 min during low-activity
-                      periods.
+                      Only one Festival can be active at a time, followed by a
+                      5-minute cooldown. The triggering player is announced
+                      globally by the Oracle, while autonomous demo Festivals
+                      can appear every 18-24 minutes during low activity.
                     </p>
-                    <Link
-                      href="/showcases/festivals"
-                      onClick={onClose}
-                      className="inline-flex items-center gap-1 text-[10px] text-cyan-700 font-black uppercase tracking-tight hover:underline"
-                    >
-                      View All Festival Details <ExternalLinkIcon />
-                    </Link>
                   </div>
                 </div>
               </AccordionSection>
@@ -540,6 +520,8 @@ export default function BonusExplainerModal({
                 dotColor="bg-emerald-400"
                 isOpen={expanded.globalevents}
                 onClick={() => toggleSection('globalevents')}
+                badge="Every 10-12m"
+                badgeColor="bg-emerald-100 text-emerald-700"
               >
                 <div className="space-y-3">
                   <p className="text-[10px] text-gray-500 leading-relaxed">
@@ -548,9 +530,8 @@ export default function BonusExplainerModal({
                     <span className="font-bold text-gray-800">
                       every online player
                     </span>{' '}
-                    simultaneously. Unlike player-triggered Festivals, Global
-                    Events are automated cosmic cycles that alter core gameplay
-                    rules for their duration.
+                    simultaneously. Automated events alter core gameplay rules
+                    and visuals for their duration.
                   </p>
 
                   <div className="space-y-1.5">
@@ -618,24 +599,246 @@ export default function BonusExplainerModal({
                     ))}
                   </div>
 
-                  <div className="p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg space-y-1.5">
+                  <div className="p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg">
                     <p className="text-[9px] text-emerald-700 leading-relaxed">
-                      Global cycles progress through automated Cooldown,
-                      Warning, and Active phases with synchronized audio
-                      notifications, real-time marquee telemetry, and visual
-                      shaders.
+                      Events occur every{' '}
+                      <span className="font-bold">10-12 minutes</span>, begin
+                      with a{' '}
+                      <span className="font-bold">30-second announcement</span>,
+                      then run for <span className="font-bold">60 seconds</span>
+                      . A
+                      <span className="font-bold"> 60-second quiet period</span>{' '}
+                      follows each event.
                     </p>
-                    <Link
-                      href="/showcases/globalevents"
-                      onClick={onClose}
-                      className="inline-flex items-center gap-1 text-[10px] text-emerald-700 font-black uppercase tracking-tight hover:underline"
-                    >
-                      View All Global Events <ExternalLinkIcon />
-                    </Link>
                   </div>
                 </div>
               </AccordionSection>
 
+              {/* 7. WORLD BOSSES */}
+              <AccordionSection
+                title="World Bosses"
+                color="text-amber-500"
+                dotColor="bg-violet-400"
+                isOpen={expanded.worldbosses}
+                onClick={() => toggleSection('worldbosses')}
+                badge="Every 10-12m"
+                badgeColor="bg-violet-100 text-violet-700"
+              >
+                <div className="space-y-3">
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    Server-wide cooperative encounters where{' '}
+                    <span className="font-bold text-gray-800">
+                      every participating player contributes
+                    </span>{' '}
+                    to defeating a rotating World Boss. Encounters temporarily
+                    replace the standard prediction arena and run for 60
+                    seconds.
+                  </p>
+
+                  <div className="space-y-1.5">
+                    {[
+                      {
+                        name: 'Hexurion',
+                        emoji: '⬡',
+                        effect:
+                          'A rotating hexagonal prism core with layered armor and a glowing central core.',
+                        color: 'text-cyan-600',
+                        bg: 'bg-cyan-50 border-cyan-100'
+                      },
+                      {
+                        name: 'Orphion',
+                        emoji: '🟣',
+                        effect:
+                          'Three concentric rings orbit a pulsing core in alternating directions.',
+                        color: 'text-purple-600',
+                        bg: 'bg-purple-50 border-purple-100'
+                      },
+                      {
+                        name: 'Fracturon',
+                        emoji: '◇',
+                        effect:
+                          'A diamond-shaped digital grid with a pulsing heartbeat pattern.',
+                        color: 'text-indigo-600',
+                        bg: 'bg-indigo-50 border-indigo-100'
+                      },
+                      {
+                        name: 'Apexion',
+                        emoji: '🔺',
+                        effect:
+                          'A breathing pyramid core surrounded by an expanding ground shadow.',
+                        color: 'text-amber-600',
+                        bg: 'bg-amber-50 border-amber-100'
+                      }
+                    ].map((boss) => (
+                      <div
+                        key={boss.name}
+                        className={`p-2 rounded-lg border ${boss.bg} flex items-start gap-2`}
+                      >
+                        <span className="text-[13px] mt-0.5 shrink-0">
+                          {boss.emoji}
+                        </span>
+                        <div className="min-w-0">
+                          <span
+                            className={`text-[10px] font-black ${boss.color}`}
+                          >
+                            {boss.name}
+                          </span>
+                          <p className="text-[9px] text-gray-600 mt-0.5 font-medium">
+                            {boss.effect}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-2.5 bg-violet-50 border border-violet-100 rounded-lg space-y-1.5">
+                    <p className="text-[9px] text-violet-700 leading-relaxed">
+                      Bosses appear every{' '}
+                      <span className="font-bold">10-12 minutes</span> after a
+                      randomized cooldown, with a{' '}
+                      <span className="font-bold">30-second announcement</span>{' '}
+                      followed by a{' '}
+                      <span className="font-bold">60-second encounter</span>.
+                      Winning predictions deal damage while missed predictions
+                      are blocked.
+                    </p>
+                    <p className="text-[9px] text-violet-700 leading-relaxed">
+                      Defeating a boss grants a{' '}
+                      <span className="font-bold">Mythical chest</span>, while
+                      partial damage earns lower chest tiers based on the
+                      percentage of HP depleted. The live damage leaderboard
+                      tracks the top contributors.
+                    </p>
+                  </div>
+                </div>
+              </AccordionSection>
+
+              {/* 8. NEON PARADISE */}
+              <AccordionSection
+                title="Neon Paradise"
+                color="text-teal-500"
+                dotColor="bg-fuchsia-400"
+                isOpen={expanded.neonparadise}
+                onClick={() => toggleSection('neonparadise')}
+                badge="2% per bet"
+                badgeColor="bg-fuchsia-100 text-fuchsia-700"
+              >
+                <div className="space-y-3">
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    A collection of{' '}
+                    <span className="font-bold text-gray-800">
+                      nine interactive bonus stages
+                    </span>{' '}
+                    that can appear during active manual prediction sessions.
+                    Each stage offers a different gameplay experience while
+                    using the same bonus payout system.
+                  </p>
+
+                  <div className="space-y-1.5">
+                    {[
+                      {
+                        name: 'Treasure Vault',
+                        emoji: '🏛️',
+                        effect: 'Choose one of three reward chests.',
+                        color: 'text-amber-700',
+                        bg: 'bg-amber-50 border-amber-100'
+                      },
+                      {
+                        name: 'Double Down',
+                        emoji: '⚡',
+                        effect: 'Climb a multiplier ladder from 2× toward 10×.',
+                        color: 'text-cyan-600',
+                        bg: 'bg-cyan-50 border-cyan-100'
+                      },
+                      {
+                        name: 'Wild Prediction',
+                        emoji: '🃏',
+                        effect:
+                          'Reveal three cards to build the final multiplier.',
+                        color: 'text-indigo-600',
+                        bg: 'bg-indigo-50 border-indigo-100'
+                      },
+                      {
+                        name: 'Surge Frenzy',
+                        emoji: '⚡',
+                        effect: 'Tap every energy node before it expires.',
+                        color: 'text-fuchsia-600',
+                        bg: 'bg-fuchsia-50 border-fuchsia-100'
+                      },
+                      {
+                        name: 'Rainbow Rush',
+                        emoji: '🌈',
+                        effect:
+                          'Complete three spectrum spins for the final reward.',
+                        color: 'text-pink-600',
+                        bg: 'bg-pink-50 border-pink-100'
+                      },
+                      {
+                        name: 'Sniper Challenge',
+                        emoji: '🎯',
+                        effect: 'Time your shot against a moving reticle.',
+                        color: 'text-emerald-600',
+                        bg: 'bg-emerald-50 border-emerald-100'
+                      },
+                      {
+                        name: 'Oracle Vision',
+                        emoji: '🔮',
+                        effect: 'Reproduce Oracle glyph sequences from memory.',
+                        color: 'text-teal-600',
+                        bg: 'bg-teal-50 border-teal-100'
+                      },
+                      {
+                        name: 'Crystal Mine',
+                        emoji: '💎',
+                        effect: 'Use five charges to uncover hidden crystals.',
+                        color: 'text-purple-600',
+                        bg: 'bg-purple-50 border-purple-100'
+                      },
+                      {
+                        name: "King's Vault",
+                        emoji: '👑',
+                        effect:
+                          'Choose from five royal chests containing every reward tier.',
+                        color: 'text-yellow-700',
+                        bg: 'bg-yellow-50 border-yellow-100'
+                      }
+                    ].map((stage) => (
+                      <div
+                        key={stage.name}
+                        className={`p-2 rounded-lg border ${stage.bg} flex items-start gap-2`}
+                      >
+                        <span className="text-[13px] mt-0.5 shrink-0">
+                          {stage.emoji}
+                        </span>
+                        <div className="min-w-0">
+                          <span
+                            className={`text-[10px] font-black ${stage.color}`}
+                          >
+                            {stage.name}
+                          </span>
+                          <p className="text-[9px] text-gray-600 mt-0.5 font-medium">
+                            {stage.effect}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-2.5 bg-fuchsia-50 border border-fuchsia-100 rounded-lg space-y-1.5">
+                    <p className="text-[9px] text-fuchsia-700 leading-relaxed">
+                      Neon Paradise has a combined 2.00% trigger chance per
+                      eligible prediction, with all nine stages having an equal
+                      chance to appear.
+                    </p>
+                    <p className="text-[9px] text-fuchsia-700 leading-relaxed">
+                      Every stage uses your last bet as its reward basis and
+                      guarantees at least +2x your last bet, with rewards
+                      scaling up to +10x. Bonus rewards are added to your
+                      existing balance.
+                    </p>
+                  </div>
+                </div>
+              </AccordionSection>
               <div className="h-8" />
             </div>
 
@@ -676,7 +879,7 @@ function BonusTierCard({
   bg: string
   winText: string
   lossText: string
-  chance: string
+  chance?: string
 }) {
   return (
     <div className={`p-2 rounded-lg border ${bg}`}>
@@ -686,7 +889,9 @@ function BonusTierCard({
         >
           {name}
         </span>
-        <span className="text-[7px] font-bold text-gray-400">{chance}</span>
+        {chance && (
+          <span className="text-[7px] font-bold text-gray-400">{chance}</span>
+        )}
       </div>
       <p className="text-[9px] font-bold text-green-600">{winText}</p>
       <p className="text-[9px] text-blue-500 italic">{lossText}</p>
@@ -787,24 +992,6 @@ function ChevronIcon({ isOpen }: { isOpen: boolean }) {
         strokeLinejoin="round"
         strokeWidth={3}
         d="M19 9l-7 7-7-7"
-      />
-    </svg>
-  )
-}
-
-function ExternalLinkIcon() {
-  return (
-    <svg
-      className="w-2.5 h-2.5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={3}
-        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
       />
     </svg>
   )

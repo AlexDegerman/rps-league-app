@@ -143,6 +143,18 @@ Real players (predictors) with persistent accounts and progression.
 | `had_lucky_shot` | BOOLEAN | Achievement latch: killing blow while contributing ≤10% of total damage |
 | `had_clutch_victory` | BOOLEAN | Achievement latch: killing blow with <5 seconds remaining |
 | `had_divine_intervention` | BOOLEAN | Achievement latch: joined in final 10 seconds and landed the killing blow |
+| `bonus_stages_played` | INT4 | Total bonus stages played |
+| `had_perfect_snipe` | BOOLEAN | Achievement latch for a perfect Sniper Challenge bullseye |
+| `crystal_mine_clears` | INT4 | Crystal Mine clears |
+| `oracle_vision_perfect_clears` | INT4 | Oracle Vision perfect clears |
+| `double_down_max_clears` | INT4 | Double Down max clears |
+| `wild_prediction_max_combos` | INT4 | Wild Prediction max combos |
+| `royal_treasure_chests_opened` | INT4 | Royal Treasure chests opened |
+| `royal_kings_chests_found` | INT4 | Royal Kings chests found |
+| `rainbow_tier_rolls` | INT4 | Rainbow tier rolls |
+| `surge_frenzy_max_combo_finishes` | INT4 | Surge Frenzy max combo finishes |
+| `neon_paradise_minigames_played` | JSONB | JSON map tracking played minigames |
+| `neon_full_circuit_today` | BOOLEAN | Whether the full circuit was completed today |
 
 ---
 
@@ -265,6 +277,26 @@ Per-user damage records for each encounter.
 
 ---
 
+## `bonus_stage_sessions`
+
+Active and historical minigame/bonus stage sessions for users
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` (PK) | UUID | Unique session identifier (`gen_random_uuid()`) |
+| `user_id` | TEXT | References `users.user_id` (ON DELETE CASCADE) |
+| `stage_type` | TEXT | Type of bonus stage (`TREASURE_VAULT`, `KINGS_VAULT`, `DOUBLE_DOWN`, `WILD_PREDICTION`, `SURGE_FRENZY`, `RAINBOW_RUSH`, `SNIPER_CHALLENGE`, `ORACLE_VISION`, `CRYSTAL_MINE`) |
+| `is_active` | BOOLEAN | Whether the session is currently ongoing |
+| `accumulated_payout` | NUMERIC | Points accumulated during the session |
+| `last_bet_amount` | NUMERIC | Last bet amount wagered inside the session |
+| `stage_steps_completed` | INT4 | Number of steps or rounds completed in the session |
+| `max_steps` | INT4 | Maximum number of steps or rounds allowed for this stage type |
+| `grid_state` | JSONB | Saved state of the minigame board or grid |
+| `created_at` | TIMESTAMPTZ | Session creation timestamp |
+| `updated_at` | TIMESTAMPTZ | Last session update timestamp |
+
+---
+
 ### Notes
 - `short_id` is a unique public identifier (`nanoid(10)`), but not used as a foreign key, all internal relationships rely on `user_id`
 - `points` enforces a 100,000 floor at the application layer
@@ -279,6 +311,7 @@ Per-user damage records for each encounter.
 - `user_achievements.user_id` → `users.user_id`
 - `world_boss_damage.encounter_id` → `world_boss_encounters.id`
 - `world_boss_damage.user_id` → `users.user_id`
+- `bonus_stage_sessions.user_id` → `users.user_id`
 
 ---
 
@@ -304,6 +337,7 @@ Per-user damage records for each encounter.
 | `user_achievements` | `user_id` | Fast achievement lookup per user |
 | `world_boss_damage` | `encounter_id` | Fast lookup of all damage records per encounter during reward distribution |
 | `world_boss_damage` | `user_id` | Fast lookup of a user's damage history across encounters |
+| `bonus_stage_sessions` | `user_id, is_active` | Composite index for active checks and fast ongoing session retrieval |
 
 ---
 
@@ -411,8 +445,28 @@ Per-user damage records for each encounter.
 ## 🏰 World Boss
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| GET | `/api/worldboss/state` | Returns the current World Boss encounter state, including phase, boss type, HP, strike count, and encounter timers. |
-| POST | `/api/worldboss/reward/claim` | Claims any pending World Boss rewards if they have not already been received. Intended as a fallback for missed reward events. |
+| GET | `/api/worldboss/state` | Returns the current World Boss encounter state, including phase, boss type, HP, strike count, and encounter timers |
+| POST | `/api/worldboss/reward/claim` | Claims any pending World Boss rewards if they have not already been received. Intended as a fallback for missed reward events |
+
+---
+
+## 🎮 Bonus Stages
+
+Endpoints for managing active minigame sessions, submitting actions, and claiming payouts. These endpoints require client identification passed via the `x-user-id` header
+
+### Endpoints
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| GET | `/api/bonus/active` | Get active minigame session data and reconnect state hydration payload |
+| POST | `/api/bonus/action` | Submit a verification-signed gameplay action to progress the active minigame step |
+| POST | `/api/bonus/claim` | Conclude the active session, credit the final payout to user points, and trigger achievements |
+
+### Related SSE Event
+
+| Event | Payload | Description |
+| :--- | :--- | :--- |
+| `bonus_stage_completed` | `{ type: 'bonus_stage_completed', userId, finalPayout, stageType }` | Broadcasted globally when a player successfully claims their winnings and completes a bonus stage session |
 
 ---
 

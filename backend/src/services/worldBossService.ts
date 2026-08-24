@@ -500,10 +500,6 @@ const resolveEncounter = async (
       : 0
   const participantCount = _state.participants.size
 
-  logger.info(
-    `Resolving world boss encounter ${_state.encounterId || 'unknown'} (${_state.bossType}). Outcome: ${outcome}, HP depleted: ${hpDepleted.toFixed(2)}%, Participants: ${participantCount}`
-  )
-
   // Save encounter results.
   if (_state.encounterId) {
     try {
@@ -634,11 +630,9 @@ const distributeRewards = async (
   broadcast: Broadcast
 ): Promise<void> => {
   const isDefeat = baseChestRarity === 'MYTHICAL'
-  logger.info(
-    `Starting reward distribution for encounter ${snapshot.encounterId} (${snapshot.bossType || 'unknown'}). Base rarity: ${baseChestRarity}`
-  )
 
-  for (const [userId] of snapshot.participants.entries()) {
+  for (const [userId, record] of snapshot.participants.entries()) {
+    if (record.damageDealt <= 0) continue
     try {
       const pointsRes = await pool.query(
         'SELECT points FROM users WHERE user_id = $1',
@@ -778,10 +772,6 @@ const startActive = async (broadcast: Broadcast): Promise<void> => {
 
   pauseExternalSystems()
 
-  logger.info(
-    `World boss encounter ${_state.encounterId || 'unknown'} is now ACTIVE. Boss: ${_state.bossType}, Max HP: ${_state.bossMaxHp}`
-  )
-
   broadcast(
     'world_boss_start',
     JSON.stringify({
@@ -841,10 +831,6 @@ const startWarning = (broadcast: Broadcast): void => {
   _state.warningStartedAt = now
   _state.warningEndsAt = now + warningDuration
 
-  logger.info(
-    `World boss warning initiated. Type: ${bossType}, warning duration: ${warningDuration}ms. Active at: ${new Date(_state.warningEndsAt).toISOString()}`
-  )
-
   broadcast(
     'world_boss_warning',
     JSON.stringify({
@@ -863,10 +849,6 @@ const scheduleCooldown = (broadcast: Broadcast): void => {
   if (!WORLD_BOSS_ENABLED) return
   _state.phase = 'COOLDOWN'
 
-  logger.info(
-    'World boss phase transitioned to COOLDOWN. Scheduling next warning.'
-  )
-
   _cooldownTimer = setTimeout(
     () => tryStartWarning(broadcast),
     rand(COOLDOWN_MIN_MS, COOLDOWN_MAX_MS)
@@ -875,15 +857,11 @@ const scheduleCooldown = (broadcast: Broadcast): void => {
 
 export const handleRestart = async (broadcast: Broadcast): Promise<void> => {
   if (!WORLD_BOSS_ENABLED) return
-  logger.info('Initializing world boss service restart handler.')
   try {
     const res = await pool.query(
       'SELECT id FROM world_boss_encounters WHERE ended_at IS NULL'
     )
     if (res.rows.length > 0) {
-      logger.info(
-        `Interrupted world boss encounter found (ID: ${res.rows[0].id}). Marking as RETREAT.`
-      )
       await pool.query(
         `UPDATE world_boss_encounters SET ended_at=$1, outcome='RETREAT', interrupted=true WHERE id=$2`,
         [Date.now(), res.rows[0].id]
@@ -898,6 +876,5 @@ export const handleRestart = async (broadcast: Broadcast): Promise<void> => {
 
 export const startScheduler = (broadcast: Broadcast): void => {
   if (!WORLD_BOSS_ENABLED) return
-  logger.info('Starting world boss scheduler...')
   handleRestart(broadcast)
 }

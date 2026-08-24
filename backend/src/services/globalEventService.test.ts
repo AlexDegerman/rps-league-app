@@ -8,6 +8,10 @@ vi.mock('./worldBossService.js', () => ({
   isWorldBossBlocking: vi.fn(() => false)
 }))
 
+vi.mock('./bonusStageService.js', () => ({
+  countActiveSessions: vi.fn(() => Promise.resolve(0))
+}))
+
 describe('Global Event Service', () => {
   let globalEventService: typeof import('./globalEventService.js')
 
@@ -67,14 +71,14 @@ describe('Global Event Service', () => {
     })
 
     describe('TIDAL_SURGE (+20% Echo) Precision & Truncation Boundaries', () => {
-      it('should apply exact 20% echo on divisible wins', () => {
+      it('should apply exact 20% echo on divisible wins', async () => {
         const broadcastMock = vi.fn()
         const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.0)
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
         // Advance into the warning phase.
-        vi.advanceTimersByTime(10 * 60 * 1000)
+        await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
 
         expect(broadcastMock).toHaveBeenCalledTimes(1)
         const warningCall = broadcastMock.mock.calls[0]!
@@ -85,7 +89,7 @@ describe('Global Event Service', () => {
         expect(warningPayload.phase).toBe('warning')
 
         // Advance into the active phase.
-        vi.advanceTimersByTime(30 * 1000)
+        await vi.advanceTimersByTimeAsync(30 * 1000)
 
         expect(broadcastMock).toHaveBeenCalledTimes(2)
         expect(broadcastMock.mock.calls[1]![0]).toBe('global_event_start')
@@ -104,14 +108,14 @@ describe('Global Event Service', () => {
         randomSpy.mockRestore()
       })
 
-      it('should handle BigInt floor-division truncation correctly on values not cleanly divisible by 5', () => {
+      it('should handle BigInt floor-division truncation correctly on values not cleanly divisible by 5', async () => {
         const broadcastMock = vi.fn()
         const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.0)
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
         // Fast-forward past the 7-minute cooldown and 90-second warning countdown
-        vi.advanceTimersByTime(10 * 60 * 1000 + 30 * 1000)
+        await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 999n // 999 is not cleanly divisible by 5
         const result = globalEventService.applyGlobalEventBuff(
@@ -129,7 +133,7 @@ describe('Global Event Service', () => {
     })
 
     describe('MIRAGE_CATACLYSM (Random 15% - 50% Echo) Distribution Limits', () => {
-      it('should enforce the strict minimum boundary condition (15% factor)', () => {
+      it('should enforce the strict minimum boundary condition (15% factor)', async () => {
         const broadcastMock = vi.fn()
 
         // First roll selects MIRAGE_CATACLYSM (weight maps above index thresholds to ~0.95)
@@ -144,9 +148,11 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(10 * 60 * 1000)
+        await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
         const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
-        vi.advanceTimersByTime(warningData.activeAt - warningData.startedAt)
+        await vi.advanceTimersByTimeAsync(
+          warningData.activeAt - warningData.startedAt
+        )
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -162,7 +168,7 @@ describe('Global Event Service', () => {
         randomSpy.mockRestore()
       })
 
-      it('should enforce the strict maximum boundary condition (50% factor)', () => {
+      it('should enforce the strict maximum boundary condition (50% factor)', async () => {
         const broadcastMock = vi.fn()
 
         const randomSpy = vi
@@ -175,7 +181,7 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(10 * 60 * 1000 + 30 * 1000)
+        await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -193,7 +199,7 @@ describe('Global Event Service', () => {
     })
 
     describe('Passive Telemetry Events (SOLAR_FLARE & CYCLONE_BLITZ)', () => {
-      it('should return unmodified gainLoss under SOLAR_FLARE but populate event metadata', () => {
+      it('should return unmodified gainLoss under SOLAR_FLARE but populate event metadata', async () => {
         const broadcastMock = vi.fn()
         const randomSpy = vi
           .spyOn(Math, 'random')
@@ -204,7 +210,7 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(10 * 60 * 1000 + 30 * 1000)
+        await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -220,7 +226,7 @@ describe('Global Event Service', () => {
         randomSpy.mockRestore()
       })
 
-      it('should return unmodified gainLoss under CYCLONE_BLITZ but populate event metadata', () => {
+      it('should return unmodified gainLoss under CYCLONE_BLITZ but populate event metadata', async () => {
         const broadcastMock = vi.fn()
         const randomSpy = vi
           .spyOn(Math, 'random')
@@ -231,9 +237,11 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        vi.advanceTimersByTime(10 * 60 * 1000)
+        await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
         const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
-        vi.advanceTimersByTime(warningData.activeAt - warningData.startedAt)
+        await vi.advanceTimersByTimeAsync(
+          warningData.activeAt - warningData.startedAt
+        )
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -252,7 +260,7 @@ describe('Global Event Service', () => {
   })
 
   describe('Scheduler State Machine & SSE Timing Controls', () => {
-    it('should correctly broadcast warning, active start, and completion states across transitions', () => {
+    it('should correctly broadcast warning, active start, and completion states across transitions', async () => {
       const broadcastMock = vi.fn()
       const randomSpy = vi
         .spyOn(Math, 'random')
@@ -264,7 +272,7 @@ describe('Global Event Service', () => {
       globalEventService.startGlobalEventScheduler(broadcastMock)
 
       // Advance into the warning phase.
-      vi.advanceTimersByTime(10 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
 
       expect(broadcastMock).toHaveBeenCalledTimes(1)
       const warningCall = broadcastMock.mock.calls[0]!
@@ -279,7 +287,7 @@ describe('Global Event Service', () => {
 
       // Advance into the active phase.
       const warningDuration = warningPayload.activeAt - warningPayload.startedAt
-      vi.advanceTimersByTime(warningDuration)
+      await vi.advanceTimersByTimeAsync(warningDuration)
 
       expect(broadcastMock).toHaveBeenCalledTimes(2)
       const startCall = broadcastMock.mock.calls[1]!
@@ -291,7 +299,7 @@ describe('Global Event Service', () => {
 
       // Advance until the event expires.
       const activeDuration = startPayload.endsAt - startPayload.activeAt
-      vi.advanceTimersByTime(activeDuration)
+      await vi.advanceTimersByTimeAsync(activeDuration)
 
       expect(broadcastMock).toHaveBeenCalledTimes(3)
       const endCall = broadcastMock.mock.calls[2]!
@@ -301,21 +309,21 @@ describe('Global Event Service', () => {
       randomSpy.mockRestore()
     })
 
-    it('should not allow double-initialization of the scheduler state', () => {
+    it('should not allow double-initialization of the scheduler state', async () => {
       const broadcastMockFirst = vi.fn()
       const broadcastMockSecond = vi.fn()
 
       globalEventService.startGlobalEventScheduler(broadcastMockFirst)
       globalEventService.startGlobalEventScheduler(broadcastMockSecond)
 
-      vi.advanceTimersByTime(12 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(12 * 60 * 1000)
 
       // First call starts, second is dropped silently to protect SSE streams.
       expect(broadcastMockFirst).toHaveBeenCalled()
       expect(broadcastMockSecond).not.toHaveBeenCalled()
     })
 
-    it('should automatically invalidate and clean up active modules when the expiration threshold passes', () => {
+    it('should automatically invalidate and clean up active modules when the expiration threshold passes', async () => {
       const broadcastMock = vi.fn()
 
       const randomSpy = vi
@@ -327,16 +335,18 @@ describe('Global Event Service', () => {
 
       globalEventService.startGlobalEventScheduler(broadcastMock)
 
-      vi.advanceTimersByTime(10 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
       const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
 
       // Advance into the active phase.
-      vi.advanceTimersByTime(warningData.activeAt - warningData.startedAt)
+      await vi.advanceTimersByTimeAsync(
+        warningData.activeAt - warningData.startedAt
+      )
       expect(globalEventService.getActiveGlobalEvent()).not.toBeNull()
 
       // Advance clock past endsAt.
       const activeDuration = warningData.endsAt - warningData.activeAt
-      vi.advanceTimersByTime(activeDuration + 1000) // Advance one second beyond the expiration time.
+      await vi.advanceTimersByTimeAsync(activeDuration + 1000) // Advance one second beyond the expiration time.
 
       expect(globalEventService.getActiveGlobalEvent()).toBeNull()
 

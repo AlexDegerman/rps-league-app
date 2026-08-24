@@ -46,7 +46,7 @@ export const parseShorthand = (val: string): bigint => {
   if (!clean) return 0n
 
   const match = clean.match(
-    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg|uvg|dvg|tvg|qvg|qiv|svg|spv|ovg|nvg|trg|utr|dtr|ttr|qtr|qntr|str|stg|otg|ntg|qag|uqg|dqg|tqg|qqg)?$/
+    /^(\d+\.?\d*)(k|m|b|t|qa|qi|sx|sp|oc|no|dc|ud|dd|td|qad|qid|sxd|spd|ocd|nod|vg|uvg|dvg|tvg|qvg|qiv|svg|spv|ovg|nvg|trg|utr|dtr|ttr|qtr|qntr|str|stg|otg|ntg|qag|uqg|dqg|tqg|qqg|qnqg|sxqg|spqg|ocqg|noqg|qg|uqgs|dqgs|tqgs)?$/
   )
   if (!match) return 0n
 
@@ -97,7 +97,16 @@ export const parseShorthand = (val: string): bigint => {
     uqg: 10n ** 126n,
     dqg: 10n ** 129n,
     tqg: 10n ** 132n,
-    qqg: 10n ** 135n
+    qqg: 10n ** 135n,
+    qnqg: 10n ** 138n,
+    sxqg: 10n ** 141n,
+    spqg: 10n ** 144n,
+    ocqg: 10n ** 147n,
+    noqg: 10n ** 150n,
+    qg: 10n ** 153n,
+    uqgs: 10n ** 156n,
+    dqgs: 10n ** 159n,
+    tqgs: 10n ** 162n
   }
 
   if (suffix && multipliers[suffix]) {
@@ -143,6 +152,15 @@ export const formatPoints = (
   const sign = bigN < 0n ? '-' : ''
 
   const tiers = [
+    { threshold: 10n ** 162n, symbol: 'Tqgs' },
+    { threshold: 10n ** 159n, symbol: 'Dqgs' },
+    { threshold: 10n ** 156n, symbol: 'Uqgs' },
+    { threshold: 10n ** 153n, symbol: 'Qg' },
+    { threshold: 10n ** 150n, symbol: 'Noqg' },
+    { threshold: 10n ** 147n, symbol: 'Ocqg' },
+    { threshold: 10n ** 144n, symbol: 'Spqg' },
+    { threshold: 10n ** 141n, symbol: 'Sxqg' },
+    { threshold: 10n ** 138n, symbol: 'Qnqg' },
     { threshold: 10n ** 135n, symbol: 'Qqg' },
     { threshold: 10n ** 132n, symbol: 'Tqg' },
     { threshold: 10n ** 129n, symbol: 'Dqg' },
@@ -228,6 +246,15 @@ export const getFullNumberName = (n: number | bigint | string): string => {
   const absN = bigN < 0n ? -bigN : bigN
 
   const names = [
+    { t: 162, n: 'Trequinquagintillion' },
+    { t: 159, n: 'Duoquinquagintillion' },
+    { t: 156, n: 'Unquinquagintillion' },
+    { t: 153, n: 'Quinquagintillion' },
+    { t: 150, n: 'Novemquadragintillion' },
+    { t: 147, n: 'Octoquadragintillion' },
+    { t: 144, n: 'Septenquadragintillion' },
+    { t: 141, n: 'Sexquadragintillion' },
+    { t: 138, n: 'Quinquadragintillion' },
     { t: 135, n: 'Quattuorquadragintillion' },
     { t: 132, n: 'Tresquadragintillion' },
     { t: 129, n: 'Duoquadragintillion' },
@@ -236,8 +263,6 @@ export const getFullNumberName = (n: number | bigint | string): string => {
     { t: 120, n: 'Novemtrigintillion' },
     { t: 117, n: 'Octotrigintillion' },
     { t: 114, n: 'Septentrigintillion' },
-    { t: 111, n: 'Sextrigintillion' },
-    { t: 108, n: 'Quintrigintillion' },
     { t: 111, n: 'Sextrigintillion' },
     { t: 108, n: 'Quintrigintillion' },
     { t: 105, n: 'Quattuortrigintillion' },

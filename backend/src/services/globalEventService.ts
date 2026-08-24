@@ -1,4 +1,8 @@
-import { isWorldBossActive, isWorldBossBlocking } from "./worldBossService.js"
+import { isWorldBossActive, isWorldBossBlocking } from './worldBossService.js'
+import { countActiveSessions } from './bonusStageService.js'
+
+// Feature toggle
+const ENABLE_GLOBAL_EVENTS = true
 
 export type GlobalEventType =
   | 'TIDAL_SURGE'
@@ -227,10 +231,19 @@ export const getGlobalEventState = () => {
   }
 }
 
-const tryLaunchEvent = (broadcast: Broadcast): void => {
+const tryLaunchEvent = async (broadcast: Broadcast): Promise<void> => {
   if (isWorldBossBlocking()) {
     setTimeout(() => tryLaunchEvent(broadcast), 5000)
     return
+  }
+  try {
+    const activeBonusSessions = await countActiveSessions()
+    if (activeBonusSessions > 0) {
+      setTimeout(() => tryLaunchEvent(broadcast), 5000)
+      return
+    }
+  } catch {
+    // If the session check fails, proceed rather than stall the scheduler
   }
   launchEvent(broadcast)
 }
@@ -281,6 +294,7 @@ const scheduleNext = (broadcast: Broadcast): void => {
 
 export const startGlobalEventScheduler = (broadcast: Broadcast): void => {
   _broadcastRef = broadcast
+  if (!ENABLE_GLOBAL_EVENTS) return
   if (_schedulerStarted) return
   _schedulerStarted = true
   scheduleNext(broadcast)
