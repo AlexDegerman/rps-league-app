@@ -336,15 +336,15 @@ async function processSurgeFrenzyAction(
       throw new Error('Frenzy window has already expired')
     }
 
-    // Enforce a strict 180ms tap throttle to block click spam
+    // Enforce a minimum 50ms interval between taps.
     const lastTapAt = grid.lastTapAt ?? 0
-    if (now - lastTapAt < 180) {
+    if (now - lastTapAt < 50) {
       throw new Error('Rate limit exceeded: Tap too fast')
     }
 
-    // Prevent the combo from exceeding the theoretical 200ms tap-rate ceiling
+    // Prevent the combo from exceeding the expected tap rate.
     const nextCombo = (grid.confirmedCombo ?? 0) + 1
-    const maxAllowedCombo = 1 + Math.floor(elapsed / 200)
+    const maxAllowedCombo = 3 + Math.floor(elapsed / 100)
     if (nextCombo > maxAllowedCombo) {
       throw new Error('Anomalous tap rate detected: Validation failed')
     }
