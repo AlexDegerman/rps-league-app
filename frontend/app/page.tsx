@@ -516,6 +516,8 @@ export default function HomePage() {
   useEffect(() => {
     const user = getOrCreateUser()
     if (!isUserValid(user)) return
+    const { pendingMatches: currentExisting } = useGameStore.getState()
+    const nowTime = Date.now() + serverOffset
 
     fetchUserFlashState(user.userId)
       .then((data) => {
@@ -581,12 +583,28 @@ export default function HomePage() {
       loadMatches(1)
     })
 
+    currentExisting.forEach((match) => {
+      const hasResult = useGameStore.getState().revealResults.has(match.gameId)
+      const isExpired = nowTime >= match.expiresAt
+
+      if (isExpired && !hasResult) {
+        useGameStore.getState().removePendingMatch(match.gameId)
+      }
+    })
+
     fetchPendingMatches()
       .then((data) => {
         if (!data) return
-        const { pendingMatches: existing } = useGameStore.getState()
-        const existingIds = new Set(existing.map((p) => p.gameId))
-        const fresh = data.filter((m) => !existingIds.has(m.gameId))
+        const { pendingMatches: currentExistingAfterSweep } =
+          useGameStore.getState()
+        const existingIds = new Set(
+          currentExistingAfterSweep.map((p) => p.gameId)
+        )
+
+        const fresh = data.filter(
+          (m) => m.expiresAt > nowTime && !existingIds.has(m.gameId)
+        )
+
         if (fresh.length > 0) {
           markReady()
           fresh.forEach(addPendingMatch)
@@ -642,17 +660,17 @@ export default function HomePage() {
       })
       .catch(() => {})
 
-      fetchActiveBonusSession(user.userId)
-        .then((data) => {
-          if (data?.active && data.session) {
-            setBonusActive(
-              data.session.stageType,
-              BigInt(data.session.lastBetAmount),
-              data.reconnectData ?? null
-            )
-          }
-        })
-        .catch(() => {})
+    fetchActiveBonusSession(user.userId)
+      .then((data) => {
+        if (data?.active && data.session) {
+          setBonusActive(
+            data.session.stageType,
+            BigInt(data.session.lastBetAmount),
+            data.reconnectData ?? null
+          )
+        }
+      })
+      .catch(() => {})
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadMatches])
@@ -713,14 +731,9 @@ export default function HomePage() {
     es.addEventListener('pending', (event) => {
       const pending: PendingMatch = JSON.parse(event.data)
       updatePacketTimestamp()
-      addPendingMatch(pending)
 
-      const { serverOffset: offset } = useGameStore.getState()
-      const timeoutMs = pending.expiresAt - (Date.now() + offset) + 5000
-      setTimeout(
-        () => removePendingMatch(pending.gameId),
-        Math.max(5000, timeoutMs)
-      )
+      // Cleanup is scheduled automatically by the store action.
+      addPendingMatch(pending)
       markReady()
     })
 

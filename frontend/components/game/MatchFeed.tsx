@@ -37,11 +37,11 @@ function MatchFeedComponent({
 }: MatchFeedProps) {
   const pendingMatches = useGameStore((s) => s.pendingMatches)
   const predictions = useGameStore((s) => s.predictions)
+  const revealResults = useGameStore((s) => s.revealResults)
   const serverOffset = useGameStore((s) => s.serverOffset)
   const festivalModeKey = useGameStore((s) => s.festivalModeKey)
   const oracleSide = useGameStore((s) => s.oracleSide)
   const winStreak = useUserStore((s) => s.winStreak)
-
   const [now, setNow] = useState(0)
 
   useEffect(() => {
@@ -160,24 +160,24 @@ function MatchFeedComponent({
             </div>
           )}
 
-          {pendingMatches
-            .filter((pm) => {
-              if (now === 0) return true
-              return pm.expiresAt - (now + serverOffset) > -5000
-            })
-            .map((pending) => (
-              <PendingMatchCard
-                key={pending.gameId}
-                pending={pending}
-                prediction={predictions.get(pending.gameId) ?? null}
-                onPick={handlePick}
-                serverOffset={serverOffset}
-                winStreak={winStreak}
-                visualMode={visualMode}
-                festivalModeKey={festivalModeKey}
-                oracleSide={oracleSide}
-              />
-            ))}
+          {now !== 0 &&
+            pendingMatches
+              .filter((pm) => {
+                return pm.expiresAt - (now + serverOffset) > -5000
+              })
+              .map((pending) => (
+                <PendingMatchCard
+                  key={pending.gameId}
+                  pending={pending}
+                  prediction={predictions.get(pending.gameId) ?? null}
+                  onPick={handlePick}
+                  serverOffset={serverOffset}
+                  winStreak={winStreak}
+                  visualMode={visualMode}
+                  festivalModeKey={festivalModeKey}
+                  oracleSide={oracleSide}
+                />
+              ))}
 
           <MatchList
             matches={matches}

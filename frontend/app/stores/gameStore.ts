@@ -223,11 +223,19 @@ export const useGameStore = create<GameState>((set, get) => ({
   // Actions - Feed
   setPendingMatches: (fn) =>
     set((s) => ({ pendingMatches: fn(s.pendingMatches) })),
-  addPendingMatch: (match) =>
-    set((s) => {
-      if (s.pendingMatches.find((p) => p.gameId === match.gameId)) return s
-      return { pendingMatches: [match, ...s.pendingMatches] }
-    }),
+  addPendingMatch: (match) => {
+    const state = get()
+    if (state.pendingMatches.some((p) => p.gameId === match.gameId)) return
+    set((s) => ({ pendingMatches: [match, ...s.pendingMatches] }))
+    // Keep the match for 5 seconds after its betting window expires.
+    const delay = Math.max(
+      0,
+      match.expiresAt - (Date.now() + state.serverOffset) + 5000
+    )
+    setTimeout(() => {
+      get().removePendingMatch(match.gameId)
+    }, delay)
+  },
   removePendingMatch: (gameId) =>
     set((s) => ({
       pendingMatches: s.pendingMatches.filter((p) => p.gameId !== gameId)
