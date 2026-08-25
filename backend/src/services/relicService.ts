@@ -449,21 +449,29 @@ export async function rollRelicDrop(
 }
 
 export async function getUserRelics(userId: string): Promise<RelicDef[]> {
-  const result = await pool.query(
+  const result = await pool.query<{
+    relic_key: string
+    counter: string | number
+  }>(
     'SELECT relic_key, counter FROM relics WHERE user_id = $1 ORDER BY found_at ASC',
     [userId]
   )
 
   return result.rows
-    .map((row: any): RelicDef | null => {
-      const staticDef = RELIC_MAP[row.relic_key]
-      if (!staticDef) return null
+    .map(
+      (row: {
+        relic_key: string
+        counter: string | number
+      }): RelicDef | null => {
+        const staticDef = RELIC_MAP[row.relic_key]
+        if (!staticDef) return null
 
-      return {
-        ...staticDef,
-        counter: Number(row.counter || 0)
+        return {
+          ...staticDef,
+          counter: Number(row.counter || 0)
+        }
       }
-    })
+    )
     .filter((relic): relic is RelicDef => relic !== null)
 }
 

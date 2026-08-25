@@ -23,13 +23,14 @@ export async function generateWithFallback(
       })
       const result = await model.generateContent(query)
       return result.response.text()
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
       logger.warn('Oracle model failed', {
         model: modelName,
-        error: err.message
+        error: message
       })
       // Only retry on capacity errors; propagate all others immediately
-      if (err.message.includes('503') || err.message.includes('429')) continue
+      if (message.includes('503') || message.includes('429')) continue
       throw err
     }
   }

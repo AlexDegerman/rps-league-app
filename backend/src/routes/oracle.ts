@@ -54,7 +54,7 @@ router.post('/consult', async (req: Request, res: Response) => {
 
     const result = await consultOracle(query, nickname)
     return res.json(result)
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('Oracle critical error', err, { query: req.body?.query })
     return res.status(500).json({ error: 'SYSTEM_ERROR' })
   }

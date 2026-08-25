@@ -115,9 +115,10 @@ export const getOrCreateUser = async (
         nickname: result.rows[0].nickname,
         shortId: result.rows[0].short_id
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Check specifically for duplicate key violation on users_short_id_key unique index
-      if (err.code === '23505' && err.constraint === 'users_short_id_key') {
+      const dbErr = err as { code?: string; constraint?: string }
+      if (dbErr.code === '23505' && dbErr.constraint === 'users_short_id_key') {
         attempts++
         logger.warn(
           `short_id collision detected in getOrCreateUser on attempt ${attempts}. Retrying with a new short_id...`,

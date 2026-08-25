@@ -1,28 +1,31 @@
 import pool from './db.js'
-import { ACHIEVEMENT_MAP } from '../services/achievementChecker.js'
+import {
+  ACHIEVEMENT_MAP,
+  type AchievementDef,
+  type AchievementRarity
+} from '../services/achievementChecker.js'
 
 export const autoEquipUserBadges = async (
   userId: string
 ): Promise<string[]> => {
   try {
-    const userRes = await pool.query(
+    const userRes = await pool.query<{ show_linkedin_badge: boolean }>(
       `SELECT show_linkedin_badge FROM users WHERE user_id = $1`,
       [userId]
     )
     if (userRes.rows.length === 0) return []
     const u = userRes.rows[0]
+    if (!u) return []
     const maxSlots = u.show_linkedin_badge ? 4 : 5
 
-    const earnedRes = await pool.query(
+    const earnedRes = await pool.query<{ achievement_code: string }>(
       `SELECT achievement_code FROM user_achievements WHERE user_id = $1`,
       [userId]
     )
-    const earnedCodes = earnedRes.rows.map(
-      (r: { achievement_code: string }) => r.achievement_code
-    )
+    const earnedCodes = earnedRes.rows.map((r) => r.achievement_code)
     if (earnedCodes.length === 0) return []
 
-    const RARITY_WEIGHT: Record<string, number> = {
+    const RARITY_WEIGHT: Record<AchievementRarity, number> = {
       RAINBOW: 6,
       MYTHICAL: 5,
       LEGENDARY: 4,
@@ -33,7 +36,7 @@ export const autoEquipUserBadges = async (
 
     const earnedDefs = earnedCodes
       .map((code) => ACHIEVEMENT_MAP.get(code))
-      .filter((a): a is any => !!a)
+      .filter((a): a is AchievementDef => !!a)
 
     const shuffled = [...earnedDefs].sort(() => Math.random() - 0.5)
 

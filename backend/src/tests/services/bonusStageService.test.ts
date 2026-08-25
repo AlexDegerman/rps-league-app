@@ -397,7 +397,7 @@ describe('Bonus Stage Service Tests', () => {
         gridState: {
           confirmedCombo: 0,
           startedAt: startTime,
-          lastTapAt: startTime - 50
+          lastTapAt: Math.max(0, startTime - 49)
         }
       } as unknown as BonusSession
 

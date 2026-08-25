@@ -370,9 +370,14 @@ router.get('/user/:userId/history', async (req, res) => {
     const { userId } = req.params
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
-    const sort = (req.query.sort as string) || 'recent'
+    
+    const rawSort = req.query.sort as string
+    const sort = (rawSort === 'wins' || rawSort === 'multipliers' || rawSort === 'recent')
+      ? rawSort
+      : 'recent'
+
     res.json(
-      await getPaginatedUserPredictions(userId, page, limit, sort as any)
+      await getPaginatedUserPredictions(userId, page, limit, sort)
     )
   } catch (err) {
     logger.error('GET /user/:userId/history failed', err, {

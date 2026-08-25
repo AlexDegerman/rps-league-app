@@ -3,6 +3,7 @@ import { getLatestMatches } from '../services/matchService.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { GAME_KNOWLEDGE } from './gameKnowledge/index.js'
+import type { Match } from '../types/rps.js'
 
 export async function buildContext(): Promise<string> {
   const [
@@ -57,13 +58,15 @@ export async function buildContext(): Promise<string> {
     `)
   ])
 
-  const formattedPredictors = topPredictorsRes.rows.map((row: any) => {
-    const stats = formatStat(row.points)
-    return {
-      nickname: row.nickname,
-      points: `${stats.formatted} (${stats.name})`
+  const formattedPredictors = topPredictorsRes.rows.map(
+    (row: { nickname: string; points: string }) => {
+      const stats = formatStat(row.points)
+      return {
+        nickname: row.nickname,
+        points: `${stats.formatted} (${stats.name})`
+      }
     }
-  })
+  )
 
   const stats = statsRes.rows[0]
   const flashStats = flashStatsRes.rows[0]
@@ -73,7 +76,7 @@ export async function buildContext(): Promise<string> {
   const houseEdge = (50 - 1.5 * winRate).toFixed(1)
   const formattedVolume = formatStat(stats.total_volume).formatted
 
-  const history = (matchesData.matches || []).map((m: any) => ({
+  const history = (matchesData.matches || []).map((m: Match) => ({
     p1: m.playerA.name,
     p2: m.playerB.name,
     moves: `${m.playerA.played} vs ${m.playerB.played}`

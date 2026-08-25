@@ -189,21 +189,22 @@ const rollChestRelic = async (
 
   const targetRarity = rollChestRelicRarity()
 
-  const owned = await pool.query(
+  const owned = await pool.query<{ relic_key: string }>(
     'SELECT relic_key FROM relics WHERE user_id = $1',
     [userId]
   )
   const ownedKeys = new Set([
-    ...owned.rows.map((r: any) => r.relic_key),
+    ...owned.rows.map((r) => r.relic_key),
     ...excludeKeys
   ])
 
   const bossRelics = RELICS.filter(
-    (r: any) => r.bossExclusive && !ownedKeys.has(r.key)
+    (r: { bossExclusive?: boolean; key: string; rarity: string }) =>
+      r.bossExclusive && !ownedKeys.has(r.key)
   )
   if (bossRelics.length === 0) return null
 
-  let candidates = bossRelics.filter((r: any) => r.rarity === targetRarity)
+  let candidates = bossRelics.filter((r) => r.rarity === targetRarity)
   if (candidates.length === 0) candidates = bossRelics
 
   const picked = candidates[Math.floor(Math.random() * candidates.length)]!

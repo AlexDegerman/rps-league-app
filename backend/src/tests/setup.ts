@@ -16,7 +16,15 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-export const mockDbResponse = (rows: any[]): any => ({
+export const mockDbResponse = <T>(
+  rows: T[]
+): {
+  rows: T[]
+  rowCount: number
+  command: string
+  oid: number
+  fields: unknown[]
+} => ({
   rows,
   rowCount: rows.length,
   command: 'SELECT',

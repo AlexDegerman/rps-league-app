@@ -75,8 +75,9 @@ router.post('/equip', async (req, res) => {
   try {
     await equipRelicToSlot(userId, relicKey, slotIndex)
     res.json({ success: true })
-  } catch (e: any) {
-    res.status(403).json({ error: e.message })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to equip'
+    res.status(403).json({ error: message })
   }
 })
 
