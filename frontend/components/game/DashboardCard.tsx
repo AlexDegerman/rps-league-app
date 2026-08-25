@@ -1,19 +1,17 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import GemIcon from '@/components/icons/GemIcon'
 import InfoIcon from '@/components/icons/InfoIcon'
 import CloseIcon from '@/components/icons/CloseIcon'
 import RelicSlot from '@/components/relics/RelicSlot'
-import SoundIcon from '@/components/icons/SoundIcon'
-import SoundControlPopover from '@/components/ui/SoundControlPopover'
+import SoundControlButton from '@/components/ui/SoundControlButton'
 import FlashBadge from '@/components/badges/FlashBadge'
 import StreakBadge from '@/components/badges/StreakBadge'
 import ModeButton from '@/components/ui/ModeButton'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUserStore } from '@/app/stores/userStore'
 import { useUIStore } from '@/app/stores/uiStore'
-import { useSound } from '@/hooks/useSound'
 import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
 import {
   formatPoints,
@@ -188,12 +186,6 @@ export default function DashboardCard() {
   const setShowPointsExplainer = useUIStore((s) => s.setShowPointsExplainer)
   const notification = useUIStore((s) => s.notification)
   const setNotification = useUIStore((s) => s.setNotification)
-  const oracleVolume = useUIStore((s) => s.oracleVolume)
-  const setOracleVolume = useUIStore((s) => s.setOracleVolume)
-
-  const { soundOn, toggleSound, volume, setVolume } = useSound()
-  const [showSoundPopover, setShowSoundPopover] = useState(false)
-  const soundBtnRef = useRef<HTMLButtonElement>(null)
 
   const pointsRef = useRef<HTMLSpanElement>(null)
   useAnimatedBigInt(pointsRef, points, stylePreference, 1000)
@@ -315,28 +307,10 @@ export default function DashboardCard() {
               )}
             </div>
 
-            {/* Sound trigger and popover */}
-            <div className="relative flex items-center gap-2 shrink-0">
+            {/* Relic and sound controls */}
+            <div className="relative flex items-start gap-2 shrink-0">
               <RelicSlot align="right" />
-              <button
-                ref={soundBtnRef}
-                onClick={() => setShowSoundPopover((p) => !p)}
-                className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm bg-white"
-              >
-                <SoundIcon muted={!soundOn} />
-              </button>
-              {showSoundPopover && (
-                <SoundControlPopover
-                  soundOn={soundOn}
-                  volume={volume}
-                  oracleVolume={oracleVolume}
-                  onVolumeChange={setVolume}
-                  onOracleVolumeChange={setOracleVolume}
-                  onToggleSound={toggleSound}
-                  anchorRef={soundBtnRef}
-                  onClose={() => setShowSoundPopover(false)}
-                />
-              )}
+              <SoundControlButton />
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { useUserStore } from '../../app/stores/userStore'
 import { formatPoints, getDisplayTierClass } from '../../lib/format'
@@ -9,9 +9,7 @@ import { NeonSoundContext } from '../../hooks/useNeonSound'
 import type { NeonSoundAPI } from '../../hooks/useNeonSound'
 import { useAnimatedBigIntVal } from '@/hooks/useAnimatedBigInt'
 import GemIcon from '@/components/icons/GemIcon'
-import SoundIcon from '@/components/icons/SoundIcon'
-import SoundControlPopover from '@/components/ui/SoundControlPopover'
-import { useUIStore } from '@/app/stores/uiStore'
+import SoundControlButton from '@/components/ui/SoundControlButton'
 
 import TreasureVaultStage from '../bonusStages/TreasureVaultStage'
 import KingsVaultStage from '../bonusStages/KingsVaultStage'
@@ -37,17 +35,7 @@ export default function NeonParadiseContainer() {
     playCards,
     playElectric,
     playChain,
-    soundOn,
-    toggleSound,
-    volume,
-    setVolume
   } = useSound()
-
-  const oracleVolume = useUIStore((s) => s.oracleVolume)
-  const setOracleVolume = useUIStore((s) => s.setOracleVolume)
-
-  const [showSoundPopover, setShowSoundPopover] = useState(false)
-  const soundBtnRef = useRef<HTMLButtonElement>(null)
 
   // Pre-decode the click buffer on mount.
   useEffect(() => {
@@ -84,33 +72,16 @@ export default function NeonParadiseContainer() {
     <NeonSoundContext.Provider value={soundApi}>
       <div className="neon-paradise-container pt-3!">
         <div className="neon-paradise-header flex items-center justify-between gap-2">
-          <div className="banner-system whitespace-nowrap">
+          <div
+            className="hidden sm:block w-10.5 shrink-0 invisible"
+            aria-hidden="true"
+          />
+
+          <div className="banner-system whitespace-nowrap sm:text-center">
             🌴 NEON PARADISE
           </div>
 
-          <div className="relative shrink-0">
-            <button
-              ref={soundBtnRef}
-              onClick={() => setShowSoundPopover((p) => !p)}
-              className="shrink-0 p-2 rounded-full border border-gray-200 hover:bg-gray-100 transition shadow-sm bg-white"
-              aria-label="Sound settings"
-            >
-              <SoundIcon muted={!soundOn} />
-            </button>
-
-            {showSoundPopover && (
-              <SoundControlPopover
-                soundOn={soundOn}
-                volume={volume}
-                oracleVolume={oracleVolume}
-                onVolumeChange={setVolume}
-                onOracleVolumeChange={setOracleVolume}
-                onToggleSound={toggleSound}
-                anchorRef={soundBtnRef}
-                onClose={() => setShowSoundPopover(false)}
-              />
-            )}
-          </div>
+          <SoundControlButton />
         </div>
 
         {/* Status bar */}
@@ -177,9 +148,7 @@ export default function NeonParadiseContainer() {
             {activeBonusStage === 'WILD_PREDICTION' && <WildPredictionStage />}
             {activeBonusStage === 'SURGE_FRENZY' && <SurgeFrenzyStage />}
             {activeBonusStage === 'RAINBOW_RUSH' && <RainbowRushStage />}
-            {activeBonusStage === 'SNIPER_CHALLENGE' && (
-              <SniperChallengeStage />
-            )}
+            {activeBonusStage === 'SNIPER_CHALLENGE' && <SniperChallengeStage />}
             {activeBonusStage === 'ORACLE_VISION' && <OracleVisionStage />}
             {activeBonusStage === 'CRYSTAL_MINE' && <CrystalMineStage />}
           </div>
