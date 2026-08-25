@@ -12,9 +12,13 @@ export interface PendingMatch {
   playerB: string
 }
 
-// Module-level so any route can query the live match without a DB round-trip
+// Keep the active match in memory for real-time access without a DB query
 let currentPendingMatch: PendingMatch | null = null
 export const getActivePendingMatch = () => currentPendingMatch
+
+// Prevent duplicate generator loops within this module instance
+let isRunning = false
+let timer: ReturnType<typeof setTimeout> | null = null
 
 const MOVES = ['ROCK', 'PAPER', 'SCISSORS'] as const
 const randomItem = <T>(arr: readonly T[] | T[]): T =>
@@ -72,16 +76,25 @@ const saveMatch = async (
 
 export const startMatchGenerator = (
   onPending: (pendingMatch: PendingMatch) => void,
-  onResult: (match: Match) => void,
-  broadcast: (event: string, data: string) => void, // passed to resolvePrediction via onResult for flash event SSE
+  onResult: (match: Match) => void | Promise<void>,
   intervalMs = 5000
-): void => {
-  setInterval(async () => {
+): (() => void) => {
+  if (isRunning) {
+    logger.warn(
+      'Match generator is already running within this module instance.'
+    )
+    return () => {}
+  }
+  isRunning = true
+
+  const tick = async () => {
     const BETTING_DURATION = 3000
     const startTime = Date.now()
 
     try {
       const match = generateMatch(startTime, BETTING_DURATION)
+
+      // Persist match record before notifying clients to prevent prediction validation races
       await saveMatch(match)
 
       const pendingMatch: PendingMatch = {
@@ -95,16 +108,41 @@ export const startMatchGenerator = (
       currentPendingMatch = pendingMatch
       onPending(pendingMatch)
 
+      // Wait for the betting period to expire
       await new Promise((resolve) => setTimeout(resolve, BETTING_DURATION))
 
       currentPendingMatch = null
-      onResult(match)
+
+      // Await downstream async processing to ensure strict sequential execution
+      await onResult(match)
     } catch (err) {
-      logger.error('matchGenerator: interval tick failed', err, {
+      logger.error('matchGenerator: tick failed', err, {
         tick: startTime
       })
       currentPendingMatch = null
-      // don't re-throw - interval must keep running
+    } finally {
+      if (isRunning) {
+        // Compensate for tick execution time to maintain the target interval
+        // If the tick overruns, start the next tick immediately
+        const elapsed = Date.now() - startTime
+        const nextDelay = Math.max(0, intervalMs - elapsed)
+
+        timer = setTimeout(tick, nextDelay)
+      }
     }
-  }, intervalMs)
+  }
+
+  timer = setTimeout(tick, 0)
+
+  // Return a cleanup function to allow test runners to isolate execution
+  return () => {
+    isRunning = false
+
+    if (timer) {
+      clearTimeout(timer)
+      timer = null
+    }
+
+    currentPendingMatch = null
+  }
 }

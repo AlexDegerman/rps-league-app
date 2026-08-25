@@ -120,8 +120,7 @@ router.get('/', (req, res) => {
             gameId: match.gameId
           })
         }
-      },
-      broadcast
+      }
     )
     startDemoFestivalScheduler(broadcast)
     startGlobalEventScheduler(broadcast)
