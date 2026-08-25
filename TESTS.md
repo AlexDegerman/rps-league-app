@@ -18,6 +18,7 @@ The backend services are tested using Vitest to verify database behavior, BigInt
 - **Festival Service**: Manages streak triggers, bonus tiers, cooldown and lockout rules, database updates, and scheduler safety windows.
 - **IP Mask Utility**: Validates IPv4/IPv6 anonymization for database storage, human-readable log masking, proxy chain extraction, and edge-case fallback handling.
 - **Neon Paradise Service** : Tests bonus stage triggering, session creation and retrieval, client/reconnect state, stage action routing and core stage mechanics, payout calculations, server-side validation, and Neon Paradise milestone tracking.
+- **Match Generator Service**: Tests sequential match generation, database persistence, callback ordering, prediction-window timing, duplicate instance prevention, and cleanup behavior.
 
 ---
 
