@@ -57,6 +57,50 @@ function PendingMatchCardComponent({
   }, [calculateTimeLeft])
 
   const canPick = timeLeft > 0 && !prediction
+  
+  useEffect(() => {
+    if (!canPick) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't fire if any input-like element has focus
+      const tag = document.activeElement?.tagName
+      const isEditable = (document.activeElement as HTMLElement)
+        ?.isContentEditable
+      if (
+        tag === 'INPUT' ||
+        tag === 'TEXTAREA' ||
+        tag === 'SELECT' ||
+        isEditable
+      )
+        return
+
+      // Don't fire if a modal/dialog is open
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]'))
+        return
+
+      switch (e.key) {
+        case 'a':
+        case 'A':
+        case '1':
+        case 'ArrowLeft':
+          e.preventDefault()
+          onPick(pending.gameId, pending.playerA)
+          break
+        case 'd':
+        case 'D':
+        case '2':
+        case 'ArrowRight':
+          e.preventDefault()
+          onPick(pending.gameId, pending.playerB)
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [canPick, pending.gameId, pending.playerA, pending.playerB, onPick])
+
+
 
   const storeVisualMode = useGameStore((s) => s.visualMode)
   const storeFestivalModeKey = useGameStore((s) => s.festivalModeKey)
