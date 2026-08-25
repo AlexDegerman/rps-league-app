@@ -3,22 +3,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 // Control the scheduler's perceived time.
 const INITIAL_SYSTEM_TIME = new Date('2026-04-02T10:00:00Z').getTime()
 
-vi.mock('./worldBossService.js', () => ({
+vi.mock('../../services/worldBossService.js', () => ({
   isWorldBossActive: vi.fn(() => false),
   isWorldBossBlocking: vi.fn(() => false)
 }))
 
-vi.mock('./bonusStageService.js', () => ({
+vi.mock('../../services/bonusStageService.js', () => ({
   countActiveSessions: vi.fn(() => Promise.resolve(0))
 }))
 
 describe('Global Event Service', () => {
-  let globalEventService: typeof import('./globalEventService.js')
+  let globalEventService: typeof import('../../services/globalEventService.js')
 
   beforeEach(async () => {
     // Reset module state between tests because scheduler flags persist in the module cache.
     vi.resetModules()
-    globalEventService = await import('./globalEventService.js')
+    globalEventService = await import('../../services/globalEventService.js')
     vi.useFakeTimers()
     vi.setSystemTime(INITIAL_SYSTEM_TIME)
   })

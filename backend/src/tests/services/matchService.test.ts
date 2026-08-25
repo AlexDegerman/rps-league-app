@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
-import * as matchService from './matchService.js'
-import pool from '../utils/db.js'
+import * as matchService from '../../services/matchService.js'
+import pool from '../..//utils/db.js'
 
 const mockQuery = vi.mocked(pool.query)
 

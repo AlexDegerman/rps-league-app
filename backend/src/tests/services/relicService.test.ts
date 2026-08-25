@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import * as relicService from './relicService.js'
-import { RELICS } from './relicService.js'
-import pool from '../utils/db.js'
-import { mockDbResponse } from '../test/setup.js'
-import { getActiveFestival } from './festivalService.js'
+import * as relicService from '../../services/relicService.js'
+import { RELICS } from '../../services/relicService.js'
+import pool from '../../utils/db.js'
+import { mockDbResponse } from '../setup.js'
+import { getActiveFestival } from '../../services/festivalService.js'
 
-vi.mock('./festivalService.js', () => ({
+vi.mock('../../services/festivalService.js', () => ({
   getActiveFestival: vi.fn(() => null)
 }))
 
-vi.mock('../utils/logger.js', () => ({
+vi.mock('../../utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),

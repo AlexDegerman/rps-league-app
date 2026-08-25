@@ -1,19 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Mock } from 'vitest'
 import type { QueryResult, QueryResultRow } from 'pg'
-import type { Match } from '../types/rps.js'
-import { startMatchGenerator, getActivePendingMatch } from './matchGenerator.js'
-import type { PendingMatch } from './matchGenerator.js'
-import pool from './db.js'
-import { logger } from '../utils/logger.js'
+import type { Match } from '../../types/rps.js'
+import {
+  startMatchGenerator,
+  getActivePendingMatch,
+  type PendingMatch
+} from '../../utils/matchGenerator.js'
+import pool from '../../utils/db.js'
+import { logger } from '../../utils/logger.js'
 
-vi.mock('./db.js', () => ({
+vi.mock('../../utils/db.js', () => ({
   default: {
     query: vi.fn()
   }
 }))
 
-vi.mock('../utils/logger.js', () => ({
+vi.mock('../../utils/logger.js', () => ({
   logger: {
     error: vi.fn(),
     warn: vi.fn(),
@@ -21,13 +24,14 @@ vi.mock('../utils/logger.js', () => ({
   }
 }))
 
+vi.mock('../../utils/playerNames.js', () => ({
+  playerNames: ['Player1', 'Player2', 'Player3']
+}))
+
 vi.mock('uuid', () => ({
   v4: () => 'mocked-game-id'
 }))
 
-vi.mock('./playerNames.js', () => ({
-  playerNames: ['Player1', 'Player2', 'Player3']
-}))
 
 describe('Match Generator Service', () => {
   let onPending: Mock<(pendingMatch: PendingMatch) => void>

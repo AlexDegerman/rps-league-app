@@ -24,7 +24,7 @@ const mockUserState = {
   showLinkedinBadge: false
 }
 
-vi.mock('../stores/userStore', () => ({
+vi.mock('@/app/stores/userStore', () => ({
   useUserStore: vi.fn(<T,>(selector?: (state: typeof mockUserState) => T) =>
     selector ? selector(mockUserState) : mockUserState
   )

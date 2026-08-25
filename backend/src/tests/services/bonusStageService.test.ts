@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest'
-import { type StageType, type BonusSession } from '../types/bonusStage.js'
+import { type StageType, type BonusSession } from '../../types/bonusStage.js'
 
 const mocks = vi.hoisted(() => {
   const queryFn = vi.fn()
@@ -20,14 +20,14 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('../utils/db.js', () => ({
+vi.mock('../../utils/db.js', () => ({
   default: {
     query: (...args: any[]) => mocks.mockQuery(...args),
     connect: () => mocks.mockConnect()
   }
 }))
 
-vi.mock('../types/bonusStage.js', async (importOriginal) => {
+vi.mock('../../types/bonusStage.js', async (importOriginal) => {
   const actual = await importOriginal<any>()
   return {
     ...actual,
@@ -44,7 +44,7 @@ import {
   getReconnectData,
   processAction,
   claimWinnings
-} from './bonusStageService.js'
+} from '../../services/bonusStageService.js'
 
 const createMockRow = (overrides = {}) => ({
   id: 'session-123',

@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import pool from '../utils/db.js'
-import { mockDbResponse } from '../test/setup.js'
+import pool from '../../utils/db.js'
+import { mockDbResponse } from '../setup.js'
 
 const mockGlobalEventBlocking = { value: false }
 
-vi.mock('./globalEventService.js', () => ({
+vi.mock('../../services/globalEventService.js', () => ({
   isGlobalEventBlocking: vi.fn(() => mockGlobalEventBlocking.value)
 }))
 
-vi.mock('./relicService.js', () => ({
+vi.mock('../../services/relicService.js', () => ({
   RELICS: [
     {
       key: 'boss_relic_a',
@@ -29,7 +29,7 @@ vi.mock('./relicService.js', () => ({
   ]
 }))
 
-vi.mock('../utils/logger.js', () => ({
+vi.mock('../../utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
@@ -42,7 +42,7 @@ const mockQuery = vi.mocked(pool.query)
 
 const freshImport = async () => {
   vi.resetModules()
-  return import('./worldBossService.js')
+  return import('../../services/worldBossService.js')
 }
 
 let queriesExecuted: { sql: string; params: any[] }[] = []

@@ -1,14 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
-import CrystalMineStage from './CrystalMineStage'
-import DoubleDownStage from './DoubleDownStage'
-import KingsVaultStage from './KingsVaultStage'
-import OracleVisionStage from './OracleVisionStage'
-import RainbowRushStage from './RainbowRushStage'
-import SniperChallengeStage from './SniperChallengeStage'
-import SurgeFrenzyStage from './SurgeFrenzyStage'
-import TreasureVaultStage from './TreasureVaultStage'
-import WildPredictionStage from './WildPredictionStage'
+import CrystalMineStage from '@/components/bonusStages/CrystalMineStage'
+import DoubleDownStage from '@/components/bonusStages/DoubleDownStage'
+import KingsVaultStage from '@/components/bonusStages/KingsVaultStage'
+import OracleVisionStage from '@/components/bonusStages/OracleVisionStage'
+import RainbowRushStage from '@/components/bonusStages/RainbowRushStage'
+import SniperChallengeStage from '@/components/bonusStages/SniperChallengeStage'
+import SurgeFrenzyStage from '@/components/bonusStages/SurgeFrenzyStage'
+import TreasureVaultStage from '@/components/bonusStages/TreasureVaultStage'
+import WildPredictionStage from '@/components/bonusStages/WildPredictionStage'
 
 const mockGameStoreState = {
   bonusGridState: null,

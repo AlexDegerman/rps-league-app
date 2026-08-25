@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
-import NeonParadiseContainer from './NeonParadiseContainer'
+import NeonParadiseContainer from '@/components/game/NeonParadiseContainer'
 
 const mocks = vi.hoisted(() => {
   return {
@@ -43,19 +43,19 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('../../hooks/useSound', () => ({
+vi.mock('@/hooks/useSound', () => ({
   useSound: () => mocks.mockSound
 }))
 
-vi.mock('../../hooks/useNeonSound', () => ({
+vi.mock('@/hooks/useNeonSound', () => ({
   NeonSoundContext: mocks.NeonSoundContext
 }))
 
-vi.mock('../../app/stores/gameStore', () => ({
+vi.mock('@/app/stores/gameStore', () => ({
   useGameStore: vi.fn((selector) => selector(mocks.gameState))
 }))
 
-vi.mock('../../app/stores/userStore', () => ({
+vi.mock('@/app/stores/userStore', () => ({
   useUserStore: vi.fn((selector) => selector(mocks.userStoreState))
 }))
 
@@ -67,7 +67,7 @@ vi.mock('@/hooks/useAnimatedBigInt', () => ({
   useAnimatedBigIntVal: vi.fn((val) => val)
 }))
 
-vi.mock('../../lib/format', () => ({
+vi.mock('@/lib/format', () => ({
   formatPoints: vi.fn((val) => ({ display: `${val} Points` })),
   getDisplayTierClass: vi.fn(() => 'tier-class')
 }))
@@ -86,36 +86,43 @@ vi.mock('@/components/ui/SoundControlPopover', () => ({
   )
 }))
 
-// Mock individual bonus stage components to isolate container testing
-vi.mock('../bonusStages/TreasureVaultStage', () => ({
+vi.mock('@/components/bonusStages/TreasureVaultStage', () => ({
   default: () => <div data-testid="TreasureVaultStage">TreasureVaultStage</div>
 }))
-vi.mock('../bonusStages/KingsVaultStage', () => ({
+
+vi.mock('@/components/bonusStages/KingsVaultStage', () => ({
   default: () => <div data-testid="KingsVaultStage">KingsVaultStage</div>
 }))
-vi.mock('../bonusStages/DoubleDownStage', () => ({
+
+vi.mock('@/components/bonusStages/DoubleDownStage', () => ({
   default: () => <div data-testid="DoubleDownStage">DoubleDownStage</div>
 }))
-vi.mock('../bonusStages/WildPredictionStage', () => ({
+
+vi.mock('@/components/bonusStages/WildPredictionStage', () => ({
   default: () => (
     <div data-testid="WildPredictionStage">WildPredictionStage</div>
   )
 }))
-vi.mock('../bonusStages/SurgeFrenzyStage', () => ({
+
+vi.mock('@/components/bonusStages/SurgeFrenzyStage', () => ({
   default: () => <div data-testid="SurgeFrenzyStage">SurgeFrenzyStage</div>
 }))
-vi.mock('../bonusStages/RainbowRushStage', () => ({
+
+vi.mock('@/components/bonusStages/RainbowRushStage', () => ({
   default: () => <div data-testid="RainbowRushStage">RainbowRushStage</div>
 }))
-vi.mock('../bonusStages/SniperChallengeStage', () => ({
+
+vi.mock('@/components/bonusStages/SniperChallengeStage', () => ({
   default: () => (
     <div data-testid="SniperChallengeStage">SniperChallengeStage</div>
   )
 }))
-vi.mock('../bonusStages/OracleVisionStage', () => ({
+
+vi.mock('@/components/bonusStages/OracleVisionStage', () => ({
   default: () => <div data-testid="OracleVisionStage">OracleVisionStage</div>
 }))
-vi.mock('../bonusStages/CrystalMineStage', () => ({
+
+vi.mock('@/components/bonusStages/CrystalMineStage', () => ({
   default: () => <div data-testid="CrystalMineStage">CrystalMineStage</div>
 }))
 

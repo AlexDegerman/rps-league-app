@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
-import { useIdleBet } from './useIdleBet'
+import { useIdleBet } from '../../hooks/useIdleBet'
 import { postPrediction } from '@/lib/api'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
 import type {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { anonymizeIp, maskIpForLogs } from './maskIp.js'
+import { anonymizeIp, maskIpForLogs } from '../../utils/maskIp.js'
 
 describe('IP Mask Service', () => {
   describe('anonymizeIp - Subnet Masking for Database Compatibility', () => {

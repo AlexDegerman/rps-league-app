@@ -4,14 +4,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 const INITIAL_SYSTEM_TIME = new Date('2026-04-02T10:00:00Z').getTime()
 
 // Mock DB module to isolate tests from persistent state.
-vi.mock('../utils/db.js', () => ({
+vi.mock('../../utils/db.js', () => ({
   default: {
     query: vi.fn().mockResolvedValue({ rows: [] })
   }
 }))
 
 // Mock logger to suppress test noise.
-vi.mock('../utils/logger.js', () => ({
+vi.mock('../../utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),
@@ -20,19 +20,19 @@ vi.mock('../utils/logger.js', () => ({
 }))
 
 // Mock flash event service dependencies.
-vi.mock('./flashEventService.js', () => ({
+vi.mock('../../services/flashEventService.js', () => ({
   clearAllFlashEvents: vi.fn().mockResolvedValue(undefined),
   getRandomFlashType: vi.fn().mockReturnValue({ type: 'CARDS' }),
   refillAllFlashEvents: vi.fn().mockResolvedValue(undefined)
 }))
 
 describe('Festival Service', () => {
-  let festivalService: typeof import('./festivalService.js')
+  let festivalService: typeof import('../../services/festivalService.js')
 
   beforeEach(async () => {
     // Reset module state between tests because tracker states persist in the module cache.
     vi.resetModules()
-    festivalService = await import('./festivalService.js')
+    festivalService = await import('../../services/festivalService.js')
     vi.useFakeTimers()
     vi.setSystemTime(INITIAL_SYSTEM_TIME)
   })
@@ -158,7 +158,7 @@ describe('Festival Service', () => {
 
   describe('Manual & Lifecyle Triggers', () => {
     it('should correctly increment database metric for player-triggered non-demo events', async () => {
-      const db = await import('../utils/db.js')
+      const db = await import('../../utils/db.js')
       const querySpy = vi.spyOn(db.default, 'query')
       const broadcastMock = vi.fn()
 
@@ -283,7 +283,7 @@ describe('Festival Service', () => {
       })
 
       it('should execute fallback logic cleanly if refilling flash events fails', async () => {
-        const flashService = await import('./flashEventService.js')
+        const flashService = await import('../../services/flashEventService.js')
         vi.spyOn(flashService, 'refillAllFlashEvents').mockRejectedValueOnce(
           new Error('Mock Refill Error')
         )

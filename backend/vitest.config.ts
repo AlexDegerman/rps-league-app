@@ -5,6 +5,6 @@ export default defineConfig({
     reporters: ['dot'],
     globals: true,
     environment: 'node',
-    setupFiles: ['./src/test/setup.ts']
+    setupFiles: ['./src/tests/setup.ts']
   }
 })

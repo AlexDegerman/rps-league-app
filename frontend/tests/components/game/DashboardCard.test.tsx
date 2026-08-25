@@ -15,7 +15,7 @@ import {
   afterEach,
   type Mock
 } from 'vitest'
-import DashboardCard from './DashboardCard'
+import DashboardCard from '@/components/game/DashboardCard'
 import { useAnimatedBigInt } from '@/hooks/useAnimatedBigInt'
 
 interface StoreMock extends Mock {

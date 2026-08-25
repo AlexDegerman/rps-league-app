@@ -37,7 +37,6 @@ function MatchFeedComponent({
 }: MatchFeedProps) {
   const pendingMatches = useGameStore((s) => s.pendingMatches)
   const predictions = useGameStore((s) => s.predictions)
-  const revealResults = useGameStore((s) => s.revealResults)
   const serverOffset = useGameStore((s) => s.serverOffset)
   const festivalModeKey = useGameStore((s) => s.festivalModeKey)
   const oracleSide = useGameStore((s) => s.oracleSide)

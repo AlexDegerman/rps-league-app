@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import * as predictionService from './predictionService.js'
-import pool from '../utils/db.js'
-import { mockDbResponse } from '../test/setup.js'
+import * as predictionService from '../../services/predictionService.js'
+import pool from '../../utils/db.js'
+import { mockDbResponse } from '../setup.js'
 
 // Test-only interfaces used by mocked services.
 interface ActiveGlobalEvent {
@@ -32,13 +32,13 @@ const mockActiveFestival: { value: ActiveFestival | null } = { value: null }
 const mockFlashEvent: { value: FlashEvent | null } = { value: null }
 
 // System-level module mocks
-vi.mock('./oracleService.js', () => ({
+vi.mock('../../services/oracleService.js', () => ({
   hasUserUsedOracle: vi.fn(() => Promise.resolve(true)),
   consumeOracleForUser: vi.fn(() => Promise.resolve()),
   getOracleState: vi.fn(() => ({ side: 'left' }))
 }))
 
-vi.mock('./flashEventService.js', () => ({
+vi.mock('../../services/flashEventService.js', () => ({
   getFlashEventForUser: vi.fn(() => mockFlashEvent.value),
   consumeFlashBetForUser: vi.fn(() => false),
   tryTriggerFlashEventForUser: vi.fn(),
@@ -46,7 +46,7 @@ vi.mock('./flashEventService.js', () => ({
   hasSeenAllFlashTypes: vi.fn(() => false)
 }))
 
-vi.mock('./festivalService.js', () => ({
+vi.mock('../../services/festivalService.js', () => ({
   checkAndTriggerFestival: vi.fn(),
   getGuaranteedBonusRemaining: vi.fn(() => 0),
   consumeGuaranteedBonus: vi.fn(),
@@ -55,7 +55,7 @@ vi.mock('./festivalService.js', () => ({
   triggerSafeguardFestival: vi.fn()
 }))
 
-vi.mock('./globalEventService.js', () => ({
+vi.mock('../../services/globalEventService.js', () => ({
   applyGlobalEventBuff: vi.fn(
     (isWin: boolean, gainLoss: bigint, bet: bigint) => {
       const isSolarFlareActive =
@@ -71,21 +71,21 @@ vi.mock('./globalEventService.js', () => ({
   getActiveGlobalEvent: vi.fn(() => mockActiveGlobalEvent.value)
 }))
 
-vi.mock('./relicService.js', () => ({
+vi.mock('../../services/relicService.js', () => ({
   RELICS: Array.from({ length: 15 }, (_, i) => ({ key: `relic_${i}` })),
   rollRelicDrop: vi.fn(() => Promise.resolve(null))
 }))
 
-vi.mock('./sessionService.js', () => ({
+vi.mock('../../services/sessionService.js', () => ({
   recordInteraction: vi.fn(() => Promise.resolve())
 }))
 
-vi.mock('../utils/badgeHelper.js', () => ({
+vi.mock('../../utils/badgeHelper.js', () => ({
   autoEquipUserBadges: vi.fn(() => Promise.resolve())
 }))
 
 // Partially mock userService while preserving unrelated exports.
-vi.mock('./userService.js', async (importOriginal) => {
+vi.mock('../../services/userService.js', async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, any>
   return {
     ...actual,
@@ -95,7 +95,7 @@ vi.mock('./userService.js', async (importOriginal) => {
   }
 })
 
-vi.mock('../utils/logger.js', () => ({
+vi.mock('../../utils/logger.js', () => ({
   logger: {
     error: vi.fn(),
     errorWithPoints: vi.fn()

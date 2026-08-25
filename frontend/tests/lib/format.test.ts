@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import type { Match } from '../types/rps'
+import type { Match } from '../../types/rps'
 import {
   formatDateTime,
   getPlayerResult,
@@ -13,10 +13,10 @@ import {
   getEventColor,
   getDisplayTierClass,
   getUnlockedTiers
-} from './format'
+} from '../../lib/format'
 
 // Mock TIER_THRESHOLDS to isolate test execution from external constant changes
-vi.mock('./constants', () => ({
+vi.mock('../../lib/constants', () => ({
   TIER_THRESHOLDS: [
     { min: 1000000n, cls: 'text-gold-tier' },
     { min: 1000n, cls: 'text-silver-tier' },

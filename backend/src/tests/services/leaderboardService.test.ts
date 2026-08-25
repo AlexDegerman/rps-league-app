@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
-import * as leaderboardService from './leaderboardService.js'
-import pool from '../utils/db.js'
-import { mockDbResponse } from '../test/setup.js'
+import * as leaderboardService from '../../services/leaderboardService.js'
+import pool from '../../utils/db.js'
+import { mockDbResponse } from '../setup.js'
 
 const mockQuery = vi.mocked(pool.query)
 
