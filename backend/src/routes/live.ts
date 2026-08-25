@@ -71,9 +71,18 @@ const clients = new Set<SSEClient>()
 // clients connect, since it drives real DB writes and SSE broadcasts.
 let generatorStarted = false
 
-export const broadcast = (event: string, data: string) => 
+export const broadcast = (event: string, data: string) =>
   clients.forEach((client) => client(event, data))
 
+if (process.env.NODE_ENV !== 'test') {
+  const heartbeat = setInterval(() => {
+    clients.forEach((client) => {
+      client(':keep-alive', '')
+    })
+  }, 20000)
+
+  heartbeat.unref()
+}
 
 router.get('/', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
@@ -83,8 +92,25 @@ router.get('/', (req, res) => {
   res.setHeader('X-Accel-Buffering', 'no')
   res.flushHeaders()
 
-  const send: SSEClient = (event, data) =>
-    res.write(`event: ${event}\ndata: ${data}\n\n`)
+  const send: SSEClient = (event, data) => {
+    try {
+      if (event === ':keep-alive') {
+        res.write(': keep-alive\n\n')
+      } else {
+        res.write(`event: ${event}\ndata: ${data}\n\n`)
+      }
+    } catch (err) {
+      logger.warn('SSE write failed, removing client', {
+        error: err instanceof Error ? err.message : String(err)
+      })
+      clients.delete(send)
+    }
+  }
+
+  res.on('error', (err) => {
+    logger.warn('SSE stream error', { error: err.message })
+    clients.delete(send)
+  })
 
   // Sync client clock on connect so countdown timers stay accurate
   send('sync', JSON.stringify({ serverTime: Date.now() }))
