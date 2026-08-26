@@ -2,12 +2,10 @@
 
 import { memo, useEffect, useRef, useState, useCallback } from 'react'
 import { useGameStore } from '@/app/stores/gameStore'
-import { useUIStore } from '@/app/stores/uiStore'
 import { useSound } from '@/hooks/useSound'
 import type { WorldBossType } from '@/types/rps'
 import { drainBurstEvents } from '@/lib/worldBossFeed'
-import SoundIcon from '@/components/icons/SoundIcon'
-import SoundControlPopover from '@/components/ui/SoundControlPopover'
+import SoundControlButton from '@/components/ui/SoundControlButton'
 
 type BossAnimState = 'assembling' | 'idle' | 'wince' | 'pain' | 'dying'
 
@@ -232,20 +230,9 @@ export default memo(function WorldBossArena({
   const lastHitResult = useGameStore((s) => s.lastBossHitResult)
   const lastBossHitDamage = useGameStore((s) => s.lastBossHitDamage)
   const clearLastHit = useGameStore((s) => s.clearLastBossHitResult)
-  const participantCount = useGameStore((s) => s.worldBossParticipantCount)
-  const oracleVolume = useUIStore((s) => s.oracleVolume)
-  const setOracleVolume = useUIStore((s) => s.setOracleVolume)
-  const {
-    soundOn,
-    toggleSound,
-    volume,
-    setVolume,
-    playBossAttack,
-    playBossTakeDmg
-  } = useSound()
-  const [showSoundPopover, setShowSoundPopover] = useState(false)
-  const soundBtnRef = useRef<HTMLButtonElement>(null)
-  const [animState, setAnimState] = useState<BossAnimState>('assembling')
+const participantCount = useGameStore((s) => s.worldBossParticipantCount)
+const { playBossAttack, playBossTakeDmg } = useSound()
+const [animState, setAnimState] = useState<BossAnimState>('assembling')
   const [timeLeft, setTimeLeft] = useState(60)
   const [showMissFlash, setShowMissFlash] = useState(false)
   const [showHitFlash, setShowHitFlash] = useState(false)
@@ -343,7 +330,7 @@ export default memo(function WorldBossArena({
     bossMaxHp > 0 ? `${((dmg / bossMaxHp) * 100).toFixed(1)}%` : `${dmg}`
 
   return (
-    <div className="world-boss-arena">
+    <div className="world-boss-arena overflow-visible!">
       {showMissFlash && <div className="boss-miss-flash" />}
 
       {/* Top row: HP + sound control */}
@@ -364,25 +351,7 @@ export default memo(function WorldBossArena({
         </div>
 
         <div className="boss-sound-area">
-          <button
-            ref={soundBtnRef}
-            className="boss-sound-btn"
-            onClick={() => setShowSoundPopover((p) => !p)}
-          >
-            <SoundIcon muted={!soundOn} />
-          </button>
-          {showSoundPopover && (
-            <SoundControlPopover
-              soundOn={soundOn}
-              volume={volume}
-              oracleVolume={oracleVolume}
-              onVolumeChange={setVolume}
-              onOracleVolumeChange={setOracleVolume}
-              onToggleSound={toggleSound}
-              anchorRef={soundBtnRef}
-              onClose={() => setShowSoundPopover(false)}
-            />
-          )}
+          <SoundControlButton className="boss-sound-btn" />
         </div>
       </div>
 

@@ -18,7 +18,7 @@ vi.mock('../../utils/logger.js', () => ({
   }
 }))
 
-const mockQuery = vi.mocked(pool.query)
+const mockQuery = vi.mocked(pool.query) as any
 const mockGetActiveFestival = vi.mocked(getActiveFestival)
 
 describe('Relic Service', () => {

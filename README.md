@@ -168,6 +168,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Unified Ranking Engine: Dual leaderboards for Players and Predictors with deep-linkable URL state, supporting dynamic time-filtering (Daily/Weekly/All-Time) and multi-metric sorting (Points, Gained, Peak, Win Rate).
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
+- Adaptive background music system with six context-aware tracks that crossfade dynamically based on the active game state (base ambient, Flash Event, Global Event, Festival, World Boss, and Neon Paradise)
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
 - Infinite Scaling: Engineered with native BigInt support to handle astronomical point values (Sextillions, Vigintillions, and beyond).
 - Cinematic Spectacle Orchestration: A priority-driven UI engine that sequences Flash Events, Ascensions, and Relics into a seamless flow, preventing interface exhaustion during high-frequency match cycles.

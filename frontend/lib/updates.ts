@@ -6,20 +6,25 @@ export type Update = {
 
 export const UPDATES: Update[] = [
   {
+    version: '4.1',
+    label: 'The Adaptive Background Music Update',
+    notes: [
+      'Adaptive Background Music: Added eight BGM tracks with three rotating Base Ambient tracks and five context-aware tracks that dynamically crossfade based on the active game state: Flash Event, Global Event, Festival, World Boss, and Neon Paradise.',
+      'Background Music Volume Control: Added a dedicated BGM volume control to the sound settings, allowing players to adjust music independently from other audio.',
+      'Keyboard Prediction Shortcuts: Added optional keyboard shortcuts for placing predictions without mouse or touch input: A / ← / 1 for the left pick and D / → / 2 for the right pick.'
+    ]
+  },
+  {
     version: '4.0',
     label: 'Neon Paradise',
     notes: [
       'Neon Paradise: Introduces nine interactive bonus stages that trigger during eligible manual prediction sessions with a combined 2.00% chance per resolved prediction. All nine stages have equal selection probability.',
-
       "Nine Bonus Stages: Adds Treasure Vault, Double Down, Wild Prediction, Surge Frenzy, Rainbow Rush, Sniper Challenge, Oracle Vision, Crystal Mine, and King's Vault, each featuring a distinct gameplay format, visual identity, audio design, and reward presentation.",
-
       'Bonus Payout System: All stages calculate rewards from the last recorded bet, guaranteeing at least 2x the bet and scaling up to 10x. Bonus rewards are added to the existing balance without reducing it.',
-
       'Nine New Themed Number Tiers: Extends the point progression system from Quattuorquadragintillion through Trequinquagintillion with nine new tiers featuring dedicated visual treatments ranging from mechanical vault and split-risk designs to spectral, tactical, cipher, crystalline, and royal treasure presentations.',
-
       'Ascension Expansion: Raises the Ascension threshold from 999 x 10^111 to 999 x 10^162, extending endgame progression through the new Neon Paradise number tiers.',
-
-      'Session Protection: Active bonus stages are isolated from Flash Events, Global Events, Festivals, and World Bosses, with server-side session persistence and navigation lockout protecting active runs.'
+      'Session Protection: Active bonus stages are isolated from Flash Events, Global Events, Festivals, and World Bosses, with server-side session persistence and navigation lockout protecting active runs.',
+      '18 New Neon Paradise Achievements: Added 18 achievements covering Neon Paradise progression, individual minigame challenges, maximum rewards, and completion milestones across all nine bonus stages.'
     ]
   },
   {

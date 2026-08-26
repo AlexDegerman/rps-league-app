@@ -51,7 +51,7 @@ const VOLUME_MULTIPLIERS: Partial<Record<SoundKey, number>> = {
   fracturon_takedmg: 0.15,
   fracturon_attack: 0.8,
   fracturon_die: 0.8,
-  moon: 0.8,
+  moon: 0.7,
   orphion_takedmg: 1.5,
   orphion_spawn: 0.5,
   orphion_attack: 0.5,

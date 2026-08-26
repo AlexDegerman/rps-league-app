@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to the platform will be documented in this file.
+
+## [4.1] - The Adaptive Background Music Update
+
+### Added
+
+* **Adaptive Background Music:** Added eight BGM tracks with three rotating Base Ambient tracks and five context-aware tracks that dynamically crossfade based on the active game state: Flash Event, Global Event, Festival, World Boss, and Neon Paradise.
+
+* **Background Music Volume Control:** Added a dedicated BGM volume control to the sound settings, allowing players to adjust music independently from other audio.
+
+* **Keyboard Prediction Shortcuts:** Added optional keyboard shortcuts for placing predictions without mouse or touch input: **A / ← / 1** for the left pick and **D / → / 2** for the right pick.
+
 ## [4.0] - Neon Paradise
 
 ### Added
@@ -34,6 +45,8 @@ All notable changes to the platform will be documented in this file.
 * **Nine New Themed Number Tiers:** Extends the point progression system from Quattuorquadragintillion through Trequinquagintillion with nine new tiers featuring dedicated visual treatments ranging from mechanical vault and split-risk designs to spectral, tactical, cipher, crystalline, and royal treasure presentations.
 
 * **Ascension Expansion:** Raised the Ascension threshold from `999 × 10^111` to `999 × 10^162` to accommodate the nine new Neon Paradise number tiers and extend endgame progression.
+
+* **18 New Neon Paradise Achievements:** Added 18 achievements covering Neon Paradise progression, individual minigame challenges, maximum rewards, and completion milestones across all nine bonus stages.
 
 ### System Integration
 

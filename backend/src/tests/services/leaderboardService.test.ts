@@ -3,7 +3,7 @@ import * as leaderboardService from '../../services/leaderboardService.js'
 import pool from '../../utils/db.js'
 import { mockDbResponse } from '../setup.js'
 
-const mockQuery = vi.mocked(pool.query)
+const mockQuery = vi.mocked(pool.query) as any
 
 describe('Leaderboard Service', () => {
   it('ranks players by wins descending, then alphabetically on ties', async () => {

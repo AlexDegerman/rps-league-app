@@ -1,6 +1,7 @@
 'use client'
 
 import { useUIStore } from '@/app/stores/uiStore'
+import { useMusicStore } from '@/app/stores/musicStore'
 import { useEffect, useRef } from 'react'
 
 const SpeakerOn = () => (
@@ -39,6 +40,31 @@ const SpeakerOff = () => (
       strokeWidth="2"
       strokeLinecap="round"
     />
+  </svg>
+)
+
+const MusicNote = ({ muted }: { muted: boolean }) => (
+  <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+    <path
+      d="M8 15V5l9-2v10"
+      stroke={muted ? '#9CA3AF' : '#10B981'}
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="6" cy="15" r="2.2" fill={muted ? '#9CA3AF' : '#10B981'} />
+    <circle cx="15" cy="13" r="2.2" fill={muted ? '#9CA3AF' : '#10B981'} />
+    {muted && (
+      <line
+        x1="3"
+        y1="3"
+        x2="17"
+        y2="17"
+        stroke="#EF4444"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    )}
   </svg>
 )
 
@@ -81,7 +107,6 @@ function Slider({
   const pct = Math.round(value * 100)
   const trackColor = active ? activeTrackColor : '#d1d5db'
   const thumbBorder = active ? activeThumbBorder : '#d1d5db'
-
   return (
     <div className="relative h-3 flex items-center">
       <div className="absolute inset-x-0 h-1.5 rounded-full bg-gray-200 overflow-hidden">
@@ -113,10 +138,10 @@ function Slider({
 interface SoundControlPopoverProps {
   soundOn: boolean
   volume: number
-  oracleVolume: number
   onVolumeChange: (v: number) => void
-  onOracleVolumeChange: (v: number) => void
   onToggleSound: () => void
+  oracleVolume: number
+  onOracleVolumeChange: (v: number) => void
   anchorRef: React.RefObject<HTMLButtonElement | null>
   onClose: () => void
 }
@@ -135,6 +160,11 @@ export default function SoundControlPopover({
   const oracleTTSEnabled = useUIStore((s) => s.oracleTTSEnabled)
   const toggleOracleTTS = useUIStore((s) => s.toggleOracleTTS)
   const setOracleVolume = useUIStore((s) => s.setOracleVolume)
+
+  const musicOn = useMusicStore((s) => s.musicOn)
+  const musicVolume = useMusicStore((s) => s.musicVolume)
+  const toggleMusic = useMusicStore((s) => s.toggleMusic)
+  const setMusicVolume = useMusicStore((s) => s.setMusicVolume)
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -158,16 +188,12 @@ export default function SoundControlPopover({
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
 
-  // Oracle slider unmutes on drag
   const handleOracleVolumeChange = (v: number) => {
     onOracleVolumeChange(v)
     setOracleVolume(v)
     if (v > 0 && !oracleTTSEnabled) toggleOracleTTS()
     if (v === 0 && oracleTTSEnabled) toggleOracleTTS()
   }
-
-  const sfxPct = Math.round(volume * 100)
-  const voicePct = Math.round(oracleVolume * 100)
 
   return (
     <div
@@ -176,7 +202,7 @@ export default function SoundControlPopover({
     >
       <div className="absolute -top-1.5 right-3.5 w-3 h-3 bg-white border-t border-l border-gray-200 rotate-45" />
 
-      {/*  Sound FX  */}
+      {/* Sound FX */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
           {soundOn ? <SpeakerOn /> : <SpeakerOff />}
@@ -191,14 +217,13 @@ export default function SoundControlPopover({
           label="Toggle sound effects"
         />
       </div>
-
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400">
             Volume
           </span>
           <span className="text-[9px] font-black text-gray-500 tabular-nums">
-            {sfxPct}%
+            {Math.round(volume * 100)}%
           </span>
         </div>
         <Slider
@@ -212,7 +237,7 @@ export default function SoundControlPopover({
 
       <div className="border-t border-gray-100 my-2.5" />
 
-      {/*  Oracle Voice  */}
+      {/* Oracle Voice */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
           <span className="text-sm leading-none">👁️</span>
@@ -227,14 +252,13 @@ export default function SoundControlPopover({
           label="Toggle Oracle voice"
         />
       </div>
-
-      <div>
+      <div className="mb-0">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400">
             Volume
           </span>
           <span className="text-[9px] font-black text-gray-500 tabular-nums">
-            {voicePct}%
+            {Math.round(oracleVolume * 100)}%
           </span>
         </div>
         <Slider
@@ -243,6 +267,41 @@ export default function SoundControlPopover({
           active={oracleTTSEnabled}
           activeTrackColor="#a855f7"
           activeThumbBorder="#a855f7"
+        />
+      </div>
+
+      <div className="border-t border-gray-100 my-2.5" />
+
+      {/* Music */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <MusicNote muted={!musicOn} />
+          <span className="text-[10px] font-black uppercase tracking-wider text-gray-600">
+            Music
+          </span>
+        </div>
+        <Toggle
+          on={musicOn}
+          onClick={toggleMusic}
+          activeColor="bg-emerald-500"
+          label="Toggle background music"
+        />
+      </div>
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400">
+            Volume
+          </span>
+          <span className="text-[9px] font-black text-gray-500 tabular-nums">
+            {Math.round(musicVolume * 100)}%
+          </span>
+        </div>
+        <Slider
+          value={musicVolume}
+          onChange={setMusicVolume}
+          active={musicOn}
+          activeTrackColor="#10B981"
+          activeThumbBorder="#10B981"
         />
       </div>
     </div>

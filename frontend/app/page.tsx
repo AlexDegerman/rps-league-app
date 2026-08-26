@@ -80,6 +80,7 @@ import type {
 } from '@/types/rps'
 import { ORACLE_VOICE_LINES } from '@/lib/constants'
 import { fetchActiveBonusSession } from '@/lib/api'
+import { useBGM } from '@/hooks/useBGM'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -118,6 +119,7 @@ export default function HomePage() {
   const setWorldBossUIActive = useUIStore((s) => s.setWorldBossUIActive)
   const setBonusActive = useGameStore((s) => s.setBonusActive)
   const isBonusActive = useGameStore((s) => s.isBonusActive)
+  const activeFestival = useGameStore((s) => s.activeFestival)
 
   // --- User Store Selectors ---
   const points = useUserStore((s) => s.points)
@@ -170,6 +172,15 @@ export default function HomePage() {
   const setEligible = useIdleStore((s) => s.setEligible)
 
   useIdleBet()
+
+  useBGM({
+    neonParadiseActive: isBonusActive,
+    worldBossActive: worldBossPhase === 'ACTIVE',
+    festivalActive: activeFestival,
+    globalEventActive:
+      activeGlobalEvent !== null && globalEventPhase === 'active',
+    flashEventActive: activeFlashEvent !== null
+  })
 
   const {
     playWin,
