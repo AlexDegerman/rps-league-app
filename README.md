@@ -1,6 +1,7 @@
 # 🎲 RPS League App
 
-A real-time live-service Rock Paper Scissors platform where players bet virtual cosmetic points, track rankings, and interact with an AI-powered game guide and match analysis system. I am the sole developer and maintainer, running it continuously in production: monitoring the system, shipping fixes, and building new features on an ongoing basis.
+A real-time live-service Rock Paper Scissors platform where players bet virtual cosmetic points, track rankings, and interact with an AI-powered game guide and match analysis system. I am the sole developer and maintainer, running it continuously in production: monitoring the system, shipping fixes, and [building new features](./CHANGELOG.md) on an ongoing basis.
+
 
 > 🚨 **Project Evolution:** This is a full-scale rebuild of my original
 > **[RPS League](https://github.com/AlexDegerman/rps-league)**, originally
@@ -40,56 +41,66 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 ## 📑 Table of Contents
 
 ### 🕹️ Core Systems
-- [Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
-- [Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
-- [Ascension System](#-ascension-system)
-- [Relic System](#-relic-system)
+
+* [Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
+* [Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
+* [Overview](#-overview)
+* [Ascension System](#-ascension-system)
+* [Relic System](#-relic-system)
 
 ### 🌍 World Systems
-- [World Bosses](#️-world-bosses)
-- [Global Events](#-global-events)
-- [Flash Events](#-flash-events)
-- [Player Festivals](#️-player-festivals)
-- [Neon Paradise](#-neon-paradise)
+
+* [World Bosses](#️-world-bosses)
+* [Global Events](#-global-events)
+* [Flash Events](#-flash-events)
+* [Player Festivals](#️-player-festivals)
+* [Neon Paradise](#-neon-paradise)
 
 ### 📊 Progression Systems
-- [Predictor Achievements](#-predictor-achievements)
-- [Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
-- [Global Number Formatting Engine](#-global-number-formatting-engine)
+
+* [Predictor Achievements](#-predictor-achievements)
+* [Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
+* [Global Number Formatting Engine](#-global-number-formatting-engine)
 
 ### 📈 Analytics
-- [Competitive Analytics & Profiles](#-competitive-analytics--profiles)
-- [Match History Timeline](#-match-history-timeline)
-- [Live Activity Feed](#-live-activity-feed)
+
+* [Competitive Analytics & Profiles](#-competitive-analytics--profiles)
+* [Match History Timeline](#-match-history-timeline)
+* [Live Activity Feed](#-live-activity-feed)
 
 ### 🏗️ Engineering
-- [Architecture](#️-architecture)
-- [Design Decisions](#-design-decisions)
-- [Technical Challenges & Solutions](#️-technical-challenges--solutions)
-- [Reliability & Feedback](#-reliability--feedback)
+
+* [Architecture](#️-architecture)
+* [Design Decisions](#-design-decisions)
+* [Technical Challenges & Solutions](#️-technical-challenges--solutions)
+* [Reliability & Feedback](#-reliability--feedback)
 
 ### 🤖 AI Systems
-- [AI Oracle & Analytics](#-ai-oracle--analytics)
-- [Oracle Voice](#-oracle-voice)
+
+* [AI Oracle & Analytics](#-ai-oracle--analytics)
+* [Oracle Voice](#-oracle-voice)
 
 ### 📱 Platform
-- [Extended Media Showcases](#-extended-media-showcases)
-- [Mobile & PWA Experience](#-mobile--pwa-experience)
+
+* [Extended Media Showcases](#-extended-media-showcases)
+* [Mobile & PWA Experience](#-mobile--pwa-experience)
 
 ### 🧪 Development
-- [Tests](#-tests)
-- [CI/CD & Automation](#-cicd--automation)
-- [Future Improvements](#-future-improvements)
-- [How to Run](#-how-to-run)
-- [API Reference](#-api-reference)
+
+* [Tests](#-tests)
+* [CI/CD & Automation](#-cicd--automation)
+* [Future Improvements](#-future-improvements)
+* [How to Run](#-how-to-run)
+* [Changelog](#-changelog)
+* [API Reference](#-api-reference)
 
 ### 📦 Meta
-- [Device Compatibility](#-device-compatibility)
-- [Disclaimer](#️-disclaimer)
-- [Privacy, Telemetry & Audit Logs](#-privacy-telemetry--audit-logs)
-- [License](#-license)
 
----
+* [Device Compatibility](#-device-compatibility)
+* [Disclaimer](#️-disclaimer)
+* [Privacy, Telemetry & Audit Logs](#-privacy-telemetry--audit-logs)
+* [License](#-license)
+
 
 ## ⚡ Identity & Zero-Friction Account System
 
@@ -674,6 +685,7 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 - **Oracle Reset:** Automated `POST` to `/api/oracle/reset` at 00:01 UTC daily generates a fresh prophecy side and clears all per-user usage state. Reuses `RESET_SECRET` for authorization. Supports manual dispatch for testing.
 - **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
 - **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
+- **Database Cleanup:** Automated hourly `POST` to `/api/predictions/cleanup` prunes old matches and prediction history while preserving retained player history.
 
 ---
 

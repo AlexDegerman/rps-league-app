@@ -349,6 +349,80 @@ router.post('/reset/weekly', async (req, res) => {
   }
 })
 
+// POST /api/predictions/cleanup
+router.post('/cleanup', async (req, res) => {
+  try {
+    const secret = req.headers['x-reset-secret']
+    if (secret !== process.env.RESET_SECRET) {
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    await pool.query(`
+      DELETE FROM matches
+      WHERE time < COALESCE((
+        SELECT time
+        FROM matches
+        ORDER BY time DESC
+        OFFSET 9999
+        LIMIT 1
+      ), 0)
+    `)
+
+    await pool.query(`
+      WITH keep_ids AS (
+        SELECT id
+        FROM (
+          SELECT
+            id,
+            ROW_NUMBER() OVER (
+              PARTITION BY user_id
+              ORDER BY created_at DESC, id DESC
+            ) AS rn
+          FROM predictions
+        ) recent
+        WHERE rn <= 100
+
+        UNION
+
+        SELECT id
+        FROM (
+          SELECT
+            id,
+            ROW_NUMBER() OVER (
+              PARTITION BY user_id
+              ORDER BY gain_loss DESC, id DESC
+            ) AS rn
+          FROM predictions
+          WHERE result = 'WIN'
+        ) wins
+        WHERE rn <= 100
+
+        UNION
+
+        SELECT id
+        FROM (
+          SELECT
+            id,
+            ROW_NUMBER() OVER (
+              PARTITION BY user_id
+              ORDER BY total_multiplier DESC, id DESC
+            ) AS rn
+          FROM predictions
+          WHERE result = 'WIN'
+        ) multipliers
+        WHERE rn <= 100
+      )
+      DELETE FROM predictions
+      WHERE id NOT IN (SELECT id FROM keep_ids)
+    `)
+
+    res.json({ success: true, pruned: true })
+  } catch (err) {
+    logger.error('Database retention cleanup failed', err)
+    res.status(500).json({ error: 'Database cleanup failed' })
+  }
+})
+
 // GET /api/predictions/:userId/stats
 router.get('/:userId/stats', async (req, res) => {
   try {

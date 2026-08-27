@@ -42,6 +42,7 @@ import { StatBox } from '@/components/game/StatBox'
 import { useGameStore } from '@/app/stores/gameStore'
 import { Package, X } from 'lucide-react'
 import { ICON_MAP } from '@/lib/relicIcons'
+import InfoIcon from '@/components/icons/InfoIcon'
 
 interface Ranks {
   daily: number | null
@@ -119,11 +120,14 @@ export default function ProfilePage() {
     string | null
   >(null)
   const [allTimePeak, setAllTimePeak] = useState<bigint>(200000n)
-  const [autoStyle, setAutoStyle] = useState(true)
-  const [activeTab, setActiveTab] = useState<'stats' | 'achievements'>('stats')
-  const recoverySectionRef = useRef<HTMLDivElement>(null)
+    const [autoStyle, setAutoStyle] = useState(true)
+    const [activeTab, setActiveTab] = useState<'stats' | 'achievements'>(
+      'stats'
+    )
+    const [showHistoryInfo, setShowHistoryInfo] = useState(false)
+    const recoverySectionRef = useRef<HTMLDivElement>(null)
 
-  const { display, full, capped } = formatPoints(points ?? '0')
+    const { display, full, capped } = formatPoints(points ?? '0')
 
   useEffect(() => {
     if (!targetShortId) return
@@ -442,7 +446,9 @@ export default function ProfilePage() {
         </div>
 
         {(() => {
-          const slots = isOwnProfile ? equippedRelics : (profileRelics ?? [null, null, null])
+          const slots = isOwnProfile
+            ? equippedRelics
+            : (profileRelics ?? [null, null, null])
           const activeSlots = slots.map((r, i) => ({ relic: r, index: i }))
           const hasAnyRelic = slots.some(Boolean)
 
@@ -501,11 +507,15 @@ export default function ProfilePage() {
                     } ${styles.border}`}
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gray-950 border ${styles.border}`}>
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gray-950 border ${styles.border}`}
+                      >
                         <Icon size={16} className={styles.text} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={`text-[11px] font-black leading-tight truncate ${styles.text}`}>
+                        <p
+                          className={`text-[11px] font-black leading-tight truncate ${styles.text}`}
+                        >
                           {relic.name}
                         </p>
                         <p className="text-[9.5px] text-gray-500 font-medium leading-tight mt-0.5 pr-4 truncate">
@@ -942,9 +952,26 @@ export default function ProfilePage() {
       )}
 
       <div className="mt-8">
-        <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">
-          Bet History
-        </h2>
+        <div className="flex items-center gap-1.5 mb-4 px-1">
+          <h2 className="text-lg font-bold text-gray-900">Bet History</h2>
+          <div className="relative group flex items-center">
+            <button
+              type="button"
+              onClick={() => setShowHistoryInfo(!showHistoryInfo)}
+              onBlur={() => setShowHistoryInfo(false)}
+              className="text-gray-300 hover:text-indigo-600 transition-colors p-1 outline-none sm:pointer-events-none"
+            >
+              <InfoIcon />
+            </button>
+            <div
+              className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-56 p-2.5 bg-gray-900 text-white text-[10px] sm:text-xs font-medium rounded-lg shadow-xl transition-opacity duration-200 z-50 text-center tracking-wide leading-relaxed ${showHistoryInfo ? 'opacity-100' : 'opacity-0 pointer-events-none'} sm:group-hover:opacity-100`}
+            >
+              History is retained for the latest 100 predictions in each
+              category.
+              <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900" />
+            </div>
+          </div>
+        </div>
         <BetHistory
           userId={profileUserId}
           stylePreference={profileStylePreference}

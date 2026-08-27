@@ -144,7 +144,7 @@ export const initDb = async (): Promise<void> => {
 
     // Indexes - predictions
     await pool.query(`
-      CREATE INDEX IF NOT EXISTS idx_predictions_user_created
+      CREATE INDEX IF NOT EXISTS idx_predictions_user_created_at
         ON predictions(user_id, created_at DESC)
     `)
     await pool.query(`
@@ -213,6 +213,18 @@ export const initDb = async (): Promise<void> => {
       CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id
         ON user_achievements(user_id)
     `)
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_user_gain_loss
+        ON predictions(user_id, gain_loss DESC)
+        WHERE result = 'WIN'
+    `)
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_predictions_user_total_multiplier
+        ON predictions(user_id, total_multiplier DESC)
+        WHERE result = 'WIN'
+    `)
+
     // Participation counters
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS global_event_participations   INTEGER NOT NULL DEFAULT 0`
@@ -260,6 +272,7 @@ export const initDb = async (): Promise<void> => {
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_thermal_fusion        BOOLEAN NOT NULL DEFAULT false`
     )
+
     // World Boss
     await pool.query(`
       CREATE TABLE IF NOT EXISTS world_boss_encounters (
@@ -289,6 +302,7 @@ export const initDb = async (): Promise<void> => {
     await pool.query(
       `CREATE INDEX IF NOT EXISTS idx_wbd_user ON world_boss_damage(user_id)`
     )
+
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS equipped_relics TEXT[] DEFAULT '{}'`
     )
@@ -332,55 +346,28 @@ export const initDb = async (): Promise<void> => {
       UPDATE users SET equipped_relics = ARRAY[equipped_relic]
       WHERE equipped_relic IS NOT NULL AND (equipped_relics = '{}' OR equipped_relics IS NULL)
     `)
-    // World Boss
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS world_boss_encounters (
-        id SERIAL PRIMARY KEY,
-        boss_type TEXT NOT NULL,
-        started_at BIGINT NOT NULL,
-        ended_at BIGINT,
-        outcome TEXT,
-        hp_depleted_pct NUMERIC DEFAULT 0,
-        participant_count INTEGER DEFAULT 0,
-        interrupted BOOLEAN DEFAULT false
-      )
-    `)
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS world_boss_damage (
-        id SERIAL PRIMARY KEY,
-        encounter_id INTEGER REFERENCES world_boss_encounters(id),
-        user_id TEXT NOT NULL,
-        damage_dealt INTEGER DEFAULT 0,
-        first_hit_at BIGINT,
-        last_hit_at BIGINT
-      )
-    `)
-    await pool.query(
-      `CREATE INDEX IF NOT EXISTS idx_wbd_encounter ON world_boss_damage(encounter_id)`
-    )
-    await pool.query(
-      `CREATE INDEX IF NOT EXISTS idx_wbd_user ON world_boss_damage(user_id)`
-    )
+
+    // Bonus Stage Sessions
     await pool.query(`
       CREATE TABLE IF NOT EXISTS bonus_stage_sessions (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    stage_type TEXT NOT NULL CHECK (stage_type IN (
-      'TREASURE_VAULT', 'KINGS_VAULT', 'DOUBLE_DOWN',
-      'WILD_PREDICTION', 'SURGE_FRENZY', 'RAINBOW_RUSH',
-      'SNIPER_CHALLENGE', 'ORACLE_VISION', 'CRYSTAL_MINE'
-    )),
-    is_active BOOLEAN NOT NULL DEFAULT true,
-    accumulated_payout NUMERIC NOT NULL DEFAULT 0,
-    last_bet_amount NUMERIC NOT NULL DEFAULT 0,
-    stage_steps_completed INTEGER NOT NULL DEFAULT 0,
-    max_steps INTEGER,
-    verification_salt TEXT NOT NULL,
-    grid_state JSONB,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-  )
-`)
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+        stage_type TEXT NOT NULL CHECK (stage_type IN (
+          'TREASURE_VAULT', 'KINGS_VAULT', 'DOUBLE_DOWN',
+          'WILD_PREDICTION', 'SURGE_FRENZY', 'RAINBOW_RUSH',
+          'SNIPER_CHALLENGE', 'ORACLE_VISION', 'CRYSTAL_MINE'
+        )),
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        accumulated_payout NUMERIC NOT NULL DEFAULT 0,
+        last_bet_amount NUMERIC NOT NULL DEFAULT 0,
+        stage_steps_completed INTEGER NOT NULL DEFAULT 0,
+        max_steps INTEGER,
+        verification_salt TEXT NOT NULL,
+        grid_state JSONB,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `)
     await pool.query(
       `CREATE INDEX IF NOT EXISTS idx_bonus_stage_sessions_user_active
       ON bonus_stage_sessions(user_id, is_active)`
@@ -421,49 +408,6 @@ export const initDb = async (): Promise<void> => {
     await pool.query(
       `ALTER TABLE users ADD COLUMN IF NOT EXISTS neon_full_circuit_today BOOLEAN NOT NULL DEFAULT false`
     )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS equipped_relics TEXT[] DEFAULT '{}'`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_encounters_total INTEGER DEFAULT 0`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_kills_total INTEGER DEFAULT 0`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS world_boss_chests_opened INTEGER DEFAULT 0`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS hexurion_kills INTEGER NOT NULL DEFAULT 0`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS orphion_kills INTEGER NOT NULL DEFAULT 0`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS fracturon_kills INTEGER NOT NULL DEFAULT 0`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS apexion_kills INTEGER NOT NULL DEFAULT 0`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_final_strike BOOLEAN NOT NULL DEFAULT false`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_perfect_assault BOOLEAN NOT NULL DEFAULT false`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_lucky_shot BOOLEAN NOT NULL DEFAULT false`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_clutch_victory BOOLEAN NOT NULL DEFAULT false`
-    )
-    await pool.query(
-      `ALTER TABLE users ADD COLUMN IF NOT EXISTS had_divine_intervention BOOLEAN NOT NULL DEFAULT false`
-    )
-    await pool.query(`
-      UPDATE users SET equipped_relics = ARRAY[equipped_relic]
-      WHERE equipped_relic IS NOT NULL AND (equipped_relics = '{}' OR equipped_relics IS NULL)
-    `)
 
     logger.info('Database initialized')
   } catch (err) {

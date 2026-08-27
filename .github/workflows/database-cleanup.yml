@@ -1,0 +1,27 @@
+name: Database Cleanup
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: database-cleanup
+  cancel-in-progress: false
+
+jobs:
+  database-cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger database retention cleanup
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST \
+            -H "x-reset-secret: ${{ secrets.RESET_SECRET }}" \
+            https://rps-league-g275.onrender.com/api/predictions/cleanup)
+          echo "Response code: $RESPONSE"
+          if [ "$RESPONSE" != "200" ]; then
+            echo "Database retention cleanup failed with status $RESPONSE"
+            exit 1
+          fi
+          echo "Database retention cleanup successful"

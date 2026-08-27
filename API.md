@@ -319,7 +319,7 @@ Active and historical minigame/bonus stage sessions for users
 
 | Table | Column(s) | Reason |
 | :--- | :--- | :--- |
-| `predictions` | `user_id, created_at DESC` | Composite index for fast user history + activity feeds |
+| `predictions` | `user_id, created_at DESC` | Fast user history, activity feeds, and selection of each user's 100 newest predictions during retention pruning |
 | `predictions` | `created_at` | Time-windowed leaderboard aggregation |
 | `predictions` | `game_id` | Fast resolution lookup, `resolvePrediction` fetches all bets per game on every match result |
 | `predictions` | `result, user_id` | Achievement checker win/loss sweep queries |
@@ -329,7 +329,7 @@ Active and historical minigame/bonus stage sessions for users
 | `users` | `all_time_peak DESC` | All-time leaderboard tab sorting |
 | `users` | `laps, points DESC` | Speedrun/ascension leaderboard filtering and ordering |
 | `matches` | `time` | Fast retrieval of recent matches (ASC) |
-| `matches` | `time DESC` | Fast retrieval of recent matches (DESC) used by match history queries |
+| `matches` | `time DESC` | Fast retrieval of recent matches and newest-match lookup during retention pruning |
 | `matches` | `game_id` | Fast lookup for match resolution and joins |
 | `matches` | `player_a_name` | Bot stats and by-player filtering |
 | `matches` | `player_b_name` | Bot stats and by-player filtering |
@@ -338,6 +338,8 @@ Active and historical minigame/bonus stage sessions for users
 | `world_boss_damage` | `encounter_id` | Fast lookup of all damage records per encounter during reward distribution |
 | `world_boss_damage` | `user_id` | Fast lookup of a user's damage history across encounters |
 | `bonus_stage_sessions` | `user_id, is_active` | Composite index for active checks and fast ongoing session retrieval |
+| `predictions` | `user_id, gain_loss DESC` where `result = 'WIN'` | Fast selection of each user's 100 biggest wins during retention pruning |
+| `predictions` | `user_id, total_multiplier DESC` where `result = 'WIN'` | Fast selection of each user's 100 best multiplier outcomes during retention pruning |
 
 ---
 
