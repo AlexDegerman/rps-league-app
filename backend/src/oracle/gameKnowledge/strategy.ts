@@ -47,7 +47,7 @@ A: Bet every match, maintain your streak, and prioritize equipping any relic you
 --- PROGRESSION DEPTH ---
 
 Q: What are laps?
-A: Laps are prestige cycles unlocked by the Ascension system. When you reach 999 STR (Sextrigintillion), you can choose to reset your point balance back to 200,000 in exchange for permanently increasing your Lap Count. Each lap increases your relic drop rates and earns you a position on the Laps and Speedrun leaderboards.
+A: Laps are prestige cycles unlocked by the Ascension system. When you reach 999 STR (Trequinquagintillion), you can choose to reset your point balance back to 200,000 in exchange for permanently increasing your Lap Count. Each lap increases your relic drop rates and earns you a position on the Laps and Speedrun leaderboards.
 
 Q: Should I lap immediately when I reach 999 STR?
 A: It depends on your goals. Lapping immediately after reaching the threshold with as few total bets as possible maximizes your Speedrun leaderboard ranking. Staying at high points and declining Ascension maintains your All-Time wealth ranking and lets you continue accumulating at extreme tiers. Ascension can always be triggered later from the profile menu, so there is no penalty for waiting.
@@ -62,13 +62,13 @@ Q: What do I lose after lapping?
 A: Your active point balance resets to 200,000. Your current win streak resets to zero. The bonus pity counter resets. Your daily and weekly leaderboard metrics reset with your balance.
 
 Q: Is there an endgame?
-A: There is no fixed endpoint. The game is designed as an infinite live-service system. Players pursuing the Infinite Path can accumulate points indefinitely toward the Singularity achievement at 999 Sextrigintillion. Players on the prestige path have no maximum lap count. New seasons and updates continuously add achievements, events, and systems.
+A: There is no fixed endpoint. The game is designed as an infinite live-service system. Players pursuing the Infinite Path can accumulate points indefinitely toward the Singularity achievement at 999 Trequinquagintillion. Players on the prestige path have no maximum lap count. New seasons and updates continuously add achievements, events, and systems.
 
 Q: What happens after Lap 10?
 A: Progression continues. There is no maximum lap count. Each lap continues to increase relic drop rates up to the defined per-rarity caps. Dedicated Laps and Speedrun leaderboard rankings remain competitive at any lap count.
 
 Q: Can I reach infinite points?
-A: The system is engineered with BigInt arithmetic and has no hard point ceiling. The current highest named tier is Sextrigintillion at 10 to the power of 111, which is the Ascension threshold. The Singularity achievement at 999 Sextrigintillion represents the deepest defined progression goal, but point accumulation can continue beyond it.
+A: The system is engineered with BigInt arithmetic and has no hard point ceiling. The current highest named tier is Trequinquagintillion at 10 to the power of 111, which is the Ascension threshold. The Singularity achievement at 999 Trequinquagintillion represents the deepest defined progression goal, but point accumulation can continue beyond it.
 
 Q: Is there a maximum lap count?
 A: No. There is no maximum lap count defined in the system.
@@ -214,7 +214,7 @@ Q: What are the biggest mistakes new players make?
 A: Not saving their recovery code before their first session ends is the most consequential mistake since it risks permanent data loss. Betting a fixed small amount rather than scaling bets with their balance is the most common progression mistake, as the bonus and multiplier system produces more absolute value at higher stake sizes.
 
 Q: What is the biggest long-term goal in the game?
-A: The deepest single defined milestone is the God King Rainbow achievement, requiring 1,000 wins, 50 prestige laps, and all 3 Mythical relics simultaneously. Beyond that, reaching 999 Sextrigintillion on the Singularity achievement and achieving Cosmic Sovereign through 50 participations in each of the 4 Global Events represent the outer edges of the current progression ceiling.
+A: The deepest single defined milestone is the God King Rainbow achievement, requiring 1,000 wins, 50 prestige laps, and all 3 Mythical relics simultaneously. Beyond that, reaching 999 Trequinquagintillion on the Singularity achievement and achieving Cosmic Sovereign through 50 participations in each of the 4 Global Events represent the outer edges of the current progression ceiling.
 
 Q: Is the game still being updated?
 A: Yes. RPS League is a live-service game with ongoing seasonal content updates. New achievements, events, relics, and gameplay systems are introduced over time. The development roadmap beyond announced systems is classified to preserve simulation integrity.

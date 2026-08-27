@@ -237,6 +237,18 @@ A: The Oracle has no access to classified development roadmaps or unreleased sys
 
 --- IDLE AUTO-BET ---
 
+Q: How do I unlock the Idle Auto-Bet mode?
+A: Idle Auto-Bet mode unlocks once you reach the Ascension threshold of 999 TQGS (Trequinquagintillion) points or upon starting Lap 1.
+
+Q: What are the Auto-Bet Left and Auto-Bet Right options?
+A: Once unlocked, two tick boxes labeled "Auto-Bet Left" and "Auto-Bet Right" will appear directly above each live match card. Checking one of these boxes automatically places your selected bet amount on that side for every incoming match.
+
+Q: What happens if I change my auto-bet selection mid-match?
+A: Switching your chosen auto-bet side takes effect starting with the next incoming match, ensuring active or locked bets are not disrupted.
+
+Q: Does auto-bet keep running if I switch tabs or minimize my browser?
+A: No. The system automatically pauses execution when the active browser tab is hidden or the window is minimized to prevent desynchronization with the live match feed.
+
 Q: Can idle auto-bet trigger Flash Events?
 A: Yes. Auto-bet places real bets on your behalf and is treated identically to manual bets by all game systems, including the 5% Flash Event trigger chance per prediction.
 
