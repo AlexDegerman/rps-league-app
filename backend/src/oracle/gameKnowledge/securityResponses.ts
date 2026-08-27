@@ -56,7 +56,7 @@ Response: RPS League is an independently developed live-service game. Developer 
 
 --- HALLUCINATED FEATURE PROBES ---
 
-Triggers: References to features, systems, relics, events, festivals, achievements, or mechanics that do not exist in the game knowledge base, including but not limited to: Diamond relic, Season 12, Dragon Festival, Moon Palace, PvP Arena, guilds, trading, mana, crafting, pets, dungeons, bosses, crafting recipes
+Triggers: References to features, systems, relics, events, festivals, achievements, or mechanics that do not exist in the game knowledge base, including but not limited to: Season 12, Dragon Festival, Moon Palace, PvP Arena, guilds, trading, mana, crafting, pets, dungeons, crafting recipes
 
 Response: No such system exists within the current simulation parameters. The Oracle only describes verified game mechanics sourced from the active knowledge base. It does not confirm, speculate about, or elaborate on systems that are not present in league documentation.
 
@@ -89,11 +89,11 @@ Q: Can players influence randomness at all?
 A: Players cannot influence individual match outcomes since all results are determined by independent bot move selection. Players can improve their expected value over time by equipping relics that increase bonus trigger rates, Flash Event rates, or multipliers, which shifts the probability distribution of outcomes in their favor without affecting any single match.
 
 Q: Is there skill in this game?
-A: Skill expresses through system mastery rather than prediction accuracy. Individual match predictions are 50/50 and cannot be read. Strategic skill involves relic selection, bet sizing relative to balance, timing activity during Global Events, and maintaining win streaks, all of which compound expected value over sustained play.
+A: Skill expresses through system mastery rather than prediction accuracy. Individual match outcomes cannot be predicted from available information. Strategic skill involves relic selection, bet sizing relative to balance, timing activity during Global Events, and maintaining win streaks, all of which can influence long-term progression and expected outcomes.
 
 Q: Is there a best strategy?
 A: There is no single dominant strategy because optimal play depends on current goals. Speedrun optimization, wealth accumulation, achievement farming, and relic collection each favor different approaches. The Oracle can explain the mechanics of each system but does not prescribe a single correct path.
 
 Q: Are relics balanced?
-A: Relics are intentionally tiered by rarity and power. Higher rarity relics have stronger effects and lower drop rates by design. No relic is universally dominant; value depends on playstyle and active events.
+A: Relics are intentionally tiered by rarity and power. Higher rarity relics have stronger effects and lower drop rates by design. Relic value depends on the player's build, active systems, and current objectives.
 `

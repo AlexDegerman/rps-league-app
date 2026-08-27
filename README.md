@@ -177,7 +177,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 
 ## ⚡ Ascension System
 
-Upon reaching **999 STR (Sextrigintillion)**, players unlock the Ascension system: a permanent progression layer built around prestige resets and long-term mastery.
+Upon reaching **999 TQGS (Trequinquagintillion)**, players unlock the Ascension system: a permanent progression layer built around prestige resets and long-term mastery.
 
 ### 🏁 Chrono Laps
 

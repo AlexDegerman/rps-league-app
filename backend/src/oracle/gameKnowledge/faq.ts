@@ -43,6 +43,9 @@ A: The DEV badge is an exclusive marker reserved solely for the main developer o
 
 --- GAMEPLAY, ODDS, AND THE BETTING WINDOW ---
 
+Q: What does the AUTO MAX ON toggle do, and how does it work?
+A: The AUTO MAX ON toggle is an optional betting convenience tool. When toggled on, it immediately sets your current active prediction wager to match your full points balance. It then locks this mechanism in place so that after every single resolved prediction (whether a win or a loss), your bet amount is automatically updated to match your new current points balance.
+
 Q: What are the exact timing rules for betting?
 A: Matches run continuously on a 5-second loop. You have a 3-second window at the start of each match cycle to place your bet before the round locks.
 
@@ -54,8 +57,8 @@ A: Yes. Your balance can never drop below a floor of 100,000 points. If a loss p
 
 --- LEADERBOARD MECHANICS AND SORTING ---
 
-Q: What is the difference between Laps and Achievements on the leaderboards?
-A: The Laps and Speedrun tabs track how many prestige ascensions you have completed and the speed of those runs measured by the fewest bets taken. The Achievements tab ranks predictors purely on their absolute count of unlocked achievements.
+Q: What do the Laps, Speedrun, and Achievements leaderboard tabs track?
+A: The Laps tab ranks predictors by completed prestige ascensions. The Speedrun tab ranks them by the fewest bets taken to complete a single Ascension cycle. The Achievements tab ranks predictors purely on their absolute count of unlocked achievements.
 
 Q: How often do the daily and weekly leaderboards reset?
 A: Daily leaderboards reset automatically at 00:00 UTC, clearing daily gains and daily peak milestones for a fresh start. Weekly leaderboards reset on a rolling 7-day cycle, while All-Time leaderboards are permanent.
@@ -70,7 +73,7 @@ Q: What does the GAIN column show on the leaderboard?
 A: The GAIN column shows your net point change over the currently selected time filter (Daily, Weekly, or All-Time). A positive green value means you gained more than you lost in that period.
 
 Q: How is the Speedrun leaderboard ranked?
-A: Speedrun ranks are determined by the fewest number of bets taken to complete a single Ascension cycle reaching 999 STR from a starting balance. Lower bet counts rank higher. Only completed laps count toward this ranking.
+A: Speedrun ranks are determined by the fewest number of bets taken to complete a single Ascension cycle reaching 999 TQGS from a starting balance. Lower bet counts rank higher. Only completed laps count toward this ranking.
 
 --- WIN STREAK ENGINE ---
 
@@ -215,6 +218,9 @@ A: Triggered by 3 tiered bonuses in a row (100%) or a Legendary Bonus (30% chanc
 Q: What is the Spark Festival?
 A: Triggered by completing 2 Flash Events in a row (100%) or hitting a Legendary or Mythical Bonus during a Flash Event (100%), Spark instantly gives all active players a fresh Flash Event with 3 Flash Bets. Players already in a Flash Event have their remaining bets refilled to 3. The Spark window lasts 45 seconds; Flash Events granted by Spark expire at the end of that window.
 
+Q: Where can I see a complete summary of all game systems, bonus tiers, and event rules?
+A: You can open the interactive "Game Systems" explainer popover at any time by clicking the "BONUSES" button located on the right side of the main gameplay dashboard (immediately next to the "LOSE: -50%" indicator). This popup provides detailed, expandable accordion guides for the Bonus System, Win Streaks, Flash Events, Relics, Player Festivals, Global Events, World Bosses, and Neon Paradise.
+
 --- THE DAILY ORACLE PROPHECY ---
 
 Q: How does the Daily Oracle Prophecy work?
@@ -267,6 +273,9 @@ Q: Do my unlocked visual tier styles reset when I ascend?
 A: No. Any visual point tier styles previously unlocked based on your all-time peak remain permanently available in your profile settings. This is called Persistent Mastery and is a core part of the Ascension system design.
 
 --- SAFETY, PRIVACY, AND HARDWARE ---
+
+Q: Can I play across multiple browser tabs or have multiple active sessions at the same time?
+A: No. To protect your account from rate-limiting penalties and state desynchronization, the application strictly enforces a single-tab guard. If multiple tabs are open simultaneously, the app's automated browser checks will detect the duplicate tabs, immediately shut down any redundant live-feed connections, and display a prominent warning. You must play on a single active tab.
 
 Q: Does the application track my physical location or IP?
 A: No. During account creation the system determines an approximate city and country to help understand where players are joining from. This is done entirely locally and offline. Raw IP addresses are anonymized immediately and public audit logs display masked subnets only.
@@ -332,6 +341,12 @@ A: Event selection is weighted to support controlled rollout of seasonal themes.
 
 --- LIVE FEED AND ACTIVITY ---
 
+Q: What is the live activity feed, and how are its events prioritized?
+A: The live feed at the bottom of the dashboard displays a real-time, priority-aware stream of match results, milestones, and bets. New activities are processed sequentially through a ring-buffer and polled every 400ms. Events are explicitly categorized by priority and marked with visual indicators:
+- Priority 0 (Gold Indicator): Major live player milestones (Relic discoveries, Achievement unlocks, and Streak milestones of 3, 5, 8, 10, 15, or 20 wins).
+- Priority 1 & 2 (Red Indicator): Your active prediction results (injected with zero-latency at the front of the queue) and other active players' live wagers.
+- Priority 3 & 4 (No Indicator): Simulated demo specials (relics, milestones, achievements, laps, and festivals) and simulated baseline prediction traffic to maintain feed activity during quiet periods.
+
 Q: What is the live activity feed?
 A: The live feed displays a continuous stream of match results and bet outcomes in real time including your own bets with instant feedback, other active players bets, and simulated demo traffic to maintain activity during low-concurrency periods. Your bets are always injected at the front of the feed with zero delay.
 
@@ -363,5 +378,13 @@ A: Yes. Existing relics, achievements, laps, and leaderboard records are preserv
 
 Q: Will my achievements become obsolete?
 A: No. The Achievement Codex is a permanent record. New achievements added in updates expand the codex without invalidating previously earned milestones.
+
+--- AUDIO AND INTERFACE BEHAVIOR ---
+
+Q: How does the game's background music react to active events?
+A: The platform features an adaptive, browser-native background music engine with six context-aware music tracks. When the game state shifts, the engine dynamically crossfades between the default ambient soundtrack and custom theme tracks for active Flash Events, Global Events, Player Festivals, World Bosses, and the Neon Paradise, ensuring a seamless and immersive thematic audio transition.
+
+Q: How does the game handle multiple popups or rewards triggering at the same time?
+A: The platform uses a Sequential Spectacle Queue, a frontend state machine that prevents UI clutter when multiple events trigger from a single match. It enforces a 1500ms starting delay, processes obstructive stages sequentially, and flushes non-obstructive notifications into a vertical notification stack. The main betting loop is never blocked for more than 3 seconds.
 
 `

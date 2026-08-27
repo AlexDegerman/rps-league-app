@@ -1,4 +1,4 @@
-# Integrated Achievement Codex v2.0
+# Integrated Achievement Codex
 
 The Integrated Achievement Codex is a multi-tier progression system designed to track and reward every facet of player interaction within the RPS simulation from economic wealth and match mastery to global event participation and identity persistence.
 

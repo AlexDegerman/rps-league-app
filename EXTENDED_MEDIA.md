@@ -44,7 +44,7 @@ The Bonus Explainer Modal is an in-game achievement reference system that explai
 
 Idle auto-betting system that automatically places your selected bet on your chosen side for every incoming match after unlock.
 
-Unlocked after reaching Ascension (999 STR) or starting Lap 1.
+Unlocked after reaching Ascension (999 TQGS) or starting Lap 1.
 
 <p align="center">
   <strong>Idle Auto-Bet Mode Showcase</strong><br/>

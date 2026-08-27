@@ -11,6 +11,8 @@ import { relics } from './relics.js'
 import { achievements } from './achievements.js'
 import { controls } from './controls.js'
 import { futureContent } from './futureContent.js'
+import { neonParadise } from './neonParadise.js'
+import { worldBosses } from './worldBosses.js'
 
 export const GAME_KNOWLEDGE = [
   securityResponses,
@@ -25,5 +27,7 @@ export const GAME_KNOWLEDGE = [
   relics,
   achievements,
   controls,
-  futureContent
+  futureContent,
+  neonParadise,
+  worldBosses
 ].join('\n\n')

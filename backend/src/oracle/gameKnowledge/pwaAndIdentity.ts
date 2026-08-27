@@ -10,7 +10,7 @@ Q: How do I install it on Android (Chrome)?
 A: Open the site in Chrome, tap the three-dot menu in the top right, and select "Install app" or "Add to Home screen." A confirmation prompt will appear; tap Install. The icon will then appear on your home screen and launches in its own standalone window without browser tabs or address bars.
 
 Q: How do I install it on iPhone or iPad (Safari)?
-A: Open the site in Safari, tap the Share icon at the bottom of the screen, scroll down and select "Add to Home Screen," then tap Add. Safari is required for this option; other iOS browsers like Chrome on iOS do not support installing PWAs to the home screen.
+A: Open the site in Safari, tap the Share icon at the bottom of the screen, select "Add to Home Screen," then tap Add. Safari provides the standard Add to Home Screen installation flow on iPhone and iPad.
 
 Q: How do I install it on desktop (Chrome, Edge, or other Chromium browsers)?
 A: Look for an install icon in the address bar, usually shaped like a small monitor with a downward arrow, on the right side of the URL field. Click it and confirm "Install" in the popup. The app will then open in its own dedicated window and can be launched from your desktop, taskbar, or start menu like a native application.
@@ -44,7 +44,7 @@ Q: Where can I read the full history of updates and features?
 A: There is a dedicated in-app Update History page documenting every major gameplay system, live-service feature, infrastructure upgrade, and seasonal content rollout since launch.
 
 Q: If I clear my browser data, will I see every past "What's New" overlay again?
-A: You will see the overlay for the current version again since the local acknowledgment record is stored in the same browser storage that gets cleared. This does not affect your point balance or progression data if you have a recovery code, but the version tracking itself is separate from your account identity.
+A: You will see the overlay for the current version again because the local acknowledgment record is stored in browser storage. Your profile can be restored separately using your recovery code if your local identity data has been cleared.
 
 --- PUBLIC PROFILES AND SHARING ---
 
@@ -52,7 +52,7 @@ Q: Can other people view my profile without an account?
 A: Yes. Every Predictor has a unique public profile URL that can be viewed by anyone, including people who have never played the game. No account or login is required to view a shared profile.
 
 Q: What does a shared public profile show?
-A: A public profile displays your 16 tracked data points, your curated badge showcase, your equipped relic, your optional LinkedIn verification badge, and a context-aware match history with Recent, Biggest Wins, and Best Multipliers tabs.
+A: A public profile displays your 16 tracked data points, your curated badge showcase, your equipped relics, your optional LinkedIn verification badge, and a context-aware match history with Recent, Biggest Wins, and Best Multipliers tabs.
 
 --- DEVICE AND BROWSER COMPATIBILITY ---
 

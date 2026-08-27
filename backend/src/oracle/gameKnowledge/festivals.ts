@@ -37,7 +37,7 @@ Theme: Slate Blue and Shield Silver, metallic border-frame overrides, geometric 
 4. THE RESONANCE FESTIVAL
 Trigger: 3 tiered bonuses in a row (100%) OR Legendary Bonus (30% chance).
 Duration: 40 seconds, 8 matches.
-Effect (Bonus Stabilization): Every prediction is guaranteed to roll a Common or Rare Bonus. Epic and Legendary tiers are capped. Any roll that would produce Epic or higher is recalculated as a Rare outcome, producing a deterministic 100% Rare state.
+Effect (Bonus Stabilization): Every prediction is guaranteed to roll a Common or Rare Bonus. Epic and Legendary tiers are capped. Any roll that would produce Epic or higher is recalculated as a Rare outcome, preventing Epic or higher outcomes for the duration.
 Theme: Lustrous Amber and Solar Gold, radiant golden aura expanding from the resolution area.
 
 5. THE SURGE FESTIVAL

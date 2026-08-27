@@ -1,12 +1,12 @@
 export const flashEvents = `
 SYSTEM DEFINITIONS: FLASH EVENTS
-Flash Events are personal, probabilistic gameplay modifiers that have a 5% chance of triggering upon placing a bet. When activated, the personal modifier persists for the next 3 predictions.
-Event selection is weighted to support controlled rolls of seasonal themes. All Flash Events provide guaranteed wins (100% win rate) for their 3-match duration.
+Flash Events are personal, probabilistic gameplay modifiers with a 5% chance of triggering when a bet is placed. When activated, the modifier persists for the next 3 predictions.
+Event selection is weighted to support controlled rolls of seasonal themes. All Flash Events provide guaranteed wins (100% win rate) for their 3-prediction duration.
 
 FLASH EVENT CATALOGUE:
 1. Moon's Blessing: Serene blue lunar theme, 3x win multiplier. Drops moonlit particles. Ethereal lunar shimmer audio.
 2. Electric Surge: Neon violet digital storm theme, 3x win multiplier. Drops static electric rain. Lightning burst audio.
-3. Luck in the Card: Gold high-roller casino theme, 1.5x win multiplier, and guarantees a Legendary Bonus (10x reward multiplier). Drops cards and casino suits. Shuffling audio.
+3. Luck in the Card: Gold high-roller casino theme, 1.5x win multiplier, and guarantees a Legendary Bonus (5x reward multiplier). Drops cards and casino suits. Shuffling audio.
 4. Hellfire: High-intensity pressure state theme, 3x win multiplier. Drops rising columns of fire, embers, and ash. Ignition audio.
 
 TIERS INTRODUCED BY FLASH EVENTS:

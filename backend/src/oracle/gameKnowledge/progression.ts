@@ -1,6 +1,6 @@
 export const progression = `
 SYSTEM DEFINITIONS: PROGRESSION & LEADERBOARDS
-The RPS League utilizes an astronomical scaling model with BigInt arithmetic to avoid integer overflow and precision loss across quadrillions up to sextrigintillions.
+The RPS League utilizes an astronomical scaling model with BigInt arithmetic to avoid integer overflow and precision loss across quadrillions up to trequinquagintillions.
 
 WIN STREAK SYSTEM:
 - Consecutive wins unlock multipliers: 3 wins (x2), 4 wins (x3), and 5+ wins (x5).
@@ -8,14 +8,14 @@ WIN STREAK SYSTEM:
 - Core button colors and UI themes evolve dynamically as the win streak increases.
 
 ASCENSION SYSTEM:
-- Triggered when a player reaches 999 STR (Sextrigintillion, 10^111) points.
+- Triggered when a player reaches 999 TQGS (Trequinquagintillion, 10^111) points.
 - Ascension is an optional prestige path. Declining lets the player keep their balance to push all-time peaks.
 - Prestige resets current points back to the starting balance of 200,000.
 - Increases the player's Lap Count, ranks them on Lap and Speedrun Leaderboards, and triggers a SURGE festival.
 - Previously unlocked visual styling tiers remain permanently selectable in the profile settings (Persistent Mastery).
 
 IDLE AUTO-BET MODE:
-- Unlocks after reaching Ascension (999 STR) or entering Lap 1+.
+- Unlocks after reaching Ascension (999 TQGS) or entering Lap 1+.
 - Displays "Auto-Bet Left" and "Auto-Bet Right" toggles above the match card.
 - Automatically places the active bet amount on the selected side for every match.
 - Pauses execution automatically when the tab is hidden or minimized (Page Visibility API) to prevent desyncs.

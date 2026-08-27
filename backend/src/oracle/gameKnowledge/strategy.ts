@@ -4,7 +4,7 @@ SYSTEM DEFINITIONS: STRATEGY, DESIGN PHILOSOPHY, AND ORACLE GUIDANCE
 --- ORACLE ROLE AND LIMITS ---
 
 Q: Should I lap now?
-A: The Oracle cannot make this decision for you since it depends on your personal goals. If you want to compete on Speedrun leaderboards, lap as soon as you hit 999 STR with as few total bets as possible. If you want to preserve your All-Time peak ranking and push extreme wealth tiers, decline Ascension and keep accumulating. Both paths have dedicated leaderboard support.
+A: The Oracle cannot make this decision for you since it depends on your personal goals. If you want to compete on Speedrun leaderboards, lap as soon as you hit 999 TQGS with as few total bets as possible. If you want to preserve your All-Time peak ranking and push extreme wealth tiers, decline Ascension and keep accumulating. Both paths have dedicated leaderboard support.
 
 Q: What is my biggest weakness as a Predictor?
 A: The Oracle does not have access to your individual account history or session data. It can analyze aggregate league telemetry and explain all game systems, but it cannot evaluate your personal betting patterns or identify individual performance gaps.
@@ -47,9 +47,9 @@ A: Bet every match, maintain your streak, and prioritize equipping any relic you
 --- PROGRESSION DEPTH ---
 
 Q: What are laps?
-A: Laps are prestige cycles unlocked by the Ascension system. When you reach 999 STR (Trequinquagintillion), you can choose to reset your point balance back to 200,000 in exchange for permanently increasing your Lap Count. Each lap increases your relic drop rates and earns you a position on the Laps and Speedrun leaderboards.
+A: Laps are prestige cycles unlocked by the Ascension system. When you reach 999 TQGS (Trequinquagintillion), you can choose to reset your point balance back to 200,000 in exchange for permanently increasing your Lap Count. Each lap increases your relic drop rates and earns you a position on the Laps and Speedrun leaderboards.
 
-Q: Should I lap immediately when I reach 999 STR?
+Q: Should I lap immediately when I reach 999 TQGS?
 A: It depends on your goals. Lapping immediately after reaching the threshold with as few total bets as possible maximizes your Speedrun leaderboard ranking. Staying at high points and declining Ascension maintains your All-Time wealth ranking and lets you continue accumulating at extreme tiers. Ascension can always be triggered later from the profile menu, so there is no penalty for waiting.
 
 Q: Is it worth delaying a lap?
@@ -133,7 +133,7 @@ Q: How are leaderboards calculated?
 A: The Points tab ranks by active virtual balance. The Laps tab ranks by total completed prestige ascensions. The Speedrun tab ranks by the fewest bets taken in a single ascension cycle. The Achievements tab ranks by total unlocked achievement count. All tabs support Daily, Weekly, and All-Time time filter overlays.
 
 Q: How do I climb the leaderboard faster?
-A: For the Points leaderboard, compound multiplier stacking during Flash Events and Global Events produces the fastest gains. For Speedrun, minimize total bets by betting maximum amounts per match to reach 999 STR in fewer cycles. For Achievements, pursue volume milestones (wins, Oracle streak, event participation) in parallel rather than sequentially.
+A: For the Points leaderboard, compound multiplier stacking during Flash Events and Global Events produces the fastest gains. For Speedrun, minimize total bets by betting maximum amounts per match to reach 999 TQGS in fewer cycles. For Achievements, pursue volume milestones (wins, Oracle streak, event participation) in parallel rather than sequentially.
 
 Q: Are there seasonal rankings?
 A: Daily and Weekly leaderboards function as rolling competitive seasons that reset automatically. All-Time rankings are permanent. The game does not currently operate explicit named seasons with separate isolated leaderboards, but live-service updates introduce new content that shifts competitive priorities over time.
