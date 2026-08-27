@@ -16,7 +16,7 @@ All notable changes to the platform will be documented in this file.
 
 ### Added
 
-* **Neon Paradise Bonus System:** Introduced a new bonus-stage system containing nine interactive experiences that activate during eligible manual prediction sessions. Neon Paradise has a combined 2.00% trigger chance per eligible resolved prediction, with all nine stages having equal selection probability.
+* **Neon Paradise Bonus System:** Introduced a new bonus-stage system containing nine interactive experiences that activate during eligible manual prediction sessions. Neon Paradise has a combined 3% trigger chance per eligible resolved prediction, with all nine stages having equal selection probability.
 
   * **Treasure Vault:** Choose one of three pre-generated reward chests, with the selected chest opening first before the remaining rewards are revealed.
   * **Double Down:** Climb a multiplier ladder from a guaranteed 2× payout toward a maximum 10× reward by choosing whether to secure or continue.

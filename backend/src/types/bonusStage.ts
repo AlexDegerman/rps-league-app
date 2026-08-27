@@ -9,6 +9,18 @@ export type StageType =
   | 'ORACLE_VISION'
   | 'CRYSTAL_MINE'
 
+export const STAGE_WEIGHTS: Record<StageType, number> = {
+  TREASURE_VAULT: 1.0,
+  DOUBLE_DOWN: 1.0,
+  WILD_PREDICTION: 1.0,
+  SURGE_FRENZY: 1.0,
+  RAINBOW_RUSH: 1.0,
+  SNIPER_CHALLENGE: 1.0,
+  KINGS_VAULT: 1.0,
+  ORACLE_VISION: 0.5,
+  CRYSTAL_MINE: 1.0
+}
+
 export const ENABLED_STAGES: StageType[] = [
   'TREASURE_VAULT',
   'DOUBLE_DOWN',
@@ -21,7 +33,7 @@ export const ENABLED_STAGES: StageType[] = [
   'CRYSTAL_MINE'
 ]
 
-export const TOTAL_TRIGGER_CHANCE = 2.0
+export const TOTAL_TRIGGER_CHANCE = 3.0
 
 export interface BonusSession {
   id: string

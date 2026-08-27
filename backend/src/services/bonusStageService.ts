@@ -17,7 +17,8 @@ import {
   DOUBLE_DOWN_PAYOUTS,
   RAINBOW_RUSH_WEIGHTS,
   RAINBOW_RUSH_PAYOUTS,
-  ORACLE_VISION_PAYOUTS
+  ORACLE_VISION_PAYOUTS,
+  STAGE_WEIGHTS
 } from '../types/bonusStage.js'
 
 export function rollBonusTrigger(): StageType | null {
@@ -25,8 +26,12 @@ export function rollBonusTrigger(): StageType | null {
 
   if (ENABLED_STAGES.length === 0) return null
 
-  const index = Math.floor(Math.random() * ENABLED_STAGES.length)
-  return ENABLED_STAGES[index] ?? null
+  const options = ENABLED_STAGES.map((stage) => ({
+    value: stage,
+    weight: STAGE_WEIGHTS[stage] ?? 1.0
+  }))
+
+  return weightedPick(options)
 }
 
 export async function createSession(

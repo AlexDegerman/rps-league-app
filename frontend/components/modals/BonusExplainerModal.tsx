@@ -720,7 +720,7 @@ export default function BonusExplainerModal({
                 dotColor="bg-fuchsia-400"
                 isOpen={expanded.neonparadise}
                 onClick={() => toggleSection('neonparadise')}
-                badge="2% per bet"
+                badge="3% per bet"
                 badgeColor="bg-fuchsia-100 text-fuchsia-700"
               >
                 <div className="space-y-3">
@@ -826,7 +826,7 @@ export default function BonusExplainerModal({
 
                   <div className="p-2.5 bg-fuchsia-50 border border-fuchsia-100 rounded-lg space-y-1.5">
                     <p className="text-[9px] text-fuchsia-700 leading-relaxed">
-                      Neon Paradise has a combined 2.00% trigger chance per
+                      Neon Paradise has a combined 3% trigger chance per
                       eligible prediction, with all nine stages having an equal
                       chance to appear.
                     </p>

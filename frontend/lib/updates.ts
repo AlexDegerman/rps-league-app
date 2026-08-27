@@ -18,7 +18,7 @@ export const UPDATES: Update[] = [
     version: '4.0',
     label: 'Neon Paradise',
     notes: [
-      'Neon Paradise: Introduces nine interactive bonus stages that trigger during eligible manual prediction sessions with a combined 2.00% chance per resolved prediction. All nine stages have equal selection probability.',
+      'Neon Paradise: Introduces nine interactive bonus stages that trigger during eligible manual prediction sessions with a combined 3% chance per resolved prediction. All nine stages have equal selection probability.',
       "Nine Bonus Stages: Adds Treasure Vault, Double Down, Wild Prediction, Surge Frenzy, Rainbow Rush, Sniper Challenge, Oracle Vision, Crystal Mine, and King's Vault, each featuring a distinct gameplay format, visual identity, audio design, and reward presentation.",
       'Bonus Payout System: All stages calculate rewards from the last recorded bet, guaranteeing at least 2x the bet and scaling up to 10x. Bonus rewards are added to the existing balance without reducing it.',
       'Nine New Themed Number Tiers: Extends the point progression system from Quattuorquadragintillion through Trequinquagintillion with nine new tiers featuring dedicated visual treatments ranging from mechanical vault and split-risk designs to spectral, tactical, cipher, crystalline, and royal treasure presentations.',

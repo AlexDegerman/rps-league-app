@@ -4,7 +4,7 @@ SYSTEM DEFINITIONS: NEON PARADISE BONUS STAGES
 --- SYSTEM RULES ---
 
 - Manual-Only Triggers: Bonus stages activate only during active manual prediction sessions. Disabled during auto-betting, minimized app states, and AFK periods.
-- Combined Trigger Rate: Eligible prediction resolutions have a combined 2.00% chance to trigger a Neon Paradise stage.
+- Combined Trigger Rate: Eligible prediction resolutions have a combined 3% chance to trigger a Neon Paradise stage.
 - Equal Stage Selection: When a bonus stage triggers, each stage has an equal chance of being selected.
 - Additive Payouts: Bonus rewards are added to the player's current balance. No stage can reduce the player's existing balance.
 - Guaranteed Floor: Every stage guarantees a minimum payout of +2x the last bet.
@@ -17,7 +17,7 @@ SYSTEM DEFINITIONS: NEON PARADISE BONUS STAGES
 
 --- TRIGGER SYSTEM & ELIGIBILITY ---
 
-- Combined Trigger Chance: 2.00% per eligible resolved prediction.
+- Combined Trigger Chance: 3% per eligible resolved prediction.
 - Stage Selection: Equal probability across all nine stages (1/9 chance each).
 - Eligibility Requirements:
   * Active manual prediction mode

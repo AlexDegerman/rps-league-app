@@ -8,7 +8,7 @@ A showcase of the nine Neon Paradise bonus stages, including their shared trigge
 
 - **Manual-Only Triggers**: Bonus stages activate only during active manual prediction sessions. Disabled during auto-betting, minimized app states, and AFK periods.
 
-- **Combined Trigger Rate**: Eligible prediction resolutions have a combined 2.00% chance to trigger a Neon Paradise stage.
+- **Combined Trigger Rate**: Eligible prediction resolutions have a combined 3% chance to trigger a Neon Paradise stage.
 
 - **Equal Stage Selection**: When a bonus stage triggers, each stage has an equal chance of being selected.
 
@@ -34,11 +34,11 @@ A showcase of the nine Neon Paradise bonus stages, including their shared trigge
 
 Bonus stages are rolled after eligible manual prediction resolutions.
 
-The system has a combined 2.00% chance to trigger Neon Paradise. When triggered, all nine stages have an equal probability of being selected.
+The system has a combined 3% chance to trigger Neon Paradise. When triggered, all nine stages have an equal probability of being selected.
 
 | Property | Rule |
 | :--- | :--- |
-| Combined trigger chance | 2.00% per eligible resolved prediction |
+| Combined trigger chance | 3% per eligible resolved prediction |
 | Stage selection | Equal probability across all nine stages |
 
 **### Eligibility**
