@@ -15,7 +15,7 @@ ASCENSION SYSTEM:
 - Previously unlocked visual styling tiers remain permanently selectable in the profile settings (Persistent Mastery).
 
 IDLE AUTO-BET MODE:
-- Unlocks after reaching Ascension (999 TQGS) or entering Lap 1+.
+- Unlocks after reaching 1 Sextrigintillion points or being in Lap 1 or higher.
 - Displays "Auto-Bet Left" and "Auto-Bet Right" toggles above the match card.
 - Automatically places the active bet amount on the selected side for every match.
 - Pauses execution automatically when the tab is hidden or minimized (Page Visibility API) to prevent desyncs.

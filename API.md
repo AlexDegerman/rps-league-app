@@ -403,7 +403,7 @@ Active and historical minigame/bonus stage sessions for users
 | GET | `/api/users/check-name/:nickname` | Check nickname availability |
 | GET | `/api/users/:userId/points` | Real-time balance, streak, and peak sync; also handles UTM attribution on first visit |
 | GET | `/api/users/:userId/recovery-tutorial-status` | Check whether user has completed the recovery tutorial |
-| GET | `/api/users/idle-eligible/:userId` | Check if user qualifies for idle auto-bet (laps ≥ 1 or points ≥ ascension threshold) |
+| GET | `/api/users/idle-eligible/:userId` | Check if user qualifies for idle auto-bet (laps ≥ 1 or points ≥ 1 STR) |
 | POST | `/api/users/:userId/auto-bet-used` | Mark that user has activated idle auto-bet |
 
 ---

@@ -585,9 +585,8 @@ router.get('/idle-eligible/:userId', async (req, res) => {
       return res.status(404).json({ error: 'User not found' })
 
     const row = result.rows[0]
-    
-    const eligible =
-      Number(row.laps) >= 1 || BigInt(row.points) >= ASCENSION_THRESHOLD
+
+    const eligible = Number(row.laps) >= 1 || BigInt(row.points) >= 10n ** 111n
 
     res.json({ eligible })
   } catch (err) {

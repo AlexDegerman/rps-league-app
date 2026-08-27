@@ -140,7 +140,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Core action buttons adapt to the active streak color state
 
 ### Idle auto-bet mode
-- Unlocks after reaching Ascension (999 TQGS) or starting Lap 1
+- Unlocks after reaching 1 Sextrigintillion points or being in Lap 1 or higher
 - Two tick boxes appear above each live match card: Auto-Bet Left and Auto-Bet Right
 - Automatically places your selected bet on your chosen side for every incoming match after unlock
 - Switching sides takes effect on the next match

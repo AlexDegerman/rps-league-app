@@ -243,8 +243,8 @@ A: The Oracle has no access to classified development roadmaps or unreleased sys
 
 --- IDLE AUTO-BET ---
 
-Q: How do I unlock the Idle Auto-Bet mode?
-A: Idle Auto-Bet mode unlocks once you reach the Ascension threshold of 999 TQGS (Trequinquagintillion) points or upon starting Lap 1.
+Q: What is the requirement to unlock idle auto-bet?
+A: Unlocks after reaching 1 Sextrigintillion points or being in Lap 1 or higher.
 
 Q: What are the Auto-Bet Left and Auto-Bet Right options?
 A: Once unlocked, two tick boxes labeled "Auto-Bet Left" and "Auto-Bet Right" will appear directly above each live match card. Checking one of these boxes automatically places your selected bet amount on that side for every incoming match.

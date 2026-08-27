@@ -43,8 +43,8 @@ export default function IdleBetControls() {
 
   const tooltip = isEligible
     ? 'Toggle automatic betting for this side'
-    : 'Unlock by becoming eligible for Lap 1'
-
+    : 'Unlock by reaching 1 Sextrigintillion or being in Lap 1 or higher'
+    
   return (
     <div className="flex justify-between items-center mb-2 px-0.5">
       <button
