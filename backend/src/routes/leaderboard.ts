@@ -160,73 +160,98 @@ router.get('/unified', async (req, res) => {
 
     const sortWhitelist: Record<string, string> = {
       points: 'u.points',
-      gained: 'gained',
+      gained: tab === 'alltime' ? 'u.total_gained' : 'gained',
       peak: peakColumn,
-      wins: 'wins',
-      losses: 'losses',
+      wins: tab === 'alltime' ? 'u.wins' : 'wins',
+      losses: tab === 'alltime' ? 'u.losses' : 'losses',
       winrate: 'win_rate'
     }
-
-    const now = new Date()
-    now.setUTCHours(0, 0, 0, 0)
-    const dayStartMs = now.getTime()
-
-    const weekStart = new Date()
-    weekStart.setUTCHours(0, 0, 0, 0)
-    const day = weekStart.getUTCDay()
-    const diff = day === 0 ? 6 : day - 1
-    weekStart.setUTCDate(weekStart.getUTCDate() - diff)
-    const weekStartMs = weekStart.getTime()
-
-    const periodStart =
-      tab === 'daily' ? dayStartMs : tab === 'weekly' ? weekStartMs : 0
-    const hasPeriod = periodStart > 0
 
     const defaultSort =
       tab === 'daily' ? 'points' : tab === 'weekly' ? 'gained' : 'peak'
     const sortKey = sortWhitelist[sortParam] ?? sortWhitelist[defaultSort]
 
-    const result = await pool.query(
-      `SELECT
-        u.user_id,
-        u.nickname,
-        u.short_id,
-        u.points,
-        u.linkedin_url,
-        u.show_linkedin_badge,
-        u.point_style_preference,
-        ${peakColumn} AS peak_points,
-        COALESCE(SUM(p.gain_loss) FILTER (WHERE p.gain_loss > 0 ${hasPeriod ? 'AND p.created_at >= $1' : ''}), 0) AS gained,
-        COUNT(p.id) FILTER (WHERE p.result = 'WIN'  ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS wins,
-        COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''}) AS losses,
-        CASE
-          WHEN (
-            COUNT(p.id) FILTER (WHERE p.result = 'WIN'  ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
-            COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''})
-          ) > 0
-          THEN ROUND(
-            COUNT(p.id) FILTER (WHERE p.result = 'WIN' ${hasPeriod ? 'AND p.created_at >= $1' : ''})::numeric /
-            (
-              COUNT(p.id) FILTER (WHERE p.result = 'WIN'  ${hasPeriod ? 'AND p.created_at >= $1' : ''}) +
-              COUNT(p.id) FILTER (WHERE p.result = 'LOSE' ${hasPeriod ? 'AND p.created_at >= $1' : ''})
-            ) * 100
-          )
-          ELSE 0
-        END AS win_rate
-      FROM users u
-      LEFT JOIN predictions p ON u.user_id = p.user_id
-      WHERE EXISTS (
-        SELECT 1 FROM predictions p2
-        WHERE p2.user_id = u.user_id
-        ${hasPeriod ? 'AND p2.created_at >= $1' : ''}
+    let result
+    if (tab === 'alltime') {
+      result = await pool.query(
+        `SELECT
+          u.user_id,
+          u.nickname,
+          u.short_id,
+          u.points,
+          u.linkedin_url,
+          u.show_linkedin_badge,
+          u.point_style_preference,
+          u.peak_points,
+          u.total_gained AS gained,
+          u.wins,
+          u.losses,
+          CASE
+            WHEN (u.wins + u.losses) > 0
+            THEN ROUND((u.wins::numeric / (u.wins + u.losses)) * 100)
+            ELSE 0
+          END AS win_rate
+        FROM users u
+        WHERE (u.wins + u.losses) > 0
+        ORDER BY ${sortKey} ${dir}, u.nickname ASC
+        LIMIT 100`
       )
-      GROUP BY u.user_id, u.nickname, u.short_id, u.points,
-              u.peak_points, u.daily_peak, u.weekly_peak,
-              u.linkedin_url, u.show_linkedin_badge, u.point_style_preference
-      ORDER BY ${sortKey} ${dir}, u.nickname ASC
-      LIMIT 100`,
-      hasPeriod ? [periodStart] : []
-    )
+    } else {
+      const now = new Date()
+      now.setUTCHours(0, 0, 0, 0)
+      const dayStartMs = now.getTime()
+
+      const weekStart = new Date()
+      weekStart.setUTCHours(0, 0, 0, 0)
+      const day = weekStart.getUTCDay()
+      const diff = day === 0 ? 6 : day - 1
+      weekStart.setUTCDate(weekStart.getUTCDate() - diff)
+      const weekStartMs = weekStart.getTime()
+
+      const periodStart = tab === 'daily' ? dayStartMs : weekStartMs
+
+      result = await pool.query(
+        `SELECT
+          u.user_id,
+          u.nickname,
+          u.short_id,
+          u.points,
+          u.linkedin_url,
+          u.show_linkedin_badge,
+          u.point_style_preference,
+          ${peakColumn} AS peak_points,
+          COALESCE(SUM(p.gain_loss) FILTER (WHERE p.gain_loss > 0 AND p.created_at >= $1), 0) AS gained,
+          COUNT(p.id) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1) AS wins,
+          COUNT(p.id) FILTER (WHERE p.result = 'LOSE' AND p.created_at >= $1) AS losses,
+          CASE
+            WHEN (
+              COUNT(p.id) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1) +
+              COUNT(p.id) FILTER (WHERE p.result = 'LOSE' AND p.created_at >= $1)
+            ) > 0
+            THEN ROUND(
+              (COUNT(p.id) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1)::numeric /
+              (
+                COUNT(p.id) FILTER (WHERE p.result = 'WIN' AND p.created_at >= $1) +
+                COUNT(p.id) FILTER (WHERE p.result = 'LOSE' AND p.created_at >= $1)
+              )) * 100
+            )
+            ELSE 0
+          END AS win_rate
+        FROM users u
+        LEFT JOIN predictions p ON u.user_id = p.user_id
+        WHERE EXISTS (
+          SELECT 1 FROM predictions p2
+          WHERE p2.user_id = u.user_id
+          AND p2.created_at >= $1
+        )
+        GROUP BY u.user_id, u.nickname, u.short_id, u.points,
+                u.peak_points, u.daily_peak, u.weekly_peak,
+                u.linkedin_url, u.show_linkedin_badge, u.point_style_preference
+        ORDER BY ${sortKey} ${dir}, u.nickname ASC
+        LIMIT 100`,
+        [periodStart]
+      )
+    }
 
     res.json(
       result.rows.map((row) => ({

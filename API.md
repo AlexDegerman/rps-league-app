@@ -69,6 +69,7 @@ Real players (predictors) with persistent accounts and progression.
 | `points` | NUMERIC | Current balance (100,000 floor) |
 | `peak_points` | NUMERIC | All-time highest balance achieved |
 | `all_time_peak` | NUMERIC | Persistent all-time peak (default 200,000) |
+| `total_gained` | NUMERIC | Total cumulative points gained from wins |
 | `daily_peak` | NUMERIC | Highest balance reached today |
 | `weekly_peak` | NUMERIC | Highest balance reached this week |
 | `current_win_streak` | INT4 | Active consecutive wins |

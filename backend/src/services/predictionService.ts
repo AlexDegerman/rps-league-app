@@ -778,6 +778,7 @@ export const resolvePrediction = async (
               total_flash_events_caught = CASE WHEN $7::text IS NOT NULL AND $5 = 'WIN' THEN total_flash_events_caught + 1 ELSE total_flash_events_caught END,
               wins                      = CASE WHEN $5 = 'WIN' THEN wins + 1 ELSE wins END,
               losses                    = CASE WHEN $5 = 'LOSE' THEN losses + 1 ELSE losses END,
+              total_gained              = CASE WHEN $5 = 'WIN' THEN total_gained + $1 ELSE total_gained END,
               lunar_events_caught       = CASE WHEN $7 = 'LUNAR'    AND $5 = 'WIN' THEN lunar_events_caught    + 1 ELSE lunar_events_caught    END,
               electric_events_caught    = CASE WHEN $7 = 'ELECTRIC' AND $5 = 'WIN' THEN electric_events_caught + 1 ELSE electric_events_caught END,
               hellfire_events_caught    = CASE WHEN $7 = 'HELLFIRE' AND $5 = 'WIN' THEN hellfire_events_caught + 1 ELSE hellfire_events_caught END,
@@ -1269,16 +1270,8 @@ export const getUserStats = async (userId: string, shortId: string) => {
         u.joined_date,
         u.wins,
         u.losses,
-        COALESCE(p_stats.total_gain, 0) as total_gain
+        u.total_gained AS total_gain
       FROM users u
-      LEFT JOIN (
-        SELECT
-            user_id,
-            SUM(gain_loss) FILTER (WHERE gain_loss > 0) AS total_gain
-        FROM predictions
-        WHERE result IS NOT NULL
-        GROUP BY user_id
-      ) p_stats ON u.user_id = p_stats.user_id
       WHERE u.user_id = $1`,
     [userId]
   )
