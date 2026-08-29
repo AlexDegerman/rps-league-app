@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import * as predictionService from '../../services/predictionService.js'
-import pool from '../../utils/db.js'
-import { mockDbResponse } from '../setup.js'
+import * as predictionService from '../../../services/prediction/predictionService.js'
+import pool from '../../../utils/db.js'
+import { mockDbResponse } from '../../setup.js'
 
 interface ActiveGlobalEvent {
   type: string
@@ -29,7 +29,7 @@ const mockActiveGlobalEvent: { value: ActiveGlobalEvent | null } = {
 const mockActiveFestival: { value: ActiveFestival | null } = { value: null }
 const mockFlashEvent: { value: FlashEvent | null } = { value: null }
 
-vi.mock('../../services/oracleProphecyService.js', () => ({
+vi.mock('../../../services/oracleProphecyService.js', () => ({
   hasUserUsedOracle: vi.fn(() => Promise.resolve(true)),
   consumeOracleForUser: vi.fn((userId, client) => {
     const q = client || pool
@@ -41,7 +41,7 @@ vi.mock('../../services/oracleProphecyService.js', () => ({
   getOracleState: vi.fn(() => ({ side: 'left' }))
 }))
 
-vi.mock('../../services/flashEventService.js', () => ({
+vi.mock('../../../services/flashEventService.js', () => ({
   getFlashEventForUser: vi.fn(() => mockFlashEvent.value),
   consumeFlashBetForUser: vi.fn(() => false),
   tryTriggerFlashEventForUser: vi.fn(),
@@ -49,7 +49,7 @@ vi.mock('../../services/flashEventService.js', () => ({
   hasSeenAllFlashTypes: vi.fn(() => false)
 }))
 
-vi.mock('../../services/festivalService.js', () => ({
+vi.mock('../../../services/festivalService.js', () => ({
   checkAndTriggerFestival: vi.fn(),
   getGuaranteedBonusRemaining: vi.fn(() => 0),
   consumeGuaranteedBonus: vi.fn(),
@@ -58,7 +58,7 @@ vi.mock('../../services/festivalService.js', () => ({
   triggerSafeguardFestival: vi.fn()
 }))
 
-vi.mock('../../services/globalEventService.js', () => ({
+vi.mock('../../../services/globalEventService.js', () => ({
   applyGlobalEventBuff: vi.fn(
     (isWin: boolean, gainLoss: bigint, _bet: bigint) => ({
       gainLossMultiplied:
@@ -74,20 +74,20 @@ vi.mock('../../services/globalEventService.js', () => ({
   getActiveGlobalEvent: vi.fn(() => mockActiveGlobalEvent.value)
 }))
 
-vi.mock('../../services/relicService.js', () => ({
+vi.mock('../../../services/relicService.js', () => ({
   RELICS: Array.from({ length: 15 }, (_, i) => ({ key: `relic_${i}` })),
   rollRelicDrop: vi.fn(() => Promise.resolve(null))
 }))
 
-vi.mock('../../services/sessionService.js', () => ({
+vi.mock('../../../services/sessionService.js', () => ({
   recordInteraction: vi.fn(() => Promise.resolve())
 }))
 
-vi.mock('../../utils/badgeHelper.js', () => ({
+vi.mock('../../../utils/badgeHelper.js', () => ({
   autoEquipUserBadges: vi.fn(() => Promise.resolve())
 }))
 
-vi.mock('../../services/worldBossService.js', () => ({
+vi.mock('../../../services/worldBossService.js', () => ({
   isWorldBossActive: vi.fn(() => false),
   getCurrentState: vi.fn(() => ({
     hpPct: 100,
@@ -99,14 +99,14 @@ vi.mock('../../services/worldBossService.js', () => ({
   applyDamage: vi.fn()
 }))
 
-vi.mock('../../services/bonusStageService.js', () => ({
+vi.mock('../../../services/bonusStageService.js', () => ({
   rollBonusTrigger: vi.fn(() => null),
   createSession: vi.fn(() => Promise.resolve(null)),
   getActiveSession: vi.fn(() => Promise.resolve(null)),
   getClientInitialData: vi.fn(() => ({}))
 }))
 
-vi.mock('../../services/userService.js', async (importOriginal) => {
+vi.mock('../../../services/userService.js', async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, any>
   return {
     ...actual,
@@ -116,9 +116,11 @@ vi.mock('../../services/userService.js', async (importOriginal) => {
   }
 })
 
-vi.mock('../../utils/logger.js', () => ({
+vi.mock('../../../utils/logger.js', () => ({
   logger: {
     error: vi.fn(),
+    warn: vi.fn(),
+    info: vi.fn(),
     errorWithPoints: vi.fn()
   }
 }))
@@ -738,12 +740,12 @@ describe('Prediction Service', () => {
     it('oracle charge (UPDATE oracle_used_date) is inside the transaction', async () => {
       // Verify the Oracle charge occurs inside the resolution transaction
       const { hasUserUsedOracle } =
-        await import('../../services/oracleProphecyService.js')
+        await import('../../../services/oracleProphecyService.js')
       vi.mocked(hasUserUsedOracle).mockResolvedValue(false)
 
       // Activate the Oracle prediction path
       const { getOracleState } =
-        await import('../../services/oracleProphecyService.js')
+        await import('../../../services/oracleProphecyService.js')
       vi.mocked(getOracleState).mockReturnValue({ side: 'left' } as any)
       currentPredictionRow = makeRow({
         pick: 'Winner',

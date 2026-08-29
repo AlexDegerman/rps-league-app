@@ -3,7 +3,7 @@ import {
   getPaginatedUserPredictions,
   getUserStats,
   savePrediction
-} from '../services/predictionService.js'
+} from '../services/prediction/predictionService.js'
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
@@ -444,15 +444,14 @@ router.get('/user/:userId/history', async (req, res) => {
     const { userId } = req.params
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 20
-    
-    const rawSort = req.query.sort as string
-    const sort = (rawSort === 'wins' || rawSort === 'multipliers' || rawSort === 'recent')
-      ? rawSort
-      : 'recent'
 
-    res.json(
-      await getPaginatedUserPredictions(userId, page, limit, sort)
-    )
+    const rawSort = req.query.sort as string
+    const sort =
+      rawSort === 'wins' || rawSort === 'multipliers' || rawSort === 'recent'
+        ? rawSort
+        : 'recent'
+
+    res.json(await getPaginatedUserPredictions(userId, page, limit, sort))
   } catch (err) {
     logger.error('GET /user/:userId/history failed', err, {
       userId: req.params.userId

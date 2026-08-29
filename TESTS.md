@@ -10,6 +10,7 @@ The backend services are tested using Vitest to verify database behavior, BigInt
 
 - **Prediction Service**: Validates bet placement, prediction resolution, point gain/loss calculations, 100k point floor enforcement, relic mechanics, festival interactions, pagination, user statistics, global betting summaries, database edge cases, and transactional resolution behavior using mocked services and SQL routing. Tests verify that `prediction_result` is emitted only after COMMIT, failed transactions roll back correctly, one user's failure does not affect other bettors, each bettor receives an independent transaction, clients are released on failure, and oracle charges occur within the transaction.
 - **Oracle Features**: Verifies both Oracle Consultation and Daily Prophecy functionality, including AI model fallback, query caching, rate limiting, validation, response formatting, daily prophecy generation, user eligibility checks, oracle consumption, and reset endpoint security.
+- **Flash Event Service**: Tests event triggering, first-flash behavior, relic modifiers, bet consumption, event lifecycle, and expiry handling.
 - **Leaderboard Service**: Tests SQL aggregations including player ranking, alphabetical tiebreaking, and time-windowed results.
 - **Match Service**: Validates deterministic winner logic, pagination, and player stat aggregation.
 - **Relic Service**: Tests loot table rolls, rarity boundaries, Smart Loot fallback behavior, modifiers, cap logic, duplicate prevention, persistence, equipment state handling, and unequip counter reset behavior.

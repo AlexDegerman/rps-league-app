@@ -521,7 +521,7 @@ graph LR
 
 - **Zero-friction onboarding**: Instant anonymous play with random nickname generation
 - **SSE over WebSockets**: Chosen for simplicity, lower overhead, and better serverless compatibility
-- **Transactional prediction resolution**: Centralized prediction processing with atomic database operations and concurrency-safe state transitions
+- **Transactional prediction resolution**: Modular prediction services coordinate atomic database operations and concurrency-safe state transitions
 - **Concurrency-aware event stream**: Guaranteed stability and zero overlap between real user bets and demo traffic
 - **Profile recovery system** for cross-device portability
 - **Custom match generator**: Self-contained server-side match generation with persistent match records and sequential execution

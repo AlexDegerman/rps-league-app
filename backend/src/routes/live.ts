@@ -3,7 +3,7 @@ import {
   startMatchGenerator,
   type PendingMatch
 } from '../utils/matchGenerator.js'
-import { resolvePrediction } from '../services/predictionService.js'
+import { resolvePrediction } from '../services/prediction/predictionService.js'
 import type { Match } from '../types/rps.js'
 import { getFlashEventForUser } from '../services/flashEventService.js'
 import { logger } from '../utils/logger.js'
@@ -12,7 +12,10 @@ import {
   getActiveFestival,
   getFestivalLockoutRemaining
 } from '../services/festivalService.js'
-import { getGlobalEventState, startGlobalEventScheduler } from '../services/globalEventService.js'
+import {
+  getGlobalEventState,
+  startGlobalEventScheduler
+} from '../services/globalEventService.js'
 import {
   startScheduler as startWorldBossScheduler,
   registerExternalSystems,
@@ -62,7 +65,6 @@ router.get('/festival-state', (req, res) => {
 router.get('/global-event-state', (_req, res) => {
   res.json(getGlobalEventState())
 })
-
 
 type SSEClient = (event: string, data: string) => void
 const clients = new Set<SSEClient>()

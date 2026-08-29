@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import request from 'supertest'
 import express from 'express'
-import pool from '../utils/db.js'
-import * as matchService from '../services/matchService.js'
+import pool from '../../utils/db.js'
+import * as matchService from '../../services/matchService.js'
 import type { GenerativeModel } from '@google/generative-ai'
 import {
   getOracleState,
   resetOracle,
   hasUserUsedOracle,
   consumeOracleForUser
-} from '../services/oracleProphecyService.js'
+} from '../../services/oracleProphecyService.js'
 
 type DbQueryResult = Awaited<ReturnType<typeof pool.query>>
 type MatchesReturnType = Awaited<
@@ -20,7 +20,7 @@ const { mockGenerateContent } = vi.hoisted(() => ({
   mockGenerateContent: vi.fn()
 }))
 
-vi.mock('../utils/logger.js', () => ({
+vi.mock('../../utils/logger.js', () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
@@ -39,11 +39,11 @@ vi.mock('@google/generative-ai', () => ({
   })
 }))
 
-vi.mock('../services/matchService.js', () => ({
+vi.mock('../../services/matchService.js', () => ({
   getLatestMatches: vi.fn()
 }))
 
-import oracleRouter from '../routes/oracle.js'
+import oracleRouter from '../../routes/oracle.js'
 
 const app = express()
 app.use(express.json())
