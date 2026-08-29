@@ -34,6 +34,7 @@ Frontend verification uses Vitest and React Testing Library to ensure correct re
 - **Idle Bet Hook**: Tests early-return guard conditions (including document visibility, eligibility, processing state, and user validation), match expiration boundary behavior, idle-side selection, and prediction state transitions during asynchronous API interactions.
 - **Neon Paradise Bonus Stages**: Verifies that all nine bonus stage components render correctly.
 - **Neon Paradise Container**: Verifies inactive-state rendering, correct bonus stage selection, completed reward rendering, and reward collection state clearing.
+- **Match Components**: Verifies prediction success, failure and timeout flows, match rendering, prediction results, loading states, pagination boundaries, and Rock-Paper-Scissors winner logic.
 
 ---
 
