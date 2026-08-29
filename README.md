@@ -174,8 +174,8 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 
 ## 📋 Overview
 
-- High-frequency match system (5s intervals, 17,000+ daily events)
-- Massive Match History: Optimized to handle and query a dataset of 10,000+ matches.
+- High-frequency match system (5s intervals, 17,000+ daily events, 3M+ matches processed)
+- Match History: Optimized retrieval and rendering across 10,000+ retained match records
 - Unified Ranking Engine: Dual leaderboards for Players and Predictors with deep-linkable URL state, supporting dynamic time-filtering (Daily/Weekly/All-Time) and multi-metric sorting (Points, Gained, Peak, Win Rate).
 - AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
@@ -488,14 +488,14 @@ Animated LiveActivityFeed
 
 | Layer | Stack |
 |-------|-------|
-| Database | Supabase PostgreSQL (Validated on 10k+ record datasets) |
+| Database | Supabase PostgreSQL |
 | Frontend | Next.js, React, TypeScript, Tailwind CSS |
 | State Management | Zustand (game, user, ui, popup queue) |
 | Backend | Node.js, Express, TypeScript, Google Gemini API |
 | Real-time | Server-Sent Events via `/api/live` |
-| Database | Supabase PostgreSQL |
 | Testing | Vitest, React Testing Library |
-| Match system | Custom generator feeding SSE stream |
+| Match system | Custom match generator with persistent 5-second match scheduling |
+| Prediction engine | Transactional prediction services with concurrency-safe resolution |
 | Analytics | UTM attribution tracking, aggregated live statistics, admin dashboards |
 
 ### System Flow
@@ -521,9 +521,10 @@ graph LR
 
 - **Zero-friction onboarding**: Instant anonymous play with random nickname generation
 - **SSE over WebSockets**: Chosen for simplicity, lower overhead, and better serverless compatibility
+- **Transactional prediction resolution**: Centralized prediction processing with atomic database operations and concurrency-safe state transitions
 - **Concurrency-aware event stream**: Guaranteed stability and zero overlap between real user bets and demo traffic
 - **Profile recovery system** for cross-device portability
-- **Mock match generator** for self-contained deployment
+- **Custom match generator**: Self-contained server-side match generation with persistent match records and sequential execution
 - **Production-hardened AI**: Resilient, grounded, and rate-limited analytics engine
 - **Single-tab enforcement**: BroadcastChannel detects duplicate tabs, closes the redundant SSE connection, and surfaces a non-blocking in-app notice.
 
@@ -542,6 +543,12 @@ Designed a non-blocking feed that prioritizes real user actions over simulated d
 
 **Real-Time Connection Guarding & State Monitoring**
 Engineered a robust connection-state monitor to manage "stale" event streams and intermittent network drops. Implemented heartbeat tracking and active status messaging to ensure seamless UI transitions and zero-data-loss during session interruptions.
+
+**Prediction resolution under concurrent requests**
+
+The prediction pipeline was refactored into a transactional service architecture to ensure that balance updates, prediction records, match outcomes, bonuses, streaks, and related state changes are resolved as a single consistent operation.
+
+Centralizing the resolution flow prevents individual API paths from independently mutating shared game state and provides a clear transactional boundary for concurrent predictions. This makes the prediction engine easier to reason about, test, and extend while preserving consistency under production load.
 
 **Handling Extreme Numbers (Quadrillions → Vigintillions)**  
 JavaScript Number (IEEE 754) loses integer precision beyond approximately 9 quadrillion (2⁵³−1). In a high-frequency betting system with compounding multipliers, this limit was reached quickly and began corrupting calculations across the stack.

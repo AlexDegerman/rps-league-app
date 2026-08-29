@@ -1,3 +1,4 @@
+import type { PoolClient } from "pg"
 import pool from "../utils/db.js"
 
 type OracleState = {
@@ -50,10 +51,15 @@ export async function hasUserUsedOracle(userId: string): Promise<boolean> {
   return row.oracle_used_date === state.date
 }
 
-export async function consumeOracleForUser(userId: string): Promise<void> {
+export async function consumeOracleForUser(
+  userId: string,
+  client?: PoolClient
+): Promise<void> {
   const state = getOracleState()
-  await pool.query(
-    `UPDATE users SET oracle_used_date = $1 WHERE user_id = $2`,
-    [state.date, userId]
-  )
+  const db = client ?? pool
+  await db.query(`UPDATE users SET oracle_used_date = $1 WHERE user_id = $2`, [
+    state.date,
+    userId
+  ])
 }
+

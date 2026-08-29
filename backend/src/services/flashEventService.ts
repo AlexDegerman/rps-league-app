@@ -114,6 +114,14 @@ export const consumeFlashBetForUser = (userId: string): boolean => {
   return false
 }
 
+export const restoreFlashEventForUser = (
+  userId: string,
+  snapshot: FlashEventState | null
+): void => {
+  if (!snapshot) return
+  _userFlashEvents.set(userId, snapshot)
+}
+
 export const refillAllFlashEvents = async (defaultType: FlashEventType) => {
   const expiry = Date.now() + 45000
 

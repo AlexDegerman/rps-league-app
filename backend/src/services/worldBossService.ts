@@ -5,7 +5,6 @@ import { isGlobalEventBlocking } from './globalEventService.js'
 // Feature flag
 const WORLD_BOSS_ENABLED = true
 
-// Types
 export type WorldBossType = 'HEXURION' | 'ORPHION' | 'FRACTURON' | 'APEXION'
 export type WorldBossPhase =
   | 'IDLE'
