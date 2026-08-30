@@ -203,121 +203,129 @@ export default function OracleVisionStage() {
     }
   }
 
-  return (
-    <div className="stage-container stage-oracle-vision">
-      <div className="stage-title g-uqg-s4 no-pseudo">🔮 ORACLE VISION</div>
-
-      <div className="ov-seq-counter">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className={[
-              'ov-seq-pip',
-              i < seqIndex ? 'ov-seq-done' : '',
-              i === seqIndex ? 'ov-seq-current' : '',
-              i > seqIndex ? 'ov-seq-future' : ''
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          />
-        ))}
-        <span className="ov-seq-label">Sequence {seqIndex + 1} / 5</span>
-      </div>
-
-      {phase === 'show' && (
-        <div className="ov-show-phase">
-          <p className="ov-show-label">Memorise this sequence</p>
-          <div className="ov-show-glyphs">
-            {currentSeq.map((gi, pos) => (
-              <div key={pos} className="ov-show-glyph">
-                {GLYPHS[gi]}
-              </div>
-            ))}
-          </div>
-          <button
-            onClick={startInputPhase}
-            className="mt-6 w-full py-3.5 px-6 bg-linear-to-r from-indigo-600 to-violet-600 text-white font-bold text-base tracking-wider rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.4)] active:scale-[0.98] transition-all cursor-pointer"
-          >
-            Start Sequence
-          </button>
+    return (
+      <div className="stage-container stage-oracle-vision">
+        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-uqg-s4 no-pseudo">
+          🔮 ORACLE VISION
         </div>
-      )}
 
-      {phase === 'between' && (
-        <div className="ov-between">
-          <p className="ov-between-label">
-            ✅ Sequence complete. Next incoming
-          </p>
-        </div>
-      )}
-
-      {phase === 'input' && (
-        <>
-          <div className="ov-timer-bar">
+        <div className="flex items-center gap-2 flex-wrap justify-center">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
-              className="ov-timer-fill"
-              style={{ width: `${(timeLeft / 8) * 100}%` }}
+              key={i}
+              className={`w-2.5 h-2.5 rounded-full transition-[background] duration-200 ${
+                i < seqIndex
+                  ? 'bg-[#00cc44]'
+                  : i === seqIndex
+                    ? 'bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.7)]'
+                    : 'bg-[rgba(255,255,255,0.1)]'
+              }`}
             />
-          </div>
-          <p className="ov-timer-label">{timeLeft}s</p>
-
-          <div className="ov-progress-dots">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className={[
-                  'ov-dot',
-                  i < inputProgress.length ? 'ov-dot-filled' : '',
-                  feedback === 'correct' && i === inputProgress.length - 1
-                    ? 'ov-dot-correct'
-                    : '',
-                  feedback === 'wrong' ? 'ov-dot-wrong' : ''
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              />
-            ))}
-          </div>
-
-          {/* 4×4 glyph grid */}
-          <div className="ov-grid">
-            {GLYPHS.map((glyph, gi) => (
-              <button
-                key={gi}
-                onClick={() => tapGlyph(gi)}
-                disabled={loading}
-                className={[
-                  'ov-glyph-btn',
-                  feedback === 'correct' &&
-                  gi === inputProgress[inputProgress.length - 1]
-                    ? 'ov-glyph-correct'
-                    : ''
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                {glyph}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
-      {phase === 'terminal' && (
-        <div className="stage-result">
-          <p className="stage-resolving">Collecting reward...</p>
+          ))}
+          <span className="text-[0.72rem] text-slate-500">
+            Sequence {seqIndex + 1} / 5
+          </span>
         </div>
-      )}
 
-      {phase === 'input' && (
-        <p className="ov-floor-reminder">
-          Floor if you stop now: +{SEQ_PAYOUTS[seqIndex] ?? 2}× ·{' '}
-          {
-            formatPoints(bonusLastBet * BigInt(SEQ_PAYOUTS[seqIndex] ?? 2))
-              .display
-          }
-        </p>
-      )}
-    </div>
-  )
+        {phase === 'show' && (
+          <div className="flex flex-col items-center gap-3">
+            <p className="text-[0.8rem] text-slate-400">
+              Memorise this sequence
+            </p>
+            <div className="flex gap-3">
+              {currentSeq.map((gi, pos) => (
+                <div key={pos} className="ov-show-glyph">
+                  {GLYPHS[gi]}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={startInputPhase}
+              className="mt-6 w-full py-3.5 px-6 bg-linear-to-r from-indigo-600 to-violet-600 text-white font-bold text-base tracking-wider rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.4)] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              Start Sequence
+            </button>
+          </div>
+        )}
+
+        {phase === 'between' && (
+          <div className="flex items-center justify-center min-h-20">
+            <p className="text-[0.85rem] text-green-500 font-bold">
+              ✅ Sequence complete. Next incoming
+            </p>
+          </div>
+        )}
+
+        {phase === 'input' && (
+          <>
+            <div className="ov-timer-bar">
+              <div
+                className="ov-timer-fill"
+                style={{ width: `${(timeLeft / 8) * 100}%` }}
+              />
+            </div>
+            <p className="text-[0.75rem] text-slate-500 self-end">
+              {timeLeft}s
+            </p>
+
+            <div className="flex gap-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-3 h-3 rounded-full border-2 transition-[background,border-color] duration-150 ${
+                    feedback === 'wrong'
+                      ? 'bg-red-500 border-red-500'
+                      : feedback === 'correct' && i === inputProgress.length - 1
+                        ? 'bg-green-500 border-green-500'
+                        : i < inputProgress.length
+                          ? 'bg-[#a855f7] border-[#a855f7]'
+                          : 'border-[rgba(255,255,255,0.2)]'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* 4×4 glyph grid */}
+            <div className="grid grid-cols-4 gap-2 w-full max-w-[320px]">
+              {GLYPHS.map((glyph, gi) => (
+                <button
+                  key={gi}
+                  onClick={() => tapGlyph(gi)}
+                  disabled={loading}
+                  className={[
+                    'ov-glyph-btn',
+                    feedback === 'correct' &&
+                    gi === inputProgress[inputProgress.length - 1]
+                      ? 'ov-glyph-correct'
+                      : ''
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  {glyph}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {phase === 'terminal' && (
+          <div className="flex flex-col items-center gap-2 mt-4 w-full">
+            <p className="text-[0.8rem] text-slate-400 font-semibold animate-[np-pulse_1.5s_infinite_ease-in-out]">
+              Collecting reward...
+            </p>
+          </div>
+        )}
+
+        {phase === 'input' && (
+          <p className="text-[0.7rem] text-slate-600 text-center">
+            Floor if you stop now: +{SEQ_PAYOUTS[seqIndex] ?? 2}x ·{' '}
+            {
+              formatPoints(bonusLastBet * BigInt(SEQ_PAYOUTS[seqIndex] ?? 2))
+                .display
+            }
+          </p>
+        )}
+      </div>
+    )
 }

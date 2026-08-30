@@ -70,14 +70,14 @@ export default function NeonParadiseContainer() {
 
   return (
     <NeonSoundContext.Provider value={soundApi}>
-      <div className="neon-paradise-container pt-3!">
-        <div className="neon-paradise-header flex items-center justify-between gap-2">
+      <div className="w-full bg-white border border-slate-200 rounded-3xl shadow-[0_10px_25px_-5px_rgba(0,0,0,0.05),0_8px_10px_-6px_rgba(0,0,0,0.05)] flex flex-col items-center p-6 pt-3! relative animate-[np-fade-in_0.3s_ease-out_forwards]">
+        <div className="w-full flex items-center justify-between gap-2 text-center pb-3 border-b border-slate-100 mb-4">
           <div
             className="hidden sm:block w-10.5 shrink-0 invisible"
             aria-hidden="true"
           />
 
-          <div className="banner-system whitespace-nowrap sm:text-center">
+          <div className="text-xl font-[850] tracking-wider text-indigo-600 whitespace-nowrap sm:text-center">
             🌴 NEON PARADISE
           </div>
 
@@ -86,16 +86,15 @@ export default function NeonParadiseContainer() {
 
         {/* Status bar */}
         {activeBonusStage === 'ORACLE_VISION' && !bonusFinalPayout && (
-          <div className="bonus-status-bar">
-            <span className="bonus-reward-label">
+          <div className="w-full flex justify-between items-center px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl mb-6">
+            <span className="text-[0.78rem] text-slate-500 font-bold uppercase tracking-wider">
               Current Reward:{' '}
-              <span className="bonus-reward-value">
+              <span className="text-green-600 font-extrabold ml-1">
                 {formatPoints(accumulatedBonusReward).display}
               </span>
             </span>
           </div>
         )}
-
         {bonusFinalPayout !== null ? (
           <div className="flex flex-col items-center gap-6 py-6 w-full animate-in zoom-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col items-center text-center gap-1.5">

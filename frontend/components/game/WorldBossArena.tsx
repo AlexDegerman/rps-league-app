@@ -230,9 +230,9 @@ export default memo(function WorldBossArena({
   const lastHitResult = useGameStore((s) => s.lastBossHitResult)
   const lastBossHitDamage = useGameStore((s) => s.lastBossHitDamage)
   const clearLastHit = useGameStore((s) => s.clearLastBossHitResult)
-const participantCount = useGameStore((s) => s.worldBossParticipantCount)
-const { playBossAttack, playBossTakeDmg } = useSound()
-const [animState, setAnimState] = useState<BossAnimState>('assembling')
+  const participantCount = useGameStore((s) => s.worldBossParticipantCount)
+  const { playBossAttack, playBossTakeDmg } = useSound()
+  const [animState, setAnimState] = useState<BossAnimState>('assembling')
   const [timeLeft, setTimeLeft] = useState(60)
   const [showMissFlash, setShowMissFlash] = useState(false)
   const [showHitFlash, setShowHitFlash] = useState(false)
@@ -243,11 +243,22 @@ const [animState, setAnimState] = useState<BossAnimState>('assembling')
   const [strikeFlash, setStrikeFlash] = useState(false)
   const modelAreaRef = useRef<HTMLDivElement>(null)
   const animLockRef = useRef(false)
+  const hpPctRef = useRef(hpPct)
+
+  useEffect(() => {
+    hpPctRef.current = hpPct
+  }, [hpPct])
 
   useEffect(() => {
     const id = setTimeout(() => setAnimState('idle'), 1400)
     return () => clearTimeout(id)
   }, [])
+
+  useEffect(() => {
+    if (hpPct <= 0 && bossMaxHp > 0) {
+      setAnimState('dying')
+    }
+  }, [hpPct, bossMaxHp])
 
   useEffect(() => {
     if (!endsAt) return
@@ -271,7 +282,7 @@ const [animState, setAnimState] = useState<BossAnimState>('assembling')
 
   const triggerHitAnim = useCallback(
     (result: 'HIT' | 'MISS', damage: number = 1) => {
-      if (!bossType || animLockRef.current) return
+      if (!bossType || animLockRef.current || hpPctRef.current <= 0) return
       animLockRef.current = true
 
       if (result === 'HIT') {
@@ -287,9 +298,11 @@ const [animState, setAnimState] = useState<BossAnimState>('assembling')
         })
 
         setTimeout(() => {
+          if (hpPctRef.current <= 0) return
           setShowHitFlash(false)
           setAnimState('pain')
           setTimeout(() => {
+            if (hpPctRef.current <= 0) return
             setAnimState('idle')
             animLockRef.current = false
           }, 280)
@@ -300,6 +313,7 @@ const [animState, setAnimState] = useState<BossAnimState>('assembling')
         setOwnResultText({ text: 'BLOCKED', cls: 'miss' })
 
         setTimeout(() => {
+          if (hpPctRef.current <= 0) return
           setShowMissFlash(false)
           animLockRef.current = false
         }, 400)
@@ -330,48 +344,42 @@ const [animState, setAnimState] = useState<BossAnimState>('assembling')
     bossMaxHp > 0 ? `${((dmg / bossMaxHp) * 100).toFixed(1)}%` : `${dmg}`
 
   return (
-    <div className="world-boss-arena overflow-visible!">
+    <div className="relative w-full bg-[radial-gradient(ellipse_at_50%_60%,rgba(20,10,40,0.98)_0%,rgba(5,3,15,1)_100%)] rounded-3xl border border-[rgba(168,85,247,0.2)] flex flex-col gap-2.5 p-3.5 overflow-hidden isolation-isolate before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_55%_35%_at_50%_75%,rgba(168,85,247,0.06)_0%,transparent_70%)] before:pointer-events-none before:z-[-1] before:animate-[arena-ambient_4s_ease-in-out_infinite]">
       {showMissFlash && <div className="boss-miss-flash" />}
 
       {/* Top row: HP + sound control */}
-      <div className="boss-top-row">
-        <div className="boss-hp-section">
-          <div className="boss-type-label">{bossType}</div>
-          <div className="boss-hp-bar">
+      <div className="flex items-start gap-2.5 w-full">
+        <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+          <div className="text-[0.58rem] font-black uppercase tracking-[0.28em] text-[rgba(216,180,254,0.75)]">
+            {bossType}
+          </div>
+          <div className="h-2 w-full bg-[rgba(255,255,255,0.04)] rounded-full border border-[rgba(168,85,247,0.18)] overflow-hidden">
             <div
               className={`boss-hp-fill boss-${bossClass}`}
               style={{ width: `${displayHpPct}%` }}
             />
           </div>
-          <div className="boss-hp-pct">
+          <div className="text-[0.48rem] font-black uppercase tracking-[0.14em] text-[rgba(168,85,247,0.45)]">
             {bossMaxHp === 0
               ? '100% HP remaining'
               : `${Math.round(hpPct)}% HP remaining`}
           </div>
         </div>
 
-        <div className="boss-sound-area">
-          <SoundControlButton className="boss-sound-btn" />
+        <div className="shrink-0 flex items-start">
+          <SoundControlButton className="p-1.75 rounded-full border border-[rgba(168,85,247,0.25)] bg-[rgba(168,85,247,0.08)] text-[rgba(216,180,254,0.7)] cursor-pointer transition-[background,color] duration-150 hover:bg-[rgba(168,85,247,0.18)] hover:text-[rgba(216,180,254,1)] flex items-center justify-center" />
         </div>
       </div>
 
       {/* Mid row: boss model + damage ranking */}
       <div
-        className="boss-mid-row"
-        style={{ display: 'flex', alignItems: 'center', padding: '2px 0' }}
+        className="flex items-center gap-2.5 w-full"
+        style={{ padding: '2px 0' }}
       >
         <div
-          className="boss-model-area"
+          className="flex-1 min-w-0 flex items-center justify-center relative overflow-hidden w-full"
           ref={modelAreaRef}
-          style={{
-            height: '100px',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-            width: '100%'
-          }}
+          style={{ height: '100px' }}
         >
           <BossModel bossType={bossType} animState={animState} />
 
@@ -387,83 +395,44 @@ const [animState, setAnimState] = useState<BossAnimState>('assembling')
         </div>
 
         <div
-          className="boss-ranking-panel"
+          className="flex flex-col gap-1.5 self-center shrink-0"
           style={{ minWidth: '80px', width: 'auto' }}
         >
-          <div className="boss-ranking-title">⚔ DMG RANK</div>
+          <div className="text-[0.46rem] font-black uppercase tracking-[0.2em] text-[rgba(168,85,247,0.4)] text-center">
+            ⚔ DMG RANK
+          </div>
           {topDamagers.length > 0 ? (
             topDamagers.map((d) => (
               <div
                 key={d.userId}
-                className="boss-rank-row top-rank"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  lineHeight: '1.1',
-                  gap: '4px',
-                  width: '100%'
-                }}
+                className="flex items-center justify-center gap-1 px-1.75 py-1 bg-[rgba(168,85,247,0.12)] border border-[rgba(168,85,247,0.32)] rounded-[10px] text-[0.54rem] font-black text-[#d8b4fe] uppercase tracking-wider w-full leading-[1.1]"
               >
-                <span className="boss-rank-num" style={{ flexShrink: 0 }}>
+                <span className="text-[0.58rem] opacity-80 shrink-0">
                   #{d.rank}
                 </span>
                 <span
-                  className="boss-rank-name"
-                  style={{
-                    fontSize: '0.52rem',
-                    opacity: 0.7,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.02em',
-                    display: 'inline-block',
-                    maxWidth: 'clamp(42px, 20vw - 35px, 140px)'
-                  }}
+                  className="text-[0.52rem] opacity-70 whitespace-nowrap overflow-hidden text-ellipsis uppercase tracking-[0.02em] inline-block"
+                  style={{ maxWidth: 'clamp(42px, 20vw - 35px, 140px)' }}
                   title={d.nickname || 'Player'}
                 >
                   {d.nickname || 'Player'}
                 </span>
-                <span
-                  className="boss-rank-dmg"
-                  style={{
-                    flexShrink: 0,
-                    fontSize: '0.52rem'
-                  }}
-                >
+                <span className="shrink-0 text-[0.52rem] tabular-nums">
                   {fmtDmgPct(d.damageDealt)}
                 </span>
               </div>
             ))
           ) : (
-            <div className="boss-rank-row">
-              <span
-                style={{
-                  fontSize: '0.44rem',
-                  opacity: 0.4,
-                  textTransform: 'uppercase'
-                }}
-              >
+            <div className="flex items-center justify-between gap-1 px-1.75 py-1 bg-[rgba(168,85,247,0.06)] border border-[rgba(168,85,247,0.12)] rounded-[10px] text-[0.54rem] font-black text-[rgba(216,180,254,0.5)] uppercase tracking-wider">
+              <span className="text-[0.44rem] opacity-40 uppercase">
                 No hits yet
               </span>
             </div>
           )}
           {myRank !== null && myRank > 3 && (
-            <div
-              className="boss-rank-row my-rank"
-              style={{ display: 'flex', alignItems: 'center' }}
-            >
-              <span className="boss-rank-num">#{myRank}</span>
-              <span
-                className="boss-rank-name"
-                style={{
-                  fontSize: '0.52rem',
-                  opacity: 0.8,
-                  textTransform: 'uppercase',
-                  margin: '0 4px'
-                }}
-              >
+            <div className="flex items-center gap-1 px-1.75 py-1 bg-[rgba(34,211,238,0.06)] border border-[rgba(34,211,238,0.35)] rounded-[10px] text-[0.54rem] font-black text-[#67e8f9] uppercase tracking-wider">
+              <span className="text-[0.58rem] opacity-80">#{myRank}</span>
+              <span className="text-[0.52rem] opacity-80 uppercase mx-1">
                 You
               </span>
             </div>
@@ -472,23 +441,31 @@ const [animState, setAnimState] = useState<BossAnimState>('assembling')
       </div>
 
       {/* Footer: participant count + strike count + countdown */}
-      <div className="boss-footer-row">
-        <div className="boss-strike-counter">
+      <div className="flex items-center justify-between w-full pt-0.5 border-t border-[rgba(168,85,247,0.08)]">
+        <div className="flex flex-col items-start gap-px">
           {/* participantCount = unique players who have predicted at least once */}
           <span className={`boss-strike-number ${strikeFlash ? 'bump' : ''}`}>
             {(participantCount ?? 0).toLocaleString()}
           </span>
-          <span className="boss-strike-label">Players Striking</span>
+          <span className="text-[0.46rem] font-black uppercase tracking-[0.2em] text-[rgba(216,180,254,0.35)]">
+            Players Striking
+          </span>
         </div>
-        <div className="boss-strike-counter">
+        <div className="flex flex-col items-start gap-px">
           <span className={`boss-strike-number ${strikeFlash ? 'bump' : ''}`}>
             {strikeCount.toLocaleString()}
           </span>
-          <span className="boss-strike-label">Total Strikes</span>
+          <span className="text-[0.46rem] font-black uppercase tracking-[0.2em] text-[rgba(216,180,254,0.35)]">
+            Total Strikes
+          </span>
         </div>
-        <div className="boss-countdown">
-          <span className="boss-countdown-num">{timeLeft}</span>
-          <span className="boss-strike-label">seconds left</span>
+        <div className="flex flex-col items-end gap-px">
+          <span className="text-2xl font-black text-[rgba(216,180,254,0.85)] tabular-nums leading-none">
+            {timeLeft}
+          </span>
+          <span className="text-[0.46rem] font-black uppercase tracking-[0.2em] text-[rgba(168,85,247,0.3)]">
+            seconds left
+          </span>
         </div>
       </div>
     </div>

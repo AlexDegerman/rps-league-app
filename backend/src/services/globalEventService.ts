@@ -1,10 +1,7 @@
 import { isWorldBossActive, isWorldBossBlocking } from './worldBossService.js'
 import { countActiveSessions } from './bonusStageService.js'
 import type { GlobalEventType, GlobalEventState, GlobalEventBuffResult } from '../types/globalEvents.js'
-import { GLOBAL_EVENT_QUIET_DURATION_MS, GLOBAL_EVENT_WARNING_DURATION_MS, GLOBAL_EVENT_ACTIVE_DURATION_MS, GLOBAL_EVENT_COOLDOWN_MIN_MS, GLOBAL_EVENT_COOLDOWN_MAX_MS, EVENT_WEIGHTS, ORACLE_WARNING_MESSAGES, ORACLE_WARNING_SPEECH } from '../constants/globalEvents.js'
-
-// Feature toggle
-const ENABLE_GLOBAL_EVENTS = true
+import { GLOBAL_EVENT_QUIET_DURATION_MS, EVENT_WEIGHTS, GLOBAL_EVENT_WARNING_DURATION_MS, GLOBAL_EVENT_ACTIVE_DURATION_MS, ORACLE_WARNING_MESSAGES, ORACLE_WARNING_SPEECH, GLOBAL_EVENT_COOLDOWN_MIN_MS, GLOBAL_EVENT_COOLDOWN_MAX_MS, ENABLE_GLOBAL_EVENTS } from '../constants/globalEvents.js'
 
 type Broadcast = (event: string, data: string) => void
 

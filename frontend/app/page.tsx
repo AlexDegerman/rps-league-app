@@ -1005,11 +1005,12 @@ export default function HomePage() {
     es.addEventListener('world_boss_end', (event) => {
       const data = JSON.parse(event.data)
       if (data.outcome === 'DEFEAT') playBossDie(data.bossType)
+      const delayMs = data.outcome === 'DEFEAT' ? 1500 : 1000
       // Delay UI swap so chest animation plays first
       setTimeout(() => {
         clearWorldBoss()
         setWorldBossUIActive(false)
-      }, 1000)
+      }, delayMs)
       const outcomeMsg =
         data.outcome === 'DEFEAT'
           ? `${data.bossType} DEFEATED, Rewards incoming!`

@@ -169,7 +169,7 @@ export default function DoubleDownStage() {
           <button
             onClick={() => sendAction('CLAIM')}
             disabled={loading}
-            className="stage-claim-btn don-claim-btn w-full sm:w-auto"
+            className="min-h-12 min-w-40 px-6 rounded-full bg-linear-to-br from-green-600 to-green-500 text-white font-extrabold text-[0.88rem] tracking-[0.06em] border-none cursor-pointer shadow-[0_4px_6px_-1px_rgba(22,163,74,0.2)] transition-[background-color,transform,box-shadow] duration-150 w-full sm:w-auto"
           >
             Claim Winnings
           </button>

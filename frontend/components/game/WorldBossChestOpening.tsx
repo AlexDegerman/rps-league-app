@@ -150,23 +150,17 @@ const ChestBox = memo(function ChestBox({
       >
         {/* Lid */}
         <div
-          className="absolute top-0 left-0 right-0 h-8 rounded-t-xl border-b flex items-center justify-center"
+          className={`absolute top-0 left-0 right-0 h-8 rounded-t-xl border-b flex items-center justify-center origin-top ${isRainbow ? 'animate-rainbow-chest-lid' : ''}`}
           style={{
             background: style.bg,
             borderColor: style.border,
-            transformOrigin: 'top center',
             transform: isOpen ? 'rotateX(-110deg)' : 'rotateX(0deg)',
             transition: 'transform 0.5s cubic-bezier(0.22,1,0.36,1)'
           }}
         >
           <span
-            style={{
-              fontSize: '0.45rem',
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              letterSpacing: '.15em',
-              color: style.border
-            }}
+            className="text-[0.45rem] font-black uppercase tracking-[0.15em]"
+            style={{ color: style.border }}
           >
             {isTwin ? 'BONUS CHEST' : style.label}
           </span>
@@ -174,14 +168,7 @@ const ChestBox = memo(function ChestBox({
         {/* Point amount */}
         <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-0.5">
           {isOpen && (
-            <span
-              style={{
-                fontSize: '1rem',
-                fontWeight: 900,
-                color: '#86efac',
-                textShadow: '0 0 12px rgba(134,239,172,.9)'
-              }}
-            >
+            <span className="text-base font-black text-[#86efac] [text-shadow:0_0_12px_rgba(134,239,172,0.9)]">
               +{display}
             </span>
           )}
@@ -192,35 +179,15 @@ const ChestBox = memo(function ChestBox({
       {isOpen && relicDrop && (
         <div
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${
-            isRainbow ? 'animate-rainbow-relic-badge' : ''
-          }`}
-          style={
             isRainbow
-              ? undefined
-              : {
-                  borderColor: 'rgba(168,85,247,.4)',
-                  background: 'rgba(168,85,247,.1)'
-                }
-          }
+              ? 'animate-rainbow-relic-badge'
+              : 'border-[rgba(168,85,247,0.4)] bg-[rgba(168,85,247,0.1)]'
+          }`}
         >
           <span
-            className={isRainbow ? 'animate-rainbow-text' : ''}
-            style={
-              isRainbow
-                ? {
-                    fontSize: '0.55rem',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    letterSpacing: '.12em'
-                  }
-                : {
-                    fontSize: '0.55rem',
-                    fontWeight: 900,
-                    color: '#d8b4fe',
-                    textTransform: 'uppercase',
-                    letterSpacing: '.12em'
-                  }
-            }
+            className={`text-[0.55rem] font-black uppercase tracking-[0.12em] ${
+              isRainbow ? 'animate-rainbow-text' : 'text-[#d8b4fe]'
+            }`}
           >
             🧿 {relicDrop.rarity}: {relicDrop.name}
           </span>
@@ -288,20 +255,9 @@ export default function WorldBossChestOpening({
   }, [phase, onComplete])
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,.85)', backdropFilter: 'blur(8px)' }}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm">
       <div className="flex flex-col items-center gap-6">
-        <p
-          style={{
-            fontSize: '.7rem',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            letterSpacing: '.3em',
-            color: 'rgba(216,180,254,.7)'
-          }}
-        >
+        <p className="text-[0.7rem] font-black uppercase tracking-[0.3em] text-[rgba(216,180,254,0.7)]">
           Encounter Reward
         </p>
 
@@ -337,17 +293,7 @@ export default function WorldBossChestOpening({
 
         <button
           onClick={onComplete}
-          style={{
-            fontSize: '.55rem',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            letterSpacing: '.2em',
-            color: 'rgba(168,85,247,.4)',
-            padding: '6px 16px',
-            cursor: 'pointer',
-            background: 'transparent',
-            border: 'none'
-          }}
+          className="text-[0.55rem] font-black uppercase tracking-[0.2em] text-[rgba(168,85,247,0.4)] px-4 py-1.5 cursor-pointer bg-transparent border-none"
         >
           Skip
         </button>

@@ -2,13 +2,25 @@ import type { WorldBossType, ChestRarity, WorldBossState, DamagerEntry, Particip
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import { isGlobalEventBlocking } from './globalEventService.js'
+import {
+  WORLD_BOSS_ENCOUNTER_DURATION_MS,
+  WORLD_BOSS_QUIET_DURATION_MS,
+  WORLD_BOSS_WARNING_DURATION_MS,
+  WORLD_BOSS_COOLDOWN_MIN_MS,
+  WORLD_BOSS_COOLDOWN_MAX_MS,
+  BOSS_POOL,
+  BOSS_WARNING_MESSAGES,
+  CHEST_RELIC_DROP_CHANCE,
+  CHEST_RELIC_RARITY_WEIGHTS,
+  WORLD_BOSS_ENABLED
+} from '../constants/worldBoss.js'
 
 type Broadcast = (event: string, data: string) => void
 
 // Boss relic definitions
 // Boss-exclusive relics can only be obtained from world boss chests.
 import { RELICS } from '../constants/relics.js'
-import { WORLD_BOSS_ENCOUNTER_DURATION_MS, WORLD_BOSS_QUIET_DURATION_MS, WORLD_BOSS_WARNING_DURATION_MS, WORLD_BOSS_COOLDOWN_MIN_MS, WORLD_BOSS_COOLDOWN_MAX_MS, BOSS_POOL, BOSS_WARNING_MESSAGES, CHEST_RELIC_DROP_CHANCE, CHEST_RELIC_RARITY_WEIGHTS, WORLD_BOSS_ENABLED } from '../constants/worldBoss.js'
+
 
 // Defeats always grant Mythical chests.
 // Retreat rewards scale with the percentage of HP depleted.
@@ -528,9 +540,12 @@ const resolveEncounter = async (
   resetEncounterState()
   resumeExternalSystems()
 
-  distributeRewards(rewardSnapshot, baseChestRarity, broadcast).catch((err) =>
-    logger.error('worldBossService: distributeRewards failed', err)
-  )
+  const rewardDelayMs = outcome === 'DEFEAT' ? 1500 : 1000
+  setTimeout(() => {
+    distributeRewards(rewardSnapshot, baseChestRarity, broadcast).catch((err) =>
+      logger.error('worldBossService: distributeRewards failed', err)
+    )
+  }, rewardDelayMs)
 
   setTimeout(() => {
     _state.phase = 'COOLDOWN'

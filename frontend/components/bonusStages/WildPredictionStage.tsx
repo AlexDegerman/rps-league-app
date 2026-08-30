@@ -154,79 +154,87 @@ export default function WildPredictionStage() {
     0
   )
 
-  return (
-    <div className="stage-container stage-wild-prediction">
-      <div className="stage-title g-spqg no-pseudo">🃏 WILD PREDICTION</div>
-      <p className="stage-subtitle">
-        Flip all three cards. Combined value determines your reward
-      </p>
+    return (
+      <div className="stage-container stage-wild-prediction">
+        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-spqg no-pseudo">
+          🃏 WILD PREDICTION
+        </div>
+        <p className="text-[0.825rem] text-slate-500 text-center leading-[1.4] -mt-2">
+          Flip all three cards. Combined value determines your reward
+        </p>
 
-      <div className="card-row">
-        {[0, 1, 2].map((i) => {
-          const isFlipped = flipped[i]
-          const isAnimating = animating[i]
-          const cardValue = revealed[i]
-          const isNext = !flipped[i] && flipsCount < 3
-          const color = cardValue !== null ? CARD_COLOR[cardValue] : undefined
+        <div className="card-row">
+          {[0, 1, 2].map((i) => {
+            const isFlipped = flipped[i]
+            const isAnimating = animating[i]
+            const cardValue = revealed[i]
+            const isNext = !flipped[i] && flipsCount < 3
+            const color = cardValue !== null ? CARD_COLOR[cardValue] : undefined
 
-          return (
-            <div
-              key={i}
-              className={[
-                'card-flip-wrapper',
-                isAnimating ? 'card-flipping' : '',
-                isFlipped ? 'card-flipped' : '',
-                isNext ? 'card-next' : ''
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              onClick={() => flipCard(i)}
-              role="button"
-              tabIndex={isNext ? 0 : -1}
-              aria-label={`Flip card ${i + 1}`}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') flipCard(i)
-              }}
-            >
-              <div className="card-face card-back">
-                <span className="card-back-icon">✦</span>
-              </div>
-
+            return (
               <div
-                className="card-face card-front"
-                style={color ? { borderColor: color } : undefined}
+                key={i}
+                className={[
+                  'card-flip-wrapper',
+                  isAnimating ? 'card-flipping' : '',
+                  isFlipped ? 'card-flipped' : '',
+                  isNext ? 'card-next' : ''
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() => flipCard(i)}
+                role="button"
+                tabIndex={isNext ? 0 : -1}
+                aria-label={`Flip card ${i + 1}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') flipCard(i)
+                }}
               >
-                {cardValue !== null && (
-                  <>
-                    <span className="card-value-name" style={{ color }}>
-                      {CARD_NAMES[cardValue]}
-                    </span>
-                    <span className="card-value-mult" style={{ color }}>
-                      {CARD_MULT[cardValue]}
-                    </span>
-                  </>
-                )}
+                <div className="card-face card-back">
+                  <span className="text-[1.4rem] opacity-40">✦</span>
+                </div>
+
+                <div
+                  className="card-face card-front"
+                  style={color ? { borderColor: color } : undefined}
+                >
+                  {cardValue !== null && (
+                    <>
+                      <span
+                        className="text-[0.62rem] font-bold text-center leading-[1.2]"
+                        style={{ color }}
+                      >
+                        {CARD_NAMES[cardValue]}
+                      </span>
+                      <span
+                        className="text-[0.9rem] font-black mt-0.5"
+                        style={{ color }}
+                      >
+                        {CARD_MULT[cardValue]}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
+
+        {/* Running total */}
+        {flipsCount > 0 && flipsCount < 3 && (
+          <p className="text-[0.8rem] text-slate-400">
+            Combined so far: <strong>{total}×</strong>
+          </p>
+        )}
+
+        {/* Instruction */}
+        {flipsCount < 3 && !loading && (
+          <p className="text-[0.825rem] text-slate-500 text-center leading-[1.4] -mt-1">
+            {flipsCount === 0
+              ? 'Tap a card to begin'
+              : `Tap card ${flipsCount + 1} to continue`}
+          </p>
+        )}
       </div>
-
-      {/* Running total */}
-      {flipsCount > 0 && flipsCount < 3 && (
-        <p className="wp-running-total">
-          Combined so far: <strong>{total}×</strong>
-        </p>
-      )}
-
-      {/* Instruction */}
-      {flipsCount < 3 && !loading && (
-        <p className="stage-subtitle wp-instruction">
-          {flipsCount === 0
-            ? 'Tap a card to begin'
-            : `Tap card ${flipsCount + 1} to continue`}
-        </p>
-      )}
-    </div>
-  )
+    )
 }

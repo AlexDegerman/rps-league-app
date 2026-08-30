@@ -169,7 +169,9 @@ export default function TreasureVaultStage() {
         })}
       </div>
       {chestState === 'chosen' && (
-        <p className="stage-resolving">Opening chest...</p>
+        <p className="text-[0.8rem] text-slate-400 font-semibold animate-[np-pulse_1.5s_infinite_ease-in-out]">
+          Opening chest...
+        </p>
       )}
     </div>
   )

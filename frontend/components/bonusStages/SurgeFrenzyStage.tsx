@@ -312,30 +312,32 @@ export default function SurgeFrenzyStage() {
         ⚡ SURGE FRENZY
       </div>
 
-      <div className="sf-hud bg-slate-50! border border-slate-100! rounded-xl">
-        <div className="sf-timer">
-          <span className="sf-timer-label text-slate-500! font-bold">Time</span>
+      <div className="w-full flex justify-between px-3 py-2 bg-slate-50! border border-slate-100! rounded-xl gap-2">
+        <div className="flex flex-col items-center gap-[0.15rem]">
+          <span className="text-[0.62rem] text-slate-500! font-bold uppercase tracking-[0.06em]">
+            Time
+          </span>
           <span
-            className={`sf-timer-value text-slate-800! font-extrabold ${timeLeft <= 2 ? 'sf-timer-urgent text-red-600!' : ''}`}
+            className={`text-[1.3rem] text-slate-800! font-extrabold ${timeLeft <= 2 ? 'text-red-600! [text-shadow:0_0_6px_rgba(239,68,68,0.6)]' : ''}`}
           >
             {timeLeft.toFixed(1)}s
           </span>
         </div>
-        <div className="sf-combo">
-          <span className="sf-combo-label text-slate-500! font-bold">
+        <div className="flex flex-col items-center gap-[0.15rem]">
+          <span className="text-[0.62rem] text-slate-500! font-bold uppercase tracking-[0.06em]">
             Combo
           </span>
           <span
-            className={`sf-combo-value text-slate-800! font-extrabold ${combo >= 15 ? 'text-green-600!' : ''}`}
+            className={`text-[1.3rem] text-slate-800! font-extrabold ${combo >= 15 ? 'text-green-600!' : ''}`}
           >
             x{combo}
           </span>
         </div>
-        <div className="sf-mult">
-          <span className="sf-mult-label text-slate-500! font-bold">
+        <div className="flex flex-col items-center gap-[0.15rem]">
+          <span className="text-[0.62rem] text-slate-500! font-bold uppercase tracking-[0.06em]">
             Reward
           </span>
-          <span className="sf-mult-value text-green-600! font-extrabold">
+          <span className="text-[1.1rem] font-extrabold text-green-600!">
             +{currentMultiplier}x
           </span>
         </div>
@@ -420,11 +422,11 @@ export default function SurgeFrenzyStage() {
       )}
 
       {gameOver && (
-        <div className="stage-result">
-          <p className="sf-final-combo text-sm font-semibold text-slate-500">
+        <div className="flex flex-col items-center gap-2 mt-4 w-full">
+          <p className="text-[0.9rem] text-slate-400 font-semibold">
             Final combo: x{combo} → +{currentMultiplier}x
           </p>
-          <p className="stage-resolving text-xs text-slate-400 font-bold">
+          <p className="text-xs text-slate-400 font-bold animate-[np-pulse_1.5s_infinite_ease-in-out]">
             {loading ? 'Calculating reward...' : 'Collecting...'}
           </p>
         </div>

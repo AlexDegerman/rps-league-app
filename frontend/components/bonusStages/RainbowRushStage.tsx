@@ -115,101 +115,112 @@ export default function RainbowRushStage() {
   const finalSpectrum = spinsRevealed === 3 ? Math.floor(sum / 3) : null
   const finalTier = finalSpectrum !== null ? TIER_META[finalSpectrum] : null
 
-  return (
-    <div className="stage-container stage-rainbow-rush">
-      <div className="stage-title g-noqg no-pseudo">🌈 RAINBOW RUSH</div>
-      <p className="stage-subtitle">
-        Three spins. Average spectrum tier determines your reward
-      </p>
-
-      <div className="rr-slots">
-        {[0, 1, 2].map((i) => {
-          const value = spinResults[i]
-          const meta = value !== null ? TIER_META[value] : null
-          const isActive = i === spinsRevealed && spinning
-
-          return (
-            <div
-              key={i}
-              className={[
-                'rr-slot',
-                isActive ? 'rr-slot-spinning' : '',
-                value !== null ? 'rr-slot-revealed' : '',
-                i >= spinsRevealed && !spinning ? 'rr-slot-pending' : ''
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              style={meta ? { borderColor: meta.color } : undefined}
-            >
-              {isActive && <span className="rr-slot-spinner">🌀</span>}
-              {!isActive && meta && (
-                <>
-                  <span className="rr-slot-label" style={{ color: meta.color }}>
-                    {meta.label}
-                  </span>
-                  <span className="rr-slot-tier" style={{ color: meta.color }}>
-                    {value}
-                  </span>
-                </>
-              )}
-              {!isActive && value === null && (
-                <span className="rr-slot-empty">?</span>
-              )}
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Show remaining spins while the stage is active */}
-      {spinsRevealed < 3 && (
-        <p className="rr-counter">
-          Spins remaining: <strong>{3 - spinsRevealed}</strong>
-        </p>
-      )}
-
-      {/* Show the calculated final spectrum after all three spins */}
-      {finalTier && (
-        <div
-          className="rr-final-tier"
-          style={{ color: finalTier.color, borderColor: finalTier.color }}
-        >
-          <span>Final Spectrum: {finalTier.label}</span>
-          <span>+{finalTier.multiplier}×</span>
+    return (
+      <div className="stage-container stage-rainbow-rush">
+        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-noqg no-pseudo">
+          🌈 RAINBOW RUSH
         </div>
-      )}
+        <p className="text-[0.825rem] text-slate-500 text-center leading-[1.4] -mt-2">
+          Three spins. Average spectrum tier determines your reward
+        </p>
 
-      {/* Allow the player to trigger the next spin */}
-      {spinsRevealed < 3 && (
-        <button
-          onClick={triggerSpin}
-          disabled={loading || spinning}
-          className="rr-spin-btn"
-        >
-          {spinning ? 'Spinning...' : `Spin ${spinsRevealed + 1} of 3`}
-        </button>
-      )}
+        <div className="flex gap-3 justify-center">
+          {[0, 1, 2].map((i) => {
+            const value = spinResults[i]
+            const meta = value !== null ? TIER_META[value] : null
+            const isActive = i === spinsRevealed && spinning
 
-      {/* Show the complete reward multiplier reference */}
-      <div className="rr-payout-table">
-        {Object.entries(TIER_META).map(([tier, meta]) => (
+            return (
+              <div
+                key={i}
+                className={[
+                  'rr-slot',
+                  isActive ? 'rr-slot-spinning' : '',
+                  value !== null ? 'rr-slot-revealed' : '',
+                  i >= spinsRevealed && !spinning ? 'rr-slot-pending' : ''
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                style={meta ? { borderColor: meta.color } : undefined}
+              >
+                {isActive && <span className="text-[1.6rem]">🌀</span>}
+                {!isActive && meta && (
+                  <>
+                    <span
+                      className="text-[0.7rem] font-bold"
+                      style={{ color: meta.color }}
+                    >
+                      {meta.label}
+                    </span>
+                    <span
+                      className="text-[1.2rem] font-black"
+                      style={{ color: meta.color }}
+                    >
+                      {value}
+                    </span>
+                  </>
+                )}
+                {!isActive && value === null && (
+                  <span className="text-[1.4rem] text-slate-700">?</span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Show remaining spins while the stage is active */}
+        {spinsRevealed < 3 && (
+          <p className="text-[0.78rem] text-slate-400">
+            Spins remaining: <strong>{3 - spinsRevealed}</strong>
+          </p>
+        )}
+
+        {/* Show the calculated final spectrum after all three spins */}
+        {finalTier && (
           <div
-            key={tier}
-            className={[
-              'rr-payout-row',
-              finalSpectrum === Number(tier) ? 'rr-payout-active' : ''
-            ].join(' ')}
-            style={
-              finalSpectrum === Number(tier) ? { color: meta.color } : undefined
-            }
+            className="flex gap-4 px-4 py-2 rounded-lg border font-extrabold text-[0.85rem]"
+            style={{ color: finalTier.color, borderColor: finalTier.color }}
           >
-            <span>{meta.label}</span>
-            <span>+{meta.multiplier}×</span>
-            <span>
-              {formatPoints(bonusLastBet * BigInt(meta.multiplier)).display}
-            </span>
+            <span>Final Spectrum: {finalTier.label}</span>
+            <span>+{finalTier.multiplier}x</span>
           </div>
-        ))}
+        )}
+
+        {/* Allow the player to trigger the next spin */}
+        {spinsRevealed < 3 && (
+          <button
+            onClick={triggerSpin}
+            disabled={loading || spinning}
+            className="rr-spin-btn"
+          >
+            {spinning ? 'Spinning...' : `Spin ${spinsRevealed + 1} of 3`}
+          </button>
+        )}
+
+        {/* Show the complete reward multiplier reference */}
+        <div className="w-full flex flex-col gap-[0.3rem]">
+          {Object.entries(TIER_META).map(([tier, meta]) => (
+            <div
+              key={tier}
+              className={`flex justify-between px-2.5 py-[0.3rem] rounded-md text-[0.72rem] ${
+                finalSpectrum === Number(tier)
+                  ? 'bg-[rgba(255,255,255,0.06)] font-bold'
+                  : 'text-slate-500'
+              }`}
+              style={
+                finalSpectrum === Number(tier)
+                  ? { color: meta.color }
+                  : undefined
+              }
+            >
+              <span>{meta.label}</span>
+              <span>+{meta.multiplier}×</span>
+              <span>
+                {formatPoints(bonusLastBet * BigInt(meta.multiplier)).display}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  )
+    )
 }

@@ -106,60 +106,66 @@ export default function KingsVaultStage() {
     }
   }
 
-  return (
-    <div className="stage-container stage-kings-vault">
-      <div className="stage-title g-tqg-s4 no-pseudo">👑 KING&apos;S VAULT</div>
-      <p className="stage-subtitle">One chest holds the Royal reward</p>
+    return (
+      <div className="stage-container stage-kings-vault">
+        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-tqg-s4 no-pseudo">
+          👑 KING&apos;S VAULT
+        </div>
+        <p className="text-[0.825rem] text-slate-500 text-center leading-[1.4] -mt-2">
+          One chest holds the Royal reward
+        </p>
 
-      <div className="chest-row chest-row-five">
-        {Array.from({ length: 5 }).map((_, i) => {
-          const isChosen = chosenIndex === i
-          const tierKey = revealed?.[i] ?? null
-          const tierData = tierKey ? TIER_META[tierKey] : null
-          const isRevealed = revealed !== null
+        <div className="flex gap-2.5 justify-center flex-wrap my-4">
+          {Array.from({ length: 5 }).map((_, i) => {
+            const isChosen = chosenIndex === i
+            const tierKey = revealed?.[i] ?? null
+            const tierData = tierKey ? TIER_META[tierKey] : null
+            const isRevealed = revealed !== null
 
-          return (
-            <button
-              key={i}
-              onClick={() => pickChest(i)}
-              disabled={chosenIndex !== null || loading}
-              className={[
-                'chest-btn',
-                'chest-btn-kings',
-                isChosen ? 'chest-chosen' : '',
-                isRevealed ? 'chest-revealed' : '',
-                chosenIndex === null ? 'chest-idle' : ''
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              style={
-                isRevealed && tierData
-                  ? { borderColor: tierData.color }
-                  : undefined
-              }
-            >
-              <span className="chest-icon">
-                {isRevealed && tierData ? tierData.emoji : '📦'}
-              </span>
-              {isRevealed && tierData && (
-                <span
-                  className="chest-tier-label"
-                  style={{ color: tierData.color }}
-                >
-                  {tierData.label}
-                  <br />
-                  <span className="chest-tier-mult">
-                    +{tierData.multiplier}×
-                  </span>
+            return (
+              <button
+                key={i}
+                onClick={() => pickChest(i)}
+                disabled={chosenIndex !== null || loading}
+                className={[
+                  'chest-btn',
+                  'chest-btn-kings',
+                  isChosen ? 'chest-chosen' : '',
+                  isRevealed ? 'chest-revealed' : '',
+                  chosenIndex === null ? 'chest-idle' : ''
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                style={
+                  isRevealed && tierData
+                    ? { borderColor: tierData.color }
+                    : undefined
+                }
+              >
+                <span className="text-[2rem] leading-none">
+                  {isRevealed && tierData ? tierData.emoji : '📦'}
                 </span>
-              )}
-              {isChosen && !isRevealed && (
-                <span className="chest-label">Opening...</span>
-              )}
-            </button>
-          )
-        })}
+                {isRevealed && tierData && (
+                  <span
+                    className="text-[0.68rem] font-bold text-center leading-[1.3]"
+                    style={{ color: tierData.color }}
+                  >
+                    {tierData.label}
+                    <br />
+                    <span className="text-[0.72rem] font-extrabold">
+                      +{tierData.multiplier}×
+                    </span>
+                  </span>
+                )}
+                {isChosen && !isRevealed && (
+                  <span className="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider">
+                    Opening...
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
       </div>
-    </div>
-  )
+    )
 }

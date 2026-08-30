@@ -232,8 +232,8 @@ export default function SniperChallengeStage() {
 
       {/* Result display */}
       {resolvedZone && (
-        <div className="stage-result select-none my-1">
-          <p className="sniper-zone-result text-sm font-black uppercase text-slate-800 leading-none">
+        <div className="flex flex-col items-center gap-2 mt-4 w-full select-none my-1">
+          <p className="text-[1.1rem] font-extrabold text-slate-800 uppercase leading-none">
             {ZONE_LABEL[resolvedZone]}
           </p>
           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 leading-none">
