@@ -1,5 +1,3 @@
-'use client'
-
 export default function Showcase() {
   return (
     <div className="bg-[#f8f7f4] min-h-screen font-[Space_Grotesk] antialiased">

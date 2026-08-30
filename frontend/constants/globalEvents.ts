@@ -1,4 +1,4 @@
-import { GlobalEventModeKey, GlobalEventType } from "@/types/events";
+import { GlobalEventModeKey, GlobalEventType } from '@/types/events'
 
 export const GLOBAL_EVENT_REGISTRY: Record<
   GlobalEventModeKey,

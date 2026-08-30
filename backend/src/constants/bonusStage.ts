@@ -1,4 +1,4 @@
-import type { StageType, CrystalTileType, RainbowRushWeights } from "../types/bonusStage.js"
+import type { CrystalTileType, StageType } from "../types/bonusStage.js"
 
 export const STAGE_WEIGHTS: Record<StageType, number> = {
   TREASURE_VAULT: 1.0,
@@ -46,12 +46,12 @@ export const CRYSTAL_TILE_DISTRIBUTION: CrystalTileType[] = [
   ...Array(18).fill('DIAMOND')
 ]
 
-export const RAINBOW_RUSH_WEIGHTS: RainbowRushWeights[] = [
-  { tier: 1, weight: 30 },
-  { tier: 2, weight: 28 },
-  { tier: 3, weight: 22 },
-  { tier: 4, weight: 13 },
-  { tier: 5, weight: 7 }
+export const RAINBOW_RUSH_WEIGHTS = [
+  { tier: 1 as const, weight: 30 },
+  { tier: 2 as const, weight: 28 },
+  { tier: 3 as const, weight: 22 },
+  { tier: 4 as const, weight: 13 },
+  { tier: 5 as const, weight: 7 }
 ]
 
 export const RAINBOW_RUSH_PAYOUTS: Record<number, number> = {

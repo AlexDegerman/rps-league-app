@@ -2,7 +2,6 @@
 
 import { useUIStore } from "@/app/stores/uiStore"
 
-
 export default function OracleTTSToggle() {
   const oracleTTSEnabled = useUIStore((s) => s.oracleTTSEnabled)
   const toggleOracleTTS = useUIStore((s) => s.toggleOracleTTS)

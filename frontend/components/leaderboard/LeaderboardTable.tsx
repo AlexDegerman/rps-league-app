@@ -1,11 +1,13 @@
-import {
-  isLapsTab,
-  isAchievementsTab,
-  EMPTY_MESSAGES
-} from './constants'
 import { SortArrow } from './SortArrow'
 import { LeaderboardRow } from './LeaderboardRow'
-import { BadgeData, LeaderboardEntry, LeaderboardTab, SortDir, SortKey } from '@/types/leaderboard'
+import {
+  BadgeData,
+  LeaderboardEntry,
+  LeaderboardTab,
+  SortDir,
+  SortKey
+} from '@/types/leaderboard'
+import { isLapsTab, isAchievementsTab, EMPTY_MESSAGES } from '@/constants/leaderboard'
 
 interface LeaderboardTableProps {
   data: LeaderboardEntry[]

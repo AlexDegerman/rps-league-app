@@ -1,7 +1,7 @@
 'use client'
 
 import { useGameStore } from '@/app/stores/gameStore'
-import { RARITY_AURA, RARITY_TEXT, RARITY_TOAST_BG } from '@/lib/achievements'
+import { RARITY_TOAST_BG, RARITY_AURA, RARITY_TEXT } from '@/constants/achievements'
 import { AchievementRarity } from '@/types/achievements'
 import { useEffect, useRef } from 'react'
 

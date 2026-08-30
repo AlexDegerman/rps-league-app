@@ -1,5 +1,3 @@
-'use client'
-
 import HellfireConfetti from '../confetti/HellfireConfetti'
 import LunarConfetti from '../confetti/LunarConfetti'
 import ElectricConfetti from '../confetti/ElectricConfetti'

@@ -1,5 +1,3 @@
-export type Side = 'left' | 'right'
-
 export interface OracleResponse {
   result?: string
   source?: string
@@ -15,10 +13,3 @@ export interface OracleTickerMessage {
   durationMs?: number
 }
 
-export interface OracleMessage {
-  prefix: string
-  suffix: string
-  side: Side
-  sideClass: string
-  speech: string
-}

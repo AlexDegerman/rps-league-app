@@ -1,6 +1,4 @@
-'use client'
-
-import { RARITY_BADGE_STYLE, BADGE_REQUIREMENT } from '@/lib/achievements'
+import { BADGE_REQUIREMENT, RARITY_BADGE_STYLE } from '@/constants/achievements'
 import { AchievementRarity } from '@/types/achievements'
 import { BadgeData } from '@/types/leaderboard'
 

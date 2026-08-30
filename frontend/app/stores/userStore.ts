@@ -18,8 +18,8 @@ import {
   updateAutoEquipBadges
 } from '@/lib/api'
 import { logger } from '@/lib/logger'
-import { ASCENSION_THRESHOLD } from '@/lib/constants'
 import { BadgeData } from '@/types/leaderboard'
+import { ASCENSION_THRESHOLD } from '@/constants/prediction'
 
 interface UserState {
   // Identity

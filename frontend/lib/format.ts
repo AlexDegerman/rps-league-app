@@ -1,5 +1,5 @@
+import { TIER_THRESHOLDS } from '@/constants/prediction'
 import type { Match } from '../types/rps'
-import { TIER_THRESHOLDS } from './constants'
 
 // Fallback conversion in case a raw timestamp reaches the frontend unnormalized.
 // Under normal conditions all timestamps are normalized to milliseconds on ingest.

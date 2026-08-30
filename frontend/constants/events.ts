@@ -1,22 +1,127 @@
-export type EventThemeKey =
-  | 'LUNAR'
-  | 'ELECTRIC'
-  | 'CARDS'
-  | 'HELLFIRE'
-  | 'winstreak_fever'
-  | 'winstreak_inferno'
-  | 'festival_spark'
-  | 'festival_ghost'
-  | 'festival_safeguard'
-  | 'festival_resonance'
-  | 'festival_surge'
-  | 'festival_vault'
-  | 'festival_fever'
-  | 'festival_sanguine'
-  | 'global_tidal_surge'
-  | 'global_solar_flare'
-  | 'global_cyclone_blitz'
-  | 'global_mirage_cataclysm'
+export const EVENT_CARD: Record<
+  string,
+  {
+    cardClass: string
+    label: string
+    emoji: string
+    textClass: string
+    multLabel: string
+  }
+> = {
+  // FLASH EVENTS
+  LUNAR: {
+    cardClass: 'event-card-base event-card-lunar',
+    label: "Moon's Blessing",
+    emoji: '🌙',
+    textClass: 'lunar-badge-text',
+    multLabel: 'x3'
+  },
+  ELECTRIC: {
+    cardClass: 'event-card-base event-card-electric',
+    label: 'Electric Surge',
+    emoji: '⚡',
+    textClass: 'electric-badge-text',
+    multLabel: 'x3'
+  },
+  CARDS: {
+    cardClass: 'event-card-base event-card-cards',
+    label: 'Luck in the Card',
+    emoji: '🃏',
+    textClass: 'cards-badge-text',
+    multLabel: 'x1.5 + LEG'
+  },
+  HELLFIRE: {
+    cardClass: 'event-card-base event-card-hellfire',
+    label: 'Hellfire Event',
+    emoji: '🔥',
+    textClass: 'streak-fire-text text-red-300',
+    multLabel: 'x3'
+  },
+
+  // FESTIVALS
+  SPARK: {
+    cardClass: 'event-card-base event-card-spark',
+    label: 'Spark Festival',
+    emoji: '⚡',
+    textClass: 'text-purple-300',
+    multLabel: 'FLASH SYNC'
+  },
+  GHOST: {
+    cardClass: 'event-card-base event-card-ghost',
+    label: 'Ghost Festival',
+    emoji: '👻',
+    textClass: 'text-teal-200',
+    multLabel: '1.2x ECHO'
+  },
+  SAFEGUARD: {
+    cardClass: 'event-card-base event-card-safeguard',
+    label: 'Safeguard Festival',
+    emoji: '🛡️',
+    textClass: 'text-slate-300',
+    multLabel: '40% LOSS DEDUCTION'
+  },
+  RESONANCE: {
+    cardClass: 'event-card-base event-card-resonance',
+    label: 'Resonance Festival',
+    emoji: '🔮',
+    textClass: 'text-yellow-200',
+    multLabel: 'BNS FLOOR'
+  },
+  SURGE: {
+    cardClass: 'event-card-base event-card-surge',
+    label: 'Surge Festival',
+    emoji: '⚡',
+    textClass: 'text-cyan-200',
+    multLabel: '2x WINS'
+  },
+  VAULT: {
+    cardClass: 'event-card-base event-card-vault',
+    label: 'Vault Festival',
+    emoji: '🏛️',
+    textClass: 'text-indigo-200',
+    multLabel: '2x RELICS'
+  },
+  FEVER_FESTIVAL: {
+    cardClass: 'event-card-base event-card-fever-festival',
+    label: 'Fever Festival',
+    emoji: '🔥',
+    textClass: 'text-orange-300',
+    multLabel: 'STRK AEGIS'
+  },
+  SANGUINE: {
+    cardClass: 'event-card-base event-card-sanguine',
+    label: 'Sanguine Festival',
+    emoji: '🩸',
+    textClass: 'text-red-400',
+    multLabel: '100% WIN'
+  }
+}
+
+
+export const EVENT_TICKER_THEME_MAP = {
+  LUNAR: 'LUNAR',
+  ELECTRIC: 'ELECTRIC',
+  CARDS: 'CARDS',
+  HELLFIRE: 'HELLFIRE',
+  festival_spark: 'festival_spark',
+  festival_ghost: 'festival_ghost',
+  festival_safeguard: 'festival_safeguard',
+  festival_resonance: 'festival_resonance',
+  festival_surge: 'festival_surge',
+  festival_vault: 'festival_vault',
+  festival_fever: 'festival_fever',
+  festival_sanguine: 'festival_sanguine',
+  winstreak_fever: 'winstreak_fever',
+  winstreak_inferno: 'winstreak_inferno',
+  global_tidal_surge: 'global_tidal_surge',
+  global_solar_flare: 'global_solar_flare',
+  global_cyclone_blitz: 'global_cyclone_blitz',
+  global_mirage_cataclysm: 'global_mirage_cataclysm',
+  boss_hexurion: 'boss_hexurion',
+  boss_orphion: 'boss_orphion',
+  boss_fracturon: 'boss_fracturon',
+  boss_apexion: 'boss_apexion'
+} as const
 
 export const FESTIVAL_THEME_CONFIG = {
   SPARK: { key: 'festival_spark', color: '#a855f7', dotClass: 'bg-purple-400' },
@@ -291,6 +396,17 @@ export const EVENT_TICKER_CONFIG = {
 } as const
 
 export const MODE_CONFIG = {
+  default: {
+    border: 'border-gray-100',
+    cardAnim: '',
+    bg: 'bg-white',
+    glowColor: null,
+    dateText: 'text-gray-400',
+    vsText: 'text-gray-300',
+    winnerBadge: 'bg-green-500',
+    winnerText: 'text-green-600 font-bold',
+    youWon: 'bg-green-500'
+  },
   flash_lunar: {
     border: 'border-blue-300',
     cardAnim: 'flash-lunar-ring',

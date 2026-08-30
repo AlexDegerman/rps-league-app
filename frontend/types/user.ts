@@ -1,5 +1,3 @@
-import { BadgeData } from './leaderboard'
-
 export interface UserStats {
   joinedDate: string
   total: number

@@ -15,7 +15,6 @@ import {
   afterEach,
   type Mock
 } from 'vitest'
-import React from 'react'
 import MatchFeed from '@/components/game/MatchFeed'
 import MatchList from '@/components/game/MatchList'
 

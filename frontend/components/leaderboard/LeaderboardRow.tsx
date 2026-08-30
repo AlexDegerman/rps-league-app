@@ -2,8 +2,12 @@ import Link from 'next/link'
 import GemIcon from '@/components/icons/GemIcon'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
 import { formatPoints, getAmountColor, getDisplayTierClass } from '@/lib/format'
-import { isAchievementsTab, isLapsTab } from './constants'
-import { BadgeData, LeaderboardEntry, LeaderboardTab } from '@/types/leaderboard'
+import {
+  BadgeData,
+  LeaderboardEntry,
+  LeaderboardTab
+} from '@/types/leaderboard'
+import { isLapsTab, isAchievementsTab } from '@/constants/leaderboard'
 
 interface LeaderboardRowProps {
   entry: LeaderboardEntry

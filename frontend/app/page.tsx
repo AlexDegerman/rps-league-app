@@ -18,10 +18,7 @@ import {
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import type {
-  Match,
-  PendingMatch,
-} from '@/types/rps'
+import type { Match, PendingMatch } from '@/types/rps'
 import { useSound } from '@/hooks/useSound'
 import LiveStatsTicker from '@/components/tickers/LiveStatTicker'
 import { useAnimatedBigIntVal } from '@/hooks/useAnimatedBigInt'
@@ -35,10 +32,9 @@ import { useTabGuard } from '@/hooks/useTabGuard'
 import WelcomeModal from '@/components/modals/WelcomeModal'
 import { logger } from '@/lib/logger'
 import UpdateModal from '@/components/modals/UpdateModal'
-import { oracleTemplates } from '@/lib/oracleTemplates'
+import { buildWorldBossWarningSpeech, oracleTemplates } from '@/lib/oracleTemplates'
 import AscensionModal from '@/components/modals/AscensionModal'
-import { ASCENSION_THRESHOLD } from '@/lib/constants'
-import { CURRENT_VERSION } from '@/lib/updates'
+import { CURRENT_VERSION } from '@/constants/updates'
 import { useIdleStore } from './stores/idleStore'
 import { useIdleBet } from '@/hooks/useIdleBet'
 import IdleBetControls from '@/components/ui/IdleBetControls'
@@ -54,23 +50,37 @@ import FlashEventActivationOverlay from '@/components/overlays/FlashEventActivat
 import { usePopupQueue } from '@/hooks/usePopupQueue'
 import { speakOracle } from '@/lib/oracleTTS'
 import GlobalTickerWrapper from '@/components/layout/GlobalTickerWrapper'
-import { GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/lib/globalEvents'
 import GlobalEventActivationOverlay from '@/components/overlays/GlobalEventActivationOverlay'
 import { emitActivity } from '@/lib/activityFeed'
 import EventTimerTicker from '@/components/tickers/EventTimerTicker'
 import DashboardCard from '@/components/game/DashboardCard'
 import MatchFeed from '@/components/game/MatchFeed'
-import { buildWorldBossWarningSpeech } from '@/lib/eventCountdown'
 import { pushBurstEvent } from '@/lib/worldBossFeed'
 import WorldBossArena from '@/components/game/WorldBossArena'
-import WorldBossChestOpening, { ChestResult } from '@/components/game/WorldBossChestOpening'
+import WorldBossChestOpening, {
+  ChestResult
+} from '@/components/game/WorldBossChestOpening'
 import NeonParadiseContainer from '@/components/game/NeonParadiseContainer'
-import { ORACLE_VOICE_LINES } from '@/lib/constants'
 import { fetchActiveBonusSession } from '@/lib/api'
 import { useBGM } from '@/hooks/useBGM'
-import { BonusStageTriggerSSEData, BonusStageCompletedSSEData } from '@/types/bonusStage'
-import { GlobalEventType, GlobalEventPhase, FestivalModeKey, VisualMode, EventTheme, FestivalSSEData, GlobalEventWarningSSEData, GlobalEventStartSSEData } from '@/types/events'
+import {
+  BonusStageTriggerSSEData,
+  BonusStageCompletedSSEData
+} from '@/types/bonusStage'
+import {
+  GlobalEventType,
+  GlobalEventPhase,
+  FestivalModeKey,
+  VisualMode,
+  EventTheme,
+  FestivalSSEData,
+  GlobalEventWarningSSEData,
+  GlobalEventStartSSEData
+} from '@/types/events'
 import { ResultAnim } from '@/types/prediction'
+import { ORACLE_VOICE_LINES } from '@/constants/bonusStage'
+import { GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/constants/globalEvents'
+import { ASCENSION_THRESHOLD } from '@/constants/prediction'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 

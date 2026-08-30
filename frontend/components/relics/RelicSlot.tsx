@@ -3,10 +3,9 @@
 import {
   Package,
 } from 'lucide-react'
-import type { RelicDef } from '@/lib/relics'
-import { RARITY_STYLES } from '@/lib/relics'
 import { useRelicStore } from '@/app/stores/relicStore'
-import { ICON_MAP } from '@/lib/relicIcons'
+import { RARITY_STYLES, ICON_MAP } from '@/constants/relics'
+import { RelicDef } from '@/types/relics'
 
 export default function RelicSlot({
   relic: propRelic,

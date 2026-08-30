@@ -5,13 +5,10 @@ Sentry.init({
   dsn: process.env.SENTRY_DSN,
   integrations: [nodeProfilingIntegration()],
   enabled: process.env.NODE_ENV === 'production',
-  // Performance Monitoring: Set to 1% to match frontend and stay within limits.
   tracesSampleRate: 0.01,
-
-  // Profiling: Set to the same rate as transactions.
   profilesSampleRate: 0.01,
 
-  // Quota Guard: Filter out high-frequency heartbeat routes to save credits.
+  // Quota guard: filter high-frequency routes
   beforeSendTransaction(event) {
     const name = event.transaction
     const ignoreList = [
@@ -29,6 +26,5 @@ Sentry.init({
     return event
   },
 
-  // Security and privacy for production
   sendDefaultPii: false
 })

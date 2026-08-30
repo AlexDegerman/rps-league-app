@@ -5,11 +5,8 @@ import OracleMessageTicker from '@/components/tickers/OracleMessageTicker'
 import { useUIStore } from '@/app/stores/uiStore'
 import { useGameStore } from '@/app/stores/gameStore'
 import EventEffectTicker from '@/components/tickers/EventEffectTicker'
-import {
-  GLOBAL_EVENT_REGISTRY,
-  GLOBAL_EVENT_MODE_MAP
-} from '@/lib/globalEvents'
 import { GlobalEventType } from '@/types/events'
+import { GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/constants/globalEvents'
 
 export default function GlobalTickerWrapper() {
   const oracleTickerMessage = useUIStore((s) => s.oracleTickerMessage)

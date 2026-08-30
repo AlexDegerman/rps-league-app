@@ -4,11 +4,9 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   enabled: process.env.NODE_ENV === 'production',
   integrations: [Sentry.replayIntegration()],
-
-  // Performance Monitoring: Set to 1% to stay within the 10k monthly limit.
   tracesSampleRate: 0.01,
 
-  // Quota Guard: Drop performance traces for high-frequency heartbeat routes.
+  // Quota guard: filter high-frequency routes
   beforeSendTransaction(event) {
     const name = event.transaction
     const ignoreList = [
@@ -23,13 +21,8 @@ Sentry.init({
     }
     return event
   },
-
-  // Session Replay: Set session rate to 0 to save your 50 monthly credits.
-  // Set Error rate to 1.0 to capture a video reproduction only when a crash occurs.
   replaysSessionSampleRate: 0,
   replaysOnErrorSampleRate: 1.0,
-
-  // Operational settings
   debug: false,
   enableLogs: false,
   sendDefaultPii: false

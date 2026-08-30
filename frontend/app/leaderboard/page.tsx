@@ -8,9 +8,15 @@ import { fetchAchievementsBulkBadges, fetchUnifiedLeaderboard } from '@/lib/api'
 import Link from 'next/link'
 import { logger } from '@/lib/logger'
 import { useUserStore } from '../stores/userStore'
-import { DEFAULT_SORT } from '@/components/leaderboard/constants'
 import { LeaderboardTable } from '@/components/leaderboard/LeaderboardTable'
-import { BadgeData, LeaderboardEntry, LeaderboardTab, SortDir, SortKey } from '@/types/leaderboard'
+import {
+  BadgeData,
+  LeaderboardEntry,
+  LeaderboardTab,
+  SortDir,
+  SortKey
+} from '@/types/leaderboard'
+import { DEFAULT_SORT } from '@/constants/leaderboard'
 
 function LeaderboardContent() {
   const searchParams = useSearchParams()

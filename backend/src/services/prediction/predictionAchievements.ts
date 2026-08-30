@@ -1,12 +1,12 @@
 import type { PoolClient } from 'pg'
 import { checkAchievements } from '../achievementChecker.js'
-import { RELICS } from '../relicService.js'
 import { hasSeenAllFlashTypes } from '../flashEventService.js'
 import type {
   ResolutionContext,
   AchievementEntry
 } from '../../types/prediction.js'
 import type { AchievementStats } from '../../types/achievements.js'
+import { RELICS } from '../../constants/relics.js'
 
 // Checks and persists newly earned achievements within the open transaction
 export const processAchievements = async (

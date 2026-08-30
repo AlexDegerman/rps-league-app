@@ -12,16 +12,7 @@ import type {
   PredictionRow,
   ResolutionContext
 } from '../../types/prediction.js'
-
-const POINTS_FLOOR = 100000n
-// Architect's Keystone upgrades a bonus to MYTHICAL at this multiplier
-const MYTHICAL_MULTIPLIER = 7.0
-const TIER_UPGRADE: Record<string, string> = {
-  COMMON: 'RARE',
-  RARE: 'EPIC',
-  EPIC: 'LEGENDARY',
-  LEGENDARY: 'MYTHICAL'
-}
+import { MYTHICAL_MULTIPLIER, POINTS_FLOOR, TIER_UPGRADE } from '../../constants/prediction.js'
 
 // 40% chance of a bonus (80% under 2M points). Tier determines multiplier range
 export const rollBonus = (

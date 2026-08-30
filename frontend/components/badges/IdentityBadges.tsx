@@ -1,5 +1,3 @@
-'use client'
-
 import { LinkedInBadge } from './LinkedInBadge'
 import { AchievementBadge } from './AchievementBadge'
 import { BadgeData } from '@/types/leaderboard'

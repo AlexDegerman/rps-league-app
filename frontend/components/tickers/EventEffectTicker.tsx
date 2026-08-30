@@ -1,15 +1,10 @@
 'use client'
 
 import { useGameStore } from '@/app/stores/gameStore'
-import {
-  FESTIVAL_REGISTRY,
-  getFestivalEffectDescription
-} from '@/lib/festivals'
-import {
-  GLOBAL_EVENT_REGISTRY,
-  GLOBAL_EVENT_MODE_MAP
-} from '@/lib/globalEvents'
-import { BOSS_COLORS, BOSS_EFFECT_TEXT } from '@/lib/worldBosses'
+import { FESTIVAL_REGISTRY } from '@/constants/festivals'
+import { GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/constants/globalEvents'
+import { BOSS_COLORS, BOSS_EFFECT_TEXT } from '@/constants/worldBoss'
+import { getFestivalEffectDescription } from '@/lib/festivals'
 import { FestivalModeKey, FestivalType, GlobalEventType } from '@/types/events'
 
 const LOCAL_FESTIVAL_MAP: Record<string, FestivalModeKey> = {

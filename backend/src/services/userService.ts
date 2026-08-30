@@ -1,9 +1,8 @@
 import pool from '../utils/db.js'
-import { wordList } from '../utils/wordList.js'
+import { wordList } from '../constants/wordList.js'
 import { logger } from '../utils/logger.js'
 import { getCoarseLocation } from '../utils/geo.js'
-
-const STARTING_POINTS = 200000n
+import { STARTING_POINTS } from '../constants/prediction.js'
 
 // Generates a random 10-character alphanumeric fallback if a collision occurs
 const generateRandomShortId = (): string => {

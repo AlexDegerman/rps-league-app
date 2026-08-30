@@ -1,9 +1,7 @@
-'use client'
-
 import { create } from 'zustand'
-import type { RelicDef } from '@/lib/relics'
 import { getOrCreateUser } from '@/lib/user'
 import { logger } from '@/lib/logger'
+import { RelicDef } from '@/types/relics'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 

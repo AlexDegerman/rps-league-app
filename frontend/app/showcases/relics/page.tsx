@@ -1,6 +1,7 @@
 'use client'
 
-import { RELICS, RARITY_STYLES, RelicRarity, RelicDef } from '@/lib/relics'
+import { RARITY_STYLES, RELICS } from '@/constants/relics'
+import { RelicDef, RelicRarity } from '@/types/relics'
 import * as Icons from 'lucide-react'
 import { LucideIcon } from 'lucide-react'
 

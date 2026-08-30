@@ -1,4 +1,4 @@
-import { RelicRarity } from '@/lib/relics'
+import { RelicRarity } from '@/types/relics'
 import { useRef, useState, useEffect, useCallback } from 'react'
 
 const SOUND_MAP = {

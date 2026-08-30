@@ -1,6 +1,7 @@
 'use client'
+
 import { X } from 'lucide-react'
-import { LATEST_UPDATE } from '@/lib/updates'
+import { LATEST_UPDATE } from '@/constants/updates'
 
 interface UpdateModalProps {
   onClose: () => void

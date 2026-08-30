@@ -5,7 +5,6 @@ import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { getSessionStats } from '../services/sessionService.js'
 import { autoEquipUserBadges } from '../utils/badgeHelper.js'
-import { ASCENSION_THRESHOLD } from './ascend.js'
 
 const router = Router()
 

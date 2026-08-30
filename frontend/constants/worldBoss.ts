@@ -1,6 +1,24 @@
 import { WorldBossType } from "@/types/worldboss"
 
-const ORACLE_WORLD_BOSS_WARNING_SPEECH: Record<WorldBossType, string[]> = {
+export const BOSS_EFFECT_TEXT: Record<string, string> = {
+  HEXURION:
+    'HEXURION ACTIVE - STRUCTURAL LATTICE ONLINE - CORRECT PREDICTIONS STRIKE THE BOSS',
+  ORPHION:
+    'ORPHION ACTIVE - ORBITAL CONVERGENCE LOCKED - CORRECT PREDICTIONS STRIKE THE BOSS',
+  FRACTURON:
+    'FRACTURON ACTIVE - FRACTAL MATRIX ONLINE - CORRECT PREDICTIONS STRIKE THE BOSS',
+  APEXION:
+    'APEXION ACTIVE - KINETIC COMPRESSION RISING - CORRECT PREDICTIONS STRIKE THE BOSS'
+}
+
+export const BOSS_COLORS: Record<string, string> = {
+  HEXURION: '#22d3ee',
+  ORPHION: '#a855f7',
+  FRACTURON: '#22c55e',
+  APEXION: '#f97316'
+}
+
+export const ORACLE_WORLD_BOSS_WARNING_SPEECH: Record<WorldBossType, string[]> = {
   HEXURION: [
     'Structural... lattice... awakening. Hexurion... assembling.',
     'Hard-light... geometry... stabilizing. Hexurion... emergence... imminent.',
@@ -23,7 +41,3 @@ const ORACLE_WORLD_BOSS_WARNING_SPEECH: Record<WorldBossType, string[]> = {
   ]
 }
 
-export const buildWorldBossWarningSpeech = (type: WorldBossType): string => {
-  const messages = ORACLE_WORLD_BOSS_WARNING_SPEECH[type]
-  return messages[Math.floor(Math.random() * messages.length)]!
-}

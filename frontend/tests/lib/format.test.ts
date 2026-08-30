@@ -16,7 +16,7 @@ import {
 } from '../../lib/format'
 
 // Mock TIER_THRESHOLDS to isolate test execution from external constant changes
-vi.mock('../../lib/constants', () => ({
+vi.mock('../../constants/prediction', () => ({
   TIER_THRESHOLDS: [
     { min: 1000000n, cls: 'text-gold-tier' },
     { min: 1000n, cls: 'text-silver-tier' },

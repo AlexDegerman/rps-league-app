@@ -4,9 +4,9 @@ import {
   getUserRelics,
   equipRelicToSlot,
   unequipRelicFromSlot,
-  RELIC_MAP
 } from '../services/relicService.js'
 import { isWorldBossActive } from '../services/worldBossService.js'
+import { RELIC_MAP } from '../constants/relics.js'
 
 const router = Router()
 

@@ -5,11 +5,10 @@ import {
   X,
   Gem,
 } from 'lucide-react'
-import { RARITY_STYLES } from '@/lib/relics'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { useSound } from '@/hooks/useSound'
 import { useUIStore } from '@/app/stores/uiStore'
-import { ICON_MAP } from '@/lib/relicIcons'
+import { RARITY_STYLES, ICON_MAP } from '@/constants/relics'
 
 export default function RelicDropPopup() {
   const soundPlayedRef = useRef(false)

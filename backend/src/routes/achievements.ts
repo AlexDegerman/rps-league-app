@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import pool from '../utils/db.js'
 import { ALL_ACHIEVEMENTS } from '../services/achievementChecker.js'
-import { RELICS } from '../services/relicService.js'
 import { hasSeenAllFlashTypes } from '../services/flashEventService.js'
+import { RELICS } from '../constants/relics.js'
 
 const router = Router()
 

@@ -1,57 +1,4 @@
-export type RelicRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHICAL'
-
-export interface RelicDef {
-  key: string
-  name: string
-  rarity: RelicRarity
-  icon: string
-  effect: string
-  threshold?: number
-  counter?: number
-  bossExclusive?: boolean
-}
-
-export const RARITY_STYLES: Record<
-  RelicRarity,
-  {
-    border: string
-    glow: string
-    text: string
-    bg: string
-  }
-> = {
-  COMMON: {
-    border: 'border-green-500/30',
-    glow: '',
-    text: 'text-green-400',
-    bg: 'bg-green-500/10',
-  },
-  RARE: {
-    border: 'border-blue-500/30',
-    glow: 'ring-1 ring-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)]',
-    text: 'text-blue-400',
-    bg: 'bg-blue-500/10',
-
-  },
-  EPIC: {
-    border: 'border-purple-500/30',
-    glow: 'ring-1 ring-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]',
-    text: 'text-purple-400',
-    bg: 'bg-purple-500/10',
-  },
-  LEGENDARY: {
-    border: 'border-yellow-400/30',
-    glow: 'ring-1 ring-yellow-400/40 shadow-[0_0_25px_rgba(250,204,21,0.25)]',
-    text: 'text-yellow-400',
-    bg: 'bg-yellow-500/10',
-  },
-  MYTHICAL: {
-    border: 'border-red-600/30',
-    glow: 'ring-2 ring-red-600/40 shadow-[0_0_30px_rgba(220,38,38,0.3)]',
-    text: 'text-red-400',
-    bg: 'bg-red-500/10',
-  }
-}
+import type { RelicDef } from '../types/relics.js'
 
 export const RELICS: RelicDef[] = [
   {
@@ -66,7 +13,7 @@ export const RELICS: RelicDef[] = [
     name: 'Conductive Filament',
     rarity: 'COMMON',
     icon: 'Zap',
-    effect: 'Reduces point losses by 5% while equipped'
+    effect: 'Reduces point losses by 5%'
   },
   {
     key: 'scavengers_lens',
@@ -81,7 +28,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'RARE',
     icon: 'Moon',
     effect:
-      "+50% Moon's Blessing spawn rate. Grants +0.5x win multiplier if equipped when event starts."
+      "+50% Moon's Blessing spawn rate. Adds +0.5x win multiplier if equipped when event starts."
   },
   {
     key: 'static_inductor',
@@ -89,7 +36,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'RARE',
     icon: 'CloudLightning',
     effect:
-      '+50% Electric Surge spawn rate. Grants +0.5x win multiplier if equipped when event starts.'
+      '+50% Electric Surge spawn rate. Adds +0.5x win multiplier if equipped when event starts.'
   },
   {
     key: 'dealers_hand',
@@ -97,7 +44,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'RARE',
     icon: 'Spade',
     effect:
-      '+50% Luck in the Card spawn rate. Grants +0.3x win multiplier if equipped when event starts.'
+      '+50% Luck in the Card spawn rate. Adds +0.3x win multiplier if equipped when event starts.'
   },
   {
     key: 'volcanic_mantle',
@@ -105,21 +52,21 @@ export const RELICS: RelicDef[] = [
     rarity: 'RARE',
     icon: 'Flame',
     effect:
-      '+50% Hellfire spawn rate. Grants +0.5x win multiplier if equipped when event starts.'
+      '+50% Hellfire spawn rate. Adds +0.5x win multiplier if equipped when event starts.'
   },
   {
     key: 'cobalt_core',
     name: 'Cobalt Core',
     rarity: 'RARE',
     icon: 'Cpu',
-    effect: '+15% Global Flash Event appearance rate'
+    effect: '+15% Flash Event appearance rate'
   },
   {
     key: 'biased_oscillator',
     name: 'Biased Oscillator',
     rarity: 'RARE',
     icon: 'Waves',
-    effect: '+10% chance for Epic/Legendary bonuses'
+    effect: '+10% increased chance for Epic and Legendary bonuses'
   },
   {
     key: 'buffer_module',
@@ -127,7 +74,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'EPIC',
     icon: 'ShieldCheck',
     effect:
-      "Every 15 matches while equipped, your next loss won't reset your streak (Resets on unequip",
+      "Every 15 matches while equipped, your next loss won't reset your streak",
     threshold: 15
   },
   {
@@ -136,14 +83,14 @@ export const RELICS: RelicDef[] = [
     rarity: 'EPIC',
     icon: 'Repeat',
     effect:
-      'Flash Events triggered while equipped grant an additional +0.5x win multiplier'
+      'Flash Events triggered while equipped grant an additional +0.5x multiplier.'
   },
   {
     key: 'prismatic_shard',
     name: 'Prismatic Shard',
     rarity: 'LEGENDARY',
     icon: 'Gem',
-    effect: '+0.5x win multiplier while NO Flash Event is active'
+    effect: '+0.5x win multiplier while no Flash Event is active'
   },
   {
     key: 'kinetic_capacitor',
@@ -151,7 +98,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'LEGENDARY',
     icon: 'BatteryCharging',
     effect:
-      'Every 30 wins while equipped, your next win gains an extra x2 multiplier (Resets on unequip',
+      'Every 30 wins while equipped, your next win gains an extra x2 multiplier.',
     threshold: 30
   },
   {
@@ -160,7 +107,7 @@ export const RELICS: RelicDef[] = [
     rarity: 'LEGENDARY',
     icon: 'CircuitBoard',
     effect:
-      'Every 20 wins while equipped, your next win guarantees a Legendary Bonus (Resets on unequip',
+      'Every 20 wins while equipped, your next win guarantees a Legendary Bonus.',
     threshold: 20
   },
   {
@@ -168,14 +115,14 @@ export const RELICS: RelicDef[] = [
     name: 'Soul of the Machine',
     rarity: 'MYTHICAL',
     icon: 'Fingerprint',
-    effect: '5% chance for wins to pay out 3x total rewards'
+    effect: '5% chance for wins to pay out 3x rewards'
   },
   {
     key: 'temporal_anchor',
     name: 'Temporal Anchor',
     rarity: 'MYTHICAL',
     icon: 'Anchor',
-    effect: 'Flash Events triggered while equipped last 4 rounds instead of 3'
+    effect: 'Flash Events triggered while equipped last 4 rounds instead of 3.'
   },
   {
     key: 'architects_keystone',
@@ -187,7 +134,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'fortune_satchel',
     name: 'Fortune Satchel',
-    rarity: 'COMMON' as RelicRarity,
+    rarity: 'COMMON',
     icon: 'Backpack',
     effect: '+25% to World Boss Chest point rewards',
     bossExclusive: true
@@ -195,7 +142,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'treasure_compass',
     name: 'Treasure Compass',
-    rarity: 'COMMON' as RelicRarity,
+    rarity: 'COMMON',
     icon: 'Compass',
     effect:
       '+25% chance for a World Boss relic to appear in a World Boss Chest',
@@ -204,7 +151,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'lucky_crest',
     name: 'Lucky Crest',
-    rarity: 'COMMON' as RelicRarity,
+    rarity: 'COMMON',
     icon: 'BadgePlus',
     effect:
       '+10% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
@@ -213,7 +160,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'kings_purse',
     name: "King's Purse",
-    rarity: 'RARE' as RelicRarity,
+    rarity: 'RARE',
     icon: 'Wallet',
     effect: '+50% to World Boss Chest point rewards',
     bossExclusive: true
@@ -221,7 +168,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'relic_magnet',
     name: 'Relic Magnet',
-    rarity: 'RARE' as RelicRarity,
+    rarity: 'RARE',
     icon: 'Magnet',
     effect:
       '+50% chance for a World Boss relic to appear in a World Boss Chest',
@@ -230,7 +177,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'fortune_seal',
     name: 'Fortune Seal',
-    rarity: 'RARE' as RelicRarity,
+    rarity: 'RARE',
     icon: 'Stamp',
     effect:
       '+20% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
@@ -239,7 +186,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'royal_treasury',
     name: 'Royal Treasury',
-    rarity: 'EPIC' as RelicRarity,
+    rarity: 'EPIC',
     icon: 'Landmark',
     effect: '+100% to World Boss Chest point rewards',
     bossExclusive: true
@@ -247,7 +194,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'vault_key',
     name: 'Vault Key',
-    rarity: 'EPIC' as RelicRarity,
+    rarity: 'EPIC',
     icon: 'KeyRound',
     effect:
       '+100% chance for a World Boss relic to appear in a World Boss Chest',
@@ -256,7 +203,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'ascension_sigil',
     name: 'Ascension Sigil',
-    rarity: 'EPIC' as RelicRarity,
+    rarity: 'EPIC',
     icon: 'Sparkles',
     effect:
       '+35% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
@@ -265,7 +212,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'dragons_hoard',
     name: "Dragon's Hoard",
-    rarity: 'LEGENDARY' as RelicRarity,
+    rarity: 'LEGENDARY',
     icon: 'Gem',
     effect: '+150% to World Boss Chest point rewards',
     bossExclusive: true
@@ -273,7 +220,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'collectors_vault',
     name: "Collector's Vault",
-    rarity: 'LEGENDARY' as RelicRarity,
+    rarity: 'LEGENDARY',
     icon: 'Archive',
     effect:
       '+150% chance for a World Boss relic to appear in a World Boss Chest',
@@ -282,7 +229,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'celestial_crown',
     name: 'Celestial Crown',
-    rarity: 'LEGENDARY' as RelicRarity,
+    rarity: 'LEGENDARY',
     icon: 'Crown',
     effect:
       '+50% chance for a World Boss Chest to upgrade by one rarity (up to Mythical)',
@@ -291,7 +238,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'twin_fortune',
     name: 'Twin Fortune',
-    rarity: 'MYTHICAL' as RelicRarity,
+    rarity: 'MYTHICAL',
     icon: 'CopyPlus',
     effect: '25% chance to duplicate the earned World Boss Chest.',
     bossExclusive: true
@@ -299,7 +246,7 @@ export const RELICS: RelicDef[] = [
   {
     key: 'prism_key',
     name: 'Prism Key',
-    rarity: 'MYTHICAL' as RelicRarity,
+    rarity: 'MYTHICAL',
     icon: 'Diamond',
     effect:
       'Enables the Rainbow World Boss Chest tier when combined with chest upgrade relics.',

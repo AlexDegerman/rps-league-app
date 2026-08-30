@@ -1,4 +1,4 @@
-export const playerNames: string[] = [
+export const playerNames = [
   'Yuki Wilson',
   'Mateo Haddad',
   'Arjun Belov',

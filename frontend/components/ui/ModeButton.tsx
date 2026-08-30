@@ -1,5 +1,3 @@
-'use client'
-
 import { VisualMode, FestivalModeKey } from "@/types/events"
 
 interface ModeButtonProps {

@@ -5,8 +5,8 @@ import { useAnimatedBigIntVal } from '@/hooks/useAnimatedBigInt'
 import { formatPoints } from '@/lib/format'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { useUIStore } from '@/app/stores/uiStore'
-import type { RelicDef } from '@/lib/relics'
 import { useSound } from '@/hooks/useSound'
+import { RelicDef } from '@/types/relics'
 
 type ChestRarity =
   | 'COMMON'

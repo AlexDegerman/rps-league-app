@@ -1,70 +1,12 @@
 import { isWorldBossActive, isWorldBossBlocking } from './worldBossService.js'
 import { countActiveSessions } from './bonusStageService.js'
 import type { GlobalEventType, GlobalEventState, GlobalEventBuffResult } from '../types/globalEvents.js'
+import { GLOBAL_EVENT_QUIET_DURATION_MS, GLOBAL_EVENT_WARNING_DURATION_MS, GLOBAL_EVENT_ACTIVE_DURATION_MS, GLOBAL_EVENT_COOLDOWN_MIN_MS, GLOBAL_EVENT_COOLDOWN_MAX_MS, EVENT_WEIGHTS, ORACLE_WARNING_MESSAGES, ORACLE_WARNING_SPEECH } from '../constants/globalEvents.js'
 
 // Feature toggle
 const ENABLE_GLOBAL_EVENTS = true
 
 type Broadcast = (event: string, data: string) => void
-
-const COOLDOWN_MIN_MS = 10 * 60 * 1000
-const COOLDOWN_MAX_MS = 12 * 60 * 1000
-const WARNING_DURATION_MS = 30 * 1000
-const ACTIVE_DURATION_MS = 60 * 1000
-const QUIET_DURATION_MS = 60 * 1000
-
-const EVENT_WEIGHTS: { type: GlobalEventType; weight: number }[] = [
-  { type: 'TIDAL_SURGE', weight: 30 },
-  { type: 'CYCLONE_BLITZ', weight: 25 },
-  { type: 'SOLAR_FLARE', weight: 20 },
-  { type: 'MIRAGE_CATACLYSM', weight: 20 }
-]
-
-const ORACLE_WARNING_MESSAGES: Record<GlobalEventType, string[]> = {
-  TIDAL_SURGE: [
-    'Oracle detects anomalous pressure buildup. Tidal Surge imminent.',
-    'Hydro-telemetry destabilizing. Tidal Surge convergence detected.',
-    'Deep current alignment confirmed. Tidal Surge approaching activation.'
-  ],
-  SOLAR_FLARE: [
-    'Solar thermal index critical. Solar Flare event window opening.',
-    'Plasma convergence imminent. Solar Flare approach vector locked.',
-    'Thermal cascade initiated. Solar Flare activation sequence armed.'
-  ],
-  CYCLONE_BLITZ: [
-    'Atmospheric pressure vortex forming. Cyclone Blitz inbound.',
-    'Kinetic wind vectors spiking. Cyclone Blitz trajectory confirmed.',
-    'Rotational field instability detected. Cyclone Blitz sequence active.'
-  ],
-  MIRAGE_CATACLYSM: [
-    'Desert thermal distortion rising. Mirage Cataclysm materializing.',
-    'Phantom lattice destabilizing. Mirage Cataclysm emergence imminent.',
-    'Illusory field collapse detected. Mirage Cataclysm sequence initiated.'
-  ]
-}
-
-const ORACLE_WARNING_SPEECH: Record<GlobalEventType, string[]> = {
-  TIDAL_SURGE: [
-    'Pressure... anomaly... detected. Tidal... Surge... approaches.',
-    'The deep... currents... converge. Tidal... Surge... imminent.',
-    'Hydro... telemetry... destabilizing. Brace... for... impact.'
-  ],
-  SOLAR_FLARE: [
-    'Thermal... index... critical. Solar... Flare... inbound.',
-    'Plasma... convergence... locked. Solar... Flare... arming.',
-    'The sun... fractures. Solar... Flare... sequence... initiated.'
-  ],
-  CYCLONE_BLITZ: [
-    'Vortex... field... detected. Cyclone... Blitz... approaching.',
-    'Kinetic... winds... rising. Cyclone... Blitz... trajectory... confirmed.',
-    'The atmosphere... tears. Cyclone... Blitz... inbound.'
-  ],
-  MIRAGE_CATACLYSM: [
-    'Desert... thermal... ascending. Mirage... Cataclysm... materializing.',
-    'The phantom... lattice... destabilizes. Mirage... Cataclysm... emerges.',
-    'Illusory... fields... collapse. Mirage... Cataclysm... sequence... active.'
-  ]
-}
 
 let _activeGlobalEvent: GlobalEventState | null = null
 let _schedulerStarted = false
@@ -171,7 +113,7 @@ const transitionToEnd = (broadcast: Broadcast): void => {
   setTimeout(() => {
     _inGlobalQuietPeriod = false
     scheduleNext(broadcast)
-  }, QUIET_DURATION_MS)
+  }, GLOBAL_EVENT_QUIET_DURATION_MS)
 }
 
 const pickEvent = (): GlobalEventType => {
@@ -235,8 +177,8 @@ const tryLaunchEvent = async (broadcast: Broadcast): Promise<void> => {
 const launchEvent = (broadcast: Broadcast): void => {
   const type = pickEvent()
   const now = Date.now()
-  const activeAt = now + WARNING_DURATION_MS
-  const endsAt = activeAt + ACTIVE_DURATION_MS
+  const activeAt = now + GLOBAL_EVENT_WARNING_DURATION_MS
+  const endsAt = activeAt + GLOBAL_EVENT_ACTIVE_DURATION_MS
 
   _activeGlobalEvent = {
     type,
@@ -266,11 +208,14 @@ const launchEvent = (broadcast: Broadcast): void => {
   if (_phaseTimer) clearTimeout(_phaseTimer)
   _phaseTimer = setTimeout(() => {
     transitionToActive(broadcast)
-  }, WARNING_DURATION_MS)
+  }, GLOBAL_EVENT_WARNING_DURATION_MS)
 }
 
 const scheduleNext = (broadcast: Broadcast): void => {
-  const cooldown = randBetween(COOLDOWN_MIN_MS, COOLDOWN_MAX_MS)
+  const cooldown = randBetween(
+    GLOBAL_EVENT_COOLDOWN_MIN_MS,
+    GLOBAL_EVENT_COOLDOWN_MAX_MS
+  )
   setTimeout(() => {
     tryLaunchEvent(broadcast)
   }, cooldown)

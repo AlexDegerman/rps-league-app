@@ -1,10 +1,4 @@
-export type Update = {
-  version: string
-  label: string
-  notes: string[]
-}
-
-export const UPDATES: Update[] = [
+export const UPDATES = [
   {
     version: '4.1',
     label: 'The Adaptive Background Music Update',

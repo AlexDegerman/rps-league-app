@@ -2,20 +2,14 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import {
-  CATEGORY_ORDER,
-  CATEGORY_HIDDEN,
-  CATEGORY_ICONS,
-  CATEGORY_LABELS,
-  RARITY_LABEL,
-  RARITY_BADGE_STYLE,
-  getHighestEarnedPerCategory,
-  ACHIEVEMENT_BADGE_MAP
-} from '@/lib/achievements'
 import { fetchUserAchievements, updateUserBadges } from '@/lib/api'
 import { useUserStore } from '@/app/stores/userStore'
 import { AchievementStats, AchievementRarity } from '@/types/achievements'
 import { AchievementEntry } from '@/types/leaderboard'
+import { CATEGORY_ORDER, ACHIEVEMENT_BADGE_MAP, CATEGORY_HIDDEN, CATEGORY_LABELS, CATEGORY_ICONS, RARITY_BADGE_STYLE, RARITY_LABEL } from '@/constants/achievements'
+import { getHighestEarnedPerCategory } from '@/lib/achievements'
+
+export type CategoryKey = (typeof CATEGORY_ORDER)[number]
 
 interface AchievementMenuProps {
   onBadgeUpdate?: () => void

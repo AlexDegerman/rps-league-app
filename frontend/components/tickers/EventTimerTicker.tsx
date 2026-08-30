@@ -2,11 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '@/app/stores/gameStore'
-import {
-  GLOBAL_EVENT_REGISTRY,
-  GLOBAL_EVENT_MODE_MAP
-} from '@/lib/globalEvents'
 import { GlobalEventType } from '@/types/events'
+import { GLOBAL_EVENT_MODE_MAP, GLOBAL_EVENT_REGISTRY } from '@/constants/globalEvents'
 
 const FESTIVAL_THEME: Record<string, { label: string; color: string }> = {
   SPARK: { label: 'SPARK', color: '#a855f7' },

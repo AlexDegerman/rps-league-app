@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import * as relicService from '../../services/relicService.js'
-import { RELICS } from '../../services/relicService.js'
 import pool from '../../utils/db.js'
 import { mockDbResponse } from '../setup.js'
 import { getActiveFestival } from '../../services/festivalService.js'
+import { RELICS } from '../../constants/relics.js'
 
 vi.mock('../../services/festivalService.js', () => ({
   getActiveFestival: vi.fn(() => null)

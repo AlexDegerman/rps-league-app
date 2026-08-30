@@ -3,28 +3,12 @@ import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import { isGlobalEventBlocking } from './globalEventService.js'
 
-// Feature flag
-const WORLD_BOSS_ENABLED = true
-
 type Broadcast = (event: string, data: string) => void
-
-// Timing constants
-const COOLDOWN_MIN_MS = 10 * 60 * 1000
-const COOLDOWN_MAX_MS = 12 * 60 * 1000
-const WARNING_DURATION_MS = 30 * 1000
-const QUIET_DURATION_MS = 60 * 1000
-const ENCOUNTER_DURATION_MS = 60 * 1000
-
-const BOSS_POOL: WorldBossType[] = [
-  'HEXURION',
-  'ORPHION',
-  'FRACTURON',
-  'APEXION'
-]
 
 // Boss relic definitions
 // Boss-exclusive relics can only be obtained from world boss chests.
-import { RELICS } from './relicService.js'
+import { RELICS } from '../constants/relics.js'
+import { WORLD_BOSS_ENCOUNTER_DURATION_MS, WORLD_BOSS_QUIET_DURATION_MS, WORLD_BOSS_WARNING_DURATION_MS, WORLD_BOSS_COOLDOWN_MIN_MS, WORLD_BOSS_COOLDOWN_MAX_MS, BOSS_POOL, BOSS_WARNING_MESSAGES, CHEST_RELIC_DROP_CHANCE, CHEST_RELIC_RARITY_WEIGHTS, WORLD_BOSS_ENABLED } from '../constants/worldBoss.js'
 
 // Defeats always grant Mythical chests.
 // Retreat rewards scale with the percentage of HP depleted.
@@ -92,24 +76,6 @@ const getChestPointReward = (
   const pctScaled = BigInt(Math.round(pct * 10000))
   return (currentPoints * pctScaled) / 10000n
 }
-
-// Relic drop system with separate drop and rarity rolls.
-const CHEST_RELIC_DROP_CHANCE: Record<ChestRarity, number> = {
-  COMMON: 0.05,
-  RARE: 0.1,
-  EPIC: 0.2,
-  LEGENDARY: 0.3,
-  MYTHICAL: 0.5,
-  RAINBOW: 1.0
-}
-
-const CHEST_RELIC_RARITY_WEIGHTS = [
-  { rarity: 'COMMON' as const, weight: 50 },
-  { rarity: 'RARE' as const, weight: 28 },
-  { rarity: 'EPIC' as const, weight: 15 },
-  { rarity: 'LEGENDARY' as const, weight: 6 },
-  { rarity: 'MYTHICAL' as const, weight: 1 }
-]
 
 const rollChestRelicRarity = (): string => {
   const total = CHEST_RELIC_RARITY_WEIGHTS.reduce((s, e) => s + e.weight, 0)
@@ -325,7 +291,7 @@ export const registerParticipant = (
 ): void => {
   if (_state.participants.has(userId)) return
 
-  const totalSec = ENCOUNTER_DURATION_MS / 1000
+  const totalSec = WORLD_BOSS_ENCOUNTER_DURATION_MS / 1000
   const ratio = totalSec > 0 ? timeRemaining / totalSec : 0
 
   let hpContribution = 1
@@ -569,7 +535,7 @@ const resolveEncounter = async (
   setTimeout(() => {
     _state.phase = 'COOLDOWN'
     scheduleCooldown(broadcast)
-  }, QUIET_DURATION_MS)
+  }, WORLD_BOSS_QUIET_DURATION_MS)
 }
 
 // Reward distribution
@@ -711,7 +677,7 @@ const startActive = async (broadcast: Broadcast): Promise<void> => {
   _state.phase = 'ACTIVE'
   const now = Date.now()
   _state.encounterStartedAt = now
-  _state.encounterEndsAt = now + ENCOUNTER_DURATION_MS
+  _state.encounterEndsAt = now + WORLD_BOSS_ENCOUNTER_DURATION_MS
   _state.bossMaxHp = 4
   _state.bossCurrentHp = 4
 
@@ -739,31 +705,8 @@ const startActive = async (broadcast: Broadcast): Promise<void> => {
   _burstInterval = setInterval(() => drainBurst(broadcast), 100)
   _encounterTimer = setTimeout(
     () => resolveEncounter('RETREAT', broadcast),
-    ENCOUNTER_DURATION_MS
+    WORLD_BOSS_ENCOUNTER_DURATION_MS
   )
-}
-
-const BOSS_WARNING_MESSAGES: Record<WorldBossType, string[]> = {
-  HEXURION: [
-    'Structural... lattice... awakening. Hexurion... assembling.',
-    'Hard-light... geometry... stabilizing. Hexurion... emergence... imminent.',
-    'Sentinel... protocol... activated. Hexurion... approaches.'
-  ],
-  ORPHION: [
-    'Gravitational... anomaly... detected. Orphion... descending.',
-    'Orbital... convergence... accelerating. Orphion... approaches.',
-    'Singularity... forming. Orphion... emergence... imminent.'
-  ],
-  FRACTURON: [
-    'Data... lattice... corruption... detected. Fracturon... materializing.',
-    'Fractal... instability... rising. Fracturon... boot... sequence... initiated.',
-    'Dimensional... refraction... increasing. Fracturon... approaches.'
-  ],
-  APEXION: [
-    'Monolith... energy... signature... detected. Apexion... awakening.',
-    'Kinetic... compression... exceeding... limits. Apexion... emergence... imminent.',
-    'Zenith... core... destabilizing. Apexion... approaches.'
-  ]
 }
 
 const tryStartWarning = (broadcast: Broadcast): void => {
@@ -778,7 +721,7 @@ const tryStartWarning = (broadcast: Broadcast): void => {
 const startWarning = (broadcast: Broadcast): void => {
   if (!WORLD_BOSS_ENABLED) return
   const bossType = randomItem(BOSS_POOL)
-  const warningDuration = WARNING_DURATION_MS
+  const warningDuration = WORLD_BOSS_WARNING_DURATION_MS
   const now = Date.now()
 
   _state.phase = 'WARNING'
@@ -806,7 +749,7 @@ const scheduleCooldown = (broadcast: Broadcast): void => {
 
   _cooldownTimer = setTimeout(
     () => tryStartWarning(broadcast),
-    rand(COOLDOWN_MIN_MS, COOLDOWN_MAX_MS)
+    rand(WORLD_BOSS_COOLDOWN_MIN_MS, WORLD_BOSS_COOLDOWN_MAX_MS)
   )
 }
 

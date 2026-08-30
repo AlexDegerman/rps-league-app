@@ -1,3 +1,6 @@
+import { ORACLE_WORLD_BOSS_WARNING_SPEECH } from "@/constants/worldBoss"
+import { WorldBossType } from "@/types/worldboss"
+
 export type Side = 'left' | 'right'
 
 export type OracleMessage = {
@@ -278,3 +281,8 @@ export const oracleTemplates = [
     speech: `Final forecasting complete. ${side} side terminates the cycle.`
   })
 ]
+
+export const buildWorldBossWarningSpeech = (type: WorldBossType): string => {
+  const messages = ORACLE_WORLD_BOSS_WARNING_SPEECH[type]
+  return messages[Math.floor(Math.random() * messages.length)]!
+}

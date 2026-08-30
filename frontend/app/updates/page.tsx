@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { UPDATES, CURRENT_VERSION, type Update } from '@/lib/updates'
+import { UPDATES, CURRENT_VERSION } from '@/constants/updates'
 
+type Update = (typeof UPDATES)[number]
 type SortOrder = 'newest' | 'oldest'
 
 export default function UpdatesPage() {

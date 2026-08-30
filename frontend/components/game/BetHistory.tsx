@@ -6,9 +6,10 @@ import GemIcon from '@/components/icons/GemIcon'
 import MoveIcon from '@/components/icons/MoveIcon'
 import { fetchUserBetHistory } from '@/lib/api'
 import { Match } from '@/types/rps'
-import { BONUS_TIER_STYLES, EVENT_CARD } from '@/lib/constants'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import { BetHistoryEntry, BonusTier, PredictionRecord } from '@/types/prediction'
+import { EVENT_CARD } from '@/constants/events'
+import { BONUS_TIER_STYLES } from '@/constants/prediction'
 
 type Tab = 'recent' | 'wins' | 'multipliers'
 

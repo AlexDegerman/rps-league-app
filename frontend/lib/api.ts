@@ -9,6 +9,7 @@ import { BetHistoryEntry, PredictionResponse } from '@/types/prediction'
 import { PendingMatch } from '@/types/rps'
 import { Match } from '@/types/rps'
 import { StageType } from '@/types/bonusStage'
+import { RelicDef } from '@/types/relics'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -393,13 +394,13 @@ export async function updateUserBadges(shortId: string, badges: string[]) {
 }
 
 export async function fetchEquippedRelic(userId: string) {
-  return handleResponse<{ relic: import('@/lib/relics').RelicDef | null }>(
+  return handleResponse<{ relic: RelicDef | null }>(
     fetch(`${API_BASE}/api/relics/equipped?userId=${userId}`)
   )
 }
 
 export async function fetchUserRelics(userId: string) {
-  return handleResponse<import('@/lib/relics').RelicDef[]>(
+  return handleResponse<RelicDef[]>(
     fetch(`${API_BASE}/api/relics?userId=${userId}`)
   )
 }
@@ -475,7 +476,7 @@ export async function claimWorldBossReward(userId: string) {
 }
 
 export async function fetchEquippedRelics(userId: string) {
-  return handleResponse<{ relics: (import('@/lib/relics').RelicDef | null)[] }>(
+  return handleResponse<{ relics: (RelicDef | null)[] }>(
     fetch(`${API_BASE}/api/relics/equipped?userId=${userId}`)
   )
 }

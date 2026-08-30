@@ -3,10 +3,9 @@ import pool from '../utils/db.js'
 import { broadcast } from './live.js'
 import { triggerSurgeFestival } from '../services/festivalService.js'
 import { logger } from '../utils/logger.js'
+import { ASCENSION_THRESHOLD } from '../constants/prediction.js'
 
 const router = Router()
-
-export const ASCENSION_THRESHOLD = 999n * 10n ** 162n
 
 router.post('/', async (req, res) => {
   try {

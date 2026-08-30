@@ -7,13 +7,13 @@ import {
   getBonusStyles,
   getDisplayTierClass
 } from '@/lib/format'
-import { BONUS_TIER_STYLES } from '@/lib/constants'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useEffect, useState, useRef } from 'react'
 import { useSound } from '@/hooks/useSound'
 import { slamState } from '@/lib/slamState'
 import { ResultAnim, ConfettiType, BonusTier } from '@/types/prediction'
+import { BONUS_TIER_STYLES } from '@/constants/prediction'
 
 interface ConfettiParticle {
   vx: number

@@ -1,22 +1,8 @@
 import pool from '../utils/db.js'
 import { getWinner } from './matchService.js'
 import { logger } from '../utils/logger.js'
-import type { Match, Move, PlayerStats } from '../types/rps.js'
-
-const rowToMatch = (row: Record<string, unknown>): Match => ({
-  type: row.type as string,
-  gameId: row.game_id as string,
-  time: Number(row.time),
-  expiresAt: row.expires_at ? Number(row.expires_at) : Number(row.time),
-  playerA: {
-    name: row.player_a_name as string,
-    played: row.player_a_played as Move
-  },
-  playerB: {
-    name: row.player_b_name as string,
-    played: row.player_b_played as Move
-  }
-})
+import type { Match, PlayerStats } from '../types/rps.js'
+import { rowToMatch } from '../utils/match.js'
 
 // Tallies wins/losses from an in-memory match list rather than SQL aggregation.
 // Acceptable because callers already scope the query to a small time window.

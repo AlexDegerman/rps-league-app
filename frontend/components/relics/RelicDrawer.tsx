@@ -7,15 +7,11 @@ import {
   Radar,
   ChevronDown
 } from 'lucide-react'
-import {
-  RELICS,
-  RARITY_STYLES,
-  type RelicRarity,
-  type RelicDef
-} from '@/lib/relics'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { useGameStore } from '@/app/stores/gameStore'
-import { ICON_MAP } from '@/lib/relicIcons'
+import { ICON_MAP, RARITY_STYLES, RELICS } from '@/constants/relics'
+import { RelicRarity, RelicDef } from '@/types/relics'
+
 
 const RARITY_ORDER: RelicRarity[] = [
   'MYTHICAL',

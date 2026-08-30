@@ -2,9 +2,6 @@ import pool from '../utils/db.js'
 import {
   type StageType,
   type BonusSession,
-  ENABLED_STAGES,
-  TOTAL_TRIGGER_CHANCE,
-  CRYSTAL_TILE_DISTRIBUTION,
   type CrystalMineGrid,
   type KingsVaultGrid,
   type SniperSession,
@@ -13,13 +10,8 @@ import {
   type WildPredictionGrid,
   type TreasureVaultGrid,
   type SurgeFrenzyGrid,
-  KINGS_VAULT_PAYOUTS,
-  DOUBLE_DOWN_PAYOUTS,
-  RAINBOW_RUSH_WEIGHTS,
-  RAINBOW_RUSH_PAYOUTS,
-  ORACLE_VISION_PAYOUTS,
-  STAGE_WEIGHTS
 } from '../types/bonusStage.js'
+import { TOTAL_TRIGGER_CHANCE, ENABLED_STAGES, STAGE_WEIGHTS, KINGS_VAULT_PAYOUTS, DOUBLE_DOWN_PAYOUTS, RAINBOW_RUSH_PAYOUTS, ORACLE_VISION_PAYOUTS, CRYSTAL_TILE_DISTRIBUTION, RAINBOW_RUSH_WEIGHTS } from '../constants/bonusStage.js'
 
 export function rollBonusTrigger(): StageType | null {
   if (Math.random() * 100 > TOTAL_TRIGGER_CHANCE) return null

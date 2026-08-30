@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { playerNames } from './playerNames.js'
+import { playerNames } from '../constants/playerNames.js'
 import pool from './db.js'
 import type { Match, Move } from '../types/rps.js'
 import { logger } from '../utils/logger.js'
@@ -30,12 +30,12 @@ const generateMatch = (
 ): Match & { expiresAt: number } => {
   let playerA = randomItem(playerNames)
   let playerB = randomItem(playerNames)
-  // Re-roll until players are distinct
+  // Ensure players are distinct
   while (playerB === playerA) playerB = randomItem(playerNames)
 
   const moveA = randomItem(MOVES) as Move
   let moveB = randomItem(MOVES) as Move
-  // Re-roll until moves differ - ties are excluded by design
+  // Exclude ties by design
   while (moveB === moveA) moveB = randomItem(MOVES) as Move
 
   return {

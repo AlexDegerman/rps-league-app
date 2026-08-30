@@ -1,30 +1,11 @@
 
+import { FLASH_EVENT_CONFIG, FLASH_EVENTS_ENABLED, FLASH_TRIGGER_CHANCE, SIPHON_MAP } from '../constants/flashEvents.js'
 import type { FlashEventType, FlashEventState } from '../types/flashEvents.js'
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import { isWorldBossActive } from './worldBossService.js'
 
 const _userSessionFlashTypes = new Map<string, Set<string>>()
-
-const FLASH_EVENTS_ENABLED = true
-const FLASH_TRIGGER_CHANCE = 0.05
-
-const FLASH_EVENT_CONFIG: Record<
-  FlashEventType,
-  { multiplier: number; weight: number }
-> = {
-  LUNAR: { multiplier: 3, weight: 1.0 },
-  ELECTRIC: { multiplier: 3, weight: 1.0 },
-  CARDS: { multiplier: 1.5, weight: 1.0 },
-  HELLFIRE: { multiplier: 3, weight: 1.0 }
-}
-
-const SIPHON_MAP: Record<string, FlashEventType> = {
-  lunar_siphon: 'LUNAR',
-  static_inductor: 'ELECTRIC',
-  dealers_hand: 'CARDS',
-  volcanic_mantle: 'HELLFIRE'
-}
 
 /**
  * Weighted random pick for Flash Events.

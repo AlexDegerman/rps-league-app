@@ -5,11 +5,11 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
-import { EVENT_HEADER_CONFIG } from '@/lib/eventConfig'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUIStore } from '@/app/stores/uiStore'
 import { primeOracleVoices } from '@/lib/oracleTTS'
+import { EVENT_HEADER_CONFIG } from '@/constants/events'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)

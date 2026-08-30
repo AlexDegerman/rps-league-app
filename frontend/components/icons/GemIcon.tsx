@@ -1,5 +1,3 @@
-'use client'
-
 interface GemIconProps {
   size?: number
   className?: string
