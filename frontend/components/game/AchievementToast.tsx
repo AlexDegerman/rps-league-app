@@ -2,7 +2,7 @@
 
 import { useGameStore } from '@/app/stores/gameStore'
 import { RARITY_AURA, RARITY_TEXT, RARITY_TOAST_BG } from '@/lib/achievements'
-import { AchievementRarity } from '@/types/rps'
+import { AchievementRarity } from '@/types/achievements'
 import { useEffect, useRef } from 'react'
 
 export default function AchievementToast() {

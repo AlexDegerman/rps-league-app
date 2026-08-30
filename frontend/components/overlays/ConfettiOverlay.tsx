@@ -8,7 +8,7 @@ import TidalSurgeConfetti from '../confetti/TidalSurgeConfetti'
 import SolarFlareConfetti from '../confetti/SolarFlareConfetti'
 import CycloneBlitzConfetti from '../confetti/CycloneBlitzConfetti'
 import MirageCataclysmConfetti from '../confetti/MirageCataclysmConfetti'
-import type { ConfettiType } from '@/types/rps'
+import { ConfettiType } from '@/types/prediction'
 
 interface ConfettiOverlayProps {
   confettiType: ConfettiType

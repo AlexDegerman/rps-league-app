@@ -104,7 +104,10 @@ export default function NeonParadiseContainer() {
                   {activeBonusStage
                     .toLowerCase()
                     .split('_')
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .map(
+                      (word: string) =>
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                    )
                     .join(' ')}
                 </span>
                 <span className="text-violet-300 mx-1.5 leading-none">·</span>
@@ -148,7 +151,9 @@ export default function NeonParadiseContainer() {
             {activeBonusStage === 'WILD_PREDICTION' && <WildPredictionStage />}
             {activeBonusStage === 'SURGE_FRENZY' && <SurgeFrenzyStage />}
             {activeBonusStage === 'RAINBOW_RUSH' && <RainbowRushStage />}
-            {activeBonusStage === 'SNIPER_CHALLENGE' && <SniperChallengeStage />}
+            {activeBonusStage === 'SNIPER_CHALLENGE' && (
+              <SniperChallengeStage />
+            )}
             {activeBonusStage === 'ORACLE_VISION' && <OracleVisionStage />}
             {activeBonusStage === 'CRYSTAL_MINE' && <CrystalMineStage />}
           </div>

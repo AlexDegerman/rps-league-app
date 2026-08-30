@@ -2,7 +2,7 @@
 
 import { LinkedInBadge } from './LinkedInBadge'
 import { AchievementBadge } from './AchievementBadge'
-import { BadgeData } from '@/types/rps'
+import { BadgeData } from '@/types/leaderboard'
 
 interface IdentityBadgesProps {
   linkedinUrl?: string | null

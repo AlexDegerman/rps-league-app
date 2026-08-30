@@ -21,15 +21,6 @@ import { getOrCreateUser, isUserValid } from '@/lib/user'
 import type {
   Match,
   PendingMatch,
-  ResultAnim,
-  EventTheme,
-  FestivalModeKey,
-  VisualMode,
-  FestivalSSEData,
-  GlobalEventStartSSEData,
-  GlobalEventWarningSSEData,
-  GlobalEventType,
-  GlobalEventPhase
 } from '@/types/rps'
 import { useSound } from '@/hooks/useSound'
 import LiveStatsTicker from '@/components/tickers/LiveStatTicker'
@@ -74,13 +65,12 @@ import { pushBurstEvent } from '@/lib/worldBossFeed'
 import WorldBossArena from '@/components/game/WorldBossArena'
 import WorldBossChestOpening, { ChestResult } from '@/components/game/WorldBossChestOpening'
 import NeonParadiseContainer from '@/components/game/NeonParadiseContainer'
-import type {
-  BonusStageTriggerSSEData,
-  BonusStageCompletedSSEData
-} from '@/types/rps'
 import { ORACLE_VOICE_LINES } from '@/lib/constants'
 import { fetchActiveBonusSession } from '@/lib/api'
 import { useBGM } from '@/hooks/useBGM'
+import { BonusStageTriggerSSEData, BonusStageCompletedSSEData } from '@/types/bonusStage'
+import { GlobalEventType, GlobalEventPhase, FestivalModeKey, VisualMode, EventTheme, FestivalSSEData, GlobalEventWarningSSEData, GlobalEventStartSSEData } from '@/types/events'
+import { ResultAnim } from '@/types/prediction'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -102,7 +92,6 @@ export default function HomePage() {
   const festivalModeKey = useGameStore((s) => s.festivalModeKey)
   const activeGlobalEvent = useGameStore((s) => s.activeGlobalEvent)
   const globalEventPhase = useGameStore((s) => s.globalEventPhase)
-  const globalEventActiveAt = useGameStore((s) => s.globalEventActiveAt)
   const setGlobalEventWarning = useGameStore((s) => s.setGlobalEventWarning)
   const setGlobalEventActive = useGameStore((s) => s.setGlobalEventActive)
   const worldBossPhase = useGameStore((s) => s.worldBossPhase)
@@ -306,167 +295,6 @@ export default function HomePage() {
       visualMode && flashMap[visualMode] ? flashMap[visualMode]! : null
     )
   }, [visualMode, setVisualMode, setLiveTheme])
-
-  // Global event warning countdown, fires at 60s and 30s before active (visual ticker only, no TTS)
-  const countdownAnnouncedRef = useRef<Set<string>>(new Set())
-
-  useEffect(() => {
-    if (
-      !activeGlobalEvent ||
-      globalEventPhase !== 'warning' ||
-      !globalEventActiveAt
-    ) {
-      countdownAnnouncedRef.current.clear()
-      return
-    }
-
-    const interval = setInterval(() => {
-      const msLeft = globalEventActiveAt - (Date.now() + serverOffset)
-      if (msLeft <= 0) return
-
-      // Announce at ~60s and ~30s remaining (500ms tolerance window)
-      const shouldAnnounce60 = msLeft <= 62000 && msLeft >= 58000
-      const shouldAnnounce30 = msLeft <= 32000 && msLeft >= 28000
-
-      const key60 = `${activeGlobalEvent}-60`
-      const key30 = `${activeGlobalEvent}-30`
-
-      if (shouldAnnounce60 && !countdownAnnouncedRef.current.has(key60)) {
-        countdownAnnouncedRef.current.add(key60)
-        setOracleTickerMessage({
-          id: `global-countdown-60-${Date.now()}`,
-          content: (
-            <span>
-              <span
-                className="font-black uppercase"
-                style={{
-                  color:
-                    GLOBAL_EVENT_REGISTRY[
-                      GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]
-                    ]?.color ?? '#94a3b8'
-                }}
-              >
-                {GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
-                  ?.label ?? activeGlobalEvent}
-              </span>{' '}
-              activates in approximately 1 minute.
-            </span>
-          ),
-          accentColor:
-            GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
-              ?.color ?? '#94a3b8',
-          durationMs: 6000
-        })
-      }
-
-      if (shouldAnnounce30 && !countdownAnnouncedRef.current.has(key30)) {
-        countdownAnnouncedRef.current.add(key30)
-        setOracleTickerMessage({
-          id: `global-countdown-30-${Date.now()}`,
-          content: (
-            <span>
-              <span
-                className="font-black uppercase"
-                style={{
-                  color:
-                    GLOBAL_EVENT_REGISTRY[
-                      GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]
-                    ]?.color ?? '#94a3b8'
-                }}
-              >
-                {GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
-                  ?.label ?? activeGlobalEvent}
-              </span>{' '}
-              imminent. 30 seconds.
-            </span>
-          ),
-          accentColor:
-            GLOBAL_EVENT_REGISTRY[GLOBAL_EVENT_MODE_MAP[activeGlobalEvent]]
-              ?.color ?? '#94a3b8',
-          durationMs: 5000
-        })
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [
-    activeGlobalEvent,
-    globalEventPhase,
-    globalEventActiveAt,
-    serverOffset,
-    setOracleTickerMessage
-  ])
-
-  // World Boss countdown, fires at 60s and 30s before spawn (visual ticker only, no TTS)
-  useEffect(() => {
-    if (worldBossPhase !== 'WARNING' || !worldBossType) {
-      bossCountdownAnnouncedRef.current.clear()
-      return
-    }
-
-    const warningAt = useGameStore.getState().worldBossWarningActiveAt
-    if (!warningAt) return
-
-    const interval = setInterval(() => {
-      const msLeft = warningAt - (Date.now() + serverOffset)
-      if (msLeft <= 0) return
-
-      const key60 = `${worldBossType}-60`
-      const key30 = `${worldBossType}-30`
-
-      if (
-        msLeft <= 62000 &&
-        msLeft >= 58000 &&
-        !bossCountdownAnnouncedRef.current.has(key60)
-      ) {
-        bossCountdownAnnouncedRef.current.add(key60)
-        setOracleTickerMessage({
-          id: `boss-countdown-60-${Date.now()}`,
-          content: (
-            <span>
-              ⚔️{' '}
-              <span
-                className="font-black uppercase"
-                style={{ color: '#e879f9' }}
-              >
-                {worldBossType}
-              </span>{' '}
-              encounter in approximately 1 minute.
-            </span>
-          ),
-          accentColor: '#e879f9',
-          durationMs: 5_000
-        })
-      }
-
-      if (
-        msLeft <= 32000 &&
-        msLeft >= 28000 &&
-        !bossCountdownAnnouncedRef.current.has(key30)
-      ) {
-        bossCountdownAnnouncedRef.current.add(key30)
-        setOracleTickerMessage({
-          id: `boss-countdown-30-${Date.now()}`,
-          content: (
-            <span>
-              ⚔️{' '}
-              <span
-                className="font-black uppercase"
-                style={{ color: '#e879f9' }}
-              >
-                {worldBossType}
-              </span>{' '}
-              imminent. 30 seconds.
-            </span>
-          ),
-          accentColor: '#e879f9',
-          durationMs: 4_000
-        })
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [worldBossPhase, worldBossType, serverOffset, setOracleTickerMessage])
 
   // scroll-to-top button
   useEffect(() => {

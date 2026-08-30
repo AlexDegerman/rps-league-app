@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import type { ResultAnim } from '@/types/rps'
 import { OracleTickerMessage } from '@/components/tickers/OracleMessageTicker'
+import { ResultAnim } from '@/types/prediction'
 
 type BrandTheme = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
 export type PopupKind =

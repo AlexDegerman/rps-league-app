@@ -1,19 +1,16 @@
-import { BadgeData, LeaderboardEntry } from '@/types/rps'
 import {
-  Tab,
-  SortKey,
-  SortDir,
   isLapsTab,
   isAchievementsTab,
   EMPTY_MESSAGES
 } from './constants'
 import { SortArrow } from './SortArrow'
 import { LeaderboardRow } from './LeaderboardRow'
+import { BadgeData, LeaderboardEntry, LeaderboardTab, SortDir, SortKey } from '@/types/leaderboard'
 
 interface LeaderboardTableProps {
   data: LeaderboardEntry[]
   isLoading: boolean
-  tab: Tab
+  tab: LeaderboardTab
   sort: SortKey
   dir: SortDir
   onSort: (col: SortKey) => void

@@ -3,10 +3,35 @@
 import React from 'react'
 import Link from 'next/link'
 import { formatDateTime, getPlayerResult, resultColor } from '@/lib/format'
-import type { Match, MatchRowProps, PredictionRecord } from '@/types/rps'
+import type { Match } from '@/types/rps'
 import MoveIcon from '@/components/icons/MoveIcon'
 import { useGameStore } from '@/app/stores/gameStore'
 import { MODE_CONFIG as BASE_MODE_CONFIG } from '@/lib/constants'
+import { PredictionRecord } from '@/types/prediction'
+
+interface MatchRowProps {
+  match: Match
+  highlightPlayer?: string
+  prediction?: PredictionRecord
+  alwaysLeft?: boolean
+  winStreak?: number
+  visualMode?: string | null
+  totalMultiplier?: number
+  festivalMultiplier?: number
+  festivalType?: string | null
+}
+
+interface MatchListProps {
+  matches: Match[]
+  highlightPlayer?: string
+  isLoadingMore?: boolean
+  hasMore?: boolean
+  predictions?: Map<string, PredictionRecord>
+  alwaysLeft?: boolean
+  winStreak?: number
+  visualMode?: string | null
+  festivalModeKey?: string | null
+}
 
 const MODE_CONFIG = {
   ...BASE_MODE_CONFIG,

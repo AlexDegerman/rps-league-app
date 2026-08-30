@@ -50,17 +50,17 @@ export interface BonusSession {
   updatedAt: Date
 }
 
-export interface CrystalMineGrid {
-  tiles: CrystalTile[]
-  revealedIndices: number[]
-  miningCharges: number
-}
-
 export type CrystalTileType = 'EMPTY' | 'DIAMOND'
 
 export interface CrystalTile {
   type: CrystalTileType
   revealed: boolean
+}
+
+export interface CrystalMineGrid {
+  tiles: CrystalTile[]
+  revealedIndices: number[]
+  miningCharges: number
 }
 
 export interface KingsVaultGrid {
@@ -85,6 +85,11 @@ export interface OracleVisionSession {
 export interface RainbowRushSession {
   spinResults: (1 | 2 | 3 | 4 | 5)[]
   spinsRevealed: number
+}
+
+export interface RainbowRushWeights {
+  tier: 1 | 2 | 3 | 4 | 5
+  weight: number
 }
 
 export interface WildPredictionGrid {

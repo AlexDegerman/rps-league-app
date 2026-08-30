@@ -1,8 +1,8 @@
 'use client'
 
+import { EventTheme } from '@/types/events'
 import { useEffect, useState, useRef } from 'react'
 import React from 'react'
-import type { EventTheme } from '@/types/rps'
 
 // Electric full-screen
 function ElectricActivationConfetti({ isMobile }: { isMobile: boolean }) {

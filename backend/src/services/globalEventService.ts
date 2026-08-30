@@ -1,25 +1,9 @@
 import { isWorldBossActive, isWorldBossBlocking } from './worldBossService.js'
 import { countActiveSessions } from './bonusStageService.js'
+import type { GlobalEventType, GlobalEventState, GlobalEventBuffResult } from '../types/globalEvents.js'
 
 // Feature toggle
 const ENABLE_GLOBAL_EVENTS = true
-
-export type GlobalEventType =
-  | 'TIDAL_SURGE'
-  | 'SOLAR_FLARE'
-  | 'CYCLONE_BLITZ'
-  | 'MIRAGE_CATACLYSM'
-
-export type GlobalEventPhase = 'warning' | 'active'
-
-export interface GlobalEventState {
-  type: GlobalEventType
-  phase: GlobalEventPhase
-  startedAt: number
-  activeAt: number
-  endsAt: number
-  triggeredAt: number
-}
 
 type Broadcast = (event: string, data: string) => void
 
@@ -298,13 +282,6 @@ export const startGlobalEventScheduler = (broadcast: Broadcast): void => {
   if (_schedulerStarted) return
   _schedulerStarted = true
   scheduleNext(broadcast)
-}
-
-export interface GlobalEventBuffResult {
-  gainLossMultiplied: bigint
-  echoAmount: bigint
-  buffType: GlobalEventType | null
-  echoFactor?: number
 }
 
 /**

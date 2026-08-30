@@ -1,19 +1,10 @@
+
+import type { FlashEventType, FlashEventState } from '../types/flashEvents.js'
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import { isWorldBossActive } from './worldBossService.js'
 
-export type FlashEventType = 'LUNAR' | 'ELECTRIC' | 'CARDS' | 'HELLFIRE'
 const _userSessionFlashTypes = new Map<string, Set<string>>()
-
-export interface FlashEventState {
-  type: FlashEventType
-  multiplier: number
-  betsRemaining: number
-  triggeredAt: number
-  expiresAt?: number
-  isFestival?: boolean
-  snapshotRelic: string | null
-}
 
 const FLASH_EVENTS_ENABLED = true
 const FLASH_TRIGGER_CHANCE = 0.05

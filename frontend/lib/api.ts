@@ -1,23 +1,14 @@
-import type {
-  UserStats,
-  ProfileData,
-  RecoverResponse,
-  LeaderboardEntry,
-  PredictionResponse,
-  UserPointsData,
-  Match,
-  SinglePlayerStats,
-  PendingMatch,
-  AchievementEntry,
-  AchievementStats,
-  BetHistoryEntry,
-  PlayerStats,
-  BadgeData,
-  GlobalEventStateResponse,
-  OracleResponse
-} from '@/types/rps'
 import { logger } from '@/lib/logger'
 import { getOrCreateUser, getStoredRecoveryCode } from './user'
+import { ProfileData, RecoverResponse, UserPointsData, UserStats } from '@/types/user'
+import { AchievementStats } from '@/types/achievements'
+import { GlobalEventStateResponse } from '@/types/events'
+import { PlayerStats, LeaderboardEntry, SinglePlayerStats, BadgeData, AchievementEntry } from '@/types/leaderboard'
+import { OracleResponse } from '@/types/oracle'
+import { BetHistoryEntry, PredictionResponse } from '@/types/prediction'
+import { PendingMatch } from '@/types/rps'
+import { Match } from '@/types/rps'
+import { StageType } from '@/types/bonusStage'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -518,7 +509,7 @@ export async function fetchActiveBonusSession(userId: string) {
     active: boolean
     session?: {
       id: string
-      stageType: import('@/types/rps').StageType
+      stageType: StageType
       accumulatedPayout: string
       lastBetAmount: string
       stageStepsCompleted: number

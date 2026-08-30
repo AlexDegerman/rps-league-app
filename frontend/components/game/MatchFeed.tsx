@@ -4,13 +4,14 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUserStore } from '@/app/stores/userStore'
 import { useUIStore } from '@/app/stores/uiStore'
-import type { Match, VisualMode } from '@/types/rps'
+import type { Match } from '@/types/rps'
 import PendingMatchCard from '@/components/game/PendingMatchCard'
 import MatchList from '@/components/game/MatchList'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
 import { unlockOracle } from '@/lib/oracleTTS'
 import { postPrediction } from '@/lib/api'
 import { logger } from '@/lib/logger'
+import { VisualMode } from '@/types/events'
 
 interface MatchFeedProps {
   visualMode: VisualMode

@@ -3,11 +3,8 @@ import { renderHook, act } from '@testing-library/react'
 import { useIdleBet } from '../../hooks/useIdleBet'
 import { postPrediction } from '@/lib/api'
 import { getOrCreateUser, isUserValid } from '@/lib/user'
-import type {
-  PendingMatch,
-  PredictionRecord,
-  PredictionResponse
-} from '@/types/rps'
+import type { PendingMatch } from '@/types/rps'
+import { PredictionRecord, PredictionResponse } from '@/types/prediction'
 
 interface MockIdleStoreState {
   idleSide: 'left' | 'right' | null

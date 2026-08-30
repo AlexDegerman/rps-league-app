@@ -2,13 +2,13 @@ import Link from 'next/link'
 import GemIcon from '@/components/icons/GemIcon'
 import { IdentityBadges } from '@/components/badges/IdentityBadges'
 import { formatPoints, getAmountColor, getDisplayTierClass } from '@/lib/format'
-import { BadgeData, LeaderboardEntry } from '@/types/rps'
-import { Tab, isLapsTab, isAchievementsTab } from './constants'
+import { isAchievementsTab, isLapsTab } from './constants'
+import { BadgeData, LeaderboardEntry, LeaderboardTab } from '@/types/leaderboard'
 
 interface LeaderboardRowProps {
   entry: LeaderboardEntry
   index: number
-  tab: Tab
+  tab: LeaderboardTab
   isMe: boolean
   myBadges: BadgeData[]
   myStoreShowLinkedin: boolean

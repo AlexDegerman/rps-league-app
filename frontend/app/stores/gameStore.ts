@@ -2,20 +2,12 @@ import { create } from 'zustand'
 import type {
   PendingMatch,
   Match,
-  PredictionRecord,
-  FestivalModeKey,
-  VisualMode,
-  EventTheme,
-  AchievementNotif,
-  GlobalEventType,
-  GlobalEventPhase,
-  PredictionResultSSEData,
-  WorldBossPhase,
-  WorldBossType,
-  DamagerEntry,
-  WorldBossSyncPayload,
-  StageType,
 } from '@/types/rps'
+import { AchievementNotif } from '@/types/achievements'
+import { StageType } from '@/types/bonusStage'
+import { FestivalModeKey, GlobalEventType, GlobalEventPhase, VisualMode, EventTheme } from '@/types/events'
+import { PredictionRecord, PredictionResultSSEData } from '@/types/prediction'
+import { WorldBossPhase, WorldBossType, DamagerEntry, WorldBossSyncPayload } from '@/types/worldboss'
 
 interface GameState {
   // Connection State

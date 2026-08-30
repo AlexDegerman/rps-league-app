@@ -1,4 +1,4 @@
-import { VisualMode } from "@/types/rps"
+import { VisualMode } from "@/types/events"
 
 interface FlashBadgeProps {
   visualMode: VisualMode

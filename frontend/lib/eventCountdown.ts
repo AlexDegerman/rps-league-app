@@ -1,4 +1,4 @@
-import type { WorldBossType } from '@/types/rps'
+import { WorldBossType } from "@/types/worldboss"
 
 const ORACLE_WORLD_BOSS_WARNING_SPEECH: Record<WorldBossType, string[]> = {
   HEXURION: [

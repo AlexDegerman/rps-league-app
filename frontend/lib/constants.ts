@@ -1,5 +1,5 @@
-import { BonusStyle, BonusTier } from '@/types/rps'
-import type { StageType } from '@/types/rps'
+import { StageType } from "@/types/bonusStage"
+import { BonusStyle, BonusTier } from "@/types/prediction"
 
 export const BONUS_TIER_STYLES: Record<BonusTier, BonusStyle> = {
   MYTHICAL: {

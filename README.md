@@ -2,7 +2,6 @@
 
 A real-time live-service Rock Paper Scissors platform where players bet virtual cosmetic points, track rankings, and interact with an AI-powered game guide and match analysis system. I am the sole developer and maintainer, running it continuously in production: monitoring the system, shipping fixes, and [building new features](./CHANGELOG.md) on an ongoing basis.
 
-
 > 🚨 **Project Evolution:** This is a full-scale rebuild of my original
 > **[RPS League](https://github.com/AlexDegerman/rps-league)**, originally
 > built for a Reaktor developer assignment as a static match viewer. This
@@ -10,6 +9,7 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 > scaling and real-time user engagement.
 
 **Play Here:** [https://rpsleague.fi/](https://rpsleague.fi/?utm_source=github/)
+
 ## 🎮 Preview
 
 <p align="center">

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { clearUserCache, getOrCreateUser } from '@/lib/user'
 import GemIcon from '@/components/icons/GemIcon'
-import type { BadgeData, UserStats } from '@/types/rps'
 import {
   getDisplayTierClass,
   getFullNumberName,
@@ -43,6 +42,8 @@ import { useGameStore } from '@/app/stores/gameStore'
 import { Package, X } from 'lucide-react'
 import { ICON_MAP } from '@/lib/relicIcons'
 import InfoIcon from '@/components/icons/InfoIcon'
+import { BadgeData } from '@/types/leaderboard'
+import { UserStats } from '@/types/user'
 
 interface Ranks {
   daily: number | null

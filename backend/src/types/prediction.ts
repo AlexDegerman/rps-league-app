@@ -1,4 +1,4 @@
-import type { GlobalEventBuffResult } from '../services/globalEventService.js'
+import type { GlobalEventBuffResult } from "./globalEvents.js"
 
 export interface PredictionRow {
   user_id: string

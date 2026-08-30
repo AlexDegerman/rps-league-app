@@ -1,4 +1,4 @@
-import { SortDir } from '@/types/rps'
+import { SortDir } from "@/types/leaderboard";
 
 export function SortArrow({ active, dir }: { active: boolean; dir: SortDir }) {
   if (!active) return <span className="text-gray-300 ml-1">↕</span>

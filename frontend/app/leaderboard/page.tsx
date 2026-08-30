@@ -6,24 +6,19 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { fetchAchievementsBulkBadges, fetchUnifiedLeaderboard } from '@/lib/api'
 import Link from 'next/link'
-import { BadgeData, LeaderboardEntry } from '@/types/rps'
 import { logger } from '@/lib/logger'
 import { useUserStore } from '../stores/userStore'
-import {
-  Tab,
-  SortKey,
-  SortDir,
-  DEFAULT_SORT
-} from '@/components/leaderboard/constants'
+import { DEFAULT_SORT } from '@/components/leaderboard/constants'
 import { LeaderboardTable } from '@/components/leaderboard/LeaderboardTable'
+import { BadgeData, LeaderboardEntry, LeaderboardTab, SortDir, SortKey } from '@/types/leaderboard'
 
 function LeaderboardContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
 
-  const [tab, setTab] = useState<Tab>(
-    (searchParams.get('tab') as Tab) || 'daily'
+  const [tab, setTab] = useState<LeaderboardTab>(
+    (searchParams.get('tab') as LeaderboardTab) || 'daily'
   )
   const [sort, setSort] = useState<SortKey>(
     (searchParams.get('sort') as SortKey) || DEFAULT_SORT[tab]
@@ -81,7 +76,7 @@ function LeaderboardContent() {
     }
   }, [tab, sort, dir])
 
-  const handleTab = (t: Tab) => {
+  const handleTab = (t: LeaderboardTab) => {
     if (t === tab) return
     const newSort = DEFAULT_SORT[t]
     setTab(t)
@@ -154,24 +149,26 @@ function LeaderboardContent() {
         {(isPointsCategory || isLapsCategory) && (
           <div className="flex gap-1 p-1 bg-gray-200/50 rounded-lg w-fit animate-in fade-in slide-in-from-top-1 duration-200">
             {isPointsCategory
-              ? (['daily', 'weekly', 'alltime'] as Tab[]).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => handleTab(t)}
-                    className={`px-3 py-1 rounded-md font-bold text-[10px] uppercase transition ${
-                      tab === t
-                        ? 'bg-white text-purple-600 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    {t === 'daily'
-                      ? 'Daily'
-                      : t === 'weekly'
-                        ? 'Weekly'
-                        : 'All Time'}
-                  </button>
-                ))
-              : (['laps', 'speedrun'] as Tab[]).map((t) => (
+              ? (['daily', 'weekly', 'alltime'] as LeaderboardTab[]).map(
+                  (t) => (
+                    <button
+                      key={t}
+                      onClick={() => handleTab(t)}
+                      className={`px-3 py-1 rounded-md font-bold text-[10px] uppercase transition ${
+                        tab === t
+                          ? 'bg-white text-purple-600 shadow-sm'
+                          : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {t === 'daily'
+                        ? 'Daily'
+                        : t === 'weekly'
+                          ? 'Weekly'
+                          : 'All Time'}
+                    </button>
+                  )
+                )
+              : (['laps', 'speedrun'] as LeaderboardTab[]).map((t) => (
                   <button
                     key={t}
                     onClick={() => handleTab(t)}

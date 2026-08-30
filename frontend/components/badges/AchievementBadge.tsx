@@ -1,7 +1,8 @@
 'use client'
 
 import { RARITY_BADGE_STYLE, BADGE_REQUIREMENT } from '@/lib/achievements'
-import { AchievementRarity, BadgeData } from '@/types/rps'
+import { AchievementRarity } from '@/types/achievements'
+import { BadgeData } from '@/types/leaderboard'
 
 interface AchievementBadgeProps {
   badge: BadgeData

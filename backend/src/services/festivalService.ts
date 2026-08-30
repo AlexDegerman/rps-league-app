@@ -1,3 +1,4 @@
+import type { FestivalType, FestivalState } from '../types/festivals.js'
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 import {
@@ -7,24 +8,6 @@ import {
 } from './flashEventService.js'
 import { isWorldBossBlocking } from './worldBossService.js'
 
-export type FestivalType =
-  | 'SPARK'
-  | 'GHOST'
-  | 'SAFEGUARD'
-  | 'RESONANCE'
-  | 'SURGE'
-  | 'VAULT'
-  | 'FEVER'
-  | 'SANGUINE'
-
-export interface FestivalState {
-  type: FestivalType
-  startedAt: number
-  flashType?: string | undefined
-  endsAt: number
-  triggeredBy: string
-  isDemo?: boolean
-}
 
 type Broadcast = (event: string, data: string) => void
 

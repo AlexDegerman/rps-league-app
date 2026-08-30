@@ -1,5 +1,6 @@
 'use client'
-import type { VisualMode, FestivalModeKey } from '@/types/rps'
+
+import { VisualMode, FestivalModeKey } from "@/types/events"
 
 interface ModeButtonProps {
   visualMode: VisualMode

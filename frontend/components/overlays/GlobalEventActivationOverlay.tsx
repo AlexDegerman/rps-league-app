@@ -1,8 +1,8 @@
 'use client'
 
+import { GlobalEventType } from '@/types/events'
 import { useEffect, useState, useRef } from 'react'
 import React from 'react'
-import type { GlobalEventType } from '@/types/rps'
 
 // TIDAL SURGE full-screen
 const TS_DROPLETS = Array.from({ length: 100 }, (_, i) => {

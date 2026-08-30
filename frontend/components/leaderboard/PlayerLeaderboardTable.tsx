@@ -1,5 +1,5 @@
+import { PlayerStats } from '@/types/leaderboard'
 import Link from 'next/link'
-import type { PlayerStats } from '@/types/rps'
 
 interface LeaderboardTableProps {
   stats: PlayerStats[]

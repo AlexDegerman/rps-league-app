@@ -1,7 +1,8 @@
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import PendingMatchCard from '@/components/game/PendingMatchCard'
-import type { PendingMatch, PredictionRecord } from '@/types/rps'
+import type { PendingMatch } from '@/types/rps'
+import { PredictionRecord } from '@/types/prediction'
 
 describe('PendingMatchCard', () => {
   const NOW = new Date(2026, 3, 2, 5, 0, 0).getTime()

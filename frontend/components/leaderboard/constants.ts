@@ -1,23 +1,6 @@
-export type Tab =
-  | 'daily'
-  | 'weekly'
-  | 'alltime'
-  | 'laps'
-  | 'speedrun'
-  | 'achievements'
-export type SortKey =
-  | 'points'
-  | 'gained'
-  | 'peak'
-  | 'wins'
-  | 'losses'
-  | 'winrate'
-  | 'laps'
-  | 'fastest'
-  | 'achievements'
-export type SortDir = 'asc' | 'desc'
+import { LeaderboardTab, SortKey } from "@/types/leaderboard"
 
-export const DEFAULT_SORT: Record<Tab, SortKey> = {
+export const DEFAULT_SORT: Record<LeaderboardTab, SortKey> = {
   daily: 'points',
   weekly: 'gained',
   alltime: 'peak',
@@ -26,7 +9,7 @@ export const DEFAULT_SORT: Record<Tab, SortKey> = {
   achievements: 'achievements'
 }
 
-export const TAB_LABELS: Record<Tab, string> = {
+export const TAB_LABELS: Record<LeaderboardTab, string> = {
   daily: 'Daily',
   weekly: 'Weekly',
   alltime: 'All Time',
@@ -35,7 +18,7 @@ export const TAB_LABELS: Record<Tab, string> = {
   achievements: 'Achievements'
 }
 
-export const EMPTY_MESSAGES: Record<Tab, string> = {
+export const EMPTY_MESSAGES: Record<LeaderboardTab, string> = {
   daily: 'No bets placed today yet, be the first to claim the top spot!',
   weekly: 'Season just started, be the first to claim the weekly crown!',
   alltime: 'No predictors yet, jump in and make history!',
@@ -44,5 +27,5 @@ export const EMPTY_MESSAGES: Record<Tab, string> = {
   achievements: 'No achievements earned yet. Be the first.'
 }
 
-export const isLapsTab = (t: Tab) => t === 'laps' || t === 'speedrun'
-export const isAchievementsTab = (t: Tab) => t === 'achievements'
+export const isLapsTab = (t: LeaderboardTab) => t === 'laps' || t === 'speedrun'
+export const isAchievementsTab = (t: LeaderboardTab) => t === 'achievements'

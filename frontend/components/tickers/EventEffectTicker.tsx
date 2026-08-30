@@ -10,7 +10,7 @@ import {
   GLOBAL_EVENT_MODE_MAP
 } from '@/lib/globalEvents'
 import { BOSS_COLORS, BOSS_EFFECT_TEXT } from '@/lib/worldBosses'
-import { FestivalModeKey, FestivalType, GlobalEventType } from '@/types/rps'
+import { FestivalModeKey, FestivalType, GlobalEventType } from '@/types/events'
 
 const LOCAL_FESTIVAL_MAP: Record<string, FestivalModeKey> = {
   SPARK: 'festival_spark',

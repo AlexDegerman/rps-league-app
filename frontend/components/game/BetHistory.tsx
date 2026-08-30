@@ -5,14 +5,10 @@ import { formatDateTime, formatPoints, getDisplayTierClass } from '@/lib/format'
 import GemIcon from '@/components/icons/GemIcon'
 import MoveIcon from '@/components/icons/MoveIcon'
 import { fetchUserBetHistory } from '@/lib/api'
-import {
-  Match,
-  PredictionRecord,
-  BonusTier,
-  BetHistoryEntry
-} from '@/types/rps'
+import { Match } from '@/types/rps'
 import { BONUS_TIER_STYLES, EVENT_CARD } from '@/lib/constants'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
+import { BetHistoryEntry, BonusTier, PredictionRecord } from '@/types/prediction'
 
 type Tab = 'recent' | 'wins' | 'multipliers'
 

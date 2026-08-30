@@ -5,10 +5,10 @@ export const dynamic = 'force-dynamic'
 import { useState, useCallback, useRef, Suspense, useEffect } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { fetchHistoricalLeaderboard, fetchTodayLeaderboard } from '@/lib/api'
-import type { PlayerStats } from '@/types/rps'
 import Link from 'next/link'
 import LeaderboardTable from '@/components/leaderboard/PlayerLeaderboardTable'
 import InfoIcon from '@/components/icons/InfoIcon'
+import { PlayerStats } from '@/types/leaderboard'
 
 const TODAY = new Date().toISOString().split('T')[0]
 const FIRST_MATCH_DATE = '2026-02-16'

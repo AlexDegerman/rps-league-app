@@ -1,4 +1,5 @@
-import { AchievementRarity, BadgeData } from '@/types/rps'
+import { AchievementRarity } from "@/types/achievements"
+import { BadgeData } from "@/types/leaderboard"
 
 export const CATEGORY_ORDER = [
   'Combatants',

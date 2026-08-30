@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useEffect, useState, useCallback, useRef } from 'react'
-import type { PendingMatch, PredictionRecord } from '@/types/rps'
+import type { PendingMatch } from '@/types/rps'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUIStore } from '@/app/stores/uiStore'
 import RevealAnimation from './RevealAnimation'
+import { PredictionRecord } from '@/types/prediction'
 
 interface PendingMatchCardProps {
   pending: PendingMatch

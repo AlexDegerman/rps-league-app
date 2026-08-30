@@ -13,12 +13,9 @@ import {
   ACHIEVEMENT_BADGE_MAP
 } from '@/lib/achievements'
 import { fetchUserAchievements, updateUserBadges } from '@/lib/api'
-import {
-  AchievementEntry,
-  AchievementRarity,
-  AchievementStats
-} from '@/types/rps'
 import { useUserStore } from '@/app/stores/userStore'
+import { AchievementStats, AchievementRarity } from '@/types/achievements'
+import { AchievementEntry } from '@/types/leaderboard'
 
 interface AchievementMenuProps {
   onBadgeUpdate?: () => void

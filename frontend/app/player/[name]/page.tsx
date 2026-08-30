@@ -5,8 +5,8 @@ import { useParams } from 'next/navigation'
 import { fetchPlayerStats, fetchMatchesByPlayer } from '@/lib/api'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
 import MatchList from '@/components/game/MatchList'
-import type { SinglePlayerStats } from '@/types/rps'
 import { StatCard } from '@/components/game/StatCard'
+import { SinglePlayerStats } from '@/types/leaderboard'
 
 export default function PlayerPage() {
   const params = useParams()

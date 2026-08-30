@@ -1,19 +1,7 @@
 import pool from '../utils/db.js'
 import { getActiveFestival } from './festivalService.js'
 import { logger } from '../utils/logger.js'
-
-export type RelicRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHICAL'
-
-export interface RelicDef {
-  key: string
-  name: string
-  rarity: RelicRarity
-  icon: string
-  effect: string
-  threshold?: number
-  counter?: number
-  bossExclusive?: boolean
-}
+import type { RelicDef, RelicRarity } from '../types/relics.js'
 
 export const RELICS: RelicDef[] = [
   {

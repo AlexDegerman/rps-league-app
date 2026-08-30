@@ -3,9 +3,9 @@
 import { memo, useEffect, useRef, useState, useCallback } from 'react'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useSound } from '@/hooks/useSound'
-import type { WorldBossType } from '@/types/rps'
 import { drainBurstEvents } from '@/lib/worldBossFeed'
 import SoundControlButton from '@/components/ui/SoundControlButton'
+import { WorldBossType } from '@/types/worldboss'
 
 type BossAnimState = 'assembling' | 'idle' | 'wince' | 'pain' | 'dying'
 

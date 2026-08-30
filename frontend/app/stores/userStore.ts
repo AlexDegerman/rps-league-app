@@ -19,7 +19,7 @@ import {
 } from '@/lib/api'
 import { logger } from '@/lib/logger'
 import { ASCENSION_THRESHOLD } from '@/lib/constants'
-import { BadgeData } from '@/types/rps'
+import { BadgeData } from '@/types/leaderboard'
 
 interface UserState {
   // Identity

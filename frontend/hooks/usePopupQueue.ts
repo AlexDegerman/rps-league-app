@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useUIStore } from '@/app/stores/uiStore'
 import { useGameStore } from '@/app/stores/gameStore'
-import type { EventTheme, AchievementNotif, GlobalEventType } from '@/types/rps'
+import { EventTheme, GlobalEventType } from '@/types/events'
+import { AchievementNotif } from '@/types/achievements'
+
 
 interface PopupQueueSounds {
   playMoon: () => void

@@ -6,7 +6,7 @@ import {
   GLOBAL_EVENT_REGISTRY,
   GLOBAL_EVENT_MODE_MAP
 } from '@/lib/globalEvents'
-import { GlobalEventType } from '@/types/rps'
+import { GlobalEventType } from '@/types/events'
 
 const FESTIVAL_THEME: Record<string, { label: string; color: string }> = {
   SPARK: { label: 'SPARK', color: '#a855f7' },

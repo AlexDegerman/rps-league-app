@@ -9,7 +9,7 @@ import {
   GLOBAL_EVENT_REGISTRY,
   GLOBAL_EVENT_MODE_MAP
 } from '@/lib/globalEvents'
-import { GlobalEventType } from '@/types/rps'
+import { GlobalEventType } from '@/types/events'
 
 export default function GlobalTickerWrapper() {
   const oracleTickerMessage = useUIStore((s) => s.oracleTickerMessage)

@@ -1,4 +1,4 @@
-import { FestivalModeKey, FestivalType } from '@/types/rps'
+import { FestivalModeKey, FestivalType } from "@/types/events";
 
 export const FESTIVAL_REGISTRY: Record<
   FestivalModeKey,

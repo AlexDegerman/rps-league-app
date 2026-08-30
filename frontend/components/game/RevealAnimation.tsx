@@ -2,7 +2,23 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import MoveIcon from '@/components/icons/MoveIcon'
-import { Move, Phase } from '@/types/rps'
+import { Move } from '@/types/rps'
+
+type AnimationPhase =
+  | 'shuffle_fast'
+  | 'shuffle_slow'
+  | 'waiting_for_result'
+  | 'clash'
+  | 'reveal'
+  | 'done';
+
+interface RevealAnimationProps {
+  leftMove: Move | null;
+  rightMove: Move | null;
+  winningSide: 'left' | 'right' | 'draw' | null;
+  outcomeRewritten?: boolean;
+  onDone?: () => void;
+}
 
 const MOVES: Move[] = ['ROCK', 'PAPER', 'SCISSORS']
 
@@ -27,7 +43,7 @@ export default function RevealAnimation({
   outcomeRewritten = false,
   onDone
 }: RevealAnimationProps) {
-  const [phase, setPhase] = useState<Phase>('shuffle_fast')
+  const [phase, setPhase] = useState<AnimationPhase>('shuffle_fast')
   const [leftDisplay, setLeftDisplay] = useState<Move>('ROCK')
   const [rightDisplay, setRightDisplay] = useState<Move>('SCISSORS')
   const [showImpact, setShowImpact] = useState(false)
@@ -36,7 +52,7 @@ export default function RevealAnimation({
   const shuffleRef = useRef<ReturnType<typeof setInterval> | null>(null)
   // Tracks the current animation phase for delayed callbacks
   // without triggering re-renders.
-  const phaseRef = useRef<Phase>('shuffle_fast')
+  const phaseRef = useRef<AnimationPhase>('shuffle_fast')
 
   // Ensures only one shuffle interval is active at a time.
   const clearShuffle = useCallback(() => {

@@ -3,7 +3,7 @@ import { vi, describe, it, expect, beforeEach, type Mock } from 'vitest'
 import LeaderboardPage from '@/app/leaderboard/page'
 import * as api from '@/lib/api'
 import { useSearchParams } from 'next/navigation'
-import type { BadgeData } from '@/types/rps'
+import { BadgeData } from '@/types/leaderboard'
 
 const mockReplace = vi.fn()
 
