@@ -3,9 +3,10 @@ import { getLatestMatches } from '../services/matchService.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { GAME_KNOWLEDGE } from './gameKnowledge/index.js'
+import { faq } from './gameKnowledge/faq.js'
 import type { Match } from '../types/rps.js'
 
-export async function buildContext(): Promise<string> {
+export async function buildContext(userQuery?: string): Promise<string> {
   const [
     matchesData,
     statsRes,
@@ -82,10 +83,31 @@ export async function buildContext(): Promise<string> {
     moves: `${m.playerA.played} vs ${m.playerB.played}`
   }))
 
+  let matchedFaqContext = ''
+  if (userQuery) {
+    const queryNormalized = userQuery.trim().toLowerCase()
+    const faqMatches = faq.match(/Q: (.*?)\nA: (.*?)(?=\n\n|\nQ:|$)/gs)
+
+    if (faqMatches) {
+      for (const block of faqMatches) {
+        const questionLine = block.split('\n')[0] || ''
+        const questionText = questionLine
+          .replace('Q: ', '')
+          .trim()
+          .toLowerCase()
+
+        if (queryNormalized === questionText) {
+          matchedFaqContext = `\n<matched_faq>\n${block}\n</matched_faq>`
+          break
+        }
+      }
+    }
+  }
+
   return `
     <game_knowledge>
     ${GAME_KNOWLEDGE}
-    </game_knowledge>
+    </game_knowledge>${matchedFaqContext}
     <league_telemetry>Total Matches: ${actualMatches}, Total Prediction Volume: ${formattedVolume}, House Edge: ${houseEdge}%</league_telemetry>
     <predictor_leaderboard>${JSON.stringify(formattedPredictors)}</predictor_leaderboard>
     <top_players_by_wins>${JSON.stringify(topPlayersRes.rows)}</top_players_by_wins>

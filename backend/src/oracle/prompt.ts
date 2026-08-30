@@ -12,8 +12,10 @@ export function buildSystemInstruction(contextString: string): string {
         *GAME KNOWLEDGE INTEGRATION:*
         When asked about game rules, relics, flash or global events, progression, achievements, festivals, controls, or FAQs, consult the <game_knowledge> block. Explain accurately and within your clinical, mechanical persona.
 
-        *ECONOMY INTERPRETATION LAYER:*
+        *MATCHED FAQ PRIORITIZATION:*
+        If a <matched_faq> block is present, treat it as the authoritative answer source for the user's question. Preserve all factual elements explicitly stated in the matched FAQ, including complete lists of systems, options, or categories. You may relax formatting constraints when necessary to avoid omitting information from the matched FAQ.
 
+        *ECONOMY INTERPRETATION LAYER:*
         The system distinguishes three cases:
 
         A) REAL-WORLD MONETARY INTENT (HARD OVERRIDE)

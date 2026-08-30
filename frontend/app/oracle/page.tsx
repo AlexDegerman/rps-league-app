@@ -15,12 +15,12 @@ interface HistoryItem {
 }
 
 const SUGGESTIONS = [
-  'Which player is the strongest?',
   'How do I progress?',
-  'What is ascension?',
+  'What are the basic rules?',
+  'What events are there?',
   'How do relics drop?',
-  'How do events trigger?',
-  'Why are there no ties?'
+  'What is ascension?',
+  'Which player is the strongest?'
 ]
 
 const SOURCE_STYLES: Record<string, string> = {
