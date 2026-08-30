@@ -161,13 +161,6 @@ const Header = () => {
               Feedback
             </Link>
             <Link
-              href="/showcases"
-              onClick={() => setIsOpen(false)}
-              className={menuRowItemClass('/showcases')}
-            >
-              Showcases
-            </Link>
-            <Link
               href="/updates"
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/updates')}
