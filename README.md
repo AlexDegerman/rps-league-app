@@ -2,6 +2,14 @@
 
 A real-time live-service Rock Paper Scissors platform where players bet virtual cosmetic points, track rankings, and interact with an AI-powered game guide and match analysis system. I am the sole developer and maintainer, running it continuously in production: monitoring the system, shipping fixes, and [building new features](./CHANGELOG.md) on an ongoing basis.
 
+> **Development Status:** After 6 months of continuous development, the
+> core RPS League experience is now finished. With the major systems,
+> progression, events, and gameplay features in place, I am now shifting my
+> primary development focus toward the wider **[Arkalon universe](https://github.com/AlexDegerman?tab=repositories)**,
+> where I am building new web applications and experiences. RPS League
+> remains live in production and will continue to receive fixes,
+> improvements, events, and new features in future releases.
+
 > 🚨 **Project Evolution:** This is a full-scale rebuild of my original
 > **[RPS League](https://github.com/AlexDegerman/rps-league)**, originally
 > built for a Reaktor developer assignment as a static match viewer. This
