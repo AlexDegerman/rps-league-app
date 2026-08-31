@@ -20,7 +20,7 @@ type CategoryKey =
   | 'bug'
   | 'visuals'
   | 'balance'
-  | 'oracle'
+  | 'arkalon'
   | 'suggestion'
   | 'praise'
 
@@ -28,7 +28,7 @@ const CATEGORIES: { key: CategoryKey; label: string }[] = [
   { key: 'bug', label: '🐛 Technical Issue' },
   { key: 'visuals', label: '🎨 Visuals & Animations' },
   { key: 'balance', label: '⚖️ Gameplay & Balance' },
-  { key: 'oracle', label: '👁️ AI Oracle Analysis' },
+  { key: 'arkalon', label: '👁️ AI Arkalon' },
   { key: 'suggestion', label: '💡 Suggestion' },
   { key: 'praise', label: '🙌 General Praise' }
 ]
@@ -37,7 +37,7 @@ const PLACEHOLDERS: Record<CategoryKey, string> = {
   bug: 'Describe what failed. What were you doing when it happened?',
   visuals: 'Which theme or animation? What looked off?',
   balance: 'Thoughts on multipliers, streaks, or the point floor?',
-  oracle: 'Was the Oracle accurate? Too long? Off-topic?',
+  arkalon: 'Was the Arkalon accurate? Too long? Off-topic?',
   suggestion: 'What feature would you like to see?',
   praise: 'Go ahead, I am listening.'
 }

@@ -33,7 +33,7 @@ export default function GlobalTickerWrapper() {
           id: `global-warning-${activeGlobalEvent}-${Date.now()}`,
           content: (
             <span>
-              Oracle signal locked.{' '}
+              Arkalon signal locked.{' '}
               <span
                 className="font-black uppercase"
                 style={{ color: config.color }}

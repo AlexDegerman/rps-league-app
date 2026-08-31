@@ -18,6 +18,7 @@ export default function BetAmountInput({
   const betAmount = useUserStore((s) => s.betAmount)
   const setBetAmount = useUserStore((s) => s.setBetAmount)
   const autoAllIn = useUserStore((s) => s.autoAllIn)
+  const setAutoAllIn = useUserStore((s) => s.setAutoAllIn)
   const isHydrated = useUserStore((s) => s.isHydrated)
   const isFocused = useUIStore((s) => s.isFocused)
   const setIsFocused = useUIStore((s) => s.setIsFocused)
@@ -68,6 +69,7 @@ export default function BetAmountInput({
       onFocus={() => {
         setIsFocused(true)
         setLocalVal('')
+        setAutoAllIn(false)
       }}
       placeholder={
         !isFocused

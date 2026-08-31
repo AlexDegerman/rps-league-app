@@ -16,7 +16,7 @@ export async function buildContext(userQuery?: string): Promise<string> {
     flashStatsRes
   ] = await Promise.all([
     getLatestMatches(1, 30).catch((err) => {
-      logger.warn('Oracle: getLatestMatches failed, using empty fallback', {
+      logger.warn('Arkalon: getLatestMatches failed, using empty fallback', {
         error: String(err)
       })
       return { matches: [] }

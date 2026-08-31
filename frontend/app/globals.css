@@ -8,6 +8,18 @@
     SECTION 1: GLOBAL / UTILITY ANIMATIONS
    ═══════════════════════════════════════════════════════════════════ */
 
+/* Global Webkit Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
 @keyframes confetti-burst {
   0% {
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
@@ -115,6 +127,17 @@ span.tracking-wider[title]:active::after {
 /* ═══════════════════════════════════════════════════════════════════
     SECTION 2: SHARED KEYFRAMES (used by multiple systems)
    ═══════════════════════════════════════════════════════════════════ */
+
+@keyframes pulsate {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.08);
+  }
+}
 
 @keyframes discovery-halo-glow {
   0%, 100% { opacity: 0.25; transform: scale(1); }
@@ -3860,6 +3883,17 @@ span.tracking-wider[title]:active::after {
     SECTION 4: BADGE AURAS & RELIC DISPLAY
    ═══════════════════════════════════════════════════════════════════ */
 
+.discovery-spectacle-bloom {
+  position: absolute;
+  inset: 0;
+  background: var(--bloom-color);
+  filter: blur(45px);
+  opacity: 0.4;
+  border-radius: 50%;
+  z-index: -1;
+  pointer-events: none;
+}
+
 /* Rainbow badge background utility */
 .rainbow-badge-bg {
   background: linear-gradient(
@@ -4021,6 +4055,11 @@ span.tracking-wider[title]:active::after {
     SECTION 5: CARD THEMES (non-event)
    ═══════════════════════════════════════════════════════════════════ */
 
+.resonance-ring {
+  border-color: #f59e0b !important;
+  animation: resonance-radiant 2s ease-in-out infinite;
+}
+
 .card-legendary-premium {
   border-color: #f59e0b;
   background: linear-gradient(to bottom right, #ffffff, #fefce8, #ffffff);
@@ -4060,6 +4099,62 @@ span.tracking-wider[title]:active::after {
 /* ═══════════════════════════════════════════════════════════════════
     SECTION 6: STREAK / FEVER / INFERNO UI
    ═══════════════════════════════════════════════════════════════════ */
+
+.event-bg-winstreak_fever {
+  background: linear-gradient(to bottom, rgba(34, 197, 94, 0.03), rgba(34, 197, 94, 0.12)) !important;
+}
+
+.event-bg-winstreak_inferno {
+  background: linear-gradient(to bottom, rgba(249, 115, 22, 0.03), rgba(249, 115, 22, 0.15)) !important;
+}
+
+.event-side-winstreak_fever {
+  box-shadow: inset 50px 0 80px -50px rgba(34, 197, 94, 0.2), inset -50px 0 80px -50px rgba(34, 197, 94, 0.2);
+}
+
+.event-side-winstreak_inferno {
+  box-shadow: inset 50px 0 80px -50px rgba(249, 115, 22, 0.25), inset -50px 0 80px -50px rgba(249, 115, 22, 0.25);
+}
+
+.lunar-btn {
+  position: relative;
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6, #60a5fa, #1e3a8a);
+  background-size: 300% 300%;
+  animation: fever-bg-shift 2s ease infinite;
+  color: white;
+  border: none;
+  isolation: isolate;
+}
+
+.electric-btn {
+  position: relative;
+  background: linear-gradient(135deg, #581c87, #8b5cf6, #c084fc, #581c87);
+  background-size: 300% 300%;
+  animation: fever-bg-shift 2s ease infinite;
+  color: white;
+  border: none;
+  isolation: isolate;
+}
+
+.cards-btn {
+  position: relative;
+  background: linear-gradient(135deg, #78350f, #f59e0b, #fbbf24, #78350f);
+  background-size: 300% 300%;
+  animation: fever-bg-shift 2s ease infinite;
+  color: white;
+  border: none;
+  isolation: isolate;
+}
+
+.flash-hellfire-btn {
+  position: relative;
+  background: linear-gradient(135deg, #7f1d1d, #dc2626, #f87171, #7f1d1d);
+  background-size: 300% 300%;
+  animation: fever-bg-shift 2s ease infinite;
+  color: white;
+  border: none;
+  isolation: isolate;
+}
 
 @keyframes edge-inferno {
   0%, 100% { opacity: 0.4; }
@@ -4533,9 +4628,11 @@ span.tracking-wider[title]:active::after {
 }
 /* --- SECTION D: FLASH EVENT CARD RINGS --- */
 
-.lunar-ring    { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.7)); }
-.electric-ring { animation: dc-electric 2s ease-in-out infinite; }
-.cards-ring    { animation: qi-shimmer 3s linear infinite; }
+.lunar-ring, .flash-lunar-ring       { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.7)); }
+.electric-ring, .flash-electric-ring { animation: dc-electric 2s ease-in-out infinite; }
+.cards-ring, .flash-cards-ring       { animation: qi-shimmer 3s linear infinite; }
+.hellfire-ring, .flash-hellfire-ring { animation: hellfire-ring-pulse 2.5s ease-in-out infinite; }
+
 @keyframes hellfire-ring-pulse {
   0%, 100% {
     border-color: rgba(239, 68, 68, 0.6);
@@ -4545,10 +4642,6 @@ span.tracking-wider[title]:active::after {
     border-color: rgba(239, 68, 68, 1);
     box-shadow: 0 0 25px rgba(239, 68, 68, 0.55);
   }
-}
-
-.hellfire-ring {
-  animation: hellfire-ring-pulse 2.5s ease-in-out infinite;
 }
 
 /* --- SECTION E: FESTIVAL CARD RINGS --- */
@@ -4770,15 +4863,15 @@ span.tracking-wider[title]:active::after {
 .event-bg-cards    { background: radial-gradient(circle at center, rgba(236, 201, 75, 0.12),  transparent 70%); }
 .event-bg-hellfire { background: radial-gradient(circle at center, rgba(220, 38, 38, 0.12),   transparent 70%); }
 
-.event-side-lunar    { box-shadow: inset 50px 0 80px -50px rgba(144,205,244,0.3), inset -50px 0 80px -50px rgba(144,205,244,0.3); }
-.event-side-electric { box-shadow: inset 50px 0 80px -50px rgba(159,122,234,0.3), inset -50px 0 80px -50px rgba(159,122,234,0.3); }
-.event-side-cards    { box-shadow: inset 50px 0 80px -50px rgba(236,201,75,0.3),  inset -50px 0 80px -50px rgba(236,201,75,0.3); }
-.event-side-hellfire { box-shadow: inset 50px 0 80px -50px rgba(220,38,38,0.3),   inset -50px 0 80px -50px rgba(220,38,38,0.3); }
+.event-side-flash_lunar    { box-shadow: inset 50px 0 80px -50px rgba(144,205,244,0.3), inset -50px 0 80px -50px rgba(144,205,244,0.3); }
+.event-side-flash_electric { box-shadow: inset 50px 0 80px -50px rgba(159,122,234,0.3), inset -50px 0 80px -50px rgba(159,122,234,0.3); }
+.event-side-flash_cards    { box-shadow: inset 50px 0 80px -50px rgba(236,201,75,0.3),  inset -50px 0 80px -50px rgba(236,201,75,0.3); }
+.event-side-flash_hellfire { box-shadow: inset 50px 0 80px -50px rgba(220,38,38,0.3),   inset -50px 0 80px -50px rgba(220,38,38,0.3); }
 
-.nav-glow-lunar    { box-shadow: 0 10px 30px -10px rgba(144, 205, 244, 0.3); }
-.nav-glow-electric { box-shadow: 0 10px 30px -10px rgba(159, 122, 234, 0.3); }
-.nav-glow-cards    { box-shadow: 0 10px 30px -10px rgba(236, 201, 75, 0.3); }
-.nav-glow-hellfire { box-shadow: 0 10px 30px -10px rgba(220, 38, 38, 0.3); }
+.nav-glow-flash_lunar    { box-shadow: 0 10px 30px -10px rgba(144, 205, 244, 0.3); }
+.nav-glow-flash_electric { box-shadow: 0 10px 30px -10px rgba(159, 122, 234, 0.3); }
+.nav-glow-flash_cards    { box-shadow: 0 10px 30px -10px rgba(236, 201, 75, 0.3); }
+.nav-glow-flash_hellfire { box-shadow: 0 10px 30px -10px rgba(220, 38, 38, 0.3); }
 
 .ticker-glow-lunar    { background: linear-gradient(90deg, transparent, #90cdf4, transparent); }
 .ticker-glow-electric { background: linear-gradient(90deg, transparent, #9f7aea, transparent); }
@@ -5496,6 +5589,9 @@ span.tracking-wider[title]:active::after {
   border-width: 1.5px !important;
 }
 
+.boss-damage-pool { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+@keyframes dmg-float { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
+
 /* ═══ BOSS MODELS ═══ */
 .hex-prism { clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); position: absolute; will-change: transform,opacity; }
 .hex-outer { width:155px;height:155px;background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(6,182,212,.06));box-shadow:0 0 0 2px rgba(34,211,238,.55),0 0 20px rgba(34,211,238,.4),0 0 50px rgba(34,211,238,.15),inset 0 0 30px rgba(34,211,238,.04); }
@@ -5636,6 +5732,30 @@ span.tracking-wider[title]:active::after {
 @keyframes np-pulse {
   0%, 100% { opacity: 0.6; }
   50%       { opacity: 1; }
+}
+
+.stage-claim-btn {
+  min-height: 48px;
+  min-width: 160px;
+  padding: 0 1.5rem;
+  border-radius: 9999px;
+  background: #4f46e5;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.06em;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1);
+  transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.stage-claim-btn:hover {
+  background: #4338ca;
+}
+
+.stage-claim-btn:active {
+  transform: scale(0.97);
 }
 
 .card-row {

@@ -143,7 +143,10 @@ const DamageNumberPool = memo(function DamageNumberPool({
       active: false
     }))
   )
+  
   useEffect(() => {
+    const activeTimeouts: ReturnType<typeof setTimeout>[] = []
+
     const interval = setInterval(() => {
       const events = drainBurstEvents()
       if (!events.length) return
@@ -178,20 +181,25 @@ const DamageNumberPool = memo(function DamageNumberPool({
             active: true
           }
           const slotId = next[targetIdx].id
-          setTimeout(
-            () =>
-              setSlots((s) =>
-                s.map((slot) =>
-                  slot.id === slotId ? { ...slot, active: false } : slot
-                )
-              ),
-            1300
-          )
+          const tId = setTimeout(() => {
+            setSlots((s) =>
+              s.map((slot) =>
+                slot.id === slotId ? { ...slot, active: false } : slot
+              )
+            )
+            const tIdx = activeTimeouts.indexOf(tId)
+            if (tIdx !== -1) activeTimeouts.splice(tIdx, 1)
+          }, 1300)
+          activeTimeouts.push(tId)
         }
         return next
       })
     }, 100)
-    return () => clearInterval(interval)
+
+    return () => {
+      clearInterval(interval)
+      activeTimeouts.forEach(clearTimeout)
+    }
   }, [containerRef])
 
   return (
@@ -335,6 +343,16 @@ export default memo(function WorldBossArena({
 
   const bossClass = bossType.toLowerCase()
 
+  const getBossTierClass = (type: WorldBossType): string => {
+    const mapping: Record<WorldBossType, string> = {
+      HEXURION: 'boss-tier-hex-lattice boss-tier-hex-breach',
+      ORPHION: 'boss-tier-orph-orbit boss-tier-orph-horizon',
+      FRACTURON: 'boss-tier-frac-matrix boss-tier-frac-corrupt',
+      APEXION: 'boss-tier-apex-kinetic boss-tier-apex-zenith'
+    }
+    return mapping[type] || ''
+  }
+
   // Show 100% HP bar until the first participant joins (bossMaxHp === 0 means
   // no one has registered yet; HP is calculated dynamically from participants).
   const displayHpPct = bossMaxHp === 0 ? 100 : hpPct
@@ -344,7 +362,9 @@ export default memo(function WorldBossArena({
     bossMaxHp > 0 ? `${((dmg / bossMaxHp) * 100).toFixed(1)}%` : `${dmg}`
 
   return (
-    <div className="relative w-full bg-[radial-gradient(ellipse_at_50%_60%,rgba(20,10,40,0.98)_0%,rgba(5,3,15,1)_100%)] rounded-3xl border border-[rgba(168,85,247,0.2)] flex flex-col gap-2.5 p-3.5 overflow-hidden isolation-isolate before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_55%_35%_at_50%_75%,rgba(168,85,247,0.06)_0%,transparent_70%)] before:pointer-events-none before:z-[-1] before:animate-[arena-ambient_4s_ease-in-out_infinite]">
+    <div
+      className={`relative w-full bg-[radial-gradient(ellipse_at_50%_60%,rgba(20,10,40,0.98)_0%,rgba(5,3,15,1)_100%)] rounded-3xl border border-[rgba(168,85,247,0.2)] flex flex-col gap-2.5 p-3.5 overflow-hidden isolation-isolate before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_55%_35%_at_50%_75%,rgba(168,85,247,0.06)_0%,transparent_70%)] before:pointer-events-none before:z-[-1] before:animate-[arena-ambient_4s_ease-in-out_infinite] ${getBossTierClass(bossType)}`}
+    >
       {showMissFlash && <div className="boss-miss-flash" />}
 
       {/* Top row: HP + sound control */}

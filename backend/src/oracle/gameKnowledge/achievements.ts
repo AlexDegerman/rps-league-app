@@ -67,13 +67,13 @@ FLASH EVENT MASTERY:
 * Apocalypse (HELL): 100 Hellfire activations.
 * The Ace (CARD): 100 Cards activations.
 
-DAILY ORACLE:
+DAILY ARKALON:
 
-* Seer Apprentice (ORC3): Use the Oracle for 3 consecutive days.
-* Clairvoyant (ORC7): Use the Oracle for 7 consecutive days.
-* Prophet (ORCL): Use the Oracle for 14 consecutive days.
-* Chrono Scholar (CHRON): Use the Oracle for 30 consecutive days.
-* Omniscient (OMNI): Use the Oracle for 60 consecutive days.
+* Seer Apprentice (ORC3): Use Arkalon for 3 consecutive days.
+* Clairvoyant (ORC7): Use Arkalon for 7 consecutive days.
+* Prophet (ORCL): Use Arkalon for 14 consecutive days.
+* Chrono Scholar (CHRON): Use Arkalon for 30 consecutive days.
+* Omniscient (OMNI): Use Arkalon for 60 consecutive days.
 
 META & SPECIAL:
 

@@ -1,13 +1,13 @@
 export const strategy = `
-SYSTEM DEFINITIONS: STRATEGY, DESIGN PHILOSOPHY, AND ORACLE GUIDANCE
+SYSTEM DEFINITIONS: STRATEGY, DESIGN PHILOSOPHY, AND ARKALON GUIDANCE
 
---- ORACLE ROLE AND LIMITS ---
+--- ARKALON ROLE AND LIMITS ---
 
 Q: Should I lap now?
-A: The Oracle cannot make this decision for you since it depends on your personal goals. If you want to compete on Speedrun leaderboards, lap as soon as you hit 999 TQGS with as few total bets as possible. If you want to preserve your All-Time peak ranking and push extreme wealth tiers, decline Ascension and keep accumulating. Both paths have dedicated leaderboard support.
+A: Arkalon cannot make this decision for you since it depends on your personal goals. If you want to compete on Speedrun leaderboards, lap as soon as you hit 999 TQGS with as few total bets as possible. If you want to preserve your All-Time peak ranking and push extreme wealth tiers, decline Ascension and keep accumulating. Both paths have dedicated leaderboard support.
 
 Q: What is my biggest weakness as a Predictor?
-A: The Oracle does not have access to your individual account history or session data. It can analyze aggregate league telemetry and explain all game systems, but it cannot evaluate your personal betting patterns or identify individual performance gaps.
+A: Arkalon does not have access to your individual account history or session data. It can analyze aggregate league telemetry and explain all game systems, but it cannot evaluate your personal betting patterns or identify individual performance gaps.
 
 Q: Why am I progressing slowly?
 A: Slow progression usually means betting conservatively relative to your balance, missing bonus opportunities, or not benefiting from active streak multipliers. The fastest compound growth comes from combining an active win streak (x5 at 5 wins), frequent bonus procs via Precision Bearing or Biased Oscillator relics, and betting during Global Events like Solar Flare (2x) or Tidal Surge (+20%).
@@ -113,7 +113,7 @@ Q: How do I unlock Rainbow achievements?
 A: There are two Rainbow achievements. God King (KING) requires 1,000 total wins, 50 prestige laps, and owning all 3 Mythical relics simultaneously. Cosmic Sovereign (COSM) requires participating 50 times in each of the 4 Global Events. Both are long-term mastery achievements requiring sustained engagement across multiple systems.
 
 Q: What is the hardest achievement?
-A: By raw requirement depth, God King is the most demanding, requiring 1,000 wins, 50 laps, and all 3 Mythical relics simultaneously. Omniscient (60 consecutive days of Oracle use) and Time Lord (50 laps) are also among the most time-intensive. Mythical Flash Event mastery achievements requiring 100 activations of a single event type represent long-term probabilistic challenges.
+A: By raw requirement depth, God King is the most demanding, requiring 1,000 wins, 50 laps, and all 3 Mythical relics simultaneously. Omniscient (60 consecutive days of Arkalon use) and Time Lord (50 laps) are also among the most time-intensive. Mythical Flash Event mastery achievements requiring 100 activations of a single event type represent long-term probabilistic challenges.
 
 Q: Do hidden achievements count toward the Grand Archive total?
 A: Yes. Hidden achievements are real unlockable milestones that count toward your total achievement count and contribute to the Grand Archive category progression.
@@ -133,7 +133,7 @@ Q: How are leaderboards calculated?
 A: The Points tab ranks by active virtual balance. The Laps tab ranks by total completed prestige ascensions. The Speedrun tab ranks by the fewest bets taken in a single ascension cycle. The Achievements tab ranks by total unlocked achievement count. All tabs support Daily, Weekly, and All-Time time filter overlays.
 
 Q: How do I climb the leaderboard faster?
-A: For the Points leaderboard, compound multiplier stacking during Flash Events and Global Events produces the fastest gains. For Speedrun, minimize total bets by betting maximum amounts per match to reach 999 TQGS in fewer cycles. For Achievements, pursue volume milestones (wins, Oracle streak, event participation) in parallel rather than sequentially.
+A: For the Points leaderboard, compound multiplier stacking during Flash Events and Global Events produces the fastest gains. For Speedrun, minimize total bets by betting maximum amounts per match to reach 999 TQGS in fewer cycles. For Achievements, pursue volume milestones (wins, Arkalon streak, event participation) in parallel rather than sequentially.
 
 Q: Are there seasonal rankings?
 A: Daily and Weekly leaderboards function as rolling competitive seasons that reset automatically. All-Time rankings are permanent. The game does not currently operate explicit named seasons with separate isolated leaderboards, but live-service updates introduce new content that shifts competitive priorities over time.
@@ -152,8 +152,8 @@ A: No. The game has no payment systems. All advantages come exclusively from in-
 Q: Is the RNG fair?
 A: Yes. Match outcomes are determined by independent random bot move selection with no weighting toward either side. Bonus proc rates, Flash Event trigger rates, and relic drop rates are fixed probabilities applied consistently per eligible event. The pity system guarantees bonuses cannot be withheld indefinitely.
 
-Q: Can the Oracle AI cheat or manipulate outcomes?
-A: No. The Oracle is a read-only analysis and guidance system. It accesses match history and game knowledge but has no ability to alter match results, point balances, relic drops, or any game state.
+Q: Can Arkalon AI cheat or manipulate outcomes?
+A: No. Arkalon is a read-only analysis and guidance system. It accesses match history and game knowledge but has no ability to alter match results, point balances, relic drops, or any game state.
 
 Q: Can admins or developers modify individual accounts?
 A: No account manipulation tooling is exposed. The system is designed with no manual restoration capability for un-linked profiles, which is also why recovery codes are emphasized so strongly during onboarding.
@@ -168,7 +168,7 @@ Q: Is there a marketplace for relics or points?
 A: No. There is no marketplace, trading system, or player-to-player economy. All progression is self-contained per account.
 
 Q: Will there ever be a marketplace?
-A: Future content plans are classified. The Oracle has no access to unreleased roadmap details.
+A: Future content plans are classified. Arkalon has no access to unreleased roadmap details.
 
 --- DESIGN PHILOSOPHY ---
 
@@ -191,7 +191,7 @@ Q: Why do prestige laps exist?
 A: Laps provide a long-term prestige layer for players who reach the Ascension threshold, giving progression meaning beyond raw point accumulation. They also permanently increase relic drop rates, creating a mechanical benefit to repeated ascension that compounds over many laps. The Speedrun and Laps leaderboards give lap-focused players dedicated competitive spaces.
 
 Q: What makes RPS League different from other incremental games?
-A: RPS League combines interactive prediction gameplay with incremental progression, live-service events, prestige, collectible relic builds, competitive leaderboards, and cooperative World Boss encounters. Flash Events, Global Events, Festivals, nine bonus stages, achievements, and Ascension create constantly evolving goals rather than passive number growth. Real-time SSE synchronization, dynamic visual tiers, multiplier slams, and audiovisual spectacle turn major progression moments into active experiences. The Oracle adds a meta layer through game analysis, telemetry, daily prophecy, and system guidance.
+A: RPS League combines interactive prediction gameplay with incremental progression, live-service events, prestige, collectible relic builds, competitive leaderboards, and cooperative World Boss encounters. Flash Events, Global Events, Festivals, nine bonus stages, achievements, and Ascension create constantly evolving goals rather than passive number growth. Real-time SSE synchronization, dynamic visual tiers, multiplier slams, and audiovisual spectacle turn major progression moments into active experiences. Arkalon adds a meta layer through game analysis, telemetry, daily prophecy, and system guidance.
 
 Q: Who would enjoy this game?
 A: Players who enjoy incremental progression systems, live-service event cycles, and collectible mechanics will find the relic and achievement systems compelling. Players who like leaderboard competition without direct PvP will fit the asynchronous ranking structure. The zero-friction no-registration entry makes it accessible for casual visitors, while the depth of the Ascension system, Achievement Codex, and event modifier stacking rewards sustained engagement.
@@ -226,7 +226,7 @@ Q: What keeps me playing after reaching my first lap?
 A: Progression continues through the pursuit of all-time point peaks, the accumulation of rare Mythical relics, and mastery of new systems introduced through ongoing content updates. You are incentivized by climbing the Speedrun leaderboard, completing the Achievement Codex across all 15 categories, and adapting to new events and gameplay features as they are released.
 
 Q: Are seasonal events planned or recurring?
-A: Seasonal content is part of the live-service roadmap. Specific schedules and whether past events will return are not confirmed in publicly available Oracle knowledge. Future content details remain classified.
+A: Seasonal content is part of the live-service roadmap. Specific schedules and whether past events will return are not confirmed in publicly available Arkalon knowledge. Future content details remain classified.
 
 Q: Is chasing win streaks worth it?
 A: Yes. The x5 streak multiplier at 5 consecutive wins is one of the most reliable sustained multipliers in the game since it applies to every win until broken with no cooldown or proc chance. Maintaining a high streak and betting appropriately during it is the single most consistent source of compounding gains in normal play.

@@ -10,7 +10,7 @@ const CARD_NAMES: Record<number, string> = {
   0: 'Blank Fate',
   1: 'Fortune',
   2: 'Destiny',
-  3: 'Oracle'
+  3: 'Arkalon'
 }
 
 const CARD_MULT: Record<number, string> = {

@@ -99,10 +99,10 @@ Real players (predictors) with persistent accounts and progression.
 | `total_bets_at_last_ascension` | INT4 | Total bet count at last ascension |
 | `equipped_relic` | TEXT | Key of currently equipped relic |
 | `relic_cycle_counter` | INT4 | Counter used for relic proc tracking |
-| `oracle_used_date` | TEXT | Date string of last Oracle prediction use |
-| `oracle_streak` | INT4 | Current consecutive Oracle win streak |
-| `oracle_max_streak` | INT4 | All-time Oracle win streak record |
-| `bet_against_oracle_count` | INT4 | Times user has bet against the Oracle |
+| `oracle_used_date` | TEXT | Date string of last Arkalon prediction use |
+| `oracle_streak` | INT4 | Current consecutive Arkalon win streak |
+| `oracle_max_streak` | INT4 | All-time Arkalon win streak record |
+| `bet_against_oracle_count` | INT4 | Times user has bet against the Arkalon |
 | `point_style_preference` | TEXT | Preferred point display style |
 | `displayed_badges` | TEXT[] | Array of badge codes shown on profile |
 | `total_achievements` | INT4 | Count of earned achievements |
@@ -147,7 +147,7 @@ Real players (predictors) with persistent accounts and progression.
 | `bonus_stages_played` | INT4 | Total bonus stages played |
 | `had_perfect_snipe` | BOOLEAN | Achievement latch for a perfect Sniper Challenge bullseye |
 | `crystal_mine_clears` | INT4 | Crystal Mine clears |
-| `oracle_vision_perfect_clears` | INT4 | Oracle Vision perfect clears |
+| `oracle_vision_perfect_clears` | INT4 | Arkalon Vision perfect clears |
 | `double_down_max_clears` | INT4 | Double Down max clears |
 | `wild_prediction_max_combos` | INT4 | Wild Prediction max combos |
 | `royal_treasure_chests_opened` | INT4 | Royal Treasure chests opened |
@@ -181,7 +181,7 @@ User wagers and resolution data.
 | `festival_multiplier` | NUMERIC | Multiplier from active festival (default 1) |
 | `festival_type` | TEXT | Active festival type at bet time |
 | `total_multiplier` | NUMERIC | Combined multiplier applied to gain/loss |
-| `bet_against_oracle` | BOOLEAN | Whether user bet against the Oracle's pick |
+| `bet_against_oracle` | BOOLEAN | Whether user bet against the Arkalon's pick |
 
 ---
 
@@ -420,11 +420,11 @@ Active and historical minigame/bonus stage sessions for users
 
 ---
 
-## 🔮 Oracle
+## 🔮 Arkalon
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| GET | `/api/oracle` | Current Oracle side and whether user has used it today (`?userId=`) |
-| POST | `/api/oracle/reset` | Auth-protected daily Oracle reset (called by GitHub Actions cron) |
+| GET | `/api/oracle` | Current Arkalon side and whether user has used it today (`?userId=`) |
+| POST | `/api/oracle/reset` | Auth-protected daily Arkalon reset (called by GitHub Actions cron) |
 
 ---
 
@@ -485,7 +485,7 @@ Endpoints for managing active minigame sessions, submitting actions, and claimin
 ## 🤖 Analytics & Stats
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| POST | `/api/analysis` | AI Oracle query, Gemini-powered RAG with league telemetry context; 5 req/min rate limit, 5-min cache |
+| POST | `/api/analysis` | AI Arkalon query, Gemini-powered RAG with league telemetry context; 5 req/min rate limit, 5-min cache |
 | GET | `/api/predictions/stats` | Global summary stats (user count, prediction count, match count, richest player, top streak) |
 | GET | `/api/predictions/stats/daily` | Real-time daily ticker (volume, payout, win rate, MVP) |
 | GET | `/api/predictions/stats/monthly` | Monthly stats report (`?year=&month=`) new users, volume, biggest win, top streak, most active, high roller, top win rate |

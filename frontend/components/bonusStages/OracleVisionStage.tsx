@@ -85,7 +85,6 @@ export default function OracleVisionStage() {
         const session = result.session as { accumulatedPayout: string }
         updateBonusReward(BigInt(session.accumulatedPayout))
       }
-      playLoss()
       const claimResult = await claimBonusWinnings(userId)
       if (claimResult?.finalPayout) {
         const metricText = `${seqIndex}/5 Sequences Completed`
@@ -98,7 +97,7 @@ export default function OracleVisionStage() {
 
   useEffect(() => {
     if (phase !== 'show') return
-    // Play the mystical sound while the Oracle displays the glyphs
+    // Play the mystical sound while Arkalon displays the glyphs
     playLayer('mirage_cataclysm')
   }, [phase, seqIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -205,8 +204,8 @@ export default function OracleVisionStage() {
 
     return (
       <div className="stage-container stage-oracle-vision">
-        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-uqg-s4 no-pseudo">
-          🔮 ORACLE VISION
+        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-uqgs no-pseudo">
+          🔮 ARKALON VISION
         </div>
 
         <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -257,16 +256,18 @@ export default function OracleVisionStage() {
         )}
 
         {phase === 'input' && (
-          <>
-            <div className="ov-timer-bar">
-              <div
-                className="ov-timer-fill"
-                style={{ width: `${(timeLeft / 8) * 100}%` }}
-              />
+          <div className="flex flex-col items-center gap-1 w-full">
+            <div className="flex items-center gap-3 w-full">
+              <div className="ov-timer-bar flex-1">
+                <div
+                  className="ov-timer-fill"
+                  style={{ width: `${(timeLeft / 8) * 100}%` }}
+                />
+              </div>
+              <span className="text-[0.75rem] text-slate-500 shrink-0">
+                {timeLeft}s
+              </span>
             </div>
-            <p className="text-[0.75rem] text-slate-500 self-end">
-              {timeLeft}s
-            </p>
 
             <div className="flex gap-2">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -306,7 +307,7 @@ export default function OracleVisionStage() {
                 </button>
               ))}
             </div>
-          </>
+          </div>
         )}
 
         {phase === 'terminal' && (

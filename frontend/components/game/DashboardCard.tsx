@@ -37,7 +37,7 @@ const DASHBOARD_BORDER_CLASSES: Record<string, string> = {
   festival_resonance: 'border-yellow-300 resonance-ring',
   festival_surge: 'border-cyan-300 surge-ring',
   festival_vault: 'border-indigo-300 vault-ring',
-  festival_spark: 'border-purple-300 spark-neon-pulse',
+  festival_spark: 'border-purple-300 spark-ring',
   festival_fever: 'border-orange-400 fever-festival-ring',
   festival_sanguine: 'border-red-900 sanguine-ring'
 }
@@ -427,7 +427,7 @@ export default function DashboardCard() {
                     <span className="text-xl flex-none mt-0.5">👁️</span>
                     <div className="flex flex-col gap-0.5 min-w-0">
                       <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-purple-800">
-                        Daily Oracle Prophecy
+                        Daily Arkalon Prophecy
                       </span>
                       <p className="text-[10px] font-medium leading-snug text-purple-700">
                         {template.prefix}{' '}

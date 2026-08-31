@@ -11,7 +11,7 @@ A showcase of all World Bosses, including their visual designs, encounter mechan
 - **Synchronized Encounters**: Every connected client receives the exact same boss state, HP updates, and damage leaderboard data from the backend in real-time via Server-Sent Events (SSE).
 - **Three-Phase Lifecycle**:
   - **Cooldown**: A randomized 10 to 12-minute quiet period between encounters before the next boss is selected.
-  - **Warning Phase**: A 30-second period alerting players of an incoming boss. The Oracle announces the boss arrival and its name.
+  - **Warning Phase**: A 30-second period alerting players of an incoming boss. Arkalon announces the boss arrival and its name.
   - **Active Phase**: A 60-second encounter window replacing the prediction arena entirely. Every prediction becomes a damage strike against the shared boss HP pool.
 - **Collective HP Scaling**: Boss HP starts at zero and grows dynamically as players join the encounter. Each unique participant contributes HP based on when they arrive:
   - Join in the first 15 seconds: +4 HP
@@ -19,7 +19,7 @@ A showcase of all World Bosses, including their visual designs, encounter mechan
   - Join between 30 and 45 seconds: +2 HP
   - Join in the final 15 seconds: +1 HP
 - **Encounter Outcome**: Boss HP depleted to zero results in a **DEFEAT**. Timer expiring with HP remaining results in a **RETREAT**. Both outcomes reward all participants with chests.
-- **Oracle Integration**: The Oracle announces the boss arrival during the warning phase and vocalizes the spawn at encounter start. No countdown alerts fire during World Boss phases.
+- **Arkalon Integration**: Arkalon announces the boss arrival during the warning phase and vocalizes the spawn at encounter start. No countdown alerts fire during World Boss phases.
 
 ## Shared Combat Mechanics
 
@@ -189,7 +189,7 @@ During World Boss encounters the interface undergoes several structural modifica
 - **Damage Leaderboard**: Live top-three damage rankings display as a percentage of total boss HP. Players outside the top three see their own rank beneath the leaderboard.
 - **Hit Feedback**: Successful predictions trigger a cyan bloom flash with a floating **STRIKE** label. Misses trigger a red border flash with **BLOCKED**. Multi-damage hits display **STRIKE ×2** or **CRIT ×3**.
 - **System Coordination**: Active Global Event and Festival timers pause during encounters and resume afterward with their remaining time.
-- **Oracle Audio**: The Oracle announces the incoming boss during the warning phase and announces the encounter again when it begins.
+- **Arkalon Audio**: Arkalon announces the incoming boss during the warning phase and announces the encounter again when it begins.
 
 ## Boss Audio
 

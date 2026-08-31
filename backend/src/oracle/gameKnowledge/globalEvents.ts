@@ -4,7 +4,7 @@ Global Events are server-wide, real-time synchronized event loops broadcasted to
 
 LIFECYCLE PHASES:
 1. Event Cooldown: 10 to 12 minutes of inactive time before the next event selection.
-2. Warning Phase: 30 seconds of visual warnings, Oracle text alerts, and speech countdown announcements.
+2. Warning Phase: 30 seconds of visual warnings, Arkalon text alerts, and speech countdown announcements.
 3. Active Phase: 60 seconds of high-intensity gameplay modifiers, custom shaders, and marquee feeds.
 4. Quiet Period: 60 seconds of separation after the Active Phase before the next Event Cooldown begins.
 

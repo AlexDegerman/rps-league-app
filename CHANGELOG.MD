@@ -24,7 +24,7 @@ All notable changes to the platform will be documented in this file.
   * **Surge Frenzy:** Survive a five-second energy-node sequence by tapping every active node before it expires, with rewards scaling up to 10×.
   * **Rainbow Rush:** Complete three server-generated spectrum spins, with each result contributing to the final reward.
   * **Sniper Challenge:** Time a shot against a moving reticle, with accuracy determining the resulting multiplier.
-  * **Oracle Vision:** Reproduce sequences of Oracle glyphs through a timed 16-glyph input interface.
+  * **Arkalon Vision:** Reproduce sequences of Arkalon glyphs through a timed 16-glyph input interface.
   * **Crystal Mine:** Use five mining charges across a 5×5 excavation grid to uncover hidden crystal deposits and determine the final multiplier.
   * **King's Vault:** Select from five royal chests containing exactly one reward of every available tier.
 
@@ -32,11 +32,11 @@ All notable changes to the platform will be documented in this file.
 
 * **Neon Paradise Payout System:** All bonus stages use the last recorded bet as their reward basis. Every stage guarantees a minimum payout of +2× the last bet, with rewards scaling up to a maximum of 10×. Bonus rewards are added directly to the player's existing balance and cannot reduce the existing balance.
 
-* **Neon Paradise Entry Experience:** Added a unified transition from prediction results into the bonus experience, including the persistent NEON PARADISE banner, Oracle voice announcement, Oracle ticker message, stage-specific presentation, dedicated audio, and shared final payout presentation.
+* **Neon Paradise Entry Experience:** Added a unified transition from prediction results into the bonus experience, including the persistent NEON PARADISE banner, Arkalon voice announcement, Arkalon ticker message, stage-specific presentation, dedicated audio, and shared final payout presentation.
 
 * **Nine New Bonus Stage Experiences:** Added nine distinct gameplay formats spanning reward selection, multiplier decisions, card reveals, survival tapping, spectrum spins, timing, memory, excavation, and chest selection.
 
-* **Stage-Specific Audio and Visual Systems:** Each Neon Paradise stage introduces its own visual language, animations, effects, interaction feedback, reward cues, and Oracle announcement while remaining part of the shared Neon Paradise presentation.
+* **Stage-Specific Audio and Visual Systems:** Each Neon Paradise stage introduces its own visual language, animations, effects, interaction feedback, reward cues, and Arkalon announcement while remaining part of the shared Neon Paradise presentation.
 
 * **Session Persistence:** Active Neon Paradise sessions are persisted server-side, allowing a player to resume from the last confirmed state after reconnecting.
 
@@ -112,14 +112,14 @@ All notable changes to the platform will be documented in this file.
 * **Fever Festival Trigger Limits:** Restricted Fever Festival to trigger only once per win streak cycle.
 * **Achievement Badge Tooltips:** Updated achievement badge tooltips to display the achievement requirement instead of just the name.
 * **Fever Mode Visuals:** Improved the appearance of Fever Mode mode buttons.
-* **Oracle Knowledge Base:** Expanded and refined the Oracle's gameplay knowledge for more accurate and consistent answers.
+* **Arkalon Knowledge Base:** Expanded and refined Arkalon's gameplay knowledge for more accurate and consistent answers.
 
 ### Fixed
 
 * **Profile Badge Display:** Fixed an issue where equipped achievement badges were not shown when viewing another player's profile.
 * **Leaderboard Layout:** Fixed a layout issue caused by Mythical achievement badges affecting leaderboard row alignment.
 
-## [2.1] - The Oracle & Game Systems Guide
+## [2.1] - Arkalon & Game Systems Guide
 
 ### Added
 
@@ -130,8 +130,8 @@ All notable changes to the platform will be documented in this file.
 
 ### Changed
 
-* **Oracle Voice and Persona Alignment:** Re-tuned the consult engine's system prompt instructions to align its personality with the ominous, clinical, and decayed cybernetic mainframe persona used during live Global Event notification rollouts and Player Festival verbal announcements.
-* **Server-Synced Prophecies:** Adjusted the daily Oracle prediction state check to enforce database validation, preventing local storage manipulation or profile cache bypasses.
+* **Arkalon Voice and Persona Alignment:** Re-tuned the consult engine's system prompt instructions to align its personality with the ominous, clinical, and decayed cybernetic mainframe persona used during live Global Event notification rollouts and Player Festival verbal announcements.
+* **Server-Synced Prophecies:** Adjusted the daily Arkalon prediction state check to enforce database validation, preventing local storage manipulation or profile cache bypasses.
 
 ## [2.0] - Global Events & Elemental Tiers
 
@@ -139,7 +139,7 @@ All notable changes to the platform will be documented in this file.
 
 * **Global Event Orchestrator:** Implemented a backend-driven event system synchronized across all connected players via Server-Sent Events (SSE). Events transition through a three-phase lifecycle:
   * **Event Cooldown:** A 10 to 30-minute randomized interval between active events.
-  * **Warning Phase:** A 1.5 to 3-minute period featuring server-wide telemetry warning broadcasts, interface countdown timers, custom Oracle warning vocalizations, and spoken alerts at 60 and 30 seconds.
+  * **Warning Phase:** A 1.5 to 3-minute period featuring server-wide telemetry warning broadcasts, interface countdown timers, custom Arkalon warning vocalizations, and spoken alerts at 60 and 30 seconds.
   * **Active Phase:** A 1 to 3-minute blitz window applying real-time gameplay modifiers, card visual transformations, dynamic CSS interface shaders, and live marquee telemetry.
 * **Elemental Gameplay Modifiers:** Added four unique global event states with weighted selection distribution:
   * **Tidal Surge (30% weight):** Activates the *Win Echo Protocol*, awarding an additional +20% signal payout echo to successful predictions.
@@ -158,17 +158,17 @@ All notable changes to the platform will be documented in this file.
 * **Expanded Progression:** Added 36 new achievements dedicated to long-term progression, statistics tracking, and element-specific badge collections.
 * **Dynamic CSS Shaders:** Themed tickers, visual card overrides, and full-viewport CSS visual modifications adapt instantly to reflect the active event.
 
-## [1.15] - Oracle Voice System
+## [1.15] - Arkalon Voice System
  
 ### Added
  
-* **Oracle TTS:** The Daily Oracle Prophecy and all Festival activations now speak aloud using the browser-native Web Speech API. No external API, no audio files, zero server cost.
+* **Arkalon TTS:** The Daily Arkalon Prophecy and all Festival activations now speak aloud using the browser-native Web Speech API. No external API, no audio files, zero server cost.
 * **Mythical Cadence Engine:** Speech is transformed before delivery. Short messages receive a pause after every word. Longer prophecies pause at punctuation boundaries. Combined with pitch 0.25 and rate 0.75, the voice presents as a system entity rather than a human assistant.
 * **Voice Priming:** Voice loading is handled at app mount via Header initialization and re-fetched at speak time to prevent Chrome's async voice load from producing silence on first trigger.
-* **Independent Volume Controls:** Oracle Voice has its own volume slider in the audio controls popover, fully separate from sound effects volume. Both settings persist across sessions via localStorage.
-* **Audio Controls Popover:** The mute button is replaced by an audio controls button that opens a popover with Sound FX toggle and volume slider on top, Oracle Voice toggle and volume slider below. All four controls are independent.
+* **Independent Volume Controls:** Arkalon Voice has its own volume slider in the audio controls popover, fully separate from sound effects volume. Both settings persist across sessions via localStorage.
+* **Audio Controls Popover:** The mute button is replaced by an audio controls button that opens a popover with Sound FX toggle and volume slider on top, Arkalon Voice toggle and volume slider below. All four controls are independent.
 * **Festival Speech Payload:** Backend festival broadcasts now include a dedicated speech field built by `buildFestivalSpeech()` alongside the existing display message. Festival type, trigger context, and lap count each produce a distinct short-form line optimized for low-pitch delivery.
-* **Oracle Voice on by default:** New users arrive with Oracle Voice enabled. The setting can be disabled at any time from the audio controls popover.
+* **Arkalon Voice on by default:** New users arrive with Arkalon Voice enabled. The setting can be disabled at any time from the audio controls popover.
 
 ## [1.14] - Recovery Code Onboarding
 
@@ -211,10 +211,10 @@ All notable changes to the platform will be documented in this file.
 - **Player Festival system:** Added eight globally-triggered gameplay festivals activated through emergent player behavior including win streaks, loss streaks, high multipliers, Flash Event chains, and Chrono-Lap completions. Only one festival can remain active at a time with a global 5-minute cooldown between activations.
 - **Global gameplay modifiers:** Each festival applies a unique live modifier affecting all active players. Effects include payout echoes, streak protection, forced bonus floors, relic amplification, global multipliers, and loss correction systems.
 - **Festival interface theming:** Active festivals dynamically transform the full interface using silk-patterned backgrounds, ember particles, themed overlays, countdown timers, persistent effect tickers, and animated result badges.
-- **Autonomous Oracle Festival engine:** Added Oracle-triggered weighted festival activations occurring every 18 to 24 minutes when no recent player festival or cooldown is active. Trigger frequency is weighted by economy impact to preserve progression stability.
+- **Autonomous Arkalon Festival engine:** Added Arkalon-triggered weighted festival activations occurring every 18 to 24 minutes when no recent player festival or cooldown is active. Trigger frequency is weighted by economy impact to preserve progression stability.
 - **Ghost Echo payout animation:** During Ghost Festival, payouts generate a secondary spectral value animation drifting upward from the final result total, representing the 20 percent signal echo bonus.
 - **Spark streak synchronization bonus:** Completing two consecutive Flash Events now activates Spark Festival, granting guaranteed bonus rolls on the player's next three predictions.
-- **Global ticker broadcast system:** All festival activations broadcast styled real-time messages to connected players. Player-triggered events display the initiating username while Oracle activations generate procedural instability warnings and system alerts.
+- **Global ticker broadcast system:** All festival activations broadcast styled real-time messages to connected players. Player-triggered events display the initiating username while Arkalon activations generate procedural instability warnings and system alerts.
 
 ## [1.10] - The Idle Update
 
@@ -224,7 +224,7 @@ All notable changes to the platform will be documented in this file.
 - **Server-authoritative unlock validation:** Auto-bet eligibility is validated from the database on session load, not from localStorage, preventing client-side spoofing or early unlocking.
 - **Race condition protection:** Added processing lock and 400ms execution buffer to prevent duplicate submissions and overlapping bets on identical match IDs during rapid SSE updates.
 - **Page visibility handling:** Auto-betting pauses instantly when the tab becomes hidden or backgrounded and resumes cleanly when the user returns, with no queued or duplicated actions.
-- **Contextual onboarding system:** Unlock notification appears automatically after Ascension modal completion and remains active until user interaction or dismissal. During this state, both auto-bet toggles pulse with Oracle glow highlighting.
+- **Contextual onboarding system:** Unlock notification appears automatically after Ascension modal completion and remains active until user interaction or dismissal. During this state, both auto-bet toggles pulse with Arkalon glow highlighting.
 
 ## [1.9] - The Ascension Update
 
@@ -237,12 +237,12 @@ All notable changes to the platform will be documented in this file.
 - **Refined history components:** Redesigned data cards with centered layouts and high-contrast containers for better readability during rapid play.
 - **Integrated visual persistence:** Added a styling layer that preserves unlocked tier aesthetics across system resets.
 
-## [1.8] - Daily Oracle Prophecy & Customization
+## [1.8] - Daily Arkalon Prophecy & Customization
 
 ### Added
 
-- **Launched automated AI predictions:** Integrated a daily "Oracle" service providing one high-confidence prediction every 24 hours (resetting at 00:00 UTC).
-- **Integrated server-side verification:** Added database tracking for Oracle usage to strictly enforce daily limits across all sessions.
+- **Launched automated AI predictions:** Integrated a daily "Arkalon" service providing one high-confidence prediction every 24 hours (resetting at 00:00 UTC).
+- **Integrated server-side verification:** Added database tracking for Arkalon usage to strictly enforce daily limits across all sessions.
 - **Enabled visual tier selection:** Allowed users to manually pin preferred interface themes from 32 unlocked tiers.
 - **Deployed adaptive UI scaling:** Introduced an "Auto-Style" toggle that updates the interface aesthetic as players reach new all-time peak thresholds.
 - **Locked persistent peak tracking:** Established an authoritative source for cosmetic unlocks, ensuring progress remains independent of daily or weekly cycles.
@@ -339,9 +339,9 @@ All notable changes to the platform will be documented in this file.
 
 - **Live Activity Feed:** Added a real-time activity stream displaying prediction results, player milestones, relic discoveries, achievements, streak milestones, and simulated background activity through a priority-aware event queue.
 
-- **AI Oracle Match Analysis:** Introduced The Oracle, a Google Gemini-powered analysis engine focused on real-time match telemetry. The Oracle analyzes historical match data, move frequencies, player behavior, dominance patterns, and global trends to provide data-driven prediction analysis.
+- **AI Arkalon Match Analysis:** Introduced Arkalon, a Google Gemini-powered analysis engine focused on real-time match telemetry. Arkalon analyzes historical match data, move frequencies, player behavior, dominance patterns, and global trends to provide data-driven prediction analysis.
 
-- **Curated Oracle Analytics:** Added database-backed analytics presets covering move frequency distributions, house edge statistics, player trends, and global match activity.
+- **Curated Arkalon Analytics:** Added database-backed analytics presets covering move frequency distributions, house edge statistics, player trends, and global match activity.
 
 - **Real-Time Match Infrastructure:** Built a high-frequency live event system capable of continuously processing and broadcasting thousands of match events per day while maintaining synchronized gameplay state across connected players.
 

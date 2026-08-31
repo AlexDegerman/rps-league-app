@@ -159,16 +159,16 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 
 ---
 
-## 🔮 Category 11: Oracle Prophecy (Daily)
-*Tracking consecutive days of Oracle consultation.*
+## 🔮 Category 11: Arkalon Prophecy (Daily)
+*Tracking consecutive days of Arkalon consultation.*
 
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
-| 🟢 Common | Seer Apprentice | Use Oracle 3 Days in a Row | 🔮 | `ORC3` |
-| 🔵 Rare | Clairvoyant | Use Oracle 7 Days in a Row | 🌠 | `ORC7` |
-| 🟣 Epic | Prophet | Use Oracle 14 Days in a Row | 👁 | `ORCL` |
-| 🟡 Legendary | Chrono Scholar | Use Oracle 30 Days in a Row | 📅 | `CHRON` |
-| 🔴 Mythical | Omniscient | Use Oracle 60 Days in a Row | 🌌 | `OMNI` |
+| 🟢 Common | Seer Apprentice | Use Arkalon 3 Days in a Row | 🔮 | `ORC3` |
+| 🔵 Rare | Clairvoyant | Use Arkalon 7 Days in a Row | 🌠 | `ORC7` |
+| 🟣 Epic | Prophet | Use Arkalon 14 Days in a Row | 👁 | `ORCL` |
+| 🟡 Legendary | Chrono Scholar | Use Arkalon 30 Days in a Row | 📅 | `CHRON` |
+| 🔴 Mythical | Omniscient | Use Arkalon 60 Days in a Row | 🌌 | `OMNI` |
 
 ---
 
@@ -200,7 +200,7 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🟢 Common | Spark Initiator | Trigger 1 Festival | 🔋 | `FES1` |
 | 🔵 Rare | System Catalyst | Trigger 5 Festivals | 🌀 | `FES2` |
 | 🟣 Epic | Instability Driver | Trigger 15 Festivals | ⚡ | `FES3` |
-| 🟡 Legendary | Oracle Breaker | Trigger 30 Festivals | 👁️‍🗨️ | `FES4` |
+| 🟡 Legendary | Arkalon Breaker | Trigger 30 Festivals | 👁️‍🗨️ | `FES4` |
 | 🔴 Mythical | System Anomaly | Trigger 50 Festivals | 🚨 | `FEST` |
 | 🟢 Common | Node Arrival | Participate in 5 Festivals | 📍 | `NET1` |
 | 🔵 Rare | Grid Intrusive | Participate in 15 Festivals | 🗺️ | `NET2` |
@@ -327,11 +327,11 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🟡 Legendary | Open the Royal Chest | Get the 10x reward from Treasure Vault | 🏆 | `TVLT` |
 | 🟡 Legendary | Find the Royal Chest | Pick the Royal chest in King's Vault | 👑 | `KVAL` |
 | 🟡 Legendary | Reach the 10× Payout | Reach step 3 in Double Down | ⚡ | `DON3` |
-| 🟡 Legendary | Reveal the Maximum Combination | Flip three Oracle cards in Wild Prediction | 🃏 | `WILD` |
+| 🟡 Legendary | Reveal the Maximum Combination | Flip three Arkalon cards in Wild Prediction | 🃏 | `WILD` |
 | 🟡 Legendary | Reach the 10× Payout | Get the 10× reward in Surge Frenzy | ⚡ | `SFX5` |
 | 🟡 Legendary | Roll Rainbow Tier | Average Rainbow spectrum in Rainbow Rush | 🌈 | `RRSH` |
 | 🟡 Legendary| Hit the Perfect Bullseye | Get the 10× reward in Sniper Challenge | 🎯 | `SNIP` |
-| 🟡 Legendary | Complete All Five Sequences | Complete all 5 sequences in Oracle Vision | 🔮 | `OVIS` |
+| 🟡 Legendary | Complete All Five Sequences | Complete all 5 sequences in Arkalon Vision | 🔮 | `OVIS` |
 | 🟡 Legendary  | Strike the Motherlode | Find 5 diamonds for the 10× reward in Crystal Mine | 💎 | `MINE` |
 
 ### Multi-Game Complete Achievements
@@ -352,7 +352,7 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
-| 🔵 Rare | The Rebel | Bet against the Oracle | 🎭 | `REBL` |
+| 🔵 Rare | The Rebel | Bet against Arkalon | 🎭 | `REBL` |
 | 🔵 Rare | Dry Mirage | Roll the minimum Echo Bonus (15%) on a win during Mirage Cataclysm | 🏜️ | `DRYM` |
 | 🔵 Rare | Eye of the Storm | Have your win streak shielded by the Buffer Module during Cyclone Blitz | 🛡️ | `EYEC` |
 | 🟣 Epic | Prismatic Wave | Win a match during Tidal Surge with the Prismatic Shard equipped | 💎 | `PRIS` |

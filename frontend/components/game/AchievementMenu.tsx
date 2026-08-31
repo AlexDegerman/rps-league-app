@@ -381,17 +381,54 @@ function AchievementCard({
       if (ach.category === 'Hellfire') current = stats.hellfireCaught ?? 0
       if (ach.category === 'Cards') current = stats.cardsCaught ?? 0
       if (ach.code === 'PITY') current = stats.totalPitiesEarned ?? 0
-      if (ach.category === 'OracleProphecy')
+      if (ach.category === 'ArkalonProphecy')
         current = stats.oracleMaxStreak ?? 0
       if (ach.category === 'Reliquary') current = stats.uniqueRelicsOwned ?? 0
       if (ach.code === 'DREM') current = stats.maxConsecutiveFlashEvents ?? 0
-      if (ach.category === 'OracleProphecy')
-        current = stats.oracleMaxStreak ?? 0
       if (ach.category === 'Festival')
         current = ach.code.startsWith('FES')
           ? (stats.festivalsTriggered ?? 0)
           : (stats.festivalsParticipated ?? 0)
       if (ach.category === 'Collector') current = totalEarned ?? 0
+      // World Boss & Boss Chest Tracks
+      if (ach.category === 'WorldBoss') current = stats.worldBossKills ?? 0
+      if (ach.category === 'WorldBossChests')
+        current = stats.worldBossChestsOpened ?? 0
+
+      // Cosmic & Global Event Element Tracks
+      if (ach.category === 'CosmicGlobal')
+        current = stats.globalEventParticipations ?? 0
+      if (ach.category === 'CosmicTidal')
+        current = stats.tidalSurgeParticipations ?? 0
+      if (ach.category === 'CosmicSolar')
+        current = stats.solarFlareParticipations ?? 0
+      if (ach.category === 'CosmicCyclone')
+        current = stats.cycloneBlitzParticipations ?? 0
+      if (ach.category === 'CosmicMirage')
+        current = stats.mirageCataclysmParticipations ?? 0
+
+      // Neon Paradise & Minigame Tracks
+      if (ach.category === 'NEON_PARADISE') {
+        if (ach.code.startsWith('NEO')) {
+          current = stats.bonusStagesPlayed ?? 0
+        } else if (ach.code === 'OVIS') {
+          current = stats.oracleVisionPerfectClears ?? 0
+        } else if (ach.code === 'MINE') {
+          current = stats.crystalMineClears ?? 0
+        } else if (ach.code === 'DON3') {
+          current = stats.doubleDownmaxClears ?? 0
+        } else if (ach.code === 'WILD') {
+          current = stats.wildPredictionMaxCombos ?? 0
+        } else if (ach.code === 'TVLT') {
+          current = stats.royalTreasureChestsOpened ?? 0
+        } else if (ach.code === 'KVAL') {
+          current = stats.royalKingsChestsFound ?? 0
+        } else if (ach.code === 'SFX5') {
+          current = stats.surgeFrenzyMaxComboFinishes ?? 0
+        } else if (ach.code === 'RRSH') {
+          current = stats.rainbowTierRolls ?? 0
+        }
+      }
     }
     return {
       current: current || 0,

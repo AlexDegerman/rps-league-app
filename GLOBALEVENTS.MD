@@ -10,7 +10,7 @@ A showcase of all Global Events, including their visual effects, backend synchro
 
 - **Automated Event Cycle**: Global Events are scheduled automatically with a randomized 10 to 12-minute cooldown before the next event launch.
 
-- **Announcement Phase**: Each event begins with a 30-second announcement period. The Oracle announces the incoming event before its active effects begin.
+- **Announcement Phase**: Each event begins with a 30-second announcement period. Arkalon announces the incoming event before its active effects begin.
 
 - **Active Phase**: Each Global Event remains active for 60 seconds, applying its gameplay modifier and themed visual effects across the interface.
 
@@ -128,8 +128,8 @@ An illusion-driven desert event featuring shifting dunes, phantom echoes, sandst
 
 During Global Event phases, the interface undergoes several structural visual modifications:
 
-- **Oracle Warning Ticker**: During the Warning Phase, the top ticker displays active telemetry warnings, preparing players for incoming atmospheric anomalies.
+- **Arkalon Warning Ticker**: During the Warning Phase, the top ticker displays active telemetry warnings, preparing players for incoming atmospheric anomalies.
 - **Global Event Marquee**: A live, scrolling marquee surfaces during the Active Phase, feeding mathematical modifiers and live event data continuously.
 - **Dynamic CSS Shaders**: High-tier containers and the background canvas are overlaid with customized shaders, simulating ocean currents, solar pulses, desert sandstorms, or rapid gales.
 - **Card Transformations**: Standard card frames and prediction resolution banners are styled dynamically with element-specific color matrices and themed border frames.
-- **Oracle Audio Announcements**: Transition cues and high-priority spoken alerts are synthesizer-processed, vocalizing warnings at key thresholds during countdowns.
+- **Arkalon Audio Announcements**: Transition cues and high-priority spoken alerts are synthesizer-processed, vocalizing warnings at key thresholds during countdowns.

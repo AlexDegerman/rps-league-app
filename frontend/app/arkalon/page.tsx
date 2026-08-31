@@ -39,14 +39,14 @@ function getTimestamp(): number {
   return Date.now()
 }
 
-export default function AnalysisPage() {
+export default function ArkalonPage() {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentResult, setCurrentResult] = useState<string | null>(null)
   const [currentSource, setCurrentSource] = useState<string | null>(null)
   const [showPrivacyInfo, setShowPrivacyInfo] = useState(false)
-  const [placeholder, setPlaceholder] = useState('Ask the Oracle...')
+  const [placeholder, setPlaceholder] = useState('Ask Arkalon..')
   const [history, setHistory] = useState<HistoryItem[]>([])
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function AnalysisPage() {
     const handleResize = () => {
       setPlaceholder(
         window.innerWidth < 640
-          ? 'Ask the Oracle...'
+          ? 'Ask Arkalon..'
           : 'Ask about match trends, events, or game mechanics...'
       )
     }
@@ -76,76 +76,76 @@ export default function AnalysisPage() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-const handleAsk = async (e?: React.FormEvent, overrideQuery?: string) => {
-  e?.preventDefault()
-  const activeQuery = overrideQuery || query
-  if (!activeQuery.trim() || loading) return
+  const handleAsk = async (e?: React.FormEvent, overrideQuery?: string) => {
+    e?.preventDefault()
+    const activeQuery = overrideQuery || query
+    if (!activeQuery.trim() || loading) return
 
-  setLoading(true)
-  setError(null)
+    setLoading(true)
+    setError(null)
 
-  try {
-    const nickname = getNickname() || undefined
+    try {
+      const nickname = getNickname() || undefined
 
-    const data = await askOracle(activeQuery, nickname)
+      const data = await askOracle(activeQuery, nickname)
 
-    if (data.error) {
-      if (data.error === 'RATE_LIMITED') {
-        throw new Error(
-          'The Oracle grows impatient. Wait a moment before seeking another vision.'
-        )
-      } else if (data.error === 'QUERY_TOO_LONG') {
-        throw new Error(
-          'The Oracle accepts questions, not tomes. Please be more concise.'
-        )
-      } else if (data.error === 'INVALID_QUERY') {
-        throw new Error(
-          'The Oracle cannot interpret that request. Ask a clear question.'
-        )
-      } else {
-        throw new Error(
-          'The Oracle has lost sight of the stars. Please try again shortly.'
-        )
+      if (data.error) {
+        if (data.error === 'RATE_LIMITED') {
+          throw new Error(
+            'Arkalon grows impatient. Wait a moment before seeking another vision.'
+          )
+        } else if (data.error === 'QUERY_TOO_LONG') {
+          throw new Error(
+            'Arkalon accepts questions, not tomes. Please be more concise.'
+          )
+        } else if (data.error === 'INVALID_QUERY') {
+          throw new Error(
+            'Arkalon cannot interpret that request. Ask a clear question.'
+          )
+        } else {
+          throw new Error(
+            'Arkalon has lost sight of the stars. Please try again shortly.'
+          )
+        }
       }
-    }
 
-    if (!data.result) {
-      throw new Error('The Oracle is currently blinded by the stars.')
-    }
-
-    setCurrentResult(data.result)
-    setCurrentSource(data.source ?? null)
-
-    // Keep only the 5 most recent queries - avoids unbounded localStorage growth
-    const newHistory: HistoryItem[] = [
-      {
-        id: generateId(),
-        query: activeQuery,
-        result: data.result,
-        source: data.source,
-        timestamp: getTimestamp()
-      },
-      ...history
-    ].slice(0, 5)
-
-    setHistory(newHistory)
-    localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
-    if (!overrideQuery) setQuery('')
-  } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : 'An unknown error occurred'
-    logger.error(
-      'Oracle query failed',
-      err instanceof Error ? err : undefined,
-      {
-        query: activeQuery
+      if (!data.result) {
+        throw new Error('Arkalon is currently blinded by the stars.')
       }
-    )
-    setError(message)
-  } finally {
-    setLoading(false)
+
+      setCurrentResult(data.result)
+      setCurrentSource(data.source ?? null)
+
+      // Keep only the 5 most recent queries - avoids unbounded localStorage growth
+      const newHistory: HistoryItem[] = [
+        {
+          id: generateId(),
+          query: activeQuery,
+          result: data.result,
+          source: data.source,
+          timestamp: getTimestamp()
+        },
+        ...history
+      ].slice(0, 5)
+
+      setHistory(newHistory)
+      localStorage.setItem('aiQueryHistory', JSON.stringify(newHistory))
+      if (!overrideQuery) setQuery('')
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'An unknown error occurred'
+      logger.error(
+        'Arkalon query failed',
+        err instanceof Error ? err : undefined,
+        {
+          query: activeQuery
+        }
+      )
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
   const clearHistory = () => {
     setHistory([])
@@ -185,7 +185,7 @@ const handleAsk = async (e?: React.FormEvent, overrideQuery?: string) => {
           </div>
         </div>
 
-        <h1 className="text-3xl font-black text-gray-900 mb-2">The Oracle</h1>
+        <h1 className="text-3xl font-black text-gray-900 mb-2">Arkalon</h1>
       </div>
 
       <div className="relative mb-6">
@@ -237,7 +237,7 @@ const handleAsk = async (e?: React.FormEvent, overrideQuery?: string) => {
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
               <span className="text-xs font-bold text-indigo-500 uppercase tracking-tighter">
-                Oracle Insight
+                Arkalon Insight
               </span>
             </div>
 

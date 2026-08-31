@@ -46,11 +46,11 @@ export default function AchievementToast() {
           <div
             key={`${achievement.code}-${index}`}
             className={`
-              flex items-center gap-3 px-5 py-3 rounded-2xl border shadow-2xl
-              min-w-70 max-w-[90vw] overflow-hidden relative
-              animate-in fade-in slide-in-from-top-4 duration-500
-              ${RARITY_TOAST_BG[rarity]} ${RARITY_AURA[rarity]}
-            `}
+            flex items-center gap-3 px-5 py-3 rounded-2xl border shadow-2xl
+            min-w-70 max-w-[90vw] relative
+            animate-in fade-in slide-in-from-top-4 duration-500
+            ${RARITY_TOAST_BG[rarity]} ${RARITY_AURA[rarity]}
+          `}
           >
             <span className="text-3xl shrink-0 relative z-10">
               {achievement.icon}

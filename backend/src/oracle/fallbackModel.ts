@@ -25,7 +25,7 @@ export async function generateWithFallback(
       return result.response.text()
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
-      logger.warn('Oracle model failed', {
+      logger.warn('Arkalon model failed', {
         model: modelName,
         error: message
       })
@@ -34,5 +34,5 @@ export async function generateWithFallback(
       throw err
     }
   }
-  throw new Error('All Oracle nodes are currently unresponsive.')
+  throw new Error('All Arkalon nodes are currently unresponsive.')
 }

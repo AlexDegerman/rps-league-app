@@ -64,7 +64,7 @@ export const UPDATES = [
   },
   {
     version: '2.1',
-    label: 'The Oracle & Game Systems Update',
+    label: 'Arkalon & Game Systems Update',
     notes: [
       'Dual-Purpose Cognitive Node: Upgrades the match analyst into a unified game guide equipped with a full structural knowledge base covering relics, global and flash events, prestige progression, achievements, and FAQs.',
       'Dynamic Response Slicing: Implements a conditional backend slicing protocol that limits standard match telemetry to 2 sentences while programmatically permitting up to 3 sentences for complex system definitions.',
@@ -87,7 +87,7 @@ export const UPDATES = [
   },
   {
     version: '1.15',
-    label: 'The Oracle Voice Update',
+    label: 'Arkalon Voice Update',
     notes: [
       'Oracle TTS: The Daily Oracle Prophecy now speaks aloud when it appears. Implemented via browser-native Web Speech API with no external dependencies or server cost.',
       'Mythical Cadence Engine: Speech text is transformed before delivery, adding rhythmic micro-pauses between words and at punctuation boundaries for a deliberate, weighted delivery at pitch 0.25.',
@@ -140,7 +140,7 @@ export const UPDATES = [
       'Player Festivals: Eight globally-triggered gameplay events now activate based on emergent player milestones including win streaks, loss streaks, high multipliers, and Chrono-Lap completions. One festival can be active at a time with a 5-minute cooldown between activations.',
       'Festival Effects: Each festival applies a unique modifier for all active players. Effects range from guaranteed win echoes (Ghost), forced bonus floors (Resonance), streak protection (Fever), a 3x global multiplier (Surge), and forced win correction on 4-loss streaks (Sanguine).',
       'Festival UI System: Active festivals theme the full interface with colored silk backgrounds and ember particles. A countdown ticker, persistent effect scroll bar, and result animation badge communicate the active state throughout the duration.',
-      'Autonomous Oracle Festivals: The Oracle system triggers weighted random festivals every 18 to 24 minutes when no player festival has occurred in the last 10 minutes and no cooldown is active. Frequency is weighted by economy impact, with Resonance and Spark firing most often and Surge and Sanguine kept deliberately rare.',
+      'Autonomous Oracle Festivals: Arkalon system triggers weighted random festivals every 18 to 24 minutes when no player festival has occurred in the last 10 minutes and no cooldown is active. Frequency is weighted by economy impact, with Resonance and Spark firing most often and Surge and Sanguine kept deliberately rare.',
       'Ghost Echo Animation: Ghost Festival wins display a ghostly echo value drifting upward from the result number after it finishes counting, representing the 20% signal echo applied to the final payout.',
       'Spark Streak Bonus: Players who trigger Spark by completing 2 consecutive Flash Events receive a guaranteed bonus roll on their next 3 predictions in addition to the global Flash Event synchronization.',
       "Oracle Ticker Broadcast: All festival activations broadcast a styled message to all connected players. Player-triggered festivals show the initiating player's name. Oracle-triggered demos display procedurally generated system instability messages."
@@ -154,7 +154,7 @@ export const UPDATES = [
       'Server-Authoritative Eligibility: The idle unlock state is validated against the database on load, not localStorage. The controls cannot be enabled through browser tooling before the threshold is reached.',
       'Race Condition Guard: A processing lock and 400ms execution buffer prevent duplicate submissions on the same match ID. Rapid SSE events cannot stack overlapping requests.',
       'Page Visibility Lifecycle: Auto-betting halts immediately when the tab is backgrounded or hidden and resumes cleanly on return with no queued backlog.',
-      'Contextual Onboarding: The unlock notification surfaces automatically after the Ascension modal resolves and persists until the player either interacts with the tick boxes or manually dismisses it. Both tick boxes pulse with the Oracle glow effect during the active notification window.'
+      'Contextual Onboarding: The unlock notification surfaces automatically after the Ascension modal resolves and persists until the player either interacts with the tick boxes or manually dismisses it. Both tick boxes pulse with Arkalon glow effect during the active notification window.'
     ]
   },
   {
@@ -256,7 +256,7 @@ export const UPDATES = [
     version: '1.0',
     label: 'League Launch',
     notes: [
-      'The Oracle: Introduced an AI-powered match analyst for real-time match analysis and player performance insights.',
+      'Arkalon: Introduced an AI-powered match analyst for real-time match analysis and player performance insights.',
       'Zero-Friction Identity: Start with 200,000 points instantly with no registration or login required.',
       'Live Match System: Introduced a fast-paced prediction experience with matches resolving every 5 seconds.',
       'Infinite Progression: Introduced an expandable point progression system reaching into the Vigintillions and beyond.',

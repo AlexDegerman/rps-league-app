@@ -53,12 +53,12 @@ Unlocked after reaching 1 Sextrigintillion points or being in Lap 1 or higher.
 
 ---
 
-## 🤖 Daily Oracle & Point Style Selection
+## 🤖 Daily Arkalon & Point Style Selection
 
-Once per day the Oracle issues a guaranteed prediction, picks a side server-side, and rigs the outcome if followed. Usage is tracked in the database so clearing browser data grants nothing. Point style selection lets players pin any visual tier they have unlocked via all-time peak.
+Once per day Arkalon issues a guaranteed prediction, picks a side server-side, and rigs the outcome if followed. Usage is tracked in the database so clearing browser data grants nothing. Point style selection lets players pin any visual tier they have unlocked via all-time peak.
 
 <p align="center">
-  <strong>Daily Oracle Prophecy and Point Style Customization</strong><br/>
+  <strong>Daily Arkalon Prophecy and Point Style Customization</strong><br/>
   <img src="./assets/oracle_selectstyling_demo.gif" width="220" />
 </p>
 

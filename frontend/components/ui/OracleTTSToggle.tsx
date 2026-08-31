@@ -9,7 +9,7 @@ export default function OracleTTSToggle() {
   return (
     <button
       onClick={toggleOracleTTS}
-      title={oracleTTSEnabled ? 'Oracle voice: on' : 'Oracle voice: off'}
+      title={oracleTTSEnabled ? 'Arkalon voice: on' : 'Arkalon voice: off'}
       className={`shrink-0 p-1.5 rounded-md transition-all duration-200 text-[10px] font-black uppercase tracking-wider border ${
         oracleTTSEnabled
           ? 'border-purple-500/40 bg-purple-500/10 text-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.3)]'

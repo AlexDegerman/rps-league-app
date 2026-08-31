@@ -11,7 +11,8 @@ export function useTabGuard(onDuplicate?: () => void) {
     channel.postMessage({ type: 'TAB_OPEN' })
 
     channel.onmessage = (e) => {
-      if (e.data.type === 'TAB_OPEN')
+      // Only assert existence while this tab is the active session
+      if (e.data.type === 'TAB_OPEN' && !isDuplicateRef.current)
         channel.postMessage({ type: 'TAB_EXISTS' })
       if (e.data.type === 'TAB_EXISTS' && !isDuplicateRef.current) {
         isDuplicateRef.current = true

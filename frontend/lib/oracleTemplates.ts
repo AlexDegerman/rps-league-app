@@ -25,7 +25,7 @@ const altSideClass = {
 
 export const oracleTemplates = [
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: System equilibrium has fractured. The',
+    prefix: '👁️ Daily Arkalon Prophecy: System equilibrium has fractured. The',
     suffix: 'side is locked for the next match outcome.',
     side,
     sideClass: baseSideClass[side],
@@ -34,7 +34,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Historical simulation layers have stabilized. The',
+      '👁️ Daily Arkalon Prophecy: Historical simulation layers have stabilized. The',
     suffix: 'side holds a fully resolved 100% outcome path.',
     side,
     sideClass: altSideClass[side],
@@ -43,7 +43,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Predictive telemetry convergence complete. The',
+      '👁️ Daily Arkalon Prophecy: Predictive telemetry convergence complete. The',
     suffix: 'side is designated as the only valid result branch.',
     side,
     sideClass: baseSideClass[side],
@@ -51,7 +51,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: System vectors fully aligned. The',
+    prefix: '👁️ Daily Arkalon Prophecy: System vectors fully aligned. The',
     suffix: 'side overrides all competing probability states.',
     side,
     sideClass: altSideClass[side],
@@ -60,7 +60,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Quantum probability collapse finalized. The',
+      '👁️ Daily Arkalon Prophecy: Quantum probability collapse finalized. The',
     suffix: 'side is the deterministic outcome of this cycle.',
     side,
     sideClass: baseSideClass[side],
@@ -69,7 +69,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Chrono-stream stabilization complete. The',
+      '👁️ Daily Arkalon Prophecy: Chrono-stream stabilization complete. The',
     suffix: 'side governs the next resolution window.',
     side,
     sideClass: altSideClass[side],
@@ -78,7 +78,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Predictive engine has eliminated variance. The',
+      '👁️ Daily Arkalon Prophecy: Predictive engine has eliminated variance. The',
     suffix: 'side is mathematically inevitable.',
     side,
     sideClass: baseSideClass[side],
@@ -86,7 +86,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Thermal convergence detected. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Thermal convergence detected. The',
     suffix: 'side will dominate the next match sequence.',
     side,
     sideClass: altSideClass[side],
@@ -94,7 +94,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Signal integrity locked. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Signal integrity locked. The',
     suffix: 'side is confirmed for total victory.',
     side,
     sideClass: baseSideClass[side],
@@ -102,7 +102,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Simulation has already resolved. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Simulation has already resolved. The',
     suffix: 'side emerges as the final outcome.',
     side,
     sideClass: altSideClass[side],
@@ -110,7 +110,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Pattern recursion collapse favors the',
+    prefix: '👁️ Daily Arkalon Prophecy: Pattern recursion collapse favors the',
     suffix: 'side as all opposing branches terminate.',
     side,
     sideClass: baseSideClass[side],
@@ -119,7 +119,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Neural telemetry confirms dominance of the',
+      '👁️ Daily Arkalon Prophecy: Neural telemetry confirms dominance of the',
     suffix: 'side trajectory in the current cycle.',
     side,
     sideClass: altSideClass[side],
@@ -127,7 +127,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Predictive noise eliminated. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Predictive noise eliminated. The',
     suffix: 'side is the only stable outcome state.',
     side,
     sideClass: baseSideClass[side],
@@ -136,7 +136,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Tactical variance inversion complete. The',
+      '👁️ Daily Arkalon Prophecy: Tactical variance inversion complete. The',
     suffix: 'side now controls the result stream.',
     side,
     sideClass: altSideClass[side],
@@ -144,7 +144,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Probability lattice locked. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Probability lattice locked. The',
     suffix: 'side cannot fail this cycle.',
     side,
     sideClass: baseSideClass[side],
@@ -152,7 +152,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Hidden calculations resolved. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Hidden calculations resolved. The',
     suffix: 'side holds absolute certainty.',
     side,
     sideClass: altSideClass[side],
@@ -160,7 +160,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Simulation drift corrected. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Simulation drift corrected. The',
     suffix: 'side defines the outcome stream.',
     side,
     sideClass: baseSideClass[side],
@@ -168,7 +168,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Deterministic state achieved. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Deterministic state achieved. The',
     suffix: 'side will prevail.',
     side,
     sideClass: altSideClass[side],
@@ -176,7 +176,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Confidence threshold exceeded. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Confidence threshold exceeded. The',
     suffix: 'side is fully stabilized.',
     side,
     sideClass: baseSideClass[side],
@@ -184,7 +184,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Entropy collapse detected. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Entropy collapse detected. The',
     suffix: 'side inherits the winning branch.',
     side,
     sideClass: altSideClass[side],
@@ -192,7 +192,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Temporal resolution complete. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Temporal resolution complete. The',
     suffix: 'side has already secured the outcome.',
     side,
     sideClass: baseSideClass[side],
@@ -200,7 +200,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Event-chain convergence complete. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Event-chain convergence complete. The',
     suffix: 'side dominates the final path.',
     side,
     sideClass: altSideClass[side],
@@ -208,7 +208,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Statistical resistance has failed. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Statistical resistance has failed. The',
     suffix: 'side controls the incoming resolution.',
     side,
     sideClass: baseSideClass[side],
@@ -217,7 +217,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Outcome trajectory fully bends toward the',
+      '👁️ Daily Arkalon Prophecy: Outcome trajectory fully bends toward the',
     suffix: 'side.',
     side,
     sideClass: altSideClass[side],
@@ -225,7 +225,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Outcome synchronization successful. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Outcome synchronization successful. The',
     suffix: 'side has achieved total alignment.',
     side,
     sideClass: baseSideClass[side],
@@ -233,7 +233,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Predictive overflow detected. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Predictive overflow detected. The',
     suffix: 'side exceeds all competing outcomes.',
     side,
     sideClass: altSideClass[side],
@@ -241,7 +241,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Calculation engine converged. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Calculation engine converged. The',
     suffix: 'side is the only viable result.',
     side,
     sideClass: baseSideClass[side],
@@ -250,7 +250,7 @@ export const oracleTemplates = [
 
   (side: Side): OracleMessage => ({
     prefix:
-      '👁️ Daily Oracle Prophecy: Active simulations unanimously select the',
+      '👁️ Daily Arkalon Prophecy: Active simulations unanimously select the',
     suffix: 'side outcome.',
     side,
     sideClass: altSideClass[side],
@@ -258,7 +258,7 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Outcome recursion stabilized. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Outcome recursion stabilized. The',
     suffix: 'side repeats as the victorious branch.',
     side,
     sideClass: baseSideClass[side],
@@ -266,15 +266,15 @@ export const oracleTemplates = [
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Oracle vision locked. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Arkalon vision locked. The',
     suffix: 'side holds full probability control.',
     side,
     sideClass: altSideClass[side],
-    speech: `Oracle vision locked. ${side} side holds full probability control.`
+    speech: `Arkalon vision locked. ${side} side holds full probability control.`
   }),
 
   (side: Side): OracleMessage => ({
-    prefix: '👁️ Daily Oracle Prophecy: Final forecasting complete. The',
+    prefix: '👁️ Daily Arkalon Prophecy: Final forecasting complete. The',
     suffix: 'side terminates the cycle.',
     side,
     sideClass: baseSideClass[side],

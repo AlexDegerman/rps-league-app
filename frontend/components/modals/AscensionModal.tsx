@@ -153,20 +153,6 @@ export default function AscensionModal({
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.1);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(144, 205, 244, 0.3);
-          border-radius: 10px;
-        }
-      `}</style>
     </div>
   )
 }

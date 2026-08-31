@@ -158,6 +158,24 @@ export const EVENT_HEADER_CONFIG = {
     textClass: 'event-header-hellfire',
     borderClass: 'event-border-hellfire'
   },
+
+  // Flash Mode Mappings
+  flash_lunar: {
+    textClass: 'event-header-lunar',
+    borderClass: 'event-border-lunar'
+  },
+  flash_electric: {
+    textClass: 'event-header-electric',
+    borderClass: 'event-border-electric'
+  },
+  flash_cards: {
+    textClass: 'event-header-cards',
+    borderClass: 'event-border-cards'
+  },
+  flash_hellfire: {
+    textClass: 'event-header-hellfire',
+    borderClass: 'event-border-hellfire'
+  },
   // Festivals
   festival_spark: {
     textClass: 'text-purple-500',

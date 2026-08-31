@@ -328,7 +328,7 @@ describe('DashboardCard', () => {
     )
     render(<DashboardCard />)
 
-    expect(screen.getByText('Daily Oracle Prophecy')).toBeInTheDocument()
+    expect(screen.getByText('Daily Arkalon Prophecy')).toBeInTheDocument()
     expect(screen.getByText('LEFT')).toBeInTheDocument()
   })
 

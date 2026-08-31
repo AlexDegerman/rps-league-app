@@ -511,46 +511,46 @@ const ORACLE_PROPHECY: AchievementDef[] = [
   {
     code: 'ORC3',
     name: 'Seer Apprentice',
-    requirement: 'Use Oracle 3 Days in a Row',
+    requirement: 'Use Arkalon 3 Days in a Row',
     icon: '🔮',
     rarity: 'COMMON',
-    category: 'OracleProphecy',
+    category: 'ArkalonProphecy',
     check: (s) => s.oracleMaxStreak >= 3
   },
   {
     code: 'ORC7',
     name: 'Clairvoyant',
-    requirement: 'Use Oracle 7 Days in a Row',
+    requirement: 'Use Arkalon 7 Days in a Row',
     icon: '🌠',
     rarity: 'RARE',
-    category: 'OracleProphecy',
+    category: 'ArkalonProphecy',
     check: (s) => s.oracleMaxStreak >= 7
   },
   {
     code: 'ORCL',
     name: 'Prophet',
-    requirement: 'Use Oracle 14 Days in a Row',
+    requirement: 'Use Arkalon 14 Days in a Row',
     icon: '👁️',
     rarity: 'EPIC',
-    category: 'OracleProphecy',
+    category: 'ArkalonProphecy',
     check: (s) => s.oracleMaxStreak >= 14
   },
   {
     code: 'CHRON',
     name: 'Chrono Scholar',
-    requirement: 'Use Oracle 30 Days in a Row',
+    requirement: 'Use Arkalon 30 Days in a Row',
     icon: '📅',
     rarity: 'LEGENDARY',
-    category: 'OracleProphecy',
+    category: 'ArkalonProphecy',
     check: (s) => s.oracleMaxStreak >= 30
   },
   {
     code: 'OMNI',
     name: 'Omniscient',
-    requirement: 'Use Oracle 60 Days in a Row',
+    requirement: 'Use Arkalon 60 Days in a Row',
     icon: '🌌',
     rarity: 'MYTHICAL',
-    category: 'OracleProphecy',
+    category: 'ArkalonProphecy',
     check: (s) => s.oracleMaxStreak >= 60
   }
 ]
@@ -678,7 +678,7 @@ const MISCELLANEOUS: AchievementDef[] = [
   {
     code: 'REBL',
     name: 'The Rebel',
-    requirement: 'Bet against the Oracle',
+    requirement: 'Bet against Arkalon',
     icon: '🎭',
     rarity: 'RARE',
     category: 'Miscellaneous',
@@ -756,7 +756,7 @@ const FESTIVAL: AchievementDef[] = [
   },
   {
     code: 'FES4',
-    name: 'Oracle Breaker',
+    name: 'Arkalon Breaker',
     requirement: 'Trigger 30 Festivals',
     icon: 'eye',
     rarity: 'LEGENDARY',
@@ -1414,7 +1414,7 @@ const NEON_PARADISE: AchievementDef[] = [
   {
     code: 'WILD',
     name: 'Reveal the Maximum Combination',
-    requirement: 'Flip three Oracle cards in Wild Prediction',
+    requirement: 'Flip three Arkalon cards in Wild Prediction',
     icon: 'joker',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
@@ -1450,7 +1450,7 @@ const NEON_PARADISE: AchievementDef[] = [
   {
     code: 'OVIS',
     name: 'Complete All Five Sequences',
-    requirement: 'Complete all 5 sequences in Oracle Vision',
+    requirement: 'Complete all 5 sequences in Arkalon Vision',
     icon: 'crystal_ball',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',

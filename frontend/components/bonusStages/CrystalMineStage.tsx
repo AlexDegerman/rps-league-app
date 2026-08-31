@@ -115,7 +115,7 @@ export default function CrystalMineStage() {
 
     return (
       <div className="stage-container stage-crystal-mine">
-        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-dqg-s4 no-pseudo">
+        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-dqgs no-pseudo">
           💎 CRYSTAL MINE
         </div>
 

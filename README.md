@@ -77,8 +77,8 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 
 ### 🤖 AI Systems
 
-* [AI Oracle & Analytics](#-ai-oracle--analytics)
-* [Oracle Voice](#-oracle-voice)
+* [AI Arkalon & Analytics](#-ai-Arkalon--analytics)
+* [Arkalon Voice](#-Arkalon-voice)
 
 ### 📱 Platform
 
@@ -271,7 +271,7 @@ Global Events introduce a server-wide synchronized event loop to RPS League. Sch
 Each event includes:
 - Server-wide real-time SSE synchronization 
 - Structured three-phase lifecycle progression (Cooldown, Warning, and Active)
-- Custom Oracle telemetry warnings and synthesized spoken countdown alerts
+- Custom Arkalon telemetry warnings and synthesized spoken countdown alerts
 - Specialized visual transformations and animated number-tier scaling
 
 Selectable events are weighted randomly, featuring **Tidal Surge** (incorporating the +20% Win Echo Protocol), **Cyclone Blitz**, **Solar Flare**, and **Mirage Cataclysm**.
@@ -316,9 +316,9 @@ A preview of the animations that play when flash events are triggered.
 
 Festivals are rare, globally-triggered gameplay events initiated by specific player actions. Unlike Flash Events, Festivals affect all active players simultaneously and are driven by emergent in-game milestones such as win streaks, loss streaks, high multipliers, and Chrono-Lap completions.
 
-Only one Festival can be active at a time. A 10-minute cooldown follows every Festival. The triggering player's name is broadcast to all active players via the Oracle ticker when a Festival activates.
+Only one Festival can be active at a time. A 10-minute cooldown follows every Festival. The triggering player's name is broadcast to all active players via the Arkalon ticker when a Festival activates.
 
-The Oracle system also runs autonomous weighted festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred recently.
+The Arkalon system also runs autonomous weighted festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred recently.
 
 <p align="center">
   <strong>Ghost Festival in Action</strong><br/>
@@ -506,7 +506,7 @@ graph LR
     Next[Next.js Frontend]
     API[Express Backend]
     DB[(Supabase DB)]
-    AI[Gemini AI Oracle]
+    AI[Gemini AI Arkalon]
 
     User <-->|UI / Zustand| Next
     Next <-->|REST API| API
@@ -578,24 +578,24 @@ To maintain a professional live-service standard and close the loop between user
 - **Subdomain-Safe Trace Debugging**: Manual feedback is linked to Sentry's `associatedEventId` with backend-side fallback event generation. Discord alerts construct direct search URLs using your organization's Sentry subdomain, preventing redirection and context loss.
 - **Secure Visual Reporting**: Support for screenshot attachments (max 5MB) via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop. Uploads are strictly validated server-side using **magic-byte sniffing** to prevent MIME-type spoofing, and processed through automated, server-side AI content moderation filters.
 - **Graceful Error Recovery**: Custom upload middleware captures file size limit violations at the network boundary, returning clean, user-friendly API errors without dropping or crashing the server process. Memory-safe preview URL lifecycle management on the frontend prevents Object URL leaks.
-- **Operational Monitoring**: Automated real-time alerts for feedback and AI Oracle queries are dispatched via **Discord Webhooks** to a private administrative channel.
+- **Operational Monitoring**: Automated real-time alerts for feedback and AI Arkalon queries are dispatched via **Discord Webhooks** to a private administrative channel.
 - **Privacy & Security**: IP addresses are anonymized and masked for audit logs using normalization logic that robustly handles standard IPv4, external IPv6, and localhost loopbacks (e.g., `127.0.x.x` and `::1` formats). No authentication tokens, passwords, or PII are ever logged or stored.
 
 ---
 
-## 🤖 AI Oracle: Game Systems Guide & Match Analysis
+## 🤖 AI Arkalon: Game Systems Guide & Match Analysis
 
-The platform features **The Oracle**, a custom-tuned AI agent powered by Google Gemini. Rather than acting as a standard chatbot, it functions as a dual-purpose cognitive system, delivering clinical, data-driven match analyses and explaining system-level mechanics, relics, active events, and progression rules.
+The platform features **The Arkalon**, a custom-tuned AI agent powered by Google Gemini. Rather than acting as a standard chatbot, it functions as a dual-purpose cognitive system, delivering clinical, data-driven match analyses and explaining system-level mechanics, relics, active events, and progression rules.
 
 ### Core Features
 
 - **Dual-Purpose Grounding Engine**: Integrates high-density match history with an expansive XML-wrapped game knowledge database to dynamically resolve both statistical telemetry queries and complex rules explanations.
 - **Dynamic Response Slicing**: Automatically scales output constraints, programmatically permitting up to 3 sentences for complex system explanations to ensure mechanical clarity, while enforcing a strict 2-sentence limit on standard match analyses.
 - **Resilient Multi-Model Fallback**: Employs automated model rotation across Gemini variants to mitigate uptime volatility, API rate limits, and service spikes.
-- **Strict Intent Guardrailing**: Filters out off-topic prompts to maintain the clinical Oracle persona and prevent hallucinations.
+- **Strict Intent Guardrailing**: Filters out off-topic prompts to maintain the clinical Arkalon persona and prevent hallucinations.
 - **Performance Optimization**: Features in-memory TTL caching and IP-bound rate limiting to manage query costs, control backend latency, and prevent abuse.
 - **Curated Analytics Presets**: Surfaces custom PostgreSQL database insights directly to the interface, detailing move frequency distributions, active house edge stats, and global trends.
-- **Server-Synced Prophecies**: Manages the Daily Oracle Prophecy via database tracking and server-side state to prevent exploit loops or local storage bypasses.
+- **Server-Synced Prophecies**: Manages the Daily Arkalon Prophecy via database tracking and server-side state to prevent exploit loops or local storage bypasses.
 
 <p align="center">
   <strong>Match Analysis</strong><br>
@@ -609,9 +609,9 @@ The platform features **The Oracle**, a custom-tuned AI agent powered by Google 
 
 ---
 
-## 🔊 Oracle Voice
+## 🔊 Arkalon Voice
 
-The Oracle generates spoken output through the browser using the Web Speech API.
+The Arkalon generates spoken output through the browser using the Web Speech API.
 
 When a Festival awakens or the Daily Prophecy is issued, the browser delivers a spoken proclamation using the native Web Speech API with no external services, audio files, or API keys.
 
@@ -619,11 +619,11 @@ Festival announcements support three distinct activation paths:
 
 - Chrono-Lap completion, announcing the player's ascension, lap number, and awakened Festival.
 - Standard player-triggered Festival activations, proclaiming the catalyst by name.
-- Oracle-triggered activations, where the Oracle announces its own intervention.
+- Arkalon-triggered activations, where the Arkalon announces its own intervention.
 
 Every speech line is intentionally authored for low-pitch synthesis with carefully controlled cadence and forced pauses, producing the impression of an ancient system completing a ritual rather than a conventional voice assistant reading text.
 
-The Daily Oracle Prophecy follows the same pipeline with 30 unique spoken templates, each delivered with deliberate pacing to sound less like a notification and more like a forgotten machine issuing decrees.
+The Daily Arkalon Prophecy follows the same pipeline with 30 unique spoken templates, each delivered with deliberate pacing to sound less like a notification and more like a forgotten machine issuing decrees.
 
 Implementation highlights:
 
@@ -632,11 +632,11 @@ Implementation highlights:
 - Tuned speech synthesis using low pitch and reduced speaking rate.
 - Voice priming on application mount with refresh-on-speak logic to accommodate asynchronous browser voice loading.
 - Cooldowns preventing collisions with simultaneous sound effects.
-- Independent Oracle Voice volume control in the audio controls popover.
+- Independent Arkalon Voice volume control in the audio controls popover.
 - Enabled by default.
 
 <p align="center">
-  <em>Oracle Voice Showcase</em><br>
+  <em>Arkalon Voice Showcase</em><br>
   <a href="https://www.youtube.com/watch?v=u2_66KIsnoo">
     <img src="./assets/oracle_voice_thumbnail.png" width="220" />
   </a>
@@ -684,12 +684,12 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 | :--- | :--- | :--- |
 | **Testing** | Vitest | ~28s suites for Betting Loops & API logic |
 | **Deployment** | Vercel / Render | Zero-touch CD after passing CI |
-| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets + Oracle prophecy reset |
+| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets + Arkalon prophecy reset |
 
 ### Key Workflows
 
 - **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
-- **Oracle Reset:** Automated `POST` to `/api/oracle/reset` at 00:01 UTC daily generates a fresh prophecy side and clears all per-user usage state. Reuses `RESET_SECRET` for authorization. Supports manual dispatch for testing.
+- **Arkalon Reset:** Automated `POST` to `/api/oracle/reset` at 00:01 UTC daily generates a fresh prophecy side and clears all per-user usage state. Reuses `RESET_SECRET` for authorization. Supports manual dispatch for testing.
 - **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
 - **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
 - **Database Cleanup:** Automated hourly `POST` to `/api/predictions/cleanup` prunes old matches and prediction history while preserving retained player history.
@@ -775,7 +775,7 @@ RPS League follows privacy-by-design principles while maintaining system stabili
 - **IP Anonymization:** IP addresses are anonymized immediately at the application boundary before processing (e.g., `203.0.113.195` → `203.0.113.0`). Geolocation is performed entirely offline using the in-memory `geoip-lite` database, ensuring raw IP addresses are never stored or transmitted to third-party services.
 - **Audit Logs:** Administrative logs display only masked IP subnets (e.g., `203.0.113.x`).
 - **Security:** Passwords, credentials, session tokens, and other personally identifiable information (PII) are never logged or stored.
-- **Observability:** Anonymous telemetry enables monitoring of AI Oracle behavior, including hallucination detection, model fallback events, and other edge cases during live operation.
+- **Observability:** Anonymous telemetry enables monitoring of AI Arkalon behavior, including hallucination detection, model fallback events, and other edge cases during live operation.
 
 ---
 

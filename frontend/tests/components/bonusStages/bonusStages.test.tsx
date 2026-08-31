@@ -70,7 +70,7 @@ describe('Bonus Stages Rendering', () => {
 
   it('renders OracleVisionStage', () => {
     render(<OracleVisionStage />)
-    expect(screen.getByText(/ORACLE VISION/i)).toBeInTheDocument()
+    expect(screen.getByText(/ARKALON VISION/i)).toBeInTheDocument()
   })
 
   it('renders RainbowRushStage', () => {

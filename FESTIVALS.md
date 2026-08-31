@@ -2,7 +2,7 @@
 
 Festivals are rare, globally-triggered gameplay events initiated by specific player actions. Unlike Flash Events which are personal and probabilistic, Festivals affect all active players simultaneously and are driven by emergent in-game milestones.
 
-The Oracle system also runs autonomous demo festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred recently.
+The Arkalon system also runs autonomous demo festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred recently.
 
 ---
 
@@ -11,9 +11,9 @@ The Oracle system also runs autonomous demo festivals during low-concurrency per
 - **One at a time**: only one Festival can be active globally. Triggers during an active Festival or cooldown are discarded.
 - **5-minute cooldown**: a mandatory lockout follows every Festival conclusion. No queue exists.
 - **Flash Events override**: Flash Event UI theming takes visual priority over an active Festival theme.
-- **Oracle overrides all**: a player who defied the Daily Oracle Prophecy will still lose even during Sanguine's forced-win state.
-- **Triggered by players**: every Festival is caused by a specific player action, and that player's name is broadcast to all active players via the Oracle ticker.
-- **Autonomous demo festivals**: if no player festival has occurred in the last 10 minutes and no cooldown is active, the Oracle triggers a weighted random festival every 18 to 24 minutes to simulate world activity.
+- **Arkalon overrides all**: a player who defied the Daily Arkalon Prophecy will still lose even during Sanguine's forced-win state.
+- **Triggered by players**: every Festival is caused by a specific player action, and that player's name is broadcast to all active players via the Arkalon ticker.
+- **Autonomous demo festivals**: if no player festival has occurred in the last 10 minutes and no cooldown is active, Arkalon triggers a weighted random festival every 18 to 24 minutes to simulate world activity.
 
 ---
 
@@ -158,7 +158,7 @@ Losses do not reset the win streak for the duration.
 **Effect: Absolute Correction**
 All predictions resolve as wins. Win streaks continue to increment normally.
 
-**Exception:** Players who defied the Daily Oracle Prophecy still lose. The Oracle overrides all correction protocols.
+**Exception:** Players who defied the Daily Arkalon Prophecy still lose. The Arkalon overrides all correction protocols.
 
 **Theme:** Blood Red and Deep Charcoal, pulsing crimson saturation, viscous liquid gradients
 
@@ -173,7 +173,7 @@ All predictions resolve as wins. Win streaks continue to increment normally.
 
 Each Festival activates a themed visual layer across the full interface for its duration:
 
-- **Oracle Ticker**: broadcast message on activation naming the triggering player and the effect
+- **Arkalon Ticker**: broadcast message on activation naming the triggering player and the effect
 - **Festival Ticker**: persistent countdown bar styled to the Festival theme with colored silk background, ember particles, and a draining progress bar
 - **Effect Ticker**: continuously scrolling text displaying the active effect for the full duration
 - **Result Animation**: Festival badge displayed on win or loss resolution where applicable, e.g. `SURGE FESTIVAL - 3x all wins`

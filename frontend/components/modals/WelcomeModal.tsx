@@ -158,7 +158,7 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
               Leave feedback of any kind in the feedback page
             </p>
             <p className="text-[9px] text-black/30 font-medium leading-snug">
-              Ask the Oracle for game guidance
+              Ask AI for game guidance
             </p>
           </div>
         </div>

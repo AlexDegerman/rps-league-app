@@ -33,13 +33,13 @@ Neon Paradise stages transition directly from the completed prediction result in
 1. Prediction resolves normally.
 2. Prediction result animations play.
 3. The standard interface transitions into Neon Paradise.
-4. The "NEON PARADISE" banner, Oracle voice announcement, Oracle ticker message, and selected stage interface appear together as part of the same transition.
+4. The "NEON PARADISE" banner, Arkalon voice announcement, Arkalon ticker message, and selected stage interface appear together as part of the same transition.
 5. Stage-specific audio and visual effects begin.
 6. The player completes the selected bonus stage.
 7. The shared final payout presentation plays.
 8. The standard prediction interface returns.
 
---- ORACLE VOICE ANNOUNCEMENTS ---
+--- ARKALON VOICE ANNOUNCEMENTS ---
 
 - Treasure Vault: "A vault... has materialized... claim what awaits..."
 - King's Vault: "The vaults... of the king... have opened..."
@@ -48,7 +48,7 @@ Neon Paradise stages transition directly from the completed prediction result in
 - Surge Frenzy: "The storm... remembers your name..."
 - Rainbow Rush: "Colors... beyond prediction threshold..."
 - Sniper Challenge: "One shot... one moment... make it count..."
-- Oracle Vision: "The glyphs... demand... to be remembered..."
+- Arkalon Vision: "The glyphs... demand... to be remembered..."
 - Crystal Mine: "The crystal depths... awaken..."
 
 --- PAYOUT MODEL ---
@@ -128,13 +128,13 @@ Final Payout = Last Bet Amount x Stage Multiplier
 - Introduced Tier:
   * Quinquagintillion (10^153) [reticle sweep / qg]: Tactical dark-green monospace digits with sharp outer glow shadows. Glowing red horizontal and vertical crosshair lines sweep across the coordinate plane, briefly converging on the center point before producing a white-hot targeting flash.
 
-7. ORACLE VISION
-- Description: A memory and sequence challenge where the player reproduces Oracle glyph sequences. The interface becomes a monochrome terminal environment filled with ancient cipher patterns and continuously shifting glyph data.
+7. ARKALON VISION
+- Description: A memory and sequence challenge where the player reproduces Arkalon glyph sequences. The interface becomes a monochrome terminal environment filled with ancient cipher patterns and continuously shifting glyph data.
 - Effects:
   * Monochrome terminal-style presentation.
   * 16-glyph input grid for sequence reproduction.
   * Timed sequence display followed by player input.
-  * Progressive reward tiers with Oracle-themed visual feedback
+  * Progressive reward tiers with Arkalon-themed visual feedback
 - Introduced Tier:
   * Unquinquagintillion (10^156) [monochrome cipher / uqg]: Terminal neon-emerald characters glowing with intense CRT monitor bloom, overlaid by a pulsing horizontal and vertical scanline grid. A multi-line matrix waterfall of ancient Greek and runic cipher glyphs continuously drifts behind the digits.
 
@@ -165,7 +165,7 @@ Final Payout = Last Bet Amount x Stage Multiplier
 During a Neon Paradise stage, the interface undergoes several shared visual and structural modifications:
 - NEON PARADISE Header: A persistent stage banner identifies the active bonus experience.
 - Inline Stage Presentation: The selected minigame replaces the standard prediction interface while the bonus session is active.
-- Oracle Announcements: Each stage receives a dedicated spoken Oracle announcement and corresponding ticker message during entry.
+- Arkalon Announcements: Each stage receives a dedicated spoken Arkalon announcement and corresponding ticker message during entry.
 - Stage-Specific Audio: Each minigame uses dedicated sound effects and reward cues matching its interaction model.
 - Reward Presentation: Final payouts use shared Neon Paradise reward presentation while preserving each stage's individual visual identity.
 - Navigation Lockout: Standard navigation is restricted during active bonus gameplay to preserve session continuity.

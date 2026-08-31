@@ -48,12 +48,6 @@ describe('Festival Service', () => {
       expect(festivalService.getActiveFestival()).toBeNull()
       expect(festivalService.getFestivalLockoutRemaining()).toBe(0)
       expect(festivalService.isFestivalLocked()).toBe(false)
-      expect(festivalService.areFestivalsEnabled()).toBe(true)
-    })
-
-    it('should honor configuration state overrides when disabled', () => {
-      festivalService.setFestivalsEnabled(false)
-      expect(festivalService.areFestivalsEnabled()).toBe(false)
     })
   })
 
@@ -73,7 +67,7 @@ describe('Festival Service', () => {
       expect(message).toContain('FESTIVAL')
       expect(message).not.toContain('{user}')
       expect(speech).toBe(
-        'The Oracle System... manifests... GHOST... Festival.'
+        'Arkalon System... manifests... GHOST... Festival.'
       )
     })
 

@@ -26,7 +26,7 @@ const CATEGORIES: Record<string, { label: string; color: number }> = {
   bug: { label: '🐛 Technical Issue', color: 0xe74c3c },
   visuals: { label: '🎨 Visuals & Animations', color: 0x3498db },
   balance: { label: '⚖️ Gameplay & Balance', color: 0xf1c40f },
-  oracle: { label: '👁️ AI Oracle Analysis', color: 0x9b59b6 },
+  oracle: { label: '👁️ AI Arkalon', color: 0x9b59b6 },
   suggestion: { label: '💡 Suggestion', color: 0x34495e },
   praise: { label: '🙌 General Praise', color: 0x2ecc71 }
 }

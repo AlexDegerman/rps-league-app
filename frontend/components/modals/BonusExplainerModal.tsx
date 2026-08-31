@@ -404,7 +404,7 @@ export default function BonusExplainerModal({
                       every active player simultaneously
                     </span>
                     . Festivals emerge from player milestones and special
-                    achievements, while the Oracle can trigger autonomous demo
+                    achievements, while Arkalon can trigger autonomous demo
                     festivals during low-activity periods.
                   </p>
 
@@ -506,7 +506,7 @@ export default function BonusExplainerModal({
                     <p className="text-[9px] text-cyan-700 leading-relaxed">
                       Only one Festival can be active at a time, followed by a
                       5-minute cooldown. The triggering player is announced
-                      globally by the Oracle, while autonomous demo Festivals
+                      globally by Arkalon, while autonomous demo Festivals
                       can appear every 18-24 minutes during low activity.
                     </p>
                   </div>
@@ -781,9 +781,9 @@ export default function BonusExplainerModal({
                         bg: 'bg-emerald-50 border-emerald-100'
                       },
                       {
-                        name: 'Oracle Vision',
+                        name: 'Arkalon Vision',
                         emoji: '🔮',
-                        effect: 'Reproduce Oracle glyph sequences from memory.',
+                        effect: 'Reproduce Arkalon glyph sequences from memory.',
                         color: 'text-teal-600',
                         bg: 'bg-teal-50 border-teal-100'
                       },
@@ -847,19 +847,6 @@ export default function BonusExplainerModal({
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #e2e8f0;
-          border-radius: 10px;
-        }
-      `}</style>
     </>
   )
 }

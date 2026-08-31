@@ -4,7 +4,15 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import {
+  Menu,
+  X,
+  Sparkles,
+  Trophy,
+  MessageSquare,
+  Megaphone,
+  Search
+} from 'lucide-react'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUIStore } from '@/app/stores/uiStore'
@@ -45,10 +53,10 @@ const Header = () => {
     }`
 
   const menuRowItemClass = (href: string) =>
-    `px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition border text-center justify-center flex items-center min-w-[calc(50%-6px)] sm:min-w-[140px] flex-1 ${
+    `px-4 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all duration-200 border text-center justify-center flex items-center min-w-[calc(50%-6px)] sm:min-w-[140px] flex-1 active:scale-[0.97] hover:scale-[1.01] ${
       pathname === href
-        ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
-        : 'bg-white text-gray-600 border-gray-100 hover:bg-gray-50'
+        ? 'bg-yellow-100/70 text-yellow-800 border-yellow-200/80 shadow-sm'
+        : 'bg-indigo-50/50 text-indigo-600 border-indigo-100/50 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-700'
     }`
 
   const burgerColorClass = modeKey
@@ -117,10 +125,10 @@ const Header = () => {
               Profile
             </Link>
             <Link
-              href="/oracle"
-              className={`${navClass('/oracle')} hidden min-[630px]:inline-block`}
+              href="/arkalon"
+              className={`${navClass('/arkalon')} hidden min-[630px]:inline-block`}
             >
-              Oracle
+              Ask AI
             </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -136,21 +144,23 @@ const Header = () => {
 
         {isOpen && (
           <nav
-            className={`mt-3 pt-3 pb-4 px-2 flex flex-row flex-wrap items-center justify-center gap-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${modeKey ? `event-bg-${modeKey}` : ''}`}
+            className={`mt-3 pt-3 pb-2 px-2 flex flex-row flex-wrap items-center justify-center gap-2 min-[540px]:grid min-[540px]:grid-cols-2 border-t border-gray-100 animate-in fade-in slide-in-from-top-1 relative overflow-hidden rounded-b-xl ${modeKey ? `event-bg-${modeKey}` : ''}`}
           >
             <div className="absolute inset-0 bg-white -z-20" />
             <Link
-              href="/oracle"
+              href="/arkalon"
               onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/oracle')} min-[540px]:hidden`}
+              className={`${menuRowItemClass('/arkalon')} min-[540px]:hidden`}
             >
-              Oracle
+              <Sparkles size={13} className="mr-1.5 shrink-0" />
+              Ask AI
             </Link>
             <Link
               href="/tiers"
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/tiers')}
             >
+              <Trophy size={13} className="mr-1.5 shrink-0" />
               Tiers
             </Link>
             <Link
@@ -158,6 +168,7 @@ const Header = () => {
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/feedback')}
             >
+              <MessageSquare size={13} className="mr-1.5 shrink-0" />
               Feedback
             </Link>
             <Link
@@ -165,13 +176,15 @@ const Header = () => {
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/updates')}
             >
+              <Megaphone size={13} className="mr-1.5 shrink-0" />
               Updates
             </Link>
             <Link
               href="/search"
               onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/search')} opacity-60`}
+              className="px-4 py-1 min-[540px]:py-2.5 rounded-lg font-semibold text-[10px] uppercase tracking-wider transition-all duration-200 border text-center justify-center flex items-center min-w-full min-[540px]:min-w-0 mt-0.5 min-[540px]:mt-0 active:scale-[0.97] bg-gray-50/30 text-gray-400 border-gray-100 hover:bg-gray-50 hover:text-gray-500 hover:border-gray-200 opacity-60 hover:opacity-100"
             >
+              <Search size={13} className="mr-1.5 shrink-0" />
               Search
             </Link>
           </nav>

@@ -144,7 +144,7 @@ export const persistPredictionResolution = async (
     ]
   )
 
-  // Consume the Oracle charge atomically with the resolution
+  // Consume Arkalon charge atomically with the resolution
   if (ctx.oracleRigged || ctx.defiedOracle) {
     await consumeOracleForUser(ctx.row.user_id, client)
   }

@@ -1,4 +1,14 @@
-import { DEMO_FESTIVAL_MAX_MS, DEMO_FESTIVAL_MIN_MS, DEMO_FESTIVAL_WEIGHTS, FESTIVAL_DURATIONS_MS, LOCKOUT_MS, ORACLE_TRIGGER_PREFIXES, PLAYER_FESTIVAL_QUIET_MS, PLAYER_TRIGGER_PREFIXES } from '../constants/festivals.js'
+import {
+  DEMO_FESTIVAL_MAX_MS,
+  DEMO_FESTIVAL_MIN_MS,
+  DEMO_FESTIVAL_WEIGHTS,
+  FESTIVAL_DURATIONS_MS,
+  LOCKOUT_MS,
+  ORACLE_TRIGGER_PREFIXES,
+  PLAYER_FESTIVAL_QUIET_MS,
+  PLAYER_TRIGGER_PREFIXES,
+  FESTIVALS_ENABLED
+} from '../constants/festivals.js'
 import type { FestivalType, FestivalState } from '../types/festivals.js'
 import pool from '../utils/db.js'
 import { logger } from '../utils/logger.js'
@@ -26,7 +36,6 @@ let _activeFestival: FestivalState | null = null
 let _lockoutUntil: number = 0
 let _lastPlayerFestivalAt: number = 0
 let _demoFestivalTimer: ReturnType<typeof setTimeout> | null = null
-let _festivalsEnabled = true
 
 const _userBonusStreak = new Map<string, number>()
 const _userFlashStreak = new Map<string, number>()
@@ -121,7 +130,7 @@ export const buildFestivalSpeech = (
   }
 
   if (isDemo) {
-    return `The Oracle System... manifests... ${festivalType}... Festival.`
+    return `Arkalon System... manifests... ${festivalType}... Festival.`
   }
 
   return `The catalyst... ${triggeredBy}... invokes... ${festivalType}... Festival.`
@@ -150,12 +159,6 @@ export const isFestivalLocked = (): boolean => {
   return _activeFestival !== null || Date.now() < _lockoutUntil
 }
 
-export const areFestivalsEnabled = (): boolean => _festivalsEnabled
-
-export const setFestivalsEnabled = (enabled: boolean): void => {
-  _festivalsEnabled = enabled
-}
-
 interface LaunchMeta {
   isDemo?: boolean
   streakTrigger?: boolean
@@ -169,7 +172,7 @@ const launchFestival = (
   broadcast: Broadcast,
   meta: LaunchMeta = {}
 ): boolean => {
-  if (!_festivalsEnabled) return false
+  if (!FESTIVALS_ENABLED) return false
   if (isFestivalLocked() || isWorldBossBlocking()) return false
 
   const isDemo = meta.isDemo ?? false
@@ -337,7 +340,7 @@ export const checkAndTriggerFestival = (
   },
   broadcast: Broadcast
 ): void => {
-  if (!_festivalsEnabled) return
+  if (!FESTIVALS_ENABLED) return
 
   const {
     isWin,
@@ -537,7 +540,7 @@ const scheduleDemoFestival = (broadcast: Broadcast): void => {
       now - _lastPlayerFestivalAt < PLAYER_FESTIVAL_QUIET_MS
 
     if (
-      _festivalsEnabled &&
+      FESTIVALS_ENABLED &&
       !isFestivalLocked() &&
       !playerFestivalRecent &&
       !isWorldBossBlocking()

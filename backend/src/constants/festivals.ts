@@ -1,5 +1,7 @@
 import type { FestivalType } from '../types/festivals.js'
 
+export const FESTIVALS_ENABLED = true
+
 export const FESTIVAL_DURATIONS_MS: Record<FestivalType, number | null> = {
   SPARK: 45_000,
   GHOST: 60_000,

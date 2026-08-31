@@ -8,9 +8,9 @@ Festivals are rare, globally-triggered gameplay events initiated by specific pla
 - One active Festival maximum at any time. Triggers during an active Festival or cooldown are discarded.
 - A mandatory 5-minute cooldown follows every Festival conclusion. No queue exists; triggers during cooldown are lost.
 - Flash Events take visual priority over an active Festival theme if both are active simultaneously.
-- The Oracle overrides all correction protocols: a player who defied the Daily Oracle Prophecy will still lose even during a Sanguine forced-win state.
-- Every Festival is caused by a specific player action, and that player's name is broadcast to all active players via the Oracle ticker on activation.
-- Autonomous demo festivals: if no player festival has occurred in the last 10 minutes and no cooldown is active, the Oracle triggers a weighted random festival every 18 to 24 minutes to simulate world activity during low-concurrency periods.
+- The Arkalon overrides all correction protocols: a player who defied the Daily Arkalon Prophecy will still lose even during a Sanguine forced-win state.
+- Every Festival is caused by a specific player action, and that player's name is broadcast to all active players via the Arkalon ticker on activation.
+- Autonomous demo festivals: if no player festival has occurred in the last 10 minutes and no cooldown is active, the Arkalon triggers a weighted random festival every 18 to 24 minutes to simulate world activity during low-concurrency periods.
 
 --- FESTIVAL CATALOGUE ---
 
@@ -62,13 +62,13 @@ Theme: Crimson Red and Burning Orange, pulsing heat-haze distortion.
 Trigger: 4-loss streak (100%).
 Duration: 15 seconds, 3 matches.
 Effect (Absolute Correction): All predictions resolve as wins. Win streaks continue to increment normally.
-Exception: Players who defied the Daily Oracle Prophecy still lose. The Oracle overrides all correction protocols.
+Exception: Players who defied the Daily Arkalon Prophecy still lose. Arkalon overrides all correction protocols.
 Theme: Blood Red and Deep Charcoal, pulsing crimson saturation, viscous liquid gradients.
 
 --- UI INTEGRATION ---
 
 Each Festival activates a themed visual layer across the full interface for its duration:
-- Oracle Ticker: broadcast message on activation naming the triggering player and the active effect.
+- Arkalon Ticker: broadcast message on activation naming the triggering player and the active effect.
 - Festival Ticker: persistent countdown bar styled to the Festival theme with colored silk background, ember particles, and a draining progress bar.
 - Effect Ticker: continuously scrolling text displaying the active effect for the full duration.
 - Result Animation: Festival badge displayed on win or loss resolution where applicable (e.g., SURGE FESTIVAL - 2x all wins).

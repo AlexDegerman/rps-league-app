@@ -93,7 +93,7 @@ Q: What happens to my win streak during the Fever Festival?
 A: Fever freezes your streak multiplier for its duration, so losses do not reset your streak.
 
 Q: What happens to my win streak during Sanguine Festival if I am already at x5?
-A: Sanguine forces predictions to resolve as wins, so your streak continues normally. The Daily Oracle Prophecy still overrides this if you bet against it.
+A: Sanguine forces predictions to resolve as wins, so your streak continues normally. The Daily Arkalon Prophecy still overrides this if you bet against it.
 
 Q: Does my win streak reset when I ascend?
 A: Yes. Ascending resets your point balance to 200,000 and your active win streak resets to zero. Your all-time longest streak record in your profile stats is preserved permanently.
@@ -189,7 +189,7 @@ Q: What happens if I complete a Lap while the Fever Festival is active?
 A: The Surge Festival trigger on Lap completion is discarded because Fever is already occupying the active Festival slot and the 5-minute cooldown follows every Festival conclusion. The Surge trigger does not queue; it is lost entirely.
 
 Q: What happens when a Global Event is about to start?
-A: A warning marquee will populate at the top of the screen, and the Oracle Voice will read out countdown warnings at 60 and 30 seconds remaining.
+A: A warning marquee will populate at the top of the screen, and Arkalon Voice will read out countdown warnings at 60 and 30 seconds remaining.
 
 Q: What is the Win Echo Protocol during Tidal Surge?
 A: Correct predictions during a Tidal Surge event receive an automatic +20% bonus payout on top of all other multipliers.
@@ -207,7 +207,7 @@ Q: What triggers a Player Festival, and what is the cooldown?
 A: Player Festivals trigger from major milestones such as streaks, multipliers, Relic discoveries, and completed Laps. A 5-minute cooldown follows each Festival.
 
 Q: What is the Sanguine Festival?
-A: Triggered when a predictor hits a 4-loss streak (100%), it corrects all predictions to resolve as wins for 15 seconds covering 3 matches. If you bet against the Daily Oracle Prophecy you will still lose, as the Oracle overrides all absolute win corrections.
+A: Triggered when a predictor hits a 4-loss streak (100%), it corrects all predictions to resolve as wins for 15 seconds covering 3 matches. If you bet against the Daily Arkalon Prophecy you will still lose, as Arkalon overrides all absolute win corrections.
 
 Q: What is the Surge Festival?
 A: Triggered when a predictor completes a Chrono-Lap (100%), the Surge Festival applies a 2x global multiplier to all win payouts for 30 seconds covering 6 matches for every active player.
@@ -233,25 +233,25 @@ A: Triggered by completing 2 Flash Events in a row (100%) or hitting a Legendary
 Q: Where can I see a complete summary of all game systems, bonus tiers, and event rules?
 A: Open the "Game Systems" guide from the "BONUSES" button on the main dashboard. It covers Bonuses, Win Streaks, Flash Events, Relics, Festivals, Global Events, World Bosses, and Neon Paradise.
 
---- THE DAILY ORACLE PROPHECY ---
+--- THE DAILY ARKALON PROPHECY ---
 
-Q: How does the Daily Oracle Prophecy work?
-A: Once per day you can consult the Oracle for a guaranteed side. Following the Oracle choice rigs the outcome in your favor, while betting against it results in a guaranteed loss regardless of the actual match result or any active Festival correction effects.
+Q: How does the Daily Arkalon Prophecy work?
+A: Once per day you can consult Arkalon for a guaranteed side. Following Arkalon choice rigs the outcome in your favor, while betting against it results in a guaranteed loss regardless of the actual match result or any active Festival correction effects.
 
-Q: What happens if I bet against the Oracle during Sanguine Festival?
-A: The Oracle override takes precedence over all correction protocols. Even though Sanguine forces all predictions to resolve as wins, betting against the Oracle pick still results in a loss.
+Q: What happens if I bet against Arkalon during Sanguine Festival?
+A: The Arkalon override takes precedence over all correction protocols. Even though Sanguine forces all predictions to resolve as wins, betting against Arkalon pick still results in a loss.
 
-Q: Does the Oracle guaranteed side change during the day?
-A: No. The Oracle prophecy is generated once per day server-side and is fixed for the full UTC day. It does not change between consultations.
+Q: Does Arkalon guaranteed side change during the day?
+A: No. The Arkalon prophecy is generated once per day server-side and is fixed for the full UTC day. It does not change between consultations.
 
-Q: Can I get extra Oracle attempts by clearing my browser cache?
-A: No. Oracle usage and streaks are securely tracked on the server and bound to your account code. Clearing local data will not grant extra attempts.
+Q: Can I get extra Arkalon attempts by clearing my browser cache?
+A: No. Arkalon usage and streaks are securely tracked on the server and bound to your account code. Clearing local data will not grant extra attempts.
 
-Q: Can the Oracle tell me which side will win the next match?
-A: No. The Daily Prophecy is the only mechanism for guaranteed outcome guidance and is available once per day. For all other matches both sides have equal probability and the Oracle cannot forecast individual match outcomes.
+Q: Can Arkalon tell me which side will win the next match?
+A: No. The Daily Prophecy is the only mechanism for guaranteed outcome guidance and is available once per day. For all other matches both sides have equal probability and Arkalon cannot forecast individual match outcomes.
 
-Q: Can I ask the Oracle about future content or upcoming features?
-A: The Oracle has no access to classified development roadmaps or unreleased system parameters. Future content remains locked to preserve simulation integrity.
+Q: Can I ask Arkalon about future content or upcoming features?
+A: The Arkalon has no access to classified development roadmaps or unreleased system parameters. Future content remains locked to preserve simulation integrity.
 
 --- IDLE AUTO-BET ---
 
@@ -333,7 +333,7 @@ Q: How does the dynamic badge upgrading system work?
 A: When you earn a higher rarity tier of a chained achievement, it automatically replaces the lower tier version in your inventory. For example earning the Rare win streak badge automatically removes the Common version. This keeps your badge collection focused on your highest accomplishments.
 
 Q: How many total achievements are there?
-A: There are over 100 achievements across 15 distinct categories, ranging from win volume and streaks to relic collection, event participation, Oracle mastery, and special hidden milestones.
+A: There are over 100 achievements across 15 distinct categories, ranging from win volume and streaks to relic collection, event participation, Arkalon mastery, and special hidden milestones.
 
 --- RELIC STACKING AND INTERACTION ---
 

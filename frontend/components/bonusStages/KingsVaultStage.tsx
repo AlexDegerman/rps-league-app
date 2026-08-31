@@ -108,7 +108,7 @@ export default function KingsVaultStage() {
 
     return (
       <div className="stage-container stage-kings-vault">
-        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-tqg-s4 no-pseudo">
+        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-tqgs no-pseudo">
           👑 KING&apos;S VAULT
         </div>
         <p className="text-[0.825rem] text-slate-500 text-center leading-[1.4] -mt-2">

@@ -242,14 +242,14 @@ export default function SoundControlPopover({
         <div className="flex items-center gap-1.5">
           <span className="text-sm leading-none">👁️</span>
           <span className="text-[10px] font-black uppercase tracking-wider text-gray-600">
-            Oracle Voice
+            Arkalon Voice
           </span>
         </div>
         <Toggle
           on={oracleTTSEnabled}
           onClick={toggleOracleTTS}
           activeColor="bg-purple-500"
-          label="Toggle Oracle voice"
+          label="Toggle Arkalon voice"
         />
       </div>
       <div className="mb-0">
