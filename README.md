@@ -13,27 +13,11 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 ## 🎮 Preview
 
 <p align="center">
-  <em><strong>Global Events Showcase</strong>: Server-wide real-time events that transform gameplay and visuals.</em>
+  <em><strong>RPS League Showcase</strong>: A rapid tour through the game's major systems, events, progression, and high-tier visuals.</em>
   <br />
-  <img src="./assets/globalevents_showcase.gif" width="280" />
+  <img src="./assets/rpsleaguehalfanniv.gif" width="280" />
   <br />
-  <a href="https://www.youtube.com/shorts/nARfsfyWoDc">Watch full quality video</a>
-</p>
-
-<p align="center">
-  <em><strong>Flash Event Activations</strong>: Personal dynamic events that temporarily override UI, audio, and outcomes.</em>
-  <br />
-  <img src="./assets/flasheventanimations.gif" width="280" />
-  <br />
-  <a href="https://www.youtube.com/shorts/cM0UDeg6uz0">Watch full quality video</a>
-</p>
-
-<p align="center">
-  <em><strong>Season 2 Tier Progression</strong>: Visual scaling system where score styling evolves across extreme number tiers.</em>
-  <br />
-  <img src="./assets/season2_tiers_showcase.gif" width="280" />
-  <br />
-  <a href="https://www.youtube.com/watch?v=4dwtzrzaOAA">Watch full quality video</a>
+  <a href="https://www.youtube.com/shorts/zlL312RXH1w">Watch full quality video</a>
 </p>
 
 ---
