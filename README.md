@@ -82,7 +82,6 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 * [Tests](#-tests)
 * [CI/CD & Automation](#-cicd--automation)
 * [Future Improvements](#-future-improvements)
-* [How to Run](#-how-to-run)
 * [Changelog](#-changelog)
 * [API Reference](#-api-reference)
 
@@ -697,45 +696,11 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 
 ---
 
-## 📦 How to Run
-```bash
-git clone https://github.com/AlexDegerman/rps-league-app.git
-cd rps-league-app
-```
-
-**Backend**
-```bash
-cd backend
-cp .env.example .env
-npm install
-npm run dev
-```
-
-**Frontend**
-```bash
-cd frontend
-cp .env.local.example .env.local
-npm install
-npm run dev
-```
-
-Open http://localhost:3000
-
----
-
 ## 📜 Changelog
 
 All notable updates, seasonal releases, and system changes are documented in the project changelog.
 
 👉 [View full changelog →](./CHANGELOG.md)
-
----
-
-## 🔌 API Reference
-
-Full API documentation for RPS League is available in a dedicated file covering all endpoints, database schema, and environment configuration.
-
-📄 [View API Documentation](./api.md)
 
 ---
 
