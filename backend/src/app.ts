@@ -2,7 +2,6 @@ import './utils/instrument.js'
 import 'dotenv/config'
 import express from 'express'
 import * as Sentry from '@sentry/node'
-import { initDb } from './utils/initDb.js'
 import matchesRouter from './routes/matches.js'
 import leaderboardRouter from './routes/leaderboard.js'
 import liveRouter from './routes/live.js'
@@ -65,7 +64,6 @@ Sentry.setupExpressErrorHandler(app)
 const PORT = process.env.PORT || 5000
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`)
-  await initDb()
 })
 
 export default app

@@ -6,17 +6,25 @@ A complete visual archive of the RPS League ecosystem.
 
 Detailed gameplay and cinematic recordings for core systems:
 
-> 🕹️ [**Flash Event Deep-Dive** →](./FLASHEVENTS.md)
-
-> 🎭 [**Player Festival Deep-Dive** →](./FESTIVALS.md)
+> 🏆 [**Achievements Deep-Dive** →](./ACHIEVEMENTS.md)
 
 > 🪐 [**Global Event Deep-Dive** →](./GLOBALEVENTS.md)
 
+> 🎭 [**Player Festival Deep-Dive** →](./FESTIVALS.md)
+
+> ⚡ [**Flash Event Deep-Dive** →](./FLASHEVENTS.md)
+
+> 🌌 [**Neon Paradise Deep-Dive** →](./NEONPARADISE.md)
+
+> 💎 [**Relics Deep-Dive** →](./RELICS.md)
+
+> 👹 [**World Boss Deep-Dive** →](./WORLDBOSSES.md)
+
 ---
 
-### 🔍 Extended Feature Showcases
+### 🔍 Extended System Showcases
 
-Visual breakdowns of UI systems, automation, and reliability tools:
+Visual breakdowns of supporting gameplay systems, UI, automation, and reliability tooling:
 
 ## 🏆 Achievement Badges Leaderboard Styling (Mythical & Rainbow)
 
