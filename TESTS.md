@@ -36,6 +36,7 @@ Frontend verification uses Vitest and React Testing Library to ensure correct re
 - **Neon Paradise Container**: Verifies inactive-state rendering, correct bonus stage selection, completed reward rendering, and reward collection state clearing.
 - **Match Components**: Verifies prediction success, failure and timeout flows, match rendering, prediction results, loading states, pagination boundaries, and Rock-Paper-Scissors winner logic.
 - **Result Animation Overlay**: Verifies win and loss result rendering, bonus tiers and multipliers, Lucky Save, streak bonuses, festival effects, global event echo calculations, and relic slam timing and result state transitions.
+- **Recovery Tutorial**: Verifies profile eligibility, tutorial completion status, tutorial rendering, recovery section scrolling and positioning, dismissal, completion requests, scroll restoration, and position updates on scroll and resize events.
 
 ---
 
