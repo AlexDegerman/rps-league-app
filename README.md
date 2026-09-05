@@ -34,64 +34,63 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 
 ### 🕹️ Core Systems
 
-* [Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
-* [Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
-* [Overview](#-overview)
-* [Ascension System](#-ascension-system)
-* [Relic System](#-relic-system)
+- [Identity & Zero-Friction Account System](#-identity--zero-friction-account-system)
+- [Gameplay & Betting Mechanics](#️-gameplay--betting-mechanics)
+- [Overview](#-overview)
+- [Ascension System](#-ascension-system)
+- [Relic System](#-relic-system)
 
 ### 🌍 World Systems
 
-* [World Bosses](#️-world-bosses)
-* [Global Events](#-global-events)
-* [Flash Events](#-flash-events)
-* [Player Festivals](#️-player-festivals)
-* [Neon Paradise](#-neon-paradise)
+- [World Bosses](#️-world-bosses)
+- [Global Events](#-global-events)
+- [Flash Events](#-flash-events)
+- [Player Festivals](#️-player-festivals)
+- [Neon Paradise](#-neon-paradise)
 
 ### 📊 Progression Systems
 
-* [Predictor Achievements](#-predictor-achievements)
-* [Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
-* [Global Number Formatting Engine](#-global-number-formatting-engine)
+- [Predictor Achievements](#-predictor-achievements)
+- [Infinite Number Scaling & Visual Tier System](#-infinite-number-scaling--visual-tier-system)
+- [Global Number Formatting Engine](#-global-number-formatting-engine)
 
 ### 📈 Analytics
 
-* [Competitive Analytics & Profiles](#-competitive-analytics--profiles)
-* [Match History Timeline](#-match-history-timeline)
-* [Live Activity Feed](#-live-activity-feed)
+- [Competitive Analytics & Profiles](#-competitive-analytics--profiles)
+- [Match History Timeline](#-match-history-timeline)
+- [Live Activity Feed](#-live-activity-feed)
 
 ### 🏗️ Engineering
 
-* [Architecture](#️-architecture)
-* [Design Decisions](#-design-decisions)
-* [Technical Challenges & Solutions](#️-technical-challenges--solutions)
-* [Reliability & Feedback](#-reliability--feedback)
+- [Architecture](#️-architecture)
+- [Design Decisions](#-design-decisions)
+- [Technical Challenges & Solutions](#️-technical-challenges--solutions)
+- [Reliability & Feedback](#-reliability--feedback)
 
 ### 🤖 AI Systems
 
-* [AI Arkalon & Analytics](#-ai-Arkalon--analytics)
-* [Arkalon Voice](#-Arkalon-voice)
+- [AI Arkalon & Analytics](#-ai-Arkalon--analytics)
+- [Arkalon Voice](#-Arkalon-voice)
 
 ### 📱 Platform
 
-* [Extended Media Showcases](#-extended-media-showcases)
-* [Mobile & PWA Experience](#-mobile--pwa-experience)
+- [Extended Media Showcases](#-extended-media-showcases)
+- [Mobile & PWA Experience](#-mobile--pwa-experience)
 
 ### 🧪 Development
 
-* [Tests](#-tests)
-* [CI/CD & Automation](#-cicd--automation)
-* [Future Improvements](#-future-improvements)
-* [Changelog](#-changelog)
-* [API Reference](#-api-reference)
+- [Tests](#-tests)
+- [CI/CD & Automation](#-cicd--automation)
+- [Future Improvements](#-future-improvements)
+- [Changelog](#-changelog)
+- [API Reference](#-api-reference)
 
 ### 📦 Meta
 
-* [Device Compatibility](#-device-compatibility)
-* [Disclaimer](#️-disclaimer)
-* [Privacy, Telemetry & Audit Logs](#-privacy-telemetry--audit-logs)
-* [License](#-license)
-
+- [Device Compatibility](#-device-compatibility)
+- [Disclaimer](#️-disclaimer)
+- [Privacy, Telemetry & Audit Logs](#-privacy-telemetry--audit-logs)
+- [License](#-license)
 
 ## ⚡ Identity & Zero-Friction Account System
 
@@ -106,7 +105,7 @@ RPS League is built for instant participation without traditional account fricti
 - **Adaptive Entry Flow**: First-time players are introduced through an interactive onboarding modal with nickname rerolling and instant identity generation, while returning users receive contextual "What's New" overlays tied to the latest acknowledged release version.
 - **Client-Side Version Tracking**: Lightweight release acknowledgement system powered by `localStorage`, ensuring update notifications are only surfaced once per deployed version without requiring authentication or backend session state.
 - **Integrated Update Log**: Dedicated in-app update history page documenting major gameplay systems, live-service features, infrastructure upgrades, and seasonal content rollouts.
-This architecture eliminates the barrier to entry while preserving a robust layer of social identity and competitive status across the league ecosystem.
+  This architecture eliminates the barrier to entry while preserving a robust layer of social identity and competitive status across the league ecosystem.
 
 ---
 
@@ -117,11 +116,13 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - No ties ever occur, every match always produces a clear winner to keep gameplay fast and decisive
 
 ### Dynamic odds
+
 - WIN: +100% of your bet
 - LOSE: -50% of your bet
 - Floor: points never drop below 100,000
 
 ### Bonus system
+
 - 40% chance per match to trigger a Tiered Bonus multiplier
 - On win: multiplies payout by 1.5x-7x depending on tier
 - On loss: reduces loss to 75%-0% depending on tier (Legendary+ fully negates loss)
@@ -134,6 +135,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Guarantees at least one bonus every 4 matches if not triggered naturally
 
 ### Win streak system
+
 - Consecutive wins unlock escalating multipliers at 3, 4, and 5 wins (x2, x3, x5)
 - x5 multiplier persists until the streak is broken
 - Longest win streak is permanently tracked in player profiles
@@ -142,6 +144,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Core action buttons adapt to the active streak color state
 
 ### Idle auto-bet mode
+
 - Unlocks after reaching 1 Sextrigintillion points or being in Lap 1 or higher
 - Two tick boxes appear above each live match card: Auto-Bet Left and Auto-Bet Right
 - Automatically places your selected bet on your chosen side for every incoming match after unlock
@@ -149,6 +152,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Pauses automatically when the tab is hidden or browser is minimized
 
 ### Progression & leaderboard
+
 - Weekly gains contribute to weekly leaderboard rankings
 - Peak point value determines all-time leaderboard position
 - Laps track long-term progression and Ascension cycles, and are ranked in dedicated lap leaderboards
@@ -156,6 +160,7 @@ This architecture eliminates the barrier to entry while preserving a robust laye
 - Points are continuously updated through live matches and modified by events, streaks, bonuses, and other gameplay systems
 
 ### Live feed
+
 - Displays high-frequency match results in real time:
   - Your bets (instant feedback)
   - Other players
@@ -186,10 +191,12 @@ Upon reaching **999 TQGS (Trequinquagintillion)**, players unlock the Ascension 
 Reset your current balance back to **200,000 points** to permanently increase your **Lap Count**.
 
 Each lap tracks:
+
 - total bets taken
 - lap completion speed
 
 Compete on dedicated:
+
 - Lap leaderboards
 - Speedrun leaderboards
 
@@ -198,6 +205,7 @@ Compete on dedicated:
 Players are never forced to prestige.
 
 Declining Ascension allows you to:
+
 - preserve your current balance
 - continue pushing toward extreme high-score tiers
 - compete for permanent wealth rankings
@@ -233,10 +241,11 @@ A second category of 14 World Boss exclusive relics exists outside the standard 
 ---
 
 ## ⚔️ World Bosses
- 
+
 World Bosses introduce server-wide cooperative raid encounters to RPS League. Triggered automatically by the backend on a 10 to 12-minute cooldown cycle and broadcast in real-time via Server-Sent Events (SSE), encounters temporarily replace the prediction arena for all active players simultaneously. Every prediction submitted during an encounter becomes a damage strike against a shared boss HP pool that scales dynamically with participant count.
- 
+
 Each encounter includes:
+
 - Shared HP pool scaling with participant arrival timing
 - 60-second encounter window replacing the prediction dashboard entirely
 - Six-tier chest reward system scaling from Common to Rainbow, calculated as a percentage of current player balance
@@ -244,10 +253,10 @@ Each encounter includes:
 - Real-time damage leaderboard tracking percentage contributions across all participants
 - Full CSS-only boss animation lifecycle covering assembly, idle, hit reaction, pain, and death states
 - Four dedicated sound effects per boss covering spawn, hit reaction, player miss, and death sequences
-Four bosses rotate through the schedule: **Hexurion** (hexagonal prism core), **Orphion** (concentric orbital rings), **Fracturon** (rhombic grid lattice), and **Apexion** (breathing pyramid monolith).
- 
+  Four bosses rotate through the schedule: **Hexurion** (hexagonal prism core), **Orphion** (concentric orbital rings), **Fracturon** (rhombic grid lattice), and **Apexion** (breathing pyramid monolith).
+
 > 📋 **[View all World Boss showcases →](./WORLDBOSSES.md)**
- 
+
 <p align="center">
   <strong>World Boss Encounter</strong><br/>
   <img src="./assets/worldboss_showcase.gif" width="220" />
@@ -260,7 +269,8 @@ Four bosses rotate through the schedule: **Hexurion** (hexagonal prism core), **
 Global Events introduce a server-wide synchronized event loop to RPS League. Scheduled entirely on the backend and broadcast in real-time via Server-Sent Events (SSE), these events temporarily warp gameplay modifiers, transform UI card structures, and trigger dynamic CSS canvas shaders for every active player session simultaneously.
 
 Each event includes:
-- Server-wide real-time SSE synchronization 
+
+- Server-wide real-time SSE synchronization
 - Structured three-phase lifecycle progression (Cooldown, Warning, and Active)
 - Custom Arkalon telemetry warnings and synthesized spoken countdown alerts
 - Specialized visual transformations and animated number-tier scaling
@@ -280,12 +290,12 @@ Selectable events are weighted randomly, featuring **Tidal Surge** (incorporatin
 
 Flash Events are live gameplay modifiers that can trigger during matches with a 5% chance per bet. When activated, a random event temporarily transforms the application for the next 3 predictions through:
 
-- Full UI theme overrides  
-- Custom particle systems  
-- Event-specific audio design  
-- Gameplay modifiers and multipliers  
-- Dynamic typography and visual effects  
-- Animated endgame number-tier styling  
+- Full UI theme overrides
+- Custom particle systems
+- Event-specific audio design
+- Gameplay modifiers and multipliers
+- Dynamic typography and visual effects
+- Animated endgame number-tier styling
 
 Events are designed as evolving seasonal content and continuously expand over time.
 Event selection is weighted to support controlled rollout of new or seasonal events, allowing certain events to appear more frequently without changing the global trigger rate.
@@ -382,18 +392,18 @@ The entire economy, leaderboard system, and UI rendering pipeline is unified thr
 
 It handles:
 
-- Parsing shorthand inputs into safe BigInt values across extreme scales  
+- Parsing shorthand inputs into safe BigInt values across extreme scales
 - Converting raw values into tiered human-readable formats (M, B, T, up to vigintillions and beyond)
-- Mapping numeric ranges directly to visual styles, gradients, and tier identities  
+- Mapping numeric ranges directly to visual styles, gradients, and tier identities
 - Ensuring consistent formatting across across all frontend rendering contexts
 
 Every visible number in the system flows through this engine, including:
 
-- Leaderboards  
-- Player profiles  
-- Live activity feed  
-- Bonus and multiplier outcomes  
-- Tier-based UI transitions  
+- Leaderboards
+- Player profiles
+- Live activity feed
+- Bonus and multiplier outcomes
+- Tier-based UI transitions
 
 This guarantees deterministic behavior across all devices and prevents divergence between stored values and rendered output, even at extreme numerical ranges.
 
@@ -436,13 +446,13 @@ A priority-aware event stream displayed at the bottom of the screen, surfacing m
 
 ### Event Priorities
 
-| Priority | Indicator | Events |
-|----------|-----------|--------|
-| 0 (Player Events) | Gold ● | Relics discovered, achievements unlocked, streak milestones (3/5/8/10/15/20) |
-| 1 (My Predictions) | Red ● | Your prediction results (win/loss) |
-| 2 (Other Predictions) | Red ● | Other players' prediction results |
-| 3 (Demo Specials) | None | Simulated relics, achievements, milestones, lap completions, streaks, and festivals |
-| 4 (Demo Predictions) | None | Simulated prediction traffic during quiet periods |
+| Priority              | Indicator | Events                                                                              |
+| --------------------- | --------- | ----------------------------------------------------------------------------------- |
+| 0 (Player Events)     | Gold ●    | Relics discovered, achievements unlocked, streak milestones (3/5/8/10/15/20)        |
+| 1 (My Predictions)    | Red ●     | Your prediction results (win/loss)                                                  |
+| 2 (Other Predictions) | Red ●     | Other players' prediction results                                                   |
+| 3 (Demo Specials)     | None      | Simulated relics, achievements, milestones, lap completions, streaks, and festivals |
+| 4 (Demo Predictions)  | None      | Simulated prediction traffic during quiet periods                                   |
 
 ### Architecture
 
@@ -473,21 +483,22 @@ Animated LiveActivityFeed
 - Red indicators identify live prediction results.
 - Feed events bypass Zustand, preventing unnecessary re-renders.
 - Demo events keep the feed active during low-traffic periods.
+
 ---
 
 ## 🏗️ Architecture
 
-| Layer | Stack |
-|-------|-------|
-| Database | Supabase PostgreSQL |
-| Frontend | Next.js, React, TypeScript, Tailwind CSS |
-| State Management | Zustand (game, user, ui, popup queue) |
-| Backend | Node.js, Express, TypeScript, Google Gemini API |
-| Real-time | Server-Sent Events via `/api/live` |
-| Testing | Vitest, React Testing Library |
-| Match system | Custom match generator with persistent 5-second match scheduling |
-| Prediction engine | Transactional prediction services with concurrency-safe resolution |
-| Analytics | UTM attribution tracking, aggregated live statistics, admin dashboards |
+| Layer             | Stack                                                                  |
+| ----------------- | ---------------------------------------------------------------------- |
+| Database          | PostgreSQL 17 (self-hosted)                                            |
+| Frontend          | Next.js, React, TypeScript, Tailwind CSS                               |
+| State Management  | Zustand (game, user, ui, popup queue)                                  |
+| Backend           | Node.js, Express, TypeScript, Google Gemini API                        |
+| Real-time         | Server-Sent Events via `/api/live`                                     |
+| Testing           | Vitest, React Testing Library                                          |
+| Match system      | Custom match generator with persistent 5-second match scheduling       |
+| Prediction engine | Transactional prediction services with concurrency-safe resolution     |
+| Analytics         | UTM attribution tracking, aggregated live statistics, admin dashboards |
 
 ### System Flow
 
@@ -496,7 +507,7 @@ graph LR
     User([User Browser])
     Next[Next.js Frontend]
     API[Express Backend]
-    DB[(Supabase DB)]
+    DB[(PostgreSQL)]
     AI[Gemini AI Arkalon]
 
     User <-->|UI / Zustand| Next
@@ -511,7 +522,7 @@ graph LR
 ## 🎨 Design Decisions
 
 - **Zero-friction onboarding**: Instant anonymous play with random nickname generation
-- **SSE over WebSockets**: Chosen for simplicity, lower overhead, and better serverless compatibility
+- **SSE over WebSockets**: Chosen for simplicity and lower overhead
 - **Transactional prediction resolution**: Modular prediction services coordinate atomic database operations and concurrency-safe state transitions
 - **Concurrency-aware event stream**: Guaranteed stability and zero overlap between real user bets and demo traffic
 - **Profile recovery system** for cross-device portability
@@ -522,6 +533,9 @@ graph LR
 ---
 
 ## 🛠️ Technical Challenges & Solutions
+
+**Production Infrastructure Migration (Vercel/Render/Supabase -> Self-Hosted VPS)**
+Migrated the entire production stack from three managed services to a single self-managed Hetzner Cloud VPS running Docker, Caddy, and PostgreSQL 17. The migration required containerizing the frontend and backend with production Dockerfiles, configuring a Caddy reverse proxy with automatic TLS certificate provisioning, restoring a live PostgreSQL database from a schema-filtered pg_dump that separated application tables from Supabase-managed internals while preserving all production data, resolving SSL connection handling differences between Supabase's connection pooler and private Docker networking, and establishing automated CI/CD through GitHub Actions deploying via SCP and SSH.
 
 **SSE buffering in production**
 Real-time events were delayed in deployment due to proxy buffering. Solved by disabling buffering via the X-Accel-Buffering: no header, ensuring instant delivery of match results.
@@ -671,17 +685,17 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 
 ### Pipeline Overview
 
-| Stage | Tool | Purpose |
-| :--- | :--- | :--- |
-| **Testing** | Vitest | ~28s suites for Betting Loops & API logic |
-| **Deployment** | Vercel / Render | Zero-touch CD after passing CI |
-| **Maintenance** | Cron Jobs | Daily/Weekly leaderboard resets + Arkalon prophecy reset |
+| Stage              | Tool                         | Purpose                                             |
+| :----------------- | :--------------------------- | :-------------------------------------------------- |
+| **Testing**        | Vitest                       | ~28s suites for Betting Loops & API logic           |
+| **Deployment**     | GitHub Actions → VPS         | CI gate + SCP + Docker Compose rebuild via SSH      |
+| **Infrastructure** | Docker, Caddy, PostgreSQL 17 | Containerized services with automatic HTTPS         |
+| **Maintenance**    | Cron Jobs                    | Daily/Weekly resets + Arkalon prophecy + DB backups |
 
 ### Key Workflows
 
 - **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
 - **Arkalon Reset:** Automated `POST` to `/api/oracle/reset` at 00:01 UTC daily generates a fresh prophecy side and clears all per-user usage state. Reuses `RESET_SECRET` for authorization. Supports manual dispatch for testing.
-- **Vercel Deployment Check:** Dispatches status updates to ensure only successful builds reach production.
 - **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
 - **Database Cleanup:** Automated hourly `POST` to `/api/predictions/cleanup` prunes old matches and prediction history while preserving retained player history.
 
@@ -689,10 +703,10 @@ The RPS League stack is fully automated via **GitHub Actions** to manage testing
 
 ## 🚀 Future Improvements
 
-* **Multi-Tiered League Layers:** A structured progression system with multiple leaderboard brackets tailored to different point thresholds, ensuring players at all stages have a relevant, competitive space to climb before hitting the main vigintillion-scale rankings.
-* **Custom Cosmetic Marketplace:** A dedicated points-based store allowing players to purchase and equip various profile customizations, such as unique leaderboard card backgrounds, exclusive text neon shimmers, custom tier badges, and premium name colors, without diluting the prestige of event-exclusive victory animations.
-* **Social Group Hubs:** Custom, isolated group and friend leaderboards designed to foster close-knit, high-frequency competition outside the global ecosystem.
-* **Unified OAuth Integration:** Optional Google Authentication built into the profile settings to streamline secure profile recovery alongside the existing short-ID architecture.
+- **Multi-Tiered League Layers:** A structured progression system with multiple leaderboard brackets tailored to different point thresholds, ensuring players at all stages have a relevant, competitive space to climb before hitting the main vigintillion-scale rankings.
+- **Custom Cosmetic Marketplace:** A dedicated points-based store allowing players to purchase and equip various profile customizations, such as unique leaderboard card backgrounds, exclusive text neon shimmers, custom tier badges, and premium name colors, without diluting the prestige of event-exclusive victory animations.
+- **Social Group Hubs:** Custom, isolated group and friend leaderboards designed to foster close-knit, high-frequency competition outside the global ecosystem.
+- **Unified OAuth Integration:** Optional Google Authentication built into the profile settings to streamline secure profile recovery alongside the existing short-ID architecture.
 
 ---
 
@@ -708,7 +722,7 @@ All notable updates, seasonal releases, and system changes are documented in the
 
 This application uses native BigInt to handle extremely large point values without precision loss, scaling into the vigintillions during extended gameplay.
 
-- Supported: Modern mobile and desktop browsers (iOS 14+, Android 9+, Chrome, Firefox, Safari)  
+- Supported: Modern mobile and desktop browsers (iOS 14+, Android 9+, Chrome, Firefox, Safari)
 - Not supported: Older browsers and devices without BigInt support, such as Internet Explorer and early iPhone models (iPhone 6 and 7)
 
 This ensures consistent leaderboard accuracy and stable gameplay across supported platforms.
