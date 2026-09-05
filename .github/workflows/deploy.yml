@@ -1,0 +1,71 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get short SHA
+        id: sha
+        run: echo "short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Deploy frontend source to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "frontend/"
+          target: /opt/arkalon/rps-league/
+          overwrite: true
+          rm: true
+
+      - name: Deploy backend source to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "backend/"
+          target: /opt/arkalon/rps-league/
+          overwrite: true
+          rm: true
+
+      - name: Build and restart on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/arkalon/rps-league
+            export DEPLOY_SHA=${{ steps.sha.outputs.short }}
+
+            echo "Building images tagged: ${DEPLOY_SHA}"
+            docker compose build
+
+            echo "Starting containers..."
+            docker compose up -d
+
+            echo "Waiting for backend health check..."
+            sleep 10
+
+            # Verify backend is healthy
+            docker exec rps-league-backend node -e \
+              "fetch('http://localhost:5000/health').then(r=>{if(!r.ok)throw new Error(r.status)}).catch(e=>{console.error(e);process.exit(1)})"
+
+            echo "Deploy ${DEPLOY_SHA} successful"
