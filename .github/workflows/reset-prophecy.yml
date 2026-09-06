@@ -15,7 +15,7 @@ jobs:
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
             -X POST \
             -H "x-reset-secret: ${{ secrets.RESET_SECRET }}" \
-            https://rps-league-g275.onrender.com/api/oracle/reset)
+            https://api.rpsleague.fi/api/oracle/reset)
           echo "Response code: $RESPONSE"
           if [ "$RESPONSE" != "200" ]; then
             echo "Oracle reset failed with status $RESPONSE"

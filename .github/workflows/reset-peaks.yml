@@ -31,7 +31,7 @@ jobs:
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
             -X POST \
             -H "x-reset-secret: ${{ secrets.RESET_SECRET }}" \
-            https://rps-league-g275.onrender.com/api/predictions/reset/daily)
+            https://api.rpsleague.fi/api/predictions/reset/daily)
           echo "Response code: $RESPONSE"
           if [ "$RESPONSE" != "200" ]; then
             echo "Daily reset failed with status $RESPONSE"
@@ -51,7 +51,7 @@ jobs:
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
             -X POST \
             -H "x-reset-secret: ${{ secrets.RESET_SECRET }}" \
-            https://rps-league-g275.onrender.com/api/predictions/reset/weekly)
+            https://api.rpsleague.fi/api/predictions/reset/weekly)
           echo "Response code: $RESPONSE"
           if [ "$RESPONSE" != "200" ]; then
             echo "Weekly reset failed with status $RESPONSE"
