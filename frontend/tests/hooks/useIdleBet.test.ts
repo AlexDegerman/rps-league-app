@@ -58,7 +58,6 @@ vi.mock('@/app/stores/userStore', () => ({
   )
 }))
 
-// Mock API and user utilities
 vi.mock('@/lib/api', () => ({
   postPrediction: vi.fn()
 }))
@@ -69,7 +68,6 @@ vi.mock('@/lib/user', () => ({
 
 const INITIAL_SYSTEM_TIME = new Date('2026-04-02T10:00:00Z').getTime()
 
-// Mock prediction response aligning with the backend schema
 const mockPredictionResponse: PredictionResponse = {
   success: true,
   gameId: 'game-101',
