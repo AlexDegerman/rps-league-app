@@ -17,29 +17,29 @@ const MONETARY_INTENT_REGEX =
 type Status = 'idle' | 'submitting' | 'success' | 'error' | 'ratelimited'
 
 type CategoryKey =
-  | 'bug'
-  | 'visuals'
-  | 'balance'
-  | 'arkalon'
+  | 'feedback'
   | 'suggestion'
-  | 'praise'
+  | 'balance'
+  | 'visuals'
+  | 'bug'
+  | 'arkalon'
 
 const CATEGORIES: { key: CategoryKey; label: string }[] = [
-  { key: 'bug', label: '🐛 Technical Issue' },
-  { key: 'visuals', label: '🎨 Visuals & Animations' },
-  { key: 'balance', label: '⚖️ Gameplay & Balance' },
-  { key: 'arkalon', label: '👁️ AI Arkalon' },
+  { key: 'feedback', label: '💬 General Feedback' },
   { key: 'suggestion', label: '💡 Suggestion' },
-  { key: 'praise', label: '🙌 General Praise' }
+  { key: 'balance', label: '⚖️ Gameplay & Balance' },
+  { key: 'visuals', label: '🎨 Visuals & Animations' },
+  { key: 'bug', label: '🐛 Technical Issue' },
+  { key: 'arkalon', label: '👁️ AI Arkalon' }
 ]
 
 const PLACEHOLDERS: Record<CategoryKey, string> = {
+  feedback: 'Share your thoughts, impressions, or general feedback.',
+  suggestion: 'What feature or improvement would you like to see?',
+  balance: 'Thoughts on multipliers, streaks, or the point economy?',
+  visuals: 'Which theme, effect, or animation could be improved?',
   bug: 'Describe what failed. What were you doing when it happened?',
-  visuals: 'Which theme or animation? What looked off?',
-  balance: 'Thoughts on multipliers, streaks, or the point floor?',
-  arkalon: 'Was the Arkalon accurate? Too long? Off-topic?',
-  suggestion: 'What feature would you like to see?',
-  praise: 'Go ahead, I am listening.'
+  arkalon: 'Was Arkalon helpful? Too long? Off-topic?'
 }
 
 export default function FeedbackPage() {
