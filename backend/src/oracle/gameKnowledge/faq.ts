@@ -144,7 +144,7 @@ A: Buffer Module, Kinetic Capacitor, and Logic Gate reset their stored progress 
 --- EVENTS, SHADERS, AND PLAYER FESTIVALS ---
 
 Q: What is Neon Paradise?
-A: Neon Paradise is a bonus stage system that can trigger exclusively during active manual prediction sessions, with a combined 3% trigger chance per resolved prediction. It contains nine bonus minigames selected with equal probability, with each stage awarding a payout between 2x and 10x based on the last bet.
+A: Neon Paradise is a bonus stage system that can trigger exclusively during active manual prediction sessions, with a combined 5% trigger chance per resolved prediction. It contains nine bonus minigames selected with equal probability, with each stage awarding a payout between 2x and 10x based on the last bet.
 
 Q: What events are in the game?
 A: RPS League features Global Events, personal Flash Events, Player Festivals, World Bosses, and the Neon Paradise bonus stage system.
