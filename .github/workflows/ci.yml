@@ -15,17 +15,31 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
-      - name: Backend — install and test
+      - name: Backend — Install & Test
         working-directory: backend
         run: |
           npm ci
           npm test
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+          NODE_ENV: test
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
+          CORS_ORIGIN: "http://localhost:3000"
+          RESET_SECRET: "dummy_secret_for_ci_testing_12345"
+          GEMINI_API_KEY: "dummy_key"
+          DISCORD_LOG_WEBHOOK: "https://discord.com/api/webhooks/dummy"
 
-      - name: Frontend — install, lint, build
+      - name: Frontend — Install, Lint & Build
         working-directory: frontend
         run: |
           npm ci
           npm run lint
           npm run build
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:5000"

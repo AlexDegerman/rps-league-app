@@ -681,23 +681,24 @@ Comprehensive Vitest coverage across backend services and frontend components, i
 
 ## 🚀 CI/CD & Automation
 
-The RPS League stack is fully automated via **GitHub Actions** to manage testing, deployment, and high-frequency maintenance.
+The RPS League stack uses GitHub Actions for automated testing, production deployment, and scheduled maintenance.
 
 ### Pipeline Overview
 
-| Stage              | Tool                         | Purpose                                             |
-| :----------------- | :--------------------------- | :-------------------------------------------------- |
-| **Testing**        | Vitest                       | ~28s suites for Betting Loops & API logic           |
-| **Deployment**     | GitHub Actions → VPS         | CI gate + SCP + Docker Compose rebuild via SSH      |
-| **Infrastructure** | Docker, Caddy, PostgreSQL 17 | Containerized services with automatic HTTPS         |
-| **Maintenance**    | Cron Jobs                    | Daily/Weekly resets + Arkalon prophecy + DB backups |
+| Stage | Tool | Purpose |
+| :--- | :--- | :--- |
+| Testing | Vitest + Next.js Build | Backend tests, frontend linting, and production build |
+| Deployment | GitHub Actions → Hetzner VPS | CI gate, source sync, Docker rebuild, and healthcheck |
+| Infrastructure | Docker, Caddy, PostgreSQL 17 | Containerized services with automatic TLS and private networking |
+| Maintenance | Scheduled Workflows | Database cleanup, leaderboard resets, and Oracle prophecy resets |
 
 ### Key Workflows
 
-- **Leaderboard Engine:** Automated `POST` to `/api/predictions/reset` keeps `daily_peak` and `weekly_peak` accurate.
-- **Arkalon Reset:** Automated `POST` to `/api/oracle/reset` at 00:01 UTC daily generates a fresh prophecy side and clears all per-user usage state. Reuses `RESET_SECRET` for authorization. Supports manual dispatch for testing.
-- **Environment Parity:** Validates `RESET_SECRET` and `DATABASE_URL` across Dev/Staging/Prod to prevent misconfigurations.
-- **Database Cleanup:** Automated hourly `POST` to `/api/predictions/cleanup` prunes old matches and prediction history while preserving retained player history.
+- `ci.yml` runs backend tests and verifies the frontend production build on PRs and pushes to `main` and `develop`
+- `deploy.yml` deploys the application to the Hetzner VPS after CI passes, rebuilds the Docker services, recreates containers, and verifies backend health
+- `reset-peak-points.yml` handles daily and weekly leaderboard peak resets
+- `reset-oracle-prophecy.yml` generates the daily Oracle prophecy and supports manual execution
+- `database-cleanup.yml` periodically removes expired predictions and transient match data
 
 ---
 

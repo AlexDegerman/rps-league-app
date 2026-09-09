@@ -1,0 +1,36 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: rps-league-frontend:${DEPLOY_SHA:-latest}
+    container_name: rps-league-frontend
+    restart: unless-stopped
+    networks:
+      - proxy-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: rps-league-backend:${DEPLOY_SHA:-latest}
+    container_name: rps-league-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - proxy-net
+      - db-net
+    healthcheck:
+      test: ["CMD", "node", "-e",
+        "fetch('http://localhost:5000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  proxy-net:
+    external: true
+  db-net:
+    external: true
