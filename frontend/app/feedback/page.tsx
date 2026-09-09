@@ -62,7 +62,7 @@ export default function FeedbackPage() {
 
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
-  const [category, setCategory] = useState<CategoryKey>('bug')
+  const [category, setCategory] = useState<CategoryKey>(CATEGORIES[0].key)
   const [screenshot, setScreenshot] = useState<File | null>(null)
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(
     null
