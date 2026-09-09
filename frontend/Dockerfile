@@ -7,14 +7,19 @@ RUN npm run build
 
 FROM node:20-alpine
 WORKDIR /app
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.ts ./
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=appuser:appgroup /app/.next/standalone ./
+COPY --from=builder --chown=appuser:appgroup /app/.next/static ./.next/static
+
 USER appuser
 
 EXPOSE 3000
-CMD ["npm", "start"]
+
+CMD ["node", "server.js"]

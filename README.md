@@ -689,13 +689,13 @@ The RPS League stack uses GitHub Actions for automated testing, production deplo
 | :--- | :--- | :--- |
 | Testing | Vitest + Next.js Build | Backend tests, frontend linting, and production build |
 | Deployment | GitHub Actions → Hetzner VPS | CI gate, source sync, Docker rebuild, and healthcheck |
-| Infrastructure | Docker, Caddy, PostgreSQL 17 | Containerized services with automatic TLS and private networking |
+| Infrastructure | Docker (Next.js Standalone), Caddy, PostgreSQL 17 | Minimal containerized services with automatic TLS and private networking |
 | Maintenance | Scheduled Workflows | Database cleanup, leaderboard resets, and Oracle prophecy resets |
 
 ### Key Workflows
 
 - `ci.yml` runs backend tests and verifies the frontend production build on PRs and pushes to `main` and `develop`
-- `deploy.yml` deploys the application to the Hetzner VPS after CI passes, rebuilds the Docker services, recreates containers, and verifies backend health
+- `deploy.yml` deploys the application to the Hetzner VPS after CI passes, rebuilds the services using Next.js standalone output for minimal image size, recreates containers, and verifies backend health
 - `reset-peak-points.yml` handles daily and weekly leaderboard peak resets
 - `reset-oracle-prophecy.yml` generates the daily Oracle prophecy and supports manual execution
 - `database-cleanup.yml` periodically removes expired predictions and transient match data
