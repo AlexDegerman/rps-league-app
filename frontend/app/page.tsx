@@ -214,6 +214,9 @@ export default function HomePage() {
   const isDuplicate = useTabGuard(() => {
     esRef.current?.close()
   })
+  const initialBootIdRef = useRef<number | null>(null)
+  const [connectionEpoch, setConnectionEpoch] = useState(0)
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [bossChestResult, setBossChestResult] = useState<ChestResult | null>(
     null
   )
@@ -572,9 +575,16 @@ export default function HomePage() {
       if (isStreamStaleRef.current) setIsStreamStale(false)
     }
     es.addEventListener('sync', (event) => {
-      const { serverTime } = JSON.parse(event.data)
+      const { serverTime, bootId } = JSON.parse(event.data)
       setServerOffset(serverTime - Date.now())
       setPersistentError(null)
+      if (bootId) {
+        if (initialBootIdRef.current && initialBootIdRef.current !== bootId) {
+          useUIStore.getState().setNotification('new_version')
+        } else if (!initialBootIdRef.current) {
+          initialBootIdRef.current = bootId
+        }
+      }
     })
 
     es.addEventListener('pending', (event) => {
@@ -1131,15 +1141,12 @@ export default function HomePage() {
 
     es.onerror = () => {
       if (es.readyState === EventSource.CLOSED) {
-        logger.error(
-          'SSE connection closed (too many players or server drop)',
-          undefined,
-          {
-            readyState: es.readyState,
-            url: `${API_BASE}/api/live`
-          }
-        )
-        setPersistentError('TOO MANY PLAYERS - TRY AGAIN IN A MOMENT')
+        es.close()
+        esRef.current = null
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current)
+        reconnectTimerRef.current = setTimeout(() => {
+          setConnectionEpoch((c) => c + 1)
+        }, 3000)
       } else {
         logger.warn('SSE connection error (will retry)', {
           readyState: es.readyState
@@ -1148,11 +1155,12 @@ export default function HomePage() {
     }
 
     return () => {
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current)
       es.close()
       esRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDuplicate])
+  }, [isDuplicate, connectionEpoch])
 
   const handleWelcomeContinue = () => {
     localStorage.setItem('rps_welcomed', '1')

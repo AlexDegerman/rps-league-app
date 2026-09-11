@@ -104,8 +104,8 @@ RPS League is built for instant participation without traditional account fricti
 - **Shareable Performance Dashboards**: Unique public profile URLs featuring 16 tracked data points and a context-aware match history (Recent, Biggest Wins, Best Multipliers), visualizing predictions through rich event cards that track tiered bonuses, flash event overlays, and move-set comparisons.
 - **Adaptive Entry Flow**: First-time players are introduced through an interactive onboarding modal with nickname rerolling and instant identity generation, while returning users receive contextual "What's New" overlays tied to the latest acknowledged release version.
 - **Client-Side Version Tracking**: Lightweight release acknowledgement system powered by `localStorage`, ensuring update notifications are only surfaced once per deployed version without requiring authentication or backend session state.
+- **Live Deployment Awareness**: Server boot-id synchronization via SSE detects fresh VPS deployments in real time, automatically recovers dropped connections, and surfaces a non-intrusive in-app refresh prompt without interrupting active sessions.
 - **Integrated Update Log**: Dedicated in-app update history page documenting major gameplay systems, live-service features, infrastructure upgrades, and seasonal content rollouts.
-  This architecture eliminates the barrier to entry while preserving a robust layer of social identity and competitive status across the league ecosystem.
 
 ---
 
@@ -687,16 +687,18 @@ The RPS League stack uses GitHub Actions for automated testing, production deplo
 
 | Stage | Tool | Purpose |
 | :--- | :--- | :--- |
-| Testing | Vitest + Next.js Build | Backend tests, frontend linting, and production build |
+| Testing | Vitest + Next.js Production Build | Backend tests, frontend validation, and production build verification |
 | Deployment | GitHub Actions → Hetzner VPS | CI gate, source sync, Docker rebuild, and healthcheck |
 | Infrastructure | Docker (Next.js Standalone), Caddy, PostgreSQL 17 | Minimal containerized services with automatic TLS and private networking |
 | Maintenance | Scheduled Workflows | Database cleanup, leaderboard resets, and Oracle prophecy resets |
 
+All deployments are gated by CI, synchronized to the VPS through GitHub Actions, rebuilt with Docker Compose, and verified through an automated backend health probe before completion.
+
 ### Key Workflows
 
 - `ci.yml` runs backend tests and verifies the frontend production build on PRs and pushes to `main` and `develop`
-- `deploy.yml` deploys the application to the Hetzner VPS after CI passes, rebuilds the services using Next.js standalone output for minimal image size, recreates containers, and verifies backend health
-- `reset-peak-points.yml` handles daily and weekly leaderboard peak resets
+- `deploy.yml` deploys the application to the Hetzner VPS after CI passes, rebuilds Docker images using the production configuration, recreates containers, and verifies backend health
+- `reset-peak-points.yml` maintains daily and weekly leaderboard peak tracking through scheduled resets
 - `reset-oracle-prophecy.yml` generates the daily Oracle prophecy and supports manual execution
 - `database-cleanup.yml` periodically removes expired predictions and transient match data
 

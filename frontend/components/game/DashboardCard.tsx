@@ -364,6 +364,22 @@ export default function DashboardCard() {
         {/* Notifications overlay slots */}
         {notification && isHydrated && (
           <div className="flex flex-col gap-2 mt-3 relative z-10">
+            {notification === 'new_version' && (
+              <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-4 rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 border border-indigo-200 bg-indigo-50/90 animate-in fade-in slide-in-from-top-2 duration-400">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-base sm:text-lg flex-none">🚀</span>
+                  <p className="text-[10px] sm:text-[11px] font-bold text-indigo-900 leading-snug whitespace-normal sm:whitespace-nowrap">
+                    New version available, refresh your page
+                  </p>
+                </div>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-sm shrink-0 cursor-pointer"
+                >
+                  Refresh
+                </button>
+              </div>
+            )}
             {(notification === 'new_visitor' ||
               notification === 'no_bigint') && (
               <div

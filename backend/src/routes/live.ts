@@ -69,6 +69,9 @@ router.get('/global-event-state', (_req, res) => {
 type SSEClient = (event: string, data: string) => void
 const clients = new Set<SSEClient>()
 
+// Tracks server startup to detect when new updates or deployments are live
+const SERVER_BOOT_ID = Date.now()
+
 // Module-level flag - generator must only start once regardless of how many
 // clients connect, since it drives real DB writes and SSE broadcasts.
 let generatorStarted = false
@@ -115,7 +118,10 @@ router.get('/', (req, res) => {
   })
 
   // Sync client clock on connect so countdown timers stay accurate
-  send('sync', JSON.stringify({ serverTime: Date.now() }))
+  send(
+    'sync',
+    JSON.stringify({ serverTime: Date.now(), bootId: SERVER_BOOT_ID })
+  )
   send('world_boss_sync', JSON.stringify(getBossState()))
   clients.add(send)
 
