@@ -24,6 +24,12 @@ A: All new Predictors begin with 200,000 points. Points can never drop below a f
 Q: What is the demo traffic I see in the live feed?
 A: The feed contains real bets and simulated demo traffic. Demo traffic only keeps activity visible during low traffic and does not affect gameplay.
 
+Q: Can I trade or gift points, relics, or items?
+A: No. All progression is account-bound. Points, relics, and items cannot be transferred, traded, or gifted between players.
+
+Q: Where can I see updates, patch notes, and what has changed?
+A: Open the More menu from the main header and select the Updates tab. The Updates page contains the latest changes, new features, balance adjustments, content additions, bug fixes, and previous update history. It is the central location for all RPS League update information.
+
 --- ACCOUNT, IDENTITY, AND NICKNAMES ---
 
 Q: Are accounts bound to email addresses or social logins?
@@ -333,7 +339,13 @@ Q: How does the dynamic badge upgrading system work?
 A: When you earn a higher rarity tier of a chained achievement, it automatically replaces the lower tier version in your inventory. For example earning the Rare win streak badge automatically removes the Common version. This keeps your badge collection focused on your highest accomplishments.
 
 Q: How many total achievements are there?
-A: There are over 100 achievements across 15 distinct categories, ranging from win volume and streaks to relic collection, event participation, Arkalon mastery, and special hidden milestones.
+A: RPS League has 155 achievements across 18 categories and six rarity tiers. Achievements permanently track progression and never reset through Ascension.
+
+Q: What are the rarest achievements?
+A: Rainbow achievements are the highest rarity tier. The four apex achievements are God King, Cosmic Sovereign, World Purifier, and Paradise Ascendant, representing the game's longest-term mastery goals.
+
+Q: Do I need every achievement to complete the achievement milestones?
+A: No. Omnivore unlocks at 142 earned achievements and does not require full archive completion. The remaining achievements can still be collected for completion and prestige.
 
 --- RELIC STACKING AND INTERACTION ---
 
