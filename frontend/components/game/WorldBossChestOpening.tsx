@@ -119,12 +119,12 @@ const ChestBox = memo(function ChestBox({
             key={i}
             className="absolute"
             style={{
-              width: '2px',
-              height: '120px',
+              width: '2.5px',
+              height: '190px',
               background: `linear-gradient(to top, transparent, ${
                 isRainbow ? rainbowColors[i] : style.glow
               }, transparent)`,
-              transform: `rotate(${i * (360 / RAY_COUNT)}deg) translateY(-60px)`,
+              transform: `rotate(${i * (360 / RAY_COUNT)}deg) translateY(-95px)`,
               opacity: isOpen ? 0.75 : 0.35,
               transformOrigin: 'bottom center',
               willChange: 'transform'
@@ -135,7 +135,7 @@ const ChestBox = memo(function ChestBox({
 
       {/* Chest body */}
       <div
-        className={`relative w-24 h-20 rounded-xl border flex items-center justify-center overflow-hidden ${
+        className={`relative w-36 h-28 sm:w-40 sm:h-32 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 p-2 overflow-hidden ${
           isRainbow ? 'animate-rainbow-chest' : ''
         }`}
         style={
@@ -144,32 +144,26 @@ const ChestBox = memo(function ChestBox({
             : {
                 background: style.bg,
                 borderColor: style.border,
-                boxShadow: `0 0 24px ${style.glow}`
+                boxShadow: `0 0 32px ${style.glow}`
               }
         }
       >
         {/* Lid */}
-        <div
-          className={`absolute top-0 left-0 right-0 h-8 rounded-t-xl border-b flex items-center justify-center origin-top ${isRainbow ? 'animate-rainbow-chest-lid' : ''}`}
-          style={{
-            background: style.bg,
-            borderColor: style.border,
-            transform: isOpen ? 'rotateX(-110deg)' : 'rotateX(0deg)',
-            transition: 'transform 0.5s cubic-bezier(0.22,1,0.36,1)'
-          }}
+        <span
+          className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.18em] text-center select-none"
+          style={{ color: style.border }}
         >
-          <span
-            className="text-[0.45rem] font-black uppercase tracking-[0.15em]"
-            style={{ color: style.border }}
-          >
-            {isTwin ? 'BONUS CHEST' : style.label}
-          </span>
-        </div>
+          {isTwin ? 'BONUS CHEST' : style.label}
+        </span>
         {/* Point amount */}
-        <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-0.5">
-          {isOpen && (
-            <span className="text-base font-black text-[#86efac] [text-shadow:0_0_12px_rgba(134,239,172,0.9)]">
+        <div className="flex flex-col items-center">
+          {isOpen ? (
+            <span className="text-2xl sm:text-3xl font-black text-[#86efac] [text-shadow:0_0_16px_rgba(134,239,172,0.95)] tabular-nums tracking-tight">
               +{display}
+            </span>
+          ) : (
+            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+              Opening...
             </span>
           )}
         </div>
@@ -178,14 +172,14 @@ const ChestBox = memo(function ChestBox({
       {/* Relic drop indicator */}
       {isOpen && relicDrop && (
         <div
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border ${
             isRainbow
               ? 'animate-rainbow-relic-badge'
               : 'border-[rgba(168,85,247,0.4)] bg-[rgba(168,85,247,0.1)]'
           }`}
         >
           <span
-            className={`text-[0.55rem] font-black uppercase tracking-[0.12em] ${
+            className={`text-[0.65rem] sm:text-[0.7rem] font-black uppercase tracking-[0.14em] ${
               isRainbow ? 'animate-rainbow-text' : 'text-[#d8b4fe]'
             }`}
           >
