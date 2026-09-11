@@ -10,16 +10,16 @@ Q: What is my biggest weakness as a Predictor?
 A: Arkalon does not have access to your individual account history or session data. It can analyze aggregate league telemetry and explain all game systems, but it cannot evaluate your personal betting patterns or identify individual performance gaps.
 
 Q: Why am I progressing slowly?
-A: Slow progression usually means betting conservatively relative to your balance, missing bonus opportunities, or not benefiting from active streak multipliers. The fastest compound growth comes from combining an active win streak (x5 at 5 wins), frequent bonus procs via Precision Bearing or Biased Oscillator relics, and betting during Global Events like Solar Flare (2x) or Tidal Surge (+20%).
+A: Slow progression usually comes from conservative betting, missing bonus opportunities, or failing to maintain streak multipliers. Fast growth comes from combining x5 streaks, frequent bonuses through relics like Precision Bearing or Biased Oscillator, and Global Events like Solar Flare (2x) or Tidal Surge (+20%).
 
 Q: What should I focus on as a new player?
 A: Early focus should be on building a win streak to x5 for the maximum multiplier, learning the Bonus system, and surviving without falling below the 100,000 point floor. Save your recovery code immediately on your first profile visit. Relic drops and achievements will accumulate naturally from normal play.
 
 Q: What should I do over the next hour?
-A: Bet consistently through as many matches as possible to maximize bonus proc opportunities and Flash Event chances. If a Global Event warning fires, stay active for the duration since Solar Flare (2x) and Tidal Surge (+20%) produce significant compound gains. Equip a relic if you have one; even Common relics improve expected value over time.
+A: Bet consistently to maximize bonus and Flash Event opportunities. Stay active during Global Events like Solar Flare (2x) and Tidal Surge (+20%). Equip any relic available, as even Common relics improve long-term value.
 
 Q: If I only have 10 minutes, what is the best way to spend it?
-A: Place bets on every available match for the full session. Ten minutes at 5-second match intervals gives roughly 120 prediction opportunities, each with independent bonus and Flash Event roll chances. Volume is the core driver of progression at all stages.
+A: Bet every available match. Ten minutes provides roughly 120 prediction opportunities, each with independent bonus and Flash Event rolls. Volume drives progression at every stage.
 
 Q: I am stuck. What should I focus on?
 A: If your balance is stagnating, check whether you have a relic equipped, whether a Global Event is active or approaching, and whether your bet sizing is proportional to your current balance. The pity system guarantees a bonus every 4 matches, so sustained betting at appropriate stakes will produce positive variance over time.
@@ -36,13 +36,13 @@ Q: How do I get stronger or more effective over time?
 A: Long-term effectiveness increases through relic acquisition (permanent modifiers), completing prestige laps (increases relic drop rates), earning achievements (cosmetic prestige and identity), and adapting to active events that temporarily boost returns. The core betting loop does not change, but your modifiers accumulate permanently.
 
 Q: How do I earn more points faster?
-A: The fastest point gains come from combining multiple active multipliers simultaneously: a 5-win streak (x5), an active Flash Event (up to 3x), a Global Event such as Solar Flare (2x), a bonus proc (up to 7x Mythical), and a compatible relic such as Overdrive Relay or Prismatic Shard. All of these compound together on a single win.
+A: Fast gains come from stacking multipliers: 5-win streak (x5), Flash Event (up to 3x), Global Event bonuses like Solar Flare (2x), bonus tiers (up to 7x Mythical), and compatible relics. These effects compound on a single win.
 
 Q: How does progression work overall?
 A: Progression has three parallel tracks. Point accumulation drives leaderboard position and unlocks visual tier styles. Relic collection permanently improves your modifiers and drop rates. Achievement completion builds your public identity and badge showcase. Prestige laps layer on top of all three by resetting points while permanently improving drop rates and adding lap-specific leaderboard rankings.
 
 Q: What is the fastest way to progress early on?
-A: Bet every match, maintain your streak, and prioritize equipping any relic you find immediately. Common relics like Precision Bearing (+10% bonus trigger) have immediate compound value. Do not skip matches as each one is an independent Flash Event roll and bonus proc opportunity.
+A: Bet every match, maintain streaks, and equip relics immediately. Relics like Precision Bearing (+10% bonus trigger) provide early value. Every match is a separate Flash Event and bonus opportunity.
 
 --- PROGRESSION DEPTH ---
 
@@ -74,7 +74,7 @@ Q: Is there a maximum lap count?
 A: No. There is no maximum lap count defined in the system.
 
 Q: Why would someone keep playing this game for months?
-A: RPS League is structured around multiple long-term progression loops that operate simultaneously. Relic collection has 17 unique pieces with no duplicates, making each drop meaningful across hundreds of sessions. The Achievement Codex has over 100 milestones. Prestige laps compound drop rates permanently. New seasons introduce additional events, systems, and achievements. The combination of persistent account growth and live-service content updates sustains engagement across extended play.
+A: RPS League combines multiple long-term progression loops. Relic collection has 17 unique pieces with no duplicates, the Achievement Codex has over 100 milestones, prestige laps permanently improve drop rates, and new seasons introduce additional systems. Persistent account growth and live-service content sustain long-term engagement.
 
 Q: How does the game change as I progress?
 A: Early play is about learning the bonus system and building initial point mass. After the first lap, relic drop rates begin improving and the Speedrun leaderboard becomes relevant. At high lap counts, Mythical relic acquisition becomes realistic and the full Achievement Codex opens up. Global Events and Flash Events provide constant variety regardless of progression stage. New systems from seasonal updates layer on top without replacing existing ones.
@@ -191,10 +191,10 @@ Q: Why do prestige laps exist?
 A: Laps provide a long-term prestige layer for players who reach the Ascension threshold, giving progression meaning beyond raw point accumulation. They also permanently increase relic drop rates, creating a mechanical benefit to repeated ascension that compounds over many laps. The Speedrun and Laps leaderboards give lap-focused players dedicated competitive spaces.
 
 Q: What makes RPS League different from other incremental games?
-A: RPS League combines interactive prediction gameplay with incremental progression, live-service events, prestige, collectible relic builds, competitive leaderboards, and cooperative World Boss encounters. Flash Events, Global Events, Festivals, nine bonus stages, achievements, and Ascension create constantly evolving goals rather than passive number growth. Real-time SSE synchronization, dynamic visual tiers, multiplier slams, and audiovisual spectacle turn major progression moments into active experiences. Arkalon adds a meta layer through game analysis, telemetry, daily prophecy, and system guidance.
+A: RPS League combines prediction gameplay with incremental progression, live events, relic builds, prestige systems, leaderboards, and World Boss encounters. Flash Events, Festivals, achievements, Ascension, real-time synchronization, visual tiers, and Arkalon create an active progression experience rather than passive number growth.
 
 Q: Who would enjoy this game?
-A: Players who enjoy incremental progression systems, live-service event cycles, and collectible mechanics will find the relic and achievement systems compelling. Players who like leaderboard competition without direct PvP will fit the asynchronous ranking structure. The zero-friction no-registration entry makes it accessible for casual visitors, while the depth of the Ascension system, Achievement Codex, and event modifier stacking rewards sustained engagement.
+A: Players who enjoy incremental games, live events, collectibles, and asynchronous leaderboards will find the systems compelling. Casual players can progress easily through zero-friction access, while optimization-focused players can pursue Ascension, achievements, relic builds, and leaderboard mastery.
 
 --- EDGE CASES ---
 
@@ -211,13 +211,10 @@ Q: Is there anything I should avoid doing as a new player?
 A: Avoid clearing your browser data before saving your recovery code, as profile data cannot be manually restored. Beyond that, no decision in normal gameplay is permanently harmful. Unequipping charge relics resets their progress counters, so avoid frequent equip-swap cycling if you are building toward a Logic Gate or Kinetic Capacitor proc.
 
 Q: What are the biggest mistakes new players make?
-A: Not saving their recovery code before their first session ends is the most consequential mistake since it risks permanent data loss. Betting a fixed small amount rather than scaling bets with their balance is the most common progression mistake, as the bonus and multiplier system produces more absolute value at higher stake sizes.
+A: The biggest mistake is not saving a recovery code, which risks permanent data loss. Another common mistake is keeping bets fixed instead of scaling with balance, reducing the value of bonuses and multipliers.
 
 Q: What is the biggest long-term goal in the game?
 A: The deepest single defined milestone is the God King Rainbow achievement, requiring 1,000 wins, 50 prestige laps, and all 3 Mythical relics simultaneously. Beyond that, reaching 999 Trequinquagintillion on the Singularity achievement and achieving Cosmic Sovereign through 50 participations in each of the 4 Global Events represent the outer edges of the current progression ceiling.
-
-Q: Is the game still being updated?
-A: Yes. RPS League is a live-service game with ongoing seasonal content updates. New achievements, events, relics, and gameplay systems are introduced over time. The development roadmap beyond announced systems is classified to preserve simulation integrity.
 
 Q: Is it worth coming back after a long time away?
 A: Yes. RPS League is designed as a live-service experience with ongoing content updates rather than a static game. New seasons introduce additional achievements, events, gameplay systems, relics, and progression goals, giving returning Predictors fresh objectives alongside their existing long-term progression. Your prestige laps, relic collection, and Achievement Codex continue to provide persistent progression as the game evolves.
@@ -232,14 +229,10 @@ Q: Is chasing win streaks worth it?
 A: Yes. The x5 streak multiplier at 5 consecutive wins is one of the most reliable sustained multipliers in the game since it applies to every win until broken with no cooldown or proc chance. Maintaining a high streak and betting appropriately during it is the single most consistent source of compounding gains in normal play.
 
 Q: Is volume more important than win rate?
-A: At a 50/50 base probability, win rate cannot be improved through prediction skill. Volume is therefore the primary driver of progression since each bet is an independent roll for bonus procs, Flash Events, and relic drops. More bets means more opportunities for high-multiplier outcomes that compound total gains over time.
+A: With a 50/50 base probability win rate cannot be improved through prediction skill. Volume is therefore the primary driver of progression since each bet is an independent roll for bonus procs, Flash Events, and relic drops. More bets means more opportunities for high-multiplier outcomes that compound total gains over time.
 
 Q: Should I prioritize achievements or points?
 A: They are not in direct conflict. Most high-value achievements are byproducts of sustained normal play (wins, streaks, event participation) and accumulate without sacrificing point optimization. The only trade-off is on the Speedrun leaderboard, where minimizing total bets (fewer chances for achievement triggers) conflicts with volume-based achievement farming. Decide based on which leaderboard matters more to you.
-
-Q: Can I gift relics, points, or items to other players?
-A: No. All progression is account-bound. There is no gifting, trading, or transfer mechanism between accounts for any item or currency in the game.
-
 
 Q: Is the game finished or still in development?
 A: RPS League is an active live-service project under continued development. It is not a finished static release. New content, systems, and seasonal updates are part of its ongoing roadmap.

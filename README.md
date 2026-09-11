@@ -69,7 +69,7 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 
 ### 🤖 AI Systems
 
-- [AI Arkalon & Analytics](#-ai-Arkalon--analytics)
+- [AI Arkalon: Game Systems Guide & Match Analysis](#-ai-arkalon-game-systems-guide--match-analysis)
 - [Arkalon Voice](#-Arkalon-voice)
 
 ### 📱 Platform
@@ -83,7 +83,6 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 - [CI/CD & Automation](#-cicd--automation)
 - [Future Improvements](#-future-improvements)
 - [Changelog](#-changelog)
-- [API Reference](#-api-reference)
 
 ### 📦 Meta
 
@@ -590,17 +589,24 @@ To maintain a professional live-service standard and close the loop between user
 
 ## 🤖 AI Arkalon: Game Systems Guide & Match Analysis
 
-The platform features **The Arkalon**, a custom-tuned AI agent powered by Google Gemini. Rather than acting as a standard chatbot, it functions as a dual-purpose cognitive system, delivering clinical, data-driven match analyses and explaining system-level mechanics, relics, active events, and progression rules.
+> *"A forgotten intelligence from a lost era. It does not predict the future, it calculates the probability of what has already begun."*
+
+The platform features **The Arkalon**, an ancient time-lost prophetic robotic entity that oversees the Arkalon universe of applications. Acting as an observer, announcer, and guide, Arkalon bridges the gap between hidden system logic and player experience.
+
+Within RPS League, Arkalon serves as the league's oracle: analyzing match outcomes, interpreting player behavior, explaining complex game mechanics, issuing daily prophecies, and announcing major events through its synthesized voice. Originally created as a system-level predictive intelligence, it has evolved into a persistent presence across the ecosystem rather than a conventional AI assistant.
+
+Powered by custom-tuned **Google Gemini** integration, Arkalon functions as a fully diegetic AI system. Every interaction is grounded in live league telemetry, game knowledge, and progression data, allowing it to provide both statistical analysis and in-world guidance while maintaining its prophetic identity.
 
 ### Core Features
 
-- **Dual-Purpose Grounding Engine**: Integrates high-density match history with an expansive XML-wrapped game knowledge database to dynamically resolve both statistical telemetry queries and complex rules explanations.
-- **Dynamic Response Slicing**: Automatically scales output constraints, programmatically permitting up to 3 sentences for complex system explanations to ensure mechanical clarity, while enforcing a strict 2-sentence limit on standard match analyses.
-- **Resilient Multi-Model Fallback**: Employs automated model rotation across Gemini variants to mitigate uptime volatility, API rate limits, and service spikes.
-- **Strict Intent Guardrailing**: Filters out off-topic prompts to maintain the clinical Arkalon persona and prevent hallucinations.
-- **Performance Optimization**: Features in-memory TTL caching and IP-bound rate limiting to manage query costs, control backend latency, and prevent abuse.
-- **Curated Analytics Presets**: Surfaces custom PostgreSQL database insights directly to the interface, detailing move frequency distributions, active house edge stats, and global trends.
-- **Server-Synced Prophecies**: Manages the Daily Arkalon Prophecy via database tracking and server-side state to prevent exploit loops or local storage bypasses.
+- **Lore-Driven AI Identity**: Arkalon maintains a consistent prophetic persona across text analysis, system explanations, Daily Prophecies, and voice announcements. It acts as an observer of the league rather than an external assistant.
+- **Dual-Purpose Grounding Engine**: Integrates high-density match history with an XML-wrapped game knowledge database to resolve both statistical telemetry queries and complex system explanations.
+- **Dynamic Response Slicing**: Automatically adjusts response length based on intent, allowing deeper mechanical explanations while enforcing concise match analysis.
+- **Strict Intent Guardrailing**: Filters unrelated prompts and unsupported requests to preserve Arkalon's role as a league intelligence and prevent hallucinated information.
+- **Resilient Multi-Model Fallback**: Automatically rotates Gemini models to handle API volatility, rate limits, and availability issues.
+- **Performance Optimization**: Uses in-memory TTL caching and IP-bound rate limiting to control latency, API usage, and abuse.
+- **Server-Synced Prophecies**: Generates the Daily Arkalon Prophecy through backend-controlled state, ensuring consistency across players and preventing client-side manipulation.
+
 
 <p align="center">
   <strong>Match Analysis</strong><br>
@@ -615,6 +621,8 @@ The platform features **The Arkalon**, a custom-tuned AI agent powered by Google
 ---
 
 ## 🔊 Arkalon Voice
+
+When The Arkalon intervenes, its messages are delivered through a synthesized voice designed to feel like an ancient machine communicating through a forgotten system.
 
 The Arkalon generates spoken output through the browser using the Web Speech API.
 

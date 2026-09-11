@@ -48,9 +48,8 @@ WORLD BOSS EXCLUSIVE RELICS:
 - Both chest rewards are combined into a single payout.
 
 SOCKET COMMITMENT & ANTI-SWAP:
-- Players may equip up to three relics simultaneously.
-- Flash Event bonuses are snapshotted when the event begins.
-- Equipping a relevant relic after a Flash Event has already started has no retroactive effect.
+- Players may equip three relics simultaneously.
+- Flash Event effects snapshot at activation. Equipping related relics afterward does not affect the active event.
 - Applies to Lunar Siphon, Static Inductor, Dealer's Hand, Volcanic Mantle, Overdrive Relay, and Temporal Anchor.
 - Charge relic progress only accumulates while the relic is equipped.
 - Unequipping a charge relic pauses its progress and resets its stored counter state.
