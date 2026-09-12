@@ -24,7 +24,7 @@ export const ENABLED_STAGES: StageType[] = [
   'CRYSTAL_MINE'
 ]
 
-export const TOTAL_TRIGGER_CHANCE = 5.0
+export const TOTAL_TRIGGER_CHANCE = 8.0
 
 export const KINGS_VAULT_PAYOUTS: Record<string, number> = {
   BRONZE: 2,

@@ -398,10 +398,10 @@ export const calculatePredictionResolution = (
     streakNum * flashMult * (effectiveBonus ? effectiveBonus.multiplier : 1)
   )
   const festivalType = activeFestival?.type ?? null
-  const festivalMultValue = isWin && festivalType === 'SURGE' ? 3 : 1
+  const festivalMultValue = isWin && festivalType === 'SURGE' ? 2 : 1
 
   if (isWin) {
-    if (activeFestival?.type === 'SURGE') finalCombinedMult *= 3
+    if (activeFestival?.type === 'SURGE') finalCombinedMult *= 2
     if (kineticFired) finalCombinedMult *= 2
     if (soulProc) finalCombinedMult *= 3
     if (isSolarFlareActive) finalCombinedMult *= 2

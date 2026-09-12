@@ -9,11 +9,11 @@ The Arkalon system also runs autonomous demo festivals during low-concurrency pe
 ## System Rules
 
 - **One at a time**: only one Festival can be active globally. Triggers during an active Festival or cooldown are discarded.
-- **5-minute cooldown**: a mandatory lockout follows every Festival conclusion. No queue exists.
+- **2-minute cooldown**: a mandatory lockout follows every Festival conclusion. No queue exists.
 - **Flash Events override**: Flash Event UI theming takes visual priority over an active Festival theme.
 - **Arkalon overrides all**: a player who defied the Daily Arkalon Prophecy will still lose even during Sanguine's forced-win state.
 - **Triggered by players**: every Festival is caused by a specific player action, and that player's name is broadcast to all active players via the Arkalon ticker.
-- **Autonomous demo festivals**: if no player festival has occurred in the last 10 minutes and no cooldown is active, Arkalon triggers a weighted random festival every 18 to 24 minutes to simulate world activity.
+- **Autonomous demo festivals**: if no player festival has occurred in the last 4 minutes and no cooldown is active, Arkalon triggers a weighted random festival every 7 to 10 minutes to simulate world activity.
 
 ---
 
@@ -43,7 +43,7 @@ All active players instantly enter a Flash Event with 3 Flash Bets. Players alre
 
 **Trigger:** Total win multiplier 30x or higher (40% chance) OR 60x or higher (100%)
 
-**Duration:** 1 minute, 12 matches
+**Duration:** 45 seconds, 9 matches
 
 **Effect: Win Echo**
 All wins generate a 20% signal echo. The final payout is multiplied by 1.2x.
@@ -63,7 +63,7 @@ The echo is visualised in the result animation: after the result number finishes
 
 **Trigger:** Completion of a Mythical Achievement (100%) OR Legendary Achievement (50%)
 
-**Duration:** 1 minute, 12 matches
+**Duration:** 45 seconds, 9 matches
 
 **Effect: Risk Shield**
 Loss deductions are reduced by 20%. Losses only deduct 40% of the stake instead of the standard 50%.
@@ -117,7 +117,7 @@ A 2x global multiplier is applied to all win payouts for the duration of the Fes
 
 **Trigger:** Discovery of a Mythical Relic (100%)
 
-**Duration:** 2 minutes, 24 matches
+**Duration:** 1 minute, 12 matches
 
 **Effect: Loot Echo**
 All Relic drop rates are doubled (2x) for the duration.

@@ -177,6 +177,7 @@ let _burstInterval: ReturnType<typeof setInterval> | null = null
 let _pendingDamage: { userId: string; nickname: string; damage: number }[] = []
 let _resolving = false
 let _rawContributionSum = 0
+let _killingBlowUserId: string | null = null
 
 let _pauseFestival: (() => void) | null = null
 let _resumeFestival: (() => void) | null = null
@@ -225,6 +226,7 @@ const resetEncounterState = () => {
   _pendingDamage = []
   _resolving = false
   _rawContributionSum = 0
+  _killingBlowUserId = null
 }
 
 // Public API
@@ -263,6 +265,7 @@ export const getTopDamagers = (
   top: DamagerEntry[]
   myRank: number | null
   myDamagePct: number
+  userRanks: Record<string, { rank: number; damageDealt: number }>
 } => {
   const sorted = Array.from(_state.damageLeaderboard.entries()).sort((a, b) => {
     const diff = b[1] - a[1]
@@ -280,19 +283,22 @@ export const getTopDamagers = (
     rank: i + 1
   }))
 
+  const userRanks: Record<string, { rank: number; damageDealt: number }> = {}
+  sorted.forEach((e, i) => {
+    userRanks[e[0]] = { rank: i + 1, damageDealt: e[1] }
+  })
+
   let myRank: number | null = null
   let myDamagePct = 0
   if (localUserId) {
-    const idx = sorted.findIndex((e) => e[0] === localUserId)
-    myRank = idx !== -1 ? idx + 1 : null
+    const entry = userRanks[localUserId]
+    myRank = entry ? entry.rank : null
     myDamagePct =
-      _state.bossMaxHp > 0
-        ? ((_state.damageLeaderboard.get(localUserId) ?? 0) /
-            _state.bossMaxHp) *
-          100
+      _state.bossMaxHp > 0 && entry
+        ? (entry.damageDealt / _state.bossMaxHp) * 100
         : 0
   }
-  return { top, myRank, myDamagePct }
+  return { top, myRank, myDamagePct, userRanks }
 }
 
 // Players increase boss health based on when they join.
@@ -307,9 +313,7 @@ export const registerParticipant = (
   const ratio = totalSec > 0 ? timeRemaining / totalSec : 0
 
   let hpContribution = 1
-  if (ratio >= 0.75) hpContribution = 4
-  else if (ratio >= 0.5) hpContribution = 3
-  else if (ratio >= 0.25) hpContribution = 2
+  if (ratio >= 0.5) hpContribution = 2
 
   _state.participants.set(userId, {
     damageDealt: 0,
@@ -319,9 +323,9 @@ export const registerParticipant = (
     nickname
   })
 
-  const oldTotalHp = Math.max(4, _rawContributionSum)
+  const oldTotalHp = Math.max(2, _rawContributionSum)
   _rawContributionSum += hpContribution
-  const newTotalHp = Math.max(4, _rawContributionSum)
+  const newTotalHp = Math.max(2, _rawContributionSum)
   const delta = newTotalHp - oldTotalHp
 
   // Increase both max and current HP when a new participant joins
@@ -366,6 +370,7 @@ export const applyDamage = (
   _state.strikeCount++
 
   if (_state.bossCurrentHp <= 0 && !_resolving) {
+    _killingBlowUserId = userId
     resolveEncounter('DEFEAT', broadcast)
   }
 }
@@ -405,12 +410,14 @@ const drainBurst = (broadcast: Broadcast): void => {
     'world_boss_damage_burst',
     JSON.stringify({ events, timestamp: Date.now() })
   )
+  const damagerData = getTopDamagers()
   broadcast(
     'world_boss_hp_update',
     JSON.stringify({
       hpPct,
       bossMaxHp: _state.bossMaxHp,
-      topDamagers: getTopDamagers().top,
+      topDamagers: damagerData.top,
+      userRanks: damagerData.userRanks,
       strikeCount: _state.strikeCount,
       participantCount: _state.participants.size
     })
@@ -461,11 +468,7 @@ const resolveEncounter = async (
     }
   }
 
-  // Evaluate achievement unlocks.
-  const sorted = Array.from(_state.damageLeaderboard.entries()).sort(
-    (a, b) => b[1] - a[1]
-  )
-  const finalDamagerUserId = sorted[0]?.[0] ?? null
+  const finalDamagerUserId = _killingBlowUserId
   const totalDamage = Array.from(_state.damageLeaderboard.values()).reduce(
     (s, d) => s + d,
     0
@@ -479,7 +482,7 @@ const resolveEncounter = async (
     const isKillingBlow = finalDamagerUserId === userId && outcome === 'DEFEAT'
     const userDamagePct = totalDamage > 0 ? userDamage / totalDamage : 0
     const joinedLateFinal10s =
-      record.firstHitAt > (_state.encounterStartedAt ?? 0) + 50_000
+      record.firstHitAt > (_state.encounterStartedAt ?? 0) + 20_000
 
     const hadFinalStrike = isKillingBlow
     const hadPerfectAssault =
@@ -693,8 +696,8 @@ const startActive = async (broadcast: Broadcast): Promise<void> => {
   const now = Date.now()
   _state.encounterStartedAt = now
   _state.encounterEndsAt = now + WORLD_BOSS_ENCOUNTER_DURATION_MS
-  _state.bossMaxHp = 4
-  _state.bossCurrentHp = 4
+  _state.bossMaxHp = 2
+  _state.bossCurrentHp = 2
 
   try {
     const res = await pool.query(

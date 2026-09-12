@@ -68,6 +68,7 @@ export interface AchievementStats {
   surgeFrenzyMaxComboFinishes: number
   neonParadiseMinigamesPlayed: Record<string, number>
   neonFullCircuitToday: boolean
+  allCommonRareEpicLegendaryRelics: boolean
 }
 
 export interface AchievementDef {

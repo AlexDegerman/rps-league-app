@@ -41,6 +41,17 @@ export const processAchievements = async (
   const commonRareEpicCount = relicCountRes.rows.filter((r) =>
     ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
   ).length
+  const commonRareEpicLegendaryCount = relicCountRes.rows.filter((r) =>
+    ['COMMON', 'RARE', 'EPIC', 'LEGENDARY'].includes(r.rarity)
+  ).length
+
+  const totalCommonRareEpic = RELICS.filter((r) =>
+    ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
+  ).length
+  const totalCommonRareEpicLegendary = RELICS.filter((r) =>
+    ['COMMON', 'RARE', 'EPIC', 'LEGENDARY'].includes(r.rarity)
+  ).length
+  const totalMythical = RELICS.filter((r) => r.rarity === 'MYTHICAL').length
 
   const stats: AchievementStats = {
     wins: Number(u.wins),
@@ -59,8 +70,10 @@ export const processAchievements = async (
     festivalsParticipated: Number(u.festivals_participated),
     uniqueRelicsOwned: userRelicKeys.size,
     allRelicsOwned: userRelicKeys.size >= RELICS.length,
-    allCommonRareEpicRelics: commonRareEpicCount >= 11,
-    allMythicalRelics: mythCount >= 3,
+    allCommonRareEpicRelics: commonRareEpicCount >= totalCommonRareEpic,
+    allCommonRareEpicLegendaryRelics:
+      commonRareEpicLegendaryCount >= totalCommonRareEpicLegendary,
+    allMythicalRelics: mythCount >= totalMythical,
     biggestMultiplierTier: null,
     totalAchievementsEarned: alreadyEarned.size,
     hadMythicRelicSlam: ctx.soulProc,

@@ -136,7 +136,7 @@ Q: How do completed Laps affect my relic drop rates?
 A: Each completed prestige Lap permanently increases your base drop rates for all relic rarities up to a set maximum cap.
 
 Q: How many relics are there in total?
-A: There are 17 unique relics across five rarity tiers: 3 Common, 6 Rare, 2 Epic, 3 Legendary, and 3 Mythical. Owning all 17 is tracked by the Full House achievement.
+A: There are 34 unique relics in total: 17 core prediction relics across five rarity tiers (3 Common, 6 Rare, 2 Epic, 3 Legendary, and 3 Mythical) and 17 World Boss exclusive relics obtainable only through boss chests. Owning all Common, Rare, Epic, and Legendary relics is tracked by the Grand Reliquary [GREL] achievement, and all 5 Mythical relics by The Pentad [PENT].
 
 Q: What happens if a relic drops while a Flash Event is active?
 A: The Relic is added immediately, but equipping it cannot change an already-active Flash Event. Its effect applies to future events.
@@ -150,7 +150,7 @@ A: Buffer Module, Kinetic Capacitor, and Logic Gate reset their stored progress 
 --- EVENTS, SHADERS, AND PLAYER FESTIVALS ---
 
 Q: What is Neon Paradise?
-A: Neon Paradise is a bonus stage system that can trigger exclusively during active manual prediction sessions, with a combined 5% trigger chance per resolved prediction. It contains nine bonus minigames selected with equal probability, with each stage awarding a payout between 2x and 10x based on the last bet.
+A: Neon Paradise is a bonus stage system that can trigger exclusively during active manual prediction sessions, with a combined 8% trigger chance per resolved prediction. It contains nine bonus minigames selected with equal probability, with each stage awarding a payout between 2x and 10x based on the last bet.
 
 Q: What events are in the game?
 A: RPS League features Global Events, personal Flash Events, Player Festivals, World Bosses, and the Neon Paradise bonus stage system.
@@ -192,10 +192,10 @@ Q: What does the Safeguard Festival reduce losses to exactly?
 A: During Safeguard, losses deduct 40% of your wagered stake instead of the standard 50%. The remaining 60% is returned to your balance rather than the usual 50%.
 
 Q: What happens if I complete a Lap while the Fever Festival is active?
-A: The Surge Festival trigger on Lap completion is discarded because Fever is already occupying the active Festival slot and the 5-minute cooldown follows every Festival conclusion. The Surge trigger does not queue; it is lost entirely.
+A: The Surge Festival trigger on Lap completion is discarded because Fever is already occupying the active Festival slot and the 2-minute cooldown follows every Festival conclusion. The Surge trigger does not queue; it is lost entirely.
 
 Q: What happens when a Global Event is about to start?
-A: A warning marquee will populate at the top of the screen, and Arkalon Voice will read out countdown warnings at 60 and 30 seconds remaining.
+A: A warning marquee will populate at the top of the screen, and Arkalon Voice will read out countdown warnings during the 30-second warning phase.
 
 Q: What is the Win Echo Protocol during Tidal Surge?
 A: Correct predictions during a Tidal Surge event receive an automatic +20% bonus payout on top of all other multipliers.
@@ -210,7 +210,7 @@ Q: What is the Variable Echo Field during Mirage Cataclysm?
 A: Successful predictions award a random extra payout between 15% and 50% of your calculated winnings on top of all other modifiers.
 
 Q: What triggers a Player Festival, and what is the cooldown?
-A: Player Festivals trigger from milestones like streaks, multipliers, Relics, and Laps. Each has a 5-minute cooldown.
+A: Player Festivals trigger from major milestones such as streaks, multipliers, Relic discoveries, and completed Laps. A 2-minute cooldown follows each Festival.
 
 Q: What is the Sanguine Festival?
 A: Triggered when a predictor hits a 4-loss streak (100%), it corrects all predictions to resolve as wins for 15 seconds covering 3 matches. If you bet against the Daily Arkalon Prophecy you will still lose, as Arkalon overrides all absolute win corrections.
@@ -222,13 +222,13 @@ Q: What is the Fever Festival?
 A: Triggered by a 5-win streak (20% chance) or an 8-win streak (100%), the Fever Festival freezes your win streak multiplier for 30 seconds covering 6 matches. Losses do not reset your streak for the duration.
 
 Q: What is the Ghost Festival?
-A: Triggered by a total win multiplier of 30x or higher (40% chance) or 60x or higher (100%), the Ghost Festival adds a 20% Win Echo to all wins for 1 minute covering 12 matches. A ghostly echo value visually drifts off the result number in the UI after each win.
+A: Triggered by a total win multiplier of 30x or higher (40% chance) or 60x or higher (100%), the Ghost Festival adds a 20% Win Echo to all wins for 45 seconds covering 9 matches. A ghostly echo value visually drifts off the result number in the UI after each win.
 
 Q: What is the Vault Festival?
-A: Triggered by discovering a Mythical Relic (100%), the Vault Festival doubles all Relic drop rates for all players for 2 minutes covering 24 matches.
+A: Triggered by discovering a Mythical Relic (100%), the Vault Festival doubles all Relic drop rates for all players for 1 minute covering 12 matches.
 
 Q: What is the Safeguard Festival?
-A: Triggered by completing a Mythical Achievement (100%) or a Legendary Achievement (50%), Safeguard reduces loss deductions by 20% for 1 minute covering 12 matches. Losses deduct 40% of the stake instead of the standard 50%.
+A: Triggered by completing a Mythical Achievement (100%) or a Legendary Achievement (50%), Safeguard reduces loss deductions by 20% for 45 seconds covering 9 matches. Losses deduct 40% of the stake instead of the standard 50%.
 
 Q: What is the Resonance Festival?
 A: Triggered by 3 tiered bonuses in a row (100%) or a Legendary Bonus (30% chance), Resonance guarantees a Common or Rare bonus on every prediction for 40 seconds covering 8 matches. Epic and Legendary bonus rolls are recalculated downward to Rare for the duration.
@@ -274,7 +274,7 @@ Q: Does auto-bet keep running if I switch tabs or minimize my browser?
 A: No. The system automatically pauses execution when the active browser tab is hidden or the window is minimized to prevent desynchronization with the live match feed.
 
 Q: Can idle auto-bet trigger Flash Events?
-A: Yes. Auto-bet places real bets on your behalf and is treated identically to manual bets by all game systems, including the 5% Flash Event trigger chance per prediction.
+A: Yes. Auto-bet places real bets on your behalf and is treated identically to manual bets by all game systems, including the 8% Flash Event trigger chance per prediction.
 
 Q: Does idle auto-bet place bets during an active Flash Event?
 A: Yes. Auto-bet continues placing bets during Flash Events and those bets consume your remaining Flash Bets normally. The Flash Event resolves across whichever predictions auto-bet places next.
@@ -325,7 +325,7 @@ Q: Does a Legendary or Mythical bonus completely cancel a loss?
 A: Yes. Both Legendary and Mythical bonus tiers fully negate a loss, reducing the point deduction to zero. You keep your entire wagered amount even on an incorrect prediction.
 
 Q: What is the Mythical bonus tier unlocked by The Architect's Keystone relic?
-A: The Architect's Keystone unlocks a special x15 Mythical bonus tier that is not available through normal rolls. It visually features crimson bloom, instability flicker, red particle eruptions, and heavy motion trails. This tier can only appear when the Keystone upgrades a triggered Legendary bonus to the next rarity.
+A: The Architect's Keystone unlocks a special 7x Mythical bonus tier that is not available through normal rolls. It visually features crimson bloom, instability flicker, red particle eruptions, and heavy motion trails. This tier can only appear when the Keystone upgrades a triggered Legendary bonus to the next rarity.
 
 --- ACHIEVEMENT SYSTEM DETAIL ---
 
@@ -353,21 +353,21 @@ Q: Does the Scavenger's Lens relic stack with the Vault Festival drop rate doubl
 A: These are separate systems that both affect acquisition rate. The Vault Festival doubles the base drop rates for all relics for all players. The Scavenger's Lens adds a 20% acquisition rate boost on top of that for the equipped player. Both effects apply independently.
 
 Q: Does the Cobalt Core relic boost all four Flash Event types equally?
-A: Yes. The Cobalt Core increases your overall Flash Event appearance rate by 25%, applying uniformly across all event types rather than boosting any single theme.
+A: Yes. The Cobalt Core increases your overall Flash Event appearance rate by 15%, applying uniformly across all event types rather than boosting any single theme.
 
 Q: Can I equip a relic and immediately benefit from it mid-session?
 A: Yes for most effects, with one exception. Passive relics like Precision Bearing, Conductive Filament, and Prismatic Shard apply immediately on equip. Flash Event bonuses from relics like Lunar Siphon or Overdrive Relay only apply to events that trigger after the relic is equipped, due to the Trigger Snapshot rule locking event values at the moment of activation.
 
 --- FLASH EVENT SYSTEM DETAIL ---
 
-Q: Does the 5% Flash Event chance apply per bet or per match?
-A: It applies per bet placed. Each time you place a prediction you have a 5% independent chance of triggering a Flash Event on that bet. Not betting a match means no roll occurs for that cycle.
+Q: Does the 9% Flash Event chance apply per bet or per match?
+A: It applies per bet placed. Each time you place a prediction you have a 9% independent chance of triggering a Flash Event on that bet. Not betting a match means no roll occurs for that cycle.
 
 Q: What happens at the end of a Flash Event if I have bets remaining?
 A: If a Flash Event ends due to the Spark Festival 45-second window expiring while you still had Flash Bets remaining, those bets are consumed by the expiration. Flash Events earned independently of Spark always run their full 3 predictions regardless.
 
 Q: What is the weighted selection for Flash Events?
-A: Event selection is weighted to support controlled rollout of seasonal themes. This means some events may appear more frequently than others without changing the global 5% trigger rate.
+A: Event selection is weighted to support controlled rollout of seasonal themes. This means some events may appear more frequently than others without changing the global 9% trigger rate.
 
 --- LIVE FEED AND ACTIVITY ---
 

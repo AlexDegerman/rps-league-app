@@ -296,18 +296,18 @@ const RELIQUARY: AchievementDef[] = [
     check: (s) => s.allCommonRareEpicRelics
   },
   {
-    code: 'FULL',
-    name: 'Full House',
-    requirement: 'Own all 17 Unique Relics',
+    code: 'GREL',
+    name: 'Grand Reliquary',
+    requirement: 'Own all Common, Rare, Epic & Legendary Relics',
     icon: '🎰',
     rarity: 'LEGENDARY',
     category: 'Reliquary',
-    check: (s) => s.allRelicsOwned
+    check: (s) => s.allCommonRareEpicLegendaryRelics
   },
   {
-    code: 'TRI',
-    name: 'Trinity',
-    requirement: 'Own all 3 Mythical Relics',
+    code: 'PENT',
+    name: 'The Pentad',
+    requirement: 'Own all 5 Mythical Relics',
     icon: '🔱',
     rarity: 'MYTHICAL',
     category: 'Reliquary',
@@ -509,7 +509,7 @@ const CARDS: AchievementDef[] = [
 
 const ORACLE_PROPHECY: AchievementDef[] = [
   {
-    code: 'ORC3',
+    code: 'ARK3',
     name: 'Seer Apprentice',
     requirement: 'Use Arkalon 3 Days in a Row',
     icon: '🔮',
@@ -518,7 +518,7 @@ const ORACLE_PROPHECY: AchievementDef[] = [
     check: (s) => s.oracleMaxStreak >= 3
   },
   {
-    code: 'ORC7',
+    code: 'ARK7',
     name: 'Clairvoyant',
     requirement: 'Use Arkalon 7 Days in a Row',
     icon: '🌠',
@@ -527,7 +527,7 @@ const ORACLE_PROPHECY: AchievementDef[] = [
     check: (s) => s.oracleMaxStreak >= 7
   },
   {
-    code: 'ORCL',
+    code: 'ARKL',
     name: 'Prophet',
     requirement: 'Use Arkalon 14 Days in a Row',
     icon: '👁️',
@@ -615,7 +615,7 @@ const META: AchievementDef[] = [
     name: 'Riding the Wave',
     requirement:
       'Win 3 consecutive predictions during a single active Tidal Surge window',
-    icon: 'waves',
+    icon: '🌊',
     rarity: 'EPIC',
     category: 'Meta',
     check: (s) => s.maxStreakDuringTidalSurge >= 3
@@ -625,7 +625,7 @@ const META: AchievementDef[] = [
     name: 'Solar Maximum',
     requirement:
       'Win a match during a Solar Flare while on an Inferno Win Streak (5+ wins)',
-    icon: 'sun',
+    icon: '☀️',
     rarity: 'EPIC',
     category: 'Meta',
     check: (s) => s.hadFlareInfernoCombo
@@ -634,7 +634,7 @@ const META: AchievementDef[] = [
     code: 'CYCL',
     name: 'Vortex Velocity',
     requirement: 'Reach a 10-win streak during a Cyclone Blitz',
-    icon: 'wind',
+    icon: '🌬️',
     rarity: 'EPIC',
     category: 'Meta',
     check: (s) => s.maxStreakDuringCycloneBlitz >= 10
@@ -643,7 +643,7 @@ const META: AchievementDef[] = [
     code: 'MIR',
     name: 'Fata Morgana',
     requirement: 'Roll a 45%+ Echo Bonus on a win during a Mirage Cataclysm',
-    icon: 'desert',
+    icon: '🏜️',
     rarity: 'LEGENDARY',
     category: 'Meta',
     check: (s) => s.hadMirageHighEcho
@@ -653,7 +653,7 @@ const META: AchievementDef[] = [
     name: 'Cosmic Alignment',
     requirement:
       'Win a match while both a personal Flash Event and a server-wide Global Event are active simultaneously',
-    icon: 'ringed_planet',
+    icon: '🪐',
     rarity: 'EPIC',
     category: 'Meta',
     check: (s) => s.hadFlashPlusGlobalWin
@@ -663,7 +663,7 @@ const META: AchievementDef[] = [
     name: 'Cataclysm Surveyor',
     requirement:
       'Participate 15 times in each of the four separate Global Events',
-    icon: 'crown',
+    icon: '👑',
     rarity: 'MYTHICAL',
     category: 'Meta',
     check: (s) =>
@@ -689,7 +689,7 @@ const MISCELLANEOUS: AchievementDef[] = [
     name: 'Dry Mirage',
     requirement:
       'Roll the minimum Echo Bonus (15%) on a win during Mirage Cataclysm',
-    icon: 'desert',
+    icon: '🏜️',
     rarity: 'RARE',
     category: 'Miscellaneous',
     check: (s) => s.hadDryMirage
@@ -699,7 +699,7 @@ const MISCELLANEOUS: AchievementDef[] = [
     name: 'Eye of the Storm',
     requirement:
       'Have your win streak shielded by the Buffer Module during Cyclone Blitz',
-    icon: 'shield',
+    icon: '🛡️',
     rarity: 'RARE',
     category: 'Miscellaneous',
     check: (s) => s.hadEyeOfStorm
@@ -709,7 +709,7 @@ const MISCELLANEOUS: AchievementDef[] = [
     name: 'Prismatic Wave',
     requirement:
       'Win a match during Tidal Surge with the Prismatic Shard equipped',
-    icon: 'diamond',
+    icon: '💎',
     rarity: 'EPIC',
     category: 'Miscellaneous',
     check: (s) => s.hadPrismaticWave
@@ -719,7 +719,7 @@ const MISCELLANEOUS: AchievementDef[] = [
     name: 'Thermal Fusion',
     requirement:
       'Trigger a Soul of the Machine Mythic Slam on a win during a Solar Flare',
-    icon: 'sun',
+    icon: '☀️',
     rarity: 'MYTHICAL',
     category: 'Miscellaneous',
     check: (s) => s.hadThermalFusion
@@ -740,7 +740,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'FES2',
     name: 'System Catalyst',
     requirement: 'Trigger 5 Festivals',
-    icon: 'sky_shimmer',
+    icon: '✨',
     rarity: 'RARE',
     category: 'Festival',
     check: (s) => s.festivalsTriggered >= 5
@@ -749,7 +749,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'FES3',
     name: 'Instability Driver',
     requirement: 'Trigger 15 Festivals',
-    icon: 'lightning',
+    icon: '⚡',
     rarity: 'EPIC',
     category: 'Festival',
     check: (s) => s.festivalsTriggered >= 15
@@ -758,7 +758,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'FES4',
     name: 'Arkalon Breaker',
     requirement: 'Trigger 30 Festivals',
-    icon: 'eye',
+    icon: '👁️',
     rarity: 'LEGENDARY',
     category: 'Festival',
     check: (s) => s.festivalsTriggered >= 30
@@ -767,7 +767,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'FEST',
     name: 'System Anomaly',
     requirement: 'Trigger 50 Festivals',
-    icon: 'exclamation',
+    icon: '❗',
     rarity: 'MYTHICAL',
     category: 'Festival',
     check: (s) => s.festivalsTriggered >= 50
@@ -776,7 +776,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'NET1',
     name: 'Node Arrival',
     requirement: 'Participate in 5 Festivals',
-    icon: 'dot',
+    icon: '🔹',
     rarity: 'COMMON',
     category: 'Festival',
     check: (s) => s.festivalsParticipated >= 5
@@ -785,7 +785,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'NET2',
     name: 'Grid Intrusive',
     requirement: 'Participate in 15 Festivals',
-    icon: 'grid',
+    icon: '▦',
     rarity: 'RARE',
     category: 'Festival',
     check: (s) => s.festivalsParticipated >= 15
@@ -794,7 +794,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'NET3',
     name: 'Phase Interlocking',
     requirement: 'Participate in 30 Festivals',
-    icon: 'chain',
+    icon: '⛓️',
     rarity: 'EPIC',
     category: 'Festival',
     check: (s) => s.festivalsParticipated >= 30
@@ -803,7 +803,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'NET4',
     name: 'Matrix Core',
     requirement: 'Participate in 60 Festivals',
-    icon: 'web',
+    icon: '🕸️',
     rarity: 'LEGENDARY',
     category: 'Festival',
     check: (s) => s.festivalsParticipated >= 60
@@ -812,7 +812,7 @@ const FESTIVAL: AchievementDef[] = [
     code: 'MESH',
     name: 'Overmesh',
     requirement: 'Participate in 100 Festivals',
-    icon: 'globe',
+    icon: '🌐',
     rarity: 'MYTHICAL',
     category: 'Festival',
     check: (s) => s.festivalsParticipated >= 100
@@ -824,7 +824,7 @@ const COSMIC_GLOBAL: AchievementDef[] = [
     code: 'GLO1',
     name: 'Event Horizon',
     requirement: 'Participate in 1 Global Event',
-    icon: 'sky_shimmer',
+    icon: '✨',
     rarity: 'COMMON',
     category: 'Cosmic',
     check: (s) => s.globalEventParticipations >= 1
@@ -833,7 +833,7 @@ const COSMIC_GLOBAL: AchievementDef[] = [
     code: 'GLO2',
     name: 'Phenomenon',
     requirement: 'Participate in 10 Global Events',
-    icon: 'globe',
+    icon: '🌐',
     rarity: 'RARE',
     category: 'Cosmic',
     check: (s) => s.globalEventParticipations >= 10
@@ -842,7 +842,7 @@ const COSMIC_GLOBAL: AchievementDef[] = [
     code: 'GLO3',
     name: 'Aether Drifter',
     requirement: 'Participate in 25 Global Events',
-    icon: 'shooting_star',
+    icon: '🌠',
     rarity: 'EPIC',
     category: 'Cosmic',
     check: (s) => s.globalEventParticipations >= 25
@@ -851,7 +851,7 @@ const COSMIC_GLOBAL: AchievementDef[] = [
     code: 'GLO4',
     name: 'Nexus Walker',
     requirement: 'Participate in 50 Global Events',
-    icon: 'cyclone',
+    icon: '🌀',
     rarity: 'LEGENDARY',
     category: 'Cosmic',
     check: (s) => s.globalEventParticipations >= 50
@@ -860,7 +860,7 @@ const COSMIC_GLOBAL: AchievementDef[] = [
     code: 'GLOB',
     name: 'Force of Nature',
     requirement: 'Participate in 100 Global Events',
-    icon: 'star',
+    icon: '⭐',
     rarity: 'MYTHICAL',
     category: 'Cosmic',
     check: (s) => s.globalEventParticipations >= 100
@@ -872,7 +872,7 @@ const COSMIC_TIDAL: AchievementDef[] = [
     code: 'TSU1',
     name: 'Neap Tide',
     requirement: 'Participate in 3 Tidal Surges',
-    icon: 'waves',
+    icon: '🌊',
     rarity: 'COMMON',
     category: 'Cosmic',
     check: (s) => s.tidalSurgeParticipations >= 3
@@ -881,7 +881,7 @@ const COSMIC_TIDAL: AchievementDef[] = [
     code: 'TSU2',
     name: 'Spring Tide',
     requirement: 'Participate in 7 Tidal Surges',
-    icon: 'droplet',
+    icon: '💧',
     rarity: 'RARE',
     category: 'Cosmic',
     check: (s) => s.tidalSurgeParticipations >= 7
@@ -890,7 +890,7 @@ const COSMIC_TIDAL: AchievementDef[] = [
     code: 'TSU3',
     name: 'Abyssal Drift',
     requirement: 'Participate in 15 Tidal Surges',
-    icon: 'whale',
+    icon: '🐋',
     rarity: 'EPIC',
     category: 'Cosmic',
     check: (s) => s.tidalSurgeParticipations >= 15
@@ -899,7 +899,7 @@ const COSMIC_TIDAL: AchievementDef[] = [
     code: 'TSU4',
     name: 'Maelstrom',
     requirement: 'Participate in 25 Tidal Surges',
-    icon: 'cyclone',
+    icon: '🌀',
     rarity: 'LEGENDARY',
     category: 'Cosmic',
     check: (s) => s.tidalSurgeParticipations >= 25
@@ -908,7 +908,7 @@ const COSMIC_TIDAL: AchievementDef[] = [
     code: 'TSU5',
     name: 'Tsunami Sovereign',
     requirement: 'Participate in 50 Tidal Surges',
-    icon: 'crown',
+    icon: '👑',
     rarity: 'MYTHICAL',
     category: 'Cosmic',
     check: (s) => s.tidalSurgeParticipations >= 50
@@ -920,7 +920,7 @@ const COSMIC_SOLAR: AchievementDef[] = [
     code: 'SFL1',
     name: 'Corona',
     requirement: 'Participate in 3 Solar Flares',
-    icon: 'sun_dim',
+    icon: '🌞',
     rarity: 'COMMON',
     category: 'Cosmic',
     check: (s) => s.solarFlareParticipations >= 3
@@ -929,7 +929,7 @@ const COSMIC_SOLAR: AchievementDef[] = [
     code: 'SFL2',
     name: 'Solar Wind',
     requirement: 'Participate in 7 Solar Flares',
-    icon: 'wind_gust',
+    icon: '🌬️',
     rarity: 'RARE',
     category: 'Cosmic',
     check: (s) => s.solarFlareParticipations >= 7
@@ -938,7 +938,7 @@ const COSMIC_SOLAR: AchievementDef[] = [
     code: 'SFL3',
     name: 'Prominence',
     requirement: 'Participate in 15 Solar Flares',
-    icon: 'fire',
+    icon: '🔥',
     rarity: 'EPIC',
     category: 'Cosmic',
     check: (s) => s.solarFlareParticipations >= 15
@@ -947,7 +947,7 @@ const COSMIC_SOLAR: AchievementDef[] = [
     code: 'SFL4',
     name: 'Coronal Ejection',
     requirement: 'Participate in 25 Solar Flares',
-    icon: 'meteor',
+    icon: '☄️',
     rarity: 'LEGENDARY',
     category: 'Cosmic',
     check: (s) => s.solarFlareParticipations >= 25
@@ -956,7 +956,7 @@ const COSMIC_SOLAR: AchievementDef[] = [
     code: 'SFL5',
     name: 'Heliosphere',
     requirement: 'Participate in 50 Solar Flares',
-    icon: 'sun',
+    icon: '☀️',
     rarity: 'MYTHICAL',
     category: 'Cosmic',
     check: (s) => s.solarFlareParticipations >= 50
@@ -968,7 +968,7 @@ const COSMIC_CYCLONE: AchievementDef[] = [
     code: 'CBL1',
     name: 'Gale',
     requirement: 'Participate in 3 Cyclone Blitzes',
-    icon: 'leaf',
+    icon: '🍃',
     rarity: 'COMMON',
     category: 'Cosmic',
     check: (s) => s.cycloneBlitzParticipations >= 3
@@ -977,7 +977,7 @@ const COSMIC_CYCLONE: AchievementDef[] = [
     code: 'CBL2',
     name: 'Squall',
     requirement: 'Participate in 7 Cyclone Blitzes',
-    icon: 'wind',
+    icon: '🌬️',
     rarity: 'RARE',
     category: 'Cosmic',
     check: (s) => s.cycloneBlitzParticipations >= 7
@@ -986,7 +986,7 @@ const COSMIC_CYCLONE: AchievementDef[] = [
     code: 'CBL3',
     name: 'Tempest',
     requirement: 'Participate in 15 Cyclone Blitzes',
-    icon: 'cloud_lightning',
+    icon: '⛈️',
     rarity: 'EPIC',
     category: 'Cosmic',
     check: (s) => s.cycloneBlitzParticipations >= 15
@@ -995,7 +995,7 @@ const COSMIC_CYCLONE: AchievementDef[] = [
     code: 'CBL4',
     name: 'Eye of the Storm',
     requirement: 'Participate in 25 Cyclone Blitzes',
-    icon: 'eye',
+    icon: '👁️',
     rarity: 'LEGENDARY',
     category: 'Cosmic',
     check: (s) => s.cycloneBlitzParticipations >= 25
@@ -1004,7 +1004,7 @@ const COSMIC_CYCLONE: AchievementDef[] = [
     code: 'CBL5',
     name: 'Zephyr King',
     requirement: 'Participate in 50 Cyclone Blitzes',
-    icon: 'crown',
+    icon: '👑',
     rarity: 'MYTHICAL',
     category: 'Cosmic',
     check: (s) => s.cycloneBlitzParticipations >= 50
@@ -1016,7 +1016,7 @@ const COSMIC_MIRAGE: AchievementDef[] = [
     code: 'MCA1',
     name: 'Haze',
     requirement: 'Participate in 3 Mirage Cataclysms',
-    icon: 'mist',
+    icon: '🌫️',
     rarity: 'COMMON',
     category: 'Cosmic',
     check: (s) => s.mirageCataclysmParticipations >= 3
@@ -1025,7 +1025,7 @@ const COSMIC_MIRAGE: AchievementDef[] = [
     code: 'MCA2',
     name: 'Shimmer',
     requirement: 'Participate in 7 Mirage Cataclysms',
-    icon: 'shimmer',
+    icon: '✨',
     rarity: 'RARE',
     category: 'Cosmic',
     check: (s) => s.mirageCataclysmParticipations >= 7
@@ -1034,7 +1034,7 @@ const COSMIC_MIRAGE: AchievementDef[] = [
     code: 'MCA3',
     name: 'Sandstorm',
     requirement: 'Participate in 15 Mirage Cataclysms',
-    icon: 'desert',
+    icon: '🏜️',
     rarity: 'EPIC',
     category: 'Cosmic',
     check: (s) => s.mirageCataclysmParticipations >= 15
@@ -1043,7 +1043,7 @@ const COSMIC_MIRAGE: AchievementDef[] = [
     code: 'MCA4',
     name: 'Oasis Phantom',
     requirement: 'Participate in 25 Mirage Cataclysms',
-    icon: 'palm_tree',
+    icon: '🌴',
     rarity: 'LEGENDARY',
     category: 'Cosmic',
     check: (s) => s.mirageCataclysmParticipations >= 25
@@ -1052,7 +1052,7 @@ const COSMIC_MIRAGE: AchievementDef[] = [
     code: 'MCA5',
     name: 'Master of Illusion',
     requirement: 'Participate in 50 Mirage Cataclysms',
-    icon: 'magic',
+    icon: '⌛',
     rarity: 'MYTHICAL',
     category: 'Cosmic',
     check: (s) => s.mirageCataclysmParticipations >= 50
@@ -1064,7 +1064,7 @@ const COLLECTOR: AchievementDef[] = [
     code: 'COL20',
     name: 'Curious',
     requirement: 'Earn 20 Achievements',
-    icon: 'book_open',
+    icon: '📖',
     rarity: 'COMMON',
     category: 'Collector',
     check: (s) => s.totalAchievementsEarned >= 20
@@ -1073,7 +1073,7 @@ const COLLECTOR: AchievementDef[] = [
     code: 'COL40',
     name: 'Dedicated',
     requirement: 'Earn 40 Achievements',
-    icon: 'books',
+    icon: '📚',
     rarity: 'RARE',
     category: 'Collector',
     check: (s) => s.totalAchievementsEarned >= 40
@@ -1082,7 +1082,7 @@ const COLLECTOR: AchievementDef[] = [
     code: 'COL65',
     name: 'Completionist',
     requirement: 'Earn 65 Achievements',
-    icon: 'folders',
+    icon: '📁',
     rarity: 'EPIC',
     category: 'Collector',
     check: (s) => s.totalAchievementsEarned >= 65
@@ -1091,7 +1091,7 @@ const COLLECTOR: AchievementDef[] = [
     code: 'COL95',
     name: 'Archivist',
     requirement: 'Earn 95 Achievements',
-    icon: 'museum',
+    icon: '🏛️',
     rarity: 'LEGENDARY',
     category: 'Collector',
     check: (s) => s.totalAchievementsEarned >= 95
@@ -1100,7 +1100,7 @@ const COLLECTOR: AchievementDef[] = [
     code: 'COLMAX',
     name: 'Omnivore',
     requirement: 'Earn 142 Achievements',
-    icon: 'star',
+    icon: '⭐',
     rarity: 'MYTHICAL',
     category: 'Collector',
     check: (s) => s.totalAchievementsEarned >= 142
@@ -1111,8 +1111,8 @@ const RAINBOW_CAT: AchievementDef[] = [
   {
     code: 'KING',
     name: 'God King',
-    requirement: '1000 Wins + 50 Laps + 3 Mythical Relics',
-    icon: 'crown',
+    requirement: '1000 Wins + 50 Laps + 5 Mythical Relics',
+    icon: '👑',
     rarity: 'RAINBOW',
     category: 'Rainbow',
     check: (s) => s.wins >= 1000 && s.laps >= 50 && s.allMythicalRelics
@@ -1121,7 +1121,7 @@ const RAINBOW_CAT: AchievementDef[] = [
     code: 'COSM',
     name: 'Cosmic Sovereign',
     requirement: 'Participate 50 times in each of the 4 Global Events',
-    icon: 'ringed_planet',
+    icon: '🪐',
     rarity: 'RAINBOW',
     category: 'Rainbow',
     check: (s) =>
@@ -1134,7 +1134,7 @@ const RAINBOW_CAT: AchievementDef[] = [
     code: 'PURI',
     name: 'World Purifier',
     requirement: 'Defeat each of the four World Bosses 50 times',
-    icon: 'globe',
+    icon: '🌐',
     rarity: 'RAINBOW',
     category: 'Rainbow',
     check: (s) =>
@@ -1147,7 +1147,7 @@ const RAINBOW_CAT: AchievementDef[] = [
     code: 'NEON',
     name: 'Paradise Ascendant',
     requirement: '50 clears of every bonus stage',
-    icon: 'rainbow',
+    icon: '🌈',
     rarity: 'RAINBOW',
     category: 'Rainbow',
     check: (s) =>
@@ -1161,7 +1161,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'WB01',
     name: 'First Contact',
     requirement: 'Defeat 1 World Boss',
-    icon: 'swords',
+    icon: '⚔️',
     rarity: 'COMMON',
     category: 'WorldBoss',
     check: (s) => s.worldBossKills >= 1
@@ -1170,7 +1170,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'WB02',
     name: 'Entity Hunter',
     requirement: 'Defeat 10 World Bosses',
-    icon: 'shield',
+    icon: '🛡️',
     rarity: 'RARE',
     category: 'WorldBoss',
     check: (s) => s.worldBossKills >= 10
@@ -1179,7 +1179,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'WB03',
     name: 'World Defender',
     requirement: 'Defeat 30 World Bosses',
-    icon: 'earth',
+    icon: '🌍',
     rarity: 'EPIC',
     category: 'WorldBoss',
     check: (s) => s.worldBossKills >= 30
@@ -1188,7 +1188,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'WB04',
     name: 'Cataclysm Breaker',
     requirement: 'Defeat 75 World Bosses',
-    icon: 'burst',
+    icon: '💥',
     rarity: 'LEGENDARY',
     category: 'WorldBoss',
     check: (s) => s.worldBossKills >= 75
@@ -1197,7 +1197,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'WB05',
     name: 'World Savior',
     requirement: 'Defeat 200 World Bosses',
-    icon: 'shining_star',
+    icon: '🌟',
     rarity: 'MYTHICAL',
     category: 'WorldBoss',
     check: (s) => s.worldBossKills >= 200
@@ -1206,7 +1206,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'HEXM',
     name: "Hexurion's Bane",
     requirement: 'Defeat Hexurion 50 times',
-    icon: 'hexagon',
+    icon: '⬡',
     rarity: 'MYTHICAL',
     category: 'WorldBoss',
     check: (s) => s.hexurionKills >= 50
@@ -1215,7 +1215,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'ORBM',
     name: 'Orbitbreaker',
     requirement: 'Defeat Orphion 50 times',
-    icon: 'ringed_planet',
+    icon: '🪐',
     rarity: 'MYTHICAL',
     category: 'WorldBoss',
     check: (s) => s.orphionKills >= 50
@@ -1224,7 +1224,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'FRAM',
     name: 'Fractal Collapse',
     requirement: 'Defeat Fracturon 50 times',
-    icon: 'diamond',
+    icon: '💎',
     rarity: 'MYTHICAL',
     category: 'WorldBoss',
     check: (s) => s.fracturonKills >= 50
@@ -1233,7 +1233,7 @@ const WORLD_BOSSES: AchievementDef[] = [
     code: 'APXM',
     name: 'Pyramid Fall',
     requirement: 'Defeat Apexion 50 times',
-    icon: 'pyramid',
+    icon: '🔺',
     rarity: 'MYTHICAL',
     category: 'WorldBoss',
     check: (s) => s.apexionKills >= 50
@@ -1245,7 +1245,7 @@ const WORLD_BOSS_CHESTS: AchievementDef[] = [
     code: 'CH01',
     name: 'Treasure Seeker',
     requirement: 'Open 5 World Boss Chests',
-    icon: 'chest',
+    icon: '🧰',
     rarity: 'COMMON',
     category: 'WorldBossChests',
     check: (s) => s.worldBossChestsOpened >= 5
@@ -1254,7 +1254,7 @@ const WORLD_BOSS_CHESTS: AchievementDef[] = [
     code: 'CH02',
     name: 'Treasure Hunter',
     requirement: 'Open 20 World Boss Chests',
-    icon: 'present',
+    icon: '🎁',
     rarity: 'RARE',
     category: 'WorldBossChests',
     check: (s) => s.worldBossChestsOpened >= 20
@@ -1263,7 +1263,7 @@ const WORLD_BOSS_CHESTS: AchievementDef[] = [
     code: 'CH03',
     name: 'Vault Raider',
     requirement: 'Open 50 World Boss Chests',
-    icon: 'bag',
+    icon: '🎒',
     rarity: 'EPIC',
     category: 'WorldBossChests',
     check: (s) => s.worldBossChestsOpened >= 50
@@ -1272,7 +1272,7 @@ const WORLD_BOSS_CHESTS: AchievementDef[] = [
     code: 'CH04',
     name: 'Treasure Hoard',
     requirement: 'Open 100 World Boss Chests',
-    icon: 'trophy',
+    icon: '🏆',
     rarity: 'LEGENDARY',
     category: 'WorldBossChests',
     check: (s) => s.worldBossChestsOpened >= 100
@@ -1281,7 +1281,7 @@ const WORLD_BOSS_CHESTS: AchievementDef[] = [
     code: 'CH05',
     name: 'Living Vault',
     requirement: 'Open 250 World Boss Chests',
-    icon: 'crown',
+    icon: '👑',
     rarity: 'MYTHICAL',
     category: 'WorldBossChests',
     check: (s) => s.worldBossChestsOpened >= 250
@@ -1293,7 +1293,7 @@ const WORLD_BOSS_META: AchievementDef[] = [
     code: 'LAST',
     name: 'Final Strike',
     requirement: 'Land the finishing blow on a World Boss',
-    icon: 'target',
+    icon: '🎯',
     rarity: 'COMMON',
     category: 'Meta',
     check: (s) => s.hadFinalStrike
@@ -1302,7 +1302,7 @@ const WORLD_BOSS_META: AchievementDef[] = [
     code: 'PERF',
     name: 'Perfect Assault',
     requirement: 'Defeat a World Boss without missing a single prediction',
-    icon: 'hundred',
+    icon: '💯',
     rarity: 'RARE',
     category: 'Meta',
     check: (s) => s.hadPerfectAssault
@@ -1312,7 +1312,7 @@ const WORLD_BOSS_META: AchievementDef[] = [
     name: 'Lucky Shot',
     requirement:
       'Land the finishing blow while contributing 10% or less of total boss damage',
-    icon: 'lucky_clover',
+    icon: '☘️',
     rarity: 'RARE',
     category: 'Meta',
     check: (s) => s.hadLuckyShot
@@ -1321,7 +1321,7 @@ const WORLD_BOSS_META: AchievementDef[] = [
     code: 'CLUT',
     name: 'Clutch Victory',
     requirement: 'Land the finishing blow with less than 5 seconds remaining',
-    icon: 'timer',
+    icon: '⏱️',
     rarity: 'EPIC',
     category: 'Meta',
     check: (s) => s.hadClutchVictory
@@ -1331,7 +1331,7 @@ const WORLD_BOSS_META: AchievementDef[] = [
     name: 'Divine Intervention',
     requirement:
       'Join a World Boss during its final 10 seconds and land the finishing blow',
-    icon: 'meteor',
+    icon: '🌠',
     rarity: 'MYTHICAL',
     category: 'Meta',
     check: (s) => s.hadDivineIntervention
@@ -1343,7 +1343,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'NEO1',
     name: 'Paradise Visitor',
     requirement: 'Trigger 1 bonus stage',
-    icon: 'slots',
+    icon: '🎰',
     rarity: 'COMMON',
     category: 'NEON_PARADISE',
     check: (s) => s.bonusStagesPlayed >= 1
@@ -1352,7 +1352,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'NEO2',
     name: 'Paradise Explorer',
     requirement: 'Trigger 10 bonus stages',
-    icon: 'slots',
+    icon: '🎰',
     rarity: 'RARE',
     category: 'NEON_PARADISE',
     check: (s) => s.bonusStagesPlayed >= 10
@@ -1361,7 +1361,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'NEO3',
     name: 'Paradise Regular',
     requirement: 'Trigger 50 bonus stages',
-    icon: 'slots',
+    icon: '🎰',
     rarity: 'EPIC',
     category: 'NEON_PARADISE',
     check: (s) => s.bonusStagesPlayed >= 50
@@ -1370,7 +1370,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'NEO4',
     name: 'Paradise Legend',
     requirement: 'Trigger 150 bonus stages',
-    icon: 'slots',
+    icon: '🎰',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.bonusStagesPlayed >= 150
@@ -1379,7 +1379,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'NEO5',
     name: 'Neon Sovereign',
     requirement: 'Trigger 300 bonus stages',
-    icon: 'crown',
+    icon: '👑',
     rarity: 'MYTHICAL',
     category: 'NEON_PARADISE',
     check: (s) => s.bonusStagesPlayed >= 300
@@ -1388,7 +1388,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'TVLT',
     name: 'Open the Royal Chest',
     requirement: 'Get the 10x reward from Treasure Vault',
-    icon: 'trophy',
+    icon: '🏆',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.royalTreasureChestsOpened >= 1
@@ -1397,7 +1397,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'KVAL',
     name: 'Find the Royal Chest',
     requirement: "Pick the Royal chest in King's Vault",
-    icon: 'crown',
+    icon: '👑',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.royalKingsChestsFound >= 1
@@ -1406,7 +1406,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'DON3',
     name: 'Reach the 10x Payout',
     requirement: 'Reach step 3 in Double Down',
-    icon: 'lightning',
+    icon: '⚡',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.doubleDownmaxClears >= 1
@@ -1415,7 +1415,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'WILD',
     name: 'Reveal the Maximum Combination',
     requirement: 'Flip three Arkalon cards in Wild Prediction',
-    icon: 'joker',
+    icon: '🃏',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.wildPredictionMaxCombos >= 1
@@ -1424,7 +1424,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'SFX5',
     name: 'Reach the 10x Payout',
     requirement: 'Get the 10x reward in Surge Frenzy',
-    icon: 'lightning',
+    icon: '⚡',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.surgeFrenzyMaxComboFinishes >= 1
@@ -1433,7 +1433,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'RRSH',
     name: 'Roll Rainbow Tier',
     requirement: 'Average Rainbow spectrum in Rainbow Rush',
-    icon: 'rainbow',
+    icon: '🌈',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.rainbowTierRolls >= 1
@@ -1442,7 +1442,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'SNIP',
     name: 'Hit the Perfect Bullseye',
     requirement: 'Get the 10x reward in Sniper Challenge',
-    icon: 'target',
+    icon: '🎯',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.hadPerfectSnipe
@@ -1451,7 +1451,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'OVIS',
     name: 'Complete All Five Sequences',
     requirement: 'Complete all 5 sequences in Arkalon Vision',
-    icon: 'crystal_ball',
+    icon: '🔮',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.oracleVisionPerfectClears >= 1
@@ -1460,7 +1460,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'MINE',
     name: 'Strike the Motherlode',
     requirement: 'Find 5 diamonds for the 10x reward in Crystal Mine',
-    icon: 'diamond',
+    icon: '💎',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.crystalMineClears >= 1
@@ -1469,7 +1469,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'NEO9',
     name: 'Complete Every Neon Paradise Minigame',
     requirement: 'Play all 9 bonus stages at least once',
-    icon: 'rainbow',
+    icon: '🌈',
     rarity: 'EPIC',
     category: 'NEON_PARADISE',
     check: (s) => Object.keys(s.neonParadiseMinigamesPlayed).length >= 9
@@ -1478,7 +1478,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'NE20',
     name: 'Complete Every Minigame 20 Times',
     requirement: '20 clears of every bonus stage',
-    icon: 'rainbow',
+    icon: '🌈',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) =>
@@ -1489,7 +1489,7 @@ const NEON_PARADISE: AchievementDef[] = [
     code: 'CIRC',
     name: 'Play Every Minigame in a Single Day',
     requirement: 'All 9 bonus stages in one calendar day',
-    icon: 'rainbow',
+    icon: '🌈',
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.neonFullCircuitToday

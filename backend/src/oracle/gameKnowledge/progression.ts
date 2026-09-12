@@ -8,7 +8,7 @@ WIN STREAK SYSTEM:
 - Core button colors and UI themes evolve dynamically as the win streak increases.
 
 ASCENSION SYSTEM:
-- Triggered when a player reaches 999 TQGS (Trequinquagintillion, 10^111) points.
+- Triggered when a player reaches 999 TQGS (Trequinquagintillion, 10^162) points.
 - Ascension is an optional prestige path. Declining lets the player keep their balance to push all-time peaks.
 - Prestige resets current points back to the starting balance of 200,000.
 - Increases the player's Lap Count, ranks them on Lap and Speedrun Leaderboards, and triggers a SURGE festival.

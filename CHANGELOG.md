@@ -2,6 +2,23 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [4.2] - The Accelerated Event Cycle Update
+
+### Changed
+
+* **Faster World Boss Rotation:** Reduced World Boss cooldowns from 10-12 minutes to 4-6 minutes, shortened encounters from 60 seconds to 30 seconds, and reduced quiet periods to keep boss raids appearing more frequently.
+
+* **World Boss Balance Adjustments:** Reduced starting boss HP from 4 to 2, lowered player HP contributions, and adjusted DIVN achievement timing to match the faster 30-second encounters.
+
+* **Increased Global Event Frequency:** Reduced Global Event cooldowns from 10-12 minutes to 4-6 minutes and shortened transition periods, creating a more consistent flow of world events.
+
+* **Festival Acceleration:** Reduced Festival vault duration, buff durations, cooldown lockouts, and demo festival timing to allow festivals to appear and rotate faster.
+
+* ***More Frequent Flash Events:** Increased Flash Event trigger chance from 5% to 9%, reducing average downtime between surprise events.
+
+* **Neon Paradise Availability Boost:** Increased Neon Paradise trigger chance from 5% to 8% to compensate for shorter event-free windows and maintain accessibility during the faster event cycle.
+
+
 ## [4.1] - The Adaptive Background Music Update
 
 ### Added
@@ -16,7 +33,7 @@ All notable changes to the platform will be documented in this file.
 
 ### Added
 
-* **Neon Paradise Bonus System:** Introduced a new bonus-stage system containing nine interactive experiences that activate during eligible manual prediction sessions. Neon Paradise has a combined 5% trigger chance per eligible resolved prediction, with all nine stages having equal selection probability.
+* **Neon Paradise Bonus System:** Introduced a new bonus-stage system containing nine interactive experiences that activate during eligible manual prediction sessions. Neon Paradise has a combined 8% trigger chance per eligible resolved prediction, with all nine stages having equal selection probability.
 
   * **Treasure Vault:** Choose one of three pre-generated reward chests, with the selected chest opening first before the remaining rewards are revealed.
   * **Double Down:** Climb a multiplier ladder from a guaranteed 2× payout toward a maximum 10× reward by choosing whether to secure or continue.
@@ -59,12 +76,12 @@ All notable changes to the platform will be documented in this file.
 
 ### Added
 
-* **World Boss System:** Introduced server-wide cooperative raid encounters that replace the standard prediction arena on a 10 to 12-minute cycle. Four bosses rotate through the schedule, each rendered and animated entirely in CSS with a full animation lifecycle covering assembly, idle breathing, hit reaction, pain, and death states, accompanied by unique sound effects for spawning, attacks, taking damage, and defeat:
+* **World Boss System:** Introduced server-wide cooperative raid encounters that replace the standard prediction arena on a 4 to 6-minute cycle. Four bosses rotate through the schedule, each rendered and animated entirely in CSS with a full animation lifecycle covering assembly, idle breathing, hit reaction, pain, and death states, accompanied by unique sound effects for spawning, attacks, taking damage, and defeat:
   * **Hexurion:** A three-layered hexagonal prism core with a rotating outer shell and a glowing central dot.
   * **Orphion:** Three concentric rings orbiting in alternating directions around a pulsing purple core.
   * **Fracturon:** A 7x7 rhombic cell grid clipped into a diamond shape with a digital heartbeat idle state.
   * **Apexion:** A vertically breathing pyramid casting an expanding ground shadow synchronized to its idle cycle.
-* **Collective HP Mechanic:** Boss HP scales dynamically with participant count based on join timing. Early participants contribute up to 4 HP per player to the shared pool. Winning predictions deal damage. Missing predictions are blocked. All encounters run on a 60-second timer.
+* **Collective HP Mechanic:** Boss HP scales dynamically with participant count based on join timing. Early participants contribute up to 2 HP per player to the shared pool. Winning predictions deal damage. Missing predictions are blocked. All encounters run on a 30-second timer.
 * **Chest Reward System:** Encounter outcome determines base chest rarity across six tiers:
   * **Common:** Less than 25% HP depleted on retreat.
   * **Rare:** 25% or more HP depleted on retreat.
@@ -138,9 +155,9 @@ All notable changes to the platform will be documented in this file.
 ### Added
 
 * **Global Event Orchestrator:** Implemented a backend-driven event system synchronized across all connected players via Server-Sent Events (SSE). Events transition through a three-phase lifecycle:
-  * **Event Cooldown:** A 10 to 30-minute randomized interval between active events.
-  * **Warning Phase:** A 1.5 to 3-minute period featuring server-wide telemetry warning broadcasts, interface countdown timers, custom Arkalon warning vocalizations, and spoken alerts at 60 and 30 seconds.
-  * **Active Phase:** A 1 to 3-minute blitz window applying real-time gameplay modifiers, card visual transformations, dynamic CSS interface shaders, and live marquee telemetry.
+  * **Event Cooldown:** A 4 to 6-minute randomized interval between active events.
+  * **Warning Phase:** A 30-second period featuring server-wide telemetry warning broadcasts, interface countdown timers, and custom Arkalon warning vocalizations.
+  * **Active Phase:** A 60-second blitz window applying real-time gameplay modifiers, card visual transformations, dynamic CSS interface shaders, and live marquee telemetry.
 * **Elemental Gameplay Modifiers:** Added four unique global event states with weighted selection distribution:
   * **Tidal Surge (30% weight):** Activates the *Win Echo Protocol*, awarding an additional +20% signal payout echo to successful predictions.
   * **Cyclone Blitz (25% weight):** Activates the *Streak Turbocurrent*, incrementing win streaks by +2 instead of +1 on successful predictions.
@@ -208,7 +225,7 @@ All notable changes to the platform will be documented in this file.
 
 ### Added
 
-- **Player Festival system:** Added eight globally-triggered gameplay festivals activated through emergent player behavior including win streaks, loss streaks, high multipliers, Flash Event chains, and Chrono-Lap completions. Only one festival can remain active at a time with a global 5-minute cooldown between activations.
+- **Player Festival system:** Added eight globally-triggered gameplay festivals activated through emergent player behavior including win streaks, loss streaks, high multipliers, Flash Event chains, and Chrono-Lap completions. Only one festival can remain active at a time with a global 2-minute cooldown between activations.
 - **Global gameplay modifiers:** Each festival applies a unique live modifier affecting all active players. Effects include payout echoes, streak protection, forced bonus floors, relic amplification, global multipliers, and loss correction systems.
 - **Festival interface theming:** Active festivals dynamically transform the full interface using silk-patterned backgrounds, ember particles, themed overlays, countdown timers, persistent effect tickers, and animated result badges.
 - **Autonomous Arkalon Festival engine:** Added Arkalon-triggered weighted festival activations occurring every 18 to 24 minutes when no recent player festival or cooldown is active. Trigger frequency is weighted by economy impact to preserve progression stability.

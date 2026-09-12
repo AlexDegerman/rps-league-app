@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import pool from '../utils/db.js'
-import { getUserPoints } from '../services/userService.js'
+import { getUserPoints, generateRecoveryCode } from '../services/userService.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { getSessionStats } from '../services/sessionService.js'
@@ -299,15 +299,16 @@ router.post('/recover', async (req, res) => {
 router.post('/update-nickname', async (req, res) => {
   const { userId, nickname, shortId } = req.body
   try {
+    const recoveryCode = generateRecoveryCode()
     const result = await pool.query(
-      `INSERT INTO users (user_id, short_id, nickname, points, peak_points)
-        VALUES ($1, $2, $3, 200000, 200000)
+      `INSERT INTO users (user_id, short_id, nickname, points, peak_points, recovery_code)
+        VALUES ($1, $2, $3, 200000, 200000, $4)
         ON CONFLICT (user_id)
         DO UPDATE SET
           nickname = EXCLUDED.nickname,
           short_id = COALESCE(users.short_id, EXCLUDED.short_id)
         RETURNING nickname`,
-      [userId, shortId, nickname]
+      [userId, shortId, nickname, recoveryCode]
     )
     res.json({ ok: true, nickname: result.rows[0].nickname })
   } catch (err) {

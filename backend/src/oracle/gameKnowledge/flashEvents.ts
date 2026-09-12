@@ -1,6 +1,6 @@
 export const flashEvents = `
 SYSTEM DEFINITIONS: FLASH EVENTS
-Flash Events are personal, probabilistic gameplay modifiers with a 5% chance of triggering when a bet is placed. When activated, the modifier persists for the next 3 predictions.
+Flash Events are personal, probabilistic gameplay modifiers with a 9% chance of triggering when a bet is placed. When activated, the modifier persists for the next 3 predictions.
 Event selection is weighted to support controlled rolls of seasonal themes. All Flash Events provide guaranteed wins (100% win rate) for their 3-prediction duration.
 
 FLASH EVENT CATALOGUE:

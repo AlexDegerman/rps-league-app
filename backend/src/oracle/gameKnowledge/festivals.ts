@@ -6,11 +6,11 @@ SYSTEM DEFINITIONS: PLAYER FESTIVALS
 Festivals are rare, globally-triggered gameplay events initiated by specific player actions. Unlike Flash Events which are personal and probabilistic, Festivals affect all active players simultaneously and are driven by emergent in-game milestones.
 
 - One active Festival maximum at any time. Triggers during an active Festival or cooldown are discarded.
-- A mandatory 5-minute cooldown follows every Festival conclusion. No queue exists; triggers during cooldown are lost.
+- A mandatory 2-minute cooldown follows every Festival conclusion. No queue exists; triggers during cooldown are lost.
 - Flash Events take visual priority over an active Festival theme if both are active simultaneously.
 - The Arkalon overrides all correction protocols: a player who defied the Daily Arkalon Prophecy will still lose even during a Sanguine forced-win state.
 - Every Festival is caused by a specific player action, and that player's name is broadcast to all active players via the Arkalon ticker on activation.
-- Autonomous demo festivals: if no player festival has occurred in the last 10 minutes and no cooldown is active, the Arkalon triggers a weighted random festival every 18 to 24 minutes to simulate world activity during low-concurrency periods.
+- Autonomous demo festivals: if no player festival has occurred in the last 4 minutes and no cooldown is active, the Arkalon triggers a weighted random festival every 7 to 10 minutes to simulate world activity during low-concurrency periods.
 
 --- FESTIVAL CATALOGUE ---
 
@@ -24,13 +24,13 @@ Theme: Neon Violet and Electric Purple, vivid border glows and high-frequency li
 
 2. THE GHOST FESTIVAL
 Trigger: Total win multiplier 30x or higher (40% chance) OR 60x or higher (100%).
-Duration: 1 minute, 12 matches.
+Duration: 45 seconds, 9 matches.
 Effect (Win Echo): All wins generate a 20% signal echo. The final payout is multiplied by 1.2x. The echo is visualized in the result animation: after the result number finishes counting up, a ghostly echo value drifts upward to the top-right and fades out with a teal glow.
 Theme: Ethereal Teal and Ghost White, transparent floating particles, drifting echo silhouettes.
 
 3. THE SAFEGUARD FESTIVAL
 Trigger: Completion of a Mythical Achievement (100%) OR Legendary Achievement (50%).
-Duration: 1 minute, 12 matches.
+Duration: 45 seconds, 9 matches.
 Effect (Risk Shield): Loss deductions are reduced by 20%. Losses only deduct 40% of the stake instead of the standard 50%.
 Theme: Slate Blue and Shield Silver, metallic border-frame overrides, geometric shield-shimmer effects.
 
@@ -48,7 +48,7 @@ Theme: High-Voltage Cyan and Frost White, clean UI brightness boost, horizontal 
 
 6. THE VAULT FESTIVAL
 Trigger: Discovery of a Mythical Relic (100%).
-Duration: 2 minutes, 24 matches.
+Duration: 1 minute, 12 matches.
 Effect (Loot Echo): All Relic drop rates are doubled (2x) for the duration.
 Theme: Deep Cobalt and Chrome Silver, liquid metallic sheen on UI containers.
 

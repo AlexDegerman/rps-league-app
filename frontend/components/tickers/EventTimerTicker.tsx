@@ -18,20 +18,20 @@ const FESTIVAL_THEME: Record<string, { label: string; color: string }> = {
 
 const FESTIVAL_DURATIONS: Record<string, number> = {
   SPARK: 45000,
-  GHOST: 60000,
-  SAFEGUARD: 60000,
+  GHOST: 45000,
+  SAFEGUARD: 45000,
   RESONANCE: 40000,
-  SURGE: 60000,
-  VAULT: 120000,
+  SURGE: 30000,
+  VAULT: 60000,
   FEVER: 30000,
   SANGUINE: 15000
 }
 
 const GLOBAL_DURATIONS: Record<GlobalEventType, number> = {
-  TIDAL_SURGE: 180000,
-  SOLAR_FLARE: 120000,
-  CYCLONE_BLITZ: 150000,
-  MIRAGE_CATACLYSM: 180000
+  TIDAL_SURGE: 60000,
+  SOLAR_FLARE: 60000,
+  CYCLONE_BLITZ: 60000,
+  MIRAGE_CATACLYSM: 60000
 }
 
 const fmt = (ms: number) => {

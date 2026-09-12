@@ -204,8 +204,13 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
   '5RL': { code: '5RL', name: 'Scavenger', icon: '📁', rarity: 'COMMON' },
   '10RL': { code: '10RL', name: 'Collector', icon: '🎒', rarity: 'RARE' },
   MUSE: { code: 'MUSE', name: 'True Curator', icon: '🏛️', rarity: 'EPIC' },
-  FULL: { code: 'FULL', name: 'Full House', icon: '🎰', rarity: 'LEGENDARY' },
-  TRI: { code: 'TRI', name: 'Trinity', icon: '🔱', rarity: 'MYTHICAL' },
+  FULL: {
+    code: 'FULL',
+    name: 'Grand Reliquary',
+    icon: '🎰',
+    rarity: 'LEGENDARY'
+  },
+  TRI: { code: 'TRI', name: 'The Pentad', icon: '🔱', rarity: 'MYTHICAL' },
   // Lunar
   LUN1: { code: 'LUN1', name: 'New Moon', icon: '🌑', rarity: 'COMMON' },
   LUN2: { code: 'LUN2', name: 'Orbit', icon: '🛰️', rarity: 'RARE' },
@@ -477,7 +482,7 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
   },
   DON3: {
     code: 'DON3',
-    name: 'Reach the 10× Payout',
+    name: 'Reach the 10x Payout',
     icon: '⚡',
     rarity: 'LEGENDARY'
   },
@@ -489,7 +494,7 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
   },
   SFX5: {
     code: 'SFX5',
-    name: 'Reach the 10× Payout',
+    name: 'Reach the 10x Payout',
     icon: '⚡',
     rarity: 'LEGENDARY'
   },
@@ -509,7 +514,7 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     code: 'OVIS',
     name: 'Complete All Five Sequences',
     icon: '🔮',
-    rarity: 'MYTHICAL'
+    rarity: 'LEGENDARY'
   },
   MINE: {
     code: 'MINE',
@@ -652,8 +657,8 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   '5RL': 'Own 5 Unique Relics',
   '10RL': 'Own 10 Unique Relics',
   MUSE: 'Own all Common, Rare & Epic Relics',
-  FULL: 'Own all 17 Unique Relics',
-  TRI: 'Own all 3 Mythical Relics',
+  GREL: 'Own all Common, Rare, Epic & Legendary Relics',
+  PENT: 'Own all 5 Mythical Relics',
   LUN1: '5 Moon Activations',
   LUN2: '10 Moon Activations',
   LUN3: '25 Moon Activations',
@@ -756,7 +761,7 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   CLUT: 'Land the finishing blow with less than 5 seconds remaining',
   DIVN: 'Join a World Boss during its final 10 seconds and land the finishing blow',
   PURI: 'Defeat each of the four World Bosses 50 times',
-  KING: '1000 Wins + 50 Laps + 3 Mythical Relics',
+  KING: '1000 Wins + 50 Laps + 5 Mythical Relics',
   COSM: 'Participate 50 times in each of the 4 Global Events',
   NEO1: 'Trigger 1 bonus stage',
   NEO2: 'Trigger 10 bonus stages',

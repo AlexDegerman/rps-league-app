@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import pool from '../utils/db.js'
-import { ALL_ACHIEVEMENTS } from '../services/achievementChecker.js'
+import { ALL_ACHIEVEMENTS } from '../constants/achievements.js'
 import { hasSeenAllFlashTypes } from '../services/flashEventService.js'
 import { RELICS } from '../constants/relics.js'
 
@@ -97,8 +97,14 @@ router.get('/:shortId', async (req, res) => {
     const commonRareEpicCount = userRelics.filter((r) =>
       ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
     ).length
+    const commonRareEpicLegendaryCount = userRelics.filter((r) =>
+      ['COMMON', 'RARE', 'EPIC', 'LEGENDARY'].includes(r.rarity)
+    ).length
     const commonRareEpicTotal = RELICS.filter((r) =>
       ['COMMON', 'RARE', 'EPIC'].includes(r.rarity)
+    ).length
+    const commonRareEpicLegendaryTotal = RELICS.filter((r) =>
+      ['COMMON', 'RARE', 'EPIC', 'LEGENDARY'].includes(r.rarity)
     ).length
     const mythicalTotal = RELICS.filter((r) => r.rarity === 'MYTHICAL').length
 
@@ -123,6 +129,8 @@ router.get('/:shortId', async (req, res) => {
       uniqueRelicsOwned: userRelics.length,
       allRelicsOwned: userRelics.length >= RELICS.length,
       allCommonRareEpicRelics: commonRareEpicCount >= commonRareEpicTotal,
+      allCommonRareEpicLegendaryRelics:
+        commonRareEpicLegendaryCount >= commonRareEpicLegendaryTotal,
       allMythicalRelics: mythicRelicCount >= mythicalTotal,
       hadMythicRelicSlam: !!u.had_mythic_relic_slam,
 
@@ -133,18 +141,17 @@ router.get('/:shortId', async (req, res) => {
       biggestMultiplierTier: null,
 
       // World Boss Stats
-      worldBossKills:         Number(u.boss_kills_total ?? 0),
-      hexurionKills:          Number(u.hexurion_kills  ?? 0),
-      orphionKills:           Number(u.orphion_kills   ?? 0),
-      fracturonKills:         Number(u.fracturon_kills ?? 0),
-      apexionKills:           Number(u.apexion_kills   ?? 0),
-      worldBossChestsOpened:  Number(u.world_boss_chests_opened ?? 0),
-      hadFinalStrike:         Boolean(u.had_final_strike),
-      hadPerfectAssault:      Boolean(u.had_perfect_assault),
-      hadLuckyShot:           Boolean(u.had_lucky_shot),
-      hadClutchVictory:       Boolean(u.had_clutch_victory),
-      hadDivineIntervention:  Boolean(u.had_divine_intervention),
-
+      worldBossKills: Number(u.boss_kills_total ?? 0),
+      hexurionKills: Number(u.hexurion_kills ?? 0),
+      orphionKills: Number(u.orphion_kills ?? 0),
+      fracturonKills: Number(u.fracturon_kills ?? 0),
+      apexionKills: Number(u.apexion_kills ?? 0),
+      worldBossChestsOpened: Number(u.world_boss_chests_opened ?? 0),
+      hadFinalStrike: Boolean(u.had_final_strike),
+      hadPerfectAssault: Boolean(u.had_perfect_assault),
+      hadLuckyShot: Boolean(u.had_lucky_shot),
+      hadClutchVictory: Boolean(u.had_clutch_victory),
+      hadDivineIntervention: Boolean(u.had_divine_intervention)
     }
 
     const achievements = ALL_ACHIEVEMENTS.map((def) => ({

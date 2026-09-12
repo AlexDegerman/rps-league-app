@@ -196,16 +196,16 @@ describe('Festival Service', () => {
         broadcastMock
       )
 
-      // SAFEGUARD has a duration of 60 seconds (60_000ms).
-      // Advance past active window but within the 5-minute lockout period.
-      vi.advanceTimersByTime(61_000)
+      // SAFEGUARD has a duration of 45 seconds (45_000ms).
+      // Advance past active window (46s) but within the 2-minute lockout period.
+      vi.advanceTimersByTime(46_000)
 
       expect(festivalService.getActiveFestival()).toBeNull()
       expect(festivalService.isFestivalLocked()).toBe(true)
       expect(festivalService.getFestivalLockoutRemaining()).toBeGreaterThan(0)
 
       // Advance past lockout limit.
-      vi.advanceTimersByTime(5 * 60 * 1000)
+      vi.advanceTimersByTime(2 * 60 * 1000)
       expect(festivalService.isFestivalLocked()).toBe(false)
       expect(festivalService.getFestivalLockoutRemaining()).toBe(0)
     })
@@ -358,7 +358,7 @@ describe('Festival Service', () => {
         )
         expect(broadcastMock).toHaveBeenCalledTimes(1)
 
-        // Advance time to reset scheduler state before next assertion.
+        // Advance time to reset scheduler state before next assertion (45s duration + 2m lockout).
         vi.advanceTimersByTime(60_000 + 5 * 60 * 1000)
         broadcastMock.mockClear()
 
@@ -406,7 +406,7 @@ describe('Festival Service', () => {
 
         expect(broadcastMock).toHaveBeenCalledTimes(1)
 
-        // Advance time to allow festival state and lockout window to expire.
+        // Advance time to allow festival state and lockout window to expire (30s duration + 2m lockout).
         vi.advanceTimersByTime(30_000 + 5 * 60 * 1000)
         broadcastMock.mockClear()
 
@@ -593,8 +593,8 @@ describe('Festival Service', () => {
 
       festivalService.startDemoFestivalScheduler(broadcastMock)
 
-      // 18 mins (Min) + 0.5 * 6 mins (Range) = 21 mins = 1,260,000ms
-      await vi.advanceTimersByTimeAsync(21 * 60 * 1000)
+      // 7 mins (Min) + 0.5 * 3 mins (Range) = 8.5 mins = 510,000ms
+      await vi.advanceTimersByTimeAsync(8.5 * 60 * 1000)
 
       expect(broadcastMock).toHaveBeenCalledTimes(1)
       const payload = JSON.parse(broadcastMock.mock.calls[0]![1])
@@ -611,7 +611,7 @@ describe('Festival Service', () => {
       festivalService.startDemoFestivalScheduler(firstBroadcast)
       festivalService.startDemoFestivalScheduler(secondBroadcast)
 
-      await vi.advanceTimersByTimeAsync(25 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(11 * 60 * 1000)
 
       expect(firstBroadcast).toHaveBeenCalled()
       expect(secondBroadcast).not.toHaveBeenCalled()
@@ -625,10 +625,10 @@ describe('Festival Service', () => {
 
       festivalService.startDemoFestivalScheduler(broadcastMock)
 
-      // Advance by 15 minutes (before the scheduled 18-minute demo tick)
-      await vi.advanceTimersByTimeAsync(15 * 60 * 1000)
+      // Advance by 5 minutes (before the scheduled 7-minute demo tick)
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000)
 
-      // Trigger a player festival to lock the system until 22 minutes (15 mins + 2 mins duration + 5 mins lockout)
+      // Trigger a player festival to lock the system
       festivalService.triggerVaultFestival(
         'PlayerOne',
         'user_001',
@@ -636,8 +636,8 @@ describe('Festival Service', () => {
       )
       broadcastMock.mockClear()
 
-      // Advance clock by 3 more minutes to reach the 18-minute scheduler tick
-      await vi.advanceTimersByTimeAsync(3 * 60 * 1000)
+      // Advance clock by 2 more minutes to reach the 7-minute scheduler tick
+      await vi.advanceTimersByTimeAsync(2 * 60 * 1000)
 
       // Since the service is locked under active lockout, no demo festival should launch
       expect(broadcastMock).not.toHaveBeenCalled()
@@ -653,8 +653,8 @@ describe('Festival Service', () => {
 
       festivalService.startDemoFestivalScheduler(broadcastMock)
 
-      // Advance clock by 15 minutes
-      await vi.advanceTimersByTimeAsync(15 * 60 * 1000)
+      // Advance clock by 5 minutes
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000)
 
       // Trigger player festival. This updates last player festival timestamp
       festivalService.triggerVaultFestival(
@@ -664,10 +664,10 @@ describe('Festival Service', () => {
       )
       broadcastMock.mockClear()
 
-      // Advance clock past active window (2 minutes) to reach 17 minutes total elapsed
-      await vi.advanceTimersByTimeAsync(2 * 60 * 1000)
+      // Advance clock past active window (1 minute) to reach 6 minutes total elapsed
+      await vi.advanceTimersByTimeAsync(1 * 60 * 1000)
 
-      // Advance another 1 minute to trigger the scheduled 18-minute scheduler check
+      // Advance another 1 minute to trigger the scheduled 7-minute scheduler check
       // Player activity is within quiet window, so demo launch is blocked.
       await vi.advanceTimersByTimeAsync(1 * 60 * 1000)
 

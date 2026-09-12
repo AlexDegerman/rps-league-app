@@ -68,7 +68,7 @@ Q: What happens after Lap 10?
 A: Progression continues. There is no maximum lap count. Each lap continues to increase relic drop rates up to the defined per-rarity caps. Dedicated Laps and Speedrun leaderboard rankings remain competitive at any lap count.
 
 Q: Can I reach infinite points?
-A: The system is engineered with BigInt arithmetic and has no hard point ceiling. The current highest named tier is Trequinquagintillion at 10 to the power of 111, which is the Ascension threshold. The Singularity achievement at 999 Trequinquagintillion represents the deepest defined progression goal, but point accumulation can continue beyond it.
+A: The system is engineered with BigInt arithmetic and has no hard point ceiling. The current highest named tier is Trequinquagintillion at 10 to the power of 162, which is the Ascension threshold. The Singularity achievement at 999 Sextrigintillion represents a major progression milestone, but point accumulation can continue beyond it.
 
 Q: Is there a maximum lap count?
 A: No. There is no maximum lap count defined in the system.
@@ -96,7 +96,7 @@ A: Mythical relics cannot be directly targeted; they drop from the same random p
 --- EVENT STRATEGY ---
 
 Q: Are Flash Event trigger chances equal across all event types?
-A: No. Event selection is weighted to support controlled rollout of seasonal content, meaning some events may appear more frequently than others without changing the global 5% trigger rate per bet.
+A: No. Event selection is weighted to support controlled rollout of seasonal content, meaning some events may appear more frequently than others without changing the global 9% trigger rate per bet.
 
 Q: Which Flash Event is the rarest?
 A: Individual event weights are not published. Selection is weighted by the system to support seasonal balance, so relative rarity can shift over time as content is adjusted.
@@ -220,7 +220,7 @@ Q: Is it worth coming back after a long time away?
 A: Yes. RPS League is designed as a live-service experience with ongoing content updates rather than a static game. New seasons introduce additional achievements, events, gameplay systems, relics, and progression goals, giving returning Predictors fresh objectives alongside their existing long-term progression. Your prestige laps, relic collection, and Achievement Codex continue to provide persistent progression as the game evolves.
 
 Q: What keeps me playing after reaching my first lap?
-A: Progression continues through the pursuit of all-time point peaks, the accumulation of rare Mythical relics, and mastery of new systems introduced through ongoing content updates. You are incentivized by climbing the Speedrun leaderboard, completing the Achievement Codex across all 15 categories, and adapting to new events and gameplay features as they are released.
+A: Progression continues through the pursuit of all-time point peaks, the accumulation of rare Mythical relics, and mastery of new systems introduced through ongoing content updates. You are incentivized by climbing the Speedrun leaderboard, completing the Achievement Codex across all 18 categories, and adapting to new events and gameplay features as they are released.
 
 Q: Are seasonal events planned or recurring?
 A: Seasonal content is part of the live-service roadmap. Specific schedules and whether past events will return are not confirmed in publicly available Arkalon knowledge. Future content details remain classified.

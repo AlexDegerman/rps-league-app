@@ -4,19 +4,19 @@ export const FESTIVALS_ENABLED = true
 
 export const FESTIVAL_DURATIONS_MS: Record<FestivalType, number | null> = {
   SPARK: 45_000,
-  GHOST: 60_000,
-  SAFEGUARD: 60_000,
+  GHOST: 45_000,
+  SAFEGUARD: 45_000,
   RESONANCE: 40_000,
   SURGE: 30_000,
-  VAULT: 120_000,
+  VAULT: 60_000,
   FEVER: 30_000,
   SANGUINE: 15_000
 }
 
-export const LOCKOUT_MS = 5 * 60 * 1000
-export const DEMO_FESTIVAL_MIN_MS = 18 * 60 * 1000
-export const DEMO_FESTIVAL_MAX_MS = 24 * 60 * 1000
-export const PLAYER_FESTIVAL_QUIET_MS = 10 * 60 * 1000
+export const LOCKOUT_MS = 2 * 60 * 1000
+export const DEMO_FESTIVAL_MIN_MS = 7 * 60 * 1000
+export const DEMO_FESTIVAL_MAX_MS = 10 * 60 * 1000
+export const PLAYER_FESTIVAL_QUIET_MS = 4 * 60 * 1000
 
 export const PLAYER_TRIGGER_PREFIXES = [
   '{user} has initiated the',

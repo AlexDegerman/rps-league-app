@@ -92,7 +92,7 @@ export default function FlashBadge({
           </span>
         ) : (
           <span className={`text-[9px] font-black ${cfg.multClass}`}>
-            x5 MULT
+            x3 MULT
           </span>
         )}
       </div>

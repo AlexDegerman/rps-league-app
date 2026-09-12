@@ -239,12 +239,12 @@ export default function BonusExplainerModal({
                 dotColor="bg-blue-400"
                 isOpen={expanded.flash}
                 onClick={() => toggleSection('flash')}
-                badge="5% per bet"
+                badge="9% per bet"
                 badgeColor="bg-blue-100 text-blue-700"
               >
                 <div className="space-y-3">
                   <p className="text-[10px] text-gray-500 leading-relaxed">
-                    Personal events that trigger mid-match with a 5% chance per
+                    Personal events that trigger mid-match with a 9% chance per
                     prediction. Last{' '}
                     <span className="font-bold text-gray-800">
                       3 predictions
@@ -299,7 +299,7 @@ export default function BonusExplainerModal({
                   </div>
 
                   <p className="text-[9px] text-gray-400 italic border-t border-gray-100 pt-2">
-                    Cobalt Core relic boosts Flash Event chance by +25%.
+                    Cobalt Core relic boosts Flash Event chance by +15%.
                     Temporal Anchor relic extends duration by +1 round. Spark
                     Festival can grant all active players a Flash Event
                     simultaneously.
@@ -430,7 +430,7 @@ export default function BonusExplainerModal({
                         name: 'Ghost',
                         emoji: '👻',
                         trigger: '30x multiplier (40%) / 60x (100%)',
-                        effect: '+20% echo on all wins for 12 matches',
+                        effect: '+20% echo on all wins for 9 matches',
                         color: 'text-teal-600',
                         bg: 'bg-teal-50 border-teal-100'
                       },
@@ -463,7 +463,7 @@ export default function BonusExplainerModal({
                         name: 'Safeguard',
                         emoji: '🛡️',
                         trigger: 'Mythical Achievement / Legendary Achievement',
-                        effect: 'Loss deductions reduced to 40% for 12 matches',
+                        effect: 'Loss deductions reduced to 40% for 9 matches',
                         color: 'text-slate-600',
                         bg: 'bg-slate-50 border-slate-200'
                       },
@@ -471,7 +471,7 @@ export default function BonusExplainerModal({
                         name: 'Vault',
                         emoji: '🔒',
                         trigger: 'Mythical Relic discovery',
-                        effect: 'Relic drop rates doubled for 24 matches',
+                        effect: 'Relic drop rates doubled for 12 matches',
                         color: 'text-blue-600',
                         bg: 'bg-blue-50 border-blue-100'
                       }
@@ -505,9 +505,9 @@ export default function BonusExplainerModal({
                   <div className="p-2.5 bg-cyan-50 border border-cyan-100 rounded-lg space-y-1.5">
                     <p className="text-[9px] text-cyan-700 leading-relaxed">
                       Only one Festival can be active at a time, followed by a
-                      5-minute cooldown. The triggering player is announced
-                      globally by Arkalon, while autonomous demo Festivals
-                      can appear every 18-24 minutes during low activity.
+                      2-minute cooldown. The triggering player is announced
+                      globally by Arkalon, while autonomous demo Festivals can
+                      appear every 7-10 minutes during low activity.
                     </p>
                   </div>
                 </div>
@@ -520,7 +520,7 @@ export default function BonusExplainerModal({
                 dotColor="bg-emerald-400"
                 isOpen={expanded.globalevents}
                 onClick={() => toggleSection('globalevents')}
-                badge="Every 10-12m"
+                badge="Every 4-6m"
                 badgeColor="bg-emerald-100 text-emerald-700"
               >
                 <div className="space-y-3">
@@ -602,12 +602,12 @@ export default function BonusExplainerModal({
                   <div className="p-2.5 bg-emerald-50 border border-emerald-100 rounded-lg">
                     <p className="text-[9px] text-emerald-700 leading-relaxed">
                       Events occur every{' '}
-                      <span className="font-bold">10-12 minutes</span>, begin
-                      with a{' '}
+                      <span className="font-bold">4-6 minutes</span>, begin with
+                      a{' '}
                       <span className="font-bold">30-second announcement</span>,
                       then run for <span className="font-bold">60 seconds</span>
                       . A
-                      <span className="font-bold"> 60-second quiet period</span>{' '}
+                      <span className="font-bold"> 30-second quiet period</span>{' '}
                       follows each event.
                     </p>
                   </div>
@@ -621,7 +621,7 @@ export default function BonusExplainerModal({
                 dotColor="bg-violet-400"
                 isOpen={expanded.worldbosses}
                 onClick={() => toggleSection('worldbosses')}
-                badge="Every 10-12m"
+                badge="Every 4-6m"
                 badgeColor="bg-violet-100 text-violet-700"
               >
                 <div className="space-y-3">
@@ -631,7 +631,7 @@ export default function BonusExplainerModal({
                       every participating player contributes
                     </span>{' '}
                     to defeating a rotating World Boss. Encounters temporarily
-                    replace the standard prediction arena and run for 60
+                    replace the standard prediction arena and run for 30
                     seconds.
                   </p>
 
@@ -694,11 +694,11 @@ export default function BonusExplainerModal({
                   <div className="p-2.5 bg-violet-50 border border-violet-100 rounded-lg space-y-1.5">
                     <p className="text-[9px] text-violet-700 leading-relaxed">
                       Bosses appear every{' '}
-                      <span className="font-bold">10-12 minutes</span> after a
+                      <span className="font-bold">4-6 minutes</span> after a
                       randomized cooldown, with a{' '}
                       <span className="font-bold">30-second announcement</span>{' '}
                       followed by a{' '}
-                      <span className="font-bold">60-second encounter</span>.
+                      <span className="font-bold">30-second encounter</span>.
                       Winning predictions deal damage while missed predictions
                       are blocked.
                     </p>
@@ -720,7 +720,7 @@ export default function BonusExplainerModal({
                 dotColor="bg-fuchsia-400"
                 isOpen={expanded.neonparadise}
                 onClick={() => toggleSection('neonparadise')}
-                badge="3% per bet"
+                badge="8% per bet"
                 badgeColor="bg-fuchsia-100 text-fuchsia-700"
               >
                 <div className="space-y-3">
@@ -783,7 +783,8 @@ export default function BonusExplainerModal({
                       {
                         name: 'Arkalon Vision',
                         emoji: '🔮',
-                        effect: 'Reproduce Arkalon glyph sequences from memory.',
+                        effect:
+                          'Reproduce Arkalon glyph sequences from memory.',
                         color: 'text-teal-600',
                         bg: 'bg-teal-50 border-teal-100'
                       },
@@ -826,7 +827,7 @@ export default function BonusExplainerModal({
 
                   <div className="p-2.5 bg-fuchsia-50 border border-fuchsia-100 rounded-lg space-y-1.5">
                     <p className="text-[9px] text-fuchsia-700 leading-relaxed">
-                      Neon Paradise has a combined 5% trigger chance per
+                      Neon Paradise has a combined 8% trigger chance per
                       eligible prediction, with all nine stages having an equal
                       chance to appear.
                     </p>

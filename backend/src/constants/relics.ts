@@ -251,6 +251,33 @@ export const RELICS: RelicDef[] = [
     effect:
       'Enables the Rainbow World Boss Chest tier when combined with chest upgrade relics.',
     bossExclusive: true
+  },
+  {
+    key: 'temporal_charge',
+    name: 'Temporal Charge',
+    rarity: 'RARE',
+    icon: 'Zap',
+    effect:
+      'During World Boss encounters, your successful hits deal 2 damage in the first 10 seconds',
+    bossExclusive: true
+  },
+  {
+    key: 'omega_shard',
+    name: 'Omega Shard',
+    rarity: 'LEGENDARY',
+    icon: 'Gem',
+    effect:
+      'During World Boss encounters, your successful hits have a 10% chance to deal 3 damage',
+    bossExclusive: true
+  },
+  {
+    key: 'phantom_reach',
+    name: 'Phantom Reach',
+    rarity: 'RARE',
+    icon: 'Fingerprint',
+    effect:
+      'During World Boss encounters, your misses have a 50% chance to deal 1 damage',
+    bossExclusive: true
   }
 ]
 

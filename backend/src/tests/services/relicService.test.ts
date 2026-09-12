@@ -27,7 +27,7 @@ describe('Relic Service', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGetActiveFestival.mockReturnValue(null)
-    // Control random rolls deterministically.
+    // Mock random rolls for deterministic boundary testing.
     randomSpy = vi.spyOn(Math, 'random')
   })
 
@@ -225,7 +225,6 @@ describe('Relic Service', () => {
         mockDbResponse([{ nickname: 'Explorer' }])
       )
 
-      // Roll within the Common probability range.
       randomSpy.mockReturnValue(0.03)
 
       const result = await relicService.rollRelicDrop('u1', [], 0)
@@ -273,7 +272,7 @@ describe('Relic Service', () => {
         mockDbResponse([{ nickname: 'AuditLog' }])
       )
 
-      // Roll falls inside Mythical range [0 .. 0.001)
+      // Roll selects the Mythical rarity boundary range.
       randomSpy.mockReturnValue(0.0005)
 
       const result = await relicService.rollRelicDrop('u1', [], 0)
@@ -372,11 +371,9 @@ describe('Relic Service', () => {
     })
 
     it('specifically resets the dynamic charging counter of the active relic (e.g. buffer_module) to zero', async () => {
-      // Reset query execution
       mockQuery.mockResolvedValueOnce(
         mockDbResponse([{ equipped_relics: ['buffer_module', null, null] }])
       )
-      // Clear equipped relic execution
       mockQuery.mockResolvedValueOnce(mockDbResponse([]))
       mockQuery.mockResolvedValueOnce(mockDbResponse([]))
 

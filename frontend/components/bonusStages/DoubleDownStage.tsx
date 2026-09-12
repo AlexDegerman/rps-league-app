@@ -142,7 +142,7 @@ export default function DoubleDownStage() {
             }`}
           >
             {lastRoll === 'WIN'
-              ? 'Double down again to advance another step'
+              ? `Step ${step} Cleared`
               : 'Payout returned to the 2x floor'}
           </p>
           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1.5! leading-none">

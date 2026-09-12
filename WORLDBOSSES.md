@@ -10,13 +10,11 @@ A showcase of all World Bosses, including their visual designs, encounter mechan
 
 - **Synchronized Encounters**: Every connected client receives the exact same boss state, HP updates, and damage leaderboard data from the backend in real-time via Server-Sent Events (SSE).
 - **Three-Phase Lifecycle**:
-  - **Cooldown**: A randomized 10 to 12-minute quiet period between encounters before the next boss is selected.
+  - **Cooldown**: A randomized 4 to 6-minute quiet period between encounters before the next boss is selected.
   - **Warning Phase**: A 30-second period alerting players of an incoming boss. Arkalon announces the boss arrival and its name.
-  - **Active Phase**: A 60-second encounter window replacing the prediction arena entirely. Every prediction becomes a damage strike against the shared boss HP pool.
-- **Collective HP Scaling**: Boss HP starts at zero and grows dynamically as players join the encounter. Each unique participant contributes HP based on when they arrive:
-  - Join in the first 15 seconds: +4 HP
-  - Join between 15 and 30 seconds: +3 HP
-  - Join between 30 and 45 seconds: +2 HP
+  - **Active Phase**: A 30-second encounter window replacing the prediction arena entirely. Every prediction becomes a damage strike against the shared boss HP pool.
+- **Collective HP Scaling**: Boss HP starts at 2 and grows dynamically as players join the encounter. Each unique participant contributes HP based on when they arrive:
+  - Join in the first 15 seconds: +2 HP
   - Join in the final 15 seconds: +1 HP
 - **Encounter Outcome**: Boss HP depleted to zero results in a **DEFEAT**. Timer expiring with HP remaining results in a **RETREAT**. Both outcomes reward all participants with chests.
 - **Arkalon Integration**: Arkalon announces the boss arrival during the warning phase and vocalizes the spawn at encounter start. No countdown alerts fire during World Boss phases.
@@ -45,7 +43,7 @@ All participants who land at least one hit receive a chest at encounter end. Che
 | RETREAT | Less than 25% HP depleted | Common |
 | Any | Prism Key relic + successful upgrade roll | Rainbow |
 
-Point rewards are calculated as a percentage of the player's current balance, scaling from **0.5%** at Common to **7.5%** at Rainbow. Equipping chest-focused relics raises this percentage additively.
+Point rewards scale with the player's current balance, ranging from **0.5x (50%)** at Common up to **7.5x (750%)** at Rainbow. Equipping chest-focused relics raises this multiplier additively.
 
 ---
 

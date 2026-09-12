@@ -1072,7 +1072,14 @@ export default function HomePage() {
     es.addEventListener('world_boss_hp_update', (event) => {
       const data = JSON.parse(event.data)
       setWorldBossHp(data.hpPct, data.bossMaxHp, data.participantCount)
-      if (data.topDamagers) setWorldBossDamagers(data.topDamagers, null, 0)
+      const myInfo = data.userRanks?.[myUserId]
+      const myRank = myInfo ? myInfo.rank : null
+      const myPct =
+        myInfo && data.bossMaxHp > 0
+          ? (myInfo.damageDealt / data.bossMaxHp) * 100
+          : 0
+      if (data.topDamagers)
+        setWorldBossDamagers(data.topDamagers, myRank, myPct)
       if (typeof data.strikeCount === 'number')
         setWorldBossStrikeCount(data.strikeCount)
     })

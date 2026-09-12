@@ -92,14 +92,14 @@ const setupDefaultDb = (
   })
 }
 
-// Skip 12m cooldown + 30s warning deterministically and flush startup queries
+// Skip 6m cooldown + 30s warning deterministically and flush startup queries
 const driveToActive = async (svc: any, bc: any) => {
-  // Force cooldown timer to evaluate to maximum duration (12 minutes)
+  // Force cooldown timer to evaluate to maximum duration (6 minutes)
   const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.9999)
   await svc.handleRestart(bc)
   randomSpy.mockRestore() // immediately restore so we don't affect other logic
 
-  await vi.advanceTimersByTimeAsync(12 * 60 * 1000)
+  await vi.advanceTimersByTimeAsync(6 * 60 * 1000)
   await vi.advanceTimersByTimeAsync(30000)
   await flushPromises()
 }
@@ -116,7 +116,7 @@ describe('worldBossService Tests', () => {
   })
 
   it('validates the complete encounter lifecycle transitions', async () => {
-    // Force cooldown to evaluate to exactly maximum duration (12 minutes)
+    // Force cooldown to evaluate to exactly maximum duration (6 minutes)
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.9999)
 
     const svc = await freshImport()
@@ -126,7 +126,7 @@ describe('worldBossService Tests', () => {
     await svc.handleRestart(bc as any)
     expect(svc.getCurrentState().phase).toBe('COOLDOWN')
 
-    await vi.advanceTimersByTimeAsync(12 * 60 * 1000)
+    await vi.advanceTimersByTimeAsync(6 * 60 * 1000)
     expect(svc.getCurrentState().phase).toBe('WARNING')
 
     await vi.advanceTimersByTimeAsync(30000)
@@ -150,11 +150,11 @@ describe('worldBossService Tests', () => {
     const bc = vi.fn()
     await driveToActive(svc, bc as any)
 
-    svc.registerParticipant('u1', 60000, 'Alice')
-    expect(svc.getCurrentState().bossMaxHp).toBe(4)
+    svc.registerParticipant('u1', 30000, 'Alice')
+    expect(svc.getCurrentState().bossMaxHp).toBe(2)
 
-    svc.registerParticipant('u2', 60000, 'Bob')
-    expect(svc.getCurrentState().bossMaxHp).toBe(8)
+    svc.registerParticipant('u2', 30000, 'Bob')
+    expect(svc.getCurrentState().bossMaxHp).toBe(4)
   })
 
   it('manages strike damage deductions, strike count, sorting, and tie-breakers', async () => {
@@ -162,15 +162,15 @@ describe('worldBossService Tests', () => {
     const bc = vi.fn()
     await driveToActive(svc, bc as any)
 
-    svc.registerParticipant('u1', 60000, 'Alice')
-    svc.registerParticipant('u2', 60000, 'Bob')
+    svc.registerParticipant('u1', 30000, 'Alice')
+    svc.registerParticipant('u2', 30000, 'Bob')
 
-    svc.applyDamage('u2', 2, bc as any)
+    svc.applyDamage('u2', 1, bc as any)
     await vi.advanceTimersByTimeAsync(5)
-    svc.applyDamage('u1', 2, bc as any)
+    svc.applyDamage('u1', 1, bc as any)
 
     const state = svc.getCurrentState()
-    expect(state.bossCurrentHp).toBe(4)
+    expect(state.bossCurrentHp).toBe(2)
     expect(state.strikeCount).toBe(2)
 
     const { top } = svc.getTopDamagers()
@@ -212,7 +212,7 @@ describe('worldBossService Tests', () => {
     const svc = await freshImport()
     const bc = vi.fn()
     await driveToActive(svc, bc as any)
-    svc.registerParticipant('u1', 60000, 'Alice')
+    svc.registerParticipant('u1', 30000, 'Alice')
 
     svc.applyDamage('u1', svc.getCurrentState().bossCurrentHp, bc as any)
     await vi.advanceTimersByTimeAsync(500)
@@ -235,7 +235,7 @@ describe('worldBossService Tests', () => {
     const bc = vi.fn()
 
     await driveToActive(svc, bc as any)
-    svc.registerParticipant('u1', 60000, 'Alice')
+    svc.registerParticipant('u1', 30000, 'Alice')
     svc.applyDamage('u1', svc.getCurrentState().bossCurrentHp, bc as any)
     await vi.advanceTimersByTimeAsync(5000)
     await flushPromises()
@@ -253,7 +253,7 @@ describe('worldBossService Tests', () => {
     setupDefaultDb([], '2000000')
     await driveToActive(svc, bc as any)
 
-    svc.registerParticipant('u1', 60000, 'Alice')
+    svc.registerParticipant('u1', 30000, 'Alice')
     svc.applyDamage('u1', svc.getCurrentState().bossCurrentHp, bc as any)
     await vi.advanceTimersByTimeAsync(5000)
     await flushPromises()
@@ -275,7 +275,7 @@ describe('worldBossService Tests', () => {
 
     vi.spyOn(Math, 'random').mockReturnValue(0.0)
 
-    svc.registerParticipant('u1', 60000, 'Alice')
+    svc.registerParticipant('u1', 30000, 'Alice')
     svc.applyDamage('u1', svc.getCurrentState().bossCurrentHp, bc as any)
     await vi.advanceTimersByTimeAsync(5000)
     await flushPromises()
@@ -294,7 +294,7 @@ describe('worldBossService Tests', () => {
     const bc = vi.fn()
     await driveToActive(svc, bc as any)
 
-    svc.registerParticipant('u1', 60000, 'Alice')
+    svc.registerParticipant('u1', 30000, 'Alice')
     svc.applyDamage('u1', svc.getCurrentState().bossCurrentHp, bc as any)
     await vi.advanceTimersByTimeAsync(5000)
     await flushPromises()
@@ -326,7 +326,7 @@ describe('worldBossService Tests', () => {
     await driveToActive(svc, bc as any)
     expect(pauseFest).toHaveBeenCalled()
 
-    svc.registerParticipant('u1', 60000, 'Alice')
+    svc.registerParticipant('u1', 30000, 'Alice')
     svc.applyDamage('u1', svc.getCurrentState().bossCurrentHp, bc as any)
     await vi.advanceTimersByTimeAsync(500)
     await flushPromises()
@@ -341,7 +341,7 @@ describe('worldBossService Tests', () => {
     const bc = vi.fn()
     await svc.handleRestart(bc as any)
 
-    await vi.advanceTimersByTimeAsync(12 * 60 * 1000)
+    await vi.advanceTimersByTimeAsync(6 * 60 * 1000)
     expect(svc.getCurrentState().phase).toBe('COOLDOWN')
 
     mockGlobalEventBlocking.value = false

@@ -244,13 +244,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       set({
         winStreak: savedStreak,
         streakMult:
-          savedStreak >= 5
-            ? 10
-            : savedStreak >= 4
-              ? 6
-              : savedStreak >= 3
-                ? 3
-                : 1
+          savedStreak >= 5 ? 5 : savedStreak >= 4 ? 3 : savedStreak >= 3 ? 2 : 1
       })
     }
   },

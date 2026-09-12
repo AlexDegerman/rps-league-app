@@ -1,5 +1,17 @@
 export const UPDATES = [
   {
+    version: '4.2',
+    label: 'The Accelerated Event Cycle Update',
+    notes: [
+      'Faster World Boss Rotation: Reduced World Boss cooldowns from 10-12 minutes to 4-6 minutes, shortened encounters from 60 seconds to 30 seconds, and reduced quiet periods to keep boss raids appearing more frequently.',
+      'World Boss Balance Adjustments: Reduced starting boss HP from 4 to 2, lowered player HP contributions, and adjusted DIVN achievement timing to match the faster 30-second encounters.',
+      'Increased Global Event Frequency: Reduced Global Event cooldowns from 10-12 minutes to 4-6 minutes and shortened transition periods, creating a more consistent flow of world events.',
+      'Festival Acceleration: Reduced Festival vault duration, buff durations, cooldown lockouts, and demo festival timing to allow festivals to appear and rotate faster.',
+      'More Frequent Flash Events: Increased Flash Event trigger chance from 5% to 9%, reducing average downtime between surprise events.',
+      'Neon Paradise Availability Boost: Increased Neon Paradise trigger chance from 5% to 8% to compensate for shorter event-free windows and maintain accessibility during the faster event cycle.'
+    ]
+  },
+  {
     version: '4.1',
     label: 'The Adaptive Background Music Update',
     notes: [
@@ -12,7 +24,7 @@ export const UPDATES = [
     version: '4.0',
     label: 'Neon Paradise',
     notes: [
-      'Neon Paradise: Introduces nine interactive bonus stages that trigger during eligible manual prediction sessions with a combined 5% chance per resolved prediction. All nine stages have equal selection probability.',
+      'Neon Paradise: Introduces nine interactive bonus stages that trigger during eligible manual prediction sessions with a combined 8% chance per resolved prediction. All nine stages have equal selection probability.',
       "Nine Bonus Stages: Adds Treasure Vault, Double Down, Wild Prediction, Surge Frenzy, Rainbow Rush, Sniper Challenge, Oracle Vision, Crystal Mine, and King's Vault, each featuring a distinct gameplay format, visual identity, audio design, and reward presentation.",
       'Bonus Payout System: All stages calculate rewards from the last recorded bet, guaranteeing at least 2x the bet and scaling up to 10x. Bonus rewards are added to the existing balance without reducing it.',
       'Nine New Themed Number Tiers: Extends the point progression system from Quattuorquadragintillion through Trequinquagintillion with nine new tiers featuring dedicated visual treatments ranging from mechanical vault and split-risk designs to spectral, tactical, cipher, crystalline, and royal treasure presentations.',
@@ -25,8 +37,8 @@ export const UPDATES = [
     version: '3.0',
     label: 'The World Boss Update',
     notes: [
-      'World Boss System: Introduces server-wide cooperative raid encounters that replace the prediction arena every 10 to 12 minutes. Four unique bosses rotate through the schedule: Hexurion, Orphion, Fracturon, and Apexion, each with a full CSS-only animation lifecycle covering assembly, idle, hit reaction, pain, and death states, accompanied by unique sound effects for spawning, attacks, taking damage, and defeat.',
-      'Collective HP Mechanic: Boss HP scales dynamically with participant count. Joining early contributes up to 4 HP to the shared pool. Winning predictions deal damage. Missing predictions are blocked. A 60-second encounter timer drives the entire raid.',
+      'World Boss System: Introduces server-wide cooperative raid encounters that replace the prediction arena every 4 to 6 minutes. Four unique bosses rotate through the schedule: Hexurion, Orphion, Fracturon, and Apexion, each with a full CSS-only animation lifecycle covering assembly, idle, hit reaction, pain, and death states, accompanied by unique sound effects for spawning, attacks, taking damage, and defeat.',
+      'Collective HP Mechanic: Boss HP scales dynamically with participant count. Joining early contributes up to 2 HP to the shared pool. Winning predictions deal damage. Missing predictions are blocked. A 30-second encounter timer drives the entire raid.',
       "Chest Reward System: Encounter outcome determines chest rarity across six tiers from Common to Rainbow. Defeat rewards Mythical. Retreat rewards are scaled to percentage of HP depleted. All rewards are calculated as a percentage of the player's current point balance.",
       'World Boss Relics: Adds 14 new boss-exclusive relics that drop only from chest rewards, never from predictions. Relics cover flat point bonuses, chest upgrade chance, relic appearance chance, Twin Fortune (25% chest duplication), and Prism Key (enables Rainbow tier).',
       'Three-Slot Relic System: Expands the relic loadout from one slot to three simultaneous equipped relics. Relic swapping is locked during active encounters.',
@@ -78,7 +90,7 @@ export const UPDATES = [
     label: 'The Global Events Update',
     notes: [
       'Global Event Orchestrator: Introduces server-wide synchronized events managed by the backend via SSE, following a structured Cooldown, Warning, and Active phase lifecycle.',
-      'Oracle Countdown & Warning System: Triggers telemetry warning broadcasts with custom interface timers and spoken counts at 60 and 30 seconds remaining.',
+      'Oracle Countdown & Warning System: Triggers telemetry warning broadcasts with custom interface timers and spoken countdown alerts during the 30-second warning phase.',
       'Elemental Modifiers: Adds four events: Tidal Surge (+20% payout), Cyclone Blitz (+1 win streak speed), Solar Flare (2x win multiplier), and Mirage Cataclysm (15-50% random phantom payouts).',
       'Eight Animated Number Tiers: Integrates themed tiers spanning Trigintillion to Sextrigintillion, featuring dynamic canvas effects, particle systems, and CSS-driven atmospheric animations.',
       'Thirty-Six New Achievements: Expands long-term progression goals, player statistics tracking, and new badge collections across all element archetypes.',
@@ -137,10 +149,10 @@ export const UPDATES = [
     version: '1.11',
     label: 'The Festival Update',
     notes: [
-      'Player Festivals: Eight globally-triggered gameplay events now activate based on emergent player milestones including win streaks, loss streaks, high multipliers, and Chrono-Lap completions. One festival can be active at a time with a 5-minute cooldown between activations.',
-      'Festival Effects: Each festival applies a unique modifier for all active players. Effects range from guaranteed win echoes (Ghost), forced bonus floors (Resonance), streak protection (Fever), a 3x global multiplier (Surge), and forced win correction on 4-loss streaks (Sanguine).',
+      'Player Festivals: Eight globally-triggered gameplay events now activate based on emergent player milestones including win streaks, loss streaks, high multipliers, and Chrono-Lap completions. One festival can be active at a time with a 2-minute cooldown between activations.',
+      'Festival Effects: Each festival applies a unique modifier for all active players. Effects range from guaranteed win echoes (Ghost), forced bonus floors (Resonance), streak protection (Fever), a 2x global multiplier (Surge), and forced win correction on 4-loss streaks (Sanguine).',
       'Festival UI System: Active festivals theme the full interface with colored silk backgrounds and ember particles. A countdown ticker, persistent effect scroll bar, and result animation badge communicate the active state throughout the duration.',
-      'Autonomous Oracle Festivals: Arkalon system triggers weighted random festivals every 18 to 24 minutes when no player festival has occurred in the last 10 minutes and no cooldown is active. Frequency is weighted by economy impact, with Resonance and Spark firing most often and Surge and Sanguine kept deliberately rare.',
+      'Autonomous Oracle Festivals: Arkalon system triggers weighted random festivals every 7 to 10 minutes when no player festival has occurred in the last 4 minutes and no cooldown is active. Frequency is weighted by economy impact, with Resonance and Spark firing most often and Surge and Sanguine kept deliberately rare.',
       'Ghost Echo Animation: Ghost Festival wins display a ghostly echo value drifting upward from the result number after it finishes counting, representing the 20% signal echo applied to the final payout.',
       'Spark Streak Bonus: Players who trigger Spark by completing 2 consecutive Flash Events receive a guaranteed bonus roll on their next 3 predictions in addition to the global Flash Event synchronization.',
       "Oracle Ticker Broadcast: All festival activations broadcast a styled message to all connected players. Player-triggered festivals show the initiating player's name. Oracle-triggered demos display procedurally generated system instability messages."

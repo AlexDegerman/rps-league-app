@@ -8,13 +8,13 @@ A showcase of all Global Events, including their visual effects, backend synchro
 
 - **Synchronized State**: Every connected client receives the same event state, countdown progression, and modifier configurations from the backend.
 
-- **Automated Event Cycle**: Global Events are scheduled automatically with a randomized 10 to 12-minute cooldown before the next event launch.
+- **Automated Event Cycle**: Global Events are scheduled automatically with a randomized 4 to 6-minute cooldown before the next event launch.
 
 - **Announcement Phase**: Each event begins with a 30-second announcement period. Arkalon announces the incoming event before its active effects begin.
 
 - **Active Phase**: Each Global Event remains active for 60 seconds, applying its gameplay modifier and themed visual effects across the interface.
 
-- **Quiet Period**: A 60-second separation period follows each Global Event before the next cooldown begins, providing a buffer between major encounters and preventing immediate event chaining.
+- **Quiet Period**: A 30-second separation period follows each Global Event before the next cooldown begins, providing a buffer between major encounters and preventing immediate event chaining.
 
 - **Weighted Selection**: When the cooldown concludes, the backend selects the next event using a weighted random distribution:
   - **Tidal Surge**: 30% weight

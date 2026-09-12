@@ -10,7 +10,7 @@ export const getFestivalEffectDescription = (type: FestivalType): string => {
       'Risk Shield active. Prediction losses deduct 40% instead of 50%.',
     RESONANCE:
       'Bonus floor stabilized. Common and Rare bonuses are designated as mandatory.',
-    SURGE: 'Power Surge active. Successful predictions are multiplied by 3x.',
+    SURGE: 'Power Surge active. Successful predictions are multiplied by 2x.',
     VAULT: 'Loot Echo active. Relic discovery rates are boosted by 100%.',
     FEVER:
       'Streak Aegis active. Prediction failures will not break active win streaks.',

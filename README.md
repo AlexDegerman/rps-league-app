@@ -241,12 +241,12 @@ A second category of 14 World Boss exclusive relics exists outside the standard 
 
 ## ⚔️ World Bosses
 
-World Bosses introduce server-wide cooperative raid encounters to RPS League. Triggered automatically by the backend on a 10 to 12-minute cooldown cycle and broadcast in real-time via Server-Sent Events (SSE), encounters temporarily replace the prediction arena for all active players simultaneously. Every prediction submitted during an encounter becomes a damage strike against a shared boss HP pool that scales dynamically with participant count.
+- **World Bosses**: World Bosses introduce server-wide cooperative raid encounters to RPS League. Triggered automatically by the backend on a 4 to 6-minute cooldown cycle and broadcast in real-time via Server-Sent Events (SSE), encounters temporarily replace the prediction arena for all active players simultaneously. Every prediction submitted during an encounter becomes a damage strike against a shared boss HP pool that scales dynamically with participant count.
 
 Each encounter includes:
 
 - Shared HP pool scaling with participant arrival timing
-- 60-second encounter window replacing the prediction dashboard entirely
+- 30-second encounter window replacing the prediction dashboard entirely
 - Six-tier chest reward system scaling from Common to Rainbow, calculated as a percentage of current player balance
 - Fourteen new boss-exclusive relics available only through chest drops
 - Real-time damage leaderboard tracking percentage contributions across all participants
@@ -287,7 +287,7 @@ Selectable events are weighted randomly, featuring **Tidal Surge** (incorporatin
 
 ## ⚡ Flash Events
 
-Flash Events are live gameplay modifiers that can trigger during matches with a 5% chance per bet. When activated, a random event temporarily transforms the application for the next 3 predictions through:
+Flash Events are live gameplay modifiers that can trigger during matches with a 9% chance per bet. When activated, a random event temporarily transforms the application for the next 3 predictions through:
 
 - Full UI theme overrides
 - Custom particle systems
@@ -316,9 +316,9 @@ A preview of the animations that play when flash events are triggered.
 
 Festivals are rare, globally-triggered gameplay events initiated by specific player actions. Unlike Flash Events, Festivals affect all active players simultaneously and are driven by emergent in-game milestones such as win streaks, loss streaks, high multipliers, and Chrono-Lap completions.
 
-Only one Festival can be active at a time. A 10-minute cooldown follows every Festival. The triggering player's name is broadcast to all active players via the Arkalon ticker when a Festival activates.
+Only one Festival can be active at a time. A 2-minute cooldown follows every Festival. The triggering player's name is broadcast to all active players via the Arkalon ticker when a Festival activates.
 
-The Arkalon system also runs autonomous weighted festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred recently.
+The Arkalon system also runs autonomous weighted festivals during low-concurrency periods, simulating world activity when no player-triggered festival has occurred in the last 4 minutes.
 
 <p align="center">
   <strong>Ghost Festival in Action</strong><br/>
@@ -333,7 +333,7 @@ The Arkalon system also runs autonomous weighted festivals during low-concurrenc
 
 Neon Paradise is the Season 4 bonus stage system. When a bonus stage triggers, the standard prediction interface transforms into an interactive mini-game, with nine self-contained experiences featuring distinct gameplay, visuals, audio, and reward systems.
 
-Bonus stages trigger exclusively during active manual prediction sessions at a combined 5% chance per resolved prediction. Every stage guarantees at least +2x the triggering bet, with stronger performance reaching higher reward tiers up to +10x.
+Bonus stages trigger exclusively during active manual prediction sessions at a combined 8% chance per resolved prediction. Every stage guarantees at least +2x the triggering bet, with stronger performance reaching higher reward tiers up to +10x.
 
 <p align="center">
   <em><strong>Neon Paradise</strong>: Nine distinct interactive bonus stages, each with its own gameplay mechanic and presentation.</em>

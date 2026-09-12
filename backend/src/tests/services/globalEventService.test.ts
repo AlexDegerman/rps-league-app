@@ -78,7 +78,7 @@ describe('Global Event Service', () => {
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
         // Advance into the warning phase.
-        await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
+        await vi.advanceTimersByTimeAsync(4 * 60 * 1000)
 
         expect(broadcastMock).toHaveBeenCalledTimes(1)
         const warningCall = broadcastMock.mock.calls[0]!
@@ -114,8 +114,8 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        // Fast-forward past the 7-minute cooldown and 90-second warning countdown
-        await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 30 * 1000)
+        // Advance into the active phase.
+        await vi.advanceTimersByTimeAsync(4 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 999n // 999 is not cleanly divisible by 5
         const result = globalEventService.applyGlobalEventBuff(
@@ -136,8 +136,7 @@ describe('Global Event Service', () => {
       it('should enforce the strict minimum boundary condition (15% factor)', async () => {
         const broadcastMock = vi.fn()
 
-        // First roll selects MIRAGE_CATACLYSM (weight maps above index thresholds to ~0.95)
-        // Second roll drives factor random assignment to absolute minimum boundary (0.0)
+        // Force MIRAGE_CATACLYSM with minimum echo factor.
         const randomSpy = vi
           .spyOn(Math, 'random')
           .mockReturnValueOnce(0.0) // Cooldown
@@ -148,7 +147,7 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
+        await vi.advanceTimersByTimeAsync(4 * 60 * 1000)
         const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
         await vi.advanceTimersByTimeAsync(
           warningData.activeAt - warningData.startedAt
@@ -181,7 +180,7 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 30 * 1000)
+        await vi.advanceTimersByTimeAsync(4 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -210,7 +209,7 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 30 * 1000)
+        await vi.advanceTimersByTimeAsync(4 * 60 * 1000 + 30 * 1000)
 
         const baseGain = 100000n
         const result = globalEventService.applyGlobalEventBuff(
@@ -237,7 +236,7 @@ describe('Global Event Service', () => {
 
         globalEventService.startGlobalEventScheduler(broadcastMock)
 
-        await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
+        await vi.advanceTimersByTimeAsync(4 * 60 * 1000)
         const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
         await vi.advanceTimersByTimeAsync(
           warningData.activeAt - warningData.startedAt
@@ -264,7 +263,7 @@ describe('Global Event Service', () => {
       const broadcastMock = vi.fn()
       const randomSpy = vi
         .spyOn(Math, 'random')
-        .mockReturnValueOnce(0.0) // Cooldown (7 minutes)
+        .mockReturnValueOnce(0.0) // Min cooldown (4 minutes)
         .mockReturnValueOnce(0.4) // Maps to CYCLONE_BLITZ
         .mockReturnValueOnce(0.0) // Msg index
         .mockReturnValueOnce(0.0) // Speech index
@@ -272,7 +271,7 @@ describe('Global Event Service', () => {
       globalEventService.startGlobalEventScheduler(broadcastMock)
 
       // Advance into the warning phase.
-      await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(4 * 60 * 1000)
 
       expect(broadcastMock).toHaveBeenCalledTimes(1)
       const warningCall = broadcastMock.mock.calls[0]!
@@ -316,7 +315,7 @@ describe('Global Event Service', () => {
       globalEventService.startGlobalEventScheduler(broadcastMockFirst)
       globalEventService.startGlobalEventScheduler(broadcastMockSecond)
 
-      await vi.advanceTimersByTimeAsync(12 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(6 * 60 * 1000)
 
       // First call starts, second is dropped silently to protect SSE streams.
       expect(broadcastMockFirst).toHaveBeenCalled()
@@ -328,14 +327,14 @@ describe('Global Event Service', () => {
 
       const randomSpy = vi
         .spyOn(Math, 'random')
-        .mockReturnValueOnce(0.0) // Cooldown (7 minutes)
+        .mockReturnValueOnce(0.0) // Min cooldown (4 minutes)
         .mockReturnValueOnce(0.1) // Maps to TIDAL_SURGE
         .mockReturnValueOnce(0.0) // Msg index
         .mockReturnValueOnce(0.0) // Speech index
 
       globalEventService.startGlobalEventScheduler(broadcastMock)
 
-      await vi.advanceTimersByTimeAsync(10 * 60 * 1000)
+      await vi.advanceTimersByTimeAsync(4 * 60 * 1000)
       const warningData = JSON.parse(broadcastMock.mock.calls[0]![1])
 
       // Advance into the active phase.
@@ -346,7 +345,7 @@ describe('Global Event Service', () => {
 
       // Advance clock past endsAt.
       const activeDuration = warningData.endsAt - warningData.activeAt
-      await vi.advanceTimersByTimeAsync(activeDuration + 1000) // Advance one second beyond the expiration time.
+      await vi.advanceTimersByTimeAsync(activeDuration + 1000)
 
       expect(globalEventService.getActiveGlobalEvent()).toBeNull()
 

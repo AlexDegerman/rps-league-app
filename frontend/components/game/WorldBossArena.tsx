@@ -234,6 +234,7 @@ export default memo(function WorldBossArena({
   const strikeCount = useGameStore((s) => s.worldBossStrikeCount)
   const topDamagers = useGameStore((s) => s.worldBossTopDamagers)
   const myRank = useGameStore((s) => s.worldBossMyRank)
+  const myDamagePct = useGameStore((s) => s.worldBossMyDamagePct)
   const endsAt = useGameStore((s) => s.worldBossEncounterEndsAt)
   const lastHitResult = useGameStore((s) => s.lastBossHitResult)
   const lastBossHitDamage = useGameStore((s) => s.lastBossHitDamage)
@@ -241,7 +242,7 @@ export default memo(function WorldBossArena({
   const participantCount = useGameStore((s) => s.worldBossParticipantCount)
   const { playBossAttack, playBossTakeDmg } = useSound()
   const [animState, setAnimState] = useState<BossAnimState>('assembling')
-  const [timeLeft, setTimeLeft] = useState(60)
+  const [timeLeft, setTimeLeft] = useState(30)
   const [showMissFlash, setShowMissFlash] = useState(false)
   const [showHitFlash, setShowHitFlash] = useState(false)
   const [ownResultText, setOwnResultText] = useState<{
@@ -393,13 +394,12 @@ export default memo(function WorldBossArena({
 
       {/* Mid row: boss model + damage ranking */}
       <div
-        className="flex items-center gap-2.5 w-full"
+        className="flex items-center gap-2.5 w-full min-h-27"
         style={{ padding: '2px 0' }}
       >
         <div
-          className="flex-1 min-w-0 flex items-center justify-center relative overflow-hidden w-full"
+          className="flex-1 min-w-0 flex items-center justify-center relative overflow-hidden w-full h-27"
           ref={modelAreaRef}
-          style={{ height: '100px' }}
         >
           <BossModel bossType={bossType} animState={animState} />
 
@@ -415,45 +415,50 @@ export default memo(function WorldBossArena({
         </div>
 
         <div
-          className="flex flex-col gap-1.5 self-center shrink-0"
-          style={{ minWidth: '80px', width: 'auto' }}
+          className="flex flex-col gap-1 self-center shrink-0"
+          style={{ minWidth: '86px', width: 'auto' }}
         >
-          <div className="text-[0.46rem] font-black uppercase tracking-[0.2em] text-[rgba(168,85,247,0.4)] text-center">
+          <div className="text-[0.46rem] font-black uppercase tracking-[0.2em] text-[rgba(168,85,247,0.4)] text-center mb-0.5">
             ⚔ DMG RANK
           </div>
           {topDamagers.length > 0 ? (
             topDamagers.map((d) => (
               <div
                 key={d.userId}
-                className="flex items-center justify-center gap-1 px-1.75 py-1 bg-[rgba(168,85,247,0.12)] border border-[rgba(168,85,247,0.32)] rounded-[10px] text-[0.54rem] font-black text-[#d8b4fe] uppercase tracking-wider w-full leading-[1.1]"
+                className="flex items-center justify-between gap-1 px-2 py-0.75 bg-[rgba(168,85,247,0.12)] border border-[rgba(168,85,247,0.32)] rounded-lg text-[0.54rem] font-black text-[#d8b4fe] uppercase tracking-wider w-full leading-[1.1]"
               >
-                <span className="text-[0.58rem] opacity-80 shrink-0">
+                <span className="text-[0.56rem] opacity-80 shrink-0">
                   #{d.rank}
                 </span>
                 <span
-                  className="text-[0.52rem] opacity-70 whitespace-nowrap overflow-hidden text-ellipsis uppercase tracking-[0.02em] inline-block"
-                  style={{ maxWidth: 'clamp(42px, 20vw - 35px, 140px)' }}
+                  className="text-[0.52rem] opacity-75 whitespace-nowrap overflow-hidden text-ellipsis uppercase tracking-[0.02em] inline-block text-left flex-1 mx-1"
+                  style={{ maxWidth: 'clamp(40px, 18vw - 20px, 120px)' }}
                   title={d.nickname || 'Player'}
                 >
                   {d.nickname || 'Player'}
                 </span>
-                <span className="shrink-0 text-[0.52rem] tabular-nums">
+                <span className="shrink-0 text-[0.52rem] tabular-nums font-mono opacity-90">
                   {fmtDmgPct(d.damageDealt)}
                 </span>
               </div>
             ))
           ) : (
-            <div className="flex items-center justify-between gap-1 px-1.75 py-1 bg-[rgba(168,85,247,0.06)] border border-[rgba(168,85,247,0.12)] rounded-[10px] text-[0.54rem] font-black text-[rgba(216,180,254,0.5)] uppercase tracking-wider">
+            <div className="flex items-center justify-center gap-1 px-1.75 py-1 bg-[rgba(168,85,247,0.06)] border border-[rgba(168,85,247,0.12)] rounded-lg text-[0.54rem] font-black text-[rgba(216,180,254,0.5)] uppercase tracking-wider">
               <span className="text-[0.44rem] opacity-40 uppercase">
                 No hits yet
               </span>
             </div>
           )}
           {myRank !== null && myRank > 3 && (
-            <div className="flex items-center gap-1 px-1.75 py-1 bg-[rgba(34,211,238,0.06)] border border-[rgba(34,211,238,0.35)] rounded-[10px] text-[0.54rem] font-black text-[#67e8f9] uppercase tracking-wider">
-              <span className="text-[0.58rem] opacity-80">#{myRank}</span>
-              <span className="text-[0.52rem] opacity-80 uppercase mx-1">
+            <div className="flex items-center justify-between gap-1 px-2 py-0.75 bg-[rgba(34,211,238,0.12)] border border-[rgba(34,211,238,0.45)] rounded-lg text-[0.54rem] font-black text-[#67e8f9] uppercase tracking-wider w-full leading-[1.1] shadow-[0_0_8px_rgba(34,211,238,0.2)]">
+              <span className="text-[0.56rem] text-cyan-300 shrink-0">
+                #{myRank}
+              </span>
+              <span className="text-[0.52rem] text-cyan-200 uppercase tracking-[0.02em] font-black flex-1 text-left mx-1">
                 You
+              </span>
+              <span className="shrink-0 text-[0.52rem] text-cyan-300 tabular-nums font-mono">
+                {myDamagePct > 0 ? `${myDamagePct.toFixed(1)}%` : '0.0%'}
               </span>
             </div>
           )}

@@ -102,8 +102,8 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🟢 Common | Scavenger | Own 5 Unique Relics | 📁 | `5RL` |
 | 🔵 Rare | Collector | Own 10 Unique Relics | 🎒 | `10RL` |
 | 🟣 Epic | True Curator | Own all Common, Rare & Epic Relics | 🏛️ | `MUSE` |
-| 🟡 Legendary | Full House | Own all 17 Unique Relics | 🎰 | `FULL` |
-| 🔴 Mythical | Trinity | Own all 3 Mythical Relics | 🔱 | `TRI` |
+| 🟡 Legendary | Grand Reliquary | Own all Common, Rare, Epic & Legendary Relics | 🎰 | `GREL` |
+| 🔴 Mythical | The Pentad | Own all 5 Mythical Relics | 🔱 | `PENT` |
 
 ---
 
@@ -164,9 +164,9 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
-| 🟢 Common | Seer Apprentice | Use Arkalon 3 Days in a Row | 🔮 | `ORC3` |
-| 🔵 Rare | Clairvoyant | Use Arkalon 7 Days in a Row | 🌠 | `ORC7` |
-| 🟣 Epic | Prophet | Use Arkalon 14 Days in a Row | 👁 | `ORCL` |
+| 🟢 Common | Seer Apprentice | Use Arkalon 3 Days in a Row | 🔮 | `ARK3` |
+| 🔵 Rare | Clairvoyant | Use Arkalon 7 Days in a Row | 🌠 | `ARK7` |
+| 🟣 Epic | Prophet | Use Arkalon 14 Days in a Row | 👁 | `ARKL` |
 | 🟡 Legendary | Chrono Scholar | Use Arkalon 30 Days in a Row | 📅 | `CHRON` |
 | 🔴 Mythical | Omniscient | Use Arkalon 60 Days in a Row | 🌌 | `OMNI` |
 

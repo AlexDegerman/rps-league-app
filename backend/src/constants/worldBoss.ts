@@ -2,11 +2,11 @@ import type { WorldBossType, ChestRarity } from '../types/worldBoss.js'
 
 export const WORLD_BOSS_ENABLED = true
 
-export const WORLD_BOSS_COOLDOWN_MIN_MS = 10 * 60 * 1000
-export const WORLD_BOSS_COOLDOWN_MAX_MS = 12 * 60 * 1000
+export const WORLD_BOSS_COOLDOWN_MIN_MS = 4 * 60 * 1000
+export const WORLD_BOSS_COOLDOWN_MAX_MS = 6 * 60 * 1000
 export const WORLD_BOSS_WARNING_DURATION_MS = 30 * 1000
-export const WORLD_BOSS_QUIET_DURATION_MS = 60 * 1000
-export const WORLD_BOSS_ENCOUNTER_DURATION_MS = 60 * 1000
+export const WORLD_BOSS_QUIET_DURATION_MS = 30 * 1000
+export const WORLD_BOSS_ENCOUNTER_DURATION_MS = 30 * 1000
 
 export const BOSS_POOL: WorldBossType[] = [
   'HEXURION',

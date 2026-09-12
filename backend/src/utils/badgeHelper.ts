@@ -1,5 +1,5 @@
 import pool from './db.js'
-import { ACHIEVEMENT_MAP } from '../services/achievementChecker.js'
+import { ACHIEVEMENT_MAP } from '../constants/achievements.js'
 import type { AchievementRarity, AchievementDef } from '../types/achievements.js'
 
 export const autoEquipUserBadges = async (

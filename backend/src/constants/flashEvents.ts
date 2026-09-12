@@ -1,7 +1,7 @@
 import type { FlashEventType } from '../types/flashEvents.js';
 
 export const FLASH_EVENTS_ENABLED = true
-export const FLASH_TRIGGER_CHANCE = 0.05
+export const FLASH_TRIGGER_CHANCE = 0.09
 
 export const FLASH_EVENT_CONFIG: Record<
   FlashEventType,

@@ -2,11 +2,11 @@ import type { GlobalEventType } from '../types/globalEvents.js'
 
 export const ENABLE_GLOBAL_EVENTS = true
 
-export const GLOBAL_EVENT_COOLDOWN_MIN_MS = 10 * 60 * 1000
-export const GLOBAL_EVENT_COOLDOWN_MAX_MS = 12 * 60 * 1000
+export const GLOBAL_EVENT_COOLDOWN_MIN_MS = 4 * 60 * 1000
+export const GLOBAL_EVENT_COOLDOWN_MAX_MS = 6 * 60 * 1000
 export const GLOBAL_EVENT_WARNING_DURATION_MS = 30 * 1000
 export const GLOBAL_EVENT_ACTIVE_DURATION_MS = 60 * 1000
-export const GLOBAL_EVENT_QUIET_DURATION_MS = 60 * 1000
+export const GLOBAL_EVENT_QUIET_DURATION_MS = 30 * 1000
 
 export const EVENT_WEIGHTS: { type: GlobalEventType; weight: number }[] = [
   { type: 'TIDAL_SURGE', weight: 30 },
@@ -62,8 +62,8 @@ export const ORACLE_WARNING_SPEECH: Record<GlobalEventType, string[]> = {
 }
 
 export const GLOBAL_DURATIONS: Record<GlobalEventType, number> = {
-  TIDAL_SURGE: 180000,
-  SOLAR_FLARE: 120000,
-  CYCLONE_BLITZ: 150000,
-  MIRAGE_CATACLYSM: 180000
+  TIDAL_SURGE: 60000,
+  SOLAR_FLARE: 60000,
+  CYCLONE_BLITZ: 60000,
+  MIRAGE_CATACLYSM: 60000
 }

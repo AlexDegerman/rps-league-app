@@ -109,7 +109,7 @@ LEGENDARY:
 MYTHICAL:
 - Soul of the Machine: 5% chance for a 3x reward multiplier.
 - Temporal Anchor: Flash Events last +1 round, for 4 rounds total.
-- The Architect's Keystone: Upgrades triggered Tiered Bonuses to the next rarity and unlocks the Mythical x15 bonus tier.
+- The Architect's Keystone: Upgrades triggered Tiered Bonuses to the next rarity and unlocks the Mythical 7x bonus tier.
 - Twin Fortune: 25% chance to duplicate the earned World Boss Chest. Both rewards receive independent relic rolls and are combined into one payout.
 - Prism Key: Enables the Rainbow Chest tier when equipped alongside any chest-upgrade relic. Does not increase upgrade chance by itself.
 

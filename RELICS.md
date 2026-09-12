@@ -125,7 +125,7 @@ Players display all equipped relics publicly, enabling build comparison across l
 | Static Inductor | CloudLightning | +50% Electric Surge rate + 0.5x multiplier | ✗ |
 | Dealer's Hand | Spade | +50% Card event rate + 0.3x multiplier | ✗ |
 | Volcanic Mantle | Flame | +50% Hellfire rate + 0.5x multiplier | ✗ |
-| Cobalt Core | Cpu | +25% Flash Event appearance rate | ✗ |
+| Cobalt Core | Cpu | +15% Flash Event appearance rate | ✗ |
 | Biased Oscillator | Waves | +10% Epic/Legendary bonus chance | ✗ |
 | King's Purse | Wallet | +50% World Boss Chest point rewards (flat additive) | ✓ |
 | Relic Magnet | Magnet | +50% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
@@ -172,7 +172,7 @@ Players display all equipped relics publicly, enabling build comparison across l
 
 ## 🔥 Mythical Bonus Tier
 
-A special x15 tier unlocked primarily through The Architect's Keystone.
+A special 7x tier unlocked primarily through The Architect's Keystone.
 
 Visual traits:
 - Crimson bloom

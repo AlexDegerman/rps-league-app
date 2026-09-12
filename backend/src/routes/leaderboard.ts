@@ -70,7 +70,15 @@ router.get('/unified', async (req, res) => {
         points: 'u.points'
       }
       const sortKey = speedSortWhitelist[sortParam] ?? 'u.fastest_lap_bets'
-      const speedDir = req.query.dir === 'desc' ? 'DESC' : 'ASC'
+      // Fastest lap requires ascending order (fewest bets = best rank)
+      const speedDir =
+        sortKey === 'u.fastest_lap_bets'
+          ? req.query.dir === 'desc'
+            ? 'ASC'
+            : 'DESC'
+          : req.query.dir === 'desc'
+            ? 'DESC'
+            : 'ASC'
 
       const result = await pool.query(`
         SELECT

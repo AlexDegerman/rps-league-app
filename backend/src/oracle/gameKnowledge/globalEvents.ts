@@ -3,13 +3,13 @@ SYSTEM DEFINITIONS: GLOBAL EVENTS
 Global Events are server-wide, real-time synchronized event loops broadcasted to all active players simultaneously via Server-Sent Events (SSE). 
 
 LIFECYCLE PHASES:
-1. Event Cooldown: 10 to 12 minutes of inactive time before the next event selection.
+1. Event Cooldown: 4 to 6 minutes of inactive time before the next event selection.
 2. Warning Phase: 30 seconds of visual warnings, Arkalon text alerts, and speech countdown announcements.
 3. Active Phase: 60 seconds of high-intensity gameplay modifiers, custom shaders, and marquee feeds.
-4. Quiet Period: 60 seconds of separation after the Active Phase before the next Event Cooldown begins.
+4. Quiet Period: 30 seconds of separation after the Active Phase before the next Event Cooldown begins.
 
 CONCURRENT ACTIVATION RULE:
-Only one Global Event can be active at a time. Events do not stack or queue. After an event ends, a 60-second quiet period occurs before the next event cycle begins.
+Only one Global Event can be active at any time. Two Global Events cannot run simultaneously and do not stack. The system enforces a strict sequential loop: one event completes its Active Phase, a 30-second quiet period follows, and only then does the next cooldown begin. There is no queuing of pending events.
 
 WORLD BOSS COORDINATION:
 Global Events cannot activate while a World Boss encounter is active. If an event launch is attempted while a World Boss is blocking the system, the launch is deferred and retried after 5 seconds until the World Boss is no longer blocking.
