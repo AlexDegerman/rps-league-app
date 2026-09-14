@@ -91,7 +91,14 @@ export default function RainbowRushStage() {
               const label = TIER_META[finalSpec]?.label || 'Low'
               const metricText = `${label} Spectrum Analyzed`
 
-              setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
+              setBonusFinalPayout(
+                BigInt(claimResult.finalPayout),
+                metricText,
+                claimResult.basePayout
+                  ? BigInt(claimResult.basePayout)
+                  : undefined,
+                claimResult.heartProc
+              )
 
               if (finalSpec >= 5) {
                 setTimeout(() => playNeonComplete(true), 400)

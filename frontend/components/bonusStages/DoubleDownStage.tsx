@@ -80,7 +80,14 @@ export default function DoubleDownStage() {
                 ? `Failed on Step ${newStep + 1} : 2x Floor Locked`
                 : `Claimed Winnings : ${newStep}/3 Steps Completed`
 
-            setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
+            setBonusFinalPayout(
+              BigInt(claimResult.finalPayout),
+              metricText,
+              claimResult.basePayout
+                ? BigInt(claimResult.basePayout)
+                : undefined,
+              claimResult.heartProc
+            )
             if (isJackpot) {
               setTimeout(() => playNeonComplete(true), 400)
             }

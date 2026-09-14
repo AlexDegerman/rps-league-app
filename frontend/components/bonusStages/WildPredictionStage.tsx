@@ -129,7 +129,14 @@ export default function WildPredictionStage() {
               0
             )
 
-            setBonusFinalPayout(BigInt(claimResult.finalPayout))
+            setBonusFinalPayout(
+              BigInt(claimResult.finalPayout),
+              undefined,
+              claimResult.basePayout
+                ? BigInt(claimResult.basePayout)
+                : undefined,
+              claimResult.heartProc
+            )
             if (finalTotal >= 9) {
               setTimeout(() => playNeonComplete(true), 400)
             }

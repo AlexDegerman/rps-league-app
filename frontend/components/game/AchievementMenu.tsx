@@ -354,6 +354,28 @@ function AchievementCard({
 }) {
   const getProgress = () => {
     if (ach.earned) return { current: 1, target: 1, percent: 100 }
+    if (ach.code === 'SLAM') {
+      let cleared10xCount = 0
+      if (stats) {
+        const stage10xChecks = [
+          (stats.royalTreasureChestsOpened ?? 0) >= 1,
+          (stats.royalKingsChestsFound ?? 0) >= 1,
+          (stats.doubleDownmaxClears ?? 0) >= 1,
+          (stats.wildPredictionMaxCombos ?? 0) >= 1,
+          (stats.surgeFrenzyMaxComboFinishes ?? 0) >= 1,
+          (stats.rainbowTierRolls ?? 0) >= 1,
+          Boolean(stats.hadPerfectSnipe),
+          (stats.oracleVisionPerfectClears ?? 0) >= 1,
+          (stats.crystalMineClears ?? 0) >= 1
+        ]
+        cleared10xCount = stage10xChecks.filter(Boolean).length
+      }
+      return {
+        current: cleared10xCount,
+        target: 9,
+        percent: Math.min(Math.round((cleared10xCount / 9) * 100), 99)
+      }
+    }
     const textTargetMatch = ach.requirement
       .replace(/x\d+/g, '')
       .match(/(\d[\d,]*)/)

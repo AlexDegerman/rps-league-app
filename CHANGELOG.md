@@ -2,20 +2,26 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [4.3] - The Neon Paradise Relics Update
+
+### Added
+
+* **Ten Dedicated Neon Paradise Relics:** Added ten new relics to the standard prediction drop pool spanning Common through Mythical rarities, introducing specialized build paths for bonus stage frequency, minigame targeting, payout scaling, and floor protection.
+* **Additive Reward Multipliers:** Introduced four stacking point bonus relics: Neon Chip (+10%), Neon Ledger (+20%), High-Roller Marker (+35%), and Paradise Vault (+50%) that combine additively to amplify final Neon Paradise rewards.
+* **Stage-Family Selection Biases:** Added three Common stage-bias relics: Gilded Token (Vaults & Cards), Cybernetic Eye (Arcade & Reflex), and Prism Dice (Gamble & Spin) each granting +300% selection weight to focus on specific minigame groups without diluting the loot pool.
+* **Floor Insurance & Trigger Boosting:** Added the Gilded Cushion (Epic) to elevate the guaranteed minimum bonus payout floor from 2x to 3x last bet, alongside the Neon Keycard (Rare) to boost bonus stage appearance rates by +35%.
+* **Heart of the Strip & Rainbow Slam:** Introduced an apex Mythical relic granting a 25% chance to duplicate 10x maximum clears into a 20x payout, paired with an animated rainbow x2 slam, subtle screen shake, custom audio sequence (slam, cascade, and fanfare), and exit button protection while animating.
+* **Paradise Grand Slam Achievement:** Added a new Mythical achievement (`SLAM`) awarded for achieving the 10x maximum payout across all nine Neon Paradise bonus stages, featuring live progression tracking in the Achievement Codex.
+
 ## [4.2] - The Accelerated Event Cycle Update
 
 ### Changed
 
 * **Faster World Boss Rotation:** Reduced World Boss cooldowns from 10-12 minutes to 4-6 minutes, shortened encounters from 60 seconds to 30 seconds, and reduced quiet periods to keep boss raids appearing more frequently.
-
 * **World Boss Balance Adjustments:** Reduced starting boss HP from 4 to 2, lowered player HP contributions, and adjusted DIVN achievement timing to match the faster 30-second encounters.
-
 * **Increased Global Event Frequency:** Reduced Global Event cooldowns from 10-12 minutes to 4-6 minutes and shortened transition periods, creating a more consistent flow of world events.
-
 * **Festival Acceleration:** Reduced Festival vault duration, buff durations, cooldown lockouts, and demo festival timing to allow festivals to appear and rotate faster.
-
 * ***More Frequent Flash Events:** Increased Flash Event trigger chance from 5% to 9%, reducing average downtime between surprise events.
-
 * **Neon Paradise Availability Boost:** Increased Neon Paradise trigger chance from 5% to 8% to compensate for shorter event-free windows and maintain accessibility during the faster event cycle.
 
 
@@ -24,9 +30,7 @@ All notable changes to the platform will be documented in this file.
 ### Added
 
 * **Adaptive Background Music:** Added eight BGM tracks with three rotating Base Ambient tracks and five context-aware tracks that dynamically crossfade based on the active game state: Flash Event, Global Event, Festival, World Boss, and Neon Paradise.
-
 * **Background Music Volume Control:** Added a dedicated BGM volume control to the sound settings, allowing players to adjust music independently from other audio.
-
 * **Keyboard Prediction Shortcuts:** Added optional keyboard shortcuts for placing predictions without mouse or touch input: **A / ← / 1** for the left pick and **D / → / 2** for the right pick.
 
 ## [4.0] - Neon Paradise
@@ -34,7 +38,6 @@ All notable changes to the platform will be documented in this file.
 ### Added
 
 * **Neon Paradise Bonus System:** Introduced a new bonus-stage system containing nine interactive experiences that activate during eligible manual prediction sessions. Neon Paradise has a combined 8% trigger chance per eligible resolved prediction, with all nine stages having equal selection probability.
-
   * **Treasure Vault:** Choose one of three pre-generated reward chests, with the selected chest opening first before the remaining rewards are revealed.
   * **Double Down:** Climb a multiplier ladder from a guaranteed 2× payout toward a maximum 10× reward by choosing whether to secure or continue.
   * **Wild Prediction:** Reveal three sequential cards, with each result contributing to the final multiplier.
@@ -44,25 +47,15 @@ All notable changes to the platform will be documented in this file.
   * **Arkalon Vision:** Reproduce sequences of Arkalon glyphs through a timed 16-glyph input interface.
   * **Crystal Mine:** Use five mining charges across a 5×5 excavation grid to uncover hidden crystal deposits and determine the final multiplier.
   * **King's Vault:** Select from five royal chests containing exactly one reward of every available tier.
-
 * **Neon Paradise Trigger Rules:** Bonus stages activate only during active manual prediction sessions. They are disabled during auto-betting, minimized application states, and AFK periods. Bonus stages cannot overlap with Flash Events, Global Events, Festivals, or World Boss encounters.
-
 * **Neon Paradise Payout System:** All bonus stages use the last recorded bet as their reward basis. Every stage guarantees a minimum payout of +2× the last bet, with rewards scaling up to a maximum of 10×. Bonus rewards are added directly to the player's existing balance and cannot reduce the existing balance.
-
 * **Neon Paradise Entry Experience:** Added a unified transition from prediction results into the bonus experience, including the persistent NEON PARADISE banner, Arkalon voice announcement, Arkalon ticker message, stage-specific presentation, dedicated audio, and shared final payout presentation.
-
 * **Nine New Bonus Stage Experiences:** Added nine distinct gameplay formats spanning reward selection, multiplier decisions, card reveals, survival tapping, spectrum spins, timing, memory, excavation, and chest selection.
-
 * **Stage-Specific Audio and Visual Systems:** Each Neon Paradise stage introduces its own visual language, animations, effects, interaction feedback, reward cues, and Arkalon announcement while remaining part of the shared Neon Paradise presentation.
-
 * **Session Persistence:** Active Neon Paradise sessions are persisted server-side, allowing a player to resume from the last confirmed state after reconnecting.
-
 * **Navigation Lockout:** Standard and external navigation are blocked while a Neon Paradise session is active to preserve gameplay continuity.
-
 * **Nine New Themed Number Tiers:** Extends the point progression system from Quattuorquadragintillion through Trequinquagintillion with nine new tiers featuring dedicated visual treatments ranging from mechanical vault and split-risk designs to spectral, tactical, cipher, crystalline, and royal treasure presentations.
-
 * **Ascension Expansion:** Raised the Ascension threshold from `999 × 10^111` to `999 × 10^162` to accommodate the nine new Neon Paradise number tiers and extend endgame progression.
-
 * **18 New Neon Paradise Achievements:** Added 18 achievements covering Neon Paradise progression, individual minigame challenges, maximum rewards, and completion milestones across all nine bonus stages.
 
 ### System Integration

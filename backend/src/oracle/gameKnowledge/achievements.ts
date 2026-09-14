@@ -10,7 +10,7 @@ ACHIEVEMENT CATEGORIES & PINNACLES:
   * Omniscient (OMNI): Receive the Daily Arkalon Prophecy for 60 consecutive days.
   * Time Lord (LORD): Complete 50 prestige laps.
 - The 4 Rainbow Tier Apex Achievements:
-  * God King (KING): 1,000 total wins, 50 prestige laps, and all 5 Mythical relics owned simultaneously.
+  * God King (KING): 1,000 total wins, 50 prestige laps, and all 6 Mythical relics owned simultaneously.
   * Cosmic Sovereign (COSM): Participate 50 times in each of the 4 Global Events.
   * World Purifier (PURI): Defeat each of the 4 World Bosses 50 times.
   * Paradise Ascendant (NEON): Clear every Neon Paradise bonus stage 50 times.

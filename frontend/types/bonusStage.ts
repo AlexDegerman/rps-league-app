@@ -108,5 +108,7 @@ export interface BonusStageTriggerSSEData {
 
 export interface BonusStageCompletedSSEData {
   finalPayout: string
+  basePayout?: string
+  heartProc?: boolean
   stageType: StageType
 }

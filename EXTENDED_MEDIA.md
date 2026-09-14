@@ -26,6 +26,17 @@ Detailed gameplay and cinematic recordings for core systems:
 
 Visual breakdowns of supporting gameplay systems, UI, automation, and reliability tooling:
 
+## 🎰 Neon Paradise Relics & Heart of the Strip Slam
+
+Neon Paradise relics introduce dedicated build customization for the bonus stage system, ranging from minigame family weights and floor insurance to stacking reward multipliers. The apex Mythical relic, Heart of the Strip, features a 25% chance to duplicate any maximum 10x clear into a massive final payout. When triggered, the completion flow builds suspense as the initial reward counts up while the collect button remains disabled and greyed out. After a brief pause, a physics-based Rainbow x2 Slam crashes down with subtle screen recoil and an audio chain of slam, cascade, and fanfare, dynamically upgrading the payout badge to the true multiplied total as the points climb to the final sum before unlocking reward collection.
+
+<p align="center">
+  <strong>Neon Paradise Relics Showcase (Heart of the Strip Slam)</strong><br/>
+  <img src="./assets/neonparadiserelics-demo.gif" width="220" />
+</p>
+
+---
+
 ## 🏆 Achievement Badges Leaderboard Styling (Mythical & Rainbow)
 
 Achievement badges are earned through player milestones and progression. When equipped, they visually transform leaderboard rows to reflect achievement rarity and status. Mythical achievement badges create a deep red reactive energy field that gives the row a volatile, high-intensity presence, while Rainbow achievement badges represent the highest achievement tier and fully override all visuals with a shifting multicolor shimmer that continuously flows across the row.

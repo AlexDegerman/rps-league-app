@@ -79,7 +79,14 @@ export default function TreasureVaultStage() {
                   ? 'Gilded Chest Unlocked'
                   : 'Silver Chest Unlocked'
 
-            setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
+            setBonusFinalPayout(
+              BigInt(claimResult.finalPayout),
+              metricText,
+              claimResult.basePayout
+                ? BigInt(claimResult.basePayout)
+                : undefined,
+              claimResult.heartProc
+            )
             playNeonReward(chosenMultiplier)
 
             if (chosenMultiplier >= 10) {

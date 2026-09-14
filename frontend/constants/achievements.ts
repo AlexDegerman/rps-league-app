@@ -210,7 +210,7 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     icon: '🎰',
     rarity: 'LEGENDARY'
   },
-  TRI: { code: 'TRI', name: 'The Pentad', icon: '🔱', rarity: 'MYTHICAL' },
+  HEXA: { code: 'HEXA', name: 'The Hexad', icon: '🔱', rarity: 'MYTHICAL' },
   // Lunar
   LUN1: { code: 'LUN1', name: 'New Moon', icon: '🌑', rarity: 'COMMON' },
   LUN2: { code: 'LUN2', name: 'Orbit', icon: '🛰️', rarity: 'RARE' },
@@ -539,6 +539,12 @@ export const ACHIEVEMENT_BADGE_MAP: Record<string, BadgeData> = {
     name: 'Play Every Minigame in a Single Day',
     icon: '🌈',
     rarity: 'LEGENDARY'
+  },
+  SLAM: {
+    code: 'SLAM',
+    name: 'Paradise Grand Slam',
+    icon: '🏆',
+    rarity: 'MYTHICAL'
   }
 }
 
@@ -550,7 +556,7 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
   Prestige: ['LAP1', 'LAP5', '10LP', '25LP', 'LORD'],
   Dimensional: ['1TRL', '1QAD', '1VIG', '1OVG', '1TRG', '1TTR', '1STR', '999X'],
   Multiplier: ['10X', '50X', 'NUKE', 'NOVA', 'BOOM'],
-  Reliquary: ['5RL', '10RL', 'MUSE', 'FULL', 'TRI'],
+  Reliquary: ['5RL', '10RL', 'MUSE', 'GREL', 'HEXA'],
   Lunar: ['LUN1', 'LUN2', 'LUN3', 'LUN4', 'LUNA'],
   Electric: ['VOL1', 'VOL2', 'VOL3', 'VOL4', 'VOLT'],
   Hellfire: ['HEL1', 'HEL2', 'HEL3', 'HEL4', 'HELL'],
@@ -618,7 +624,8 @@ export const CATEGORY_CHAINS: Record<string, string[]> = {
     'MINE',
     'NEO9',
     'NE20',
-    'CIRC'
+    'CIRC',
+    'SLAM'
   ],
   Rainbow: ['KING', 'COSM', 'PURI', 'NEON']
 }
@@ -658,7 +665,7 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   '10RL': 'Own 10 Unique Relics',
   MUSE: 'Own all Common, Rare & Epic Relics',
   GREL: 'Own all Common, Rare, Epic & Legendary Relics',
-  PENT: 'Own all 5 Mythical Relics',
+  HEXA: 'Own all 6 Mythical Relics',
   LUN1: '5 Moon Activations',
   LUN2: '10 Moon Activations',
   LUN3: '25 Moon Activations',
@@ -761,7 +768,7 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   CLUT: 'Land the finishing blow with less than 5 seconds remaining',
   DIVN: 'Join a World Boss during its final 10 seconds and land the finishing blow',
   PURI: 'Defeat each of the four World Bosses 50 times',
-  KING: '1000 Wins + 50 Laps + 5 Mythical Relics',
+  KING: '1000 Wins + 50 Laps + 6 Mythical Relics',
   COSM: 'Participate 50 times in each of the 4 Global Events',
   NEO1: 'Trigger 1 bonus stage',
   NEO2: 'Trigger 10 bonus stages',
@@ -780,5 +787,6 @@ export const BADGE_REQUIREMENT: Record<string, string> = {
   NEO9: 'Play all 9 bonus stages at least once',
   NE20: '20 clears of every bonus stage',
   CIRC: 'All 9 bonus stages in one calendar day',
-  NEON: '50 clears of every bonus stage'
+  NEON: '50 clears of every bonus stage',
+  SLAM: 'Achieve the 10x maximum payout on all 9 bonus stages'
 }

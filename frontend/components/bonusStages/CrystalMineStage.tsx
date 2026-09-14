@@ -99,7 +99,12 @@ export default function CrystalMineStage() {
 
           const metricText = `${revealedDiamonds}/5 Diamonds Found`
 
-          setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
+          setBonusFinalPayout(
+            BigInt(claimResult.finalPayout),
+            metricText,
+            claimResult.basePayout ? BigInt(claimResult.basePayout) : undefined,
+            claimResult.heartProc
+          )
         }
       }
     } catch (err) {

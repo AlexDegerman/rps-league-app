@@ -170,4 +170,14 @@ During a Neon Paradise stage, the interface undergoes several shared visual and 
 - Reward Presentation: Final payouts use shared Neon Paradise reward presentation while preserving each stage's individual visual identity.
 - Navigation Lockout: Standard navigation is restricted during active bonus gameplay to preserve session continuity.
 - Themed Visual Systems: Each stage applies its own color language, animations, effects, and interaction presentation while remaining within the shared Neon Paradise identity.
+
+--- NEON PARADISE RELICS ---
+
+Ten relics drop during regular prediction gameplay that enhance Neon Paradise:
+- Stage Family Biases (Common): Gilded Token (+300% Vault/Card weight), Cybernetic Eye (+300% Arcade/Reflex weight), Prism Dice (+300% Gamble/Spin weight).
+- Frequency Booster (Rare): Neon Keycard increases appearance rate by +35%.
+- Floor Insurance (Epic): Gilded Cushion raises guaranteed minimum floor from +2x to +3x.
+- Stacking Reward Boosters: Neon Chip (+10%), Neon Ledger (+20%), High-Roller Marker (+35%), Paradise Vault (+50%).
+- Jackpot Duplicator (Mythical): Heart of the Strip gives a 25% chance to trigger a Rainbow x2 Slam on 10x max clears, elevating the final payout to 20x.
+
 `

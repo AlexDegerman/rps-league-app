@@ -305,9 +305,9 @@ const RELIQUARY: AchievementDef[] = [
     check: (s) => s.allCommonRareEpicLegendaryRelics
   },
   {
-    code: 'PENT',
-    name: 'The Pentad',
-    requirement: 'Own all 5 Mythical Relics',
+    code: 'HEXA',
+    name: 'The Hexad',
+    requirement: 'Own all 6 Mythical Relics',
     icon: '🔱',
     rarity: 'MYTHICAL',
     category: 'Reliquary',
@@ -1111,8 +1111,8 @@ const RAINBOW_CAT: AchievementDef[] = [
   {
     code: 'KING',
     name: 'God King',
-    requirement: '1000 Wins + 50 Laps + 5 Mythical Relics',
-    icon: '👑',
+    requirement: '1000 Wins + 50 Laps + 6 Mythical Relics',
+    icon: 'crown',
     rarity: 'RAINBOW',
     category: 'Rainbow',
     check: (s) => s.wins >= 1000 && s.laps >= 50 && s.allMythicalRelics
@@ -1493,6 +1493,24 @@ const NEON_PARADISE: AchievementDef[] = [
     rarity: 'LEGENDARY',
     category: 'NEON_PARADISE',
     check: (s) => s.neonFullCircuitToday
+  },
+  {
+    code: 'SLAM',
+    name: 'Paradise Grand Slam',
+    requirement: 'Achieve the 10x maximum payout on all 9 bonus stages',
+    icon: 'trophy',
+    rarity: 'MYTHICAL',
+    category: 'NEON_PARADISE',
+    check: (s) =>
+      s.royalTreasureChestsOpened >= 1 &&
+      s.royalKingsChestsFound >= 1 &&
+      s.doubleDownmaxClears >= 1 &&
+      s.wildPredictionMaxCombos >= 1 &&
+      s.surgeFrenzyMaxComboFinishes >= 1 &&
+      s.rainbowTierRolls >= 1 &&
+      s.hadPerfectSnipe &&
+      s.oracleVisionPerfectClears >= 1 &&
+      s.crystalMineClears >= 1
   }
 ]
 

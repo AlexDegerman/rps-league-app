@@ -136,6 +136,8 @@ interface GameState {
   bonusLastBet: bigint
   bonusGridState: unknown | null
   bonusFinalPayout: bigint | null
+  bonusBasePayout: bigint | null
+  bonusHeartProc: boolean
   bonusCompletionMetric: string | null
   setBonusActive: (
     stageType: StageType,
@@ -143,7 +145,12 @@ interface GameState {
     reconnectData: unknown
   ) => void
   updateBonusReward: (amount: bigint) => void
-  setBonusFinalPayout: (payout: bigint, metric?: string) => void
+  setBonusFinalPayout: (
+    payout: bigint,
+    metric?: string,
+    basePayout?: bigint,
+    heartProc?: boolean
+  ) => void
   clearBonusState: () => void
 }
 
@@ -206,6 +213,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   bonusLastBet: 0n,
   bonusGridState: null,
   bonusFinalPayout: null,
+  bonusBasePayout: null,
+  bonusHeartProc: false,
   bonusCompletionMetric: null,
 
   // Actions - Connection
@@ -491,9 +500,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       bonusCompletionMetric: null
     }),
   updateBonusReward: (amount) => set({ accumulatedBonusReward: amount }),
-  setBonusFinalPayout: (payout, metric) =>
+  setBonusFinalPayout: (payout, metric, basePayout, heartProc) =>
     set({
       bonusFinalPayout: payout,
+      bonusBasePayout: basePayout ?? payout,
+      bonusHeartProc: heartProc ?? false,
       bonusCompletionMetric: metric ?? null
     }),
   clearBonusState: () =>
@@ -504,6 +515,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       bonusLastBet: 0n,
       bonusGridState: null,
       bonusFinalPayout: null,
+      bonusBasePayout: null,
+      bonusHeartProc: false,
       bonusCompletionMetric: null
     })
 }))

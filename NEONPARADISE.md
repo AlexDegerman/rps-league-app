@@ -345,3 +345,29 @@ During a Neon Paradise stage, the interface undergoes several shared visual and 
 - **Navigation Lockout**: Standard navigation is restricted during active bonus gameplay to preserve session continuity.
 
 - **Themed Visual Systems**: Each stage applies its own color language, animations, effects, and interaction presentation while remaining within the shared Neon Paradise identity.
+
+---
+
+## 🧿 Neon Paradise Relics
+
+Ten dedicated relics drop through regular prediction gameplay that directly modify Neon Paradise trigger rates, minigame family weights, guaranteed payout floors, and jackpot scaling:
+
+### 1. Stage Family Biases (Common)
+When a bonus stage triggers, equipping a Family relic increases the selection weight of its three assigned stages by +300% (4x weight):
+- **Gilded Token:** Biases toward Vault & Selection stages (*Treasure Vault*, *King's Vault*, *Wild Prediction*).
+- **Cybernetic Eye:** Biases toward Arcade & Reflex stages (*Surge Frenzy*, *Sniper Challenge*, *Arkalon Vision*).
+- **Prism Dice:** Biases toward Gamble & Exploration stages (*Double Down*, *Rainbow Rush*, *Crystal Mine*).
+
+### 2. Spawn Booster & Floor Insurance
+- **Neon Keycard (Rare):** Increases Neon Paradise appearance rate by +35% (raising base trigger rate from 8% to ~10.8%).
+- **Gilded Cushion (Epic):** Guarantees a minimum +3x payout in Neon Paradise instead of +2x, elevating all worst-case outcomes.
+
+### 3. Additive Reward Multipliers
+Stack additively with each other on the final calculated payout:
+- **Neon Chip (Common):** `+10% point rewards`
+- **Neon Ledger (Rare):** `+20% point rewards`
+- **High-Roller Marker (Epic):** `+35% point rewards`
+- **Paradise Vault (Legendary):** `+50% point rewards`
+
+### 4. Apex Jackpot Proc (Mythical)
+- **Heart of the Strip (Mythical):** Clearing any stage with the maximum 10x reward triggers a 25% chance to drop a Rainbow x2 Slam, duplicating the final reward to 20x.

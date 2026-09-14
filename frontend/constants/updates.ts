@@ -1,5 +1,17 @@
 export const UPDATES = [
   {
+    version: '4.3',
+    label: 'The Neon Paradise Relics Update',
+    notes: [
+      'Ten Dedicated Neon Paradise Relics: Adds ten new relics to the standard prediction drop pool spanning Common through Mythical rarities, introducing specialized build paths for bonus stage frequency, minigame targeting, payout scaling, and floor protection.',
+      'Additive Reward Multipliers: Introduces four stacking point bonus relics: Neon Chip (+10%), Neon Ledger (+20%), High-Roller Marker (+35%), and Paradise Vault (+50%) that combine additively on final bonus payouts.',
+      'Stage-Family Selection Biases: Adds Gilded Token (Vaults & Cards), Cybernetic Eye (Arcade & Reflex), and Prism Dice (Gamble & Spin), each granting a +300% selection weight to target specific minigames.',
+      'Floor Insurance & Trigger Boosting: Adds the Gilded Cushion (Epic) to raise the guaranteed minimum bonus payout floor from 2x to 3x last bet, alongside the Neon Keycard (Rare) boosting bonus stage appearance rates by +35%.',
+      'Heart of the Strip & Rainbow Slam: Introduces an apex Mythical relic granting a 25% chance to duplicate 10x maximum clears into a 20x payout, paired with an animated rainbow x2 slam, subtle screen shake, custom audio sequence (slam, cascade, and fanfare), and exit button protection while animating.',
+      'Paradise Grand Slam Achievement: Adds a new Mythical achievement (SLAM) awarded for achieving the 10x maximum payout across all nine Neon Paradise bonus stages, featuring live progression tracking in the codex.'
+    ]
+  },
+  {
     version: '4.2',
     label: 'The Accelerated Event Cycle Update',
     notes: [

@@ -72,9 +72,29 @@ export default function OracleVisionStage() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const handleTimerExpiry = async () => {
-    // Timeout locks the current payout
+  const finishStage = async (metricText: string, isJackpot = false) => {
+    if (timerRef.current) clearInterval(timerRef.current)
     setPhase('terminal')
+    const { userId } = getOrCreateUser()
+    try {
+      const claimResult = await claimBonusWinnings(userId)
+      if (claimResult?.finalPayout) {
+        setBonusFinalPayout(
+          BigInt(claimResult.finalPayout),
+          metricText,
+          claimResult.basePayout ? BigInt(claimResult.basePayout) : undefined,
+          claimResult.heartProc
+        )
+        if (isJackpot) {
+          setTimeout(() => playNeonComplete(true), 400)
+        }
+      }
+    } catch (err) {
+      console.error('[OracleVision] claim error', err)
+    }
+  }
+
+  const handleTimerExpiry = async () => {
     const { userId } = getOrCreateUser()
     try {
       const result = await postBonusAction(
@@ -85,19 +105,14 @@ export default function OracleVisionStage() {
         const session = result.session as { accumulatedPayout: string }
         updateBonusReward(BigInt(session.accumulatedPayout))
       }
-      const claimResult = await claimBonusWinnings(userId)
-      if (claimResult?.finalPayout) {
-        const metricText = `${seqIndex}/5 Sequences Completed`
-        setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
-      }
+      await finishStage(`${seqIndex}/5 Sequences Completed`, false)
     } catch (err) {
-      console.error('[OracleVision] timeout claim error', err)
+      console.error('[OracleVision] timeout error', err)
     }
   }
 
   useEffect(() => {
     if (phase !== 'show') return
-    // Play the mystical sound while Arkalon displays the glyphs
     playLayer('mirage_cataclysm')
   }, [phase, seqIndex]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -154,15 +169,9 @@ export default function OracleVisionStage() {
       setTimeout(() => setFeedback(null), 400)
 
       if (!isCorrect || isFailed) {
-        if (timerRef.current) clearInterval(timerRef.current)
         playLoss()
-        setPhase('terminal')
         updateBonusReward(BigInt(session.accumulatedPayout))
-        const claimResult = await claimBonusWinnings(userId)
-        if (claimResult?.finalPayout) {
-          const metricText = `${seqIndex}/5 Sequences Completed`
-          setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
-        }
+        await finishStage(`${seqIndex}/5 Sequences Completed`, false)
         return
       }
 
@@ -175,15 +184,7 @@ export default function OracleVisionStage() {
         playNeonReward(SEQ_PAYOUTS[newSeqIndex] ?? 2)
 
         if (isComplete) {
-          const claimResult = await claimBonusWinnings(userId)
-          if (claimResult?.finalPayout) {
-            setBonusFinalPayout(
-              BigInt(claimResult.finalPayout),
-              'Perfect Recall : 5/5 Sequences'
-            )
-            setTimeout(() => playNeonComplete(true), 400)
-          }
-          setPhase('terminal')
+          await finishStage('Perfect Recall : 5/5 Sequences', true)
         } else {
           const nextSeq = grid?.sequences[newSeqIndex] ?? []
           setPhase('between')
@@ -202,131 +203,129 @@ export default function OracleVisionStage() {
     }
   }
 
-    return (
-      <div className="stage-container stage-oracle-vision">
-        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-uqgs no-pseudo">
-          🔮 ARKALON VISION
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap justify-center">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className={`w-2.5 h-2.5 rounded-full transition-[background] duration-200 ${
-                i < seqIndex
-                  ? 'bg-[#00cc44]'
-                  : i === seqIndex
-                    ? 'bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.7)]'
-                    : 'bg-[rgba(255,255,255,0.1)]'
-              }`}
-            />
-          ))}
-          <span className="text-[0.72rem] text-slate-500">
-            Sequence {seqIndex + 1} / 5
-          </span>
-        </div>
-
-        {phase === 'show' && (
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-[0.8rem] text-slate-400">
-              Memorise this sequence
-            </p>
-            <div className="flex gap-3">
-              {currentSeq.map((gi, pos) => (
-                <div key={pos} className="ov-show-glyph">
-                  {GLYPHS[gi]}
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={startInputPhase}
-              className="mt-6 w-full py-3.5 px-6 bg-linear-to-r from-indigo-600 to-violet-600 text-white font-bold text-base tracking-wider rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.4)] active:scale-[0.98] transition-all cursor-pointer"
-            >
-              Start Sequence
-            </button>
-          </div>
-        )}
-
-        {phase === 'between' && (
-          <div className="flex items-center justify-center min-h-20">
-            <p className="text-[0.85rem] text-green-500 font-bold">
-              ✅ Sequence complete. Next incoming
-            </p>
-          </div>
-        )}
-
-        {phase === 'input' && (
-          <div className="flex flex-col items-center gap-1 w-full">
-            <div className="flex items-center gap-3 w-full">
-              <div className="ov-timer-bar flex-1">
-                <div
-                  className="ov-timer-fill"
-                  style={{ width: `${(timeLeft / 8) * 100}%` }}
-                />
-              </div>
-              <span className="text-[0.75rem] text-slate-500 shrink-0">
-                {timeLeft}s
-              </span>
-            </div>
-
-            <div className="flex gap-2">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-3 h-3 rounded-full border-2 transition-[background,border-color] duration-150 ${
-                    feedback === 'wrong'
-                      ? 'bg-red-500 border-red-500'
-                      : feedback === 'correct' && i === inputProgress.length - 1
-                        ? 'bg-green-500 border-green-500'
-                        : i < inputProgress.length
-                          ? 'bg-[#a855f7] border-[#a855f7]'
-                          : 'border-[rgba(255,255,255,0.2)]'
-                  }`}
-                />
-              ))}
-            </div>
-
-            {/* 4×4 glyph grid */}
-            <div className="grid grid-cols-4 gap-2 w-full max-w-[320px]">
-              {GLYPHS.map((glyph, gi) => (
-                <button
-                  key={gi}
-                  onClick={() => tapGlyph(gi)}
-                  disabled={loading}
-                  className={[
-                    'ov-glyph-btn',
-                    feedback === 'correct' &&
-                    gi === inputProgress[inputProgress.length - 1]
-                      ? 'ov-glyph-correct'
-                      : ''
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {glyph}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {phase === 'terminal' && (
-          <div className="flex flex-col items-center gap-2 mt-4 w-full">
-            <p className="text-[0.8rem] text-slate-400 font-semibold animate-[np-pulse_1.5s_infinite_ease-in-out]">
-              Collecting reward...
-            </p>
-          </div>
-        )}
-
-        {phase === 'input' && (
-          <p className="text-[0.7rem] text-slate-600 text-center">
-            Floor if you stop now: +{SEQ_PAYOUTS[seqIndex] ?? 2}x ·{' '}
-            {
-              formatPoints(bonusLastBet * BigInt(SEQ_PAYOUTS[seqIndex] ?? 2))
-                .display
-            }
-          </p>
-        )}
+  return (
+    <div className="stage-container stage-oracle-vision">
+      <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-uqgs no-pseudo">
+        🔮 ARKALON VISION
       </div>
-    )
+
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className={`w-2.5 h-2.5 rounded-full transition-[background] duration-200 ${
+              i < seqIndex
+                ? 'bg-[#00cc44]'
+                : i === seqIndex
+                  ? 'bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.7)]'
+                  : 'bg-[rgba(255,255,255,0.1)]'
+            }`}
+          />
+        ))}
+        <span className="text-[0.72rem] text-slate-500">
+          Sequence {seqIndex + 1} / 5
+        </span>
+      </div>
+
+      {phase === 'show' && (
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-[0.8rem] text-slate-400">Memorise this sequence</p>
+          <div className="flex gap-3">
+            {currentSeq.map((gi, pos) => (
+              <div key={pos} className="ov-show-glyph">
+                {GLYPHS[gi]}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={startInputPhase}
+            className="mt-6 w-full py-3.5 px-6 bg-linear-to-r from-indigo-600 to-violet-600 text-white font-bold text-base tracking-wider rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.4)] active:scale-[0.98] transition-all cursor-pointer"
+          >
+            Start Sequence
+          </button>
+        </div>
+      )}
+
+      {phase === 'between' && (
+        <div className="flex items-center justify-center min-h-20">
+          <p className="text-[0.85rem] text-green-500 font-bold">
+            ✅ Sequence complete. Next incoming
+          </p>
+        </div>
+      )}
+
+      {phase === 'input' && (
+        <div className="flex flex-col items-center gap-1 w-full">
+          <div className="flex items-center gap-3 w-full">
+            <div className="ov-timer-bar flex-1">
+              <div
+                className="ov-timer-fill"
+                style={{ width: `${(timeLeft / 8) * 100}%` }}
+              />
+            </div>
+            <span className="text-[0.75rem] text-slate-500 shrink-0">
+              {timeLeft}s
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className={`w-3 h-3 rounded-full border-2 transition-[background,border-color] duration-150 ${
+                  feedback === 'wrong'
+                    ? 'bg-red-500 border-red-500'
+                    : feedback === 'correct' && i === inputProgress.length - 1
+                      ? 'bg-green-500 border-green-500'
+                      : i < inputProgress.length
+                        ? 'bg-[#a855f7] border-[#a855f7]'
+                        : 'border-[rgba(255,255,255,0.2)]'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* 4×4 glyph grid */}
+          <div className="grid grid-cols-4 gap-2 w-full max-w-[320px]">
+            {GLYPHS.map((glyph, gi) => (
+              <button
+                key={gi}
+                onClick={() => tapGlyph(gi)}
+                disabled={loading}
+                className={[
+                  'ov-glyph-btn',
+                  feedback === 'correct' &&
+                  gi === inputProgress[inputProgress.length - 1]
+                    ? 'ov-glyph-correct'
+                    : ''
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                {glyph}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {phase === 'terminal' && (
+        <div className="flex flex-col items-center gap-2 mt-4 w-full">
+          <p className="text-[0.8rem] text-slate-400 font-semibold animate-[np-pulse_1.5s_infinite_ease-in-out]">
+            Collecting reward...
+          </p>
+        </div>
+      )}
+
+      {phase === 'input' && (
+        <p className="text-[0.7rem] text-slate-600 text-center">
+          Floor if you stop now: +{SEQ_PAYOUTS[seqIndex] ?? 2}x ·{' '}
+          {
+            formatPoints(bonusLastBet * BigInt(SEQ_PAYOUTS[seqIndex] ?? 2))
+              .display
+          }
+        </p>
+      )}
+    </div>
+  )
 }

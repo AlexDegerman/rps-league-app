@@ -4295,6 +4295,19 @@ span.tracking-wider[title]:active::after {
     SECTION 8: RELIC EFFECTS
    ═══════════════════════════════════════════════════════════════════ */
 
+.rainbow-slam-text {
+  font-weight: 900;
+  display: inline-block;
+  line-height: 1;
+  background: linear-gradient(135deg, #ff0080, #ff8800, #ffd700, #00ff88, #00ccff, #8800ff);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 25px rgba(255, 0, 128, 0.85)) drop-shadow(0 0 50px rgba(0, 204, 255, 0.7));
+  animation: shimmer-slide 2s linear infinite;
+}
+
 .mythical-slam-glow {
   text-shadow: 
     0 0 20px rgba(248, 113, 113, 0.8), 

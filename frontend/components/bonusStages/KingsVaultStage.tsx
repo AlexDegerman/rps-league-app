@@ -92,11 +92,18 @@ export default function KingsVaultStage() {
         }
         const mult = multMap[tier] ?? 2
         playNeonReward(mult)
-        if (tier === 'ROYAL') setTimeout(() => playNeonComplete(true), 300)
         const claimResult = await claimBonusWinnings(userId)
         if (claimResult?.finalPayout) {
           const metricText = `${TIER_META[tier]?.label || 'Bronze'} Chest Found`
-          setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
+          setBonusFinalPayout(
+            BigInt(claimResult.finalPayout),
+            metricText,
+            claimResult.basePayout ? BigInt(claimResult.basePayout) : undefined,
+            claimResult.heartProc
+          )
+          if (tier === 'ROYAL' && !claimResult.heartProc) {
+            setTimeout(() => playNeonComplete(true), 300)
+          }
         }
       }, 1400)
     } catch (err) {

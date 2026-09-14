@@ -151,7 +151,24 @@ router.get('/:shortId', async (req, res) => {
       hadPerfectAssault: Boolean(u.had_perfect_assault),
       hadLuckyShot: Boolean(u.had_lucky_shot),
       hadClutchVictory: Boolean(u.had_clutch_victory),
-      hadDivineIntervention: Boolean(u.had_divine_intervention)
+      hadDivineIntervention: Boolean(u.had_divine_intervention),
+
+      // Neon Paradise Stats
+      bonusStagesPlayed: Number(u.bonus_stages_played ?? 0),
+      crystalMineClears: Number(u.crystal_mine_clears ?? 0),
+      oracleVisionPerfectClears: Number(u.oracle_vision_perfect_clears ?? 0),
+      doubleDownmaxClears: Number(u.double_down_max_clears ?? 0),
+      wildPredictionMaxCombos: Number(u.wild_prediction_max_combos ?? 0),
+      royalTreasureChestsOpened: Number(u.royal_treasure_chests_opened ?? 0),
+      royalKingsChestsFound: Number(u.royal_kings_chests_found ?? 0),
+      hadPerfectSnipe: Boolean(u.had_perfect_snipe),
+      rainbowTierRolls: Number(u.rainbow_tier_rolls ?? 0),
+      surgeFrenzyMaxComboFinishes: Number(
+        u.surge_frenzy_max_combo_finishes ?? 0
+      ),
+      neonParadiseMinigamesPlayed:
+        (u.neon_paradise_minigames_played as Record<string, number>) ?? {},
+      neonFullCircuitToday: Boolean(u.neon_full_circuit_today)
     }
 
     const achievements = ALL_ACHIEVEMENTS.map((def) => ({

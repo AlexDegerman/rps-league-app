@@ -74,7 +74,7 @@ Q: Is there a maximum lap count?
 A: No. There is no maximum lap count defined in the system.
 
 Q: Why would someone keep playing this game for months?
-A: RPS League combines multiple long-term progression loops. Relic collection has 17 unique pieces with no duplicates, the Achievement Codex has over 100 milestones, prestige laps permanently improve drop rates, and new seasons introduce additional systems. Persistent account growth and live-service content sustain long-term engagement.
+A: RPS League combines multiple long-term progression loops. Relic collection has 44 unique pieces with no duplicates (27 core and 17 World Boss exclusives), the Achievement Codex has over 100 milestones, prestige laps permanently improve drop rates, and new seasons introduce additional systems. Persistent account growth and live-service content sustain long-term engagement.
 
 Q: How does the game change as I progress?
 A: Early play is about learning the bonus system and building initial point mass. After the first lap, relic drop rates begin improving and the Speedrun leaderboard becomes relevant. At high lap counts, Mythical relic acquisition becomes realistic and the full Achievement Codex opens up. Global Events and Flash Events provide constant variety regardless of progression stage. New systems from seasonal updates layer on top without replacing existing ones.
@@ -85,13 +85,16 @@ Q: Which relic is the best?
 A: There is no single best relic as value depends on your playstyle. For maximum Flash Event returns, Temporal Anchor (4 rounds) or Overdrive Relay (+0.5x during events) compound heavily. For non-event play, Prismatic Shard (+0.5x when no Flash Event active) provides consistent gains. For long-term Mythical upside, Soul of the Machine (5% chance for 3x Relic Slam) produces the highest single-match ceiling. Build choice depends on whether you are optimizing for sustained average returns or peak multiplier moments.
 
 Q: What is the rarest relic?
-A: Mythical relics are the rarest tier with a base drop rate of 0.1% per prediction, scaling up with laps to a maximum of 0.3%. There are three Mythical relics: Soul of the Machine, Temporal Anchor, and The Architect's Keystone.
+A: Mythical relics are the rarest tier with a base drop rate of 0.1% per prediction, scaling up with laps to a maximum of 0.3%. There are six Mythical relics in total: Soul of the Machine, Temporal Anchor, The Architect's Keystone, and Heart of the Strip in the prediction pool, plus Twin Fortune and Prism Key in the World Boss chest pool.
 
 Q: Are any relics event-exclusive?
 A: No relics are locked behind events. However, the four Rare Flash Event relics (Lunar Siphon, Static Inductor, Dealer's Hand, Volcanic Mantle) are specifically designed around Flash Event synergy and are more valuable during their respective event types.
 
 Q: Should I chase Mythical relics?
 A: Mythical relics cannot be directly targeted; they drop from the same random pool as all other rarities. The Scavenger's Lens Common relic (+20% acquisition rate) and completing more laps (scales base drop rates) are the only ways to meaningfully improve acquisition speed. The Vault Festival also temporarily doubles all drop rates when triggered. Sustained play is the primary driver of Mythical acquisition.
+
+Q: What is the best relic build for Neon Paradise?
+A: For maximizing Neon Paradise value, equip Neon Keycard (+35% appearance rate) alongside High-Roller Marker (+35% rewards) or Paradise Vault (+50% rewards). For achievement hunting, equip the corresponding Common family bias relic (Gilded Token for Vaults, Cybernetic Eye for Arcade, or Prism Dice for Gamble/Spin) to quadrupled stage appearance weight. Heart of the Strip provides the ultimate ceiling, with a 25% chance to double any 10x clear to 20x.
 
 --- EVENT STRATEGY ---
 
@@ -113,7 +116,7 @@ Q: How do I unlock Rainbow achievements?
 A: There are two Rainbow achievements. God King (KING) requires 1,000 total wins, 50 prestige laps, and owning all 3 Mythical relics simultaneously. Cosmic Sovereign (COSM) requires participating 50 times in each of the 4 Global Events. Both are long-term mastery achievements requiring sustained engagement across multiple systems.
 
 Q: What is the hardest achievement?
-A: By raw requirement depth, God King is the most demanding, requiring 1,000 wins, 50 laps, and all 3 Mythical relics simultaneously. Omniscient (60 consecutive days of Arkalon use) and Time Lord (50 laps) are also among the most time-intensive. Mythical Flash Event mastery achievements requiring 100 activations of a single event type represent long-term probabilistic challenges.
+A: By raw requirement depth, God King is the most demanding, requiring 1,000 wins, 50 laps, and all 6 Mythical relics simultaneously. Omniscient (60 consecutive days of Arkalon Prophecies) and Time Lord (50 laps) are also among the most time-intensive. Mythical Flash Event mastery achievements requiring 100 activations of a single event type represent long-term probabilistic challenges.
 
 Q: Do hidden achievements count toward the Grand Archive total?
 A: Yes. Hidden achievements are real unlockable milestones that count toward your total achievement count and contribute to the Grand Archive category progression.

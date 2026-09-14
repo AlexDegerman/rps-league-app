@@ -531,14 +531,15 @@ describe('Bonus Stage Service Tests', () => {
         userId: 'user-123',
         stageType: 'TREASURE_VAULT',
         accumulatedPayout: 5000n,
+        lastBetAmount: 1000n,
         stageStepsCompleted: 1,
         gridState: { rewards: [2, 5, 10], chosen: 1 }
       } as unknown as BonusSession
 
       mocks.mockClient.query.mockResolvedValue({ rows: [] })
 
-      const finalPayout = await claimWinnings(session, 10000n)
-      expect(finalPayout).toBe(5000n)
+      const result = await claimWinnings(session, 10000n)
+      expect(result.finalPayout).toBe(5000n)
       expect(mocks.mockClient.query).toHaveBeenCalledWith('BEGIN')
       expect(mocks.mockClient.query).toHaveBeenCalledWith('COMMIT')
       expect(mocks.mockClient.release).toHaveBeenCalled()

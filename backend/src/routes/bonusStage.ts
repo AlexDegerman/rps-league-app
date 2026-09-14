@@ -74,21 +74,25 @@ router.post('/claim', async (req: Request, res: Response) => {
       [userId]
     )
     const currentBalance = BigInt(String(userResult.rows[0]?.points ?? '0'))
-    const finalPayout = await bonusStageService.claimWinnings(
-      session,
-      currentBalance
-    )
+    const { finalPayout, basePayout, heartProc } =
+      await bonusStageService.claimWinnings(session, currentBalance)
     broadcast(
       'bonus_stage_completed',
       JSON.stringify({
         type: 'bonus_stage_completed',
         userId,
         finalPayout: finalPayout.toString(),
+        basePayout: basePayout.toString(),
+        heartProc,
         stageType: session.stageType
       })
     )
     await checkBonusAchievements(userId, session, finalPayout)
-    return res.json({ finalPayout: finalPayout.toString() })
+    return res.json({
+      finalPayout: finalPayout.toString(),
+      basePayout: basePayout.toString(),
+      heartProc
+    })
   } catch (err) {
     console.error('[bonus/claim]', err)
     return res.status(500).json({ error: 'Internal error' })

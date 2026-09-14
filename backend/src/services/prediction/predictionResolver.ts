@@ -251,7 +251,7 @@ export const resolveUserPrediction = async (
     try {
       const existingSession = await getActiveSession(row.user_id)
       if (!existingSession) {
-        const stageType = rollBonusTrigger()
+        const stageType = rollBonusTrigger(allEquippedKeys)
         if (stageType) {
           const session = await createSession(row.user_id, ctx.bet, stageType)
           broadcast(

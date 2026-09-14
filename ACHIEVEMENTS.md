@@ -103,7 +103,7 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🔵 Rare | Collector | Own 10 Unique Relics | 🎒 | `10RL` |
 | 🟣 Epic | True Curator | Own all Common, Rare & Epic Relics | 🏛️ | `MUSE` |
 | 🟡 Legendary | Grand Reliquary | Own all Common, Rare, Epic & Legendary Relics | 🎰 | `GREL` |
-| 🔴 Mythical | The Pentad | Own all 5 Mythical Relics | 🔱 | `PENT` |
+| 🔴 Mythical | The Hexad | Own all 6 Mythical Relics | 🔱 | `HEXA` |
 
 ---
 
@@ -333,6 +333,7 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 | 🟡 Legendary| Hit the Perfect Bullseye | Get the 10× reward in Sniper Challenge | 🎯 | `SNIP` |
 | 🟡 Legendary | Complete All Five Sequences | Complete all 5 sequences in Arkalon Vision | 🔮 | `OVIS` |
 | 🟡 Legendary  | Strike the Motherlode | Find 5 diamonds for the 10× reward in Crystal Mine | 💎 | `MINE` |
+| 🔴 Mythical | Paradise Grand Slam | Achieve the 10x maximum payout on all 9 bonus stages | 🏆 | `SLAM` |
 
 ### Multi-Game Complete Achievements
 | Rarity | Name | Requirement | Icon | Code |
@@ -367,7 +368,7 @@ Users are provided with **5 dedicated badge slots** on their public identity. Th
 
 | Rarity | Name | Requirement | Icon | Code |
 | :--- | :--- | :--- | :--- | :--- |
-| 🌈 Rainbow | God King | 1000 Wins + 50 Laps + Trinity of Relics | 👑 | `KING` |
+| 🌈 Rainbow | God King | 1000 Wins + 50 Laps + 6 Mythical Relics | 👑 | `KING` |
 | 🌈 Rainbow | Cosmic Sovereign | Participate 50 times in each of the 4 Global Events | 🪐 | `COSM` |
 | 🌈 Rainbow | World Purifier | Defeat each of the four World Bosses 50 times | 🌍 | `PURI` |
 | 🌈 Rainbow | Paradise Ascendant | 50 clears of every bonus stage | 🌈 | `NEON` |

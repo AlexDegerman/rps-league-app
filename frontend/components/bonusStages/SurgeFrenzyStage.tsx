@@ -102,7 +102,12 @@ export default function SurgeFrenzyStage() {
           ? `Survived Full Storm : ${secondsSurvived}s`
           : `Frenzied For : ${secondsSurvived}s`
 
-        setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
+        setBonusFinalPayout(
+          BigInt(claimResult.finalPayout),
+          metricText,
+          claimResult.basePayout ? BigInt(claimResult.basePayout) : undefined,
+          claimResult.heartProc
+        )
         if (isMax) {
           setTimeout(() => playNeonComplete(true), 400)
         }

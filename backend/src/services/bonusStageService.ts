@@ -13,15 +13,55 @@ import {
 } from '../types/bonusStage.js'
 import { TOTAL_TRIGGER_CHANCE, ENABLED_STAGES, STAGE_WEIGHTS, KINGS_VAULT_PAYOUTS, DOUBLE_DOWN_PAYOUTS, RAINBOW_RUSH_PAYOUTS, ORACLE_VISION_PAYOUTS, CRYSTAL_TILE_DISTRIBUTION, RAINBOW_RUSH_WEIGHTS } from '../constants/bonusStage.js'
 
-export function rollBonusTrigger(): StageType | null {
-  if (Math.random() * 100 > TOTAL_TRIGGER_CHANCE) return null
+export function rollBonusTrigger(
+  equippedRelics: string[] = []
+): StageType | null {
+  let triggerChance = TOTAL_TRIGGER_CHANCE
+  if (equippedRelics.includes('neon_keycard')) {
+    triggerChance *= 1.35
+  }
+
+  if (Math.random() * 100 > triggerChance) return null
 
   if (ENABLED_STAGES.length === 0) return null
 
-  const options = ENABLED_STAGES.map((stage) => ({
-    value: stage,
-    weight: STAGE_WEIGHTS[stage] ?? 1.0
-  }))
+  const VAULT_FAMILY: StageType[] = [
+    'TREASURE_VAULT',
+    'KINGS_VAULT',
+    'WILD_PREDICTION'
+  ]
+  const ARCADE_FAMILY: StageType[] = [
+    'SURGE_FRENZY',
+    'SNIPER_CHALLENGE',
+    'ORACLE_VISION'
+  ]
+  const RISK_FAMILY: StageType[] = [
+    'DOUBLE_DOWN',
+    'RAINBOW_RUSH',
+    'CRYSTAL_MINE'
+  ]
+
+  const options = ENABLED_STAGES.map((stage) => {
+    let weight = STAGE_WEIGHTS[stage] ?? 1.0
+
+    if (
+      equippedRelics.includes('gilded_token') &&
+      VAULT_FAMILY.includes(stage)
+    ) {
+      weight *= 4.0
+    }
+    if (
+      equippedRelics.includes('cybernetic_eye') &&
+      ARCADE_FAMILY.includes(stage)
+    ) {
+      weight *= 4.0
+    }
+    if (equippedRelics.includes('prism_dice') && RISK_FAMILY.includes(stage)) {
+      weight *= 4.0
+    }
+
+    return { value: stage, weight }
+  })
 
   return weightedPick(options)
 }
@@ -538,20 +578,70 @@ async function processCrystalMineTap(
 
 //  Claim & Resolve 
 
+export interface ClaimResult {
+  finalPayout: bigint
+  basePayout: bigint
+  heartProc: boolean
+}
+
 export async function claimWinnings(
   session: BonusSession,
   _currentBalance: bigint
-): Promise<bigint> {
-  const finalPayout = session.accumulatedPayout
+): Promise<ClaimResult> {
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
+
+    const userRelicsRes = await client.query<{
+      equipped_relics: string[] | null
+    }>('SELECT equipped_relics FROM users WHERE user_id = $1', [session.userId])
+    const relics: string[] =
+      userRelicsRes.rows[0]?.equipped_relics?.filter(Boolean) ?? []
+
+    let payout = session.accumulatedPayout
+
+    if (
+      relics.includes('gilded_cushion') &&
+      payout <= session.lastBetAmount * 2n &&
+      payout > 0n
+    ) {
+      payout = session.lastBetAmount * 3n
+    }
+
+    // Additive Stacking Multipliers (+10%, +20%, +35%, +50%)
+    let bonusPct = 0
+    if (relics.includes('neon_chip')) bonusPct += 10
+    if (relics.includes('neon_ledger')) bonusPct += 20
+    if (relics.includes('high_roller_marker')) bonusPct += 35
+    if (relics.includes('paradise_vault')) bonusPct += 50
+
+    if (bonusPct > 0) {
+      payout = payout + (payout * BigInt(bonusPct)) / 100n
+    }
+
+    // Heart of the Strip: 25% chance to duplicate 10x maximum clear
+    const basePayout = payout
+    let heartProc = false
+    const accumulatedPayout = BigInt(session.accumulatedPayout ?? 0n)
+    const lastBetAmount = BigInt(session.lastBetAmount ?? 0n)
+    const isTenX = accumulatedPayout >= lastBetAmount * 10n
+
+    if (
+      isTenX &&
+      relics.includes('heart_of_the_strip') &&
+      Math.random() < 0.25
+    ) {
+      heartProc = true
+      payout = payout * 2n
+    }
+
     await client.query(
       `UPDATE bonus_stage_sessions
-        SET is_active = false, updated_at = NOW()
+        SET is_active = false, updated_at = NOW(), accumulated_payout = $2
         WHERE id = $1`,
-      [session.id]
+      [session.id, payout.toString()]
     )
+
     // Build milestone increments based on stage outcome
     const milestoneUpdates: string[] = []
 
@@ -595,10 +685,7 @@ export async function claimWinnings(
 
     if (session.stageType === 'TREASURE_VAULT') {
       const grid = session.gridState as TreasureVaultGrid
-      if (
-        grid.chosen !== null &&
-        grid.rewards[grid.chosen as number] === 10
-      ) {
+      if (grid.chosen !== null && grid.rewards[grid.chosen as number] === 10) {
         milestoneUpdates.push(
           'royal_treasure_chests_opened = royal_treasure_chests_opened + 1'
         )
@@ -647,16 +734,16 @@ export async function claimWinnings(
               )
             ${milestoneClause}
         WHERE user_id = $2`,
-      [finalPayout.toString(), session.userId, session.stageType]
+      [payout.toString(), session.userId, session.stageType]
     )
     await client.query('COMMIT')
+    return { finalPayout: payout, basePayout, heartProc }
   } catch (err) {
     await client.query('ROLLBACK')
     throw err
   } finally {
     client.release()
   }
-  return finalPayout
 }
 
 // Private Helpers 

@@ -278,6 +278,79 @@ export const RELICS: RelicDef[] = [
     effect:
       'During World Boss encounters, your misses have a 50% chance to deal 1 damage',
     bossExclusive: true
+  },
+  {
+    key: 'neon_chip',
+    name: 'Neon Chip',
+    rarity: 'COMMON',
+    icon: 'Coins',
+    effect: '+10% to Neon Paradise point rewards'
+  },
+  {
+    key: 'gilded_token',
+    name: 'Gilded Token',
+    rarity: 'COMMON',
+    icon: 'Ticket',
+    effect: '+300% selection weight for Vault and Card stages in Neon Paradise'
+  },
+  {
+    key: 'cybernetic_eye',
+    name: 'Cybernetic Eye',
+    rarity: 'COMMON',
+    icon: 'Gamepad2',
+    effect:
+      '+300% selection weight for Arcade and Reflex stages in Neon Paradise'
+  },
+  {
+    key: 'prism_dice',
+    name: 'Prism Dice',
+    rarity: 'COMMON',
+    icon: 'Dices',
+    effect:
+      '+300% selection weight for Gamble, Spin, and Mining stages in Neon Paradise'
+  },
+  {
+    key: 'neon_keycard',
+    name: 'Neon Keycard',
+    rarity: 'RARE',
+    icon: 'CreditCard',
+    effect: '+35% Neon Paradise appearance rate'
+  },
+  {
+    key: 'neon_ledger',
+    name: 'Neon Ledger',
+    rarity: 'RARE',
+    icon: 'Scroll',
+    effect: '+20% to Neon Paradise point rewards'
+  },
+  {
+    key: 'gilded_cushion',
+    name: 'Gilded Cushion',
+    rarity: 'EPIC',
+    icon: 'LifeBuoy',
+    effect: 'Guarantees a minimum +3x payout in Neon Paradise'
+  },
+  {
+    key: 'high_roller_marker',
+    name: 'High-Roller Marker',
+    rarity: 'EPIC',
+    icon: 'Award',
+    effect: '+35% to Neon Paradise point rewards'
+  },
+  {
+    key: 'paradise_vault',
+    name: 'Paradise Vault',
+    rarity: 'LEGENDARY',
+    icon: 'Vault',
+    effect: '+50% to Neon Paradise point rewards'
+  },
+  {
+    key: 'heart_of_the_strip',
+    name: 'Heart of the Strip',
+    rarity: 'MYTHICAL',
+    icon: 'Heart',
+    effect:
+      'Achieving a 10x maximum payout in Neon Paradise has a 25% chance to duplicate the reward'
   }
 ]
 

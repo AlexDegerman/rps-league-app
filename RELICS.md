@@ -66,11 +66,12 @@ Twin Fortune triggers a full second chest with an independent relic roll, and th
 
 To maintain balance, relic effects are bound to strict timing rules that prevent mid-event abuse.
 
-### 1. Trigger Snapshots (Flash Events)
-Flash Event bonuses (multipliers and duration) are locked at the moment the event triggers.
+### 1. Trigger Snapshots (Flash Events & Neon Paradise)
+Event bonuses, stage weights, and trigger multipliers are locked at the moment of activation.
 
-- If a relic is not equipped when the event starts, equipping it later will not apply its effect
-- Applies to: Lunar Siphon, Static Inductor, Dealer's Hand, Volcanic Mantle, Overdrive Relay, Temporal Anchor
+- If a relic is not equipped when the event or bonus stage triggers, equipping it later will not apply its effect
+- Applies to Flash Relics: Lunar Siphon, Static Inductor, Dealer's Hand, Volcanic Mantle, Overdrive Relay, Temporal Anchor
+- Applies to Neon Paradise Relics: Neon Keycard (trigger rate), Gilded Token, Cybernetic Eye, Prism Dice (stage selection weights)
 
 ### 2. Socket-Locked Progress (Charge Relics)
 Some relics accumulate progress only while actively equipped.
@@ -114,6 +115,10 @@ Players display all equipped relics publicly, enabling build comparison across l
 | Fortune Satchel | Backpack | +25% World Boss Chest point rewards (flat additive) | ✓ |
 | Treasure Compass | Compass | +25% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
 | Lucky Crest | BadgePlus | +10% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
+| Neon Chip | Coins | +10% to Neon Paradise point rewards | ✗ |
+| Gilded Token | Ticket | +300% selection weight for Vault and Card stages in Neon Paradise | ✗ |
+| Cybernetic Eye | Gamepad2 | +300% selection weight for Arcade and Reflex stages in Neon Paradise | ✗ |
+| Prism Dice | Dices | +300% selection weight for Gamble, Spin, and Mining stages in Neon Paradise | ✗ |
 
 ---
 
@@ -130,6 +135,8 @@ Players display all equipped relics publicly, enabling build comparison across l
 | King's Purse | Wallet | +50% World Boss Chest point rewards (flat additive) | ✓ |
 | Relic Magnet | Magnet | +50% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
 | Fortune Seal | Stamp | +20% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
+| Neon Keycard | CreditCard | +35% Neon Paradise appearance rate | ✗ |
+| Neon Ledger | Scroll | +20% to Neon Paradise point rewards | ✗ |
 
 ---
 
@@ -142,6 +149,7 @@ Players display all equipped relics publicly, enabling build comparison across l
 | Royal Treasury | Landmark | +100% World Boss Chest point rewards (flat additive) | ✓ |
 | Vault Key | KeyRound | +100% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
 | Ascension Sigil | Sparkles | +35% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
+| High-Roller Marker | Award | +35% to Neon Paradise point rewards | ✗ |
 
 ---
 
@@ -155,6 +163,7 @@ Players display all equipped relics publicly, enabling build comparison across l
 | Dragon's Hoard | Gem | +150% World Boss Chest point rewards (flat additive) | ✓ |
 | Collector's Vault | Archive | +150% chance for a World Boss relic to appear in a World Boss Chest | ✓ |
 | Celestial Crown | Crown | +50% chance for a World Boss Chest to upgrade by one rarity (up to Mythical) | ✓ |
+| Paradise Vault | Vault | +50% to Neon Paradise point rewards | ✗ |
 
 ---
 
@@ -167,6 +176,7 @@ Players display all equipped relics publicly, enabling build comparison across l
 | The Architect's Keystone | Diamond | Upgrades triggered bonuses to next rarity | ✗ |
 | Twin Fortune | CopyPlus | 25% chance to duplicate the earned World Boss Chest. Both rewards combined with independent relic rolls. | ✓ |
 | Prism Key | Diamond | Enables Rainbow Chest tier when combined with any chest-upgrade relic. Does not increase upgrade chance alone. | ✓ |
+| Heart of the Strip | Heart | Achieving a 10x maximum payout in Neon Paradise has a 25% chance to duplicate the reward | ✗ |
 
 ---
 

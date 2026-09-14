@@ -1,9 +1,20 @@
 import { logger } from '@/lib/logger'
 import { getOrCreateUser, getStoredRecoveryCode } from './user'
-import { ProfileData, RecoverResponse, UserPointsData, UserStats } from '@/types/user'
+import {
+  ProfileData,
+  RecoverResponse,
+  UserPointsData,
+  UserStats
+} from '@/types/user'
 import { AchievementStats } from '@/types/achievements'
 import { GlobalEventStateResponse } from '@/types/events'
-import { PlayerStats, LeaderboardEntry, SinglePlayerStats, BadgeData, AchievementEntry } from '@/types/leaderboard'
+import {
+  PlayerStats,
+  LeaderboardEntry,
+  SinglePlayerStats,
+  BadgeData,
+  AchievementEntry
+} from '@/types/leaderboard'
 import { OracleResponse } from '@/types/oracle'
 import { BetHistoryEntry, PredictionResponse } from '@/types/prediction'
 import { PendingMatch } from '@/types/rps'
@@ -541,7 +552,11 @@ export async function postBonusAction(
 }
 
 export async function claimBonusWinnings(userId: string) {
-  return handleResponse<{ finalPayout: string }>(
+  return handleResponse<{
+    finalPayout: string
+    basePayout?: string
+    heartProc?: boolean
+  }>(
     fetch(`${API_BASE}/api/bonus/claim`, {
       method: 'POST',
       headers: { 'x-user-id': userId }

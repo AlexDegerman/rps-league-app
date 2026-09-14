@@ -123,6 +123,9 @@ A: Yes. The pity counter is a session-level mechanic tied to your current bettin
 
 --- THE RELIC CORE ---
 
+Q: Are there relics specifically for Neon Paradise?
+A: Yes. Ten Neon Paradise relics drop during regular gameplay: Gilded Token, Cybernetic Eye, and Prism Dice (Common stage family weights), Neon Chip (+10%), Neon Ledger (+20%), High-Roller Marker (+35%), Paradise Vault (+50%), Neon Keycard (+35% appearance rate), Gilded Cushion (+3x floor insurance), and Heart of the Strip (Mythical 25% jackpot duplication).
+
 Q: How do relics drop?
 A: Relics drop randomly after completed predictions, with duplicate protection removing already-discovered Relics from the drop pool. Completed Chrono-Laps permanently increase your base Relic drop rates up to the system cap, while certain events and Relics can provide additional acquisition bonuses.
 
@@ -136,7 +139,7 @@ Q: How do completed Laps affect my relic drop rates?
 A: Each completed prestige Lap permanently increases your base drop rates for all relic rarities up to a set maximum cap.
 
 Q: How many relics are there in total?
-A: There are 34 unique relics in total: 17 core prediction relics across five rarity tiers (3 Common, 6 Rare, 2 Epic, 3 Legendary, and 3 Mythical) and 17 World Boss exclusive relics obtainable only through boss chests. Owning all Common, Rare, Epic, and Legendary relics is tracked by the Grand Reliquary [GREL] achievement, and all 5 Mythical relics by The Pentad [PENT].
+A: There are 44 unique relics in total: 27 core prediction relics across five rarity tiers (7 Common, 8 Rare, 4 Epic, 4 Legendary, and 4 Mythical) and 17 World Boss exclusive relics obtainable only through boss chests. Owning all Common, Rare, Epic, and Legendary relics is tracked by the Grand Reliquary [GREL] achievement, and all 6 Mythical relics by The Hexad [HEXA].
 
 Q: What happens if a relic drops while a Flash Event is active?
 A: The Relic is added immediately, but equipping it cannot change an already-active Flash Event. Its effect applies to future events.
@@ -339,7 +342,7 @@ Q: How does the dynamic badge upgrading system work?
 A: When you earn a higher rarity tier of a chained achievement, it automatically replaces the lower tier version in your inventory. For example earning the Rare win streak badge automatically removes the Common version. This keeps your badge collection focused on your highest accomplishments.
 
 Q: How many total achievements are there?
-A: RPS League has 155 achievements across 18 categories and six rarity tiers. Achievements permanently track progression and never reset through Ascension.
+A: RPS League has 156 achievements across 18 categories and six rarity tiers. Achievements permanently track progression and never reset through Ascension.
 
 Q: What are the rarest achievements?
 A: Rainbow achievements are the highest rarity tier. The four apex achievements are God King, Cosmic Sovereign, World Purifier, and Paradise Ascendant, representing the game's longest-term mastery goals.

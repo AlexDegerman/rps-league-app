@@ -135,15 +135,20 @@ export default function SniperChallengeStage() {
           return
         }
         playNeonReward(zoneMult)
-        if (zone === 'bullseye') {
-          setTimeout(() => playNeonComplete(true), 400)
-        }
       }, 400)
 
       const claimResult = await claimBonusWinnings(userId)
       if (claimResult?.finalPayout) {
         const metricText = ZONE_LABEL[zone]
-        setBonusFinalPayout(BigInt(claimResult.finalPayout), metricText)
+        setBonusFinalPayout(
+          BigInt(claimResult.finalPayout),
+          metricText,
+          claimResult.basePayout ? BigInt(claimResult.basePayout) : undefined,
+          claimResult.heartProc
+        )
+        if (zone === 'bullseye' && !claimResult.heartProc) {
+          setTimeout(() => playNeonComplete(true), 400)
+        }
       }
     } catch (err) {
       console.error('[SniperChallenge] fire error', err)

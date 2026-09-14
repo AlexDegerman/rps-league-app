@@ -31,8 +31,10 @@ DROP RATES & PROGRESSION SCALE:
 - Legendary: 0.2% base + 0.03% per lap, capped at +1%
 - Mythical: 0.1% base + 0.01% per lap, capped at +0.2%
 
-WORLD BOSS EXCLUSIVE RELICS:
-- 14 relics exist outside the standard prediction drop pool.
+CORE & EXCLUSIVE RELIC DISTRIBUTION:
+- 27 relics drop in the regular prediction pool (including 10 Neon Paradise relics).
+- 17 relics exist outside the standard prediction drop pool, obtainable only through World Boss chest rewards.
+- 44 relics exist in total across the entire simulation.
 - They are obtainable only through World Boss chest rewards.
 - They are not affected by The Scavenger's Lens or Vault Festival multipliers.
 - Their effects specialize in World Boss chest point rewards, relic appearance chance, and chest upgrade chance.
@@ -79,6 +81,10 @@ COMMON:
 - Fortune Satchel: +25% World Boss Chest point rewards.
 - Treasure Compass: +25% chance for a World Boss relic to appear in a World Boss Chest.
 - Lucky Crest: +10% chance for a World Boss Chest to upgrade by one rarity, up to Mythical.
+- Neon Chip: +10% to Neon Paradise point rewards.
+- Gilded Token: +300% selection weight for Vault and Card stages in Neon Paradise.
+- Cybernetic Eye: +300% selection weight for Arcade and Reflex stages in Neon Paradise.
+- Prism Dice: +300% selection weight for Gamble, Spin, and Mining stages in Neon Paradise.
 
 RARE:
 - Lunar Siphon: +50% Moon event rate and +0.5x Flash Event multiplier.
@@ -90,6 +96,10 @@ RARE:
 - King's Purse: +50% World Boss Chest point rewards.
 - Relic Magnet: +50% chance for a World Boss relic to appear in a World Boss Chest.
 - Fortune Seal: +20% chance for a World Boss Chest to upgrade by one rarity, up to Mythical.
+- Neon Keycard: +35% Neon Paradise appearance rate.
+- Neon Ledger: +20% to Neon Paradise point rewards.
+- Temporal Charge: In World Boss encounters, your successful hits deal 2 damage in the first 10 seconds.
+- Phantom Reach: In World Boss encounters, your misses have a 50% chance to deal 1 damage.
 
 EPIC:
 - Buffer Module: Every 15 matches, the next loss does not reset the win streak.
@@ -97,6 +107,8 @@ EPIC:
 - Royal Treasury: +100% World Boss Chest point rewards.
 - Vault Key: +100% chance for a World Boss relic to appear in a World Boss Chest.
 - Ascension Sigil: +35% chance for a World Boss Chest to upgrade by one rarity, up to Mythical.
+- Gilded Cushion: Guarantees a minimum +3x payout in Neon Paradise.
+- High-Roller Marker: +35% to Neon Paradise point rewards.
 
 LEGENDARY:
 - Prismatic Shard: +0.5x multiplier when no Flash Event is active.
@@ -105,6 +117,8 @@ LEGENDARY:
 - Dragon's Hoard: +150% World Boss Chest point rewards.
 - Collector's Vault: +150% chance for a World Boss relic to appear in a World Boss Chest.
 - Celestial Crown: +50% chance for a World Boss Chest to upgrade by one rarity, up to Mythical.
+- Paradise Vault: +50% to Neon Paradise point rewards.
+- Omega Shard: In World Boss encounters, your successful hits have a 10% chance to deal 3 damage.
 
 MYTHICAL:
 - Soul of the Machine: 5% chance for a 3x reward multiplier.
@@ -112,6 +126,7 @@ MYTHICAL:
 - The Architect's Keystone: Upgrades triggered Tiered Bonuses to the next rarity and unlocks the Mythical 7x bonus tier.
 - Twin Fortune: 25% chance to duplicate the earned World Boss Chest. Both rewards receive independent relic rolls and are combined into one payout.
 - Prism Key: Enables the Rainbow Chest tier when equipped alongside any chest-upgrade relic. Does not increase upgrade chance by itself.
+- Heart of the Strip: Achieving a 10x maximum payout in Neon Paradise has a 25% chance to duplicate the reward.
 
 MYTHICAL BONUS TIER:
 - The Architect's Keystone can unlock the Mythical x15 Tiered Bonus.
