@@ -87,19 +87,27 @@ Relic equipping and unequipping is fully blocked for all players while a World B
 
 ## 🧩 UI Architecture
 
+### 3-Preset Automatic Loadout System
+Relics are segregated into three dedicated gameplay presets:
+- Prediction Loadout: Active during standard match predictions. Contains core prediction and flash-modifier relics as well as Neon Keycard.
+- World Boss Loadout: Automatically equipped when a World Boss encounter becomes active and automatically returned to the Prediction preset once the encounter concludes.
+- Neon Paradise Loadout: Automatically equipped upon entering any Neon Paradise bonus minigame and automatically returned to the Prediction preset once the bonus stage resolves.
+
 ### Relic Slots
-Three relic slots are always visible in the main gameplay header. Each slot shows the currently equipped relic or an empty state, and any slot opens the Relic Drawer on tap. The slot capacity indicator (e.g. 1/3) is always visible regardless of whether a relic is equipped.
+Three relic slots are always visible in the main gameplay header. Each slot reflects the currently active mode's preset loadout in real time. The slot capacity indicator (e.g. 1/3) remains visible across all modes.
 
 ### Relic Drawer
 Mobile-first overlay panel containing:
-- Full inventory organized by rarity
-- Active slots summary bar at the top showing all three slots
-- Slot selector on equip - choose which of the three slots to assign the relic to
-- Equip and remove actions per relic
-- Locked state display during active World Boss encounters
+- Three preset tabs across the top: Prediction, World Boss, and Neon Paradise
+- Dedicated 3-slot loadout bar for the selected preset
+- Filtered catalog showing only relics eligible for the selected preset
+- Slot selector on equip targeting the selected preset
+- Locked state display during active World Boss combat
 
-### Profile Integration
-Players display all equipped relics publicly, enabling build comparison across leaderboards. Up to three relics are shown on profile pages with rarity-matched styling.
+<p align="center">
+  <strong>Relic Loadout Tabs Showcase</strong><br/>
+  <img src="./assets/relicloadouts-demo.gif" width="220" />
+</p>
 
 ---
 

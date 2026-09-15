@@ -1,8 +1,8 @@
 import pool from '../utils/db.js'
 import { getActiveFestival } from './festivalService.js'
 import { logger } from '../utils/logger.js'
-import type { RelicDef, RelicRarity } from '../types/relics.js'
-import { RELICS, RELIC_MAP } from '../constants/relics.js'
+import type { RelicDef, RelicRarity, LoadoutType } from '../types/relics.js'
+import { RELICS, RELIC_MAP, getRelicCategory } from '../constants/relics.js'
 
 function getLapBonus(rarity: RelicRarity, userLaps: number) {
   const caps: Record<RelicRarity, { perLap: number; max: number }> = {
@@ -44,14 +44,14 @@ async function logRelicDrop(userId: string, relic: RelicDef) {
 
 /**
  * Evaluates and processes relic drops using a single-roll cumulative probability model.
- * 
+ *
  * Logic:
  * 1. Grants first-time players a 25% welcome drop chance to find their very first Common relic.
- * 2. Compiles independent, non-overlapping drop rates for each rarity tier (factoring in Lap bonuses, 
+ * 2. Compiles independent, non-overlapping drop rates for each rarity tier (factoring in Lap bonuses,
  *    Scavenger's Lens, and Vault Festival multipliers) and tests them against a single random float.
  * 3. Maps the roll to its corresponding rarity range, ensuring no tier interferes with another's rate.
- * 4. Applies a "Smart Loot" fallback: if the selected rarity is fully collected, the system 
- *    gracefully searches outward starting with more common tiers first to preserve the economic rarity 
+ * 4. Applies a "Smart Loot" fallback: if the selected rarity is fully collected, the system
+ *    gracefully searches outward starting with more common tiers first to preserve the economic rarity
  *    of high-tier items (such as Mythicals), wrapping around to rarer tiers only as a last resort.
  */
 export async function rollRelicDrop(
@@ -201,6 +201,7 @@ export async function getUserRelics(userId: string): Promise<RelicDef[]> {
 
         return {
           ...staticDef,
+          category: getRelicCategory(row.relic_key),
           counter: Number(row.counter || 0)
         }
       }
@@ -208,10 +209,69 @@ export async function getUserRelics(userId: string): Promise<RelicDef[]> {
     .filter((relic): relic is RelicDef => relic !== null)
 }
 
+export async function getAllLoadouts(
+  userId: string
+): Promise<Record<LoadoutType, (RelicDef | null)[]>> {
+  const result = await pool.query(
+    `SELECT loadout_prediction, loadout_world_boss, loadout_neon_paradise, equipped_relics FROM users WHERE user_id = $1`,
+    [userId]
+  )
+  const row = result.rows[0]
+  const predKeys: (string | null)[] = row?.loadout_prediction?.length
+    ? row.loadout_prediction
+    : (row?.equipped_relics ?? [null, null, null])
+  const bossKeys: (string | null)[] = row?.loadout_world_boss ?? [
+    null,
+    null,
+    null
+  ]
+  const neonKeys: (string | null)[] = row?.loadout_neon_paradise ?? [
+    null,
+    null,
+    null
+  ]
+
+  const allKeys = [...predKeys, ...bossKeys, ...neonKeys].filter(
+    Boolean
+  ) as string[]
+  const counterMap = new Map<string, number>()
+  if (allKeys.length > 0) {
+    const counterRes = await pool.query(
+      'SELECT relic_key, counter FROM relics WHERE user_id = $1 AND relic_key = ANY($2)',
+      [userId, allKeys]
+    )
+    for (const r of counterRes.rows)
+      counterMap.set(r.relic_key, Number(r.counter ?? 0))
+  }
+
+  const mapKeysToRelics = (keys: (string | null)[]) => {
+    const arr: (RelicDef | null)[] = [null, null, null]
+    for (let i = 0; i < 3; i++) {
+      const key = keys[i]
+      if (!key) continue
+      const def = RELIC_MAP[key]
+      if (def)
+        arr[i] = {
+          ...def,
+          category: getRelicCategory(key),
+          counter: counterMap.get(key) ?? 0
+        }
+    }
+    return arr
+  }
+
+  return {
+    prediction: mapKeysToRelics(predKeys),
+    world_boss: mapKeysToRelics(bossKeys),
+    neon_paradise: mapKeysToRelics(neonKeys)
+  }
+}
+
 export async function equipRelicToSlot(
   userId: string,
   relicKey: string,
-  slotIndex: number
+  slotIndex: number,
+  loadout: LoadoutType = 'prediction'
 ): Promise<void> {
   const owned = await pool.query(
     'SELECT id FROM relics WHERE user_id = $1 AND relic_key = $2',
@@ -219,15 +279,29 @@ export async function equipRelicToSlot(
   )
   if (owned.rows.length === 0) throw new Error('Relic not owned')
 
+  const category = getRelicCategory(relicKey)
+  if (category !== loadout) {
+    throw new Error(`Relic belongs to ${category} loadout, not ${loadout}`)
+  }
+
+  const col =
+    loadout === 'world_boss'
+      ? 'loadout_world_boss'
+      : loadout === 'neon_paradise'
+        ? 'loadout_neon_paradise'
+        : 'loadout_prediction'
+
   const current = await pool.query(
-    'SELECT equipped_relics FROM users WHERE user_id = $1',
+    `SELECT ${col}, equipped_relics FROM users WHERE user_id = $1`,
     [userId]
   )
-  const slots: (string | null)[] = current.rows[0]?.equipped_relics ?? [
-    null,
-    null,
-    null
-  ]
+  const rawSlots: (string | null)[] = current.rows[0]?.[col] ??
+    (loadout === 'prediction' ? current.rows[0]?.equipped_relics : null) ?? [
+      null,
+      null,
+      null
+    ]
+  const slots: (string | null)[] = [...rawSlots]
   while (slots.length < 3) slots.push(null)
 
   // Remove from any existing slot first (no duplicate keys)
@@ -237,25 +311,42 @@ export async function equipRelicToSlot(
 
   slots[slotIndex] = relicKey
 
-  await pool.query(
-    `UPDATE users SET equipped_relics = $1, equipped_relic = $2 WHERE user_id = $3`,
-    [slots, slots[0] ?? null, userId]
-  )
+  if (loadout === 'prediction') {
+    await pool.query(
+      `UPDATE users SET equipped_relics = $1, loadout_prediction = $1, equipped_relic = $2 WHERE user_id = $3`,
+      [slots, slots[0] ?? null, userId]
+    )
+  } else {
+    await pool.query(`UPDATE users SET ${col} = $1 WHERE user_id = $2`, [
+      slots,
+      userId
+    ])
+  }
 }
 
 export async function unequipRelicFromSlot(
   userId: string,
-  slotIndex: number
+  slotIndex: number,
+  loadout: LoadoutType = 'prediction'
 ): Promise<void> {
+  const col =
+    loadout === 'world_boss'
+      ? 'loadout_world_boss'
+      : loadout === 'neon_paradise'
+        ? 'loadout_neon_paradise'
+        : 'loadout_prediction'
+
   const current = await pool.query(
-    'SELECT equipped_relics FROM users WHERE user_id = $1',
+    `SELECT ${col}, equipped_relics FROM users WHERE user_id = $1`,
     [userId]
   )
-  const slots: (string | null)[] = current.rows[0]?.equipped_relics ?? [
-    null,
-    null,
-    null
-  ]
+  const rawSlots: (string | null)[] = current.rows[0]?.[col] ??
+    (loadout === 'prediction' ? current.rows[0]?.equipped_relics : null) ?? [
+      null,
+      null,
+      null
+    ]
+  const slots: (string | null)[] = [...rawSlots]
   while (slots.length < 3) slots.push(null)
 
   const relicKey = slots[slotIndex]
@@ -268,12 +359,20 @@ export async function unequipRelicFromSlot(
     )
   }
 
-  await pool.query(
-    `UPDATE users SET equipped_relics = $1, equipped_relic = $2 WHERE user_id = $3`,
-    [slots, slots[0] ?? null, userId]
-  )
+  if (loadout === 'prediction') {
+    await pool.query(
+      `UPDATE users SET equipped_relics = $1, loadout_prediction = $1, equipped_relic = $2 WHERE user_id = $3`,
+      [slots, slots[0] ?? null, userId]
+    )
+  } else {
+    await pool.query(`UPDATE users SET ${col} = $1 WHERE user_id = $2`, [
+      slots,
+      userId
+    ])
+  }
 }
 
 export const equipRelic = (userId: string, relicKey: string) =>
-  equipRelicToSlot(userId, relicKey, 0)
-export const unequipRelic = (userId: string) => unequipRelicFromSlot(userId, 0)
+  equipRelicToSlot(userId, relicKey, 0, 'prediction')
+export const unequipRelic = (userId: string) =>
+  unequipRelicFromSlot(userId, 0, 'prediction')

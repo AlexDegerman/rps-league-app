@@ -14,7 +14,8 @@ import {
 import { TOTAL_TRIGGER_CHANCE, ENABLED_STAGES, STAGE_WEIGHTS, KINGS_VAULT_PAYOUTS, DOUBLE_DOWN_PAYOUTS, RAINBOW_RUSH_PAYOUTS, ORACLE_VISION_PAYOUTS, CRYSTAL_TILE_DISTRIBUTION, RAINBOW_RUSH_WEIGHTS } from '../constants/bonusStage.js'
 
 export function rollBonusTrigger(
-  equippedRelics: string[] = []
+  equippedRelics: string[] = [],
+  neonParadiseRelics: string[] = []
 ): StageType | null {
   let triggerChance = TOTAL_TRIGGER_CHANCE
   if (equippedRelics.includes('neon_keycard')) {
@@ -41,22 +42,22 @@ export function rollBonusTrigger(
     'CRYSTAL_MINE'
   ]
 
+  const stageRelics =
+    neonParadiseRelics.length > 0 ? neonParadiseRelics : equippedRelics
+
   const options = ENABLED_STAGES.map((stage) => {
     let weight = STAGE_WEIGHTS[stage] ?? 1.0
 
-    if (
-      equippedRelics.includes('gilded_token') &&
-      VAULT_FAMILY.includes(stage)
-    ) {
+    if (stageRelics.includes('gilded_token') && VAULT_FAMILY.includes(stage)) {
       weight *= 4.0
     }
     if (
-      equippedRelics.includes('cybernetic_eye') &&
+      stageRelics.includes('cybernetic_eye') &&
       ARCADE_FAMILY.includes(stage)
     ) {
       weight *= 4.0
     }
-    if (equippedRelics.includes('prism_dice') && RISK_FAMILY.includes(stage)) {
+    if (stageRelics.includes('prism_dice') && RISK_FAMILY.includes(stage)) {
       weight *= 4.0
     }
 
@@ -593,10 +594,16 @@ export async function claimWinnings(
     await client.query('BEGIN')
 
     const userRelicsRes = await client.query<{
+      loadout_neon_paradise: string[] | null
       equipped_relics: string[] | null
-    }>('SELECT equipped_relics FROM users WHERE user_id = $1', [session.userId])
+    }>(
+      'SELECT loadout_neon_paradise, equipped_relics FROM users WHERE user_id = $1',
+      [session.userId]
+    )
     const relics: string[] =
-      userRelicsRes.rows[0]?.equipped_relics?.filter(Boolean) ?? []
+      userRelicsRes.rows[0]?.loadout_neon_paradise?.filter(Boolean)?.length
+        ? userRelicsRes.rows[0].loadout_neon_paradise.filter(Boolean)
+        : (userRelicsRes.rows[0]?.equipped_relics?.filter(Boolean) ?? [])
 
     let payout = session.accumulatedPayout
 

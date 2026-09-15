@@ -1,17 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import {
-  Package,
-  X,
-  Radar,
-  ChevronDown
-} from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Package, X, Radar, ChevronDown, AlertTriangle } from 'lucide-react'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { useGameStore } from '@/app/stores/gameStore'
-import { ICON_MAP, RARITY_STYLES, RELICS } from '@/constants/relics'
-import { RelicRarity, RelicDef } from '@/types/relics'
-
+import {
+  ICON_MAP,
+  RARITY_STYLES,
+  RELICS,
+  getRelicCategory
+} from '@/constants/relics'
+import { RelicRarity, RelicDef, LoadoutType } from '@/types/relics'
+import { tryAutoEquipRelic } from '@/lib/relicEquipper'
 
 const RARITY_ORDER: RelicRarity[] = [
   'MYTHICAL',
@@ -21,35 +21,67 @@ const RARITY_ORDER: RelicRarity[] = [
   'COMMON'
 ]
 
+const LOADOUT_TABS: {
+  id: LoadoutType
+  label: string
+  shortLabel: string
+  icon: string
+}[] = [
+  { id: 'prediction', label: 'Prediction', shortLabel: 'Predict', icon: '🎯' },
+  { id: 'world_boss', label: 'World Boss', shortLabel: 'Boss', icon: '⚔️' },
+  {
+    id: 'neon_paradise',
+    label: 'Neon Paradise',
+    shortLabel: 'Neon',
+    icon: '🌴'
+  }
+]
+
 export default function RelicDrawer() {
   const drawerOpen = useRelicStore((s) => s.drawerOpen)
+  if (!drawerOpen) return null
+  return <RelicDrawerContent />
+}
+
+function RelicDrawerContent() {
   const setDrawerOpen = useRelicStore((s) => s.setDrawerOpen)
   const inventory = useRelicStore((s) => s.inventory)
   const inventoryLoaded = useRelicStore((s) => s.inventoryLoaded)
-  const equippedRelics = useRelicStore((s) => s.equippedRelics)
+  const activeLoadout = useRelicStore((s) => s.activeLoadout)
+  const loadouts = useRelicStore((s) => s.loadouts)
   const equipRelic = useRelicStore((s) => s.equipRelic)
   const unequipRelic = useRelicStore((s) => s.unequipRelic)
   const fetchInventory = useRelicStore((s) => s.fetchInventory)
   const worldBossPhase = useGameStore((s) => s.worldBossPhase)
   const bossActive = worldBossPhase === 'ACTIVE'
 
+  const [selectedTab, setSelectedTab] = useState<LoadoutType>(activeLoadout)
   const [pendingRelic, setPendingRelic] = useState<RelicDef | null>(null)
   const [collapsedRarities, setCollapsedRarities] = useState<
     Record<string, boolean>
   >({})
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (drawerOpen) fetchInventory()
-  }, [drawerOpen, fetchInventory])
+    fetchInventory()
+  }, [fetchInventory])
 
   useEffect(() => {
-    if (!drawerOpen) {
-      const raf = requestAnimationFrame(() => setPendingRelic(null))
-      return () => cancelAnimationFrame(raf)
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0
     }
-  }, [drawerOpen])
+  }, [selectedTab])
 
-  if (!drawerOpen) return null
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [])
+
+  const isLockedInCombat = bossActive && selectedTab === 'world_boss'
+  const currentTabEquipped = loadouts[selectedTab] ?? [null, null, null]
 
   const toggleRarity = (rarity: string) => {
     setCollapsedRarities((prev) => ({
@@ -59,26 +91,42 @@ export default function RelicDrawer() {
   }
 
   const handleEquipClick = (relic: RelicDef) => {
-    if (bossActive) return
-    setPendingRelic((prev) => (prev?.key === relic.key ? null : relic))
+    if (isLockedInCombat) return
+
+    tryAutoEquipRelic({
+      relic,
+      slots: currentTabEquipped,
+      loadout: selectedTab,
+      equipRelic,
+      onAutoEquipped: () => setPendingRelic(null),
+      onPromptReplace: () =>
+        setPendingRelic((prev) => (prev?.key === relic.key ? null : relic))
+    })
   }
 
   const handleSlotSelect = (slotIndex: number) => {
-    if (!pendingRelic || bossActive) return
-    equipRelic(pendingRelic, slotIndex)
+    if (!pendingRelic || isLockedInCombat) return
+    equipRelic(pendingRelic, slotIndex, selectedTab)
     setPendingRelic(null)
   }
 
-  // Create a set of equipped relic keys to easily hide them below
   const equippedKeys = new Set(
-    equippedRelics.filter(Boolean).map((r) => r!.key)
+    currentTabEquipped.filter(Boolean).map((r) => r!.key)
   )
+
+  const tabInventory = inventory.filter(
+    (r) => (r.category ?? getRelicCategory(r.key)) === selectedTab
+  )
+  const unequippedCount = tabInventory.filter(
+    (r) => !equippedKeys.has(r.key)
+  ).length
 
   const renderSlotSelector = (relic: RelicDef) => (
     <div className="mt-3 pt-3 border-t border-indigo-950/40 flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p className="text-[8px] font-black uppercase tracking-[0.2em] text-indigo-400">
-          Choose a slot to equip
+          Choose a slot to replace (
+          {LOADOUT_TABS.find((t) => t.id === selectedTab)?.label})
         </p>
         <button
           onClick={(e) => {
@@ -93,7 +141,7 @@ export default function RelicDrawer() {
 
       <div className="flex gap-2">
         {[0, 1, 2].map((i) => {
-          const occupant = equippedRelics[i]
+          const occupant = currentTabEquipped[i]
           const isSameRelic = occupant?.key === relic.key
           return (
             <button
@@ -122,7 +170,6 @@ export default function RelicDrawer() {
     </div>
   )
 
-  // Renders unequipped relics only
   const renderRelicCard = (relic: RelicDef) => {
     const Icon = ICON_MAP[relic.icon] ?? Package
     const styles = RARITY_STYLES[relic.rarity]
@@ -177,7 +224,7 @@ export default function RelicDrawer() {
           </div>
         )}
 
-        {bossActive && (
+        {isLockedInCombat && (
           <div className="mt-2.5 px-2 py-1 bg-red-950/30 border border-red-900/20 rounded-md">
             <p className="text-[8px] text-red-400 font-bold uppercase tracking-widest text-center">
               🔒 Locked in Combat
@@ -185,18 +232,13 @@ export default function RelicDrawer() {
           </div>
         )}
 
-        {isPending && !bossActive && renderSlotSelector(relic)}
+        {isPending && !isLockedInCombat && renderSlotSelector(relic)}
       </div>
     )
   }
 
-  // Count how many discovered relics are currently not equipped
-  const unequippedCount = inventory.filter(
-    (r) => !equippedKeys.has(r.key)
-  ).length
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pb-20 sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pb-20">
       <div
         className="absolute inset-0 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200"
         onClick={() => setDrawerOpen(false)}
@@ -220,67 +262,123 @@ export default function RelicDrawer() {
           </button>
         </div>
 
-        <div className="px-5 py-4 border-b border-gray-900/60 shrink-0 flex flex-col gap-2 bg-gray-900/10">
-          <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-600">
-            Equipped Slots
-          </p>
-          <div className="flex flex-col gap-1.5">
-            {equippedRelics.map((r, i) => {
-              const styles = r ? RARITY_STYLES[r.rarity] : null
-              const Icon = r ? (ICON_MAP[r.icon] ?? Package) : Package
+        {/* Loadout Preset Tabs */}
+        <div className="flex border-b border-gray-900 shrink-0 bg-gray-950 px-3 max-[409px]:px-1.5 pt-2 gap-1.5 max-[409px]:gap-1">
+          {LOADOUT_TABS.map((tab) => {
+            const isActive = selectedTab === tab.id
+
+            const tabSlots = loadouts[tab.id] ?? [null, null, null]
+            const hasEmptySlot = tabSlots.some((r) => r === null)
+            const equippedKeys = new Set(
+              tabSlots.filter(Boolean).map((r) => r!.key)
+            )
+            const hasEquippable =
+              hasEmptySlot &&
+              inventory.some(
+                (r) =>
+                  (r.category ?? getRelicCategory(r.key)) === tab.id &&
+                  !equippedKeys.has(r.key)
+              )
+
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setSelectedTab(tab.id)
+                  setPendingRelic(null)
+                }}
+                className={`flex-1 py-2 px-2 max-[409px]:px-1 text-[10px] max-[409px]:text-[9px] font-black uppercase tracking-wider max-[409px]:tracking-tight rounded-t-xl transition-all flex items-center justify-center gap-1.5 max-[409px]:gap-1 border-t border-x ${
+                  isActive
+                    ? 'bg-gray-900 text-white border-gray-800'
+                    : 'bg-transparent text-gray-500 border-transparent hover:text-gray-300'
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span className="max-[409px]:hidden">{tab.label}</span>
+                <span className="hidden max-[409px]:inline">
+                  {tab.shortLabel}
+                </span>
+                {hasEquippable && (
+                  <AlertTriangle
+                    size={11}
+                    className="text-amber-400 shrink-0"
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="px-4 py-3 border-b border-gray-900/60 shrink-0 flex flex-col gap-2 bg-gray-900/10">
+          <div className="flex items-center justify-between px-0.5">
+            <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-600">
+              {LOADOUT_TABS.find((t) => t.id === selectedTab)?.label} Slots
+            </p>
+            {activeLoadout === selectedTab && (
+              <span className="text-[7.5px] font-black uppercase tracking-widest text-emerald-400">
+                Active In-Game
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-3 gap-1.5">
+            {currentTabEquipped.map((r, i) => {
+              if (!r) {
+                return (
+                  <div
+                    key={i}
+                    className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-gray-900 bg-gray-950/20 h-14.5 min-w-0 text-center"
+                  >
+                    <span className="text-[8px] font-black text-gray-700 uppercase tracking-wider mb-0.5">
+                      Slot {i + 1}
+                    </span>
+                    <span className="text-[9px] font-bold text-gray-600 uppercase tracking-tight">
+                      Empty
+                    </span>
+                  </div>
+                )
+              }
+
+              const styles = RARITY_STYLES[r.rarity]
+              const Icon = ICON_MAP[r.icon] ?? Package
+
               return (
                 <div
                   key={i}
-                  className={`flex justify-between px-3.5 py-2.5 rounded-xl border transition-all ${
-                    r
-                      ? `items-start bg-gray-900/40 ${styles!.border}`
-                      : 'items-center border-dashed border-gray-900 bg-gray-950/20'
-                  }`}
+                  title={`${r.name} (${r.rarity}): ${r.effect}`}
+                  className={`relative flex flex-col items-center justify-center p-1.5 rounded-xl border bg-gray-900/40 h-14.5 min-w-0 text-center transition-all ${styles.border}`}
                 >
-                  <div className="flex items-start gap-3 min-w-0 flex-1">
-                    <div
-                      className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 text-[10px] font-black ${
-                        r
-                          ? `bg-gray-950 ${styles!.text} mt-0.5`
-                          : 'bg-gray-900/50 text-gray-700'
-                      }`}
-                    >
-                      {i + 1}
-                    </div>
+                  <span
+                    className={`absolute top-1 left-1.5 text-[8px] font-black opacity-50 ${styles.text}`}
+                  >
+                    {i + 1}
+                  </span>
 
-                    {r ? (
-                      <>
-                        <Icon
-                          size={16}
-                          className={`${styles!.text} shrink-0 mt-1`}
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className={`text-[11px] font-black leading-snug ${styles!.text}`}
-                          >
-                            {r.name}
-                          </p>
-                          <p className="text-[9px] text-slate-300 font-semibold leading-snug mt-0.5 pr-2">
-                            {r.effect}
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <span className="text-[9px] font-bold text-gray-700 uppercase tracking-widest">
-                        Empty
-                      </span>
-                    )}
-                  </div>
-
-                  {r && !bossActive && (
+                  {!isLockedInCombat && (
                     <button
-                      onClick={() => unequipRelic(i)}
-                      title="Unequip"
-                      className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center active:scale-95 shrink-0 mt-0.5"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        unequipRelic(i, selectedTab)
+                      }}
+                      aria-label="Unequip"
+                      className="absolute! top-1 right-1 p-0.5 rounded-md text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
                     >
-                      <X size={14} />
+                      <X size={11} />
                     </button>
                   )}
+
+                  <div
+                    className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 bg-gray-950 border ${styles.border} mb-1`}
+                  >
+                    <Icon size={13} className={styles.text} />
+                  </div>
+
+                  <p
+                    className={`text-[9px] font-black leading-none truncate w-full px-1 ${styles.text}`}
+                  >
+                    {r.name}
+                  </p>
                 </div>
               )
             })}
@@ -288,7 +386,10 @@ export default function RelicDrawer() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto flex-1 custom-scrollbar">
+        <div
+          ref={scrollContainerRef}
+          className="overflow-y-auto flex-1 custom-scrollbar"
+        >
           <div className="px-4 py-4 space-y-4">
             {!inventoryLoaded ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -303,20 +404,20 @@ export default function RelicDrawer() {
                   <Radar size={20} className="text-gray-700 animate-pulse" />
                 </div>
                 <h3 className="text-white font-black uppercase text-[10px] tracking-widest mb-1">
-                  {inventory.length === 0
-                    ? 'No Relics Discovered'
-                    : 'All Relics Equipped'}
+                  {tabInventory.length === 0
+                    ? `No ${LOADOUT_TABS.find((t) => t.id === selectedTab)?.label} Relics`
+                    : `All ${LOADOUT_TABS.find((t) => t.id === selectedTab)?.label} Relics Equipped`}
                 </h3>
                 <p className="text-gray-600 text-[8px] uppercase tracking-wider">
-                  {inventory.length === 0
-                    ? 'Keep playing to find them'
-                    : 'All of your discovered relics are currently active!'}
+                  {tabInventory.length === 0
+                    ? 'Keep playing to discover specialized relics'
+                    : 'All discovered relics for this mode are active!'}
                 </p>
               </div>
             ) : (
               <>
                 {RARITY_ORDER.map((rarity) => {
-                  const ownedItems = inventory.filter(
+                  const ownedItems = tabInventory.filter(
                     (r) => r.rarity === rarity && !equippedKeys.has(r.key)
                   )
 
@@ -358,7 +459,7 @@ export default function RelicDrawer() {
 
         <div className="p-3 bg-gray-900/25 border-t border-gray-900 shrink-0">
           <p className="text-[8px] text-center text-gray-600 font-bold uppercase tracking-[0.2em]">
-            Select any relic to equip or swap slots
+            Select any relic to equip or swap slots in this preset
           </p>
         </div>
       </div>

@@ -580,12 +580,15 @@ const distributeRewards = async (
       const currentPoints = BigInt(pointsRes.rows[0]?.points ?? '0')
 
       const userRes = await pool.query(
-        'SELECT equipped_relics, nickname FROM users WHERE user_id = $1',
+        'SELECT loadout_world_boss, equipped_relics, nickname FROM users WHERE user_id = $1',
         [userId]
       )
       if (!userRes.rows.length) continue
-      const relics: string[] =
-        userRes.rows[0].equipped_relics?.filter(Boolean) ?? []
+      const relics: string[] = userRes.rows[0].loadout_world_boss?.filter(
+        Boolean
+      )?.length
+        ? userRes.rows[0].loadout_world_boss.filter(Boolean)
+        : (userRes.rows[0].equipped_relics?.filter(Boolean) ?? [])
 
       const finalRarity = applyChestUpgrade(baseChestRarity, relics)
       const pointReward = getChestPointReward(

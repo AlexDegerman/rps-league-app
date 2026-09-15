@@ -1183,6 +1183,16 @@ export default function HomePage() {
 
   const isBossActive = worldBossPhase === 'ACTIVE' && worldBossUIActive
 
+  useEffect(() => {
+    if (isBonusActive) {
+      useRelicStore.getState().setActiveLoadout('neon_paradise')
+    } else if (isBossActive) {
+      useRelicStore.getState().setActiveLoadout('world_boss')
+    } else {
+      useRelicStore.getState().setActiveLoadout('prediction')
+    }
+  }, [isBonusActive, isBossActive])
+
   return (
     <div className="max-w-2xl mx-auto px-4 pb-24">
       {showWelcomeModal && <WelcomeModal onContinue={handleWelcomeContinue} />}

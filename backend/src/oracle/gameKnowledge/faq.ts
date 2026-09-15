@@ -123,6 +123,27 @@ A: Yes. The pity counter is a session-level mechanic tied to your current bettin
 
 --- THE RELIC CORE ---
 
+Q: What are Relic Loadouts, and how do they work?
+A: Three dedicated 3-slot presets: Prediction, World Boss, and Neon Paradise. The game automatically equips World Boss relics during raids and Neon Paradise relics during bonus minigames, returning to Prediction when finished.
+
+Q: How do I equip relics across loadouts?
+A: Open the Relic Vault and switch between the three tabs. Tapping an unequipped relic fills your first empty slot automatically. If all three slots are full, it asks which active relic you want to replace.
+
+Q: Can I change World Boss relics during combat?
+A: No. World Boss slots lock during active encounters to prevent mid-fight swapping between damage and chest relics. Prediction and Neon Paradise loadouts remain editable.
+
+Q: Why is Neon Keycard in Prediction instead of Neon Paradise?
+A: It boosts bonus stage trigger rates on standard matches, so its passive only functions while placing regular predictions.
+
+Q: What does the amber warning icon mean?
+A: It alerts you that a loadout has empty slots while you have unequipped relics waiting in inventory. Tap or hold the badge to see which loadouts have available gear.
+
+Q: How do I change which loadout is active in-game?
+A: You don't need to. Swapping is fully automatic based on your current mode: Prediction for standard matches, World Boss for raids, and Neon Paradise for bonus stages.
+
+Q: Do I need to manually switch loadouts before a boss or bonus stage?
+A: No. The game detects when a World Boss or Neon Paradise stage begins and equips that preset instantly, returning to Prediction when it ends.
+
 Q: Are there relics specifically for Neon Paradise?
 A: Yes. Ten Neon Paradise relics drop during regular gameplay: Gilded Token, Cybernetic Eye, and Prism Dice (Common stage family weights), Neon Chip (+10%), Neon Ledger (+20%), High-Roller Marker (+35%), Paradise Vault (+50%), Neon Keycard (+35% appearance rate), Gilded Cushion (+3x floor insurance), and Heart of the Strip (Mythical 25% jackpot duplication).
 

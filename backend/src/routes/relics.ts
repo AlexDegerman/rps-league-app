@@ -2,11 +2,13 @@ import { Router } from 'express'
 import pool from '../utils/db.js'
 import {
   getUserRelics,
+  getAllLoadouts,
   equipRelicToSlot,
-  unequipRelicFromSlot,
+  unequipRelicFromSlot
 } from '../services/relicService.js'
 import { isWorldBossActive } from '../services/worldBossService.js'
-import { RELIC_MAP } from '../constants/relics.js'
+import { getRelicCategory } from '../constants/relics.js'
+import type { LoadoutType } from '../types/relics.js'
 
 const router = Router()
 
@@ -25,35 +27,24 @@ router.get('/', async (req, res) => {
 
 // GET /api/relics/equipped: returns array of up to 3 equipped relics
 router.get('/equipped', async (req, res) => {
-  const { userId } = req.query
+  const { userId, loadout } = req.query
   if (!userId || typeof userId !== 'string')
     return res.status(400).json({ error: 'Missing userId' })
 
+  const targetLoadout: LoadoutType =
+    loadout === 'world_boss' ||
+    loadout === 'neon_paradise' ||
+    loadout === 'prediction'
+      ? loadout
+      : 'prediction'
+
   try {
-    const result = await pool.query(
-      `SELECT equipped_relics FROM users WHERE user_id = $1`,
-      [userId]
-    )
-    const keys: (string | null)[] = result.rows[0]?.equipped_relics ?? []
-
-    // Fetch counters for equipped relics
-    const counterRes = await pool.query(
-      'SELECT relic_key, counter FROM relics WHERE user_id = $1 AND relic_key = ANY($2)',
-      [userId, keys.filter(Boolean)]
-    )
-    const counterMap = new Map<string, number>()
-    for (const r of counterRes.rows)
-      counterMap.set(r.relic_key, Number(r.counter ?? 0))
-
-    const relics: (object | null)[] = [null, null, null]
-    for (let i = 0; i < 3; i++) {
-      const key = keys[i]
-      if (!key) continue
-      const def = RELIC_MAP[key]
-      if (def) relics[i] = { ...def, counter: counterMap.get(key) ?? 0 }
-    }
-
-    res.json({ relics })
+    const loadouts = await getAllLoadouts(userId)
+    res.json({
+      relics: loadouts[targetLoadout],
+      loadout: targetLoadout,
+      loadouts
+    })
   } catch (err) {
     console.error('GET /relics/equipped error:', err)
     res.status(500).json({ error: 'Failed to fetch equipped relics' })
@@ -62,18 +53,24 @@ router.get('/equipped', async (req, res) => {
 
 // POST /api/relics/equip
 router.post('/equip', async (req, res) => {
-  const { userId, relicKey, slotIndex } = req.body
+  const { userId, relicKey, slotIndex, loadout } = req.body
   if (!userId || !relicKey || slotIndex === undefined)
     return res.status(400).json({ error: 'Missing fields' })
   if (typeof slotIndex !== 'number' || slotIndex < 0 || slotIndex > 2)
     return res.status(400).json({ error: 'Invalid slotIndex (must be 0-2)' })
-  if (isWorldBossActive())
+
+  const targetLoadout: LoadoutType =
+    loadout === 'world_boss' || loadout === 'neon_paradise' || loadout === 'prediction'
+      ? loadout
+      : getRelicCategory(relicKey)
+
+  if (targetLoadout === 'world_boss' && isWorldBossActive())
     return res
       .status(403)
-      .json({ error: 'Relic swapping locked during World Boss encounter' })
+      .json({ error: 'World Boss loadout is locked during active combat' })
 
   try {
-    await equipRelicToSlot(userId, relicKey, slotIndex)
+    await equipRelicToSlot(userId, relicKey, slotIndex, targetLoadout)
     res.json({ success: true })
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to equip'
@@ -83,16 +80,22 @@ router.post('/equip', async (req, res) => {
 
 // POST /api/relics/unequip
 router.post('/unequip', async (req, res) => {
-  const { userId, slotIndex } = req.body
+  const { userId, slotIndex, loadout } = req.body
   if (!userId) return res.status(400).json({ error: 'Missing userId' })
-  if (isWorldBossActive())
+
+  const targetLoadout: LoadoutType =
+    loadout === 'world_boss' || loadout === 'neon_paradise' || loadout === 'prediction'
+      ? loadout
+      : 'prediction'
+
+  if (targetLoadout === 'world_boss' && isWorldBossActive())
     return res
       .status(403)
-      .json({ error: 'Relic swapping locked during World Boss encounter' })
+      .json({ error: 'World Boss loadout is locked during active combat' })
 
   const slot = typeof slotIndex === 'number' ? slotIndex : 0
   try {
-    await unequipRelicFromSlot(userId, slot)
+    await unequipRelicFromSlot(userId, slot, targetLoadout)
     res.json({ success: true })
   } catch {
     res.status(500).json({ error: 'Failed to unequip' })

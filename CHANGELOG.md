@@ -2,6 +2,16 @@
 
 All notable changes to the platform will be documented in this file.
 
+## [4.4] - The Automatic Relic Loadouts Update
+
+### Added
+
+* **Three Specialized Relic Categories:** Partitioned all 44 relics across the simulation into three dedicated gameplay types: Prediction, World Boss, and Neon Paradise. Prediction contains core match modifiers and the Neon Keycard spawn relic, World Boss houses encounter damage and chest modifiers, and Neon Paradise encompasses stage-family weights, payout multipliers, and floor cushions.
+* **Dedicated Three-Preset Loadouts:** Introduced independent three-slot loadout presets for Prediction, World Boss, and Neon Paradise, empowering players to maintain specialized relic builds for every activity without manual gear conflicts.
+* **Automatic Mode-Driven Loadout Swapping:** Added seamless runtime loadout transitions that automatically equip your World Boss preset when entering raid combat and your Neon Paradise preset upon entering a bonus minigame, immediately restoring your Prediction preset once the mode concludes.
+* **Tabbed Relic Vault Interface:** Overhauled the Relic Locker UI with three top-level preset tabs (Prediction, World Boss, and Neon Paradise). Each tab displays its preset's equipped slots at the top and cleanly filters the catalog below to show only unequipped relics belonging to that specific mode.
+* **Profile and Drop Routing Integration:** Enhanced the discovery flow so newly uncovered relics route directly into their corresponding preset slots on equip, and updated player profiles with preset selectors to inspect and manage all three loadout configurations.
+
 ## [4.3] - The Neon Paradise Relics Update
 
 ### Added

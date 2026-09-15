@@ -15,7 +15,7 @@ export const resolveWorldBossPrediction = async (
   let predictions
   try {
     predictions = await pool.query(
-      `SELECT p.user_id, p.pick, u.nickname, u.equipped_relics
+      `SELECT p.user_id, p.pick, u.nickname, u.loadout_world_boss, u.equipped_relics
         FROM predictions p
         JOIN users u ON p.user_id = u.user_id
         WHERE p.game_id = $1 AND p.result IS NULL`,
@@ -36,7 +36,9 @@ export const resolveWorldBossPrediction = async (
     predictions.rows.map(async (row) => {
       try {
         const isWin = row.pick === winnerName
-        const relics: string[] = row.equipped_relics?.filter(Boolean) ?? []
+        const relics: string[] = row.loadout_world_boss?.filter(Boolean)?.length
+          ? row.loadout_world_boss.filter(Boolean)
+          : (row.equipped_relics?.filter(Boolean) ?? [])
 
         registerParticipant(
           row.user_id,

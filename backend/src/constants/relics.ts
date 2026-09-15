@@ -354,4 +354,61 @@ export const RELICS: RelicDef[] = [
   }
 ]
 
-export const RELIC_MAP = Object.fromEntries(RELICS.map((r) => [r.key, r]))
+export type LoadoutType = 'prediction' | 'world_boss' | 'neon_paradise'
+
+export const RELIC_CATEGORY_MAP: Record<string, LoadoutType> = {
+  precision_bearing: 'prediction',
+  conductive_filament: 'prediction',
+  scavengers_lens: 'prediction',
+  neon_keycard: 'prediction',
+  lunar_siphon: 'prediction',
+  static_inductor: 'prediction',
+  dealers_hand: 'prediction',
+  volcanic_mantle: 'prediction',
+  cobalt_core: 'prediction',
+  biased_oscillator: 'prediction',
+  buffer_module: 'prediction',
+  overdrive_relay: 'prediction',
+  prismatic_shard: 'prediction',
+  kinetic_capacitor: 'prediction',
+  logic_gate: 'prediction',
+  soul_of_the_machine: 'prediction',
+  temporal_anchor: 'prediction',
+  architects_keystone: 'prediction',
+
+  fortune_satchel: 'world_boss',
+  treasure_compass: 'world_boss',
+  lucky_crest: 'world_boss',
+  kings_purse: 'world_boss',
+  relic_magnet: 'world_boss',
+  fortune_seal: 'world_boss',
+  temporal_charge: 'world_boss',
+  phantom_reach: 'world_boss',
+  royal_treasury: 'world_boss',
+  vault_key: 'world_boss',
+  ascension_sigil: 'world_boss',
+  dragons_hoard: 'world_boss',
+  collectors_vault: 'world_boss',
+  celestial_crown: 'world_boss',
+  omega_shard: 'world_boss',
+  twin_fortune: 'world_boss',
+  prism_key: 'world_boss',
+
+  neon_chip: 'neon_paradise',
+  gilded_token: 'neon_paradise',
+  cybernetic_eye: 'neon_paradise',
+  prism_dice: 'neon_paradise',
+  neon_ledger: 'neon_paradise',
+  gilded_cushion: 'neon_paradise',
+  high_roller_marker: 'neon_paradise',
+  paradise_vault: 'neon_paradise',
+  heart_of_the_strip: 'neon_paradise'
+}
+
+export function getRelicCategory(key: string): LoadoutType {
+  return RELIC_CATEGORY_MAP[key] ?? 'prediction'
+}
+
+export const RELIC_MAP: Record<string, RelicDef> = Object.fromEntries(
+  RELICS.map((r) => [r.key, { ...r, category: getRelicCategory(r.key) }])
+)

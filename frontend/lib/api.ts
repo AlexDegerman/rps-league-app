@@ -20,7 +20,7 @@ import { BetHistoryEntry, PredictionResponse } from '@/types/prediction'
 import { PendingMatch } from '@/types/rps'
 import { Match } from '@/types/rps'
 import { StageType } from '@/types/bonusStage'
-import { RelicDef } from '@/types/relics'
+import { RelicDef, LoadoutType } from '@/types/relics'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -486,32 +486,44 @@ export async function claimWorldBossReward(userId: string) {
   )
 }
 
-export async function fetchEquippedRelics(userId: string) {
-  return handleResponse<{ relics: (RelicDef | null)[] }>(
-    fetch(`${API_BASE}/api/relics/equipped?userId=${userId}`)
-  )
+export async function fetchEquippedRelics(
+  userId: string,
+  loadout?: LoadoutType
+) {
+  const params = new URLSearchParams({ userId })
+  if (loadout) params.append('loadout', loadout)
+  return handleResponse<{
+    relics: (RelicDef | null)[]
+    loadout?: LoadoutType
+    loadouts?: Record<LoadoutType, (RelicDef | null)[]>
+  }>(fetch(`${API_BASE}/api/relics/equipped?${params.toString()}`))
 }
 
 export async function equipRelicToSlot(
   userId: string,
   relicKey: string,
-  slotIndex: number
+  slotIndex: number,
+  loadout?: LoadoutType
 ) {
   return handleResponse<{ success: boolean }>(
     fetch(`${API_BASE}/api/relics/equip`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, relicKey, slotIndex })
+      body: JSON.stringify({ userId, relicKey, slotIndex, loadout })
     })
   )
 }
 
-export async function unequipRelicFromSlot(userId: string, slotIndex: number) {
+export async function unequipRelicFromSlot(
+  userId: string,
+  slotIndex: number,
+  loadout?: LoadoutType
+) {
   return handleResponse<{ success: boolean }>(
     fetch(`${API_BASE}/api/relics/unequip`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, slotIndex })
+      body: JSON.stringify({ userId, slotIndex, loadout })
     })
   )
 }

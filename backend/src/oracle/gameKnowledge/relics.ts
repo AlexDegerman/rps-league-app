@@ -59,19 +59,20 @@ SOCKET COMMITMENT & ANTI-SWAP:
 - Relic equipping and unequipping is completely blocked during active World Boss encounters.
 - World Boss loadouts lock when the encounter starts and become interactive again after rewards are distributed.
 
+LOADOUT PRESET ARCHITECTURE:
+- Three dedicated loadout presets exist: Prediction, World Boss, and Neon Paradise.
+- The simulation automatically equips the World Boss loadout upon entering combat and restores the Prediction loadout upon conclusion.
+- The simulation automatically equips the Neon Paradise loadout upon entering any bonus stage and restores the Prediction loadout upon conclusion.
+- Relics are locked to their specific mode. Neon Keycard belongs to the Prediction preset as its spawn modifier operates in standard matches.
+
 RELIC UI:
-- Three relic slots are permanently visible in the main gameplay header.
-- Each slot displays its equipped relic or an empty state.
+- Three relic slots are permanently visible in the main gameplay header, automatically mirroring the active mode's preset.
 - Slot capacity remains visible even when no relic is equipped.
 - Tapping a slot opens the Relic Drawer.
-- The Relic Drawer displays the complete inventory grouped by rarity.
-- The drawer includes an active slot summary showing all three slots.
-- Equipping a relic allows the player to select which of the three slots receives it.
-- Relics can be equipped or removed from the drawer.
+- The Relic Drawer features three tabs on top for Prediction, World Boss, and Neon Paradise.
+- Each tab displays its preset's equipped slots on top and only unequipped relics belonging to that mode below.
 - Relic interaction is locked during active World Boss encounters.
-- Public profiles display all equipped relics.
-- Up to three equipped relics are shown on public profiles with rarity-matched styling.
-
+- Public profiles allow switching between all three preset loadouts.
 RELIC CATALOGUE:
 
 COMMON:

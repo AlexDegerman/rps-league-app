@@ -42,7 +42,7 @@ import { BadgeData } from '@/types/leaderboard'
 import { UserStats } from '@/types/user'
 import { ASCENSION_THRESHOLD } from '@/constants/prediction'
 import { RARITY_STYLES, ICON_MAP } from '@/constants/relics'
-import { RelicDef } from '@/types/relics'
+import { RelicDef, LoadoutType } from '@/types/relics'
 
 interface Ranks {
   daily: number | null
@@ -71,7 +71,7 @@ export default function ProfilePage() {
   const showAscensionPrompt = useUIStore((s) => s.showAscensionPrompt)
   const setShowAscensionPrompt = useUIStore((s) => s.setShowAscensionPrompt)
 
-  const equippedRelics = useRelicStore((s) => s.equippedRelics)
+  const loadouts = useRelicStore((s) => s.loadouts)
   const unequipRelic = useRelicStore((s) => s.unequipRelic)
   const setDrawerOpen = useRelicStore((s) => s.setDrawerOpen)
 
@@ -114,6 +114,11 @@ export default function ProfilePage() {
   const [profileRelics, setProfileRelics] = useState<
     (RelicDef | null)[] | undefined
   >(undefined)
+  const [profileLoadouts, setProfileLoadouts] = useState<
+    Record<LoadoutType, (RelicDef | null)[]> | undefined
+  >(undefined)
+  const [selectedProfileLoadout, setSelectedProfileLoadout] =
+    useState<LoadoutType>('prediction')
   const [profileBadges, setProfileBadges] = useState<BadgeData[]>([])
 
   const [profileStylePreference, setProfileStylePreference] = useState<
@@ -166,6 +171,9 @@ export default function ProfilePage() {
           try {
             const data = await fetchEquippedRelics(profileData.userId)
             setProfileRelics(data?.relics ?? [null, null, null])
+            if (data?.loadouts) {
+              setProfileLoadouts(data.loadouts)
+            }
           } catch {
             setProfileRelics([null, null, null])
           }
@@ -445,10 +453,35 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        <div className="flex items-center justify-between mt-2 mb-2 px-1">
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+            {(
+              [
+                { id: 'prediction', label: 'Prediction' },
+                { id: 'world_boss', label: 'World Boss' },
+                { id: 'neon_paradise', label: 'Neon Paradise' }
+              ] as const
+            ).map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedProfileLoadout(tab.id)}
+                className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg transition-all ${
+                  selectedProfileLoadout === tab.id
+                    ? 'bg-white text-gray-900 shadow-xs'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {(() => {
           const slots = isOwnProfile
-            ? equippedRelics
-            : (profileRelics ?? [null, null, null])
+            ? (loadouts[selectedProfileLoadout] ?? [null, null, null])
+            : (profileLoadouts?.[selectedProfileLoadout] ??
+              profileRelics ?? [null, null, null])
           const activeSlots = slots.map((r, i) => ({ relic: r, index: i }))
           const hasAnyRelic = slots.some(Boolean)
 
@@ -528,7 +561,7 @@ export default function ProfilePage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
-                          unequipRelic(index)
+                          unequipRelic(index, selectedProfileLoadout)
                         }}
                         title="Unequip"
                         className="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors flex items-center justify-center active:scale-95 shrink-0 focus:outline-none"

@@ -180,15 +180,26 @@ export const resolveUserPrediction = async (
   }
 
   // Relic drop runs post-commit so a drop failure cannot roll back the prediction resolution
-  const relicsArrayRes = await pool.query<{ equipped_relics: string[] | null }>(
-    'SELECT equipped_relics FROM users WHERE user_id = $1',
+  const relicsArrayRes = await pool.query<{
+    loadout_prediction: string[] | null
+    loadout_neon_paradise: string[] | null
+    equipped_relics: string[] | null
+  }>(
+    'SELECT loadout_prediction, loadout_neon_paradise, equipped_relics FROM users WHERE user_id = $1',
     [row.user_id]
   )
-  const allEquippedKeys: string[] =
-    relicsArrayRes.rows[0]?.equipped_relics?.filter(Boolean) ?? []
+  const rowUser = relicsArrayRes.rows[0]
+  const predictionRelics: string[] = rowUser?.loadout_prediction?.filter(
+    Boolean
+  )?.length
+    ? rowUser.loadout_prediction.filter(Boolean)
+    : (rowUser?.equipped_relics?.filter(Boolean) ?? [])
+  const neonParadiseRelics: string[] =
+    rowUser?.loadout_neon_paradise?.filter(Boolean) ?? []
+
   const droppedRelic = await rollRelicDrop(
     row.user_id,
-    allEquippedKeys,
+    predictionRelics,
     Number(freshUser.laps)
   )
 
@@ -251,7 +262,7 @@ export const resolveUserPrediction = async (
     try {
       const existingSession = await getActiveSession(row.user_id)
       if (!existingSession) {
-        const stageType = rollBonusTrigger(allEquippedKeys)
+        const stageType = rollBonusTrigger(predictionRelics, neonParadiseRelics)
         if (stageType) {
           const session = await createSession(row.user_id, ctx.bet, stageType)
           broadcast(

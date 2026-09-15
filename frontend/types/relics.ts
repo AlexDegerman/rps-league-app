@@ -1,4 +1,5 @@
 export type RelicRarity = 'COMMON' | 'RARE' | 'EPIC' | 'LEGENDARY' | 'MYTHICAL'
+export type LoadoutType = 'prediction' | 'world_boss' | 'neon_paradise'
 
 export interface RelicDef {
   key: string
@@ -9,4 +10,5 @@ export interface RelicDef {
   threshold?: number
   counter?: number
   bossExclusive?: boolean
+  category?: LoadoutType
 }

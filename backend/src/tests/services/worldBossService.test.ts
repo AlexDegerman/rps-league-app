@@ -73,9 +73,16 @@ const setupDefaultDb = (
     if (s.includes('INSERT INTO world_boss_damage')) return mockDbResponse([])
     if (s.includes('SELECT points FROM users'))
       return mockDbResponse([{ points: customPoints }])
-    if (s.includes('SELECT equipped_relics, nickname FROM users'))
+    if (
+      s.includes('nickname FROM users') &&
+      (s.includes('equipped_relics') || s.includes('loadout_world_boss'))
+    )
       return mockDbResponse([
-        { equipped_relics: customUserRelics, nickname: 'Tester' }
+        {
+          equipped_relics: customUserRelics,
+          loadout_world_boss: customUserRelics,
+          nickname: 'Tester'
+        }
       ])
     if (s.includes('SELECT relic_key FROM relics')) return mockDbResponse([])
     if (s.includes('INSERT INTO relics')) return mockDbResponse([])

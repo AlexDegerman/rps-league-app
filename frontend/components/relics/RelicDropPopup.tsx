@@ -1,14 +1,12 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import {
-  X,
-  Gem,
-} from 'lucide-react'
+import { X, Gem } from 'lucide-react'
 import { useRelicStore } from '@/app/stores/relicStore'
 import { useSound } from '@/hooks/useSound'
 import { useUIStore } from '@/app/stores/uiStore'
-import { RARITY_STYLES, ICON_MAP } from '@/constants/relics'
+import { RARITY_STYLES, ICON_MAP, getRelicCategory } from '@/constants/relics'
+import { tryAutoEquipRelic } from '@/lib/relicEquipper'
 
 export default function RelicDropPopup() {
   const soundPlayedRef = useRef(false)
@@ -20,7 +18,6 @@ export default function RelicDropPopup() {
   const relicDropQueue = useRelicStore((s) => s.relicDropQueue)
   const shiftDropQueue = useRelicStore((s) => s.shiftDropQueue)
   const equipRelic = useRelicStore((s) => s.equipRelic)
-  const equippedRelics = useRelicStore((s) => s.equippedRelics)
 
   const { playRelicDrop } = useSound()
   const [visible, setVisible] = useState(false)
@@ -53,11 +50,35 @@ export default function RelicDropPopup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePopup?.kind, readyToShow, currentDrop])
 
+  const targetCategory = currentDrop
+    ? (currentDrop.category ?? getRelicCategory(currentDrop.key))
+    : 'prediction'
+  const targetLoadoutEquipped = useRelicStore(
+    (s) => s.loadouts[targetCategory]
+  ) ?? [null, null, null]
+
+  const handleEquipNow = async () => {
+    if (!currentDrop) return
+    setEquipping(true)
+    try {
+      await tryAutoEquipRelic({
+        relic: currentDrop,
+        slots: targetLoadoutEquipped,
+        loadout: targetCategory,
+        equipRelic,
+        onAutoEquipped: () => dismiss(),
+        onPromptReplace: () => setShowSlotSelector(true)
+      })
+    } finally {
+      setEquipping(false)
+    }
+  }
+
   const handleEquipSelect = async (slotIndex: number) => {
     if (!currentDrop) return
     setEquipping(true)
     try {
-      await equipRelic(currentDrop, slotIndex)
+      await equipRelic(currentDrop, slotIndex, targetCategory)
       dismiss()
     } finally {
       setEquipping(false)
@@ -135,7 +156,8 @@ export default function RelicDropPopup() {
             <div className="flex flex-col gap-3 w-full">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
-                  Choose a slot to equip
+                  Assign to {targetCategory.toUpperCase().replace('_', ' ')}{' '}
+                  Preset
                 </span>
                 <button
                   onClick={() => setShowSlotSelector(false)}
@@ -146,7 +168,7 @@ export default function RelicDropPopup() {
               </div>
               <div className="flex gap-2">
                 {[0, 1, 2].map((i) => {
-                  const occupant = equippedRelics[i]
+                  const occupant = targetLoadoutEquipped[i]
                   const isSameRelic = occupant?.key === currentDrop.key
                   return (
                     <button
@@ -183,7 +205,8 @@ export default function RelicDropPopup() {
                 Dismiss
               </button>
               <button
-                onClick={() => setShowSlotSelector(true)}
+                disabled={equipping}
+                onClick={handleEquipNow}
                 className={`flex-1 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all shadow-lg active:scale-95 disabled:opacity-40 ${styles.text} ${styles.border} ${styles.bg} hover:brightness-125`}
               >
                 Equip Now
