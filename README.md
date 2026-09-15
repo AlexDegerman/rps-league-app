@@ -21,11 +21,11 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 ## 🎮 Preview
 
 <p align="center">
-  <em><strong>RPS League Showcase</strong>: A rapid tour through the game's major systems, events, progression, and high-tier visuals.</em>
+  <em><strong>RPS League Showcase</strong>: A rapid tour starting with core gameplay and fundamentals, followed by highlights of the game's major systems, events, progression, and high-tier visuals.</em>
   <br />
   <img src="./assets/rpsleaguehalfanniv.gif" width="280" />
   <br />
-  <a href="https://www.youtube.com/shorts/zlL312RXH1w">Watch full quality video</a>
+  <a href="https://www.youtube.com/shorts/-jMBO1FlPaE">Watch full quality video</a>
 </p>
 
 ---
