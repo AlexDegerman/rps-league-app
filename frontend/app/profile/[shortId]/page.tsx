@@ -881,9 +881,22 @@ export default function ProfilePage() {
               </div>
               {!codeRevealed ? (
                 <button
-                  onClick={() => setCodeRevealed(true)}
-                  disabled={!recoveryCode}
-                  className="text-[10px] px-5 py-3 bg-white border border-gray-200 text-gray-600 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm disabled:opacity-50"
+                  onClick={async () => {
+                    if (!recoveryCode) {
+                      try {
+                        const data = await fetchRecoveryCode()
+                        if (data?.recoveryCode)
+                          setRecoveryCode(data.recoveryCode)
+                      } catch (err) {
+                        logger.error(
+                          'Failed to fetch recovery code on reveal',
+                          err instanceof Error ? err : undefined
+                        )
+                      }
+                    }
+                    setCodeRevealed(true)
+                  }}
+                  className="text-[10px] px-5 py-3 bg-white border border-gray-200 text-gray-600 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
                 >
                   Reveal
                 </button>
