@@ -537,7 +537,23 @@ router.get('/:userId/points', async (req, res) => {
 
     const row = result.rows[0]
 
-    if (utmSource && (!row.utm_source || row.utm_source === 'direct' || row.utm_source === '')) {
+    let recoveryCode = row.recovery_code
+    if (!recoveryCode) {
+      recoveryCode = generateRecoveryCode()
+      await pool
+        .query(`UPDATE users SET recovery_code = $1 WHERE user_id = $2`, [
+          recoveryCode,
+          userId
+        ])
+        .catch((err) =>
+          logger.warn('failed to backfill recovery_code', { userId, err })
+        )
+    }
+
+    if (
+      utmSource &&
+      (!row.utm_source || row.utm_source === 'direct' || row.utm_source === '')
+    ) {
       await pool
         .query(`UPDATE users SET utm_source = $1 WHERE user_id = $2`, [
           utmSource,
@@ -551,7 +567,7 @@ router.get('/:userId/points', async (req, res) => {
     res.json({
       shortId: row.short_id,
       nickname: row.nickname ?? (nickname as string) ?? 'Anonymous',
-      recoveryCode: row.recovery_code ?? null,
+      recoveryCode: recoveryCode ?? null,
       points: row.points.toString(),
       peakPoints: row.peak_points.toString(),
       dailyPeak: row.daily_peak.toString(),
