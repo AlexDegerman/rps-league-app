@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger'
-import { getOrCreateUser, getStoredRecoveryCode } from './user'
+import { getOrCreateUser, getStoredRecoveryCode, getUserId, storeRecoveryCode } from './user'
 import {
   ProfileData,
   RecoverResponse,
@@ -162,6 +162,21 @@ export async function fetchRecoveryCode(): Promise<{
 } | null> {
   const stored = getStoredRecoveryCode()
   if (stored) return { recoveryCode: stored }
+
+  const userId = getUserId()
+  const user = getOrCreateUser()
+  if (!userId) return null
+
+  try {
+    const data = await fetchUserPoints(userId, user.shortId, user.nickname)
+    if (data?.recoveryCode) {
+      storeRecoveryCode(data.recoveryCode)
+      return { recoveryCode: data.recoveryCode }
+    }
+  } catch {
+    return null
+  }
+
   return null
 }
 
