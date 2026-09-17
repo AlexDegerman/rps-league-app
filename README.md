@@ -5,7 +5,7 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 > **Development Status:** After 6 months of continuous development, the
 > core RPS League experience is now finished. With the major systems,
 > progression, events, and gameplay features in place, I am now shifting my
-> primary development focus toward the wider **[Arkalon universe](https://github.com/AlexDegerman?tab=repositories)**,
+> primary development focus toward the wider **[Arkalon universe](https://network.rpsleague.fi/)**,
 > where I am building new web applications and experiences. RPS League
 > remains live in production and will continue to receive fixes,
 > improvements, events, and new features in future releases.
