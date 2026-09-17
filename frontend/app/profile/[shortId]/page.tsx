@@ -223,13 +223,14 @@ export default function ProfilePage() {
       if (isMounted) setRanks({ daily: d, weekly: w, allTime: a })
     })
 
-    if (isOwn) {
+    if (isOwnProfile || isOwn) {
       const getRecovery = async () => {
         try {
           const data = await fetchRecoveryCode()
           if (!isMounted) return
           setRecoveryCode(data?.recoveryCode ?? null)
-        } catch {
+        } catch (err) {
+          console.error('[fetchRecoveryCode error]', err)
           if (isMounted) setRecoveryCode(null)
         }
       }
