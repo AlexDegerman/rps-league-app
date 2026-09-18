@@ -763,6 +763,8 @@ RPS League follows privacy-by-design principles while maintaining system stabili
 
 ## 📜 License
 
-This project is proprietary software.
+Copyright (c) 2026 Alex Degerman. All Rights Reserved.
 
-Source code is not licensed for public reuse, modification, or distribution.
+RPS League and all associated source code, assets, systems, and files are proprietary.
+
+Unauthorized copying, modification, distribution, public hosting, sublicensing, or use of this software, in whole or in part, is strictly prohibited without prior written permission from the copyright holder.
