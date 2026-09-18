@@ -6,9 +6,9 @@ import { buildSystemInstruction } from './prompt.js'
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
 const MODEL_FALLBACK_CHAIN = [
-  'gemini-flash-lite-latest',
-  'gemini-flash-latest',
-  'gemini-2.0-flash-exp'
+  'gemini-3.5-flash-lite',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-flash'
 ] as const
 
 export async function generateWithFallback(
