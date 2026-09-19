@@ -224,11 +224,11 @@ Resets are visual-friendly. Any previously unlocked point-tier stylings (UVG, DV
 
 ## 🧿 Relic System
 
-Relics are permanent collectible gameplay modifiers that introduce long-term progression and strategic specialization. Players discover relics through a single-roll cumulative loot table spanning five rarity tiers (Common through Mythical), and each relic can only be collected once.
+Relics are permanent collectible gameplay modifiers that introduce long-term progression and strategic specialization. Players discover relics through a single-roll cumulative loot table spanning five rarity tiers (Common through Mythical), with permanent duplicate protection ensuring each relic is collected only once.
 
-Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling, creating distinct build paths and playstyles. Players may equip up to three active relics simultaneously, while permanent duplicate protection turns collection into long-term progression rather than repetitive RNG farming.
+Each relic meaningfully alters prediction strategy, event behavior, or multiplier scaling. Players configure **three dedicated loadouts** (Prediction, World Boss, and Neon Paradise), each holding up to three active relics. The system features **automated loadout switching**, seamlessly equipping the correct preset when entering World Boss encounters or Neon Paradise bonus stages, and reverting to your Prediction loadout afterward.
 
-A second category of 14 World Boss exclusive relics exists outside the standard drop pool entirely. These relics are only obtainable through World Boss chest rewards and specialize in chest point multipliers, relic appearance chance, chest upgrade chance, and two Mythical-tier chase items: Twin Fortune, which duplicates the entire chest reward on a 25% proc, and Prism Key, which unlocks Rainbow chest tier when combined with any upgrade-chance relic.
+A separate category of 14 World Boss exclusive relics exists outside the standard drop pool. Obtainable only through chest rewards, these specialize in chest point multipliers, relic appearance chance, and upgrade chances, highlighted by two Mythical-tier chase items: *Twin Fortune* (25% chance to duplicate the entire chest reward) and *Prism Key* (unlocks Rainbow chest tier when combined with any upgrade-chance relic).
 
 <p align="center">
   <strong>Relic Discovery & Equipment in Action</strong><br/>

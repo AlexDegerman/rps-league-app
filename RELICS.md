@@ -4,7 +4,7 @@ Relics are permanent collectible gameplay modifiers that introduce long-term acc
 
 Unlike temporary Flash Events, relics persist across sessions and fundamentally alter how players approach prediction strategies, event targeting, streak preservation, and high-tier multiplier scaling.
 
-Each player may equip up to three active relics simultaneously.
+Players configure **three dedicated loadouts** (Prediction, World Boss, and Neon Paradise), each holding up to three active relics. The system features **automated loadout switching**, seamlessly equipping the correct preset when entering World Boss encounters or Neon Paradise bonus stages, and reverting to the Prediction loadout afterward.
 
 ---
 
