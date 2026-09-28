@@ -214,9 +214,9 @@ export const useUserStore = create<UserState>((set, get) => ({
         set({ fastestLapBets: userData.fastestLapBets ?? null })
       if (userData.autoEquipBadges !== undefined)
         set({ autoEquipBadges: userData.autoEquipBadges })
-      if (userData.nickname) {
-        set({ displayNickname: userData.nickname })
-        Sentry.setContext('user', { username: userData.nickname })
+      if (data.displayName) {
+        set({ displayNickname: data.displayName })
+        Sentry.setContext('user', { username: data.displayName })
       }
 
       const savedStreak = userData.currentWinStreak ?? 0

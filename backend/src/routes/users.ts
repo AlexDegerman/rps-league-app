@@ -464,6 +464,16 @@ router.get('/:userId/points', async (req, res) => {
 
     const row = result.rows[0]
 
+    if (nickname && row.nickname !== nickname) {
+      await pool
+        .query(`UPDATE users SET nickname = $1 WHERE user_id = $2`, [
+          nickname,
+          userId
+        ])
+        .catch(() => {})
+      row.nickname = nickname as string
+    }
+
     if (
       utmSource &&
       (!row.utm_source || row.utm_source === 'direct' || row.utm_source === '')

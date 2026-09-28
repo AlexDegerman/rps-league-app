@@ -146,7 +146,7 @@ export function ArkalonNetworkWidget({
   // Collapsed State: Logo Only (Floating in corner with discovery or alert pip)
   if (collapsed) {
     return (
-      <div className="fixed bottom-10 right-3 sm:bottom-16 sm:right-4 z-40">
+      <div className="fixed bottom-10 right-3 sm:bottom-10 sm:right-4 z-40">
         <button
           type="button"
           onClick={toggleCollapse}
@@ -168,7 +168,7 @@ export function ArkalonNetworkWidget({
   // Expanded State: Floating Corner Dock
   return (
     <>
-      <div className="fixed bottom-10 right-3 sm:bottom-12 sm:right-4 z-40 w-[calc(100vw-24px)] max-w-64 rounded-xl border border-gray-200 bg-white p-3 flex flex-col gap-2 shadow-lg animate-[fade-in_0.15s_ease-out_both]">
+      <div className="fixed bottom-10 right-3 sm:bottom-10 sm:right-4 z-40 w-[calc(100vw-24px)] max-w-64 rounded-xl border border-gray-200 bg-white p-3 flex flex-col gap-2 shadow-lg animate-[fade-in_0.15s_ease-out_both]">
         {/* Widget Header with Arkalon Logo and Collapse Button */}
         <div className="flex items-center justify-between border-b border-gray-100 pb-2">
           <div className="flex items-center gap-2">
@@ -220,7 +220,7 @@ export function ArkalonNetworkWidget({
                       className={`shrink-0 text-[8px] font-mono font-black uppercase px-1.5 py-0.2 rounded border leading-tight ${
                         isUpdated
                           ? 'bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/40'
-                          : 'bg-indigo-500/20 text-indigo-600 border-indigo-500/30'
+                          : 'bg-green-500/20 text-green-600 border-green-500/30'
                       }`}
                     >
                       {isUpdated ? 'UPDATED' : 'NEW'}

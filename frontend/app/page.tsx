@@ -1348,7 +1348,8 @@ export default function HomePage() {
       {/* Scroll-to-top */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-25 left-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+        aria-label="Scroll to top"
+        className={`fixed bottom-10 left-3 sm:bottom-10 sm:left-4 z-40 flex items-center justify-center w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg transition-all duration-300 active:scale-95 cursor-pointer ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
       >
         <ChevronUpIcon />
       </button>
