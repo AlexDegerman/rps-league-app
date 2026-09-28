@@ -25,6 +25,15 @@ jobs:
         id: sha
         run: echo "short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Clean stale source on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            rm -rf /opt/arkalon/rps-league/frontend /opt/arkalon/rps-league/backend
+
       # Preserve server-managed files during sync
       - name: Deploy source code to VPS
         uses: appleboy/scp-action@v0.1.7
