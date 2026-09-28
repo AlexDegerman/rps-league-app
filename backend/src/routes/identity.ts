@@ -5,10 +5,20 @@ const INTERNAL_NETWORK_URL =
   process.env.INTERNAL_NETWORK_URL || 'http://arkalon-network:3000'
 const INTERNAL_SERVICE_SECRET = process.env.INTERNAL_SERVICE_SECRET || ''
 
+function getCookie(req: Request, name: string): string | undefined {
+  const raw = req.headers.cookie
+  if (!raw) return undefined
+  const match = raw.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`))
+  return match && match[1] ? decodeURIComponent(match[1]) : undefined
+}
+
 router.post('/provision', async (req: Request, res: Response) => {
   try {
     const coreId =
-      req.cookies?.arkalon_core_id || req.body?.coreId || req.body?.legacyUserId
+      getCookie(req, 'arkalon_core_id') ||
+      req.cookies?.arkalon_core_id ||
+      req.body?.coreId ||
+      req.body?.legacyUserId
 
     const response = await fetch(
       `${INTERNAL_NETWORK_URL}/api/identity/provision`,
@@ -57,7 +67,8 @@ router.post('/provision', async (req: Request, res: Response) => {
 })
 
 router.post('/reroll', async (req: Request, res: Response) => {
-  const coreId = req.cookies?.arkalon_core_id
+  const coreId =
+    getCookie(req, 'arkalon_core_id') || req.cookies?.arkalon_core_id
   if (!coreId)
     return res.status(401).json({ success: false, error: 'No session' })
 
