@@ -573,9 +573,9 @@ export default function HomePage() {
   // SSE live stream
   useEffect(() => {
     if (isDuplicate) return
-    const { userId: myUserId, isHydrated: storeHydrated } =
-      useUserStore.getState()
-    if (!myUserId || !storeHydrated) return
+    if (!isHydrated) return
+    const { userId: myUserId } = useUserStore.getState()
+    if (!myUserId) return
     const es = new EventSource(`${API_BASE}/api/live`)
     esRef.current = es
     const updatePacketTimestamp = () => {
@@ -1175,7 +1175,7 @@ export default function HomePage() {
       esRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDuplicate, connectionEpoch])
+  }, [isDuplicate, connectionEpoch, isHydrated])
 
   const handleWelcomeContinue = () => {
     localStorage.setItem('rps_welcomed', '1')
