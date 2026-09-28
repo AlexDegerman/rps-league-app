@@ -60,7 +60,7 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 - [Reliability & Observability](#-reliability--observability)
 
 ### 📱 Platform
-- [Arkalon Voice](#-Arkalon-voice)
+- [Arkalon Voice](#-arkalon-voice)
 - [Extended Media Showcases](#-extended-media-showcases)
 - [Mobile & PWA Experience](#-mobile--pwa-experience)
 
@@ -497,7 +497,7 @@ graph LR
     User <-->|UI / Zustand| Next
     Next <-->|REST API| API
     API <-->|SQL / BigInt| DB
-    API <-->|Data Context| AI
+    Hub[Arkalon Network Hub (SSO / Core ID)].
     API -.->|SSE Live Stream| User
 ```
 
@@ -516,6 +516,9 @@ graph LR
 ---
 
 ## 🛠️ Technical Challenges & Solutions
+
+**Zero-Downtime Identity Migration (1,500+ Legacy Players -> Central Network Hub)**
+Migrated RPS League's entire player base from standalone local-storage identities to the unified Arkalon Network architecture without session drops or data loss. Engineered a dual-path "Claim & Link" identity bridge in the Express backend and client Zustand store: incoming requests detect legacy `rps_user_id` tokens, query PostgreSQL to link player balances and achievements to a master `coreId`, set root `.rpsleague.fi` SSO cookies, and purge legacy keys. A one-time streaming SQL migration backfilled 1,520 existing records directly into `arkalon_network.core_identities` with zero service interruption.
 
 **Production Infrastructure Migration (Vercel/Render/Supabase -> Self-Hosted VPS)**
 Migrated the entire production stack from three managed services to a single self-managed Hetzner Cloud VPS running Docker, Caddy, and PostgreSQL 17. The migration required containerizing the frontend and backend with production Dockerfiles, configuring a Caddy reverse proxy with automatic TLS certificate provisioning, restoring a live PostgreSQL database from a schema-filtered pg_dump that separated application tables from Supabase-managed internals while preserving all production data, resolving SSL connection handling differences between Supabase's connection pooler and private Docker networking, and establishing automated CI/CD through GitHub Actions deploying via SCP and SSH.
@@ -665,7 +668,7 @@ All deployments are gated by CI, synchronized to the VPS through GitHub Actions,
 - **Multi-Tiered League Layers:** A structured progression system with multiple leaderboard brackets tailored to different point thresholds, ensuring players at all stages have a relevant, competitive space to climb before hitting the main vigintillion-scale rankings.
 - **Custom Cosmetic Marketplace:** A dedicated points-based store allowing players to purchase and equip various profile customizations, such as unique leaderboard card backgrounds, exclusive text neon shimmers, custom tier badges, and premium name colors, without diluting the prestige of event-exclusive victory animations.
 - **Social Group Hubs:** Custom, isolated group and friend leaderboards designed to foster close-knit, high-frequency competition outside the global ecosystem.
-- **Unified OAuth Integration:** Optional Google Authentication built into the profile settings to streamline secure profile recovery alongside the existing short-ID architecture.
+- **Ecosystem Cross-App Progression & Achievements**: Unified player levels and ecosystem trophies shared between RPS League, Arkalon Daily, and future Arkalon Network titles.
 
 ---
 
