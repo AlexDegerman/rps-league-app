@@ -49,7 +49,10 @@ interface Ranks {
 
 export default function ProfilePage() {
   const params = useParams()
-  const targetShortId = params.shortId as string
+  const rawShortId = params?.shortId
+  const targetShortId = Array.isArray(rawShortId)
+    ? rawShortId[0]
+    : (rawShortId as string | undefined)
 
   const rerollNickname = useUserStore((s) => s.rerollNickname)
   const setStoreStylePreference = useUserStore((s) => s.setStylePreference)
@@ -74,11 +77,8 @@ export default function ProfilePage() {
   const worldBossPhase = useGameStore((s) => s.worldBossPhase)
   const bossActive = worldBossPhase === 'ACTIVE'
 
-  const localShortId =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('rps_short_id') || ''
-      : ''
-  const isOwnProfile = (myShortId || localShortId) === targetShortId
+  const isOwnProfile = !targetShortId || targetShortId === myShortId
+  const activeShortId = targetShortId || myShortId || ''
 
   const [nickname, setNickname] = useState('')
   const [points, setPoints] = useState<string | null>(null)
@@ -112,19 +112,16 @@ export default function ProfilePage() {
     string | null
   >(null)
   const [allTimePeak, setAllTimePeak] = useState<bigint>(200000n)
-    const [autoStyle, setAutoStyle] = useState(true)
-    const [activeTab, setActiveTab] = useState<'stats' | 'achievements'>(
-      'stats'
-    )
-    const [showHistoryInfo, setShowHistoryInfo] = useState(false)
-    const recoverySectionRef = useRef<HTMLDivElement>(null)
+  const [autoStyle, setAutoStyle] = useState(true)
+  const [activeTab, setActiveTab] = useState<'stats' | 'achievements'>('stats')
+  const [showHistoryInfo, setShowHistoryInfo] = useState(false)
+  const recoverySectionRef = useRef<HTMLDivElement>(null)
 
-    const { display, full, capped } = formatPoints(points ?? '0')
+  const { display, full, capped } = formatPoints(points ?? '0')
 
   useEffect(() => {
-    if (!targetShortId) return
+    if (!activeShortId) return
 
-    
     let isMounted = true
 
     const checkWidth = () => {
@@ -142,7 +139,7 @@ export default function ProfilePage() {
 
     const loadProfile = async () => {
       try {
-        const profileData = await fetchUserProfile(targetShortId)
+        const profileData = await fetchUserProfile(activeShortId)
 
         if (!isMounted) return
 
@@ -168,7 +165,7 @@ export default function ProfilePage() {
 
           const statsData = await fetchUserStats(
             profileData.userId,
-            targetShortId,
+            activeShortId,
             profileData.nickname
           )
           if (isMounted && statsData) setStats(statsData)
@@ -176,9 +173,9 @@ export default function ProfilePage() {
             setStoreLinkedinEnabled(profileData.showLinkedinBadge ?? true)
         }
         if (!isOwnProfile) {
-          const badgeRes = await fetchAchievementsBulkBadges([targetShortId])
-          if (badgeRes && badgeRes[targetShortId] && isMounted) {
-            setProfileBadges(badgeRes[targetShortId])
+          const badgeRes = await fetchAchievementsBulkBadges([activeShortId])
+          if (badgeRes && badgeRes[activeShortId] && isMounted) {
+            setProfileBadges(badgeRes[activeShortId])
           }
         }
       } catch (err) {
@@ -186,7 +183,7 @@ export default function ProfilePage() {
         logger.error(
           'Failed to load profile',
           err instanceof Error ? err : undefined,
-          { targetShortId }
+          { activeShortId }
         )
         if (isOwnProfile) {
           setPoints('200000')
@@ -202,9 +199,9 @@ export default function ProfilePage() {
     loadProfile()
 
     Promise.all([
-      fetchRank('daily', targetShortId),
-      fetchRank('weekly', targetShortId),
-      fetchRank('alltime', targetShortId)
+      fetchRank('daily', activeShortId),
+      fetchRank('weekly', activeShortId),
+      fetchRank('alltime', activeShortId)
     ]).then(([d, w, a]) => {
       if (isMounted) setRanks({ daily: d, weekly: w, allTime: a })
     })
@@ -213,16 +210,14 @@ export default function ProfilePage() {
       isMounted = false
       window.removeEventListener('resize', checkWidth)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    targetShortId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeShortId, isOwnProfile])
 
   const handleRegenerate = async () => {
     if (!isOwnProfile) return
     const newName = await rerollNickname()
     if (newName) setNickname(newName)
   }
-
 
   if (!mounted) {
     return (
@@ -702,7 +697,7 @@ export default function ProfilePage() {
                     }
                     try {
                       await updateLinkedin(
-                        targetShortId,
+                        activeShortId,
                         url || null,
                         showLinkedinBadge
                       )
@@ -738,7 +733,7 @@ export default function ProfilePage() {
                       setStoreLinkedinEnabled(next)
                     }
                     await updateLinkedin(
-                      targetShortId,
+                      activeShortId,
                       linkedinInput.trim() || null,
                       next
                     )
