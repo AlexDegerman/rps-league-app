@@ -27,7 +27,6 @@ const {
   mockGameStore,
   mockUIStore,
   mockPostPrediction,
-  mockUser
 } = vi.hoisted(() => {
   const createMockStore = () => {
     const mock = vi.fn() as unknown as StoreMock
@@ -71,11 +70,6 @@ vi.mock('@/components/game/PendingMatchCard', () => ({
   )
 }))
 
-vi.mock('@/lib/user', () => ({
-  getOrCreateUser: vi.fn(() => mockUser),
-  isUserValid: vi.fn(() => true)
-}))
-
 vi.mock('@/lib/oracleTTS', () => ({
   unlockOracle: vi.fn()
 }))
@@ -105,6 +99,10 @@ const setupMocks = (
   const userState = {
     betAmount: 50000n,
     winStreak: 0,
+    isHydrated: true,
+    userId: 'user_123',
+    shortId: 'abc',
+    displayNickname: 'TestUser',
     ...userOverrides
   }
 

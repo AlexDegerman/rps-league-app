@@ -1,8 +1,8 @@
 import { create } from 'zustand'
-import { getOrCreateUser } from '@/lib/user'
 import { logger } from '@/lib/logger'
 import { RelicDef, LoadoutType } from '@/types/relics'
 import { getRelicCategory } from '@/constants/relics'
+import { useUserStore } from './userStore'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -111,7 +111,7 @@ export const useRelicStore = create<RelicStore>((set, get) => ({
   },
 
   equipRelic: async (relic, slotIndex, targetLoadout) => {
-    const user = getOrCreateUser()
+    const { userId } = useUserStore.getState()
     const currentActive = get().activeLoadout
     const loadout =
       targetLoadout ?? relic.category ?? getRelicCategory(relic.key)
@@ -138,7 +138,7 @@ export const useRelicStore = create<RelicStore>((set, get) => ({
     })
 
     try {
-      await apiEquip(user.userId, relic.key, slotIndex, loadout)
+      await apiEquip(userId, relic.key, slotIndex, loadout)
     } catch (err) {
       const rollbackLoadouts = {
         ...get().loadouts,
@@ -161,7 +161,7 @@ export const useRelicStore = create<RelicStore>((set, get) => ({
   },
 
   unequipRelic: async (slotIndex, targetLoadout) => {
-    const user = getOrCreateUser()
+    const { userId } = useUserStore.getState()
     const currentActive = get().activeLoadout
     const loadout = targetLoadout ?? currentActive
     const prevLoadout = [...(get().loadouts[loadout] ?? [null, null, null])]
@@ -184,7 +184,7 @@ export const useRelicStore = create<RelicStore>((set, get) => ({
     })
 
     try {
-      await apiUnequip(user.userId, slotIndex, loadout)
+      await apiUnequip(userId, slotIndex, loadout)
     } catch (err) {
       const rollbackLoadouts = {
         ...get().loadouts,
@@ -207,9 +207,9 @@ export const useRelicStore = create<RelicStore>((set, get) => ({
   },
 
   fetchInventory: async () => {
-    const user = getOrCreateUser()
+    const { userId } = useUserStore.getState()
     try {
-      const relics = await apiFetchInventory(user.userId)
+      const relics = await apiFetchInventory(userId)
       const { equippedRelics } = get()
       const merged = relics.map((r) => {
         const slot = equippedRelics.find((e) => e?.key === r.key)
@@ -230,10 +230,10 @@ export const useRelicStore = create<RelicStore>((set, get) => ({
   },
 
   initRelics: async () => {
-    const user = getOrCreateUser()
+    const { userId } = useUserStore.getState()
     try {
       const res = await fetch(
-        `${API_BASE}/api/relics/equipped?userId=${user.userId}`
+        `${API_BASE}/api/relics/equipped?userId=${userId}`
       )
       if (!res.ok) return
       const data = await res.json()

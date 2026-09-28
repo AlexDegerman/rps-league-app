@@ -5,7 +5,6 @@ import { useIdleStore } from '@/app/stores/idleStore'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUserStore } from '@/app/stores/userStore'
 import { postPrediction } from '@/lib/api'
-import { getOrCreateUser, isUserValid } from '@/lib/user'
 
 export function useIdleBet() {
   const idleSide = useIdleStore((s) => s.idleSide)
@@ -35,8 +34,9 @@ export function useIdleBet() {
     if (useGameStore.getState().isBonusActive) return
     if (!idleSide || !isEligible || isProcessing) return
 
-    const user = getOrCreateUser()
-    if (!isUserValid(user) || betAmount <= 0n) return
+    const { userId, shortId, displayNickname, isHydrated } =
+      useUserStore.getState()
+    if (!isHydrated || !userId || betAmount <= 0n) return
     const target = pendingMatches.find((pm) => !processedGameIds.has(pm.gameId))
     if (!target) return
     const timeLeft = target.expiresAt - (Date.now() + serverOffset)
@@ -58,12 +58,12 @@ export function useIdleBet() {
     })
 
     postPrediction({
-      userId: user.userId,
+      userId: userId,
       gameId: target.gameId,
       pick: playerName,
       betAmount: betAmount.toString(),
-      nickname: user.nickname!,
-      shortId: user.shortId
+      nickname: displayNickname!,
+      shortId: shortId
     })
       .then(({ ok }) => {
         if (ok) {

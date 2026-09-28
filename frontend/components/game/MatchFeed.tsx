@@ -7,7 +7,6 @@ import { useUIStore } from '@/app/stores/uiStore'
 import type { Match } from '@/types/rps'
 import PendingMatchCard from '@/components/game/PendingMatchCard'
 import MatchList from '@/components/game/MatchList'
-import { getOrCreateUser, isUserValid } from '@/lib/user'
 import { unlockOracle } from '@/lib/oracleTTS'
 import { postPrediction } from '@/lib/api'
 import { logger } from '@/lib/logger'
@@ -57,9 +56,11 @@ function MatchFeedComponent({
 
   const handlePick = useCallback(async (gameId: string, playerName: string) => {
     unlockOracle()
-    const user = getOrCreateUser()
+    const { userId, shortId, displayNickname, isHydrated } =
+      useUserStore.getState()
     const { betAmount: currentBet } = useUserStore.getState()
-    if (!isUserValid(user) || !user.nickname || currentBet <= 0n) return
+
+    if (!isHydrated || !userId || !displayNickname || currentBet <= 0n) return
 
     const currentNotification = useUIStore.getState().notification
     if (currentNotification === 'new_visitor') {
@@ -81,12 +82,12 @@ function MatchFeedComponent({
 
       const { ok, data } = await postPrediction(
         {
-          userId: user.userId,
+          userId: userId,
           gameId,
           pick: playerName,
           betAmount: currentBet.toString(),
-          nickname: user.nickname,
-          shortId: user.shortId
+          nickname: displayNickname,
+          shortId: shortId
         },
         controller.signal
       )

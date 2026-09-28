@@ -1,36 +1,36 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { getOrCreateUser } from '@/lib/user'
-import { useUserStore } from '@/app/stores/userStore'
+import { getOrCreatePlayer, rerollPlayerName } from '@/lib/identity'
+import { useState, useEffect, useTransition } from 'react'
 
 interface WelcomeModalProps {
   onContinue: () => void
 }
 
 export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
-  const [nickname, setNickname] = useState('')
+  const [nickname, setNickname] = useState('Loading...')
   const [rerolling, setRerolling] = useState(false)
   const [justRerolled, setJustRerolled] = useState(false)
-  const rerollNickname = useUserStore((s) => s.rerollNickname)
+  const [isRerolling, startReroll] = useTransition()
 
   useEffect(() => {
-    const user = getOrCreateUser()
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNickname(user.nickname || '')
+    getOrCreatePlayer().then(({ displayName }) => {
+      setNickname(displayName)
+    })
   }, [])
 
-  const handleReroll = async () => {
-    if (rerolling) return
+  const handleReroll = () => {
+    if (isRerolling) return
     setRerolling(true)
-
-    const newName = await rerollNickname()
-    if (newName) {
-      setNickname(newName)
-      setJustRerolled(true)
-      setTimeout(() => setJustRerolled(false), 1000)
-    }
-    setRerolling(false)
+    startReroll(async () => {
+      const res = await rerollPlayerName()
+      if (res.success && res.nickname) {
+        setNickname(res.nickname)
+        setJustRerolled(true)
+        setTimeout(() => setJustRerolled(false), 800)
+      }
+      setRerolling(false)
+    })
   }
 
   return (
@@ -79,7 +79,7 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
 
                 <button
                   onClick={handleReroll}
-                  disabled={rerolling}
+                  disabled={rerolling || nickname === 'Loading...'}
                   className="shrink-0 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-500 hover:text-indigo-700 disabled:opacity-40 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-50 active:scale-95"
                 >
                   <svg
@@ -135,9 +135,7 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
               </div>
 
               <p className="mt-2 text-[10px] font-medium text-black/40 leading-snug">
-                Your identity in RPS League
-                <br />
-                You can reroll your name anytime in your profile.
+                Shared across the Arkalon Network. Reroll anytime in Profile.
               </p>
             </div>
 
@@ -149,16 +147,11 @@ export default function WelcomeModal({ onContinue }: WelcomeModalProps) {
             </button>
 
             <p className="text-[9px] text-black/40 font-medium leading-snug -mt-2">
-              Your account is stored on this device.
+              Your session is secured on this device.
             </p>
             <p className="text-[9px] text-black/30 font-medium leading-snug">
-              Save your recovery code from your profile to restore it.
-            </p>
-            <p className="text-[9px] text-black/30 font-medium leading-snug">
-              Leave feedback of any kind in the feedback page
-            </p>
-            <p className="text-[9px] text-black/30 font-medium leading-snug">
-              Ask AI for game guidance
+              Save your recovery code on the Network Hub to protect your
+              progress.
             </p>
           </div>
         </div>

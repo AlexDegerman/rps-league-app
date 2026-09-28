@@ -1,9 +1,8 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { generateNickname } from '@/lib/nicknames'
+import { useUserStore } from '@/app/stores/userStore'
 import { formatTickerPoints, getAmountColor } from '@/lib/format'
-import { getUserId } from '@/lib/user'
 import { useGameStore } from '@/app/stores/gameStore'
 import GemIcon from '../icons/GemIcon'
 import { drainActivities, type ActivityBroadcast } from '@/lib/activityFeed'
@@ -11,6 +10,7 @@ import { ACHIEVEMENT_BADGE_MAP } from '@/constants/achievements'
 import { EVENT_TICKER_CONFIG } from '@/constants/events'
 import { RELICS } from '@/constants/relics'
 import { RelicRarity } from '@/types/relics'
+import { DEMO_USERS } from '@/constants/demoUsers'
 
 type EventCategory =
   | 'prediction'
@@ -69,7 +69,6 @@ const BOSS_TYPE_COLOR: Record<string, string> = {
   APEXION: '#f97316'
 }
 
-
 const DEMO_MILESTONES = [
   { name: 'Quadrillion', color: '#3b82f6' },
   { name: 'Quintillion', color: '#a855f7' },
@@ -86,17 +85,21 @@ const ALL_ACH_CODES = Object.keys(ACHIEVEMENT_BADGE_MAP)
 const rand = <T,>(arr: readonly T[] | T[]): T =>
   arr[Math.floor(Math.random() * arr.length)]!
 
+const getDemoName = () => rand(DEMO_USERS)
+
 const randomRelicWeighted = () => {
   const r = Math.random()
   const rarity: RelicRarity =
-    r < 0.40 ? 'COMMON'
-    : r < 0.70 ? 'RARE'
-    : r < 0.88 ? 'EPIC'
-    : r < 0.97 ? 'LEGENDARY'
-    : 'MYTHICAL'
-  return (
-    rand(RELICS.filter((rl) => rl.rarity === rarity)) ?? rand(RELICS)
-  )
+    r < 0.4
+      ? 'COMMON'
+      : r < 0.7
+        ? 'RARE'
+        : r < 0.88
+          ? 'EPIC'
+          : r < 0.97
+            ? 'LEGENDARY'
+            : 'MYTHICAL'
+  return rand(RELICS.filter((rl) => rl.rarity === rarity)) ?? rand(RELICS)
 }
 
 const randomAchWeighted = () => {
@@ -130,7 +133,7 @@ function buildDemoEvent(): Omit<LiveEvent, 'id' | 'timestamp'> {
 
   // 50% prediction win / loss
   if (roll < 0.5) {
-    const name = generateNickname()
+    const name = getDemoName()
     const tier = Math.random() * 100
     let amount = 0n
     if (tier < 15)
@@ -163,7 +166,7 @@ function buildDemoEvent(): Omit<LiveEvent, 'id' | 'timestamp'> {
   // 18% relic find
   if (s < 0.18) {
     const relic = randomRelicWeighted()
-    const name = generateNickname()
+    const name = getDemoName()
     const color = RELIC_RARITY_COLOR[relic.rarity]
     const msg = `🧿 ${name} unearthed ${relic.rarity}: ${relic.name}`
     return {
@@ -179,7 +182,7 @@ function buildDemoEvent(): Omit<LiveEvent, 'id' | 'timestamp'> {
   // 18% achievement
   if (s < 0.36) {
     const ach = randomAchWeighted()
-    const name = generateNickname()
+    const name = getDemoName()
     const color = ACH_RARITY_COLOR[ach.rarity]
     const msg = `${ach.icon} ${name} earned [${ach.code}] ${ach.name}`
     return {
@@ -195,7 +198,7 @@ function buildDemoEvent(): Omit<LiveEvent, 'id' | 'timestamp'> {
   // 7% point milestone
   if (s < 0.43) {
     const m = rand(DEMO_MILESTONES)
-    const name = generateNickname()
+    const name = getDemoName()
     const msg = `💎 ${name} crossed 1 ${m.name}!`
     return {
       message: msg,
@@ -210,7 +213,7 @@ function buildDemoEvent(): Omit<LiveEvent, 'id' | 'timestamp'> {
   // 7% win streak milestone
   if (s < 0.5) {
     const n = rand([3, 5, 8, 10] as const)
-    const name = generateNickname()
+    const name = getDemoName()
     const inferno = n >= 5
     const msg = `${inferno ? '🔥' : '⚡'} ${name} hit ${n}-Win ${inferno ? 'Inferno' : 'Fever'} Streak!`
     const color = inferno ? '#f97316' : '#22c55e'
@@ -226,7 +229,7 @@ function buildDemoEvent(): Omit<LiveEvent, 'id' | 'timestamp'> {
 
   // 7% - lap / prestige
   const lap = Math.floor(Math.random() * 25) + 1
-  const name = generateNickname()
+  const name = getDemoName()
   const msg = `🔄 ${name} completed Lap ${lap}!`
   return {
     message: msg,
@@ -259,7 +262,12 @@ function buildFromBroadcast(
   }
 
   if (type === 'achievement') {
-    const { code, name: n, rarity, icon } = payload as {
+    const {
+      code,
+      name: n,
+      rarity,
+      icon
+    } = payload as {
       code: string
       name: string
       rarity: string
@@ -364,7 +372,7 @@ export default function LiveActivityFeed() {
     if (!latestPredictionResult) return
     if (document.hidden) return
     const data = latestPredictionResult
-    const isMe = data.userId === getUserId()
+    const isMe = data.userId === useUserStore.getState().userId
     const amount = BigInt(data.amount)
     // Suppress the minimal floor-bounce loss for current user
     if (isMe && data.result === 'LOSE' && amount === 50000n) return
@@ -409,10 +417,9 @@ export default function LiveActivityFeed() {
     let t: ReturnType<typeof setTimeout>
     const schedule = () => {
       const mobile = window.innerWidth < 768
-      const delay =
-        mobile
-          ? 2000 + Math.random() * 1000
-          : 1000 + Math.random() * 1000
+      const delay = mobile
+        ? 2000 + Math.random() * 1000
+        : 1000 + Math.random() * 1000
       t = setTimeout(() => {
         if (visible && !document.hidden && pendingRef.current.length < 10) {
           const demo = buildDemoEvent()

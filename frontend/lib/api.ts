@@ -1,8 +1,6 @@
 import { logger } from '@/lib/logger'
-import { getOrCreateUser, getStoredRecoveryCode, getUserId, storeRecoveryCode } from './user'
 import {
   ProfileData,
-  RecoverResponse,
   UserPointsData,
   UserStats
 } from '@/types/user'
@@ -15,12 +13,12 @@ import {
   BadgeData,
   AchievementEntry
 } from '@/types/leaderboard'
-import { OracleResponse } from '@/types/oracle'
 import { BetHistoryEntry, PredictionResponse } from '@/types/prediction'
 import { PendingMatch } from '@/types/rps'
 import { Match } from '@/types/rps'
 import { StageType } from '@/types/bonusStage'
 import { RelicDef, LoadoutType } from '@/types/relics'
+import { useUserStore } from '@/app/stores/userStore'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -48,9 +46,15 @@ export async function fetchUserProfile(shortId: string) {
   )
 }
 
-export async function fetchUserStats(userId: string, shortId: string) {
+export async function fetchUserStats(
+  userId: string,
+  shortId: string,
+  nickname: string
+) {
   return handleResponse<UserStats>(
-    fetch(`${API_BASE}/api/predictions/${userId}/stats?shortId=${shortId}`)
+    fetch(
+      `${API_BASE}/api/predictions/${userId}/stats?shortId=${encodeURIComponent(shortId)}&nickname=${encodeURIComponent(nickname)}`
+    )
   )
 }
 
@@ -69,19 +73,6 @@ export async function fetchUserPoints(
   )
 }
 
-export async function updateNickname(
-  userId: string,
-  newNickname: string,
-  shortId: string
-) {
-  return handleResponse<{ success: boolean }>(
-    fetch(`${API_BASE}/api/users/update-nickname`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, nickname: newNickname, shortId })
-    })
-  )
-}
 
 export async function fetchUserBetHistory(
   userId: string,
@@ -132,7 +123,8 @@ export async function ascendUser(userId: string, shortId: string) {
 }
 
 export async function markAutoBetUsed(userId: string): Promise<void> {
-  const { shortId } = getOrCreateUser()
+  const shortId = useUserStore.getState().shortId
+  if (!shortId) return
   try {
     await fetch(`${API_BASE}/api/users/${userId}/auto-bet-used`, {
       method: 'POST',
@@ -151,41 +143,6 @@ export async function updateAutoEquipBadges(
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ shortId, autoEquip })
-    })
-  )
-}
-
-/* --- AUTH & RECOVERY --- */
-
-export async function fetchRecoveryCode(): Promise<{
-  recoveryCode: string
-} | null> {
-  const stored = getStoredRecoveryCode()
-  if (stored) return { recoveryCode: stored }
-
-  const userId = getUserId()
-  const user = getOrCreateUser()
-  if (!userId) return null
-
-  try {
-    const data = await fetchUserPoints(userId, user.shortId, user.nickname)
-    if (data?.recoveryCode) {
-      storeRecoveryCode(data.recoveryCode)
-      return { recoveryCode: data.recoveryCode }
-    }
-  } catch {
-    return null
-  }
-
-  return null
-}
-
-export async function handleRecoverProfile(recoveryCode: string) {
-  return handleResponse<RecoverResponse>(
-    fetch(`${API_BASE}/api/users/recover`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recoveryCode })
     })
   )
 }
@@ -331,20 +288,6 @@ export async function fetchFestivalState() {
   }>(fetch(`${API_BASE}/api/live/festival-state`))
 }
 
-export async function submitFeedback(formData: FormData) {
-  try {
-    const res = await fetch(`${API_BASE}/api/feedback`, {
-      method: 'POST',
-      body: formData
-    })
-    if (res.ok) return { ok: true }
-    const d = await res.json().catch(() => ({}))
-    return { error: d.error ?? 'UNKNOWN' }
-  } catch {
-    return { error: 'CONNECTION_FAILED' }
-  }
-}
-
 export async function updateStylePreference(
   shortId: string,
   stylePreference: string | null
@@ -457,27 +400,6 @@ export const fetchGlobalEventState =
       return null
     }
   }
-
-export const askOracle = async (
-  query: string,
-  nickname?: string
-): Promise<OracleResponse> => {
-  try {
-    const res = await fetch(`${API_BASE}/api/oracle/consult`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, nickname })
-    })
-
-    const data = await res.json()
-    if (!res.ok) {
-      return { error: data.error || 'SYSTEM_ERROR' }
-    }
-    return data as OracleResponse
-  } catch {
-    return { error: 'SYSTEM_ERROR' }
-  }
-}
 
 export async function fetchWorldBossState() {
   return handleResponse<{

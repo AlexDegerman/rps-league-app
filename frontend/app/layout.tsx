@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import Header from '../components/ui/Header'
 import LiveActivityFeed from '@/components/tickers/LiveActivityFeed'
+import { ArkalonNetworkWidget } from '@/components/ui/ArkalonNetworkWidget'
 
 export const viewport: Viewport = {
   themeColor: '#f3f4f6',
@@ -62,6 +63,7 @@ export default function RootLayout({
         <Header />
         <main className="w-full pb-24 pt-2">{children}</main>
         <LiveActivityFeed />
+        <ArkalonNetworkWidget theme="dark" />
       </body>
     </html>
   )

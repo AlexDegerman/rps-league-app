@@ -1,20 +1,6 @@
 # 🎲 RPS League App
 
-A real-time live-service Rock Paper Scissors platform where players bet virtual cosmetic points, track rankings, and interact with an AI-powered game guide and match analysis system. I am the sole developer and maintainer, running it continuously in production: monitoring the system, shipping fixes, and [building new features](./CHANGELOG.md) on an ongoing basis.
-
-> **Development Status:** After 6 months of continuous development, the
-> core RPS League experience is now finished. With the major systems,
-> progression, events, and gameplay features in place, I am now shifting my
-> primary development focus toward the wider **[Arkalon universe](https://network.rpsleague.fi/)**,
-> where I am building new web applications and experiences. RPS League
-> remains live in production and will continue to receive fixes,
-> improvements, events, and new features in future releases.
-
-> 🚨 **Project Evolution:** This is a full-scale rebuild of my original
-> **[RPS League](https://github.com/AlexDegerman/rps-league)**, originally
-> built for a Reaktor developer assignment as a static match viewer. This
-> version is a concurrency-aware prediction engine engineered for infinite
-> scaling and real-time user engagement.
+A real-time live-service Rock Paper Scissors platform where players bet virtual cosmetic points, track rankings, and participate in a high-frequency prediction arena. I am the sole developer and maintainer, running it continuously in production: monitoring the system, shipping fixes, and [building new features](./CHANGELOG.md) on an ongoing basis.
 
 **Play Here:** [https://rpsleague.fi/](https://rpsleague.fi/?utm_source=github/)
 
@@ -27,6 +13,12 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
   <br />
   <a href="https://www.youtube.com/shorts/-jMBO1FlPaE">Watch full quality video</a>
 </p>
+
+> **🌐 Part of the Arkalon Network:** RPS League is one application in the wider Arkalon ecosystem, a multi-app platform sharing a common identity layer, visual language, and cross-app features. The network beacon connects players to Arkalon AI, feedback systems, release updates, and other ecosystem applications.
+
+> **🚀 Development Status:** After 6 months of continuous development, the core RPS League experience is complete, with major systems, progression, events, and gameplay features implemented. Development focus has expanded toward the wider Arkalon ecosystem while RPS League remains live in production with future fixes, improvements, events, and feature releases.
+
+> 🚨 **Project Evolution:** This project is a full-scale rebuild of my original RPS League Reaktor developer assignment, transforming a static match viewer into a production-ready real-time prediction platform engineered for persistent user engagement.
 
 ---
 
@@ -65,15 +57,10 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 - [Architecture](#️-architecture)
 - [Design Decisions](#-design-decisions)
 - [Technical Challenges & Solutions](#️-technical-challenges--solutions)
-- [Reliability & Feedback](#-reliability--feedback)
-
-### 🤖 AI Systems
-
-- [AI Arkalon: Game Systems Guide & Match Analysis](#-ai-arkalon-game-systems-guide--match-analysis)
-- [Arkalon Voice](#-Arkalon-voice)
+- [Reliability & Observability](#-reliability--observability)
 
 ### 📱 Platform
-
+- [Arkalon Voice](#-Arkalon-voice)
 - [Extended Media Showcases](#-extended-media-showcases)
 - [Mobile & PWA Experience](#-mobile--pwa-experience)
 
@@ -93,15 +80,15 @@ A real-time live-service Rock Paper Scissors platform where players bet virtual 
 
 ## ⚡ Identity & Zero-Friction Account System
 
-RPS League is built for instant participation without traditional account friction. A persistent identity is automatically created on first visit, allowing users to enter the competition loop in seconds with no email or registration required.
+Operating as an Arkalon Network satellite app, RPS League delegates all core identity provisioning and account creation to the central Arkalon Network. This architecture ensures instant participation without traditional account friction, allowing users to enter the competition loop in seconds with no local email or registration required.
 
-- **Interactive Onboarding**: A Welcome Modal for first-time visitors that introduces the virtual economy and allows for immediate nickname "Rerolling" to establish identity before the first match.
-- **Anonymous Persistence**: Native `localStorage` identity architecture ensures long-term session and progression continuity without a central database login.
-- **Recovery-Code Restoration**: Simple alphanumeric slugs generated on the backend allowing users to securely migrate or restore profiles and statistics across different devices.
-- **Guided Recovery Onboarding**: A one-time, server-persisted tutorial that triggers on the first profile visit. It utilizes a dynamic spotlight overlay and auto-scroll logic to ensure players acknowledge and secure their recovery codes, preventing permanent data loss.
+- **Interactive Onboarding**: A Welcome Modal for first-time visitors that introduces the virtual economy and allows for immediate nickname "Rerolling" via the Arkalon Network to establish identity before the first match.
+- **Anonymous Persistence**: Local session persistence through `localStorage` maintains seamless gameplay continuity while identity management remains handled by the Arkalon Network.
+- **Network Identity Recovery**: Profile restoration and cross-device migration are entirely delegated to the Arkalon Network, removing local secret management and recovery code generation from the satellite app.
+- **Guided Recovery Onboarding**: A one-time, server-persisted tutorial that triggers on the first profile visit, directing players to the Arkalon Network to secure their identity and prevent permanent data loss.
 - **Hybrid Identity Layer**: Optional professional signaling using URL-validated links to display identity badges on leaderboards for social proof and fully clickable external links on public profiles.
 - **Shareable Performance Dashboards**: Unique public profile URLs featuring 16 tracked data points and a context-aware match history (Recent, Biggest Wins, Best Multipliers), visualizing predictions through rich event cards that track tiered bonuses, flash event overlays, and move-set comparisons.
-- **Adaptive Entry Flow**: First-time players are introduced through an interactive onboarding modal with nickname rerolling and instant identity generation, while returning users receive contextual "What's New" overlays tied to the latest acknowledged release version.
+- **Adaptive Entry Flow**: First-time players are seamlessly provisioned through the Arkalon Network with an interactive onboarding modal and nickname rerolling, while returning users receive contextual "What's New" overlays tied to the latest acknowledged release version.
 - **Client-Side Version Tracking**: Lightweight release acknowledgement system powered by `localStorage`, ensuring update notifications are only surfaced once per deployed version without requiring authentication or backend session state.
 - **Live Deployment Awareness**: Server boot-id synchronization via SSE detects fresh VPS deployments in real time, automatically recovers dropped connections, and surfaces a non-intrusive in-app refresh prompt without interrupting active sessions.
 - **Integrated Update Log**: Dedicated in-app update history page documenting major gameplay systems, live-service features, infrastructure upgrades, and seasonal content rollouts.
@@ -172,7 +159,6 @@ RPS League is built for instant participation without traditional account fricti
 - High-frequency match system (5s intervals, 17,000+ daily events, 3M+ matches processed)
 - Match History: Optimized retrieval and rendering across 10,000+ retained match records
 - Unified Ranking Engine: Dual leaderboards for Players and Predictors with deep-linkable URL state, supporting dynamic time-filtering (Daily/Weekly/All-Time) and multi-metric sorting (Points, Gained, Peak, Win Rate).
-- AI-powered analysis using Gemini
 - Full test coverage across backend services and frontend components
 - Adaptive background music system with six context-aware tracks that crossfade dynamically based on the active game state (base ambient, Flash Event, Global Event, Festival, World Boss, and Neon Paradise)
 - Live League Insights: Live Stat Ticker showing daily betting volume, net community gains, and Daily MVP, updates every 15 seconds
@@ -492,7 +478,7 @@ Animated LiveActivityFeed
 | Database          | PostgreSQL 17 (self-hosted)                                            |
 | Frontend          | Next.js, React, TypeScript, Tailwind CSS                               |
 | State Management  | Zustand (game, user, ui, popup queue)                                  |
-| Backend           | Node.js, Express, TypeScript, Google Gemini API                        |
+| Backend           | Node.js, Express, TypeScript                                           |
 | Real-time         | Server-Sent Events via `/api/live`                                     |
 | Testing           | Vitest, React Testing Library                                          |
 | Match system      | Custom match generator with persistent 5-second match scheduling       |
@@ -507,7 +493,6 @@ graph LR
     Next[Next.js Frontend]
     API[Express Backend]
     DB[(PostgreSQL)]
-    AI[Gemini AI Arkalon]
 
     User <-->|UI / Zustand| Next
     Next <-->|REST API| API
@@ -524,9 +509,8 @@ graph LR
 - **SSE over WebSockets**: Chosen for simplicity and lower overhead
 - **Transactional prediction resolution**: Modular prediction services coordinate atomic database operations and concurrency-safe state transitions
 - **Concurrency-aware event stream**: Guaranteed stability and zero overlap between real user bets and demo traffic
-- **Profile recovery system** for cross-device portability
+- **Network Hub delegation** for identity, recovery, and cross-device portability
 - **Custom match generator**: Self-contained server-side match generation with persistent match records and sequential execution
-- **Production-hardened AI**: Resilient, grounded, and rate-limited analytics engine
 - **Single-tab enforcement**: BroadcastChannel detects duplicate tabs, closes the redundant SSE connection, and surfaces a non-blocking in-app notice.
 
 ---
@@ -573,50 +557,14 @@ I engineered a Sequential Spectacle Queue using a Zustand-based state machine. T
 
 ---
 
-## 🔮 Reliability & Feedback
+## 🔮 Reliability & Observability
 
 To maintain a professional live-service standard and close the loop between user experience and system logs:
 
 - **Unified Observability**: Integrated Sentry for full-stack error tracking and performance monitoring across the entire stack, frontend React/Next.js and backend Express, specifically guarding against BigInt overflows and SSE connection failures. Structured logging captures SSE client lifecycle events (connect, disconnect, client count) and match resolution errors in real time.
-- **Context-Aware Feedback**: An in-app portal for bug reports and suggestions. Submissions automatically bundle game state (points, streak, active events) and environment metadata (route, viewport, browser), and dynamically associate relevant player profile safely.
-- **Subdomain-Safe Trace Debugging**: Manual feedback is linked to Sentry's `associatedEventId` with backend-side fallback event generation. Discord alerts construct direct search URLs using your organization's Sentry subdomain, preventing redirection and context loss.
-- **Secure Visual Reporting**: Support for screenshot attachments (max 5MB) via **Multer** buffer-processing, including native clipboard paste (Ctrl+V) and drag-and-drop. Uploads are strictly validated server-side using **magic-byte sniffing** to prevent MIME-type spoofing, and processed through automated, server-side AI content moderation filters.
-- **Graceful Error Recovery**: Custom upload middleware captures file size limit violations at the network boundary, returning clean, user-friendly API errors without dropping or crashing the server process. Memory-safe preview URL lifecycle management on the frontend prevents Object URL leaks.
-- **Operational Monitoring**: Automated real-time alerts for feedback and AI Arkalon queries are dispatched via **Discord Webhooks** to a private administrative channel.
+- **Graceful Error Recovery**: Custom middleware captures file size limit violations at the network boundary, returning clean, user-friendly API errors without dropping or crashing the server process. Memory-safe preview URL lifecycle management on the frontend prevents Object URL leaks.
+- **Operational Monitoring**: Automated real-time alerts for critical system events and database anomalies are dispatched via **Discord Webhooks** to a private administrative channel.
 - **Privacy & Security**: IP addresses are anonymized and masked for audit logs using normalization logic that robustly handles standard IPv4, external IPv6, and localhost loopbacks (e.g., `127.0.x.x` and `::1` formats). No authentication tokens, passwords, or PII are ever logged or stored.
-
----
-
-## 🤖 AI Arkalon: Game Systems Guide & Match Analysis
-
-> *"A forgotten intelligence from a lost era. It does not predict the future, it calculates the probability of what has already begun."*
-
-The platform features **The Arkalon**, an ancient time-lost prophetic robotic entity that oversees the Arkalon universe of applications. Acting as an observer, announcer, and guide, Arkalon bridges the gap between hidden system logic and player experience.
-
-Within RPS League, Arkalon serves as the league's oracle: analyzing match outcomes, interpreting player behavior, explaining complex game mechanics, issuing daily prophecies, and announcing major events through its synthesized voice. Originally created as a system-level predictive intelligence, it has evolved into a persistent presence across the ecosystem rather than a conventional AI assistant.
-
-Powered by custom-tuned **Google Gemini** integration, Arkalon functions as a fully diegetic AI system. Every interaction is grounded in live league telemetry, game knowledge, and progression data, allowing it to provide both statistical analysis and in-world guidance while maintaining its prophetic identity.
-
-### Core Features
-
-- **Lore-Driven AI Identity**: Arkalon maintains a consistent prophetic persona across text analysis, system explanations, Daily Prophecies, and voice announcements. It acts as an observer of the league rather than an external assistant.
-- **Dual-Purpose Grounding Engine**: Integrates high-density match history with an XML-wrapped game knowledge database to resolve both statistical telemetry queries and complex system explanations.
-- **Dynamic Response Slicing**: Automatically adjusts response length based on intent, allowing deeper mechanical explanations while enforcing concise match analysis.
-- **Strict Intent Guardrailing**: Filters unrelated prompts and unsupported requests to preserve Arkalon's role as a league intelligence and prevent hallucinated information.
-- **Resilient Multi-Model Fallback**: Automatically rotates Gemini models to handle API volatility, rate limits, and availability issues.
-- **Performance Optimization**: Uses in-memory TTL caching and IP-bound rate limiting to control latency, API usage, and abuse.
-- **Server-Synced Prophecies**: Generates the Daily Arkalon Prophecy through backend-controlled state, ensuring consistency across players and preventing client-side manipulation.
-
-
-<p align="center">
-  <strong>Match Analysis</strong><br>
-  <img src="./assets/ai_analysis_showcase.gif" width="220" />
-</p>
-
-<p align="center">
-  <strong>Game Systems Guide</strong><br>
-  <img src="./assets/gameguide_oracle_showcase.gif" width="220" />
-</p>
 
 ---
 
@@ -757,7 +705,6 @@ RPS League follows privacy-by-design principles while maintaining system stabili
 - **IP Anonymization:** IP addresses are anonymized immediately at the application boundary before processing (e.g., `203.0.113.195` → `203.0.113.0`). Geolocation is performed entirely offline using the in-memory `geoip-lite` database, ensuring raw IP addresses are never stored or transmitted to third-party services.
 - **Audit Logs:** Administrative logs display only masked IP subnets (e.g., `203.0.113.x`).
 - **Security:** Passwords, credentials, session tokens, and other personally identifiable information (PII) are never logged or stored.
-- **Observability:** Anonymous telemetry enables monitoring of AI Arkalon behavior, including hallucination detection, model fallback events, and other edge cases during live operation.
 
 ---
 
@@ -768,3 +715,5 @@ Copyright (c) 2026 Alex Degerman. All Rights Reserved.
 RPS League and all associated source code, assets, systems, and files are proprietary.
 
 Unauthorized copying, modification, distribution, public hosting, sublicensing, or use of this software, in whole or in part, is strictly prohibited without prior written permission from the copyright holder.
+
+*Part of the [Arkalon Network](https://network.rpsleague.fi)*

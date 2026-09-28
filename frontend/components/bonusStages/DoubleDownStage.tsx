@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { postBonusAction, claimBonusWinnings } from '../../lib/api'
-import { getOrCreateUser } from '../../lib/user'
+import { useUserStore } from '@/app/stores/userStore'
 import { formatPoints } from '../../lib/format'
 import { useNeonSound } from '../../hooks/useNeonSound'
 
@@ -28,15 +28,14 @@ export default function DoubleDownStage() {
     reconnect?.lastRoll ?? null
   )
   const [loading, setLoading] = useState(false)
-  const { playNeonReward, playNeonComplete, playLoss } =
-    useNeonSound()
+  const { playNeonReward, playNeonComplete, playLoss } = useNeonSound()
 
   const currentMultiplier = STEP_PAYOUTS[step] ?? 2
   const currentReward = bonusLastBet * BigInt(currentMultiplier)
 
   const sendAction = async (action: 'GAMBLE' | 'CLAIM') => {
     if (terminal || loading) return
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     setLoading(true)
     try {
       const result = await postBonusAction(userId, { action })

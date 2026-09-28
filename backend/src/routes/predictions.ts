@@ -427,8 +427,13 @@ router.post('/cleanup', async (req, res) => {
 router.get('/:userId/stats', async (req, res) => {
   try {
     const { userId } = req.params
-    const { shortId } = req.query
-    const stats = await getUserStats(userId, shortId as string)
+    const { shortId, nickname } = req.query
+    
+    if (!shortId || !nickname) {
+      return res.status(400).json({ error: 'Missing shortId or nickname' })
+    }
+
+    const stats = await getUserStats(userId, shortId as string, nickname as string)
     res.json(stats)
   } catch (err) {
     logger.error('GET /:userId/stats failed', err, {

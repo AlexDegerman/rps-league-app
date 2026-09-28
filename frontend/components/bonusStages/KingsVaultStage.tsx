@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { postBonusAction, claimBonusWinnings } from '../../lib/api'
-import { getOrCreateUser } from '../../lib/user'
+import { useUserStore } from '@/app/stores/userStore'
 import { useNeonSound } from '../../hooks/useNeonSound'
 
 const TIER_META: Record<
@@ -54,12 +54,11 @@ export default function KingsVaultStage() {
   const [chosenIndex, setChosenIndex] = useState<number | null>(null)
   const [revealed, setRevealed] = useState<string[] | null>(null)
   const [loading, setLoading] = useState(false)
-  const { playNeonReward, playNeonComplete } =
-    useNeonSound()
+  const { playNeonReward, playNeonComplete } = useNeonSound()
 
   const pickChest = async (index: number) => {
     if (chosenIndex !== null || loading) return
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     setLoading(true)
     setChosenIndex(index)
     const multMap: Record<string, number> = {
@@ -113,66 +112,66 @@ export default function KingsVaultStage() {
     }
   }
 
-    return (
-      <div className="stage-container stage-kings-vault">
-        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-tqgs no-pseudo">
-          👑 KING&apos;S VAULT
-        </div>
-        <p className="text-[0.825rem] text-slate-500 text-center leading-[1.4] -mt-2">
-          One chest holds the Royal reward
-        </p>
-
-        <div className="flex gap-2.5 justify-center flex-wrap my-4">
-          {Array.from({ length: 5 }).map((_, i) => {
-            const isChosen = chosenIndex === i
-            const tierKey = revealed?.[i] ?? null
-            const tierData = tierKey ? TIER_META[tierKey] : null
-            const isRevealed = revealed !== null
-
-            return (
-              <button
-                key={i}
-                onClick={() => pickChest(i)}
-                disabled={chosenIndex !== null || loading}
-                className={[
-                  'chest-btn',
-                  'chest-btn-kings',
-                  isChosen ? 'chest-chosen' : '',
-                  isRevealed ? 'chest-revealed' : '',
-                  chosenIndex === null ? 'chest-idle' : ''
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                style={
-                  isRevealed && tierData
-                    ? { borderColor: tierData.color }
-                    : undefined
-                }
-              >
-                <span className="text-[2rem] leading-none">
-                  {isRevealed && tierData ? tierData.emoji : '📦'}
-                </span>
-                {isRevealed && tierData && (
-                  <span
-                    className="text-[0.68rem] font-bold text-center leading-[1.3]"
-                    style={{ color: tierData.color }}
-                  >
-                    {tierData.label}
-                    <br />
-                    <span className="text-[0.72rem] font-extrabold">
-                      +{tierData.multiplier}×
-                    </span>
-                  </span>
-                )}
-                {isChosen && !isRevealed && (
-                  <span className="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider">
-                    Opening...
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
+  return (
+    <div className="stage-container stage-kings-vault">
+      <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-tqgs no-pseudo">
+        👑 KING&apos;S VAULT
       </div>
-    )
+      <p className="text-[0.825rem] text-slate-500 text-center leading-[1.4] -mt-2">
+        One chest holds the Royal reward
+      </p>
+
+      <div className="flex gap-2.5 justify-center flex-wrap my-4">
+        {Array.from({ length: 5 }).map((_, i) => {
+          const isChosen = chosenIndex === i
+          const tierKey = revealed?.[i] ?? null
+          const tierData = tierKey ? TIER_META[tierKey] : null
+          const isRevealed = revealed !== null
+
+          return (
+            <button
+              key={i}
+              onClick={() => pickChest(i)}
+              disabled={chosenIndex !== null || loading}
+              className={[
+                'chest-btn',
+                'chest-btn-kings',
+                isChosen ? 'chest-chosen' : '',
+                isRevealed ? 'chest-revealed' : '',
+                chosenIndex === null ? 'chest-idle' : ''
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={
+                isRevealed && tierData
+                  ? { borderColor: tierData.color }
+                  : undefined
+              }
+            >
+              <span className="text-[2rem] leading-none">
+                {isRevealed && tierData ? tierData.emoji : '📦'}
+              </span>
+              {isRevealed && tierData && (
+                <span
+                  className="text-[0.68rem] font-bold text-center leading-[1.3]"
+                  style={{ color: tierData.color }}
+                >
+                  {tierData.label}
+                  <br />
+                  <span className="text-[0.72rem] font-extrabold">
+                    +{tierData.multiplier}×
+                  </span>
+                </span>
+              )}
+              {isChosen && !isRevealed && (
+                <span className="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider">
+                  Opening...
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
 }

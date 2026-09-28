@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { clearUserCache, getOrCreateUser } from '@/lib/user'
+import { useParams } from 'next/navigation'
 import GemIcon from '@/components/icons/GemIcon'
 import {
   getDisplayTierClass,
@@ -14,8 +13,6 @@ import {
   fetchUserProfile,
   fetchUserStats,
   fetchRank,
-  fetchRecoveryCode,
-  handleRecoverProfile,
   updateLinkedin,
   ascendUser,
   fetchAchievementsBulkBadges
@@ -36,7 +33,7 @@ import { fetchEquippedRelics } from '@/lib/api'
 import { StatSection } from '@/components/game/StatSection'
 import { StatBox } from '@/components/game/StatBox'
 import { useGameStore } from '@/app/stores/gameStore'
-import { Package, X } from 'lucide-react'
+import { ExternalLink, Package, X } from 'lucide-react'
 import InfoIcon from '@/components/icons/InfoIcon'
 import { BadgeData } from '@/types/leaderboard'
 import { UserStats } from '@/types/user'
@@ -52,7 +49,6 @@ interface Ranks {
 
 export default function ProfilePage() {
   const params = useParams()
-  const router = useRouter()
   const targetShortId = params.shortId as string
 
   const rerollNickname = useUserStore((s) => s.rerollNickname)
@@ -96,15 +92,6 @@ export default function ProfilePage() {
     allTime: null
   })
   const [showPointsExplainer, setShowPointsExplainer] = useState(false)
-  const [recoveryCode, setRecoveryCode] = useState<string | null>(null)
-  const [codeRevealed, setCodeRevealed] = useState(false)
-  const [codeCopied, setCodeCopied] = useState(false)
-  const [recoverInput, setRecoverInput] = useState('')
-  const [recoverError, setRecoverError] = useState('')
-  const [recoverLoading, setRecoverLoading] = useState(false)
-  const [recoverConfirm, setRecoverConfirm] = useState(false)
-  const [resetConfirm, setResetConfirm] = useState(false)
-  const [resetError, setResetError] = useState('')
   const [profileUserId, setProfileUserId] = useState<string | null>(null)
   const [linkedinUrl, setLinkedinUrl] = useState<string | null>(null)
   const [showLinkedinBadge, setShowLinkedinBadge] = useState(true)
@@ -137,8 +124,6 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!targetShortId) return
 
-    const localShortId = localStorage.getItem('rps_short_id') || ''
-    const isOwn = localShortId === targetShortId
     
     let isMounted = true
 
@@ -183,7 +168,8 @@ export default function ProfilePage() {
 
           const statsData = await fetchUserStats(
             profileData.userId,
-            targetShortId
+            targetShortId,
+            profileData.nickname
           )
           if (isMounted && statsData) setStats(statsData)
           if (isOwnProfile)
@@ -204,9 +190,9 @@ export default function ProfilePage() {
         )
         if (isOwnProfile) {
           setPoints('200000')
-          const local = getOrCreateUser()
-          setNickname(local.nickname || 'New Player')
-          setProfileUserId(local.userId)
+          const { displayNickname, userId } = useUserStore.getState()
+          setNickname(displayNickname || 'New Player')
+          setProfileUserId(userId)
         }
       } finally {
         if (isMounted) setStatsLoading(false)
@@ -223,20 +209,6 @@ export default function ProfilePage() {
       if (isMounted) setRanks({ daily: d, weekly: w, allTime: a })
     })
 
-    if (isOwnProfile || isOwn) {
-      const getRecovery = async () => {
-        try {
-          const data = await fetchRecoveryCode()
-          if (!isMounted) return
-          setRecoveryCode(data?.recoveryCode ?? null)
-        } catch (err) {
-          console.error('[fetchRecoveryCode error]', err)
-          if (isMounted) setRecoveryCode(null)
-        }
-      }
-      getRecovery()
-    }
-
     return () => {
       isMounted = false
       window.removeEventListener('resize', checkWidth)
@@ -251,72 +223,6 @@ export default function ProfilePage() {
     if (newName) setNickname(newName)
   }
 
-  const onRecoverConfirm = async () => {
-    setRecoverLoading(true)
-    setRecoverError('')
-    setRecoverConfirm(false)
-    try {
-      const data = await handleRecoverProfile(recoverInput.trim())
-      if (!data) {
-        setRecoverError('Invalid recovery code')
-        return
-      }
-      localStorage.setItem('rps_user_id', data.userId)
-      localStorage.setItem('rps_short_id', data.shortId)
-      if (data.nickname) localStorage.setItem('rps_nickname', data.nickname)
-      clearUserCache()
-      await useUserStore.getState().initUser()
-      const freshUser = getOrCreateUser()
-      router.push(`/profile/${freshUser.shortId}`)
-    } catch (err) {
-      logger.error(
-        'Profile recovery failed',
-        err instanceof Error ? err : undefined
-      )
-      setRecoverError('Failed to recover profile')
-    } finally {
-      setRecoverLoading(false)
-    }
-  }
-
-  const handleResetProfile = async () => {
-    const now = Date.now()
-    const oneHour = 60 * 60 * 1000
-    let timestamps: number[] = []
-    try {
-      const stored = localStorage.getItem('rps_restart_timestamps')
-      if (stored) timestamps = JSON.parse(stored)
-    } catch {
-      timestamps = []
-    }
-    timestamps = timestamps.filter((t) => now - t < oneHour)
-    if (timestamps.length >= 3) {
-      const waitMin = Math.ceil((oneHour - (now - timestamps[0])) / 60000)
-      setResetError(`Rate limit reached. Wait ${waitMin}m.`)
-      return
-    }
-    timestamps.push(now)
-    localStorage.setItem('rps_restart_timestamps', JSON.stringify(timestamps))
-    try {
-      setResetError('')
-
-      const { resetProfile } = useUserStore.getState()
-      const result = await resetProfile()
-
-      if (result.success) {
-        const newShortId = useUserStore.getState().shortId
-        window.location.href = `/profile/${newShortId}`
-      } else {
-        setResetError(result.error || 'Failed to reset profile')
-      }
-    } catch (err) {
-      logger.error(
-        'Failed to reset profile',
-        err instanceof Error ? err : undefined
-      )
-      setResetError('Failed to reset profile. Please try again.')
-    }
-  }
 
   if (!mounted) {
     return (
@@ -864,139 +770,61 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Recovery section */}
+        {showAscensionPrompt && (
+          <AscensionModal
+            laps={laps}
+            onAscend={async () => {
+              const { userId, shortId } = useUserStore.getState()
+              const data = await ascendUser(userId, shortId)
+              if (data?.success) {
+                setLaps(data.laps)
+                setFastestLapBets(data.fastestLapBets ?? null)
+                setPoints('200000')
+                setStorePoints(200000n)
+              }
+              setShowAscensionPrompt(false)
+            }}
+            onDismiss={() => setShowAscensionPrompt(false)}
+          />
+        )}
+
+        {/* Arkalon Core Network Identity Card */}
         {isOwnProfile && (
           <div
+            className="w-full rounded-xl sm:rounded-2xl border border-gray-100 bg-white p-3 sm:p-4 mt-4 sm:mt-6"
+            id="recovery-section"
             ref={recoverySectionRef}
-            className="border-t border-gray-50 mt-8 pt-6"
           >
-            <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-2 ml-1">
-              Recovery Access
+            <p className="mb-1.5 sm:mb-2 text-[9px] sm:text-[10px] font-black uppercase tracking-wider sm:tracking-widest text-gray-400">
+              Arkalon Core Identity
             </p>
-            <div className="flex items-center gap-2">
-              <div
-                className={`bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100 font-mono text-[11px] font-bold text-gray-800 tracking-wider flex-1 transition-all ${!codeRevealed ? 'blur-md select-none' : 'bg-white shadow-inner'}`}
+            <p className="mb-3 text-[10px] sm:text-[11px] text-gray-500 leading-snug">
+              Your profile is anchored by Arkalon Core. Manage recovery code and
+              nickname on the Network Hub.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <a
+                href={`https://network.rpsleague.fi/settings?returnTo=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-1 rounded-md border border-gray-200 px-3 py-2 sm:py-2.5 text-[10px] font-bold text-gray-700 hover:bg-gray-50"
               >
-                {recoveryCode ?? 'generating-code-0000'}
-              </div>
-              {!codeRevealed ? (
-                <button
-                  onClick={async () => {
-                    if (!recoveryCode) {
-                      try {
-                        const data = await fetchRecoveryCode()
-                        if (data?.recoveryCode)
-                          setRecoveryCode(data.recoveryCode)
-                      } catch (err) {
-                        logger.error(
-                          'Failed to fetch recovery code on reveal',
-                          err instanceof Error ? err : undefined
-                        )
-                      }
-                    }
-                    setCodeRevealed(true)
-                  }}
-                  className="text-[10px] px-5 py-3 bg-white border border-gray-200 text-gray-600 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-50 transition-all shadow-sm cursor-pointer"
-                >
-                  Reveal
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    if (!recoveryCode) return
-                    navigator.clipboard.writeText(recoveryCode)
-                    setCodeCopied(true)
-                    setTimeout(() => setCodeCopied(false), 2000)
-                  }}
-                  className="text-[10px] px-5 py-3 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-md min-w-25"
-                >
-                  {codeCopied ? 'Copied!' : 'Copy'}
-                </button>
-              )}
+                Reroll Nickname
+                <ExternalLink size={12} />
+              </a>
+              <a
+                href={`https://network.rpsleague.fi/settings?tab=identity&returnTo=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-1 rounded-md bg-indigo-50 border border-indigo-200 px-3 py-2 sm:py-2.5 text-[10px] font-bold text-indigo-600 hover:bg-indigo-100"
+              >
+                Recovery Code
+                <ExternalLink size={12} />
+              </a>
             </div>
           </div>
         )}
       </div>
-
-      {showAscensionPrompt && (
-        <AscensionModal
-          laps={laps}
-          onAscend={async () => {
-            const user = getOrCreateUser()
-            const data = await ascendUser(user.userId, user.shortId)
-            if (data?.success) {
-              setLaps(data.laps)
-              setFastestLapBets(data.fastestLapBets ?? null)
-              setPoints('200000')
-              setStorePoints(200000n)
-            }
-            setShowAscensionPrompt(false)
-          }}
-          onDismiss={() => setShowAscensionPrompt(false)}
-        />
-      )}
-
-      {isOwnProfile && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
-            <p className="text-[10px] uppercase font-black tracking-widest text-black/40 mb-4 ml-1">
-              Switch Profile
-            </p>
-            {recoverError && (
-              <p className="text-red-500 text-[10px] mb-2 ml-1 uppercase font-black">
-                {recoverError}
-              </p>
-            )}
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={recoverInput}
-                onChange={(e) => {
-                  setRecoverInput(e.target.value)
-                  setRecoverConfirm(false)
-                  setRecoverError('')
-                }}
-                placeholder="word-word-1234"
-                className="w-full bg-gray-50 border-gray-100 rounded-2xl px-4 py-3.5 text-[12px] font-mono focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all outline-none"
-              />
-              <button
-                onClick={() => {
-                  if (recoverConfirm) onRecoverConfirm()
-                  else if (recoverInput.trim()) setRecoverConfirm(true)
-                }}
-                disabled={!recoverInput.trim() || recoverLoading}
-                className={`w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50 ${recoverConfirm ? 'bg-amber-500 text-white animate-pulse' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}
-              >
-                {recoverLoading
-                  ? '...'
-                  : recoverConfirm
-                    ? 'Click to Confirm Load'
-                    : 'Load Identity'}
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-red-50 shadow-sm p-6">
-            <h2 className="text-[10px] font-black text-red-400/60 uppercase tracking-widest mb-4 ml-1">
-              Danger Zone
-            </h2>
-            {resetError && (
-              <p className="text-red-500 text-[10px] mb-2 ml-1 uppercase font-black">
-                {resetError}
-              </p>
-            )}
-            <button
-              onClick={() => {
-                if (resetConfirm) handleResetProfile()
-                else setResetConfirm(true)
-              }}
-              className={`w-full py-3.5 border rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${resetConfirm ? 'bg-red-600 text-white border-red-600 animate-pulse' : 'border-red-100 text-red-400 hover:bg-red-50'}`}
-            >
-              {resetConfirm ? 'Confirm Full Reset' : 'Reset All'}
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="mt-8">
         <div className="flex items-center gap-1.5 mb-4 px-1">

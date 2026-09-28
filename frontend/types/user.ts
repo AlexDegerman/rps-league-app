@@ -50,9 +50,3 @@ export interface ProfileData {
   allTimePeak: string
   autoEquipBadges?: boolean
 }
-
-export interface RecoverResponse {
-  userId: string
-  shortId: string
-  nickname?: string
-}

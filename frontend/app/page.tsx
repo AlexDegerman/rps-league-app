@@ -17,7 +17,6 @@ import {
 } from '@/lib/api'
 import ChevronUpIcon from '@/components/icons/ChevronUpIcon'
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll'
-import { getOrCreateUser, isUserValid } from '@/lib/user'
 import type { Match, PendingMatch } from '@/types/rps'
 import { useSound } from '@/hooks/useSound'
 import LiveStatsTicker from '@/components/tickers/LiveStatTicker'
@@ -366,12 +365,15 @@ export default function HomePage() {
 
   // initial data fetch
   useEffect(() => {
-    const user = getOrCreateUser()
-    if (!isUserValid(user)) return
+    if (!isHydrated) return
+
+    const { userId, shortId } = useUserStore.getState()
+    if (!userId || !shortId) return
+
     const { pendingMatches: currentExisting } = useGameStore.getState()
     const nowTime = Date.now() + serverOffset
 
-    fetchUserFlashState(user.userId)
+    fetchUserFlashState(userId)
       .then((data) => {
         if (data?.type) {
           setActiveFlashEvent(data.type)
@@ -381,14 +383,14 @@ export default function HomePage() {
       })
       .catch((err) => {
         logger.warn('Failed to fetch flash state', {
-          userId: user.userId,
+          userId: userId,
           error: String(err)
         })
       })
 
     useRelicStore.getState().initRelics()
 
-    fetchOracleState(user.userId)
+    fetchOracleState(userId)
       .then((data) => {
         const alreadyWelcomed = !!localStorage.getItem('rps_welcomed')
         if (!alreadyWelcomed) return
@@ -424,7 +426,7 @@ export default function HomePage() {
       })
       .catch(() => {})
 
-    fetchIdleEligibility(user.userId)
+    fetchIdleEligibility(userId)
       .then((data) => {
         if (data?.eligible) setEligible(true)
       })
@@ -469,7 +471,7 @@ export default function HomePage() {
 
     fetchUnifiedLeaderboard('daily')
       .then((data) => {
-        const idx = data.findIndex((e) => e.shortId === user.shortId)
+        const idx = data.findIndex((e) => e.shortId === shortId)
         setDailyRank(idx !== -1 ? idx + 1 : null)
       })
       .catch((err) => {
@@ -512,7 +514,7 @@ export default function HomePage() {
       })
       .catch(() => {})
 
-    fetchActiveBonusSession(user.userId)
+    fetchActiveBonusSession(userId)
       .then((data) => {
         if (data?.active && data.session) {
           setBonusActive(
@@ -525,21 +527,25 @@ export default function HomePage() {
       .catch(() => {})
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadMatches])
+  }, [loadMatches, isHydrated])
 
   const fetchUpdatedPoints = useCallback(async (): Promise<{
     newPoints: bigint
     isNewPeak: boolean
   }> => {
-    const user = getOrCreateUser()
-    const { points: currentPoints, peakPoints: currentPeak } =
-      useUserStore.getState()
-    if (!isUserValid(user))
+    const {
+      userId,
+      shortId,
+      isHydrated: storeHydrated,
+      points: currentPoints,
+      peakPoints: currentPeak
+    } = useUserStore.getState()
+    if (!userId || !shortId || !storeHydrated)
       return { newPoints: currentPoints, isNewPeak: false }
 
-    const data = await fetchUserPoints(user.userId, user.shortId)
+    const data = await fetchUserPoints(userId, shortId)
     if (!data) {
-      logger.warn('fetchUserPoints returned null', { userId: user.userId })
+      logger.warn('fetchUserPoints returned null', { userId })
       return { newPoints: currentPoints, isNewPeak: false }
     }
 
@@ -567,7 +573,9 @@ export default function HomePage() {
   // SSE live stream
   useEffect(() => {
     if (isDuplicate) return
-    const { userId: myUserId } = getOrCreateUser()
+    const { userId: myUserId, isHydrated: storeHydrated } =
+      useUserStore.getState()
+    if (!myUserId || !storeHydrated) return
     const es = new EventSource(`${API_BASE}/api/live`)
     esRef.current = es
     const updatePacketTimestamp = () => {
@@ -1215,8 +1223,8 @@ export default function HomePage() {
             <AscensionModal
               laps={laps}
               onAscend={async () => {
-                const user = getOrCreateUser()
-                const data = await ascendUser(user.userId, user.shortId)
+                const { userId, shortId } = useUserStore.getState()
+                const data = await ascendUser(userId, shortId)
                 if (data?.success) {
                   setLaps(data.laps)
                   setFastestLapBets(data.fastestLapBets)
@@ -1340,7 +1348,7 @@ export default function HomePage() {
       {/* Scroll-to-top */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className={`fixed bottom-25 right-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
+        className={`fixed bottom-25 left-4 z-40 bg-indigo-600 text-white p-3 rounded-full shadow-2xl transition-all duration-300 ${showJumpButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}
       >
         <ChevronUpIcon />
       </button>

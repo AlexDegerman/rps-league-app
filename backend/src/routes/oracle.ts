@@ -1,13 +1,10 @@
 import { Router } from 'express'
 import type { Request, Response } from 'express'
-import { checkRateLimit } from '../oracle/rateLimiter.js'
-import { consultOracle } from '../services/oracleConsultService.js'
 import {
   getOracleState,
   hasUserUsedOracle,
   resetOracle
 } from '../services/oracleProphecyService.js'
-import { logger } from '../utils/logger.js'
 
 const router = Router()
 
@@ -28,36 +25,6 @@ router.post('/reset', (req: Request, res: Response) => {
   }
   resetOracle()
   res.json({ ok: true, newSide: getOracleState().side })
-})
-
-// POST /api/oracle/consult - AI consultation
-router.post('/consult', async (req: Request, res: Response) => {
-  try {
-    const ip = (req.headers['x-forwarded-for'] ||
-      req.socket.remoteAddress ||
-      'anonymous') as string
-
-    const rateLimit = checkRateLimit(ip)
-    if (!rateLimit.allowed) {
-      return res.status(429).json({ error: rateLimit.error })
-    }
-
-    const { query, nickname } = req.body
-
-    if (!query || typeof query !== 'string') {
-      return res.status(400).json({ error: 'INVALID_QUERY' })
-    }
-
-    if (query.length > 500) {
-      return res.status(400).json({ error: 'QUERY_TOO_LONG' })
-    }
-
-    const result = await consultOracle(query, nickname)
-    return res.json(result)
-  } catch (err: unknown) {
-    logger.error('Oracle critical error', err, { query: req.body?.query })
-    return res.status(500).json({ error: 'SYSTEM_ERROR' })
-  }
 })
 
 export default router

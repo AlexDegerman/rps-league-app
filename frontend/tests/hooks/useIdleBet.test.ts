@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useIdleBet } from '../../hooks/useIdleBet'
 import { postPrediction } from '@/lib/api'
-import { getOrCreateUser, isUserValid } from '@/lib/user'
 import type { PendingMatch } from '@/types/rps'
 import { PredictionRecord, PredictionResponse } from '@/types/prediction'
 
@@ -23,6 +22,10 @@ interface MockGameStoreState {
 }
 
 interface MockUserStoreState {
+  userId: string
+  shortId: string
+  displayNickname: string
+  isHydrated: boolean
   betAmount: bigint
 }
 
@@ -36,6 +39,7 @@ vi.mock('@/app/stores/idleStore', () => ({
       selector(mockIdleStoreState)
   )
 }))
+
 vi.mock('@/app/stores/gameStore', () => {
   const mockStoreFn = vi.fn(
     <T>(selector: (s: MockGameStoreState) => T): T =>
@@ -51,19 +55,25 @@ vi.mock('@/app/stores/gameStore', () => {
     }
   }
 })
-vi.mock('@/app/stores/userStore', () => ({
-  useUserStore: vi.fn(
+
+vi.mock('@/app/stores/userStore', () => {
+  const mockStoreFn = vi.fn(
     <T>(selector: (s: MockUserStoreState) => T): T =>
       selector(mockUserStoreState)
   )
-}))
+  const mockStore = Object.assign(mockStoreFn, {
+    getState: () => mockUserStoreState
+  })
+  return {
+    useUserStore: mockStore as unknown as {
+      <T>(selector: (s: MockUserStoreState) => T): T
+      getState: () => MockUserStoreState
+    }
+  }
+})
 
 vi.mock('@/lib/api', () => ({
   postPrediction: vi.fn()
-}))
-vi.mock('@/lib/user', () => ({
-  getOrCreateUser: vi.fn(),
-  isUserValid: vi.fn()
 }))
 
 const INITIAL_SYSTEM_TIME = new Date('2026-04-02T10:00:00Z').getTime()
@@ -79,7 +89,6 @@ describe('useIdleBet Hook', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(INITIAL_SYSTEM_TIME)
-
     vi.clearAllMocks()
 
     mockIdleStoreState = {
@@ -110,16 +119,14 @@ describe('useIdleBet Hook', () => {
       isBonusActive: false
     }
 
+    // Mock the new Zustand user store state
     mockUserStoreState = {
+      userId: 'user-789',
+      shortId: 'XYZ',
+      displayNickname: 'IdlePlayer',
+      isHydrated: true,
       betAmount: 100n
     }
-
-    vi.mocked(getOrCreateUser).mockReturnValue({
-      userId: 'user-789',
-      nickname: 'IdlePlayer',
-      shortId: 'XYZ'
-    })
-    vi.mocked(isUserValid).mockReturnValue(true)
 
     vi.mocked(postPrediction).mockResolvedValue({
       ok: true,
@@ -142,7 +149,6 @@ describe('useIdleBet Hook', () => {
 
   describe('Guard Conditions & Early Returns', () => {
     it('should bypass all execution if the document is hidden', () => {
-      // Initialize with eligibility disabled to prevent immediate execution on render mount
       mockIdleStoreState.isEligible = false
 
       const { rerender } = renderHook(() => useIdleBet())
@@ -185,8 +191,8 @@ describe('useIdleBet Hook', () => {
       expect(postPrediction).not.toHaveBeenCalled()
     })
 
-    it('should bypass execution if user configuration is invalid', () => {
-      vi.mocked(isUserValid).mockReturnValue(false)
+    it('should bypass execution if user configuration is invalid (not hydrated)', () => {
+      mockUserStoreState.isHydrated = false
 
       renderHook(() => useIdleBet())
 
@@ -346,7 +352,6 @@ describe('useIdleBet Hook', () => {
         document.dispatchEvent(new Event('visibilitychange'))
       })
 
-      // Modify game dependencies to trigger hook recalculation
       mockGameStoreState.pendingMatches = [
         {
           gameId: 'game-202',

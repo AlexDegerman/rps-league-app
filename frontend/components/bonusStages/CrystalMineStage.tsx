@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { postBonusAction, claimBonusWinnings } from '../../lib/api'
-import { getOrCreateUser } from '../../lib/user'
+import { useUserStore } from '@/app/stores/userStore'
 import { useNeonSound } from '../../hooks/useNeonSound'
 
 type TileType = 'EMPTY' | 'DIAMOND'
@@ -43,7 +43,7 @@ export default function CrystalMineStage() {
 
   const tapTile = async (index: number) => {
     if (tiles[index]?.revealed || charges <= 0 || loading) return
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     setLoading(true)
     playNeonClick()
     try {
@@ -102,7 +102,9 @@ export default function CrystalMineStage() {
           setBonusFinalPayout(
             BigInt(claimResult.finalPayout),
             metricText,
-            claimResult.basePayout ? BigInt(claimResult.basePayout) : undefined,
+            claimResult.basePayout
+              ? BigInt(claimResult.basePayout)
+              : undefined,
             claimResult.heartProc
           )
         }
@@ -118,89 +120,87 @@ export default function CrystalMineStage() {
     (t) => t.revealed && t.type === 'DIAMOND'
   ).length
 
-    return (
-      <div className="stage-container stage-crystal-mine">
-        <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-dqgs no-pseudo">
-          💎 CRYSTAL MINE
-        </div>
-
-        <p className="text-center text-xs text-slate-400 mb-2">
-          5 picks • Find 💎 • Win up to 10x
-        </p>
-
-        {/* Status bar */}
-        <div className="w-full flex justify-center items-center flex-wrap gap-x-10 sm:gap-x-16 gap-y-2 text-[0.78rem]">
-          <div className="flex items-center gap-1.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <span
-                key={i}
-                className={`text-base transition-colors ${
-                  i < charges
-                    ? 'text-cyan-400 [text-shadow:0_0_4px_rgba(34,211,238,0.7)]'
-                    : 'text-[rgba(255,255,255,0.12)]'
-                }`}
-              >
-                ●
-              </span>
-            ))}
-            <span className="text-[0.68rem] text-slate-500 font-bold ml-0.5">
-              Charges
-            </span>
-          </div>
-          <div className="text-slate-400 font-bold">
-            💎 {revealedDiamonds} Found
-          </div>
-        </div>
-
-        {/* 5×5 grid */}
-        <div className="grid grid-cols-5 gap-1.5 w-full max-w-85">
-          {tiles.map((tile, i) => {
-            const meta = TILE_META[tile.type]
-            const isRevealed = tile.revealed
-            const isEmpty = tile.type === 'EMPTY'
-
-            return (
-              <button
-                key={i}
-                onClick={() => tapTile(i)}
-                disabled={isRevealed || charges <= 0 || loading}
-                className={[
-                  'cm-tile',
-                  isRevealed && isEmpty ? 'cm-tile-empty' : '',
-                  isRevealed && !isEmpty ? 'cm-tile-crystal' : '',
-                  !isRevealed ? 'cm-tile-hidden' : ''
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                style={
-                  isRevealed && !isEmpty
-                    ? { borderColor: meta.color }
-                    : undefined
-                }
-              >
-                {isRevealed ? (
-                  <span
-                    className="text-[1.3rem] leading-none"
-                    style={!isEmpty ? { color: meta.color } : undefined}
-                  >
-                    {meta.emoji}
-                  </span>
-                ) : (
-                  <span className="text-[0.9rem] text-[rgba(255,255,255,0.15)]">
-                    ▪
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Exhausted message */}
-        {charges <= 0 && (
-          <p className="text-[0.78rem] text-slate-500">
-            All charges spent. Collecting reward...
-          </p>
-        )}
+  return (
+    <div className="stage-container stage-crystal-mine">
+      <div className="text-[1.15rem] font-extrabold tracking-wider text-center text-slate-800 g-dqgs no-pseudo">
+        💎 CRYSTAL MINE
       </div>
-    )
+
+      <p className="text-center text-xs text-slate-400 mb-2">
+        5 picks • Find 💎 • Win up to 10x
+      </p>
+
+      {/* Status bar */}
+      <div className="w-full flex justify-center items-center flex-wrap gap-x-10 sm:gap-x-16 gap-y-2 text-[0.78rem]">
+        <div className="flex items-center gap-1.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <span
+              key={i}
+              className={`text-base transition-colors ${
+                i < charges
+                  ? 'text-cyan-400 [text-shadow:0_0_4px_rgba(34,211,238,0.7)]'
+                  : 'text-[rgba(255,255,255,0.12)]'
+              }`}
+            >
+              ●
+            </span>
+          ))}
+          <span className="text-[0.68rem] text-slate-500 font-bold ml-0.5">
+            Charges
+          </span>
+        </div>
+        <div className="text-slate-400 font-bold">
+          💎 {revealedDiamonds} Found
+        </div>
+      </div>
+
+      {/* 5×5 grid */}
+      <div className="grid grid-cols-5 gap-1.5 w-full max-w-85">
+        {tiles.map((tile, i) => {
+          const meta = TILE_META[tile.type]
+          const isRevealed = tile.revealed
+          const isEmpty = tile.type === 'EMPTY'
+
+          return (
+            <button
+              key={i}
+              onClick={() => tapTile(i)}
+              disabled={isRevealed || charges <= 0 || loading}
+              className={[
+                'cm-tile',
+                isRevealed && isEmpty ? 'cm-tile-empty' : '',
+                isRevealed && !isEmpty ? 'cm-tile-crystal' : '',
+                !isRevealed ? 'cm-tile-hidden' : ''
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={
+                isRevealed && !isEmpty ? { borderColor: meta.color } : undefined
+              }
+            >
+              {isRevealed ? (
+                <span
+                  className="text-[1.3rem] leading-none"
+                  style={!isEmpty ? { color: meta.color } : undefined}
+                >
+                  {meta.emoji}
+                </span>
+              ) : (
+                <span className="text-[0.9rem] text-[rgba(255,255,255,0.15)]">
+                  ▪
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Exhausted message */}
+      {charges <= 0 && (
+        <p className="text-[0.78rem] text-slate-500">
+          All charges spent. Collecting reward...
+        </p>
+      )}
+    </div>
+  )
 }

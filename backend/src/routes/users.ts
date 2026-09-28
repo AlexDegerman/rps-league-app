@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import pool from '../utils/db.js'
-import { getUserPoints, generateRecoveryCode } from '../services/userService.js'
+import { getUserPoints } from '../services/userService.js'
 import { logger } from '../utils/logger.js'
 import { formatStat } from '../utils/formatStat.js'
 import { getSessionStats } from '../services/sessionService.js'
@@ -267,56 +267,6 @@ router.get('/admin/stats', async (req, res) => {
   }
 })
 
-// POST /api/users/recover
-router.post('/recover', async (req, res) => {
-  try {
-    const { recoveryCode } = req.body
-    if (!recoveryCode)
-      return res.status(400).json({ error: 'Recovery code required' })
-
-    const result = await pool.query(
-      `SELECT user_id, short_id, nickname, points FROM users WHERE recovery_code = $1`,
-      [recoveryCode.toLowerCase().trim()]
-    )
-
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: 'Invalid recovery code' })
-
-    const user = result.rows[0]
-    res.json({
-      userId: user.user_id,
-      shortId: user.short_id,
-      nickname: user.nickname,
-      points: user.points.toString()
-    })
-  } catch (err) {
-    logger.error('POST /users/recover failed', err)
-    res.status(500).json({ error: 'Failed to recover profile' })
-  }
-})
-
-// POST /api/users/update-nickname
-router.post('/update-nickname', async (req, res) => {
-  const { userId, nickname, shortId } = req.body
-  try {
-    const recoveryCode = generateRecoveryCode()
-    const result = await pool.query(
-      `INSERT INTO users (user_id, short_id, nickname, points, peak_points, recovery_code)
-        VALUES ($1, $2, $3, 200000, 200000, $4)
-        ON CONFLICT (user_id)
-        DO UPDATE SET
-          nickname = EXCLUDED.nickname,
-          short_id = COALESCE(users.short_id, EXCLUDED.short_id)
-        RETURNING nickname`,
-      [userId, shortId, nickname, recoveryCode]
-    )
-    res.json({ ok: true, nickname: result.rows[0].nickname })
-  } catch (err) {
-    logger.error('POST /users/update-nickname failed', err, { userId, shortId })
-    res.status(500).json({ error: 'Internal server error' })
-  }
-})
-
 // POST /api/users/update-linkedin
 router.post('/update-linkedin', async (req, res) => {
   try {
@@ -411,7 +361,7 @@ router.get('/profile/:shortId', async (req, res) => {
         all_time_peak,
         laps,
         fastest_lap_bets,
-        auto_equip_badges -- Added
+        auto_equip_badges
         FROM users
         WHERE short_id = $1`,
       [shortId]
@@ -447,22 +397,6 @@ router.get('/profile/:shortId', async (req, res) => {
   }
 })
 
-// GET /api/users/check-name/:nickname
-router.get('/check-name/:nickname', async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT user_id FROM users WHERE nickname = $1',
-      [req.params.nickname]
-    )
-    res.json({ available: result.rows.length === 0 })
-  } catch (err) {
-    logger.error('GET /users/check-name/:nickname failed', err, {
-      nickname: req.params.nickname
-    })
-    res.status(500).json({ error: 'Failed to check nickname' })
-  }
-})
-
 // GET /api/users/:userId/points
 router.get('/:userId/points', async (req, res) => {
   try {
@@ -484,9 +418,9 @@ router.get('/:userId/points', async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT short_id, utm_source, nickname, recovery_code, points, peak_points, daily_peak, weekly_peak,
+      `SELECT short_id, utm_source, nickname, points, peak_points, daily_peak, weekly_peak,
           current_win_streak, all_time_peak, point_style_preference,
-          laps, fastest_lap_bets, auto_equip_badges -- Added
+          laps, fastest_lap_bets, auto_equip_badges
           FROM users WHERE user_id = $1`,
       [userId]
     )
@@ -512,12 +446,6 @@ router.get('/:userId/points', async (req, res) => {
           .catch((err) => logger.warn('New user utm update failed', err))
       }
 
-      const recoveryRes = await pool.query(
-        `SELECT recovery_code FROM users WHERE user_id = $1`,
-        [userId]
-      )
-      const recoveryCode = recoveryRes.rows[0]?.recovery_code ?? null
-
       return res.json({
         shortId: user.shortId,
         nickname: user.nickname ?? (nickname as string) ?? 'New Player',
@@ -531,24 +459,10 @@ router.get('/:userId/points', async (req, res) => {
         laps: 0,
         fastestLapBets: null,
         autoEquipBadges: true,
-        recoveryCode
       })
     }
 
     const row = result.rows[0]
-
-    let recoveryCode = row.recovery_code
-    if (!recoveryCode) {
-      recoveryCode = generateRecoveryCode()
-      await pool
-        .query(`UPDATE users SET recovery_code = $1 WHERE user_id = $2`, [
-          recoveryCode,
-          userId
-        ])
-        .catch((err) =>
-          logger.warn('failed to backfill recovery_code', { userId, err })
-        )
-    }
 
     if (
       utmSource &&
@@ -567,7 +481,6 @@ router.get('/:userId/points', async (req, res) => {
     res.json({
       shortId: row.short_id,
       nickname: row.nickname ?? (nickname as string) ?? 'Anonymous',
-      recoveryCode: recoveryCode ?? null,
       points: row.points.toString(),
       peakPoints: row.peak_points.toString(),
       dailyPeak: row.daily_peak.toString(),

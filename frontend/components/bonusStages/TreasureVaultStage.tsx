@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { postBonusAction, claimBonusWinnings } from '../../lib/api'
-import { getOrCreateUser } from '../../lib/user'
+import { useUserStore } from '@/app/stores/userStore'
 import { useNeonSound } from '../../hooks/useNeonSound'
 import { formatPoints } from '../../lib/format'
 
@@ -39,12 +39,11 @@ export default function TreasureVaultStage() {
   )
   const [loading, setLoading] = useState(false)
 
-  const { playNeonShimmer, playNeonReward, playNeonComplete } =
-    useNeonSound()
+  const { playNeonShimmer, playNeonReward, playNeonComplete } = useNeonSound()
 
   const pickChest = async (index: number) => {
     if (chestState !== 'idle' || loading) return
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     setLoading(true)
     try {
       const result = await postBonusAction(userId, { chestIndex: index })

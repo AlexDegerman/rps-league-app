@@ -2,8 +2,8 @@
 
 import { useIdleStore } from '@/app/stores/idleStore'
 import { useUIStore } from '@/app/stores/uiStore'
+import { useUserStore } from '@/app/stores/userStore'
 import { markAutoBetUsed } from '@/lib/api'
-import { getOrCreateUser } from '@/lib/user'
 
 export default function IdleBetControls() {
   const isEligible = useIdleStore((s) => s.isEligible)
@@ -24,8 +24,8 @@ export default function IdleBetControls() {
     setIdleSide(idleSide === side ? null : side)
 
     if (turningOn) {
-      const user = getOrCreateUser()
-      markAutoBetUsed(user.userId)
+      const { userId } = useUserStore.getState()
+      markAutoBetUsed(userId)
     }
   }
 

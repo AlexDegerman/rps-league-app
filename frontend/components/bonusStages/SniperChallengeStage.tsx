@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { postBonusAction, claimBonusWinnings } from '../../lib/api'
-import { getOrCreateUser } from '../../lib/user'
+import { useUserStore } from '@/app/stores/userStore'
 import { useNeonSound } from '../../hooks/useNeonSound'
 
 type Zone = 'bullseye' | 'clean' | 'hit' | 'near' | 'miss'
@@ -76,7 +76,7 @@ export default function SniperChallengeStage() {
     if (reconnect?.fired !== undefined) return
 
     const initGame = async () => {
-      const { userId } = getOrCreateUser()
+      const userId = useUserStore.getState().userId
       try {
         const result = await postBonusAction(userId, {
           action: 'START'
@@ -103,7 +103,7 @@ export default function SniperChallengeStage() {
       rafRef.current = null
     }
     const tapTimestampMs = Date.now()
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     playChain(['slam', 'solar_flare_explosion'])
     setFired(true)
     setLoading(true)

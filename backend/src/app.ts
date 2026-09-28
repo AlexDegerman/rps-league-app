@@ -7,8 +7,6 @@ import leaderboardRouter from './routes/leaderboard.js'
 import liveRouter from './routes/live.js'
 import predictionsRouter from './routes/predictions.js'
 import usersRouter from './routes/users.js'
-import feedbackRouter from './routes/feedback.js'
-import oracleRouter from './routes/oracle.js'
 import ascendRouter from './routes/ascend.js'
 import festivalsRouter from './routes/festivals.js'
 import achievementsRouter from './routes/achievements.js'
@@ -16,6 +14,8 @@ import relicRouter from './routes/relics.js'
 import globaleventsRouter from './routes/globalevents.js'
 import worldbossRouter from './routes/worldboss.js'
 import bonusStageRouter from './routes/bonusStage.js'
+import identityRouter from './routes/identity.js'
+import oracleRouter from './routes/oracle.js' 
 
 const app = express()
 
@@ -49,14 +49,14 @@ app.use('/api/live', liveRouter)
 app.use('/api/predictions', predictionsRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/ascend', ascendRouter)
-app.use('/api/feedback', feedbackRouter)
-app.use('/api/oracle', oracleRouter)
 app.use('/api/festivals', festivalsRouter)
 app.use('/api/achievements', achievementsRouter)
 app.use('/api/relics', relicRouter)
 app.use('/api/globalevents', globaleventsRouter)
 app.use('/api/worldboss', worldbossRouter)
 app.use('/api/bonus', bonusStageRouter)
+app.use('/api/identity', identityRouter)
+app.use('/api/oracle', oracleRouter)
 
 // Sentry Error Handler
 Sentry.setupExpressErrorHandler(app)

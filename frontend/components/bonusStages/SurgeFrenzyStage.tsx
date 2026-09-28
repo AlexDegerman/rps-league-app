@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { postBonusAction, claimBonusWinnings } from '../../lib/api'
-import { getOrCreateUser } from '../../lib/user'
+import { useUserStore } from '@/app/stores/userStore'
 import { useNeonSound } from '../../hooks/useNeonSound'
 
 const STAGE_DURATION_MS = 5_000
@@ -82,7 +82,7 @@ export default function SurgeFrenzyStage() {
     if (spawnTimeoutRef.current) clearTimeout(spawnTimeoutRef.current)
     if (decayIntervalRef.current) clearInterval(decayIntervalRef.current)
 
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     try {
       // Sync final state to the server before claiming the authoritative payout.
       await bonusActionQueueRef.current
@@ -200,7 +200,7 @@ export default function SurgeFrenzyStage() {
     milestonesPlayedRef.current.clear()
 
     // Register the initial node tap before the frenzy begins.
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
 
     bonusActionQueueRef.current = bonusActionQueueRef.current
       .then(() =>
@@ -280,8 +280,8 @@ export default function SurgeFrenzyStage() {
       (STAGE_DURATION_MS / 1000 - gameTimeLeftRef.current).toFixed(1)
     )
 
-    const { userId } = getOrCreateUser()
-    
+    const userId = useUserStore.getState().userId
+
     // Queue the node tap to preserve server-side action ordering.
     bonusActionQueueRef.current = bonusActionQueueRef.current
       .then(() =>

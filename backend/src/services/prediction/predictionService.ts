@@ -18,7 +18,7 @@ export const savePrediction = async (
   nickname: string,
   shortId: string
 ): Promise<{ success: boolean; error?: string }> => {
-  const { points: balance } = await getOrCreateUser(userId, shortId)
+  const { points: balance } = await getOrCreateUser(userId, shortId, nickname)
 
   if (betAmount <= 0n) return { success: false, error: 'Invalid bet amount' }
   if (betAmount > balance)
@@ -227,8 +227,12 @@ export const getPaginatedUserPredictions = async (
   return { matches, predictions, total, hasMore: offset + limit < total }
 }
 
-export const getUserStats = async (userId: string, shortId: string) => {
-  await getOrCreateUser(userId, shortId)
+export const getUserStats = async (
+  userId: string,
+  shortId: string,
+  nickname: string
+) => {
+  await getOrCreateUser(userId, shortId, nickname)
 
   const result = await pool.query(
     `SELECT

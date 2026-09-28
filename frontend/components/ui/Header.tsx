@@ -4,15 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import {
-  Menu,
-  X,
-  Sparkles,
-  Trophy,
-  MessageSquare,
-  Megaphone,
-  Search
-} from 'lucide-react'
+import { Menu, X, Trophy, Megaphone, Search } from 'lucide-react'
 import { useUserStore } from '@/app/stores/userStore'
 import { useGameStore } from '@/app/stores/gameStore'
 import { useUIStore } from '@/app/stores/uiStore'
@@ -124,12 +116,6 @@ const Header = () => {
             <Link href={profileHref} className={navClass(profileHref)}>
               Profile
             </Link>
-            <Link
-              href="/arkalon"
-              className={`${navClass('/arkalon')} hidden min-[630px]:inline-block`}
-            >
-              Ask AI
-            </Link>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`flex items-center justify-center p-2 rounded-lg border transition-all shrink-0 ${isOpen ? 'bg-gray-800 text-white border-gray-800 shadow-inner' : modeKey ? 'bg-white/50 border-current backdrop-blur-sm ' + burgerColorClass : 'bg-gray-50 border-gray-200 active:bg-gray-200'} min-[480px]:px-3 min-[480px]:gap-2`}
@@ -148,28 +134,12 @@ const Header = () => {
           >
             <div className="absolute inset-0 bg-white -z-20" />
             <Link
-              href="/arkalon"
-              onClick={() => setIsOpen(false)}
-              className={`${menuRowItemClass('/arkalon')} min-[540px]:hidden`}
-            >
-              <Sparkles size={13} className="mr-1.5 shrink-0" />
-              Ask AI
-            </Link>
-            <Link
               href="/tiers"
               onClick={() => setIsOpen(false)}
               className={menuRowItemClass('/tiers')}
             >
               <Trophy size={13} className="mr-1.5 shrink-0" />
               Tiers
-            </Link>
-            <Link
-              href="/feedback"
-              onClick={() => setIsOpen(false)}
-              className={menuRowItemClass('/feedback')}
-            >
-              <MessageSquare size={13} className="mr-1.5 shrink-0" />
-              Feedback
             </Link>
             <Link
               href="/updates"
@@ -182,7 +152,7 @@ const Header = () => {
             <Link
               href="/search"
               onClick={() => setIsOpen(false)}
-              className="px-4 py-1 min-[540px]:py-2.5 rounded-lg font-semibold text-[10px] uppercase tracking-wider transition-all duration-200 border text-center justify-center flex items-center min-w-full min-[540px]:min-w-0 mt-0.5 min-[540px]:mt-0 active:scale-[0.97] bg-gray-50/30 text-gray-400 border-gray-100 hover:bg-gray-50 hover:text-gray-500 hover:border-gray-200 opacity-60 hover:opacity-100"
+              className="px-4 py-1 min-[540px]:py-2.5 rounded-lg font-semibold text-[10px] uppercase tracking-wider transition-all duration-200 border text-center justify-center flex items-center min-w-full min-[540px]:min-w-0 min-[540px]:col-span-2 mt-0.5 min-[540px]:mt-0 active:scale-[0.97] bg-gray-50/30 text-gray-400 border-gray-100 hover:bg-gray-50 hover:text-gray-500 hover:border-gray-200 opacity-60 hover:opacity-100"
             >
               <Search size={13} className="mr-1.5 shrink-0" />
               Search

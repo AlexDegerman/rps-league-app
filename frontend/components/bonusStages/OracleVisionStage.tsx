@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../../app/stores/gameStore'
 import { postBonusAction, claimBonusWinnings } from '../../lib/api'
-import { getOrCreateUser } from '../../lib/user'
+import { useUserStore } from '@/app/stores/userStore'
 import { formatPoints } from '../../lib/format'
 import { useNeonSound } from '../../hooks/useNeonSound'
 
@@ -75,7 +75,7 @@ export default function OracleVisionStage() {
   const finishStage = async (metricText: string, isJackpot = false) => {
     if (timerRef.current) clearInterval(timerRef.current)
     setPhase('terminal')
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     try {
       const claimResult = await claimBonusWinnings(userId)
       if (claimResult?.finalPayout) {
@@ -95,7 +95,7 @@ export default function OracleVisionStage() {
   }
 
   const handleTimerExpiry = async () => {
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     try {
       const result = await postBonusAction(
         userId,
@@ -142,7 +142,7 @@ export default function OracleVisionStage() {
 
   const tapGlyph = async (glyphIndex: number) => {
     if (phase !== 'input' || loading) return
-    const { userId } = getOrCreateUser()
+    const userId = useUserStore.getState().userId
     playNeonClick()
     setLoading(true)
     try {
