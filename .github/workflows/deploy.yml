@@ -41,7 +41,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "frontend,backend,compose.yml"
+          source: 'frontend,backend,compose.yml'
           target: /opt/arkalon/rps-league/
           overwrite: true
           rm: false
@@ -67,5 +67,8 @@ jobs:
             sleep 10
 
             docker exec rps-league-backend node -e "fetch('http://localhost:5000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+
+            echo "Cleaning up dangling images from previous deploy..."
+            docker image prune -f
 
             echo "Deployment of ${DEPLOY_SHA} complete and healthy!"
