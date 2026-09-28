@@ -246,9 +246,11 @@ export default function DashboardCard() {
                           ref={pointsRef}
                           style={{ position: 'relative' }}
                           data-text={display}
-                        />
+                        >
+                          {display}
+                        </span>
                       ) : (
-                        <span>...</span>
+                        <span className="w-16 h-5 bg-gray-200/80 rounded animate-pulse inline-block align-middle" />
                       )}
                     </span>
                   </div>

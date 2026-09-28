@@ -190,7 +190,25 @@ export const useUserStore = create<UserState>((set, get) => ({
         return null
       })
 
-      if (!userData) return
+      if (!userData) {
+        // Automatic background retry after 2 seconds without overwriting points
+        setTimeout(() => {
+          const { userId, shortId } = get()
+          if (userId && shortId && !get().pointsLoaded) {
+            fetchUserPoints(userId, shortId)
+              .then((retryData) => {
+                if (retryData) {
+                  get().applyPointsUpdate(
+                    BigInt(retryData.points),
+                    BigInt(retryData.peakPoints)
+                  )
+                }
+              })
+              .catch(() => {})
+          }
+        }, 2000)
+        return
+      }
 
       if (userData.shortId && userData.shortId !== data.shortId) {
         set({ shortId: userData.shortId })
