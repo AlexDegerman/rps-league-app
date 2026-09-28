@@ -17,15 +17,29 @@ export async function getOrCreatePlayer() {
     }
   }
 
+  const legacyUserId =
+    typeof window !== 'undefined' ? localStorage.getItem('rps_user_id') : null
+
   const res = await fetch(`${API_BASE}/api/identity/provision`, {
     method: 'POST',
-    credentials: 'include'
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      legacyUserId: legacyUserId || undefined
+    })
   })
 
   if (!res.ok) throw new Error('Failed to provision identity')
-  return res.json()
-}
+  const data = await res.json()
 
+  if (legacyUserId && data.coreId) {
+    localStorage.removeItem('rps_user_id')
+  }
+
+  return data
+}
 export async function rerollPlayerName() {
   const res = await fetch(`${API_BASE}/api/identity/reroll`, {
     method: 'POST',

@@ -7,11 +7,18 @@ const INTERNAL_SERVICE_SECRET = process.env.INTERNAL_SERVICE_SECRET || ''
 
 router.post('/provision', async (req: Request, res: Response) => {
   try {
+    const coreId =
+      req.cookies?.arkalon_core_id || req.body?.coreId || req.body?.legacyUserId
+
     const response = await fetch(
       `${INTERNAL_NETWORK_URL}/api/identity/provision`,
       {
         method: 'POST',
-        headers: { 'x-internal-secret': INTERNAL_SERVICE_SECRET }
+        headers: {
+          'Content-Type': 'application/json',
+          'x-internal-secret': INTERNAL_SERVICE_SECRET
+        },
+        body: JSON.stringify({ coreId: coreId || undefined })
       }
     )
 
@@ -27,14 +34,16 @@ router.post('/provision', async (req: Request, res: Response) => {
       sameSite: 'lax',
       path: '/'
     })
-    res.cookie('arkalon_session', data.sessionToken, {
-      domain: '.rpsleague.fi',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/'
-    })
+    if (data.sessionToken) {
+      res.cookie('arkalon_session', data.sessionToken, {
+        domain: '.rpsleague.fi',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/'
+      })
+    }
 
     res.json({
       success: true,
