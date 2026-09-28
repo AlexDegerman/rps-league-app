@@ -23,18 +23,28 @@ const app = express()
 app.get('/health', (_req, res) => res.status(200).send('OK'))
 
 // CORS Middleware
-const allowedOrigin = process.env.CORS_ORIGIN || '*'
+const allowedOrigins = [
+  'https://rpsleague.fi',
+  'https://network.rpsleague.fi',
+  'https://daily.rpsleague.fi',
+  'http://localhost:3000'
+]
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+  const origin = req.headers.origin
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || 'https://rpsleague.fi')
+  }
   res.setHeader(
     'Access-Control-Allow-Methods',
     'GET,POST,PUT,PATCH,DELETE,OPTIONS'
   )
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'Content-Type,Authorization,x-admin-key,x-user-id'
+    'Content-Type,Authorization,x-admin-key,x-user-id,x-internal-secret'
   )
-  res.setHeader('Access-Control-Allow-Credentials', 'false')
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
   if (req.method === 'OPTIONS') return res.sendStatus(204)
   next()
 })
