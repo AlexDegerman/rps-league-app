@@ -793,7 +793,11 @@ describe('Prediction Service', () => {
     })
 
     it('parses detailed user stats correctly', async () => {
-      const stats = await predictionService.getUserStats('u1', 'abc123')
+      const stats = await predictionService.getUserStats(
+        'u1',
+        'abc123',
+        'TestUser'
+      )
       expect(stats.wins).toBe(12)
       expect(stats.losses).toBe(3)
       expect(stats.winRate).toBe(80)
