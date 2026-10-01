@@ -129,20 +129,44 @@ const MatchRow = React.memo(
         <div className="flex items-center justify-between gap-2 relative z-10">
           {/* Left player */}
           <div className="flex flex-col items-start flex-1 min-w-0">
-            <Link
-              href={`/player/${encodeURIComponent(left.name)}`}
-              onClick={(e) => e.stopPropagation()}
-              className={`font-medium text-sm underline decoration-gray-300 transition truncate max-w-full
-              ${
-                winner === left.name && isActive
-                  ? cfg.winnerText
-                  : winner === left.name
-                    ? 'text-green-600 font-bold hover:decoration-green-600'
-                    : 'text-gray-800 hover:decoration-indigo-600 hover:text-indigo-600'
-              }`}
-            >
-              {left.name}
-            </Link>
+            <div className="inline-flex items-center gap-0.5 max-w-full">
+              <span
+                className={`font-medium text-sm transition truncate select-none
+                ${
+                  winner === left.name && isActive
+                    ? cfg.winnerText
+                    : winner === left.name
+                      ? 'text-green-600 font-bold'
+                      : 'text-gray-800'
+                }`}
+              >
+                {left.name}
+              </span>
+              <Link
+                href={`/player/${encodeURIComponent(left.name)}`}
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`View ${left.name}'s profile`}
+                className={`p-1 transition-opacity shrink-0 touch-manipulation
+                  ${
+                    winner === left.name
+                      ? 'text-green-600 opacity-50 hover:opacity-100'
+                      : 'text-gray-400 opacity-40 hover:opacity-100'
+                  }`}
+              >
+                <svg
+                  className="w-3 h-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+              </Link>
+            </div>
             {highlightPlayer === left.name && (
               <span
                 className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(getPlayerResult(match, left.name))}`}
@@ -187,20 +211,44 @@ const MatchRow = React.memo(
 
           {/* Right player */}
           <div className="flex flex-col items-end flex-1 min-w-0">
-            <Link
-              href={`/player/${encodeURIComponent(right.name)}`}
-              onClick={(e) => e.stopPropagation()}
-              className={`font-medium text-sm text-right underline decoration-gray-300 transition truncate max-w-full
-              ${
-                winner === right.name && isActive
-                  ? cfg.winnerText
-                  : winner === right.name
-                    ? 'text-green-600 font-bold hover:decoration-green-600'
-                    : 'text-gray-800 hover:decoration-indigo-600 hover:text-indigo-600'
-              }`}
-            >
-              {right.name}
-            </Link>
+            <div className="inline-flex items-center justify-end gap-0.5 max-w-full">
+              <Link
+                href={`/player/${encodeURIComponent(right.name)}`}
+                onClick={(e) => e.stopPropagation()}
+                aria-label={`View ${right.name}'s profile`}
+                className={`p-1 transition-opacity shrink-0 touch-manipulation order-first
+                  ${
+                    winner === right.name
+                      ? 'text-green-600 opacity-50 hover:opacity-100'
+                      : 'text-gray-400 opacity-40 hover:opacity-100'
+                  }`}
+              >
+                <svg
+                  className="w-3 h-3"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="7" y1="17" x2="17" y2="7" />
+                  <polyline points="7 7 17 7 17 17" />
+                </svg>
+              </Link>
+              <span
+                className={`font-medium text-sm text-right transition truncate select-none
+                ${
+                  winner === right.name && isActive
+                    ? cfg.winnerText
+                    : winner === right.name
+                      ? 'text-green-600 font-bold'
+                      : 'text-gray-800'
+                }`}
+              >
+                {right.name}
+              </span>
+            </div>
             {highlightPlayer === right.name && (
               <span
                 className={`text-xs font-bold mt-1 px-2 py-0.5 rounded text-white ${resultColor(getPlayerResult(match, right.name))}`}
